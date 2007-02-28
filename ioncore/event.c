@@ -172,21 +172,45 @@ static void skip_enterwindow()
 }
 
 
+static void skip_focusenter()
+{
+    XEvent ev;
+    
+    XSync(ioncore_g.dpy, False);
+
+    while(XCheckMaskEvent(ioncore_g.dpy,
+                          EnterWindowMask|FocusChangeMask, &ev)){
+        ioncore_update_timestamp(&ev);
+        if(ev.type==FocusOut)
+            ioncore_handle_focus_out(&(ev.xfocus));
+        else if(ev.type==FocusIn)
+            ioncore_handle_focus_in(&(ev.xfocus), TRUE);
+        /*else if(ev.type==EnterNotify)
+            handle_enter_window(&ev);*/
+    }
+}
+
+
 void ioncore_flush()
 {
+
     if(ioncore_g.focus_next!=NULL && 
        ioncore_g.input_mode==IONCORE_INPUTMODE_NORMAL){
         bool warp=ioncore_g.warp_next;
         WRegion *next=ioncore_g.focus_next;
         
-        ioncore_g.focus_next=NULL;
+        skip_focusenter();
         
+        ioncore_g.focus_next=NULL;
+
         region_do_set_focus(next, warp);
         
         /* Just greedily eating it all away that X has to offer
          * seems to be the best we can do with Xlib.
          */
-        skip_enterwindow();
+        if(warp)
+            skip_enterwindow();
+        
     }
     
     XFlush(ioncore_g.dpy);
@@ -226,7 +250,7 @@ void ioncore_mainloop()
         check_signals();
         mainloop_execute_deferred();
         ioncore_flush();
-
+        
         if(QLength(ioncore_g.dpy)>0)
             ioncore_x_connection_handler(ioncore_g.conn, NULL);
         else
