@@ -451,17 +451,22 @@ WRegion *ioncore_current()
  */
 void region_pointer_focus_hack(WRegion *reg)
 {
-    WRegion *act=ioncore_await_focus();
-    const WRectangle *g=&REGION_GEOM(reg);
-    int x, y;
+    WRegion *act;
     
     if(ioncore_g.opmode!=IONCORE_OPMODE_NORMAL)
         return;
+        
+    if(ioncore_g.focus_next!=NULL &&
+       ioncore_g.focus_next_source<=IONCORE_FOCUSNEXT_POINTERHACK){
+        return;
+    }
     
-    if(ioncore_g.focus_next!=NULL)
+    act=ioncore_await_focus();
+    
+    if((REGION_IS_ACTIVE(reg) && act==NULL) || !region_is_fully_mapped(reg))
         return;
     
-    if(!REGION_IS_ACTIVE(reg) && act==NULL)
+    if(act==NULL)
         act=ioncore_g.focus_current;
     
     if(act==NULL || 
@@ -470,22 +475,9 @@ void region_pointer_focus_hack(WRegion *reg)
        region_skip_focus(act)){
         return;
     }
-    
-    /* Ok, anything under us should not get focus as we're unmapped:
-     * Either we don't have the focus, or focus change somewhere else
-     * is pending.
-     *
-     * It might be possible to do the pointer check more efficiently
-     * by trying to maintain our internal pointer containment state
-     * by tracking Enter/Leave events...
-     */
-    
-    xwindow_pointer_pos(region_xwindow(reg), &x, &y);
-    
-    if(x>=0 && y>=0 && x<g->w && y<g->h){
-        D(fprintf(stderr, "Pointer here and shouldn't alter focus!\n"));
-        region_set_focus(act);
-    }
+
+    region_set_focus(act);
+    ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_POINTERHACK;
 }
 
 
