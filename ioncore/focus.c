@@ -328,6 +328,9 @@ void region_finalise_focusing(WRegion* reg, Window win, bool warp)
     if(warp)
         region_do_warp(reg);
     
+    if(REGION_IS_ACTIVE(reg) && ioncore_await_focus()==NULL)
+        return;
+    
     region_set_await_focus(reg);
     /*xwindow_do_set_focus(win);*/
     XSetInputFocus(ioncore_g.dpy, win, RevertToParent, 
