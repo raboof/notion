@@ -285,7 +285,7 @@ bool region_prepare_focus(WRegion *reg, int flags,
 
     if(REGION_IS_MAPPED(reg) && region_may_control_focus(reg)){
         res->reg=reg;
-        res->flags=0;
+        res->flags=flags;
         return TRUE;
     }else{
         if(mgr!=NULL){
