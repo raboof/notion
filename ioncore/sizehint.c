@@ -70,8 +70,8 @@ static void correct_aspect(int max_w, int max_h, const WSizeHints *hints,
 void sizehints_correct(const WSizeHints *hints, int *wp, int *hp, 
                        bool min, bool override_no_constrain)
 {
-    int w=*wp;
-    int h=*hp;
+    int w=*wp, wa;
+    int h=*hp, ha;
     int bs=0;
     
     if(min){
@@ -85,8 +85,14 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
         return;
     }
 
-    if(w>=hints->min_width && h>=hints->min_height)
-        correct_aspect(w, h, hints, &w, &h);
+    wa=w-hints->base_width;
+    ha=h-hints->base_height;
+    
+    if(wa>=0 && ha>=0){
+        correct_aspect(wa, ha, hints, &wa, &ha);
+        w=wa+hints->base_width;
+        h=ha+hints->base_height;
+    }
     
     if(hints->max_set){
         w=minof(w, hints->max_width);
@@ -132,9 +138,9 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
         hints->min_height=0;
 
     if(!(hints->flags&PBaseSize) || hints->base_width<0)
-        hints->base_width=hints->min_width;
+        hints->base_width=0;
     if(!(hints->flags&PBaseSize) || hints->base_height<0)
-        hints->base_height=hints->min_height;
+        hints->base_height=0;
 
     
     if(hints->flags&PMaxSize){
