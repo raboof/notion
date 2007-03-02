@@ -833,9 +833,17 @@ bool frame_is_numbers(WFrame *frame)
 
 void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
 {
-    frame_update_attrs(frame);
-    frame_recalc_bar(frame);
-    frame_draw_bar(frame, FALSE);
+    if(how==ioncore_g.notifies.activated ||
+       how==ioncore_g.notifies.inactivated ||
+       how==ioncore_g.notifies.name ||
+       how==ioncore_g.notifies.activity ||
+       how==ioncore_g.notifies.sub_activity ||
+       how==ioncore_g.notifies.tag){
+       
+        frame_update_attrs(frame);
+        frame_recalc_bar(frame);
+        frame_draw_bar(frame, FALSE);
+    }
 }
 
 
