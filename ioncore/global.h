@@ -111,7 +111,9 @@ DECLSTRUCT(WGlobal){
                  unset_return,
                  pseudoactivated,
                  pseudoinactivated,
-                 deinit;
+                 deinit,
+                 map,
+                 unmap;
     } notifies;
 };
 

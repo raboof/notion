@@ -152,12 +152,14 @@ void region_updategr(WRegion *reg)
 void region_map(WRegion *reg)
 {
     CALL_DYN(region_map, reg, (reg));
+    region_notify_change_(reg, ioncore_g.notifies.map);
 }
 
 
 void region_unmap(WRegion *reg)
 {
     CALL_DYN(region_unmap, reg, (reg));
+    region_notify_change_(reg, ioncore_g.notifies.unmap);
 }
 
 

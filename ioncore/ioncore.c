@@ -364,6 +364,8 @@ static bool init_global()
     INITSTR(pseudoinactivated);
     INITSTR(tag);
     INITSTR(deinit);
+    INITSTR(map);
+    INITSTR(unmap);
     
     return TRUE;
 }
