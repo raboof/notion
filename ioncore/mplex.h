@@ -140,8 +140,6 @@ extern WRegion *mplex_do_attach(WMPlex *mplex, WMPlexAttachParams *param,
 extern WRegion *mplex_do_attach_new(WMPlex *mplex, WMPlexAttachParams *param,
                                     WRegionCreateFn *fn, void *fn_param);
 
-extern void mplex_attach_tagged(WMPlex *mplex);
-
 extern void mplex_managed_remove(WMPlex *mplex, WRegion *reg);
 extern void mplex_child_removed(WMPlex *mplex, WRegion *sub);
 

@@ -70,9 +70,9 @@ bool region_is_tagged(WRegion *reg)
  * Untag all regions.
  */
 EXTL_EXPORT
-void ioncore_clear_tags()
+void ioncore_tagged_clear()
 {
-    while(ioncore_tagged_take_first()!=NULL)
+    while(ioncore_tagged_first(TRUE)!=NULL)
         /* nothing */;
 }
 
@@ -84,27 +84,28 @@ void ioncore_clear_tags()
 
 
 /*EXTL_DOC
- * Returns first tagged object.
+ * Returns first tagged object, untagging it as well if \var{untag}is set.
  */
 EXTL_SAFE
 EXTL_EXPORT
-WRegion *ioncore_tagged_first()
+WRegion *ioncore_tagged_first(bool untag)
 {
-    return (WRegion*)OBJLIST_FIRST(WRegion*, taglist);
-}
-
-
-WRegion *ioncore_tagged_take_first()
-{
-    WRegion *reg=(WRegion*)objlist_take_first(&taglist);
+    WRegion *reg;
     
-    if(reg!=NULL){
-        reg->flags&=~REGION_TAGGED;
-        region_notify_change(reg, ioncore_g.notifies.tag);
+    if(!untag){
+        reg=(WRegion*)OBJLIST_FIRST(WRegion*, taglist);
+    }else{
+        reg=(WRegion*)objlist_take_first(&taglist);
+    
+        if(reg!=NULL){
+            reg->flags&=~REGION_TAGGED;
+            region_notify_change(reg, ioncore_g.notifies.tag);
+        }
     }
     
     return reg;
 }
+
 
 /*EXTL_DOC
  * Iterate over tagged regions until \var{iterfn} returns \code{false}.

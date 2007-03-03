@@ -254,7 +254,7 @@ defbindings("WFrame.toplevel", {
         kpress("V", "WFrame.maximize_vert(_)"),
 
         bdoc("Attach tagged objects to this frame."),
-        kpress("A", "WFrame.attach_tagged(_)"),
+        kpress("A", "ioncore.tagged_attach(_)"),
     }),
 })
 
@@ -354,7 +354,7 @@ defctxmenu("WFrame", "Frame", {
     -- destroy the frame itself. An entry to destroy tiled frames is 
     -- configured in cfg_tiling.lua.
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
-    menuentry("Attach tagged",  "WFrame.attach_tagged(_)"),
+    menuentry("Attach tagged",  "ioncore.tagged_attach(_)"),
     menuentry("Clear tags",     "ioncore.clear_tags()"),
     menuentry("Window info",    "mod_query.show_tree(_, _sub)"),
 })
@@ -371,6 +371,7 @@ defctxmenu("WGroup", "Group", {
 defctxmenu("WGroupWS", "Workspace", {
     menuentry("Close",          "WRegion.rqclose(_)"),
     menuentry("Rename",         "mod_query.query_renameworkspace(nil, _)"),
+    menuentry("Attach tagged",  "ioncore.tagged_attach(_)"),
 })
 
 

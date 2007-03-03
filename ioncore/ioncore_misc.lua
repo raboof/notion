@@ -79,3 +79,25 @@ function ioncore.TR(s, ...)
     return string.format(ioncore.gettext(s), unpack(arg))
 end
 
+
+--DOC
+-- Attach tagged regions to \var{reg}. The method of attach
+-- depends on the types of attached regions and whether \var{reg} 
+-- implements \code{attach_framed} and \code{attach}. If \var{param}
+-- is not set, the default of \verb!{switchto=true}! is used.
+function ioncore.tagged_attach(reg, param)
+    if not param then
+        param={switchto=true}
+    end
+    local tagged=function() return ioncore.tagged_first(true) end
+    for r in tagged do
+        local fn=((not obj_is(r, "WWindow") and reg.attach_framed) 
+                  or reg.attach)
+        
+        if not (fn and fn(reg, r, param)) then
+            return false
+        end
+    end
+    return true
+end
+

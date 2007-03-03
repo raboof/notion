@@ -1371,22 +1371,6 @@ WRegion *mplex_attach_new(WMPlex *mplex, ExtlTab param)
 }
 
 
-/*EXTL_DOC
- * Attach all tagged regions to \var{mplex}.
- */
-EXTL_EXPORT_MEMBER
-void mplex_attach_tagged(WMPlex *mplex)
-{
-    WRegion *reg;
-    int flags=MPLEX_ATTACH_SWITCHTO;
-    
-    while((reg=ioncore_tagged_take_first())!=NULL){
-        mplex_attach_simple(mplex, reg, flags);
-        /*flags=0;*/
-    }
-}
-
-
 static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
                               WRegion *dropped)
 {

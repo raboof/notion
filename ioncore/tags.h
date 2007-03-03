@@ -18,8 +18,8 @@
 extern bool region_set_tagged(WRegion *reg, int sp);
 extern bool region_is_tagged(WRegion *reg);
 
-extern void ioncore_clear_tags();
-extern WRegion *ioncore_tagged_first();
-extern WRegion *ioncore_tagged_take_first();
+extern void ioncore_tagged_clear();
+extern WRegion *ioncore_tagged_first(bool untag);
+extern bool ioncore_tagged_i(ExtlFn iterfn);
 
 #endif /* ION_IONCORE_TAGS_H */
