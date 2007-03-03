@@ -178,9 +178,6 @@ defbindings("WMPlex.toplevel", {
     bdoc("Query for a client window to go to."),
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
     
-    bdoc("Query for a client window to attach."),
-    kpress(META.."A", "mod_query.query_attachclient(_)"),
-    
     bdoc("Display context menu."),
     --kpress(META.."M", "mod_menu.menu(_, _chld, 'ctxmenu')"),
     kpress(META.."M", "mod_query.query_menu(_, _chld, 'ctxmenu', 'Context menu:')"),
@@ -227,6 +224,9 @@ defbindings("WFrame", {
 defbindings("WFrame.toplevel", {
     bdoc("Tag current object within the frame."),
     kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
+    
+    bdoc("Query for a client window to attach."),
+    kpress(META.."A", "mod_query.query_attachclient(_)"),
     
     submap(META.."K", {
         bdoc("Switch to n:th object within the frame."),
