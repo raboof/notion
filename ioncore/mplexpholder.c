@@ -245,7 +245,8 @@ WRegion *recreate_handler(WWindow *par,
 static WMPlexPHolder *get_head(WMPlexPHolder *ph)
 {
     while(1){
-        if(ph->prev->next==NULL)
+        /* ph->prev==NULL should not happen.. */
+        if(ph->prev==NULL || ph->prev->next==NULL)
             break;
         ph=ph->prev;
     }
