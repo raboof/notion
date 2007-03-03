@@ -185,8 +185,6 @@ extern WRegion *mplex_mx_current(WMPlex *mplex);
 extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
                                     int mode, bool sw, WRegion *reg);
 
-extern WLListNode *mplex_find_node(WMPlex *mplex, WRegion *reg);
-
 extern void mplex_remanage_stdisp(WMPlex *mplex);
 
 /* Dynfuns */
