@@ -46,6 +46,7 @@
 static void group_place_stdisp(WGroup *ws, WWindow *parent,
                                  int pos, WRegion *stdisp);
 
+static void group_remanage_stdisp(WGroup *ws);
 
 
 /*{{{ Stacking list stuff */
@@ -341,13 +342,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             /* We should probably be managing any stdisp, that 'bottom' 
              * was managing.
              */
-            WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
-            
-            if(mplex!=NULL 
-               && mplex->mx_current!=NULL 
-               && mplex->mx_current->st->reg==(WRegion*)ws){
-                mplex_remanage_stdisp(mplex);
-            }
+            group_remanage_stdisp(ws);
         }
         
         if(was_current){
@@ -484,7 +479,60 @@ static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ attach */
+/*{{{ Bottom */
+
+
+static void group_do_set_bottom(WGroup *grp, WStacking *st)
+{
+    WStacking *was=grp->bottom;
+    
+    grp->bottom=st;
+    
+    if(st!=was){
+        if(st==NULL || HAS_DYN(st->reg, region_manage_stdisp)))
+            group_remanage_stdisp(grp);
+        
+    }
+}
+
+
+/*EXTL_DOC
+ * Sets the 'bottom' of \var{ws}. The region \var{reg} must already
+ * be managed by \var{ws}.
+ */
+EXTL_EXPORT_MEMBER
+bool group_set_bottom(WGroup *ws, WRegion *reg)
+{
+    WStacking *st=NULL;
+    
+    if(reg!=NULL){
+        st=group_find_stacking(ws, reg);
+        
+        if(st==NULL)
+            return FALSE;
+    }
+        
+    group_do_set_bottom(ws, st);
+    
+    return TRUE;
+}
+
+
+/*EXTL_DOC
+ * Returns the 'bottom' of \var{ws}.
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+WRegion *group_bottom(WGroup *ws)
+{
+    return (ws->bottom!=NULL ? ws->bottom->reg : NULL);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Attach */
 
 
 WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, int level,
@@ -630,25 +678,10 @@ bool group_do_attach_final(WGroup *ws,
     if(stabove!=NULL)
         st->above=stabove;
 
-    /* Misc. */
-    if(param->bottom){
-        ws->bottom=st;
-        
-        if(HAS_DYN(reg, region_manage_stdisp) && ws->managed_stdisp!=NULL){
-            WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
-            if(mplex!=NULL){ /* should always hold */
-                WMPlexSTDispInfo di;
-                WRegion *stdisp=NULL;
-                mplex_get_stdisp(mplex, &stdisp, &di);
-                if(stdisp!=NULL){
-                    assert(stdisp==ws->managed_stdisp->reg);
-                    /* WARNING! Calls back to group code (managed_remove). */
-                    region_manage_stdisp(reg, stdisp, &di);
-                }
-            }
-        }
-    }
+    if(param->bottom)
+        group_do_set_bottom(ws, st);
     
+    /* Focus */
     sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
     
     if(sw || st->level>=STACKING_LEVEL_MODAL1){
@@ -884,6 +917,24 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
 
     region_fitrep(stdisp, NULL, &fp);
 }
+
+
+static void group_remanage_stdisp(WGroup *ws)
+{
+    WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
+    
+    if(mplex!=NULL && 
+       mplex->mx_current!=NULL && 
+       mplex->mx_current->st->reg==(WRegion*)ws){
+        mplex_remanage_stdisp(mplex);
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Geometry requests */
 
 
 void group_managed_rqgeom(WGroup *ws, WRegion *reg,
@@ -1137,17 +1188,6 @@ bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order)
 
 
 /*{{{ Misc. */
-
-
-/*EXTL_DOC
- * Returns the 'bottom' of \var{ws}.
- */
-EXTL_SAFE
-EXTL_EXPORT_MEMBER
-WRegion *group_bottom(WGroup *ws)
-{
-    return (ws->bottom!=NULL ? ws->bottom->reg : NULL);
-}
 
 
 /*EXTL_DOC
