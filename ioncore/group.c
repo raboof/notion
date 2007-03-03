@@ -489,7 +489,7 @@ static void group_do_set_bottom(WGroup *grp, WStacking *st)
     grp->bottom=st;
     
     if(st!=was){
-        if(st==NULL || HAS_DYN(st->reg, region_manage_stdisp)))
+        if(st==NULL || HAS_DYN(st->reg, region_manage_stdisp))
             group_remanage_stdisp(grp);
         
     }
