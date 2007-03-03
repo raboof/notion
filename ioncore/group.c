@@ -388,7 +388,6 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     ws->managed_stdisp=NULL;
     ws->bottom=NULL;
     ws->managed_list=NULL;
-    ws->bottom_last_close=TRUE;
     
     ws->dummywin=XCreateWindow(ioncore_g.dpy, par->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
@@ -473,7 +472,7 @@ static bool group_empty_for_bottom_stdisp(WGroup *ws)
 
 static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
 {
-    if(ws->bottom_last_close && group_bottom(ws)==reg){
+    if(group_bottom(ws)==reg){
         if(group_empty_for_bottom_stdisp(ws))
             return region_disposeroot((WRegion*)ws);
     }
@@ -1238,8 +1237,6 @@ static ExtlTab group_get_configuration(WGroup *ws)
     
     mgds=extl_create_table();
     
-    extl_table_sets_b(tab, "bottom_last_close", ws->bottom_last_close);
-    
     extl_table_sets_t(tab, "managed", mgds);
     
     /* TODO: stacking order messed up */
@@ -1292,8 +1289,6 @@ void group_do_load(WGroup *ws, ExtlTab tab)
         
         extl_unref_table(substab);
     }
-
-    extl_table_gets_b(tab, "bottom_last_close", &ws->bottom_last_close);
 }
 
 
