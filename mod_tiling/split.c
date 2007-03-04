@@ -1029,6 +1029,7 @@ err:
 void splittree_changeroot(WSplit *root, WSplit *node)
 {
     WTiling *ws=(WTiling*)(root->ws_if_root);
+    
     assert(ws!=NULL);
     assert(ws->split_tree==root);
     root->ws_if_root=NULL;

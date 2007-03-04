@@ -32,6 +32,7 @@ DECLCLASS(WTiling){
     PtrList *managed_list;
     WRegionSimpleCreateFn *create_frame_fn;
     Window dummywin;
+    bool batchop;
 };
 
 
@@ -124,6 +125,11 @@ typedef PtrListIterTmp WTilingIterTmp;
     
 #define FOR_ALL_MANAGED_BY_TILING_UNSAFE(VAR, WS) \
     FOR_ALL_ON_PTRLIST_UNSAFE(WRegion*, VAR, (WS)->managed_list)
+
+/* Misc. */
+
+#define TILING_STDISP_OF(WS) \
+     ((WS)->stdispnode!=NULL ? (WS)->stdispnode->regnode.reg : NULL)
 
 
 #endif /* ION_MOD_TILING_TILING_H */

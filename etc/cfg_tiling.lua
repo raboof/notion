@@ -48,6 +48,8 @@ defctxmenu("WTiling", "Tiling", {
     menuentry("Flip", "WTiling.flip_at(_, _sub)"),
     menuentry("Transpose", "WTiling.transpose_at(_, _sub)"),
     
+    menuentry("Untile", "mod_tiling.untile(_)"),
+    
     submenu("Float split", {
         menuentry("At left", 
                   "WTiling.set_floating_at(_, _sub, 'toggle', 'left')"),

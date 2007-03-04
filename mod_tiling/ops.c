@@ -9,12 +9,16 @@
  * (at your option) any later version.
  */
 
+#include <libtu/objp.h>
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
 #include <ioncore/focus.h>
 #include <ioncore/return.h>
 #include <ioncore/group.h>
 #include "tiling.h"
+
+
+/*{{{ mkbottom */
 
 
 static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp, 
@@ -65,7 +69,7 @@ bool mod_tiling_mkbottom(WRegion *reg)
         return FALSE;
     }
     
-    if(grp->bottom!=NULL){
+    if(group_bottom(grp)!=NULL){
         warn(TR("Manager group already has bottom"));
         return FALSE;
     }
@@ -88,3 +92,71 @@ bool mod_tiling_mkbottom(WRegion *reg)
     /* See the "Warning!" above. */
     return (group_do_attach(grp, &ap, &data)!=NULL);
 }
+
+
+/*}}}*/
+
+
+/*{{{ untile */
+
+
+/*EXTL_DOC
+ * If \var{tiling} is managed by some group, float the frames in
+ * the tiling in that group, and dispose of \var{tiling}.
+ */
+EXTL_EXPORT
+bool mod_tiling_untile(WTiling *tiling)
+{
+    WGroup *grp=REGION_MANAGER_CHK(tiling, WGroup);
+    WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
+    WTilingIterTmp tmp;
+    WRegion *reg, *reg2;
+    
+    if(grp==NULL){
+        warn(TR("Not member of a group"));
+        return FALSE;
+    }
+    
+    if(group_bottom(grp)==(WRegion*)tiling)
+        group_set_bottom(grp, NULL);
+    
+    /* Setting `batchop` will stop `tiling_managed_remove` from 
+     * resizing remaining frames into freed space. It will also 
+     * stop the tiling from being destroyed by actions of
+     * `tiling_managed_disposeroot`.
+     */
+    tiling->batchop=TRUE;
+    
+    FOR_ALL_MANAGED_BY_TILING(reg, tiling, tmp){
+        WRegionAttachData data;
+        
+        /* Don't bother with the status display */
+        if(reg==TILING_STDISP_OF(tiling))
+            continue;
+        
+        /* Don't bother with regions containing no client windows. */
+        if(!region_rescue_needed(reg))
+            continue;
+        
+        data.type=REGION_ATTACH_REPARENT;
+        data.u.reg=reg;
+        
+        param.geom_set=TRUE;
+        param.geom=REGION_GEOM(reg);
+        
+        reg2=group_do_attach(grp, &param, &data);
+        
+        if(reg2==NULL)
+            warn(TR("Unable to move a region from tiling to group."));
+    }
+    
+    tiling->batchop=FALSE;
+    
+    region_dispose((WRegion*)tiling);
+    
+    return TRUE;
+}
+
+
+/*}}}*/
+

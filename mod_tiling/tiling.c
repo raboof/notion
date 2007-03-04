@@ -48,10 +48,6 @@ static WTilingIterTmp tiling_iter_default_tmp;
 /*{{{ Some helper routines */
 
 
-#define STDISP_OF(WS) \
-     ((WS)->stdispnode!=NULL ? (WS)->stdispnode->regnode.reg : NULL)
-
-
 static WSplitRegion *get_node_check(WTiling *ws, WRegion *reg)
 {
     WSplitRegion *node;
@@ -493,7 +489,7 @@ bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
     Window bottom=None, top=None;
     WFrame *frame;
     
-    if(STDISP_OF(ws)!=reg){
+    if(TILING_STDISP_OF(ws)!=reg){
         if(!ptrlist_insert_last(&(ws->managed_list), reg))
             return FALSE;
     }
@@ -563,7 +559,8 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
                          : create_frame_tiling);
     ws->stdispnode=NULL;
     ws->managed_list=NULL;
-
+    ws->batchop=FALSE;
+    
     ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
                                 CopyFromParent, InputOnly,
@@ -651,9 +648,12 @@ WRegion *tiling_managed_disposeroot(WTiling *ws, WRegion *reg)
 {
     WTilingIterTmp tmp;
     WRegion *mgd;
-
+    
+    if(ws->batchop)
+        return reg;
+    
     FOR_ALL_MANAGED_BY_TILING(mgd, ws, tmp){
-        if(mgd!=STDISP_OF(ws) && mgd!=reg)
+        if(mgd!=TILING_STDISP_OF(ws) && mgd!=reg)
             return reg;
     }
     
@@ -675,7 +675,7 @@ bool tiling_rescue_clientwins(WTiling *ws, WRescueInfo *info)
 
 void tiling_do_managed_remove(WTiling *ws, WRegion *reg)
 {
-    if(STDISP_OF(ws)==reg){
+    if(TILING_STDISP_OF(ws)==reg){
         ws->stdispnode->regnode.reg=NULL;
     }else{
         ptrlist_remove(&(ws->managed_list), reg);
@@ -696,10 +696,11 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     bool act=REGION_IS_ACTIVE(reg);
     bool mcf=region_may_control_focus((WRegion*)ws);
     WSplitRegion *node=get_node_check(ws, reg);
-    bool ds=OBJ_IS_BEING_DESTROYED(ws);
-    WRegion *other;
+    bool norestore=(OBJ_IS_BEING_DESTROYED(ws) || ws->batchop);
+    WRegion *other=NULL;
 
-    other=tiling_do_navi_next(ws, reg, REGION_NAVI_ANY, TRUE, FALSE);
+    if(!norestore)
+        other=tiling_do_navi_next(ws, reg, REGION_NAVI_ANY, TRUE, FALSE);
     
     tiling_do_managed_remove(ws, reg);
 
@@ -709,7 +710,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     if(node!=NULL){
         bool reused=FALSE;
         
-        if(other==NULL && !ds){
+        if(other==NULL && !norestore){
             WWindow *par=REGION_PARENT(ws);
             WFitParams fp;
             
@@ -730,10 +731,10 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
         }
         
         if(!reused)
-            splittree_remove((WSplit*)node, (!ds && other!=NULL));
+            splittree_remove((WSplit*)node, (!norestore && other!=NULL));
     }
     
-    if(!OBJ_IS_BEING_DESTROYED(ws) && other!=NULL && act && mcf)
+    if(!norestore && other!=NULL && act && mcf)
         region_warp(other);
 }
 
