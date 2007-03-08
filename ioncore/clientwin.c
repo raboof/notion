@@ -1164,7 +1164,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
     if(ev->value_mask&CWBorderWidth)
         cwin->orig_bw=ev->border_width;
     
-    cwin->flags|=CLIENTWIN_FS_RQ;
+    cwin->flags|=CLIENTWIN_NEED_CFGNTFY;
 
     if(!(cwin->flags&CLIENTWIN_PROP_IGNORE_CFGRQ)){
         if(!check_fs_cfgrq(cwin, ev))
