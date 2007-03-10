@@ -434,13 +434,6 @@ err:
 }
 
 
-WPHolder *screen_get_rescue_pholder_for(WScreen *scr, WRegion *mgd)
-{
-#warning "TODO: better special case handling for groups"
-    
-    return (WPHolder*)mplex_get_rescue_pholder_for(&(scr->mplex), mgd);
-}
-
 /*}}}*/
 
 
@@ -540,9 +533,6 @@ static DynFunTab screen_dynfuntab[]={
     {(DynFun*)region_fitrep,
      (DynFun*)screen_fitrep},
 
-    {(DynFun*)region_get_rescue_pholder_for,
-     (DynFun*)screen_get_rescue_pholder_for},
-    
     END_DYNFUNTAB
 };
 
