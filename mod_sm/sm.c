@@ -15,6 +15,7 @@
 #include <libtu/misc.h>
 #include <libtu/parser.h>
 #include <libtu/tokenizer.h>
+#include <libtu/util.h>
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
@@ -84,7 +85,7 @@ static void mod_sm_set_sessiondir()
      * to the session.
      */
     if(smdir!=NULL){
-        tmp=scat(smdir, "/ion3"); /* TODO: pwm<=>ion! */
+        tmp=scat3(smdir, "/", libtu_progbasename());
     }else if(id!=NULL){
         tmp=scat("gnome-session-", id);
         if(tmp!=NULL){
