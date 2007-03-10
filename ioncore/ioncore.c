@@ -100,7 +100,7 @@ WHook *ioncore_deinit_hook=NULL;
 
 void ioncore_warn_nolog(const char *str)
 {
-    fprintf(stderr, "%s: %s\n", prog_execname(), str);
+    fprintf(stderr, "%s: %s\n", libtu_progname(), str);
 }
 
 

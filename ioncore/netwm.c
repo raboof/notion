@@ -74,8 +74,8 @@ void netwm_init_rootwin(WRootWin *rw)
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supported, XA_ATOM,
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
-    /* Something else should probably be used as WM name here. */
-    p[0]=prog_execname();
+
+    p[0]=libtu_progbasename();
     xwindow_set_text_property(rw->dummy_win, atom_net_wm_name, p, 1);
 }
 

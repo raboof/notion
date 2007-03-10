@@ -76,7 +76,7 @@ static OptParserOpt pwm_opts[]={
 static void help()
 {
     int i;
-    printf(TR("Usage: %s [options]\n\n"), prog_execname());
+    printf(TR("Usage: %s [options]\n\n"), libtu_progname());
     for(i=0; pwm_opts[i].descr!=NULL; i++)
         pwm_opts[i].descr=TR(pwm_opts[i].descr);
     optparser_printhelp(OPTP_MIDLONG, pwm_opts);
