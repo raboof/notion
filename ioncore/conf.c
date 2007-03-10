@@ -156,12 +156,18 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "switchto", ioncore_g.switchto_new);
     extl_table_sets_i(tab, "dblclick_delay", ioncore_g.dblclick_delay);
     extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
-
+    extl_table_sets_b(tab, "framed_transients", ioncore_g.framed_transients);
+    extl_table_sets_b(tab, "unsqueeze", ioncore_g.unsqueeze_enabled);
+    
     extl_table_sets_s(tab, "frame_default_index", 
                       stringintmap_key(frame_idxs, 
                                        ioncore_g.frame_default_index,
                                        NULL));
     
+    extl_table_sets_s(tab, "mousefocus", (ioncore_g.no_mousefocus
+                                          ? "disabled" 
+                                          : "sloppy"));
+
     ioncore_get_moveres_accel(tab);
     
     ioncore_groupws_get(tab);
