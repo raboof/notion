@@ -316,8 +316,6 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
         llist_unlink(&(mplex->mx_list), lnode);
     }
     
-    /* TODO: Support remove? */
-    
     after=llist_index_to_after(mplex->mx_list, mplex->mx_current, index);
     llist_link_after(&(mplex->mx_list), after, lnode);
     mplex_managed_changed(mplex, MPLEX_CHANGE_REORDER, FALSE, reg);
@@ -688,11 +686,13 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
          * no visible netscape windows.
          */
         {
-            #warning "TODO: less ugly hack"
             WGroup *grp=(WGroup*)OBJ_CAST(sub, WGroupCW);
-            if(grp!=NULL && grp->bottom!=NULL){
-                region_managed_rqorder((WRegion*)grp, grp->bottom->reg, 
-                                       REGION_ORDER_BACK);
+            if(grp!=NULL){
+                WRegion *bottom=group_bottom(grp);
+                if(bottom!=NULL){
+                    region_managed_rqorder((WRegion*)grp, bottom,
+                                           REGION_ORDER_BACK);
+                }
             }
         }
         
@@ -1869,7 +1869,6 @@ static void save_node(WMPlex *mplex, ExtlTab subs, int *n,
     st=region_get_configuration(node->reg);
     
     if(st!=extl_table_none()){
-        /*"TODO: better switchto saving? */
         if(mplex->mx_current!=NULL && node==mplex->mx_current->st)
             extl_table_sets_b(st, "switchto", TRUE);
         extl_table_sets_i(st, "sizepolicy", node->szplcy);

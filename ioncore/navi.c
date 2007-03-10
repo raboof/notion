@@ -273,10 +273,8 @@ WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
 {
     WRegionNaviData data;
     
-    if(reg==NULL){
-        /* ??? */
+    if(reg==NULL)
         return NULL;
-    }
     
     if(!get_param(&data, dirstr, param))
         return NULL;
@@ -291,7 +289,6 @@ WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
 static WRegion *do_goto(WRegion *res)
 {
     if(res!=NULL){
-        /* TODO: deep rqorder? */
         region_rqorder(res, REGION_ORDER_FRONT);
         region_goto(res);
     }

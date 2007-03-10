@@ -252,12 +252,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     XDeleteProperty(ioncore_g.dpy, root, net_virtual_roots);
 
-    /* */ {
-        /* TODO: typed LINK_ITEM */
-        WRegion *tmp=(WRegion*)ioncore_g.rootwins;
-        LINK_ITEM(tmp, (WRegion*)rootwin, p_next, p_prev);
-        ioncore_g.rootwins=(WRootWin*)tmp;
-    }
+    LINK_ITEM(*(WRegion**)&ioncore_g.rootwins, (WRegion*)rootwin, p_next, p_prev);
 
     xwindow_set_cursor(root, IONCORE_CURSOR_DEFAULT);
     
@@ -280,11 +275,7 @@ void rootwin_deinit(WRootWin *rw)
             destroy_obj((Obj*)scr);
     }
     
-    /* */ {
-        WRegion *tmp=(WRegion*)ioncore_g.rootwins;
-        UNLINK_ITEM(tmp, (WRegion*)rw, p_next, p_prev);
-        ioncore_g.rootwins=(WRootWin*)tmp;
-    }
+    UNLINK_ITEM(*(WRegion**)&ioncore_g.rootwins, (WRegion*)rw, p_next, p_prev);
     
     XSelectInput(ioncore_g.dpy, WROOTWIN_ROOT(rw), 0);
     
