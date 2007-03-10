@@ -40,6 +40,7 @@ extern int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
                               ExtlFn errh);
 extern bool ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh);
 extern void ioncore_setup_environ(const WExecP *p);
+extern void ioncore_setup_display(int xscr);
 
 extern bool ioncore_set_smhook(void (*fn)(int what));
 

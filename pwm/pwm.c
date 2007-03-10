@@ -188,7 +188,7 @@ fail:
             fclose(ef);
             pid=fork();
             if(pid==0){
-                ioncore_setup_environ(DefaultScreen(ioncore_g.dpy));
+                ioncore_setup_display(DefaultScreen(ioncore_g.dpy));
                 if(!may_continue)
                     XCloseDisplay(ioncore_g.dpy);
                 else

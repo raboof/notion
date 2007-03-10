@@ -28,7 +28,7 @@
 /*{{{ Exec */
 
 
-static void ioncore_setup_display(WRootWin *rw)
+void ioncore_setup_display(int xscr)
 {
     char *tmp, *ptr;
     char *display;
@@ -52,8 +52,8 @@ static void ioncore_setup_display(WRootWin *rw)
             *ptr='\0';
     }
 
-    if(rw!=NULL)
-        snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)rw->xscr);
+    if(xscr>=0)
+        snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)xscr);
     
     putenv(tmp);
         
@@ -69,8 +69,8 @@ void ioncore_setup_environ(const WExecP *p)
     /* Set up $DISPLAY */
     
     ioncore_setup_display(p->target!=NULL 
-                          ? region_rootwin_of(p->target)
-                          : NULL);
+                          ? region_rootwin_of(p->target)->xscr
+                          : -1);
     
     /* Set up working directory */
     
@@ -205,7 +205,7 @@ void ioncore_do_restart()
     ioncore_deinit();
     if(other!=NULL){
         if(ioncore_g.display!=NULL)
-            ioncore_setup_display(NULL);
+            ioncore_setup_display(-1);
         mainloop_do_exec(other);
         warn_err_obj(other);
     }
