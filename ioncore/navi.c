@@ -288,10 +288,9 @@ WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
 
 static WRegion *do_goto(WRegion *res)
 {
-    if(res!=NULL){
-        region_rqorder(res, REGION_ORDER_FRONT);
+    if(res!=NULL)
         region_goto(res);
-    }
+    
     return res;
 }
 

@@ -91,6 +91,7 @@ DECLSTRUCT(WGlobal){
     bool framed_transients;
     bool no_mousefocus;
     bool unsqueeze_enabled;
+    bool autoraise;
     
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */

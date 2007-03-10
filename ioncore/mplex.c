@@ -744,6 +744,13 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
         foc=mplex_do_to_focus(mplex, sub);
 
     if(foc!=NULL){
+        if(ioncore_g.autoraise && 
+           !(flags&REGION_GOTO_ENTERWINDOW) &&
+           foc->level>STACKING_LEVEL_BOTTOM){
+            WStacking **stackingp=mplex_get_stackingp(mplex);
+            stacking_restack(stackingp, foc, None, NULL, NULL, FALSE);
+        }
+        
         res->reg=foc->reg;
         res->flags=flags;
         

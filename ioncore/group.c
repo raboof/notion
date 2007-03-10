@@ -281,18 +281,20 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
         return mplex_do_prepare_focus(mplex, node, st,
                                       flags, res);
     }else{
-        WStacking *stacking;
-        
         if(!region_prepare_focus((WRegion*)ws, flags, res))
             return FALSE;
 
-        stacking=group_get_stacking(ws);
         st=find_to_focus(ws, st, FALSE);
-        
-#warning "TODO: raise in some cases (not enter-window)?"
         
         if(st==NULL)
             return FALSE;
+        
+        if(ioncore_g.autoraise && 
+           !(flags&REGION_GOTO_ENTERWINDOW) &&
+           st->level>STACKING_LEVEL_BOTTOM){
+            WStacking **stackingp=group_get_stackingp(ws);
+            stacking_restack(stackingp, st, None, NULL, NULL, FALSE);
+        }
         
         res->reg=st->reg;
         res->flags=flags;
