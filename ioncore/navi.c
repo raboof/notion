@@ -230,12 +230,12 @@ static WRegion *release(WRegionNaviData *data, WRegion *res)
 
 /*EXTL_DOC
  * Find region next from \var{reg} in direction \var{dirstr}
- * (up/down/left/right/next/prev/any). The table param may
+ * (up/down/left/right/next/prev/any). The table \var{param} may
  * contain the boolean field \var{nowrap}, instructing not to wrap 
  * around, and the \type{WRegion}s \var{no_ascend} and \var{no_descend},
- * and functions \var{ascend_filter} and \var{descend_filter} from
- * \var{WRegion}s (\var{to}, \var{from}), used to decide when to descend
- * or ascend into another region. (TODO: more detailed explanation.)
+ * and boolean functions \var{ascend_filter} and \var{descend_filter} 
+ * on \var{WRegion} pairs (\var{to}, \var{from}), are used to decide when
+ * to descend or ascend into another region.
  */
 EXTL_EXPORT
 WRegion *ioncore_navi_next(WRegion *reg, const char *dirstr, ExtlTab param)

@@ -281,8 +281,8 @@ bool mplex_managed_i(WMPlex *mplex, ExtlFn iterfn)
 
 
 /*EXTL_DOC
- * Set index of \var{reg} within the multiplexer to \var{index} within 
- * the mutually exclusive list. Special values for \var{index} are:
+ * Set index of \var{reg} to \var{index} within the mutually exclusive 
+ * list of \var{mplex}. Special values for \var{index} are:
  * \begin{tabularx}{\linewidth}{lX}
  *   $-1$ & Last. \\
  *   $-2$ & After \fnref{WMPlex.mx_current}. \\
@@ -325,9 +325,9 @@ void mplex_set_index(WMPlex *mplex, WRegion *reg, int index)
 
 
 /*EXTL_DOC
- * Get index of \var{reg} within the multiplexer on list 1. The first region 
- * managed by \var{mplex} has index zero. If \var{reg} is not managed by 
- * \var{mplex}, -1 is returned.
+ * Get index of \var{reg} on the mutually exclusive list of \var{mplex}.
+ * The indices begin from zero.. If \var{reg} is not on the list,
+ * -1 is returned.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
@@ -1354,8 +1354,7 @@ WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par,
  *  \var{hidden} & (boolean) Attach hidden, if not prevented
  *                  by e.g. the mutually exclusive list being empty.
  *                  This option overrides \var{switchto}. \\
- *  \var{sizepolicy} & (integer) Size policy.
- *                     (TODO: document them somewhere.) \\
+ *  \var{sizepolicy} & (integer) Size policy. \\
  *  \var{geom} & (table) Geometry specification. \\
  * \end{tabularx}
  * 
