@@ -514,7 +514,7 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 /*{{{ Focus  */
 
 
-static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
+static WStacking *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 {
     WStacking *stacking=mplex_get_stacking(mplex);
     WStacking *st=NULL;
@@ -528,15 +528,15 @@ static WRegion *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
     st=stacking_find_to_focus_mapped(stacking, to_try, NULL);
     
     if(st!=NULL)
-        return st->reg;
+        return st;
     else if(mplex->mx_current!=NULL)
-        return mplex->mx_current->st->reg;
+        return mplex->mx_current->st;
     else
         return NULL;
 }
 
 
-WRegion *mplex_to_focus(WMPlex *mplex)
+static WStacking *mplex_to_focus(WMPlex *mplex)
 {
     WRegion *reg=REGION_ACTIVE_SUB(mplex);
     WStacking *to_try=NULL;
@@ -548,8 +548,8 @@ WRegion *mplex_to_focus(WMPlex *mplex)
 }
 
 
-static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
-                                     WStacking *to_try)
+static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
+                                       WStacking *to_try)
 {
     WStacking *stacking=mplex_get_stacking(mplex);
     WStacking *st=NULL;
@@ -560,42 +560,40 @@ static WRegion *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
     if(to_try!=NULL && (to_try->reg==NULL || !REGION_IS_MAPPED(to_try->reg)))
         to_try=NULL;
     
-    st=stacking_find_to_focus_mapped(stacking, to_try, node->reg);
-    
-    return (st!=NULL ? st->reg : NULL);
+    return stacking_find_to_focus_mapped(stacking, to_try, node->reg);
 }
 
 
-static WRegion *mplex_to_focus_on(WMPlex *mplex, WStacking *node,
-                                  WStacking *to_try)
+static WStacking *mplex_to_focus_on(WMPlex *mplex, WStacking *node,
+                                    WStacking *to_try)
 {
-    WRegion *reg;
     WGroup *grp=OBJ_CAST(node->reg, WGroup);
+    WStacking *st;
     
     if(grp!=NULL){
         if(to_try==NULL)
             to_try=grp->current_managed;
-        reg=mplex_do_to_focus_on(mplex, node, to_try);
-        if(reg!=NULL || to_try!=NULL)
-            return reg;
+        st=mplex_do_to_focus_on(mplex, node, to_try);
+        if(st!=NULL || to_try!=NULL)
+            return st;
         /* We don't know whether something is blocking focus here,
          * or if there was nothing to focus (as node->reg itself
          * isn't on the stacking list).
          */
     }
     
-    reg=mplex_do_to_focus(mplex, node);
-    return (reg==node->reg ? reg : NULL);
+    st=mplex_do_to_focus(mplex, node);
+    return (st==node ? st : NULL);
 }
 
 
 void mplex_do_set_focus(WMPlex *mplex, bool warp)
 {
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        WRegion *reg=mplex_to_focus(mplex);
+        WStacking *st=mplex_to_focus(mplex);
         
-        if(reg!=NULL){
-            region_do_set_focus(reg, warp);
+        if(st!=NULL){
+            region_do_set_focus(st->reg, warp);
             return;
         }
     }
@@ -704,7 +702,7 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
 
 static bool mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
 {
-    WRegion *foc=NULL;
+    WStacking *foc=NULL;
     bool ret=TRUE;
     
     if(node!=NULL){
@@ -717,8 +715,8 @@ static bool mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
         foc=mplex_to_focus(mplex);
     }
     
-    if(foc!=NULL /* && !REGION_IS_ACTIVE(foc) */ )
-        region_maybewarp(foc, warp);
+    if(foc!=NULL)
+        region_maybewarp(foc->reg, warp);
     
     return ret;
 }
@@ -728,7 +726,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
                             WStacking *sub, int flags, 
                             WPrepareFocusResult *res)
 {
-    WRegion *foc;
+    WStacking *foc;
     
     if(sub==NULL && node==NULL)
         return FALSE;
@@ -746,13 +744,13 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
         foc=mplex_do_to_focus(mplex, sub);
 
     if(foc!=NULL){
-        res->reg=foc;
+        res->reg=foc->reg;
         res->flags=flags;
         
         if(sub==NULL)
-            return (foc==node->reg);
+            return (foc==node);
         else
-            return (foc==sub->reg);
+            return (foc==sub);
     }else{
         return FALSE;
     }
