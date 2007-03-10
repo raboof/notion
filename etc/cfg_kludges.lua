@@ -17,6 +17,13 @@ defwinprop{
     transient_mode = "current",
 }
 
+defwinprop{
+    class = "Xpdf",
+    instance = "openDialog_popup",
+    ignore_cfgrq = true,
+}
+
+
 -- You might want to enable these if you really must use XMMS. 
 --[[
 defwinprop{
