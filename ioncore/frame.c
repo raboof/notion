@@ -966,6 +966,11 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     if(frame!=NULL)
         frame_do_load(frame, tab);
     
+    if(DEST_EMPTY(frame) && frame->mplex.mgd==NULL){
+        destroy_obj((Obj*)frame);
+        return NULL;
+    }
+    
     return (WRegion*)frame;
 }
 
