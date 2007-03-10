@@ -27,12 +27,16 @@ static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp,
     WRegion *reg=(WRegion*)param, *res;
     WRegionAttachData data;
     WTiling *tiling;
+    WFitParams fp2;
     
-    tiling=create_tiling(parent, fp, NULL, FALSE);
+    fp2.mode=REGION_FIT_EXACT;
+    fp2.g=fp->g;
+    
+    tiling=create_tiling(parent, &fp2, NULL, FALSE);
     
     if(tiling==NULL)
         return NULL;
-    
+        
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
@@ -40,7 +44,7 @@ static WRegion *mkbottom_fn(WWindow *parent, const WFitParams *fp,
      * group we're being attached to, and from the attach routine of which
      * this function is called from!
      */
-    res=region_attach_helper((WRegion*)tiling, parent, fp,
+    res=region_attach_helper((WRegion*)tiling, parent, &fp2,
                              (WRegionDoAttachFn*)tiling_do_attach_initial, 
                              NULL, &data);
     
