@@ -282,14 +282,11 @@ void region_updategr_default(WRegion *reg)
 bool region_prepare_focus(WRegion *reg, int flags, 
                           WPrepareFocusResult *res)
 {
-    WRegion *mgr=REGION_MANAGER(reg);
-    WRegion *par=REGION_PARENT_REG(reg);
 
-    if(REGION_IS_MAPPED(reg) && region_may_control_focus(reg)){
-        res->reg=reg;
-        res->flags=flags;
-        return TRUE;
-    }else{
+    if(!REGION_IS_ACTIVE(reg) || !REGION_IS_MAPPED(reg)){
+        WRegion *mgr=REGION_MANAGER(reg);
+        WRegion *par=REGION_PARENT_REG(reg);
+        
         if(mgr!=NULL){
             return region_managed_prepare_focus(mgr, reg, flags, res);
         }else if(par!=NULL){
@@ -298,11 +295,14 @@ bool region_prepare_focus(WRegion *reg, int flags,
             /* Just focus reg, if it has no manager, and parent can be 
              * focused. 
              */
+        }else if(!REGION_IS_MAPPED(reg)){
+            region_map(reg);
         }
-        res->reg=reg;
-        res->flags=flags;
-        return TRUE;
     }
+    
+    res->reg=reg;
+    res->flags=flags;
+    return TRUE;
 }
 
 
