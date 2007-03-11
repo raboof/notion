@@ -84,11 +84,28 @@ static void defer_watch_handler(Watch *w, Obj *obj)
     warn(TR("Object destroyed while deferred actions are still pending."));
 }
 
+
+static bool already_deferred(Obj *obj, WDeferredAction *action, 
+                             WDeferred *list)
+{
+    WDeferred *d;
     
+    for(d=list; d!=NULL; d=d->next){
+        if(d->action==action && d->watch.obj==obj)
+            return TRUE;
+    }
+    
+    return FALSE;
+}
+
+
 bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action, 
                                    WDeferred **list)
 {
     WDeferred *d;
+    
+    if(already_deferred(obj, action, *list))
+        return TRUE;
     
     d=alloc_defer();
     

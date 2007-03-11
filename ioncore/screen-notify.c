@@ -331,7 +331,7 @@ void ioncore_screen_activity_notify(WRegion *reg, WRegionNotify how)
 {
     if(how==ioncore_g.notifies.activity){
         WScreen *scr=region_screen_of(reg);
-        /* TODO: multiple calls */
+        
         mainloop_defer_action((Obj*)scr, 
                               (WDeferredAction*)screen_update_notifywin);
         mainloop_defer_action((Obj*)scr, 
