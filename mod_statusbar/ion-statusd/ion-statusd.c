@@ -88,7 +88,7 @@ static ExtlTab configtab;
 static void help()
 {
     int i;
-    printf(TR("Usage: %s [options]\n\n"), prog_execname());
+    printf(TR("Usage: %s [options]\n\n"), libtu_progname());
     for(i=0; ion_opts[i].descr!=NULL; i++)
         ion_opts[i].descr=TR(ion_opts[i].descr);
     optparser_printhelp(OPTP_MIDLONG, ion_opts);
