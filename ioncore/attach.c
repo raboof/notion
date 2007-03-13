@@ -21,6 +21,7 @@
 #include "manage.h"
 #include "extlconv.h"
 #include "names.h"
+#include "focus.h"
 
 
 /*{{{ Helper */
@@ -86,7 +87,29 @@ static WRegion *doit_reparent(WRegion *mgr,
     region_detach_manager(reg);
     
     if(!cont(mgr, reg, cont_param)){
-        #warning "TODO: What?"
+        WScreen *scr=region_screen_of(reg);
+        
+        warn(TR("Unexpected attach error: "
+                "trying to recover by attaching to screen."));
+        
+        if(scr!=NULL){
+            /* Try to attach to screen, to have `reg` attached at least
+             * somewhere. For better recovery, we could try to get
+             * a placeholder for `reg` before we detach it, but this
+             * would add unnecessary overhead in the usual succesfull
+             * case. (This failure is supposed to be _very_ rare!)
+             * We intentionally also do not region_postdetach_dispose 
+             * on recovery.
+             */
+            int flags=(region_may_control_focus(reg) 
+                       ? MPLEX_ATTACH_SWITCHTO 
+                       : 0);
+            if(mplex_attach_simple(&scr->mplex, reg, flags)!=NULL)
+                return NULL;
+        }
+        
+        warn(TR("Failed recovery."));
+        
         return NULL;
     }
     
