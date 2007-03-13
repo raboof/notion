@@ -934,13 +934,8 @@ static WRegion *do_navi(WMPlex *mplex, WStacking *sti,
             if(OBJ_IS(st->reg, WGroup)){
                 /* WGroup navigation code should respect modal stuff. */
                 WRegion *res=region_navi_cont((WRegion*)mplex, st->reg, data);
-                if(res!=NULL){
-                    if(res!=st->reg){
-                        return res;
-                    }else{
-                        #warning "TODO: What to do?"
-                    }
-                }
+                if(res!=NULL && res!=st->reg)
+                    return res;
             }else{
                 if(st->level>=min_level && !PASSIVE(st))
                     return region_navi_cont((WRegion*)mplex, st->reg, data);
