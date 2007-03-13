@@ -214,7 +214,7 @@ unnotify:
 }
 
 
-void screen_update_notifywin(WScreen *scr)
+static void screen_do_update_notifywin(WScreen *scr)
 {
     if(ioncore_g.screen_notify)
         screen_managed_activity(scr);
@@ -277,7 +277,7 @@ static void init_attr()
 }
 
 
-void screen_update_infowin(WScreen *scr)
+static void screen_do_update_infowin(WScreen *scr)
 {
     WRegion *reg=mplex_mx_current(&(scr->mplex));
     bool tag=(reg!=NULL && region_is_tagged(reg));
@@ -312,18 +312,31 @@ void screen_update_infowin(WScreen *scr)
 }
 
 
+
 /*}}}*/
 
 
-/*{{{ Notification callbacks */
+/*{{{ Notification callbacks and deferred updates*/
+
+
+void screen_update_infowin(WScreen *scr)
+{
+    mainloop_defer_action((Obj*)scr, 
+                          (WDeferredAction*)screen_do_update_infowin);
+}
+
+
+void screen_update_notifywin(WScreen *scr)
+{
+    mainloop_defer_action((Obj*)scr, 
+                          (WDeferredAction*)screen_do_update_notifywin);
+}
 
 
 void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how)
 {
-    if(how==ioncore_g.notifies.tag){
-        mainloop_defer_action((Obj*)scr, 
-                              (WDeferredAction*)screen_update_infowin);
-    }
+    if(how==ioncore_g.notifies.tag)
+        screen_update_infowin(scr);
 }
 
 
@@ -332,10 +345,9 @@ void ioncore_screen_activity_notify(WRegion *reg, WRegionNotify how)
     if(how==ioncore_g.notifies.activity){
         WScreen *scr=region_screen_of(reg);
         
-        mainloop_defer_action((Obj*)scr, 
-                              (WDeferredAction*)screen_update_notifywin);
-        mainloop_defer_action((Obj*)scr, 
-                              (WDeferredAction*)screen_update_infowin);
+        screen_update_infowin(scr);
+        screen_update_notifywin(scr);
+
     }
 }
 
