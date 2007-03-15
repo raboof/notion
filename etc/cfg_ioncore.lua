@@ -348,15 +348,16 @@ defmenu("sessionmenu", {
 })
 
 
--- Context menu (frame/client window actions)
+-- Context menu (frame actions etc.)
 defctxmenu("WFrame", "Frame", {
     -- Note: this propagates the close to any subwindows; it does not
-    -- destroy the frame itself. An entry to destroy tiled frames is 
-    -- configured in cfg_tiling.lua.
+    -- destroy the frame itself, unless empty. An entry to destroy tiled
+    -- frames is configured in cfg_tiling.lua.
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
-    menuentry("Attach tagged",  "ioncore.tagged_attach(_)"),
-    menuentry("Clear tags",     "ioncore.clear_tags()"),
-    menuentry("Window info",    "mod_query.show_tree(_, _sub)"),
+    -- Low-priority entries
+    menuentry("Attach tagged", "ioncore.tagged_attach(_)", { priority = 0 }),
+    menuentry("Clear tags",    "ioncore.clear_tags()", { priority = 0 }),
+    menuentry("Window info",   "mod_query.show_tree(_, _sub)", { priority = 0 }),
 })
 
 

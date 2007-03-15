@@ -75,15 +75,34 @@ end
 
 --DOC
 -- Use this function to define normal menu entries. The string \var{name} 
--- is the string shown in the visual representation of menu, and the
--- parameter \var{cmd} and \var{guard} are similar to those of
--- \fnref{ioncore.defbindings}.
-function ioncore.menuentry(name, cmd, guard)
+-- is the string shown in the visual representation of menu. The
+-- parameter \var{cmd} and \var{guard_or_opts} (when string) are similar
+-- to those of \fnref{ioncore.defbindings}.  If \var{guard_or_opts} is
+-- a table, it may contains the \var{guard} field, and the \var{priority}
+-- field, for controlling positioning of entries in context menus.
+-- (The default priority is 1 for most entries, and -1 for auto-generated
+-- submenus.)
+function ioncore.menuentry(name, cmd, guard_or_opts)
+    local guard
+    local opts
+    
+    if type(guard_or_opts)=="string" then
+        guard=guard_or_opts
+    elseif type(guard_or_opts)=="table" then
+        opts=guard_or_opts
+        guard=opts.guard
+    end
+    
     local fn, gfn=ioncore.compile_cmd(cmd, guard)
     if fn then
-        return {name=ioncore.gettext(name), func=fn, guard_func=gfn}
+        return table.append({
+                   name=ioncore.gettext(name), 
+                   func=fn, 
+                   guard_func=gfn, 
+               }, opts or {})
     end
 end
+
 
 --DOC
 -- Use this function to define menu entries for submenus. The parameter
@@ -94,17 +113,12 @@ end
 -- \var{options.noautoexpand} that will cause \fnref{mod_query.query_menu}
 -- to not automatically expand this submenu.
 function ioncore.submenu(name, sub_or_name, options)
-    if not options then
-        options={}
-    end
-    return {
-        name=ioncore.gettext(name),
-        submenu_fn=function()
-                       return ioncore.evalmenu  (sub_or_name)
-                   end,
-        initial=options.initial,
-        noautoexpand=options.noautoexpand,
-    }
+    return table.append({
+               name=ioncore.gettext(name),
+               submenu_fn=function()
+                              return ioncore.evalmenu  (sub_or_name)
+                          end,
+           }, options or {})
 end
 
 
@@ -376,6 +390,21 @@ local function get_ctxmenu(reg, sub)
     return m
 end
 
+
+local function sortmenu(m)
+    local v=1/2
+    
+    for _, e in ipairs(m) do
+        e.priority=(e.priority or 1)+v
+        v=v/2
+    end
+    
+    table.sort(m, function(e1, e2) return e1.priority > e2.priority end)
+    
+    return m
+end
+
+
 function menus.ctxmenu(reg, sub_or_chld)
     local m, r, s
     
@@ -396,13 +425,14 @@ function menus.ctxmenu(reg, sub_or_chld)
         local mm = get_ctxmenu(r, s)
         if #mm>0 then
             local nm=mm.label or obj_typename(reg)
-            table.insert(m, ioncore.submenu(nm, mm))
+            local tmp=ioncore.submenu(nm, sortmenu(mm), {priority=-1})
+            table.insert(m, tmp)
         end
         s=r
         r=r:manager()
     end
     
-    return m
+    return sortmenu(m)
 end
 
 -- }}}
