@@ -317,6 +317,33 @@ WMoveresMode *region_begin_move(WRegion *reg, WDrawRubberbandFn *rubfn,
 }
 
 
+static void moveresmode_setorig(WMoveresMode *mode)
+{
+    mode->dx1=0;
+    mode->dx2=0;
+    mode->dy1=0;
+    mode->dy2=0;
+    mode->origgeom=mode->geom;
+}
+
+
+static void moveresmode_do_newgeom(WMoveresMode *mode, WRQGeomParams *rq)
+{    
+    if(XOR_RESIZE)
+        moveres_draw_rubberband(mode);
+    
+    if(mode->reg!=NULL){
+        rq->flags|=mode->rqflags;
+        region_rqgeom(mode->reg, rq, &mode->geom);
+    }
+    
+    moveres_draw_infowin(mode);
+    
+    if(XOR_RESIZE)
+        moveres_draw_rubberband(mode);
+}
+
+
 static void moveresmode_delta(WMoveresMode *mode, 
                               int dx1, int dx2, int dy1, int dy2,
                               WRectangle *rret)
@@ -387,26 +414,10 @@ static void moveresmode_delta(WMoveresMode *mode,
             rq.geom.y+=mode->origgeom.h-rq.geom.h;
     }
     
-    if(XOR_RESIZE)
-        moveres_draw_rubberband(mode);
+    moveresmode_do_newgeom(mode, &rq);
     
-    if(mode->reg!=NULL){
-        rq.flags=mode->rqflags;
-        region_rqgeom(mode->reg, &rq, &mode->geom);
-    }
-    
-    if(!mode->resize_cumulative){
-        mode->dx1=0;
-        mode->dx2=0;
-        mode->dy1=0;
-        mode->dy2=0;
-        mode->origgeom=mode->geom;
-    }
-    
-    moveres_draw_infowin(mode);
-    
-    if(XOR_RESIZE)
-        moveres_draw_rubberband(mode);
+    if(!mode->resize_cumulative)
+        moveresmode_setorig(mode);
     
     if(rret!=NULL)
         *rret=mode->geom;
@@ -427,6 +438,15 @@ void moveresmode_delta_move(WMoveresMode *mode,
 {
     mode->mode=MOVERES_POS;
     moveresmode_delta(mode, dx, dx, dy, dy, rret);
+}
+
+
+void moveresmode_rqgeom(WMoveresMode *mode, WRQGeomParams *rq, 
+                        WRectangle *rret)
+{
+    mode->mode=MOVERES_SIZE;
+    moveresmode_do_newgeom(mode, rq);
+    moveresmode_setorig(mode);
 }
 
 
@@ -520,6 +540,26 @@ void region_rqgeom(WRegion *reg, const WRQGeomParams *rq,
 }
 
 
+void rqgeomparams_from_table(WRQGeomParams *rq, 
+                             const WRectangle *origg, ExtlTab g)
+{
+    rq->geom=*origg;
+    rq->flags=REGION_RQGEOM_WEAK_ALL;
+    
+    if(extl_table_gets_i(g, "x", &(rq->geom.x)))
+       rq->flags&=~REGION_RQGEOM_WEAK_X;
+    if(extl_table_gets_i(g, "y", &(rq->geom.y)))
+       rq->flags&=~REGION_RQGEOM_WEAK_Y;
+    if(extl_table_gets_i(g, "w", &(rq->geom.w)))
+       rq->flags&=~REGION_RQGEOM_WEAK_W;
+    if(extl_table_gets_i(g, "h", &(rq->geom.h)))
+       rq->flags&=~REGION_RQGEOM_WEAK_H;
+
+    rq->geom.w=maxof(1, rq->geom.w);
+    rq->geom.h=maxof(1, rq->geom.h);
+}
+
+
 /*EXTL_DOC
  * Attempt to resize and/or move \var{reg}. The table \var{g} is a usual
  * geometry specification (fields \var{x}, \var{y}, \var{w} and \var{h}),
@@ -529,29 +569,14 @@ void region_rqgeom(WRegion *reg, const WRQGeomParams *rq,
 EXTL_EXPORT_AS(WRegion, rqgeom)
 ExtlTab region_rqgeom_extl(WRegion *reg, ExtlTab g)
 {
-    WRectangle ogeom=REGION_GEOM(reg);
     WRQGeomParams rq=RQGEOMPARAMS_INIT;
+    WRectangle res;
     
+    rqgeomparams_from_table(&rq, &REGION_GEOM(reg), g);
     
-    rq.geom=ogeom;
-    rq.flags=REGION_RQGEOM_WEAK_ALL;
+    region_rqgeom(reg, &rq, &res);
     
-    
-    if(extl_table_gets_i(g, "x", &(rq.geom.x)))
-       rq.flags&=~REGION_RQGEOM_WEAK_X;
-    if(extl_table_gets_i(g, "y", &(rq.geom.y)))
-       rq.flags&=~REGION_RQGEOM_WEAK_Y;
-    if(extl_table_gets_i(g, "w", &(rq.geom.w)))
-       rq.flags&=~REGION_RQGEOM_WEAK_W;
-    if(extl_table_gets_i(g, "h", &(rq.geom.h)))
-       rq.flags&=~REGION_RQGEOM_WEAK_H;
-
-    rq.geom.w=maxof(1, rq.geom.w);
-    rq.geom.h=maxof(1, rq.geom.h);
-    
-    region_rqgeom(reg, &rq, &ogeom);
-    
-    return extl_table_from_rectangle(&ogeom);
+    return extl_table_from_rectangle(&res);
 }
 
 

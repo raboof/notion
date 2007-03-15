@@ -28,6 +28,8 @@ extern void moveresmode_move(WMoveresMode *mode,
                              int horizmul, int vertmul);
 extern void moveresmode_resize(WMoveresMode *mode, 
                                int left, int right, int top, int bottom);
+extern ExtlTab moveresmode_geom(WMoveresMode *mode);
+extern ExtlTab moveresmode_rqgeom_extl(WMoveresMode *mode, ExtlTab g);
 extern void moveresmode_accel(WMoveresMode *mode, 
                               int *wu, int *hu, int accel_mode);
 

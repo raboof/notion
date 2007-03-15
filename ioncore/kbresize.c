@@ -137,6 +137,8 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 static ExtlExportedFn *moveres_safe_fns[]={
     (ExtlExportedFn*)&moveresmode_resize,
     (ExtlExportedFn*)&moveresmode_move,
+    (ExtlExportedFn*)&moveresmode_rqgeom_extl,
+    (ExtlExportedFn*)&moveresmode_geom,
     (ExtlExportedFn*)&moveresmode_finish,
     (ExtlExportedFn*)&moveresmode_cancel,
     NULL
@@ -306,6 +308,33 @@ void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 
     moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
                              NULL);
+}
+
+
+/*EXTL_DOC
+ * Request exact geometry in move/resize mode. For details on parameters,
+ * see \fnref{WRegion.rqgeom}.
+ */
+EXTL_EXPORT_AS(WMoveresMode, rqgeom)
+ExtlTab moveresmode_rqgeom_extl(WMoveresMode *mode, ExtlTab g)
+{
+    WRQGeomParams rq=RQGEOMPARAMS_INIT;
+    WRectangle res;
+    
+    rqgeomparams_from_table(&rq, &mode->geom, g);
+    
+    moveresmode_rqgeom(mode, &rq, &res);
+    
+    return extl_table_from_rectangle(&res);
+}
+
+/*EXTL_DOC
+ * Returns current geometry.
+ */
+EXTL_EXPORT_MEMBER
+ExtlTab moveresmode_geom(WMoveresMode *mode)
+{
+    return extl_table_from_rectangle(&mode->geom);
 }
 
 

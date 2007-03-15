@@ -93,6 +93,8 @@ extern void moveresmode_delta_resize(WMoveresMode *mode,
                                      WRectangle *rret);
 extern void moveresmode_delta_move(WMoveresMode *mode, 
                                    int dx, int dy, WRectangle *rret);
+extern void moveresmode_rqgeom(WMoveresMode *mode, WRQGeomParams *rq, 
+                               WRectangle *rret);
 extern bool moveresmode_do_end(WMoveresMode *mode, bool apply);
 extern WRegion *moveresmode_target(WMoveresMode *mode);
 
@@ -146,5 +148,8 @@ extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
 extern void region_absolute_geom_to_parent(WRegion *reg, 
                                            const WRectangle *rgeom,
                                            WRectangle *pgeom);
+
+extern void rqgeomparams_from_table(WRQGeomParams *rq, 
+                                    const WRectangle *origg, ExtlTab g);
 
 #endif /* ION_IONCORE_RESIZE_H */
