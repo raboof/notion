@@ -1,11 +1,14 @@
 #!/bin/sh
 
+prog=$0
 tocompl=""
 section=""
 beg=""
 action=""
 usercache=""
 syscache=""
+linebeg="^"
+icase=""
 
 translate_grepsafe() { 
     # The regexp below is supposed to be [\[\].*$^\\], but sed sucks
@@ -15,30 +18,46 @@ translate_grepsafe() {
     sed 's:^[ \t]*\(.*\)[ \t]*$:\1:; s:[[.[.][.].].*$^\\]:\\&:g'
 }
 
-case "$1" in
-    -complete)
-        read section tocompl << EOF
+
+while test $# -ge 1; do
+    case "$1" in
+        -mid)
+            linebeg=""
+            ;;
+        -icase)
+            icase="-i"
+            ;;
+        -complete)
+            read section tocompl << EOF
 $2
 EOF
-        if test "$tocompl" = ""; then
-            tocompl="$section"
-            section=""
-        else
-            beg="$section "
-        fi
-        tocompl=`echo "$tocompl" | translate_grepsafe`
-        action="complete"
-        ;;
-    -mkusercache)
-        action="mkusercache"
-        ;;
-    -mksyscache)
-        action="mksyscache"
-        ;;
-esac
-   
+            if test "$tocompl" = ""; then
+                tocompl="$section"
+                section=""
+            else
+                beg="$section "
+            fi
+            tocompl=`echo "$tocompl" | translate_grepsafe`
+            action="complete"
+            break
+            ;;
+        -mkusercache)
+            action="mkusercache"
+            break
+            ;;
+        -mksyscache)
+            action="mksyscache"
+            break
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
 if test "x$action" = x; then
-    echo 2>&1 "Usage: $0 (-complete what|-mkusercache|-mksyscache)"
+    echo 2>&1 "Usage: $prog [-icase] [-mid] (-complete what|-mkusercache|-mksyscache)"
     exit 1
 fi
         
@@ -58,7 +77,7 @@ grepper() {
         if test "$section" = ""; then
             section="[0-9]"
         fi
-        grep "^$tocompl.*\.$section"
+        grep $icase "$linebeg$tocompl.*\.$section"
     fi
 }
 
