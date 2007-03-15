@@ -971,8 +971,10 @@ end
 
 function mod_query.man_completor(wedln, str)
     local mc=ioncore.lookup_script("ion-completeman")
+    local icase=(mod_query.get().caseicompl and " -icase" or "")
+    local mid=""
     if mc then
-        mod_query.popen_completions(wedln, (mc.." -complete "
+        mod_query.popen_completions(wedln, (mc..icase..mid.." -complete "
                                             ..string.shell_safe(str)))
     end
 end
