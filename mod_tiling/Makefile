@@ -17,6 +17,7 @@ SOURCES=main.c tiling.c placement.c split.c split-stdisp.c \
 MAKE_EXPORTS=mod_tiling
 
 MODULE=mod_tiling
+MODULE_STUB=mod_tiling.lua
 
 ######################################
 
