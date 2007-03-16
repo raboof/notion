@@ -50,7 +50,7 @@ Building and installing
    if you're using some X display/login manager. If `~/.xsession` does not 
    help and you're not using a display manager, modifying `~/.xinitrc` or 
    creating one based on your system's `xinitrc` (wherever that may be; 
-   use locate) may be what you need to do. Note that unlike `.xsession`, 
+   use `locate`) may be what you need to do. Note that unlike `.xsession`, 
    a `.xinitrc` should usually do much more setup than simply start a few
    programs of your choice.
 
@@ -64,11 +64,11 @@ Some optional installation steps
 1. The F5 and F6 keys expect to find the program `run-mailcap` to select
    a program to view a file based on its guessed MIME type. Unless you are
    using Debian, most likely you don't have it, but any other similar 
-   program (or just plain old text editor) will do as well - just the bindings
-   in `cfg_ioncore.lua`. Of course, if you don't want to use the feature at 
-   this time or never, you may simply skip this step. If you want to use 
-   `run-mailcap`, it can be found from the following address, as a source 
-   tarball as well:
+   program (or just plain old text editor) will do as well -- just modify the
+   bindings in `cfg_ioncore.lua`. Of course, if you don't want to use the 
+   feature at this time or never, you may simply skip this step. If you want
+   to use `run-mailcap`, it can be found from the following address, as a 
+   source tarball as well:
    
        <http://www.debian.org/Packages/unstable/net/mime-support.html>
 
@@ -122,16 +122,16 @@ The autoconf script written by Tom Payne for the most part.
 
 The dock module was written by Tom Payne and Per Olofsson.
 
-`share/ion-completefile/ion-completefile.c` is based on editline, (c)
+`utils/ion-completefile/ion-completefile.c` is based on editline, (c)
 1992 Simmule Turner and Rich Salz. See the file for details.
 
-The code that `de/fontset.c` is based on was apparently originally written 
-by Tomohiro Kubota; see
+The code that `de/fontset.c` is based on was apparently originally 
+written by Tomohiro Kubota; see
 <http://www.debian.org/doc/manuals/intro-i18n/ch-examples.en.html#s13.4.5>.
 
-Various patches have been contributed by other individuals unlisted here.
-See the mailing list archives and the darcs source repository history at
-<http://iki.fi/tuomov/repos/>. For translators see the individual `.po`
-files in `po/`.
+Various (minor) patches have been contributed by other individuals 
+unlisted  here. See the mailing list archives and the darcs source 
+repository history at <http://iki.fi/tuomov/repos/>. For translators
+see the individual `.po` files in `po/`.
 
 See `libtu/README` for code by others integrated into libtu.
