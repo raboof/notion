@@ -34,17 +34,23 @@ ioncore.set{
     --warp=true,
 }
 
--- cfg_ioncore contains configuration of the Ion 'core'
-dopath("cfg_ioncore")
+
+-- Load default settings. The file cfg_defaults loads all the files
+-- commented out below, except mod_dock. If you do not want to load
+-- something, comment out this line, and uncomment the lines corresponding
+-- the the modules or configuration files that you want, below.
+dopath("cfg_defaults")
+
+-- Load configuration of the Ion 'core'
+--dopath("cfg_ioncore")
 
 -- Load some kludges to make apps behave better.
-dopath("cfg_kludges")
+--dopath("cfg_kludges")
 
--- Load some modules. Disable the loading of cfg_modules by commenting out 
--- the corresponding line with -- if you don't want the whole default set 
--- (everything except mod_dock). Then uncomment the lines for the modules
--- you want. 
-dopath("cfg_modules")
+-- Define some layouts. 
+--dopath("cfg_layouts", true)
+
+-- Load some modules. 
 --dopath("mod_query")
 --dopath("mod_menu")
 --dopath("mod_tiling")
@@ -52,9 +58,3 @@ dopath("cfg_modules")
 --dopath("mod_dock")
 --dopath("mod_sp")
 
--- Define some default layouts. This is also done by cfg_modules
--- if loaded.
---dopath("cfg_layouts", true)
-
--- Deprecated.
-dopath("cfg_user", true)
