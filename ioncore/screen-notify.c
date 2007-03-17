@@ -31,7 +31,7 @@
 /*{{{ Generic stuff */
 
 
-static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, bool right,
+static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, uint pos,
                                   char *style)
 {
 
@@ -47,18 +47,36 @@ static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, bool right,
                      MPLEX_ATTACH_LEVEL);
         param.level=STACKING_LEVEL_ON_TOP;
         
-        if(!right){
-            param.szplcy=SIZEPOLICY_GRAVITY_NORTHWEST;
-            param.geom.x=0;
-        }else{
-            param.szplcy=SIZEPOLICY_GRAVITY_NORTHEAST;
-            param.geom.x=REGION_GEOM(scr).w-1;
-        }
-        
+        param.geom.x=0;
         param.geom.y=0;
         param.geom.w=1;
         param.geom.h=1;
         
+        switch(pos){
+        case MPLEX_STDISP_TL:
+            param.szplcy=SIZEPOLICY_GRAVITY_NORTHWEST;
+            param.geom.x=0;
+            break;
+            
+        case MPLEX_STDISP_TR:
+            param.szplcy=SIZEPOLICY_GRAVITY_NORTHEAST;
+            param.geom.x=REGION_GEOM(scr).w-1;
+            break;
+            
+        case MPLEX_STDISP_BL:
+            param.szplcy=SIZEPOLICY_GRAVITY_SOUTHWEST;
+            param.geom.x=0;
+            param.geom.y=REGION_GEOM(scr).h-1;
+            break;
+            
+        case MPLEX_STDISP_BR:
+            param.szplcy=SIZEPOLICY_GRAVITY_SOUTHEAST;
+            param.geom.x=REGION_GEOM(scr).w-1;
+            param.geom.y=REGION_GEOM(scr).h-1;
+            break;
+        }
+        
+
         iw=(WInfoWin*)mplex_do_attach_new(&scr->mplex, &param,
                                           (WRegionCreateFn*)create_infowin, 
                                           style);
@@ -89,7 +107,15 @@ static void do_unnotify(Watch *watch)
 
 static WInfoWin *get_notifywin(WScreen *scr)
 {
-    return do_get_notifywin(scr, &scr->notifywin_watch, FALSE, "actnotify");
+    WRegion *stdisp=NULL;
+    WMPlexSTDispInfo info;
+    uint pos=MPLEX_STDISP_TL;
+    
+    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
+    if(stdisp!=NULL)
+        pos=info.pos;
+    
+    return do_get_notifywin(scr, &scr->notifywin_watch, pos, "actnotify");
 }
 
 
@@ -231,7 +257,15 @@ static void screen_do_update_notifywin(WScreen *scr)
 
 static WInfoWin *get_infowin(WScreen *scr)
 {
-    return do_get_notifywin(scr, &scr->infowin_watch, TRUE, "tab-info");
+    WRegion *stdisp=NULL;
+    WMPlexSTDispInfo info;
+    uint pos=MPLEX_STDISP_TR;
+    
+    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
+    if(stdisp!=NULL && info.pos==MPLEX_STDISP_TR)
+        pos=MPLEX_STDISP_BR;
+    
+    return do_get_notifywin(scr, &scr->infowin_watch, pos, "tab-info");
 }
 
 
