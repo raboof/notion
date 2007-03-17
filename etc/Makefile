@@ -13,7 +13,7 @@ ETC =	cfg_ion.lua cfg_ioncore.lua cfg_kludges.lua cfg_defaults.lua \
 	cfg_statusbar.lua cfg_dock.lua cfg_layouts.lua \
 	look_brownsteel.lua look_clean.lua look_dusky.lua \
 	look_greyviolet.lua look_ios.lua look_cleanviolet.lua \
-	look_simpleblue.lua look_cleanios.lua \
+	look_simpleblue.lua look_cleanios.lua look_newviolet.lua \
         lookcommon_clean.lua lookcommon_emboss.lua
 
 ######################################
@@ -24,4 +24,4 @@ include $(TOPDIR)/build/rules.mk
 
 _install: etc_install
 	rm -f $(ETCDIR)/look.lua
-	ln -s look_cleanviolet.lua $(ETCDIR)/look.lua
+	ln -s look_newviolet.lua $(ETCDIR)/look.lua
