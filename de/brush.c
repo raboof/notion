@@ -188,7 +188,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
     
     switch(bd->sides){
     case DEBORDER_TB:
-        tbf=1;
+        lrf=0;
         break;
     case DEBORDER_LR:
         tbf=0;
