@@ -94,12 +94,33 @@ void de_get_border_style(uint *ret, ExtlTab tab)
 }
 
 
+void de_get_border_sides(uint *ret, ExtlTab tab)
+{
+    char *style=NULL;
+    
+    if(!extl_table_gets_s(tab, "border_sides", &style))
+        return;
+    
+    if(strcmp(style, "all")==0)
+        *ret=DEBORDER_ALL;
+    else if(strcmp(style, "tb")==0)
+        *ret=DEBORDER_TB;
+    else if(strcmp(style, "lr")==0)
+        *ret=DEBORDER_LR;
+    else
+        warn(TR("Unknown border side configuration \"%s\"."), style);
+    
+    free(style);
+}
+
+
 void de_get_border(DEBorder *border, ExtlTab tab)
 {
     de_get_border_val(&(border->sh), tab, "shadow_pixels");
     de_get_border_val(&(border->hl), tab, "highlight_pixels");
     de_get_border_val(&(border->pad), tab, "padding_pixels");
     de_get_border_style(&(border->style), tab);
+    de_get_border_sides(&(border->sides), tab);
 }
 
 

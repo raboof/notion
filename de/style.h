@@ -31,6 +31,12 @@ enum{
     DEBORDER_GROOVE       /* \_/xxxx\_/ */
 };
 
+enum{
+    DEBORDER_ALL=0, 
+    DEBORDER_TB,
+    DEBORDER_LR
+};
+
 
 enum{
     DEALIGN_LEFT=0,
@@ -42,6 +48,7 @@ enum{
 DECLSTRUCT(DEBorder){
     uint sh, hl, pad;
     uint style;
+    uint sides;
 };
 
 

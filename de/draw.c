@@ -112,8 +112,8 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
     b=0;
     
     for(i=0; i<br; i++){
-        points[0].x=x+w-i;        points[0].y=y+b;
-        points[1].x=x+w-i;        points[1].y=y+h-i;
+        points[0].x=x+w-i;      points[0].y=y+b;
+        points[1].x=x+w-i;      points[1].y=y+h-i;
         points[2].x=x+a;        points[2].y=y+h-i;
     
         if(a<tl)
@@ -138,64 +138,25 @@ static void draw_border(Window win, GC gc, WRectangle *geom,
 }
 
 
-void debrush_do_draw_border(DEBrush *brush, WRectangle geom, 
-                            DEColourGroup *cg)
-{
-    DEBorder *bd=&(brush->d->border);
-    GC gc=brush->d->normal_gc;
-    Window win=brush->win;
-    
-    switch(bd->style){
-    case DEBORDER_RIDGE:
-        draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
-    case DEBORDER_INLAID:
-        draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
-        draw_border(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl);
-        break;
-    case DEBORDER_GROOVE:
-        draw_border(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl);
-        draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
-        draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
-        break;
-    case DEBORDER_ELEVATED:
-    default:
-        draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
-        draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
-        break;
-    }
-}
-
-
-
-    
-void debrush_draw_border(DEBrush *brush, 
-                         const WRectangle *geom)
-{
-    DEColourGroup *cg=debrush_get_current_colour_group(brush);
-    if(cg!=NULL)
-        debrush_do_draw_border(brush, *geom, cg);
-}
-
-
 static void draw_borderline(Window win, GC gc, WRectangle *geom,
                             uint tl, uint br, DEColour tlc, DEColour brc, 
                             GrBorderLine line)
 {
-    if(line==GR_BORDERLINE_LEFT && geom->h>0){
+    if(line==GR_BORDERLINE_LEFT && geom->h>0 && tl>0){
         XSetForeground(ioncore_g.dpy, gc, tlc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, tl, geom->h);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, tl-1, geom->h);
         geom->x+=tl;
-    }else if(line==GR_BORDERLINE_TOP && geom->w>0){
+    }else if(line==GR_BORDERLINE_TOP && geom->w>0 && tl>0){
         XSetForeground(ioncore_g.dpy, gc, tlc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, tl);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, tl-1);
         geom->y+=tl;
-    }else if(line==GR_BORDERLINE_RIGHT && geom->h>0){
+    }else if(line==GR_BORDERLINE_RIGHT && geom->h>0 && br>0){
         XSetForeground(ioncore_g.dpy, gc, brc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-1-br, geom->y, br, geom->h);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-br, geom->y, br-1, geom->h);
         geom->w-=br;
-    }else if(line==GR_BORDERLINE_BOTTOM && geom->w>0){
+    }else if(line==GR_BORDERLINE_BOTTOM && geom->w>0 && br>0){
         XSetForeground(ioncore_g.dpy, gc, brc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-1-br, geom->w, br);
+        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-br, geom->w, br-1);
         geom->h-=br;
     }
 }
@@ -229,12 +190,85 @@ void debrush_do_draw_borderline(DEBrush *brush, WRectangle geom,
 }
 
 
+void debrush_do_draw_padline(DEBrush *brush, WRectangle geom,
+                             DEColourGroup *cg, GrBorderLine line)
+{
+    DEBorder *bd=&(brush->d->border);
+    GC gc=brush->d->normal_gc;
+    Window win=brush->win;
+    
+    draw_borderline(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad, line);
+}
+
+
 void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
                              GrBorderLine line)
 {
     DEColourGroup *cg=debrush_get_current_colour_group(brush);
     if(cg!=NULL)
         debrush_do_draw_borderline(brush, *geom, cg, line);
+}
+
+
+static void debrush_do_do_draw_border(DEBrush *brush, WRectangle geom, 
+                                      DEColourGroup *cg)
+{
+    DEBorder *bd=&(brush->d->border);
+    GC gc=brush->d->normal_gc;
+    Window win=brush->win;
+    
+    switch(bd->style){
+    case DEBORDER_RIDGE:
+        draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
+    case DEBORDER_INLAID:
+        draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
+        draw_border(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl);
+        break;
+    case DEBORDER_GROOVE:
+        draw_border(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl);
+        draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
+        draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
+        break;
+    case DEBORDER_ELEVATED:
+    default:
+        draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
+        draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
+        break;
+    }
+}
+
+
+void debrush_do_draw_border(DEBrush *brush, WRectangle geom, 
+                            DEColourGroup *cg)
+{
+    DEBorder *bd=&(brush->d->border);
+
+    switch(bd->sides){
+    case DEBORDER_ALL:
+        debrush_do_do_draw_border(brush, geom, cg);
+        break;
+    case DEBORDER_TB:
+        debrush_do_draw_padline(brush, geom, cg, GR_BORDERLINE_LEFT);
+        debrush_do_draw_padline(brush, geom, cg, GR_BORDERLINE_RIGHT);
+        debrush_do_draw_borderline(brush, geom, cg, GR_BORDERLINE_TOP);
+        debrush_do_draw_borderline(brush, geom, cg, GR_BORDERLINE_BOTTOM);
+        break;
+    case DEBORDER_LR:
+        debrush_do_draw_padline(brush, geom, cg, GR_BORDERLINE_TOP);
+        debrush_do_draw_padline(brush, geom, cg, GR_BORDERLINE_BOTTOM);
+        debrush_do_draw_borderline(brush, geom, cg, GR_BORDERLINE_LEFT);
+        debrush_do_draw_borderline(brush, geom, cg, GR_BORDERLINE_RIGHT);
+        break;
+    }
+}
+
+    
+void debrush_draw_border(DEBrush *brush, 
+                         const WRectangle *geom)
+{
+    DEColourGroup *cg=debrush_get_current_colour_group(brush);
+    if(cg!=NULL)
+        debrush_do_draw_border(brush, *geom, cg);
 }
 
 

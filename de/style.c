@@ -220,6 +220,7 @@ bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
     style->border.hl=1;
     style->border.pad=1;
     style->border.style=DEBORDER_INLAID;
+    style->border.sides=DEBORDER_ALL;
 
     style->spacing=0;
     

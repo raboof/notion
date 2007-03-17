@@ -182,32 +182,42 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
 {
     DEStyle *style=brush->d;
     DEBorder *bd=&(style->border);
-    uint tmp=0, spc=style->spacing;
+    uint tmp=0;
+    uint tbf=1, lrf=1;
+    uint pad=bd->pad;
     
-    switch(bd->style){
-    case DEBORDER_RIDGE:
-        tmp=spc;
-    case DEBORDER_GROOVE:
-        tmp+=bd->sh+bd->hl+bd->pad;
-        bdw->top=tmp; bdw->bottom=tmp; bdw->left=tmp; bdw->right=tmp;
+    switch(bd->sides){
+    case DEBORDER_TB:
+        tbf=1;
         break;
-    case DEBORDER_INLAID:
-        tmp=bd->sh+bd->pad+spc; bdw->top=tmp; bdw->left=tmp;
-        tmp=bd->hl+bd->pad+spc; bdw->bottom=tmp; bdw->right=tmp;
-        break;
-    case DEBORDER_ELEVATED:
-    default:
-        tmp=bd->hl+bd->pad; bdw->top=tmp; bdw->left=tmp;
-        tmp=bd->sh+bd->pad; bdw->bottom=tmp; bdw->right=tmp;
+    case DEBORDER_LR:
+        tbf=0;
         break;
     }
     
+    switch(bd->style){
+    case DEBORDER_RIDGE:
+    case DEBORDER_GROOVE:
+        tmp=bd->sh+bd->hl;
+        bdw->top=tbf*tmp+pad; bdw->bottom=tbf*tmp+pad; 
+        bdw->left=lrf*tmp+pad; bdw->right=lrf*tmp+pad;
+        break;
+    case DEBORDER_INLAID:
+        tmp=bd->sh; bdw->top=tbf*tmp+pad; bdw->left=lrf*tmp+pad;
+        tmp=bd->hl; bdw->bottom=tbf*tmp+pad; bdw->right=lrf*tmp+pad;
+        break;
+    case DEBORDER_ELEVATED:
+    default:
+        tmp=bd->hl; bdw->top=tbf*tmp+pad; bdw->left=lrf*tmp+pad;
+        tmp=bd->sh; bdw->bottom=tbf*tmp+pad; bdw->right=lrf*tmp+pad;
+        break;
+    }
+    
+    bdw->right+=brush->indicator_w;
+
     bdw->tb_ileft=bdw->left;
     bdw->tb_iright=bdw->right;
     bdw->spacing=style->spacing;
-    
-    bdw->right+=brush->indicator_w;
-    bdw->tb_iright+=brush->indicator_w;
 }
 
 

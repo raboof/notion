@@ -235,7 +235,7 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
     
     if(m>0){
         grbrush_get_border_widths(frame->bar_brush, &bdw);
-        bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright)
+        bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)
                  +bdw.right+bdw.left);
 
         FRAME_MX_FOR_ALL(sub, frame, itmp){
