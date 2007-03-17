@@ -641,25 +641,19 @@ static void mplex_do_remanage_stdisp(WMPlex *mplex, WRegion *sub)
     /* Move stdisp */
     if(sub!=NULL && CAN_MANAGE_STDISP(sub)){
         if(stdisp!=NULL){
-            WRegion *mgrw=region_managed_within((WRegion*)mplex, stdisp);
-            if(mgrw!=sub){
-                WRegion *mgr=REGION_MANAGER(stdisp);
-                if(mgr!=NULL){
-                    if(CAN_MANAGE_STDISP(mgr))
-                        region_unmanage_stdisp(mgr, FALSE, FALSE);
-                    region_detach_manager(stdisp);
-                }
-                
-                region_manage_stdisp(sub, stdisp, 
-                                     &(mplex->stdispinfo));
+            WRegion *omgr=REGION_MANAGER(stdisp);
+            if(omgr!=sub && omgr!=NULL){
+                if(CAN_MANAGE_STDISP(omgr))
+                    region_unmanage_stdisp(omgr, FALSE, FALSE);
+                region_detach_manager(stdisp);
             }
+            
+            region_manage_stdisp(sub, stdisp, 
+                                 &(mplex->stdispinfo));
         }else{
             region_unmanage_stdisp(sub, TRUE, FALSE);
         }
-    }/*else if(stdisp!=NULL){
-        region_detach_manager(stdisp);
-        region_unmap(stdisp);
-    }*/
+    }
 }
 
 
