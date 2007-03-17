@@ -536,14 +536,40 @@ static WStacking *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
 }
 
 
+static WStacking *maybe_focusable(WRegion *reg)
+{
+    if(reg==NULL || !REGION_IS_MAPPED(reg))
+        return NULL;
+
+    return ioncore_find_stacking(reg);
+}
+
+
+static WStacking *stacking_within(WMPlex *mplex, WRegion *reg)
+{
+    while(reg!=NULL && REGION_MANAGER(reg)!=(WRegion*)mplex)
+        reg=REGION_MANAGER(reg);
+    
+    return maybe_focusable(reg);
+}
+
+
 static WStacking *mplex_to_focus(WMPlex *mplex)
 {
-    WRegion *reg=REGION_ACTIVE_SUB(mplex);
     WStacking *to_try=NULL;
+    WRegion *reg=NULL;
     
-    if(reg!=NULL)
-        to_try=ioncore_find_stacking(reg);
-
+    to_try=maybe_focusable(REGION_ACTIVE_SUB(mplex));
+    
+    if(to_try==NULL){
+        /* Search focus history */
+        for(reg=ioncore_g.focus_current; reg!=NULL; reg=reg->active_next){
+            to_try=stacking_within(mplex, reg);
+            if(to_try!=NULL)
+                break;
+        }
+    }
+    
     return mplex_do_to_focus(mplex, to_try);
 }
 
