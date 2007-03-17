@@ -48,7 +48,7 @@ dopath("cfg_defaults")
 --dopath("cfg_kludges")
 
 -- Define some layouts. 
---dopath("cfg_layouts", true)
+--dopath("cfg_layouts")
 
 -- Load some modules. 
 --dopath("mod_query")
