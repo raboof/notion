@@ -144,19 +144,23 @@ static void draw_borderline(Window win, GC gc, WRectangle *geom,
 {
     if(line==GR_BORDERLINE_LEFT && geom->h>0 && tl>0){
         XSetForeground(ioncore_g.dpy, gc, tlc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, tl-1, geom->h-1);
+        XSetBackground(ioncore_g.dpy, gc, tlc);
+        XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, tl, geom->h);
         geom->x+=tl;
     }else if(line==GR_BORDERLINE_TOP && geom->w>0 && tl>0){
         XSetForeground(ioncore_g.dpy, gc, tlc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w-1, tl-1);
+        XSetBackground(ioncore_g.dpy, gc, tlc);
+        XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, tl);
         geom->y+=tl;
     }else if(line==GR_BORDERLINE_RIGHT && geom->h>0 && br>0){
         XSetForeground(ioncore_g.dpy, gc, brc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-br, geom->y, br-1, geom->h);
+        XSetBackground(ioncore_g.dpy, gc, brc);
+        XFillRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-br, geom->y, br, geom->h);
         geom->w-=br;
     }else if(line==GR_BORDERLINE_BOTTOM && geom->w>0 && br>0){
         XSetForeground(ioncore_g.dpy, gc, brc);
-        XDrawRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-br, geom->w, br-1);
+        XSetBackground(ioncore_g.dpy, gc, brc);
+        XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-br, geom->w, br);
         geom->h-=br;
     }
 }
