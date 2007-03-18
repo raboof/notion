@@ -65,27 +65,6 @@ de.defstyle("tab", {
     text_align = "center",
 })
 
-de.defstyle("tab-frame", {
-    based_on = "tab",
-    de.substyle("*-*-*-*-activity", {
-        shadow_colour = "#907070",
-        highlight_colour = "#907070",
-        background_colour = "#990000",
-        foreground_colour = "#eeeeee",
-    }),
-})
-
-de.defstyle("tab-menuentry", {
-    based_on = "tab",
-    text_align = "left",
-})
-
-de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
-    padding_pixels = 7,
-})
-
 de.defstyle("input", {
     based_on = "*",
     shadow_colour = "black",

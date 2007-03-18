@@ -52,3 +52,9 @@ de.defstyle("tab-menuentry", {
         foreground_colour = "#ffffff",
     }),
 })
+
+de.defstyle("tab-menuentry-big", {
+    based_on = "tab-menuentry",
+    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
+    padding_pixels = 7,
+})

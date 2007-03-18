@@ -73,15 +73,41 @@ de.defstyle("input-menu", {
 })
 
 
-dopath("lookcommon_clean")
-
-
-de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
-    padding_pixels = 7,
+de.defstyle("frame", {
+    based_on = "*",
+    background_colour = "#000000",
+    transparent_background = false,
+    shadow_pixels = 1,
+    highlight_pixels = 1,
+    padding_pixels = 0,
+    border_sides = "all",
+    de.substyle("quasiactive", {
+        -- Something detached from the frame is active
+        padding_colour = "#901010",
+    }),
 })
 
+de.defstyle("frame-tiled", {
+    based_on = "frame",
+    shadow_pixels = 0,
+    highlight_pixels = 0,
+    padding_pixels = 1,
+})
+
+de.defstyle("frame-tiled-alt", {
+    based_on = "frame-tiled",
+    bar = "none",
+})
+
+de.defstyle("frame-floating", {
+    based_on = "frame",
+    bar = "shaped",
+    padding_pixels = 0,
+})
+
+
+dopath("lookcommon_clean_stdisp")
+dopath("lookcommon_clean_tab")
     
 -- Refresh objects' brushes.
 gr.refresh()

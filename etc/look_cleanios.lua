@@ -62,11 +62,5 @@ de.defstyle("input-edln", {
 
 dopath("lookcommon_clean")
 
-de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
-    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
-    padding_pixels = 7,
-})
-
 gr.refresh()
 
