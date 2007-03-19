@@ -19,6 +19,7 @@
 #include <ioncore/saveload.h>
 #include <ioncore/screen.h>
 #include <ioncore/mplex.h>
+#include <ioncore/stacking.h>
 #include <ioncore/ioncore.h>
 #include <ioncore/global.h>
 #include <ioncore/framep.h>
@@ -66,10 +67,11 @@ static WFrame *create(WMPlex *mplex, int flags)
 
     par.flags=(flags
                |MPLEX_ATTACH_UNNUMBERED
-               |MPLEX_ATTACH_MODAL
+               |MPLEX_ATTACH_LEVEL
                |MPLEX_ATTACH_SIZEPOLICY
                |MPLEX_ATTACH_GEOM);
     par.szplcy=SIZEPOLICY_FREE_GLUE;
+    par.level=STACKING_LEVEL_MODAL1;
     
     par.geom.w=minof(sw, CF_SCRATCHPAD_DEFAULT_W);
     par.geom.h=minof(sh, CF_SCRATCHPAD_DEFAULT_H);

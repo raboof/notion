@@ -1108,16 +1108,13 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
                : SIZEPOLICY_FULL_EXACT));
 
     modal=(param->flags&MPLEX_ATTACH_LEVEL
-           ? param->level>=STACKING_LEVEL_MODAL1
-           : param->flags&MPLEX_ATTACH_MODAL);
+           && param->level>=STACKING_LEVEL_MODAL1);
     
     level=(param->flags&MPLEX_ATTACH_LEVEL
            ? param->level
-           : (param->flags&MPLEX_ATTACH_MODAL
-              ? STACKING_LEVEL_MODAL1
-              : (param->flags&MPLEX_ATTACH_UNNUMBERED
-                 ? STACKING_LEVEL_NORMAL
-                 : STACKING_LEVEL_BOTTOM)));
+           : (param->flags&MPLEX_ATTACH_UNNUMBERED
+              ? STACKING_LEVEL_NORMAL
+              : STACKING_LEVEL_BOTTOM));
     
     hidden=(param->flags&MPLEX_ATTACH_HIDDEN
             && (param->flags&MPLEX_ATTACH_UNNUMBERED
@@ -1285,15 +1282,17 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
     int tmp;
     int ok=~mask;
     
-    if(extl_table_gets_i(tab, "level", &tmp)){
-        if(tmp>=0 && ok&MPLEX_ATTACH_LEVEL){
-            par->flags|=MPLEX_ATTACH_LEVEL;
-            par->level=tmp;
+    if(ok&MPLEX_ATTACH_LEVEL){
+        if(extl_table_gets_i(tab, "level", &tmp)){
+            if(tmp>=0){
+                par->flags|=MPLEX_ATTACH_LEVEL;
+                par->level=tmp;
+            }
         }
-    }
     
-    if(extl_table_is_bool_set(tab, "modal"))
-        par->flags|=MPLEX_ATTACH_MODAL&ok;
+        if(extl_table_is_bool_set(tab, "modal"))
+            par->level=maxof(par->level, STACKING_LEVEL_MODAL1);
+    }
 
     if(extl_table_is_bool_set(tab, "unnumbered"))
         par->flags|=MPLEX_ATTACH_UNNUMBERED&ok;
