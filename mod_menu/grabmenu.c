@@ -17,6 +17,7 @@
 #include <ioncore/binding.h>
 #include <ioncore/conf-bindings.h>
 #include <ioncore/key.h>
+#include <ioncore/stacking.h>
 #include "menu.h"
 #include "mkmenu.h"
 
@@ -93,9 +94,11 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     extl_table_gets_i(param, "initial", &(fnp.initial));
 
     par.flags=(MPLEX_ATTACH_SWITCHTO|
+               MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
+    par.level=STACKING_LEVEL_MODAL1+1;
 
     menu=(WMenu*)mplex_do_attach_new(mplex, &par,
                                      (WRegionCreateFn*)create_menu,

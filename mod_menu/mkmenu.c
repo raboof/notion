@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <ioncore/common.h>
 #include <ioncore/pointer.h>
+#include <ioncore/stacking.h>
 #include <ioncore/grab.h>
 #include <libextl/extl.h>
 #include "menu.h"
@@ -49,11 +50,12 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.refg.h=0;
     
     par.flags=(MPLEX_ATTACH_SWITCHTO|
-               MPLEX_ATTACH_MODAL|
+               MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
-        
+    par.level=STACKING_LEVEL_MODAL1+1;
+    
     return (WMenu*)mplex_do_attach_new(mplex, &par,
                                        (WRegionCreateFn*)create_menu,
                                        (void*)&fnp); 

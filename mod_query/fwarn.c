@@ -14,6 +14,7 @@
 #include <ioncore/global.h>
 #include <ioncore/focus.h>
 #include <ioncore/frame.h>
+#include <ioncore/stacking.h>
 #include <libtu/objp.h>
 #include "wmessage.h"
 #include "fwarn.h"
@@ -56,10 +57,11 @@ WMessage *mod_query_do_message(WMPlex *mplex, const char *p)
         return NULL;
     
     par.flags=(MPLEX_ATTACH_SWITCHTO|
-               MPLEX_ATTACH_MODAL|
+               MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
+    par.level=STACKING_LEVEL_MODAL1+1;
 
     return (WMessage*)mplex_do_attach_new(mplex, &par,
                                           (WRegionCreateFn*)create_wmsg,

@@ -16,6 +16,7 @@
 #include <ioncore/binding.h>
 #include <ioncore/regbind.h>
 #include <ioncore/bindmaps.h>
+#include <ioncore/stacking.h>
 #include <ioncore/key.h>
 #include "query.h"
 #include "wedln.h"
@@ -45,10 +46,11 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
     fnp.completor=completor;
     
     par.flags=(MPLEX_ATTACH_SWITCHTO|
-               MPLEX_ATTACH_MODAL|
+               MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
+    par.level=STACKING_LEVEL_MODAL1+1;
 
     wedln=(WEdln*)mplex_do_attach_new(mplex, &par,
                                       (WRegionCreateFn*)create_wedln,
