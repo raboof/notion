@@ -1085,9 +1085,9 @@ static bool check_fs_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
             
             if(!region_fullscreen_scr(grp, scr, sw))
                 cwin->flags&=~CLIENTWIN_FS_RQ;
+                
+            return TRUE;
         }
-        
-        return TRUE;
     }
 
     return FALSE;
