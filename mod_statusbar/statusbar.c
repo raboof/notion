@@ -1051,7 +1051,7 @@ bool statusbar_set_systray_extl(WStatusBar *sb, const char *how)
 /*EXTL_DOC
  * Is \var{sb} used as a systray?
  */
-EXTL_EXPORT_MEMBER
+EXTL_EXPORT_AS(WStatusBar, is_systray)
 bool statusbar_is_systray_extl(WStatusBar *sb)
 {
     return sb->systray_enabled;
