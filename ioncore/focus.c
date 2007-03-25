@@ -166,10 +166,8 @@ void region_set_await_focus(WRegion *reg)
 }
 
 
-static bool region_is_await(WRegion *reg)
+static bool region_is_parent(WRegion *reg, WRegion *aw)
 {
-    WRegion *aw=(WRegion*)await_watch.obj;
-    
     while(aw!=NULL){
         if(aw==reg)
             return TRUE;
@@ -177,6 +175,18 @@ static bool region_is_await(WRegion *reg)
     }
     
     return FALSE;
+}
+
+
+static bool region_is_await(WRegion *reg)
+{
+    return region_is_parent(reg, (WRegion*)await_watch.obj);
+}
+
+
+static bool region_is_focusnext(WRegion *reg)
+{
+    return region_is_parent(reg, ioncore_g.focus_next);
 }
 
 
@@ -299,6 +309,18 @@ bool region_is_active(WRegion *reg)
 }
 
 
+static bool region_manager_is_focusnext(WRegion *reg)
+{
+    if(reg==NULL || ioncore_g.focus_next==NULL)
+        return FALSE;
+        
+    if(reg==ioncore_g.focus_next)
+        return TRUE;
+        
+    return region_manager_is_focusnext(REGION_MANAGER(reg));
+}
+
+
 bool region_may_control_focus(WRegion *reg)
 {
     if(OBJ_IS_BEING_DESTROYED(reg))
@@ -306,8 +328,11 @@ bool region_may_control_focus(WRegion *reg)
 
     if(REGION_IS_ACTIVE(reg) || REGION_IS_PSEUDOACTIVE(reg))
         return TRUE;
-    
-    if(region_is_await(reg))
+        
+    if(region_is_await(reg) || region_is_focusnext(reg))
+        return TRUE;
+        
+    if(region_manager_is_focusnext(reg))
         return TRUE;
 
     return FALSE;
