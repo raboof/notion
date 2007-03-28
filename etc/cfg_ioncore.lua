@@ -179,8 +179,8 @@ defbindings("WMPlex.toplevel", {
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
     
     bdoc("Display context menu."),
-    --kpress(META.."M", "mod_menu.menu(_, _chld, 'ctxmenu')"),
-    kpress(META.."M", "mod_query.query_menu(_, _chld, 'ctxmenu', 'Context menu:')"),
+    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    kpress(META.."M", "mod_query.query_menu(_, _sub, 'ctxmenu', 'Context menu:')"),
 })
 
 
@@ -197,7 +197,7 @@ defbindings("WFrame", {
     }),
     
     bdoc("Display context menu."),
-    mpress("Button3", "mod_menu.pmenu(_, _chld, 'ctxmenu')"),
+    mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
     
     bdoc("Begin move/resize mode."),
     kpress(META.."R", "WFrame.begin_kbresize(_)"),

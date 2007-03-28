@@ -405,12 +405,16 @@ local function sortmenu(m)
 end
 
 
-function menus.ctxmenu(reg, sub_or_chld)
+function menus.ctxmenu(reg, sub)
     local m, r, s
+    
+    if obj_is(sub, "WGroup") then
+        sub=(sub:bottom() or sub)
+    end
     
     -- First, stuff between reg (inclusive) and sub_or_chld (inclusive)
     -- at the top level in the menu.
-    r=(sub_or_chld or reg)
+    r=(sub or reg)
     while r and s~=reg do
         local mm=get_ctxmenu(r, s)
         m=((m and table.icat(mm, m)) or mm)
