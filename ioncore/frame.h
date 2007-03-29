@@ -121,6 +121,11 @@ extern bool frame_managed_rqdispose(WFrame *frame, WRegion *reg);
 
 extern void ioncore_frame_quasiactivation_notify(WRegion *reg, WRegionNotify how);
 
+extern WPHolder *frame_prepare_manage_transient(WFrame *frame,
+                                                const WClientWin *transient,
+                                                const WManageParams *param,
+                                                int unused);
+
 /* Save/load */
 extern ExtlTab frame_get_configuration(WFrame *frame);
 extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);

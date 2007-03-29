@@ -72,7 +72,7 @@ static bool placement_mrsh_extl(ExtlFn fn, WTilingPlacementParams *param)
 
 
 WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
-                               const WManageParams *mp, int redir)
+                                const WManageParams *mp, int redir)
 {
     WRegion *target=NULL;
     WTilingPlacementParams param;

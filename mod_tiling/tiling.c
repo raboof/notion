@@ -262,25 +262,6 @@ Window tiling_xwindow(const WTiling *ws)
 }
 
 
-WPHolder *tiling_prepare_manage_transient(WTiling *ws,
-                                          const WClientWin *transient,
-                                          const WManageParams *param,
-                                          int unused)
-{
-    /* Transient manager searches should not cross tilings unless
-     * explicitly floated.
-     */
-    if(extl_table_is_bool_set(transient->proptab, "float")){
-        return region_prepare_manage_transient_default((WRegion*)ws,
-                                                       transient,
-                                                       param,
-                                                       unused);
-    }else{
-         return NULL;
-    }
-}
-    
-
 /*}}}*/
 
 
@@ -1771,9 +1752,6 @@ static DynFunTab tiling_dynfuntab[]={
     {(DynFun*)region_xwindow,
      (DynFun*)tiling_xwindow},
     
-    {(DynFun*)region_prepare_manage_transient,
-     (DynFun*)tiling_prepare_manage_transient},
-     
     END_DYNFUNTAB
 };
 

@@ -907,6 +907,32 @@ int frame_default_index(WFrame *frame)
 /*}}}*/
 
 
+/*{{{ prepare_manage_transient */
+
+
+WPHolder *frame_prepare_manage_transient(WFrame *frame,
+                                         const WClientWin *transient,
+                                         const WManageParams *param,
+                                         int unused)
+{
+    /* Transient manager searches should not cross tiled frames
+     * unless explicitly floated.
+     */
+    if(IS_FLOATING_MODE(frame) ||
+       extl_table_is_bool_set(transient->proptab, "float")){
+        return region_prepare_manage_transient_default((WRegion*)frame,
+                                                       transient,
+                                                       param,
+                                                       unused);
+    }else{
+         return NULL;
+    }
+}
+
+
+/*}}}*/
+
+
 /*{{{ Save/load */
 
 
@@ -1016,6 +1042,9 @@ static DynFunTab frame_dynfuntab[]={
 
     {(DynFun*)mplex_default_index,
      (DynFun*)frame_default_index},
+     
+    {(DynFun*)region_prepare_manage_transient,
+     (DynFun*)frame_prepare_manage_transient},
     
     END_DYNFUNTAB
 };
