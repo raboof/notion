@@ -41,7 +41,8 @@ static void get_relative_geom(WRectangle *g, WRegion *reg, WRegion *mgr)
 }
 
 
-bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
+static bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode,
+                              uint framelevel)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
@@ -71,6 +72,9 @@ bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
         
         ap.geom_weak_set=TRUE;
         ap.geom_weak=0;
+
+        ap.level_set=TRUE;
+        ap.level=framelevel+1;
         
         get_relative_geom(&fpa.inner_geom, reg, (WRegion*)grp);
 
@@ -84,8 +88,8 @@ bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
             ap.szplcy=st->szplcy;
             ap.szplcy_set=TRUE;
             
-            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);
             ap.level_set=TRUE;
+            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);
         }
         
         ap.geom_set=TRUE;
@@ -103,7 +107,7 @@ bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode)
 }
 
 
-static WRegion *check_mplex(WRegion *reg, WFrameMode *mode)
+static WRegion *check_mplex(WRegion *reg, WFrameMode *mode, uint *level)
 {
     WMPlex *mplex=REGION_MANAGER_CHK(reg, WMPlex);
     
@@ -116,7 +120,11 @@ static WRegion *check_mplex(WRegion *reg, WFrameMode *mode)
     
     if(OBJ_IS(mplex, WFrame)
        && frame_mode((WFrame*)mplex)==FRAME_MODE_TRANSIENT){
+        WStacking *st=ioncore_find_stacking((WRegion*)mplex);
+        if(st!=NULL)
+            *level=st->level;
         *mode=FRAME_MODE_TRANSIENT;
+        
     }
     
     return (WRegion*)mplex;
@@ -143,10 +151,11 @@ bool ioncore_detach(WRegion *reg, int sp)
     WFrameMode mode;
     WGroup *grp;
     bool set, nset;
+    uint level=STACKING_LEVEL_NORMAL;
     
     reg=region_groupleader_of(reg);
     
-    grp=find_group(check_mplex(reg, &mode));
+    grp=find_group(check_mplex(reg, &mode, &level));
     
     /* reg is only considered detached if there's no higher-level group
      * to attach to, thus causing 'toggle' to cycle.
@@ -158,7 +167,7 @@ bool ioncore_detach(WRegion *reg, int sp)
         return set;
 
     if(!set){
-        return ioncore_do_detach(reg, grp, mode);
+        return ioncore_do_detach(reg, grp, mode, level);
     }else{
         WPHolder *ph=region_get_return(reg);
         
