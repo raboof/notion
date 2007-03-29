@@ -206,19 +206,19 @@ bool ioncore_detach_extl(WRegion *reg, const char *how)
 
 void do_unsqueeze(WRegion *reg)
 {
-    WSizeHints hints;
+    WSizeHints h;
     WRegion *mgr=REGION_MANAGER(reg);
     
     if(OBJ_IS(reg, WScreen))
         return;
     
-    region_size_hints(reg, &hints);
+    region_size_hints(reg, &h);
 
-    if(!hints.min_set)
+    if(!h.min_set)
         return;
         
-    if(hints.min_width<=REGION_GEOM(reg).w &&
-       hints.min_height<=REGION_GEOM(reg).h){
+    if((h.base_set ? h.base_width : 0)+h.min_width<=REGION_GEOM(reg).w &&
+       (h.base_set ? h.base_height : 0)+h.min_height<=REGION_GEOM(reg).h){
         return;
     }
     
