@@ -25,6 +25,8 @@
 #include <ioncore/framep.h>
 #include <ioncore/frame.h>
 #include <ioncore/names.h>
+#include <ioncore/group.h>
+#include <ioncore/group-ws.h>
 
 #include "main.h"
 #include "exports.h"
@@ -44,6 +46,7 @@ char mod_sp_ion_api_version[]=ION_API_VERSION;
 
 
 #define SP_NAME  "*scratchpad*"
+#define SPWS_NAME  "*scratchws*"
 
 
 /*}}}*/
@@ -59,35 +62,68 @@ static WRegion *create_frame_scratchpad(WWindow *parent, const WFitParams *fp,
 }
 
 
-static WFrame *create(WMPlex *mplex, int flags)
+static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp, 
+                                 void *unused)
 {
-    WFrame *sp;
+    WRegion *reg;
+    WRegionAttachData data;
+    WGroupAttachParams par;
+    WGroupWS *ws;
+    
+    ws=create_groupws(parent, fp);
+    
+    if(ws==NULL)
+        return NULL;
+        
+    region_set_name((WRegion*)ws, SPWS_NAME);
+    
+    data.type=REGION_ATTACH_NEW;
+    data.u.n.fn=create_frame_scratchpad;
+    data.u.n.param=NULL;
+    
+    par.szplcy_set=TRUE;
+    par.szplcy=SIZEPOLICY_FREE_GLUE;
+    
+    par.geom_set=TRUE;
+    par.geom.w=minof(fp->g.w, CF_SCRATCHPAD_DEFAULT_W);
+    par.geom.h=minof(fp->g.h, CF_SCRATCHPAD_DEFAULT_H);
+    par.geom.x=(fp->g.w-par.geom.w)/2;
+    par.geom.y=(fp->g.h-par.geom.h)/2;
+    
+    par.level_set=TRUE;
+    par.level=STACKING_LEVEL_MODAL1;
+    
+    par.bottom=TRUE;
+    
+    reg=group_do_attach(&ws->grp, &par, &data);
+
+    if(reg==NULL){
+        destroy_obj((Obj*)ws);
+        return NULL;
+    }
+     
+    region_set_name((WRegion*)reg, SP_NAME);
+    
+    return (WRegion*)ws;
+}
+
+
+static WRegion *create(WMPlex *mplex, int flags)
+{
+    WRegion *sp;
     WMPlexAttachParams par;
-    int sw=REGION_GEOM(mplex).w, sh=REGION_GEOM(mplex).h;
 
     par.flags=(flags
                |MPLEX_ATTACH_UNNUMBERED
-               |MPLEX_ATTACH_LEVEL
-               |MPLEX_ATTACH_SIZEPOLICY
-               |MPLEX_ATTACH_GEOM);
-    par.szplcy=SIZEPOLICY_FREE_GLUE;
-    par.level=STACKING_LEVEL_MODAL1;
-    
-    par.geom.w=minof(sw, CF_SCRATCHPAD_DEFAULT_W);
-    par.geom.h=minof(sh, CF_SCRATCHPAD_DEFAULT_H);
-    par.geom.x=(sw-par.geom.w)/2;
-    par.geom.y=(sh-par.geom.h)/2;
+               |MPLEX_ATTACH_SIZEPOLICY);
+    par.szplcy=SIZEPOLICY_FULL_EXACT;
 
-    sp=(WFrame*)mplex_do_attach_new((WMPlex*)mplex, &par,
-                                    create_frame_scratchpad,
-                                    NULL);
+    sp=mplex_do_attach_new((WMPlex*)mplex, &par,
+                           create_scratchws,
+                           NULL);
     
-
-    if(sp==NULL){
+    if(sp==NULL)
         warn(TR("Unable to create scratchpad."));
-    }
-    
-    region_set_name((WRegion*)sp, SP_NAME);
     
     return sp;
 }
@@ -101,10 +137,11 @@ static bool is_scratchpad(WRegion *reg)
     if(nm==NULL)
         return FALSE;
     
-    if(inst_off<0)
-        return (strcmp(nm, SP_NAME)==0);
-    else
-        return (strncmp(nm, SP_NAME, inst_off)==0);
+    return (inst_off<0
+            ? (strcmp(nm, SP_NAME)==0 || 
+               strcmp(nm, SPWS_NAME)==0)
+            : (strncmp(nm, SP_NAME, inst_off)==0 ||
+               strncmp(nm, SPWS_NAME, inst_off)==0));
 }
 
 
