@@ -126,6 +126,8 @@ extern WPHolder *frame_prepare_manage_transient(WFrame *frame,
                                                 const WManageParams *param,
                                                 int unused);
 
+extern bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info);
+
 /* Save/load */
 extern ExtlTab frame_get_configuration(WFrame *frame);
 extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);

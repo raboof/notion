@@ -671,8 +671,12 @@ static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame)
     
     ph=region_make_return_pholder((WRegion*)frame);
     
-    if(ph==NULL)
+    if(ph==NULL){
+        fprintf(stderr, "BAH\n");
         return NULL;
+    }
+    
+    fprintf(stderr, "JEE\n");
         
     fparam.mode=frame->mode;
     
@@ -724,6 +728,13 @@ static void frame_modify_pholders(WFrame *frame)
 }
 
 
+bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info)
+{
+    frame_modify_pholders(frame);
+    return mplex_rescue_clientwins(&frame->mplex, info);
+}
+
+    
 /*}}}*/
 
 
@@ -1045,6 +1056,9 @@ static DynFunTab frame_dynfuntab[]={
      
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)frame_prepare_manage_transient},
+     
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)frame_rescue_clientwins},
     
     END_DYNFUNTAB
 };
