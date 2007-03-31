@@ -41,11 +41,11 @@ Zobrazí informace o programu (verze, copyright)
 
 .SH PØIØAZENÍ
 
-Toto jsou implicitní pøiøazení klávesových zkratek. Pøiøazení modifikátoru
+Toto jsou výchozí pøiøazení klávesových zkratek. Pøiøazení modifikátoru
 (\fBMod1\fP) závisí na systému. Na PCèkách s XFree86 bude nejspí¹ navázán
 na levou klávesu Alt (\fBAlt_L\fP). Na Sunech je obvykle namapován na klávesy
 s diamanty (\fBMeta_L\fP, \fBMeta_R\fP). Konkrétní pøiøazení zjistíte
-programem \fIxmodmap(1x)\fP.
+programem \fIxmodmap(1)\fP.
 
 Øetìzec v hranatých závorkách urèuje modul, jeho¾ konfiguraèní soubor
 definuje toto pøiøazení.

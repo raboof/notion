@@ -7,7 +7,7 @@ Ion - správce oken systému X11
 .SH "POPIS"
 
 Ion je dla¾dicový správce oken se zálo¾kami navr¾ený pro klávesnicové u¾ivatele.
- 
+
 .SH "VOLBY"
 .TP
 .B \-display poèítaè:displej.obrazovka
@@ -40,7 +40,7 @@ Zobrazí informace o programu (verze, copyright)
 .SH Základní pojetí
 
 Tato sekce pøiná¹í pøehled typù objektù, které se objevují na X displeji
-spravovaném Ionem. To je nezbytné pro pochopení operací s objekty a pro 
+spravovaném Ionem. To je nezbytné pro pochopení operací s objekty a pro
 pochopení, proè jsou rùzná klávesová pøiøazení dostupná jen u nìkterých
 objektù. Podrobnìj¹í popis nutný pro psaní vlastních pøizpùsobení naleznete
 na webových stránkách Ionu.
@@ -104,11 +104,11 @@ BINDINGS:WFrame.floating
 BINDINGS:WTiling
 .\" BINDINGS:WFrame.tiled
 
-.SS Pøiøazení pro kientská okna
+.SS Pøiøazení pro klientská okna
 
 BINDINGS:WClientWin
 
-BINDINGS:WGroupWS
+BINDINGS:WGroupCW
 
 .SS Pøiøazení pro pøesun/zmìnu velikosti
 
