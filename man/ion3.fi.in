@@ -39,7 +39,7 @@ Näytä tietoja Ionista (versio, tekijänoikeudet).
 
 .SH PERUSKÄSITTEET
 
-Tämä kappale on katsaus erilaisiin niin kutsuttuihin \fBolioihin\fP,
+Tämä kappale on katsaus erilaisiin niin kutsuttuihin \fBkappaleisiin\fP,
 joita ilmenee Ionin hallitsemalla X-näytöllä, ja niiden suhteisiin 
 tavallisessa kokoonpanossa. Sinun tarvitse ymmärtää nämä suhteet 
 tietääksesi milloin mitkäkin alempana kuvattavat näppäinsidonnat 
@@ -47,20 +47,20 @@ ovat käytettävissäsi. Jos kaipaat vielä tarkempaa kuvausta, esimerkiksi
 tehdäksesi omat asetustiedostot, katso Ionin seittisivulta saatavaa 
 yksityiskohtaisempaa dokumentaatiota.
 
-Ylimmän tason olioita, joilla on merkitystä tässä yhteydessä, 
+Ylimmän tason kappaleista, joilla on merkitystä tässä yhteydessä, 
 kutsutaan \fBnäytöiksi\fP. Ne vastaavat fyysisiä näyttöjä. Näytöt
 sisältävät \fBtyöpöytiä\fP (jotka ovat itse eräänlaisia \fBryhmiä\fP)
-ja kokoruudun tilassa olevia \fBasiakasikkunoita\fP. Nämä oliot ovat 
+ja kokoruudun tilassa olevia \fBasiakasikkunoita\fP. Nämä kappaleet ovat 
 \fBlomitettu\fP siten, että vain yksi voi näkyä kerrallaan.
 
 Työpöydät voivat vuorostaan sisältää \fBlaatoituksia\fP sekä
 kelluvia/irroitettuja \fBkehyksiä\fP. Laatoitukset taasen sisältävät
 \fBkehyksiä\fP laatoitettuna täyttämään koko näytön, sekä mahdollisesti
 tilapalkin tai telakan (dock). Näyttöjen tapaan kehykset lomittavat 
-muita olioita, mutta tässä tapauksessa lähinnä asiakasikkuna\fBryhmiä\fP. 
+muita kappaleita, mutta tässä tapauksessa lähinnä asiakasikkuna\fBryhmiä\fP. 
 Kehykset ovat suurimman osan ajasta ainut asia, minkä näet Ionista. Niillä
 voi olla reunakoristukset, ja lisäksi kehyksissä on \fBvälilehti\fP 
-jokaiselle lomitetulle oliolle.
+jokaiselle lomitetulle kappaleelle.
 
 \fBKyselyt\fP ovat näyttöjen tai kehysten alaosiin imestyviä laatikoita,
 jotka odottavat sinulta tekstin syöttöä jonkin siitä riippuvan toiminnon
