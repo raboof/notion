@@ -1341,6 +1341,11 @@ WSplit *split_current_todir(WSplit *node, WPrimn hprimn, WPrimn vprimn,
 }
 
 
+/* Note: both hprimn and vprimn are inverted when descending.  Therefore
+ * one should be either PRIMN_NONE or PRIMN_ANY for sensible geometric 
+ * navigation. (Both are PRIMN_TL or PRIMN_BR for pseudo-linear 
+ * next/previous navigation.)
+ */
 WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
                           WPrimn hprimn, WPrimn vprimn, 
                           WSplitFilter *filter)
@@ -1348,26 +1353,21 @@ WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
     WPrimn primn=(node->dir==SPLIT_HORIZONTAL ? hprimn : vprimn);
     WSplit *split=NULL, *nnode=NULL;
     
-    if(node->tl==child && (primn==PRIMN_BR || primn==PRIMN_ANY)){
+    if(node->tl==child && (primn==PRIMN_BR || primn==PRIMN_ANY))
         split=node->br;
-        primn=PRIMN_TL;
-    }else if(node->br==child && (primn==PRIMN_TL || primn==PRIMN_ANY)){
+    else if(node->br==child && (primn==PRIMN_TL || primn==PRIMN_ANY))
         split=node->tl;
-        primn=PRIMN_BR;
-    }
     
     if(split!=NULL){
-        if(node->dir==SPLIT_HORIZONTAL){
-            hprimn=primn;
-            vprimn=primn_none2any(vprimn);
-        }else{
-            vprimn=primn;
-            hprimn=primn_none2any(vprimn);
-        }
-        
-        nnode=split_current_todir(split, hprimn, vprimn, filter);
+        nnode=split_current_todir(split, 
+                                  primn_none2any(primn_invert(hprimn)),
+                                  primn_none2any(primn_invert(vprimn)),
+                                  filter);
     }
-   
+    
+    if(nnode==NULL)
+        nnode=split_nextto((WSplit*)node, hprimn, vprimn, filter);
+        
     return nnode;
 }
 
