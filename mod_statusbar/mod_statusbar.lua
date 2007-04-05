@@ -238,7 +238,9 @@ end
 
 
 --DOC
--- Load modules and launch ion-statusd with configuration table \var{cfg}.
+-- Load modules and launch \file{ion-statusd} with configuration 
+-- table \var{cfg}. The options for each \file{ion-statusd} monitor
+-- script should be contained in the corresponding sub-table of \var{cfg}.
 function mod_statusbar.launch_statusd(cfg)
     if statusd_pid>0 then
         return
@@ -292,7 +294,23 @@ end
 -- Initialisation and default settings {{{
 
 --DOC
--- Create a statusbar.
+-- Create a statusbar. The possible parameters in the
+-- table \var{param} are:
+--
+-- \begin{tabularx}{\linewidth}{llX}
+--   Variable & Type & Description \\
+--   \var{template} & string & The template; see
+--                             Section \ref{sec:statusbar}. \\
+--   \var{pos} & string & Position: \code{"tl"}, \code{"tr"}, 
+--                        \code{"bl"} or \code{"br"}
+--                        (for the obvious combinations of 
+--                        top/left/bottom/right). \\
+--   \var{screen} & integer & Screen number to create the statusbar on. \\
+--   \var{fullsize} & boolean & If set, the statusbar will waste
+--                              space instead of adapting to layout. \\
+--   \var{systray} & boolaen & Swallow (KDE protocol) systray icons. \\
+-- \end{tabularx}
+--
 function mod_statusbar.create(param)
     local scr=ioncore.find_screen_id(param.screen or 0)
     if not scr then
