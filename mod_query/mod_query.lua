@@ -514,9 +514,9 @@ end
 
 
 --DOC
--- This query asks for the name of a client window and attaches
--- it to the frame the query was opened in. It uses the completion
--- function \fnref{ioncore.complete_clientwin}.
+-- This query asks for the name of a client window and switches
+-- focus to the one entered. It uses the completion function
+-- \fnref{ioncore.complete_clientwin}.
 function mod_query.query_gotoclient(mplex)
     mod_query.query(mplex, TR("Go to window:"), nil,
                     mod_query.gotoclient_handler,
@@ -525,9 +525,9 @@ function mod_query.query_gotoclient(mplex)
 end
 
 --DOC
--- This query asks for the name of a client window and switches
--- focus to the one entered. It uses the completion function
--- \fnref{ioncore.complete_clientwin}.
+-- This query asks for the name of a client window and attaches
+-- it to the frame the query was opened in. It uses the completion
+-- function \fnref{ioncore.complete_clientwin}.
 function mod_query.query_attachclient(mplex)
     mod_query.query(mplex, TR("Attach window:"), nil,
                     mod_query.attachclient_handler, 
