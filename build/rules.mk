@@ -40,10 +40,10 @@ depend: subdirs-depend _depend
 install: subdirs-install _install
 
 
+ifdef MAKE_EXPORTS
+
 # Exports
 ######################################
-
-ifdef MAKE_EXPORTS
 
 EXPORTS_C = exports.c
 EXPORTS_H = exports.h
@@ -56,14 +56,28 @@ _exports: $(EXPORTS_C)
 
 $(EXPORTS_H): $(EXPORTS_C)
 
-$(EXPORTS_C): $(SOURCES)
+$(EXPORTS_C): $(SOURCES) $(MKEXPORTS_EXTRA_DEPS)
 	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) \
+	$(SOURCES) $(MKEXPORTS_EXTRAS)
+
+# Exports documentation
+######################################
+
+EXPORTS_DOC = exports.tex
+
+TO_CLEAN := $(TO_CLEAN) $(EXPORTS_DOC)
+
+_exports_doc: $(EXPORTS_DOC)
+
+$(EXPORTS_DOC): $(SOURCES) $(MKEXPORTS_EXTRA_DEPS)
+	$(MKEXPORTS) -mkdoc -module $(MAKE_EXPORTS) -o $(EXPORTS_DOC) \
 	$(SOURCES) $(MKEXPORTS_EXTRAS)
 
 else # !MAKE_EXPORTS
 
 EXPORTS_C = 
 EXPORTS_H = 
+EXPORTS_DOC =
 
 endif # !MAKE_EXPORTS
 
