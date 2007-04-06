@@ -105,6 +105,12 @@ de.defstyle("frame-floating", {
     padding_pixels = 0,
 })
 
+de.defstyle("frame-transient", {
+    based_on = "frame",
+    bar = "none",
+    padding_pixels = 1,
+})
+
 
 dopath("lookcommon_clean_stdisp")
 dopath("lookcommon_clean_tab")
