@@ -1382,7 +1382,7 @@ WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par,
  *  \var{hidden} & (boolean) Attach hidden, if not prevented
  *                  by e.g. the mutually exclusive list being empty.
  *                  This option overrides \var{switchto}. \\
- *  \var{sizepolicy} & (integer) Size policy. \\
+ *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}. \\
  *  \var{geom} & (table) Geometry specification. \\
  * \end{tabularx}
  * 

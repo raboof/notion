@@ -822,12 +822,12 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
  * 
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
- *  \var{type} & Class name (a string) of the object to be created. Mandatory. \\
- *  \var{name} & Name of the object to be created (a string). Optional. \\
- *  \var{switchto} & Should the region be switched to (boolean)? Optional. \\
- *  \var{level} & Stacking level; default is 1. \\
- *  \var{modal} & Make object modal; ignored if level is set. \\
- *  \var{sizepolicy} & Size policy. \\
+ *  \var{type} & (string) Class of the object to be created. Mandatory. \\
+ *  \var{name} & (string) Name of the object to be created. \\
+ *  \var{switchto} & (boolean) Should the region be switched to? \\
+ *  \var{level} & (integer) Stacking level; default is 1. \\
+ *  \var{modal} & (boolean) Make object modal; ignored if level is set. \\
+ *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}. \\
  * \end{tabularx}
  * 
  * In addition parameters to the region to be created are passed in this 
