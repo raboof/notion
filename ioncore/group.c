@@ -1290,7 +1290,8 @@ static ExtlTab group_get_configuration(WGroup *ws)
         subtab=region_get_configuration(st->reg);
 
         if(subtab!=extl_table_none()){
-            extl_table_sets_i(subtab, "sizepolicy", st->szplcy);
+            extl_table_sets_s(subtab, "sizepolicy", 
+                              sizepolicy2string(st->szplcy));
             extl_table_sets_i(subtab, "level", st->level);
         
             tmpg=REGION_GEOM(st->reg);

@@ -72,7 +72,7 @@ extern void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
                        WFitParams *fp);
 
 
-bool string2sizepolicy(const char *szplcy, WSizePolicy *value);
-
+extern bool string2sizepolicy(const char *szplcy, WSizePolicy *value);
+extern const char *sizepolicy2string(WSizePolicy szplcy);
 
 #endif /* ION_IONCORE_SIZEPOLICY_H */

@@ -1280,6 +1280,7 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
 {
     int layer=1;
     int tmp;
+    char *tmpstr;
     int ok=~mask;
     
     if(ok&MPLEX_ATTACH_LEVEL){
@@ -1306,8 +1307,16 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
     if(extl_table_gets_i(tab, "index", &(par->index)))
         par->flags|=MPLEX_ATTACH_INDEX&ok;
 
-    if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
-        if(ok&MPLEX_ATTACH_SIZEPOLICY){
+    if(ok&MPLEX_ATTACH_SIZEPOLICY){
+        if(extl_table_gets_s(tab, "sizepolicy", &tmpstr)){
+            WSizePolicy tmpp;
+            if(string2sizepolicy(tmpstr, &tmpp)){
+                par->flags|=MPLEX_ATTACH_SIZEPOLICY;
+                par->szplcy=tmpp;
+            }
+            free(tmpstr);
+        }else if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
+            /* Backwards compat. numeric version */
             par->flags|=MPLEX_ATTACH_SIZEPOLICY;
             par->szplcy=tmp;
         }
@@ -1890,7 +1899,8 @@ static void save_node(WMPlex *mplex, ExtlTab subs, int *n,
     if(st!=extl_table_none()){
         if(mplex->mx_current!=NULL && node==mplex->mx_current->st)
             extl_table_sets_b(st, "switchto", TRUE);
-        extl_table_sets_i(st, "sizepolicy", node->szplcy);
+        extl_table_sets_s(st, "sizepolicy", 
+                          sizepolicy2string(node->szplcy));
         extl_table_sets_i(st, "level", node->level);
         g=extl_table_from_rectangle(&REGION_GEOM(node->reg));
         extl_table_sets_t(st, "geom", g);

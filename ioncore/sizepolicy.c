@@ -283,14 +283,8 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
 }
 
 
-struct szplcy_spec {
-    const char *spec;
-    int szplcy;
-};
-
-
 /* translation table for sizepolicy specifications */
-static struct szplcy_spec szplcy_specs[] = {
+static StringIntMap szplcy_specs[] = {
     {"default",         SIZEPOLICY_DEFAULT},
     {"full",            SIZEPOLICY_FULL_EXACT},
     {"full_bounds",     SIZEPOLICY_FULL_BOUNDS},
@@ -324,17 +318,21 @@ static struct szplcy_spec szplcy_specs[] = {
 
 bool string2sizepolicy(const char *szplcy, WSizePolicy *value)
 {
-    const struct szplcy_spec *sp;
+    int tmp;
     
-    *value=SIZEPOLICY_DEFAULT;
-
-    for(sp=szplcy_specs; sp->spec; ++sp){
-	if(strcasecmp(szplcy,sp->spec)==0){
-	    *value=sp->szplcy;
-	    return TRUE;
-        }
+    tmp=stringintmap_value(szplcy_specs, szplcy, -1);
+    
+    if(tmp==-1){
+        *value=SIZEPOLICY_DEFAULT;
+        return FALSE;
+    }else{
+        *value=tmp;
+        return TRUE;
     }
-    
-    return FALSE;
 }
 
+
+const char *sizepolicy2string(WSizePolicy szplcy)
+{
+    return stringintmap_key(szplcy_specs, szplcy, NULL);
+}
