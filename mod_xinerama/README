@@ -18,11 +18,15 @@ INSTALLATION
            or (as yourself),
                 $ mkdir -p ~/.ion3/lib
                 $ cp .libs/mod_xinerama.* ~/.ion3/lib
-        4. Add dopath("mod_xinerama") to ~/.ion3/cfg_ion.lua. 
+        4. Add dopath("mod_xinerama") to ~/.ion3/cfg_ion.lua. See below
+	   for possible status bar issues.
         5. (Re)start Ion.
 		
 
 LIMITATIONS
+
+For some reason, loading the statusbar module _BEFORE_ the Xinerama module hides the 
+status bar. To work around this, load mod_xinerama before loading the statusbar module.
 
 This does not contain the Sun Xinerama support that was in the original ion3 because
 I don't have a machine running Solaris ready. Adding it should be rather trivial with
