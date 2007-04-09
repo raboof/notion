@@ -1,0 +1,29 @@
+Ion Xinerama module (based on the mod_xrandr skeleton)
+by Thomas Themel <themel0r@wanabehacket.com>
+
+INTRODUCTION
+
+This module gives ion3 back its Xinerama support that was killed on 20070117.
+
+INSTALLATION
+
+        1. Edit Makefile to ensure TOPDIR points to your top-level ion source
+           directory with a system.mk that matches the version of ion installed
+           on your system.
+
+        2. Run make.
+
+        3. Either run (as root)
+                # make install
+           or (as yourself),
+                $ mkdir -p ~/.ion3/lib
+                $ cp .libs/mod_xinerama.* ~/.ion3/lib
+        4. Add dopath("mod_xinerama") to ~/.ion3/cfg_ion.lua. 
+        5. (Re)start Ion.
+		
+
+LIMITATIONS
+
+This does not contain the Sun Xinerama support that was in the original ion3 because
+I don't have a machine running Solaris ready. Adding it should be rather trivial with
+access to the original ion code and a Solaris machine.
