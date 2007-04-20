@@ -56,7 +56,7 @@ function ioncore.getwinprop(cwin)
                 props={}
                 pcall(function() props=winprops[c][r][i] or {} end)
                 for idx, prop in ipairs_r(props) do
-                    if prop:match(cwin) then
+                    if prop:match(cwin, id) then
                         if prop.oneshot then
                             table.remove(props, idx)
                         end
@@ -82,7 +82,7 @@ local function ensure_winproptab(class, role, instance)
     end
 end    
 
-local function do_add_winprop(class, role, instance, name, prop)
+local function do_add_winprop(class, role, instance, prop)
     ensure_winproptab(class, role, instance)
     table.insert(winprops[class][role][instance], prop)
 end
@@ -90,10 +90,15 @@ end
 
 --DOC
 -- The basic name-based winprop matching criteria.
-function ioncore.match_winprop_name(prop, cwin)
-    if not prop.name then
-        return true
-    else
+function ioncore.match_winprop_dflt(prop, cwin, id)
+    if prop.is_transient~=nil then
+        if id.is_transient~=(prop.is_transient and true) then
+                                               -- hack for nil
+            return false
+        end
+    end
+    
+    if prop.name then
         local nm=cwin:name()
         if nm then
             local st, en=string.find(nm, prop.name)
@@ -102,6 +107,8 @@ function ioncore.match_winprop_name(prop, cwin)
             return false
         end
     end
+    
+    return true
 end
 
 
@@ -123,9 +130,9 @@ function ioncore.defwinprop(list)
     end
     
     if not list2.match then
-        list2.match=ioncore.match_winprop_name
+        list2.match=ioncore.match_winprop_dflt
     end
     
-    do_add_winprop(class, role, instance, name, list2)
+    do_add_winprop(class, role, instance, list2)
 end
 

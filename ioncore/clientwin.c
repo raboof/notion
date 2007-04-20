@@ -1041,6 +1041,7 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
     char **p=NULL, *wrole=NULL;
     int n=0, n2=0, n3=0, tmp=0;
+    Window tforwin=None;
     ExtlTab tab;
     
     p=xwindow_get_text_property(cwin->win, XA_WM_CLASS, &n);
@@ -1053,6 +1054,11 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
         extl_table_sets_s(tab, "instance", p[0]);
     if(wrole!=NULL)
         extl_table_sets_s(tab, "role", wrole);
+    
+    if(XGetTransientForHint(ioncore_g.dpy, cwin->win, &tforwin) 
+       && tforwin!=None){
+        extl_table_sets_b(tab, "is_transient", TRUE);
+    }
     
     if(p!=NULL)
         XFreeStringList(p);
