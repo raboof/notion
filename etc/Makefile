@@ -14,6 +14,7 @@ ETC =	cfg_ion.lua cfg_ioncore.lua cfg_kludges.lua cfg_defaults.lua \
 	look_brownsteel.lua look_clean.lua look_dusky.lua \
 	look_greyviolet.lua look_ios.lua look_cleanviolet.lua \
 	look_simpleblue.lua look_cleanios.lua look_newviolet.lua \
+        look_greenlight.lua \
         lookcommon_clean.lua lookcommon_clean_stdisp.lua \
         lookcommon_clean_tab.lua lookcommon_clean_frame.lua \
         lookcommon_emboss.lua lookcommon_emboss_stdisp.lua \
