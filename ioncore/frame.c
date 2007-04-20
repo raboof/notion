@@ -672,12 +672,9 @@ static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame)
     ph=region_make_return_pholder((WRegion*)frame);
     
     if(ph==NULL){
-        fprintf(stderr, "BAH\n");
         return NULL;
     }
     
-    fprintf(stderr, "JEE\n");
-        
     fparam.mode=frame->mode;
     
     fph=create_framedpholder(ph, &fparam);
