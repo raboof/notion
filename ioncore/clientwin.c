@@ -323,8 +323,6 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     
     set_sane_gravity(cwin->win);
 
-    cwin->transient_for=None;
-    
     cwin->n_cmapwins=0;
     cwin->cmap=attr->colormap;
     cwin->cmaps=NULL;

@@ -54,8 +54,6 @@ DECLCLASS(WClientWin){
     
     int orig_bw;
 
-    Window transient_for;
-    
     Colormap cmap;
     Colormap *cmaps;
     Window *cmapwins;
