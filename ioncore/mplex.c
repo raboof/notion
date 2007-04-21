@@ -1418,33 +1418,32 @@ static bool mplex_handle_drop(WMPlex *mplex, int x, int y,
 
 
 WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
-                               const WManageParams *param, int redir)
+                               const WManageParams *param, int priority)
 {
+    int cpriority=MANAGE_PRIORITY_SUB(priority, MANAGE_PRIORITY_NORMAL);
     WMPlexAttachParams ap;
     WPHolder *ph=NULL;
     WMPlexPHolder *mph;
     WLListNode *after;
     
-    if(redir==MANAGE_REDIR_STRICT_YES || redir==MANAGE_REDIR_PREFER_YES){
+    /* Check current */ {
         WStacking *cur=mplex_current_node(mplex);
         
         if(cur!=NULL){
-            ph=region_prepare_manage(cur->reg, cwin, param,
-                                     MANAGE_REDIR_PREFER_YES);
+            ph=region_prepare_manage(cur->reg, cwin, param, cpriority);
             if(ph!=NULL)
                 return ph;
         }
         
         if(mplex->mx_current!=NULL && mplex->mx_current->st!=cur){
             ph=region_prepare_manage(mplex->mx_current->st->reg, 
-                                     cwin, param, 
-                                     MANAGE_REDIR_PREFER_YES);
+                                     cwin, param, cpriority);
             if(ph!=NULL)
                 return ph;
         }
     }
     
-    if(redir==MANAGE_REDIR_STRICT_YES)
+    if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_NORMAL))
         return NULL;
     
     ap.flags=((param->switchto ? MPLEX_ATTACH_SWITCHTO : 0)

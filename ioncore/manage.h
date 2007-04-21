@@ -28,11 +28,28 @@ INTRSTRUCT(WManageParams);
   {FALSE, FALSE, FALSE, FALSE, FALSE, ForgetGravity, {0, 0, 0, 0}, NULL}
 
 enum{
-    MANAGE_REDIR_PREFER_YES,
-    MANAGE_REDIR_PREFER_NO,
-    MANAGE_REDIR_STRICT_YES,
-    MANAGE_REDIR_STRICT_NO
+    MANAGE_PRIORITY_NONE,
+    MANAGE_PRIORITY_LOW,
+    MANAGE_PRIORITY_NORMAL,
+    MANAGE_PRIORITY_GROUP,
+    MANAGE_PRIORITY_NO,
+    /* Special */
+    MANAGE_PRIORITY_NOREDIR
 };
+
+#define MANAGE_PRIORITY_OK(PRIORITY, OUR)                        \
+    ((PRIORITY) <= (OUR) || (PRIORITY)==MANAGE_PRIORITY_NOREDIR)
+
+#define MANAGE_PRIORITY_SUB(PRIORITY, OUR)      \
+    ((PRIORITY)==MANAGE_PRIORITY_NOREDIR        \
+     ? MANAGE_PRIORITY_NO                       \
+     : (PRIORITY) < (OUR) ? (OUR) : (PRIORITY))
+
+#define MANAGE_PRIORITY_SUBX(PRIORITY, OUR)                    \
+    ((PRIORITY)==MANAGE_PRIORITY_NOREDIR || (OUR) < (PRIORITY) \
+     ? MANAGE_PRIORITY_NO                                      \
+     : MANAGE_PRIORITY_NONE)
+
 
 DECLSTRUCT(WManageParams){
     bool switchto;

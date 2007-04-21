@@ -72,9 +72,9 @@ static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
 
 
 WPHolder *groupcw_prepare_manage(WGroupCW *cwg, const WClientWin *cwin,
-                                 const WManageParams *param, int redir)
+                                 const WManageParams *param, int priority)
 {
-    if(redir==MANAGE_REDIR_STRICT_YES)
+    if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_GROUP))
         return NULL;
     
     /* Only catch windows with transient mode set to current here. */

@@ -254,7 +254,7 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
         return FALSE;
 
     return region_manage_clientwin((WRegion*)sb, cwin, param,
-                                   MANAGE_REDIR_PREFER_NO);
+                                   MANAGE_PRIORITY_NONE);
 }
 
     

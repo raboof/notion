@@ -173,34 +173,12 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, 
                                            const WClientWin *cwin,
                                            const WManageParams *param, 
-                                           int redir, int geom_weak)
+                                           int geom_weak)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;
     WPHolder *ph;
     
-    if(redir==MANAGE_REDIR_PREFER_YES){
-        WRegion *r=(ws->grp.current_managed!=NULL 
-                    ? ws->grp.current_managed->reg 
-                    : NULL);
-        WGroupIterTmp tmp;
-        WPHolder *ph=NULL;
-        
-        if(r!=NULL)
-            ph=region_prepare_manage(r, cwin, param, MANAGE_REDIR_PREFER_YES);
-        
-        if(ph==NULL){
-            FOR_ALL_MANAGED_BY_GROUP(&ws->grp, r, tmp){
-                ph=region_prepare_manage(r, cwin, param, 
-                                         MANAGE_REDIR_PREFER_YES);
-                if(ph!=NULL)
-                    break;
-            }
-        }
-    }
-    
-    if(redir==MANAGE_REDIR_STRICT_YES)
-        return NULL;
 
     fp.inner_geom_gravity_set=TRUE;
     fp.inner_geom=param->geom;
@@ -223,8 +201,10 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
 
 WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
                                  const WManageParams *param,
-                                 int redir)
+                                 int priority)
 {
+    int cpriority=MANAGE_PRIORITY_SUB(priority, MANAGE_PRIORITY_GROUP);
+    int bpriority=MANAGE_PRIORITY_SUBX(priority, MANAGE_PRIORITY_GROUP);
     WRegion *b=(ws->grp.bottom!=NULL ? ws->grp.bottom->reg : NULL);
     WPHolder *ph=NULL;
     bool act_b=(ws->grp.bottom==ws->grp.current_managed);
@@ -249,13 +229,23 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
                 : act_b);
     
     if(b!=NULL && use_bottom)
-        ph=region_prepare_manage(b, cwin, param, redir);
+        ph=region_prepare_manage(b, cwin, param, bpriority);
     
-    if(ph==NULL)
-        ph=groupws_do_prepare_manage(ws, cwin, param, redir, weak);
-
+    if(ph==NULL){
+        /* Check current */
+        WRegion *r=(ws->grp.current_managed!=NULL 
+                    ? ws->grp.current_managed->reg 
+                    : NULL);
+        
+        if(r!=NULL && r!=b)
+            ph=region_prepare_manage(r, cwin, param, cpriority);
+    }
+    
+    if(ph==NULL && MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_GROUP))
+        ph=groupws_do_prepare_manage(ws, cwin, param, weak);
+    
     if(ph==NULL && b!=NULL && !use_bottom)
-        ph=region_prepare_manage(b, cwin, param, redir);
+        ph=region_prepare_manage(b, cwin, param, cpriority);
     
     return ph;
 }

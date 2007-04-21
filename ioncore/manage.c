@@ -74,8 +74,8 @@ static WPHolder *try_target(WClientWin *cwin, const WManageParams *param,
         
     if(r==NULL)
         return NULL;
-            
-    return region_prepare_manage(r, cwin, param, MANAGE_REDIR_PREFER_NO);
+    
+    return region_prepare_manage(r, cwin, param, MANAGE_PRIORITY_NONE);
 }
 
 
@@ -118,7 +118,7 @@ static bool handle_target_winprops(WClientWin *cwin, const WManageParams *param,
                 
                 if(ph==NULL){
                     ph=region_prepare_manage(reg, cwin, param, 
-                                             MANAGE_REDIR_PREFER_YES);
+                                             MANAGE_PRIORITY_NONE);
                     
                     if(ph==NULL)
                         destroy_obj((Obj*)reg);
@@ -159,7 +159,7 @@ static bool try_fullscreen(WClientWin *cwin, WScreen *dflt,
     
     if(fs_scr!=NULL){
         WPHolder *fs_ph=region_prepare_manage((WRegion*)fs_scr, cwin, param,
-                                              MANAGE_REDIR_STRICT_NO);
+                                              MANAGE_PRIORITY_NOREDIR);
         
         if(fs_ph!=NULL){
             int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
@@ -208,8 +208,8 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     if(ph==NULL){
         /* Find a placeholder for non-fullscreen state */
         ph=region_prepare_manage((WRegion*)scr, cwin, param,
-                                 MANAGE_REDIR_PREFER_YES);
-
+                                 MANAGE_PRIORITY_NONE);
+        
         if(try_fullscreen(cwin, scr, param)){
             if(pholder_target(ph)!=(WRegion*)region_screen_of((WRegion*)cwin)){
                 WRegion *grp=region_groupleader_of((WRegion*)cwin);
@@ -245,29 +245,25 @@ bool clientwin_do_manage_default(WClientWin *cwin,
 
 
 WPHolder *region_prepare_manage(WRegion *reg, const WClientWin *cwin,
-                                const WManageParams *param, int redir)
+                                const WManageParams *param, int priority)
 {
     WPHolder *ret=NULL;
     CALL_DYN_RET(ret, WPHolder*, region_prepare_manage, reg, 
-                 (reg, cwin, param, redir));
+                 (reg, cwin, param, priority));
     return ret;
 }
 
 
 WPHolder *region_prepare_manage_default(WRegion *reg, const WClientWin *cwin,
-                                        const WManageParams *param, int redir)
+                                        const WManageParams *param, int priority)
 {
-    WRegion *curr;
-    
-    if(redir==MANAGE_REDIR_STRICT_NO)
-        return NULL;
-    
-    curr=region_current(reg);
+    int cpriority=MANAGE_PRIORITY_SUB(priority, MANAGE_PRIORITY_NONE);
+    WRegion *curr=region_current(reg);
     
     if(curr==NULL)
         return NULL;
         
-    return region_prepare_manage(curr, cwin, param, MANAGE_REDIR_PREFER_YES);
+    return region_prepare_manage(curr, cwin, param, cpriority);
 }
 
 
@@ -298,10 +294,10 @@ WPHolder *region_prepare_manage_transient_default(WRegion *reg,
 
 
 bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
-                             const WManageParams *par, int redir)
+                             const WManageParams *par, int priority)
 {
     bool ret;
-    WPHolder *ph=region_prepare_manage(reg, cwin, par, redir);
+    WPHolder *ph=region_prepare_manage(reg, cwin, par, priority);
     int swf=(par->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
     
     if(ph==NULL)

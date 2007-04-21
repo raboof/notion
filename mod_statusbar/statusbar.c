@@ -553,9 +553,9 @@ static WRegion *statusbar_attach_ph(WStatusBar *sb, int flags,
 static WPHolder *statusbar_prepare_manage(WStatusBar *sb, 
                                           const WClientWin *cwin,
                                           const WManageParams *param,
-                                          int redir)
+                                          int priority)
 {
-    if(redir==MANAGE_REDIR_STRICT_YES)
+    if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_LOW))
         return NULL;
     
     return (WPHolder*)create_basicpholder((WRegion*)sb, 
@@ -664,7 +664,7 @@ WPHolder *statusbar_prepare_manage_transient(WStatusBar *sb,
     
     if(mgr!=NULL)
         return region_prepare_manage(mgr, cwin, param, 
-                                     MANAGE_REDIR_PREFER_NO);
+                                     MANAGE_PRIORITY_NONE);
     else
         return NULL;
 }

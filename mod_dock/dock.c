@@ -1437,9 +1437,9 @@ static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
 
 static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *cwin,
                                      const WManageParams *param UNUSED,
-                                     int redir)
+                                     int priority)
 {
-    if(redir==MANAGE_REDIR_STRICT_YES)
+    if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_LOW))
         return NULL;
 
     return (WPHolder*)create_basicpholder((WRegion*)dock,
@@ -1583,7 +1583,7 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
     }
 
     return region_manage_clientwin((WRegion*)dock, cwin, param,
-                                   MANAGE_REDIR_PREFER_NO);
+                                   MANAGE_PRIORITY_NONE);
 }
 
 

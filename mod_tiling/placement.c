@@ -72,16 +72,14 @@ static bool placement_mrsh_extl(ExtlFn fn, WTilingPlacementParams *param)
 
 
 WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
-                                const WManageParams *mp, int redir)
+                                const WManageParams *mp, int priority)
 {
+    int cpriority=MANAGE_PRIORITY_SUBX(priority, MANAGE_PRIORITY_NORMAL);
     WRegion *target=NULL;
     WTilingPlacementParams param;
     WPHolder *ph;
     bool ret;
-
-    if(redir==MANAGE_REDIR_STRICT_NO)
-        return NULL;
-
+    
     param.ws=ws;
     param.reg=(WRegion*)cwin;
     param.mp=mp;
@@ -95,7 +93,7 @@ WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
         
         target=(WRegion*)param.res_frame;
         
-        ph=region_prepare_manage(target, cwin, mp, redir);
+        ph=region_prepare_manage(target, cwin, mp, cpriority);
         if(ph!=NULL)
             return ph;
     }
@@ -108,6 +106,6 @@ WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
         return NULL;
     }
     
-    return region_prepare_manage(target, cwin, mp, redir);
+    return region_prepare_manage(target, cwin, mp, cpriority);
 }
 
