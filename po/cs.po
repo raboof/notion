@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-03-31 20:52+0200\n"
-"PO-Revision-Date: 2007-03-31 22:17+0200\n"
+"POT-Creation-Date: 2007-04-22 15:41+0200\n"
+"PO-Revision-Date: 2007-04-22 15:42+0200\n"
 "Last-Translator: Miroslav Kure <kurem at debian.cz>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -221,12 +221,12 @@ msgstr "Vstupní metoda nepodporuje mùj pøedpøipravený typ."
 msgid "Failed to create input context."
 msgstr "Selhalo vytvoøení vstupního kontextu."
 
-#: ../ioncore/clientwin.c:381
+#: ../ioncore/clientwin.c:379
 #, c-format
 msgid "The transient_for hint for \"%s\" points to itself."
 msgstr "Nápovìda transient_for pro \"%s\" ukazuje sama na sebe."
 
-#: ../ioncore/clientwin.c:385
+#: ../ioncore/clientwin.c:383
 #, c-format
 msgid ""
 "Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" "
@@ -235,36 +235,36 @@ msgstr ""
 "Klientské okno \"%s\" má poru¹enou nápovìdu transient_for. (Schizofrenie "
 "více rodièù \"Extended WM hints\"?)"
 
-#: ../ioncore/clientwin.c:390
+#: ../ioncore/clientwin.c:388
 #, c-format
 msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Okno transient_for pro \"%s\" není na stejné obrazovce."
 
-#: ../ioncore/clientwin.c:410 ../ioncore/clientwin.c:498
-#: ../ioncore/clientwin.c:1288
+#: ../ioncore/clientwin.c:408 ../ioncore/clientwin.c:496
+#: ../ioncore/clientwin.c:1292
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Okno %#x zmizelo."
 
-#: ../ioncore/clientwin.c:518
+#: ../ioncore/clientwin.c:516
 msgid "Unable to find a matching root window!"
 msgstr "Nemohu najít odpovídající koøenové okno!"
 
-#: ../ioncore/clientwin.c:557
+#: ../ioncore/clientwin.c:555
 #, c-format
 msgid "Unable to manage client window %#x."
 msgstr "Nemohu spravovat klientské okno %#x."
 
-#: ../ioncore/clientwin.c:606
+#: ../ioncore/clientwin.c:604
 msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Zmìny vlastnosti WM_TRANSIENT_FOR nejsou podporovány."
 
 #
-#: ../ioncore/clientwin.c:778
+#: ../ioncore/clientwin.c:776
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Klient nepodporuje protokol WM_DELETE."
 
-#: ../ioncore/clientwin.c:1294
+#: ../ioncore/clientwin.c:1298
 msgid "Saved client window does not want to be managed."
 msgstr "Ulo¾ené klientské okno nechce být spravováno."
 
@@ -397,12 +397,12 @@ msgstr ""
 "z pøedchozího umístìní nás nechce spravovat."
 
 #
-#: ../ioncore/mplex.c:1677
+#: ../ioncore/mplex.c:1685
 msgid "Invalid position setting."
 msgstr "Neplatné nastavení pozice."
 
 #
-#: ../ioncore/mplex.c:1717
+#: ../ioncore/mplex.c:1725
 msgid "Invalid action setting."
 msgstr "Neplatné nastavení akce."
 
@@ -446,7 +446,7 @@ msgstr "Neplatný parametr smìru."
 msgid "Unknown placement method \"%s\"."
 msgstr "Neznámý zpùsob umístìní \"%s\"."
 
-#: ../ioncore/detach.c:167
+#: ../ioncore/detach.c:176
 msgid "Failed to reattach."
 msgstr "Znovupøipojení selhalo."
 
@@ -459,91 +459,91 @@ msgstr "akt: "
 msgid "Split not on workspace."
 msgstr "Rozdìlení není na pracovní plo¹e."
 
-#: ../mod_tiling/tiling.c:367
+#: ../mod_tiling/tiling.c:348
 msgid "Unable to create a node for status display."
 msgstr "Nemohu vytvoøit uzel pro stavový øádek."
 
-#: ../mod_tiling/tiling.c:380
+#: ../mod_tiling/tiling.c:361
 msgid "Unable to create new split for status display."
 msgstr "Nemohu vytvoøit nové rozdìlení pro stavový øádek."
 
-#: ../mod_tiling/tiling.c:729
+#: ../mod_tiling/tiling.c:710
 msgid "Tiling in useless state."
 msgstr "Dl¾dice v neu¾iteèném stavu."
 
-#: ../mod_tiling/tiling.c:943
+#: ../mod_tiling/tiling.c:924
 msgid "Invalid direction"
 msgstr "Neplatný smìr"
 
 #
-#: ../mod_tiling/tiling.c:976 ../mod_tiling/split.c:1018
+#: ../mod_tiling/tiling.c:957 ../mod_tiling/split.c:1018
 msgid "Invalid node."
 msgstr "Neplatný uzel."
 
 #
-#: ../mod_tiling/tiling.c:995
+#: ../mod_tiling/tiling.c:976
 msgid "Unable to split."
 msgstr "Nemohu rozdìlit."
 
-#: ../mod_tiling/tiling.c:1109
+#: ../mod_tiling/tiling.c:1090
 msgid ""
 "Unable to unsplit: Could not move client windows elsewhere within the tiling."
 msgstr "Nemohu slouèit: Nemohu pøesunout klientské okno nìkam do dla¾dic."
 
-#: ../mod_tiling/tiling.c:1226
+#: ../mod_tiling/tiling.c:1207
 msgid "Nil parameter."
 msgstr "Prázdný parametr."
 
-#: ../mod_tiling/tiling.c:1231
+#: ../mod_tiling/tiling.c:1212
 msgid "Manager doesn't match."
 msgstr "Správce se neshoduje."
 
-#: ../mod_tiling/tiling.c:1268
+#: ../mod_tiling/tiling.c:1249
 msgid "The status display is not a valid parameter for this routine."
 msgstr "Stavový displej není v této rutinì platným parametrem."
 
-#: ../mod_tiling/tiling.c:1359
+#: ../mod_tiling/tiling.c:1340
 msgid "Refusing to float split directly containing the status display."
 msgstr "Odmítám rozdìlit pøímo prvek obsahující stavový displej."
 
-#: ../mod_tiling/tiling.c:1422
+#: ../mod_tiling/tiling.c:1403
 msgid "No suitable split here."
 msgstr "®ádné vhodné rozdìlení."
 
 #
-#: ../mod_tiling/tiling.c:1458
+#: ../mod_tiling/tiling.c:1439
 msgid "Could not get split tree."
 msgstr "Nemohu získat strom rozdìlení"
 
-#: ../mod_tiling/tiling.c:1479
+#: ../mod_tiling/tiling.c:1460
 msgid "Workspace already has a status display node."
 msgstr "Pracovní plocha ji¾ obsahuje stavový displej."
 
 #
-#: ../mod_tiling/tiling.c:1517
+#: ../mod_tiling/tiling.c:1498
 msgid "Missing region parameters."
 msgstr "Chybìjící parametry oblasti."
 
-#: ../mod_tiling/tiling.c:1561 ../mod_tiling/splitfloat.c:780
+#: ../mod_tiling/tiling.c:1542 ../mod_tiling/splitfloat.c:780
 msgid "Invalid direction."
 msgstr "Neplatný smìr."
 
 #
-#: ../mod_tiling/tiling.c:1636
+#: ../mod_tiling/tiling.c:1617
 msgid "No split type given."
 msgstr "Nebyl zadán typ rozdìlení."
 
-#: ../mod_tiling/tiling.c:1649
+#: ../mod_tiling/tiling.c:1630
 msgid "Unknown split type."
 msgstr "Neznámý typ rozdìlení."
 
 #
 #
-#: ../mod_tiling/tiling.c:1689
+#: ../mod_tiling/tiling.c:1670
 msgid "The workspace is empty."
 msgstr "Pracovní plocha je prázdná."
 
-#: ../mod_tiling/placement.c:106
+#: ../mod_tiling/placement.c:104
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
@@ -638,7 +638,7 @@ msgstr "Správce sezení: IceAddConnectionWatch selhalo."
 msgid "Unable to connect to the session manager."
 msgstr "Nemohu se pøipojit ke správci sezení."
 
-#: ../mod_sp/main.c:87
+#: ../mod_sp/main.c:126
 msgid "Unable to create scratchpad."
 msgstr "Nemohu vytvoøit poznámkový blok."
 
@@ -926,134 +926,478 @@ msgstr ""
 "Kontrola typu selhala ve druhé úrovni obsluhy volání pro parametr %d "
 "(obdr¾el %s, oèekával %s)."
 
-msgid "Grow-D"
-msgstr "Rùst dolù"
+msgid "Scroll the message or completions up/down."
+msgstr "Roluje zprávu nebo seznam dokonèení nahoru/dolù."
 
-msgid "Grow-U"
-msgstr "Rùst nahoru"
+msgid "Close the query/message box, not executing bound actions."
+msgstr "Zavøe okno s dotazem/zprávou, ani¾ by se spustily svázané akce.."
 
-msgid "Grow-R"
-msgstr "Rùst vpravo"
+msgid "Close the query and execute bound action."
+msgstr "Zavøe dotaz a spustí svázanou akci."
 
-msgid "Grow-L"
-msgstr "Rùst vlevo"
+msgid "Complete from history"
+msgstr "Doplní z historie."
 
-msgid "Pos-BR"
-msgstr "Pozice PD"
-
-msgid "Pos-BL"
-msgstr "Pozice LD"
-
-msgid "Pos-TR"
-msgstr "Pozice PH"
-
-msgid "Pos-TL"
-msgstr "Pozice LH"
-
-msgid "Toggle floating dock."
-msgstr "Zapne plovoucí dok."
-
-msgid "Clear the menu's typeahead find buffer."
-msgstr "Vyma¾e buffer pro dopøedné hledání v menu."
-
-msgid "Select next/previous menu entry."
-msgstr "V menu vybere dal¹í/pøedchozí polo¾ku."
+msgid "Try to complete the entered text or cycle through completions."
+msgstr "Zkusí doplnit zadaný text nebo bude cyklovat mezi mo¾nostmi."
 
 #
+msgid "Clear mark/cancel selection."
+msgstr "Sma¾e znaèku/zru¹í výbìr."
+
 #
-msgid "Activate current menu entry."
-msgstr "Aktivuje vybranou polo¾ku v menu."
+msgid "Copy selection."
+msgstr "Zkopíruje výbìr."
 
-msgid "Close the menu."
-msgstr "Zavøe menu."
+#
+msgid "Cut selection."
+msgstr "Vyjme výbìr."
 
-msgid "New tiling"
-msgstr "Vytvoøit dla¾dice"
+#
+msgid "Set mark/begin selection."
+msgstr "Nastaví znaèku/zaèátek výbìru."
 
-msgid "Transpose"
-msgstr "Transponovat"
+msgid "Paste from the clipboard."
+msgstr "Vlo¾í ze schránky."
 
-msgid "Flip"
-msgstr "Obrátit"
+msgid "Select next/previous (matching) history entry."
+msgstr "Vybere dal¹í/pøedchozí (odpovídající) polo¾ku historie."
 
-msgid "Split horizontally"
-msgstr "Rozpùlit horizontálnì"
+msgid "Transpose characters."
+msgstr "Transponuje znaky."
 
-msgid "Split vertically"
-msgstr "Rozpùlit vertikálnì"
+msgid "Delete the whole line."
+msgstr "Sma¾e celý øádek."
 
-msgid "At root"
-msgstr "Na koøenu"
+msgid "Delete to end of line."
+msgstr "Sma¾e text do konce øádky."
 
-msgid "Below"
-msgstr "Dole"
+msgid "Delete one word forward/backward."
+msgstr "Sma¾e slovo pøed/za kurzorem."
 
-msgid "Above"
-msgstr "Nahoøe"
+msgid "Delete previous character."
+msgstr "Sma¾e pøedchozí znak."
 
-msgid "At right"
-msgstr "Vpravo"
+msgid "Delete next character."
+msgstr "Sma¾e následující znak."
 
-msgid "At left"
-msgstr "Vlevo"
+msgid "Skip one word forward/backward."
+msgstr "Pøeskoèí slovo dopøedu/dozadu."
 
-msgid "Float split"
-msgstr "Plovoucí okraj"
+msgid "Go to end/beginning."
+msgstr "Skoèí na konec/zaèátek."
 
-msgid "Untile"
-msgstr "Zru¹it dla¾dice"
+msgid "Move one character forward/backward."
+msgstr "Posune se o znak vpøed/vzad."
 
-msgid "Destroy frame"
-msgstr "Znièit rám"
+msgid "Kill"
+msgstr "Ukonèit"
 
-msgid "Tile frame, if no tiling exists on the workspace"
+msgid "Attach tagged"
+msgstr "Pøipojit oznaèené"
+
+msgid "Rename"
+msgstr "Pøejmenovat"
+
+msgid "Close"
+msgstr "Zavøít"
+
+msgid "De/reattach"
+msgstr "Od/pøipojit"
+
+msgid "Toggle tag"
+msgstr "(Od)znaèit"
+
+msgid "Window info"
+msgstr "Informace o oknì"
+
+msgid "Clear tags"
+msgstr "Vyèistit znaèky"
+
+msgid "Exit"
+msgstr "Ukonèit"
+
+msgid "Restart TWM"
+msgstr "Restartovat TWM"
+
+msgid "Restart"
+msgstr "Restartovat"
+
+msgid "Save"
+msgstr "Ulo¾it"
+
+msgid "Session"
+msgstr "Sezení"
+
+msgid "Styles"
+msgstr "Styly"
+
+msgid "About Ion"
+msgstr "O Ionu"
+
+msgid "Help"
+msgstr "Nápovìda"
+
+msgid "Lock screen"
+msgstr "Zamknout obrazovku"
+
+msgid "Terminal"
+msgstr "Terminál"
+
+#
+msgid "Run..."
+msgstr "Spustit..."
+
+#
+msgid "Move in specified direction."
+msgstr "Posune se v zadaném smìru."
+
+msgid "Shrink in specified direction."
+msgstr "Zmen¹uje v zadaném smìru."
+
+#
+msgid "Grow in specified direction."
+msgstr "Roste v zadaném smìru."
+
+msgid "End the resize mode."
+msgstr "Ukonèí re¾im zmìny velikosti."
+
+msgid "Cancel the resize mode."
+msgstr "Zru¹í re¾im zmìny velikosti."
+
+msgid "Move the frame."
+msgstr "Pøesune rám."
+
+msgid "Lower the frame."
+msgstr "Pøesune rám do pozadí"
+
+#
+msgid "Raise the frame."
+msgstr "Pøesune rám do popøedí."
+
+msgid "Toggle shade mode"
+msgstr "Pøepne stínový re¾im"
+
+msgid "Attach tagged objects to this frame."
+msgstr "Pøipojí oznaèené objekty k tomuto rámu."
+
+msgid "Maximize the frame horizontally/vertically."
+msgstr "Maximalizuje rám horizontálnì/vertikálnì."
+
+msgid "Move current object within the frame left/right."
+msgstr "Pøesune objekt v rámu vlevo/vpravo."
+
+msgid "Switch to next/previous object within the frame."
+msgstr "Pøepne se na dal¹í/pøedchozí objekt v rámu."
+
+msgid "Switch to n:th object within the frame."
+msgstr "Pøepne se do n-tého objektu v rámu."
+
+#
+msgid "Query for a client window to attach."
+msgstr "Dotá¾e se na klientské okno, které má pøipojit."
+
+msgid "Move objects between frames by dragging and dropping the tab."
+msgstr "Pøesune objekty mezi rámy pomocí ta¾ení za zálo¾ku."
+
+msgid "Resize the frame."
+msgstr "Zmìní velikost rámu."
+
+msgid "Switch the frame to display the object indicated by the tab."
+msgstr "Pøepne rám, aby zobrazoval objekt urèený zálo¾kou."
+
+msgid "Begin move/resize mode."
+msgstr "Zahájí re¾im pøesunu/zmìny velikosti."
+
+msgid "Display context menu."
+msgstr "Zobrazí kontextové menu."
+
+#
+msgid "Query for a client window to go to."
+msgstr "Dotá¾e se na klientské okno, do nìho¾ má pøejít."
+
+msgid "Query for workspace to go to or create a new one."
+msgstr "Zeptá se na pracovní plochu, na kterou má pøejít, nebo ji vytvoøit."
+
+msgid "Query for file to view."
+msgstr "Zeptá se na soubor, který chcete zobrazit."
+
+msgid "Query for file to edit."
+msgstr "Zeptá se na soubor, který chcete upravit."
+
+msgid "Query for host to connect to with SSH."
+msgstr "Zeptá se na jméno poèítaèe, ke kterému se má pøipojit pomocí SSH."
+
+msgid "Query for Lua code to execute."
+msgstr "Zeptá se na lua kód, který má vykonat."
+
+msgid "Query for command line to execute."
+msgstr "Zeptá se na pøíkaz, který má spustit."
+
+#
+msgid "Run a terminal emulator."
+msgstr "Spustí emulátor terminálu."
+
+msgid "Show the Ion manual page."
+msgstr "Zobrazí manuálovou stránku Ionu."
+
+msgid "Query for manual page to be displayed."
+msgstr "Zeptá se na manuálovou stánku, kterou má zobrazit."
+
+msgid "Toggle tag of current object."
+msgstr "Pøepne oznaèení aktuálního objektu."
+
+msgid "Detach (float) or reattach an object to its previous location."
+msgstr "Odpojí nebo znovu pøipojí objekt z/do pùvodního umístìní."
+
+msgid "Close current object."
+msgstr "Zavøe aktuální objekt."
+
+msgid "Toggle client window group full-screen mode"
+msgstr "Pøepne skupinu klientského okna do celoobrazovkového re¾imu."
+
+#
+msgid ""
+"Send next key press to the client window. Some programs may not allow this "
+"by default."
 msgstr ""
-"Zmìní rám na dla¾dice (pokud zatím dla¾dice na pracovní plo¹e neexistují)."
+"Po¹le následující stisk klávesy klientskému oknu. Nìkteré programy to "
+"implicitnì nepovolují."
 
-msgid "Destroy current frame."
-msgstr "Znièí aktuální rám."
+#
+msgid "Kill client owning the client window."
+msgstr "Ukonèí klienta vlastnícího klientské okno."
 
-msgid "Split current frame horizontally."
-msgstr "Rozpùlí rám horizontálnì."
+#
+msgid ""
+"Nudge the client window. This might help with some programs' resizing "
+"problems."
+msgstr ""
+"Postrèí klientské okno. To mù¾e pomoci nìkterým programùm, které mají "
+"problémy se zmìnou velikosti."
 
-msgid "Go to frame above/below/right/left of current frame."
-msgstr "Pøejde do rámu nad/pod/vpravo/vlevo od aktuálního rámu."
+msgid "Raise focused object, if possible."
+msgstr "Pokud je to mo¾né, pøesune zamìøený objekt nahoru."
 
-msgid "Split current frame vertically."
-msgstr "Rozpùlí rám vertikálnì."
+msgid "Backward-circulate focus."
+msgstr "Cykluje vzad."
 
-msgid "Failed to create statusbar."
-msgstr "Selhalo vytvoøení stavového øádku."
+msgid "Forward-circulate focus."
+msgstr "Cykluje vpøed."
 
-msgid "Screen already has an stdisp. Refusing to create a statusbar."
-msgstr "Obrazovka ji¾ obsahuje stdisp. Odmítám vytvoøit stavový øádek."
+msgid "Display the window list menu."
+msgstr "Zobrazí menu se seznamem oken."
 
-msgid "Screen not found."
-msgstr "Obrazovka nebyla nalezna."
+msgid "Display the main menu."
+msgstr "Zobrazí hlavní menu."
 
-msgid "Failed to start ion-statusd."
-msgstr "Selhalo spu¹tìní ion-statusd."
+#
+#
+msgid "Create a new workspace of chosen default type."
+msgstr "Vytvoøí novou pracovní plochu vybraného typu."
 
-msgid "Errors starting ion-statusd:\n"
-msgstr "Chyba pøi startu ion-statusd:\n"
+#
+msgid "Go to next/previous screen on multihead setup."
+msgstr "Ve víceobrazovkovém nastavení pøejde na dal¹í/pøedchozí obrazovku."
 
-msgid "Could not find %s"
-msgstr "Nemohu najít %s"
+#
+msgid "Go to n:th screen on multihead setup."
+msgstr "U víceobrazovkového nastavení pøejde na n-tou obrazovku."
 
-msgid "ion-statusd quit."
-msgstr "ion-statusd konèí."
+#
+msgid "Clear all tags."
+msgstr "Vyèistí v¹echny znaèky."
+
+msgid "Go to first region demanding attention or previously active one."
+msgstr ""
+"Pøejde do prvního regionu vy¾adujícího pozornost nebo do pøedchozího "
+"aktivního."
+
+#
+msgid "Switch to next/previous object within current screen."
+msgstr "Pøepne se na dal¹í/pøedchozí objekt v aktuální obrazovce."
+
+#
+msgid ""
+"Switch to n:th object (workspace, full screen client window) within current "
+"screen."
+msgstr ""
+"Pøepne se na n-tý objekt (pracovní plochu, celoobrazovkové okno) na aktuální "
+"obrazovce."
+
+msgid "List"
+msgstr "Seznam"
+
+msgid "New"
+msgstr "Nový"
+
+msgid "Dillo"
+msgstr "Dillo"
+
+msgid "Konqueror"
+msgstr "Konqueror"
+
+msgid "Links"
+msgstr "Links"
+
+msgid "Opera"
+msgstr "Opera"
+
+msgid "Rxvt"
+msgstr "Rxvt"
+
+msgid "W3M"
+msgstr "W3M"
+
+msgid "XTerm"
+msgstr "XTerm"
+
+#
+msgid "Workspaces"
+msgstr "Pracovní plochy"
+
+msgid "Programs"
+msgstr "Programy"
+
+msgid "Show the PWM manual page."
+msgstr "Zobrazí manuálovou stránku PWM."
+
+msgid "Toggle scratchpad."
+msgstr "Zapne poznámkový blok."
+
+msgid ""
+"\n"
+"%sClass: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
+msgstr ""
+"\n"
+"%sTøída: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
+
+msgid "No entry '%s'"
+msgstr "®ádný záznam '%s'"
+
+msgid "%s:"
+msgstr "%s:"
+
+msgid "Missing submenu "
+msgstr "Chybìjící podmenu"
+
+msgid "Unknown menu %s."
+msgstr "Neznámé menu %s."
+
+msgid "Lua code:"
+msgstr "Lua kód:"
+
+msgid "Manual page (%s):"
+msgstr "Manuálová stránka (%s):"
+
+msgid "SSH to:"
+msgstr "SSH na:"
+
+msgid "Failed to open ~/.ssh/config"
+msgstr "Selhalo otevøení ~/.ssh/config"
+
+msgid "Failed to open ~/.ssh/known_hosts"
+msgstr "Selhalo otevøení ~/.ssh/known_hosts"
+
+msgid "Run:"
+msgstr "Spustit:"
+
+msgid "View file:"
+msgstr "Prohlédnout soubor:"
+
+msgid "Edit file:"
+msgstr "Upravit soubor:"
+
+msgid "Workspace name:"
+msgstr "Název pracovní plochy:"
+
+msgid "Frame name:"
+msgstr "Název rámu:"
+
+msgid "Restart Ion (y/n)?"
+msgstr "Restartovat Ion (y/n)?"
+
+msgid "Exit Ion/Shutdown session (y/n)?"
+msgstr "Ukonèit Ion/ukonèit sezení (y/n)?"
+
+msgid "Go to or create workspace:"
+msgstr "Vytvoøit nebo pøejít na pracovní plochu:"
+
+msgid "Attach window:"
+msgstr "Pøipojit okno:"
+
+msgid "Go to window:"
+msgstr "Jít do okna:"
+
+msgid "New workspace layout (default):"
+msgstr "Rozlo¾ení nové pracovní plochy (default):"
+
+msgid "Unknown error"
+msgstr "Neznámá chyba"
+
+msgid "Unknown layout"
+msgstr "Neznámé rozlo¾ení."
+
+msgid "Cannot attach: different root windows."
+msgstr "Nemohu pøipojit: rùzná koøenová okna."
+
+msgid "Could not find client window %s."
+msgstr "Nemohu najít klientské okno %s."
 
 msgid "Too much result data"
 msgstr "Pøíli¹ mnoho výsledkù"
 
-msgid "Save look selection in %s?"
-msgstr "Ulo¾it nastavení vzhledu do %s?"
+msgid "Could not find %s"
+msgstr "Nemohu najít %s"
 
-msgid "Cannot save selection."
-msgstr "Nemohu ulo¾it výbìr."
+msgid "Not a directory."
+msgstr "Není adresáøem."
 
-msgid "Unable to append to non-table menu"
-msgstr "Nelze pøidat do netabulkového menu"
+msgid "Invalid command"
+msgstr "Neplatný pøíkaz"
+
+msgid "Error in command string: "
+msgstr "Chyba v pøíkazu: "
+
+msgid "Error compiling guard: %s"
+msgstr "Chyba pøi sestavení strá¾ce: %s"
+
+msgid "Invalid guard %s."
+msgstr "Neplatná ochrana %s."
+
+msgid "Main menu:"
+msgstr "Hlavní menu:"
+
+msgid "Context menu:"
+msgstr "Kontextové menu:"
+
+msgid "Floating frame"
+msgstr "Plovoucí rám"
+
+msgid "Tiled frame"
+msgstr "Dla¾dicový rám"
+
+msgid "Tiling"
+msgstr "Dla¾dice"
+
+#
+msgid "Workspace"
+msgstr "Pracovní plocha"
+
+msgid "Screen"
+msgstr "Obrazovka"
+
+msgid "Frame"
+msgstr "Rám"
+
+msgid "Recursive table - unable to deepcopy"
+msgstr "Rekurzivní tabulka - nemohu provést hlubokou kopii"
 
 msgid ""
 "Making the following minimal emergency mappings:\n"
@@ -1070,472 +1414,128 @@ msgstr ""
 "  Mod1+C -> close\n"
 "  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
 
-msgid "Recursive table - unable to deepcopy"
-msgstr "Rekurzivní tabulka - nemohu provést hlubokou kopii"
+msgid "Unable to append to non-table menu"
+msgstr "Nelze pøidat do netabulkového menu"
 
-msgid "Frame"
-msgstr "Rám"
+msgid "Cannot save selection."
+msgstr "Nemohu ulo¾it výbìr."
 
-msgid "Screen"
-msgstr "Obrazovka"
+msgid "Save look selection in %s?"
+msgstr "Ulo¾it nastavení vzhledu do %s?"
 
-#
-msgid "Workspace"
-msgstr "Pracovní plocha"
+msgid "ion-statusd quit."
+msgstr "ion-statusd konèí."
 
-msgid "Tiling"
-msgstr "Dla¾dice"
+msgid "Errors starting ion-statusd:\n"
+msgstr "Chyba pøi startu ion-statusd:\n"
 
-msgid "Tiled frame"
-msgstr "Dla¾dicový rám"
+msgid "Failed to start ion-statusd."
+msgstr "Selhalo spu¹tìní ion-statusd."
 
-msgid "Floating frame"
-msgstr "Plovoucí rám"
+msgid "Screen not found."
+msgstr "Obrazovka nebyla nalezna."
 
-msgid "Context menu:"
-msgstr "Kontextové menu:"
+msgid "Screen already has an stdisp. Refusing to create a statusbar."
+msgstr "Obrazovka ji¾ obsahuje stdisp. Odmítám vytvoøit stavový øádek."
 
-msgid "Main menu:"
-msgstr "Hlavní menu:"
+msgid "Failed to create statusbar."
+msgstr "Selhalo vytvoøení stavového øádku."
 
-msgid "Invalid guard %s."
-msgstr "Neplatná ochrana %s."
+msgid "Split current frame vertically."
+msgstr "Rozpùlí rám vertikálnì."
 
-msgid "Error compiling guard: %s"
-msgstr "Chyba pøi sestavení strá¾ce: %s"
+msgid "Go to frame above/below/right/left of current frame."
+msgstr "Pøejde do rámu nad/pod/vpravo/vlevo od aktuálního rámu."
 
-msgid "Error in command string: "
-msgstr "Chyba v pøíkazu: "
+msgid "Split current frame horizontally."
+msgstr "Rozpùlí rám horizontálnì."
 
-msgid "Invalid command"
-msgstr "Neplatný pøíkaz"
+msgid "Destroy current frame."
+msgstr "Znièí aktuální rám."
 
-msgid "Unknown layout"
-msgstr "Neznámé rozlo¾ení."
-
-msgid "Not a directory."
-msgstr "Není adresáøem."
-
-msgid "Could not find client window %s."
-msgstr "Nemohu najít klientské okno %s."
-
-msgid "Cannot attach: different root windows."
-msgstr "Nemohu pøipojit: rùzná koøenová okna."
-
-msgid "Unknown error"
-msgstr "Neznámá chyba"
-
-msgid "New workspace layout (default):"
-msgstr "Rozlo¾ení nové pracovní plochy (default):"
-
-msgid "Go to window:"
-msgstr "Jít do okna:"
-
-msgid "Attach window:"
-msgstr "Pøipojit okno:"
-
-msgid "Go to or create workspace:"
-msgstr "Vytvoøit nebo pøejít na pracovní plochu:"
-
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Ukonèit Ion/ukonèit sezení (y/n)?"
-
-msgid "Restart Ion (y/n)?"
-msgstr "Restartovat Ion (y/n)?"
-
-msgid "Frame name:"
-msgstr "Název rámu:"
-
-msgid "Workspace name:"
-msgstr "Název pracovní plochy:"
-
-msgid "Edit file:"
-msgstr "Upravit soubor:"
-
-msgid "View file:"
-msgstr "Prohlédnout soubor:"
-
-msgid "Run:"
-msgstr "Spustit:"
-
-msgid "Failed to open ~/.ssh/known_hosts"
-msgstr "Selhalo otevøení ~/.ssh/known_hosts"
-
-msgid "Failed to open ~/.ssh/config"
-msgstr "Selhalo otevøení ~/.ssh/config"
-
-msgid "SSH to:"
-msgstr "SSH na:"
-
-msgid "Manual page (%s):"
-msgstr "Manuálová stránka (%s):"
-
-msgid "Lua code:"
-msgstr "Lua kód:"
-
-msgid "Unknown menu %s."
-msgstr "Neznámé menu %s."
-
-msgid "Missing submenu "
-msgstr "Chybìjící podmenu"
-
-msgid "%s:"
-msgstr "%s:"
-
-msgid "No entry '%s'"
-msgstr "®ádný záznam '%s'"
-
-msgid ""
-"\n"
-"%sClass: %s\n"
-"%sRole: %s\n"
-"%sInstance: %s\n"
-"%sXID: 0x%x"
+msgid "Tile frame, if no tiling exists on the workspace"
 msgstr ""
-"\n"
-"%sTøída: %s\n"
-"%sRole: %s\n"
-"%sInstance: %s\n"
-"%sXID: 0x%x"
+"Zmìní rám na dla¾dice (pokud zatím dla¾dice na pracovní plo¹e neexistují)."
 
-msgid "Toggle scratchpad."
-msgstr "Zapne poznámkový blok."
+msgid "Destroy frame"
+msgstr "Znièit rám"
 
-msgid "Programs"
-msgstr "Programy"
+msgid "Split vertically"
+msgstr "Rozpùlit vertikálnì"
 
-msgid "Lock screen"
-msgstr "Zamknout obrazovku"
+msgid "Split horizontally"
+msgstr "Rozpùlit horizontálnì"
 
-msgid "Help"
-msgstr "Nápovìda"
+msgid "Flip"
+msgstr "Obrátit"
 
-#
-msgid "Workspaces"
-msgstr "Pracovní plochy"
+msgid "Transpose"
+msgstr "Transponovat"
 
-msgid "Styles"
-msgstr "Styly"
+msgid "Untile"
+msgstr "Zru¹it dla¾dice"
 
-msgid "Session"
-msgstr "Sezení"
+msgid "Float split"
+msgstr "Plovoucí okraj"
 
-msgid "XTerm"
-msgstr "XTerm"
+msgid "At left"
+msgstr "Vlevo"
 
-msgid "W3M"
-msgstr "W3M"
+msgid "At right"
+msgstr "Vpravo"
 
-msgid "Rxvt"
-msgstr "Rxvt"
+msgid "Above"
+msgstr "Nahoøe"
 
-msgid "Opera"
-msgstr "Opera"
+msgid "Below"
+msgstr "Dole"
 
-msgid "Links"
-msgstr "Links"
+msgid "At root"
+msgstr "Na koøenu"
 
-msgid "Konqueror"
-msgstr "Konqueror"
+msgid "New tiling"
+msgstr "Vytvoøit dla¾dice"
 
-msgid "Dillo"
-msgstr "Dillo"
-
-#
-msgid "Run..."
-msgstr "Spustit..."
-
-msgid "New"
-msgstr "Nový"
-
-msgid "Close"
-msgstr "Zavøít"
-
-msgid "List"
-msgstr "Seznam"
-
-#
-msgid ""
-"Switch to n:th object (workspace, full screen client window) within current "
-"screen."
-msgstr ""
-"Pøepne se na n-tý objekt (pracovní plochu, celoobrazovkové okno) na aktuální "
-"obrazovce."
-
-#
-msgid "Switch to next/previous object within current screen."
-msgstr "Pøepne se na dal¹í/pøedchozí objekt v aktuální obrazovce."
-
-msgid "Go to first region demanding attention or previously active one."
-msgstr ""
-"Pøejde do prvního regionu vy¾adujícího pozornost nebo do pøedchozího "
-"aktivního."
-
-#
-msgid "Clear all tags."
-msgstr "Vyèistí v¹echny znaèky."
-
-#
-msgid "Go to n:th screen on multihead setup."
-msgstr "U víceobrazovkového nastavení pøejde na n-tou obrazovku."
-
-#
-msgid "Go to next/previous screen on multihead setup."
-msgstr "Ve víceobrazovkovém nastavení pøejde na dal¹í/pøedchozí obrazovku."
+msgid "Close the menu."
+msgstr "Zavøe menu."
 
 #
 #
-msgid "Create a new workspace of chosen default type."
-msgstr "Vytvoøí novou pracovní plochu vybraného typu."
+msgid "Activate current menu entry."
+msgstr "Aktivuje vybranou polo¾ku v menu."
 
-msgid "Display the main menu."
-msgstr "Zobrazí hlavní menu."
+msgid "Select next/previous menu entry."
+msgstr "V menu vybere dal¹í/pøedchozí polo¾ku."
 
-msgid "Display the window list menu."
-msgstr "Zobrazí menu se seznamem oken."
+msgid "Clear the menu's typeahead find buffer."
+msgstr "Vyma¾e buffer pro dopøedné hledání v menu."
 
-msgid "Forward-circulate focus."
-msgstr "Cykluje vpøed."
+msgid "Toggle floating dock."
+msgstr "Zapne plovoucí dok."
 
-msgid "Backward-circulate focus."
-msgstr "Cykluje vzad."
+msgid "Pos-TL"
+msgstr "Pozice LH"
 
-msgid "Raise focused object, if possible."
-msgstr "Pokud je to mo¾né, pøesune zamìøený objekt nahoru."
+msgid "Pos-TR"
+msgstr "Pozice PH"
 
-#
-msgid ""
-"Nudge the client window. This might help with some programs' resizing "
-"problems."
-msgstr ""
-"Postrèí klientské okno. To mù¾e pomoci nìkterým programùm, které mají "
-"problémy se zmìnou velikosti."
+msgid "Pos-BL"
+msgstr "Pozice LD"
 
-#
-msgid "Kill client owning the client window."
-msgstr "Ukonèí klienta vlastnícího klientské okno."
+msgid "Pos-BR"
+msgstr "Pozice PD"
 
-#
-msgid ""
-"Send next key press to the client window. Some programs may not allow this "
-"by default."
-msgstr ""
-"Po¹le následující stisk klávesy klientskému oknu. Nìkteré programy to "
-"implicitnì nepovolují."
+msgid "Grow-L"
+msgstr "Rùst vlevo"
 
-msgid "Toggle client window group full-screen mode"
-msgstr "Pøepne skupinu klientského okna do celoobrazovkového re¾imu."
+msgid "Grow-R"
+msgstr "Rùst vpravo"
 
-msgid "Close current object."
-msgstr "Zavøe aktuální objekt."
+msgid "Grow-U"
+msgstr "Rùst nahoru"
 
-msgid "Detach (float) or reattach an object to its previous location."
-msgstr "Odpojí nebo znovu pøipojí objekt z/do pùvodního umístìní."
-
-msgid "Toggle tag of current object."
-msgstr "Pøepne oznaèení aktuálního objektu."
-
-msgid "Query for manual page to be displayed."
-msgstr "Zeptá se na manuálovou stánku, kterou má zobrazit."
-
-msgid "Show the Ion manual page."
-msgstr "Zobrazí manuálovou stránku Ionu."
-
-#
-msgid "Run a terminal emulator."
-msgstr "Spustí emulátor terminálu."
-
-msgid "Query for command line to execute."
-msgstr "Zeptá se na pøíkaz, který má spustit."
-
-msgid "Query for Lua code to execute."
-msgstr "Zeptá se na lua kód, který má vykonat."
-
-msgid "Query for host to connect to with SSH."
-msgstr "Zeptá se na jméno poèítaèe, ke kterému se má pøipojit pomocí SSH."
-
-msgid "Query for file to edit."
-msgstr "Zeptá se na soubor, který chcete upravit."
-
-msgid "Query for file to view."
-msgstr "Zeptá se na soubor, který chcete zobrazit."
-
-msgid "Query for workspace to go to or create a new one."
-msgstr "Zeptá se na pracovní plochu, na kterou má pøejít, nebo ji vytvoøit."
-
-#
-msgid "Query for a client window to go to."
-msgstr "Dotá¾e se na klientské okno, do nìho¾ má pøejít."
-
-msgid "Display context menu."
-msgstr "Zobrazí kontextové menu."
-
-msgid "Maximize the frame horizontally/vertically."
-msgstr "Maximalizuje rám horizontálnì/vertikálnì."
-
-msgid "Begin move/resize mode."
-msgstr "Zahájí re¾im pøesunu/zmìny velikosti."
-
-msgid "Switch the frame to display the object indicated by the tab."
-msgstr "Pøepne rám, aby zobrazoval objekt urèený zálo¾kou."
-
-msgid "Resize the frame."
-msgstr "Zmìní velikost rámu."
-
-msgid "Move the frame."
-msgstr "Pøesune rám."
-
-msgid "Move objects between frames by dragging and dropping the tab."
-msgstr "Pøesune objekty mezi rámy pomocí ta¾ení za zálo¾ku."
-
-msgid "Tag current object within the frame."
-msgstr "Oznaèí aktuální objekt v rámu."
-
-#
-msgid "Query for a client window to attach."
-msgstr "Dotá¾e se na klientské okno, které má pøipojit."
-
-msgid "Switch to n:th object within the frame."
-msgstr "Pøepne se do n-tého objektu v rámu."
-
-msgid "Switch to next/previous object within the frame."
-msgstr "Pøepne se na dal¹í/pøedchozí objekt v rámu."
-
-msgid "Move current object within the frame left/right."
-msgstr "Pøesune objekt v rámu vlevo/vpravo."
-
-msgid "Attach tagged objects to this frame."
-msgstr "Pøipojí oznaèené objekty k tomuto rámu."
-
-msgid "Toggle shade mode"
-msgstr "Pøepne stínový re¾im"
-
-#
-msgid "Raise the frame."
-msgstr "Pøesune rám do popøedí."
-
-msgid "Lower the frame."
-msgstr "Pøesune rám do pozadí"
-
-msgid "Cancel the resize mode."
-msgstr "Zru¹í re¾im zmìny velikosti."
-
-msgid "End the resize mode."
-msgstr "Ukonèí re¾im zmìny velikosti."
-
-#
-msgid "Grow in specified direction."
-msgstr "Roste v zadaném smìru."
-
-msgid "Shrink in specified direction."
-msgstr "Zmen¹uje v zadaném smìru."
-
-#
-msgid "Move in specified direction."
-msgstr "Posune se v zadaném smìru."
-
-msgid "Terminal"
-msgstr "Terminál"
-
-msgid "About Ion"
-msgstr "O Ionu"
-
-msgid "Save"
-msgstr "Ulo¾it"
-
-msgid "Restart"
-msgstr "Restartovat"
-
-msgid "Restart TWM"
-msgstr "Restartovat TWM"
-
-msgid "Exit"
-msgstr "Ukonèit"
-
-msgid "Attach tagged"
-msgstr "Pøipojit oznaèené"
-
-msgid "Clear tags"
-msgstr "Vyèistit znaèky"
-
-msgid "Window info"
-msgstr "Informace o oknì"
-
-msgid "Toggle tag"
-msgstr "(Od)znaèit"
-
-msgid "De/reattach"
-msgstr "Od/pøipojit"
-
-msgid "Rename"
-msgstr "Pøejmenovat"
-
-msgid "Kill"
-msgstr "Ukonèit"
-
-msgid "Move one character forward/backward."
-msgstr "Posune se o znak vpøed/vzad."
-
-msgid "Go to end/beginning."
-msgstr "Skoèí na konec/zaèátek."
-
-msgid "Skip one word forward/backward."
-msgstr "Pøeskoèí slovo dopøedu/dozadu."
-
-msgid "Delete next character."
-msgstr "Sma¾e následující znak."
-
-msgid "Delete previous character."
-msgstr "Sma¾e pøedchozí znak."
-
-msgid "Delete one word forward/backward."
-msgstr "Sma¾e slovo pøed/za kurzorem."
-
-msgid "Delete to end of line."
-msgstr "Sma¾e text do konce øádky."
-
-msgid "Delete the whole line."
-msgstr "Sma¾e celý øádek."
-
-msgid "Transpose characters."
-msgstr "Transponuje znaky."
-
-msgid "Select next/previous (matching) history entry."
-msgstr "Vybere dal¹í/pøedchozí (odpovídající) polo¾ku historie."
-
-msgid "Paste from the clipboard."
-msgstr "Vlo¾í ze schránky."
-
-#
-msgid "Set mark/begin selection."
-msgstr "Nastaví znaèku/zaèátek výbìru."
-
-#
-msgid "Cut selection."
-msgstr "Vyjme výbìr."
-
-#
-msgid "Copy selection."
-msgstr "Zkopíruje výbìr."
-
-#
-msgid "Clear mark/cancel selection."
-msgstr "Sma¾e znaèku/zru¹í výbìr."
-
-msgid "Try to complete the entered text or cycle through completions."
-msgstr "Zkusí doplnit zadaný text nebo bude cyklovat mezi mo¾nostmi."
-
-msgid "Complete from history"
-msgstr "Doplní z historie."
-
-msgid "Close the query and execute bound action."
-msgstr "Zavøe dotaz a spustí svázanou akci."
-
-msgid "Close the query/message box, not executing bound actions."
-msgstr "Zavøe okno s dotazem/zprávou, ani¾ by se spustily svázané akce.."
-
-msgid "Scroll the message or completions up/down."
-msgstr "Roluje zprávu nebo seznam dokonèení nahoru/dolù."
+msgid "Grow-D"
+msgstr "Rùst dolù"
 
 msgid "press"
 msgstr "stisk"
@@ -1554,6 +1554,9 @@ msgstr "%s %s"
 
 msgid "%s %s at %s"
 msgstr "%s %s na %s"
+
+#~ msgid "Tag current object within the frame."
+#~ msgstr "Oznaèí aktuální objekt v rámu."
 
 #~ msgid "Xinerama sanity check failed; overlapping screens detected."
 #~ msgstr "Kontrola Xineramy selhala: byly nalezeny pøekrývající se obrazovky."

@@ -35,7 +35,7 @@ Zobrazí nápovìdu k pøíkazovým parametrùm
 Zobrazí verzi
 .TP
 .B \-about
-Zobrazí informace o programu (verze, copyright)
+Zobrazí informace o programu (verze, autor, copyright)
 
 .SH Základní pojetí
 
@@ -79,19 +79,19 @@ definuje toto pøiøazení.
 
 BINDINGS:WScreen
 
-.SS Pøiøazení pro práci s nejvy¹¹ími rámy a obrazovkami a jejich potomky
-
-BINDINGS:WMPlex.toplevel
-
-.SS Pøiøazení pro práci s rámy a obrazovkami a jejich potomky
+.SS Pøiøazení pro práci s rámy a obrazovkami
 
 BINDINGS:WMPlex
 
-.SS Pøiøazení pro práci se v¹emi rámy (vèetnì doèasných) a jejich potomky
+.SS Pøiøazení pro práci se v¹emi rámy
 
 BINDINGS:WFrame
 
-.SS Pøiøazení pro práci s nejvy¹¹ími rámy (ne s doèasnými) a jejich potomky
+.SS Pøiøazení pro práci s nejvy¹¹ími rámy (ne s doèasnými) a obrazovkami
+
+BINDINGS:WMPlex.toplevel
+
+.SS Pøiøazení pro práci s nejvy¹¹ími rámy (ne s doèasnými)
 
 BINDINGS:WFrame.toplevel
 
@@ -107,7 +107,6 @@ BINDINGS:WTiling
 .SS Pøiøazení pro klientská okna
 
 BINDINGS:WClientWin
-
 BINDINGS:WGroupCW
 
 .SS Pøiøazení pro pøesun/zmìnu velikosti

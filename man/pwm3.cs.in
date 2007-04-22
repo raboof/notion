@@ -37,7 +37,7 @@ Zobrazí nápovìdu k pøíkazovým parametrùm
 Zobrazí verzi
 .TP
 .B \-about
-Zobrazí informace o programu (verze, copyright)
+Zobrazí informace o programu (verze, autor, copyright)
 
 .SH PØIØAZENÍ
 
@@ -54,23 +54,31 @@ definuje toto pøiøazení.
 
 BINDINGS:WScreen
 
-.".SS Pøiøazení pro práci s rámy, obrazovkami a jejich potomky
+.SS Pøiøazení pro práci s rámy, obrazovkami a jejich potomky
 
 BINDINGS:WMPlex
 
 .SS Pøiøazení pro práci s rámy a jejich potomky
 
 BINDINGS:WFrame
+BINDINGS:WFrame.floating
+
+.SS Pøiøazení pro práci s nejvy¹¹ími (ne s doèasnými) rámy a obrazovkami
+
+BINDINGS:WMPlex.toplevel
+
+.SS Pøiøazení pro práci s nejvy¹¹ími (ne s doèasnými) rámy
+
+BINDINGS:WFrame.toplevel
+
+.SS Pøiøazení pro práci s klientskými okny
+
+BINDINGS:WClientWin
+BINDINGS:WGroupCW
 
 .SS Pøiøazení pro pøesun/zmìnu velikosti
 
 BINDINGS:WMoveresMode
-
-.SS Pøiøazení pro plovoucí pracovní plochy [mod_floatws]
-
-BINDINGS:WGroupWS
-
-BINDINGS:WFrame.floating
 
 .SS Pøiøazení pro menu [mod_menu]
 
