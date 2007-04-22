@@ -91,11 +91,21 @@ end
 --DOC
 -- The basic name-based winprop matching criteria.
 function ioncore.match_winprop_dflt(prop, cwin, id)
-    if prop.is_transient~=nil then
-        if id.is_transient~=(prop.is_transient and true) then
-                                               -- hack for nil
-            return false
+    local function chkf(p, i)
+        if p==nil then
+            return true
+        else
+            return (p==(i and true)) 
+                           -- hack for nil
         end
+    end
+    
+    if not chkf(prop.is_transient, id.is_transient) then
+        return false
+    end
+    
+    if not chkf(prop.is_dockapp, id.is_dockapp) then
+        return false
     end
     
     if prop.name then

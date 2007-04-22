@@ -294,11 +294,11 @@ static void set_sane_gravity(Window win)
 
 
 static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
-                           XWindowAttributes *attr)
+                           XWindowAttributes *attr, int initflags)
 {
     WFitParams fp;
 
-    cwin->flags=0;
+    cwin->flags=initflags;
     cwin->win=win;
     cwin->state=WithdrawnState;
     
@@ -352,9 +352,9 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
 
 static WClientWin *create_clientwin(WWindow *par, Window win,
-                                    XWindowAttributes *attr)
+                                    XWindowAttributes *attr, int initflags)
 {
-    CREATEOBJ_IMPL(WClientWin, clientwin, (p, par, win, attr));
+    CREATEOBJ_IMPL(WClientWin, clientwin, (p, par, win, attr, initflags));
 }
 
 
@@ -447,6 +447,7 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
     int init_state=NormalState;
     WManageParams param=MANAGEPARAMS_INIT;
     void *mrshpm[2];
+    int initflags=0;
 
     param.dockapp=FALSE;
     
@@ -485,6 +486,7 @@ again:
          * with the icon window.
          */
         param.dockapp=TRUE;
+        initflags|=CLIENTWIN_IS_DOCKAPP_HACK;
         goto again;
     }
     
@@ -518,7 +520,7 @@ again:
     }
 
     /* Allocate and initialize */
-    cwin=create_clientwin((WWindow*)rootwin, win, &attr);
+    cwin=create_clientwin((WWindow*)rootwin, win, &attr, initflags);
     
     if(cwin==NULL){
         warn_err();
@@ -1060,6 +1062,9 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
         extl_table_sets_b(tab, "is_transient", TRUE);
     }
     
+    if(cwin->flags&CLIENTWIN_IS_DOCKAPP_HACK)
+        extl_table_sets_b(tab, "is_dockapp", TRUE);
+    
     if(p!=NULL)
         XFreeStringList(p);
     if(wrole!=NULL)
@@ -1240,6 +1245,9 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
 
     extl_table_sets_d(tab, "windowid", (double)(cwin->win));
     
+    if(cwin->flags&CLIENTWIN_IS_DOCKAPP_HACK)
+        extl_table_sets_b(tab, "is_dockapp_hack", TRUE);
+    
     if(last_checkcode!=0){
         chkc=last_checkcode++;
         xwindow_set_integer_property(cwin->win, ioncore_g.atom_checkcode, 
@@ -1264,8 +1272,9 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     WClientWin *cwin=NULL;
     XWindowAttributes attr;
     WRectangle rg;
-    bool got_chkc;
-
+    bool got_chkc=FALSE;
+    int initflags=0;
+    
     if(!extl_table_gets_d(tab, "windowid", &wind) ||
        !extl_table_gets_i(tab, "checkcode", &chkc)){
         return NULL;
@@ -1299,14 +1308,10 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
     }
 
-    /*
-    attr.x=fp->g.x;
-    attr.y=fp->g.y;
-    attr.width=fp->g.w;
-    attr.height=fp->g.h;
-     */
-
-    cwin=create_clientwin(par, win, &attr);
+    if(extl_table_is_bool_set(tab, "is_dockapp_hack"))
+        initflags|=CLIENTWIN_IS_DOCKAPP_HACK;
+    
+    cwin=create_clientwin(par, win, &attr, initflags);
     
     if(cwin==NULL)
         return FALSE;
