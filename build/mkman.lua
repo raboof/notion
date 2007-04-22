@@ -68,9 +68,18 @@ end
 
 local function dobindings(fn, bindings)
     local p={}
+    local dummy = function() end
     
     p.META="Mod1+"
     p.ALTMETA=""
+    
+    p.dopath=dummy
+    p.defmenu=dummy
+    p.defctxmenu=dummy
+    p.menuentry=dummy
+    p.submenu=dummy
+
+    p.ioncore={ set=dummy }
     
     function p.bdoc(text)
         return {action = "doc", text = text}
@@ -124,26 +133,43 @@ local function dobindings(fn, bindings)
         return mact("mdrag", buttonspec, cmd, guard)
     end
     
-    function p.defbindings(context, bnd)
-        if not bindings[context] then
-            bindings[context]=bnd
+    function ins(t, v)
+        if not t.seen then
+            t.seen={}
+        end
+        
+        if (not v.kcb) or v.submap then
+            -- Submap rebinds are not presently handled
+            table.insert(t, v)
         else
-            for _, v in ipairs(bnd) do
-                table.insert(bindings[context], v)
+            local id=v.action..":"..v.kcb..":"..(v.area or "")
+            local i=t.seen[id]
+            if i then
+                t[i].invalid=true
+            end
+            if v.cmd then
+                table.insert(t, v)
+                t.seen[id]=#t
+            else
+                -- Unbind only
+                t.seen[id]=nil
             end
         end
     end
-
-    local function dummy() 
+    
+    function p.defbindings(context, bnd)
+        if not bindings[context] then
+            bindings[context]={}
+        else
+            -- Reset documentation
+            table.insert(bindings[context], { action = "doc", text = nil })
+        end
+        
+        for _, v in ipairs(bnd) do
+            ins(bindings[context], v)
+        end
     end
-    
-    p.defmenu=dummy
-    p.defctxmenu=dummy
-    p.menuentry=dummy
-    p.submenu=dummy
 
-    p.ioncore={ set=dummy }
-    
     local env=setmetatable({}, {
         __index=p, 
         __newindex=function(x) 
@@ -175,20 +201,28 @@ local function docgroup_bindings(bindings)
     
     local function parsetable(t, prefix)
         for _, v in ipairs(t) do
-            if v.kcb then
-                v.kcb=string.gsub(v.kcb, "AnyModifier%+", "")
-            end
-            if v.action=="doc" then
-                outi=outi+1
-                out[outi]={doc=v.text, bindings={}}
-            elseif v.submap then
-                parsetable(v.submap, prefix..v.kcb.." ")
-            else
-                assert(out[outi])
-                v.kcb=prefix..v.kcb
-                table.insert(out[outi].bindings, v)
+            if not v.invalid then
+                if v.kcb then
+                    v.kcb=string.gsub(v.kcb, "AnyModifier%+", "")
+                end
+                if v.action=="doc" then
+                    if outi==0 or #out[outi].bindings>0 then
+                        outi=outi+1
+                    end
+                    out[outi]={doc=v.text, bindings={}}
+                elseif v.submap then
+                    parsetable(v.submap, prefix..v.kcb.." ")
+                else
+                    assert(out[outi])
+                    v.kcb=prefix..v.kcb
+                    table.insert(out[outi].bindings, v)
+                end
             end
         end
+    end
+    
+    if outi~=0 and #out[outi].bindings==0 then
+        out[outi]=nil
     end
     
     parsetable(bindings, "")
@@ -227,7 +261,7 @@ end
 
 local function write_bindings_man(db)
     local function write_binding_man(v)
-        return '.TP\n.B '..combine_bindings(v)..'\n'..gettext(v.doc)..'\n'
+        return '.TP\n.B '..combine_bindings(v)..'\n'..gettext(v.doc or "?")..'\n'
     end
     
     local s=""
