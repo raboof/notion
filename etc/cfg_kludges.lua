@@ -17,6 +17,16 @@ defwinprop{
 }
 
 
+-- Put all dockapps in the statusbar's systray, also adding the missing
+-- size hints necessary for this to work.
+defwinprop{
+    is_dockapp = true,
+    statusbar = "systray",
+    max_size = { w = 64, h = 64},
+    min_size = { w = 64, h = 64},
+}
+
+
 -- You might want to enable these if you really must use XMMS. 
 --[[
 defwinprop{
