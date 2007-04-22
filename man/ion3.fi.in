@@ -35,7 +35,7 @@ Näytä komentorivin ohje.
 Näytä Ionin versio.
 .TP
 .B \-about
-Näytä tietoja Ionista (versio, tekijänoikeudet).
+Näytä tietoja Ionista (versio, tekijä, lisenssi).
 
 .SH PERUSKÄSITTEET
 
@@ -82,11 +82,7 @@ jonka asetustiedosto määrittelee alla olevat sidonnat.
 
 BINDINGS:WScreen
 
-.SS Näytöillä tai ylimmän tason kehyksissä toimivat sidonnat
-
-BINDINGS:WMPlex.toplevel
-
-.SS Näytöillä tai (kaikissa) kehyksissä toimivat sidonnat
+.SS Näytöillä ja kaikissa kehyksissä toimivat sidonnat
 
 BINDINGS:WMPlex
 
@@ -94,7 +90,11 @@ BINDINGS:WMPlex
 
 BINDINGS:WFrame
 
-.SS Ylimmän tason kehyksissä (ei ns. transient-dialogi) toimivat sidonnat
+.SS Näytöillä ja ylimmän tason kehyksissä (ei ns. transientit) toimivat sidonnat
+
+BINDINGS:WMPlex.toplevel
+
+.SS Ylimmän tason kehyksissä (ei ns. transientit) toimivat sidonnat
 
 BINDINGS:WFrame.toplevel
 
@@ -110,7 +110,6 @@ BINDINGS:WTiling
 .SS Asiakasikkunoiden sidonnat
 
 BINDINGS:WClientWin
-
 BINDINGS:WGroupCW
 
 .SS Siirto- ja koonmuutostilan sidonnat

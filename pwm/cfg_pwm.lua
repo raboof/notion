@@ -54,12 +54,12 @@ dopath("mod_dock")
 -- applicable.
 
 defbindings("WScreen", {
+    bdoc("Display the main menu."),
     kpress(ALTMETA.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
 })
 
 defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."F1", nil),
-    kpress(META..   "F1", "ioncore.exec_on(_, ':man pwm3')"),
     kpress(ALTMETA.."F3", nil),
     kpress(META..   "F3", nil),
     kpress(ALTMETA.."F4", nil),
@@ -67,6 +67,11 @@ defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."F6", nil),
     kpress(ALTMETA.."F9", nil),
     kpress(META.."G", nil),
+    
+    bdoc("Show the PWM manual page."),
+    kpress(META..   "F1", "ioncore.exec_on(_, ':man pwm3')"),
+    
+    bdoc("Display context menu."),
     kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
 })
 

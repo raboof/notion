@@ -38,7 +38,7 @@ Show help on command line options
 Show version
 .TP
 .B \-about
-Show about text (version, copyright)
+Show about text (version, author, license)
 
 .SH BINDINGS
 
@@ -54,23 +54,31 @@ the module that whose configuration file defines these bindings.
 
 BINDINGS:WScreen
 
-.".SS Bindings operating on both frames and screens and their children
+.SS Bindings operating on all frames and screens and their children
 
 BINDINGS:WMPlex
 
-.SS Bindings operating on frames and their children
+.SS Bindings operating on all frames and their children
 
 BINDINGS:WFrame
+BINDINGS:WFrame.floating
+
+.SS Bindings operating on top-level (non-transient) frames as well as screens
+
+BINDINGS:WMPlex.toplevel
+
+.SS Bindings operating on top-level (non-transient) frames
+
+BINDINGS:WFrame.toplevel
+
+.SS Bindings for client windows
+
+BINDINGS:WClientWin
+BINDINGS:WGroupCW
 
 .SS Move/resize mode bindings
 
 BINDINGS:WMoveresMode
-
-.SS Bindings for floating workspaces and frames [mod_floatws]
-
-BINDINGS:WGroupWS
-
-BINDINGS:WFrame.floating
 
 .SS Bindings for menus [mod_menu]
 

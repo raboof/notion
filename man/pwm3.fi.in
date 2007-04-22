@@ -36,7 +36,7 @@ Näytä komentorivin ohje.
 Näytä Ionin versio.
 .TP
 .B \-about
-Näytä tietoja PWM:sta (versio, tekijänoikeudet).
+Näytä tietoja PWM:sta (versio, tekijä, lisenssi).
 
 .SH SIDONNAT
 
@@ -53,23 +53,31 @@ jonka asetustiedosto määrittelee alla olevat sidonnat.
 
 BINDINGS:WScreen
 
-.\".SS Kehyksiä ja näyttöjä, sekä niiden lapsia käsittelevät sidonnat
+.SS Näytöillä ja kaikissa kehyksissä toimivat sidonnat
 
 BINDINGS:WMPlex
 
-.SS Kehyksiä, sekä niiden lapsia käsittelevät sidonnat
+.SS Kaikissa kehyksissä toimivat sidonnat
 
 BINDINGS:WFrame
+BINDINGS:WFrame.floating
 
-.SS Siirto ja koonmuutostilan sidonnat
+.SS Näytöillä ja ylimmän tason kehyksissä (ei ns. transientit) toimivat sidonnat
+
+BINDINGS:WMPlex.toplevel
+
+.SS Ylimmän tason kehyksissä (ei ns. transientit) toimivat sidonnat
+
+BINDINGS:WFrame.toplevel
+
+.SS Asiakasikkunoiden sidonnat
+
+BINDINGS:WClientWin
+BINDINGS:WGroupCW
+
+.SS Siirto- ja koonmuutostilan sidonnat
 
 BINDINGS:WMoveresMode
-
-.SS Kelluvien työpöytien ja kehyksien sidonnat [mod_floatws]
-
-BINDINGS:WGroupWS
-
-BINDINGS:WFrame.floating
 
 .SS Valikoiden sidonnat [mod_menu]
 

@@ -31,7 +31,8 @@ CONFIGS=../etc/cfg_ioncore.lua \
 # TODO: PWM configuration file is undocumented
 PWM_CONFIGS=\
 	../etc/cfg_ioncore.lua \
-	../etc/cfg_menu.lua
+	../etc/cfg_menu.lua \
+	../pwm/cfg_pwm.lua
 
 ######################################
 

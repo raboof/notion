@@ -35,7 +35,7 @@ Show help on command line options
 Show version
 .TP
 .B \-about
-Show about text (version, copyright)
+Show about text (version, author, license)
 
 .SH BASIC CONCEPTS
 
@@ -79,19 +79,19 @@ the module that whose configuration file defines these bindings.
 
 BINDINGS:WScreen
 
-.SS Bindings operating on top-level frames and screens and their children
-
-BINDINGS:WMPlex.toplevel
-
-.SS Bindings operating on frames and screens and their children
+.SS Bindings operating on all frames and screens
 
 BINDINGS:WMPlex
 
-.SS Bindings operating on all frames (including transient) and their children
+.SS Bindings operating on all frames
 
 BINDINGS:WFrame
 
-.SS Bindings operating on top-level (non-transient) frames and their children
+.SS Bindings operating on top-level (non-transient) frames and screens
+
+BINDINGS:WMPlex.toplevel
+
+.SS Bindings operating on top-level (non-transient) frames
 
 BINDINGS:WFrame.toplevel
 
@@ -107,7 +107,6 @@ BINDINGS:WTiling
 .SS Bindings for client windows
 
 BINDINGS:WClientWin
-
 BINDINGS:WGroupCW
 
 .SS Move/resize mode bindings
