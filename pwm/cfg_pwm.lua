@@ -50,7 +50,7 @@ dopath("mod_dock")
 --
 
 
--- Unbind anything using mod_query and rebinding to mod_menu where
+-- Unbind anything using mod_query and rebind to mod_menu where
 -- applicable.
 
 defbindings("WScreen", {
@@ -67,11 +67,11 @@ defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."F6", nil),
     kpress(ALTMETA.."F9", nil),
     kpress(META.."G", nil),
-    kpress(META.."A", nil),
+    kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
 })
 
-defbindings("WFrame", {
-    kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+defbindings("WFrame.toplevel", {
+    kpress(META.."A", nil),
 })
 
 -- Make a new main menu with additional workspace menu.
