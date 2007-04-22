@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-04-03 18:25+0300\n"
+"POT-Creation-Date: 2007-04-22 13:13+0300\n"
 "PO-Revision-Date: 2004-07-31 23:50+0300\n"
 "Last-Translator: Tuomo Valkonen <tuomov at iki.fi>\n"
 "Language-Team: none\n"
@@ -231,48 +231,48 @@ msgstr "Syöttömenetelmä ei tue kaivattua esimuokkaustyyliä."
 msgid "Failed to create input context."
 msgstr "Syöttökontekstin luonti epäonnistui."
 
-#: ../ioncore/clientwin.c:381
+#: ../ioncore/clientwin.c:379
 #, c-format
 msgid "The transient_for hint for \"%s\" points to itself."
 msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa itseensä."
 
-#: ../ioncore/clientwin.c:385
+#: ../ioncore/clientwin.c:383
 #, c-format
 msgid ""
 "Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" "
 "multi-parent brain damage?)"
 msgstr "Ikkunan \"%s\" transient_for neuvo on rikki."
 
-#: ../ioncore/clientwin.c:390
+#: ../ioncore/clientwin.c:388
 #, c-format
 msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri näytölle."
 
-#: ../ioncore/clientwin.c:410 ../ioncore/clientwin.c:498
-#: ../ioncore/clientwin.c:1288
+#: ../ioncore/clientwin.c:408 ../ioncore/clientwin.c:496
+#: ../ioncore/clientwin.c:1292
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Ikkuna %#x katosi."
 
-#: ../ioncore/clientwin.c:518
+#: ../ioncore/clientwin.c:516
 msgid "Unable to find a matching root window!"
 msgstr "Vastaavaa juuri-ikkunaa ei löytynyt."
 
-#: ../ioncore/clientwin.c:557
+#: ../ioncore/clientwin.c:555
 #, c-format
 msgid "Unable to manage client window %#x."
 msgstr "Asiakasikkunan %x hallittavaksi saattaminen epäonnistui."
 
-#: ../ioncore/clientwin.c:606
+#: ../ioncore/clientwin.c:604
 msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Muutoksia WM_TRANSIENT_FOR ominaisuudessa ei tueta."
 
 #
-#: ../ioncore/clientwin.c:778
+#: ../ioncore/clientwin.c:776
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
 
-#: ../ioncore/clientwin.c:1294
+#: ../ioncore/clientwin.c:1298
 msgid "Saved client window does not want to be managed."
 msgstr "Talletettu asiakasikkuna ei halua sitä hallittavan."
 
@@ -291,6 +291,7 @@ msgid "Destroying object \"%s\" with client windows as children."
 msgstr "Tuhotaan kappale \"%s\", jolla on vielä asiakasikkunoita."
 
 #: ../ioncore/region.c:434
+#, c-format
 msgid "Can not destroy %s: contains client windows."
 msgstr "Kappaletta %s ei voida tuhota, sillä se sisältää asiakasikkunoita."
 
@@ -406,12 +407,12 @@ msgstr ""
 "tai vanhempi kieltäytyi hallitsemasta ikkunaa."
 
 #
-#: ../ioncore/mplex.c:1677
+#: ../ioncore/mplex.c:1685
 msgid "Invalid position setting."
 msgstr "Virheellinen paikka-asetus."
 
 #
-#: ../ioncore/mplex.c:1717
+#: ../ioncore/mplex.c:1725
 msgid "Invalid action setting."
 msgstr "Virheellinen toiminto-asetus."
 
@@ -500,8 +501,9 @@ msgstr "Halkaisu ei ole mahdollista."
 #: ../mod_tiling/tiling.c:1090
 msgid ""
 "Unable to unsplit: Could not move client windows elsewhere within the tiling."
-msgstr "Ei voida poistaa halkaisua: asiakasikkunoita ei voitu "
-"siirtää muualle laatoituksessa."
+msgstr ""
+"Ei voida poistaa halkaisua: asiakasikkunoita ei voitu siirtää muualle "
+"laatoituksessa."
 
 #: ../mod_tiling/tiling.c:1207
 msgid "Nil parameter."
@@ -556,7 +558,7 @@ msgstr "Tuntematon halkaisutyyppi."
 msgid "The workspace is empty."
 msgstr "Työpöytä on tyhjä."
 
-#: ../mod_tiling/placement.c:106
+#: ../mod_tiling/placement.c:104
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
@@ -677,6 +679,7 @@ msgid "Unknown border style \"%s\"."
 msgstr "Reunan tyyli \"%s\" on tuntematon."
 
 #: ../de/init.c:111
+#, c-format
 msgid "Unknown border side configuration \"%s\"."
 msgstr "Reunan sivuasetus \"%s\" on tuntematon."
 
@@ -701,6 +704,7 @@ msgid "'based_on' for %s points back to the style itself."
 msgstr "Tyylin %s 'based_on' -asetus osoittaa itseensä."
 
 #: ../de/init.c:322
+#, c-format
 msgid "Unknown base style. \"%s\""
 msgstr "Tuntematon pohjatyyli \"%s\"."
 
@@ -939,143 +943,482 @@ msgstr ""
 "Tyyppitarkistus epäonnistui tason 2 kutsunkäsittelijässä parametrille #%d "
 "(oli %s, odotettiin %s)."
 
-msgid "Grow-D"
-msgstr "Kasvu: alas"
+msgid "Scroll the message or completions up/down."
+msgstr "Vieritä viestiä tai täydennyksiä ylös/alas."
 
-msgid "Grow-U"
-msgstr "Kasvu: ylös"
+msgid "Close the query/message box, not executing bound actions."
+msgstr "Sulje kysely/viesti suorittamatta sidottuja toimintoja."
 
-msgid "Grow-R"
-msgstr "Kasvu: oikealle"
+msgid "Close the query and execute bound action."
+msgstr "Sulje kysely ja suorita sidottu toiminta."
 
-msgid "Grow-L"
-msgstr "Kasvu: vasemmalle"
+msgid "Complete from history"
+msgstr "Täydennä historiasta"
 
-msgid "Pos-BR"
-msgstr "Paikka: alaoikea"
-
-msgid "Pos-BL"
-msgstr "Paikka: alavasen"
-
-msgid "Pos-TR"
-msgstr "Paikka: yläoikea"
-
-msgid "Pos-TL"
-msgstr "Paikka: ylävasen"
-
-msgid "Toggle floating dock."
-msgstr "Näytä/piiloita kelluva laituri (dock)."
-
-msgid "Clear the menu's typeahead find buffer."
-msgstr "Tyhjää valikon hakupuskuri."
-
-msgid "Select next/previous menu entry."
-msgstr "Siirry seuraavaan/edelliseen valintaan."
+msgid "Try to complete the entered text or cycle through completions."
+msgstr "Yritä täydentää syötetty teksti tai selaa täydennyksiä."
 
 #
-#
-msgid "Activate current menu entry."
-msgstr "Suorita valinta."
-
-msgid "Close the menu."
-msgstr "Sulje valikko."
-
-msgid "New tiling"
-msgstr "Uusi laatoitus"
+msgid "Clear mark/cancel selection."
+msgstr "Lopeta tekstin valinta."
 
 #
-msgid "Transpose"
-msgstr "Käännä"
+msgid "Copy selection."
+msgstr "Kopioi valittu teksti."
 
 #
-msgid "Flip"
-msgstr "Peilaa"
+msgid "Cut selection."
+msgstr "Leikkaa valittu teksti."
 
 #
-#
-msgid "Split horizontally"
-msgstr "Jaa vaakasuunnassa"
+msgid "Set mark/begin selection."
+msgstr "Aloita tekstin valinta."
+
+msgid "Paste from the clipboard."
+msgstr "Liimaa teksti leikelaudalta."
 
 #
-#
-msgid "Split vertically"
-msgstr "Jaa pystysuunnassa"
+msgid "Select next/previous (matching) history entry."
+msgstr "Näytä seuraava/edellinen vastaus muistista."
+
+msgid "Transpose characters."
+msgstr "Transponoi merkit."
+
+msgid "Delete the whole line."
+msgstr "Tuhoa koko rivi."
+
+msgid "Delete to end of line."
+msgstr "Tuhoa merkit rivin loppuun saakka."
+
+msgid "Delete one word forward/backward."
+msgstr "Tuhoa yksi sana eteen/taakse."
+
+msgid "Delete previous character."
+msgstr "Tuhoa edellinen merkki."
+
+msgid "Delete next character."
+msgstr "Poista seuraava merkki."
+
+msgid "Skip one word forward/backward."
+msgstr "Ohita yksi sana eteen/taaksepäin"
+
+msgid "Go to end/beginning."
+msgstr "Mene rivin alkuun/loppuun."
+
+msgid "Move one character forward/backward."
+msgstr "Siirry yksi merkki eteen/taakse."
+
+msgid "Kill"
+msgstr "Tapa"
+
+msgid "Attach tagged"
+msgstr "Liitä merkityt"
+
+msgid "Rename"
+msgstr "Uudelleennimeä"
+
+msgid "Close"
+msgstr "Sulje"
+
+msgid "De/reattach"
+msgstr "Irroita/liitä"
+
+msgid "Toggle tag"
+msgstr "Muuta merkintää"
+
+msgid "Window info"
+msgstr "Ikkunan tiedot"
+
+msgid "Clear tags"
+msgstr "Poista merkinnät"
+
+msgid "Exit"
+msgstr "Poistu"
+
+msgid "Restart TWM"
+msgstr "Käynnistä TWM"
+
+msgid "Restart"
+msgstr "Uudelleenkäynnistä"
+
+msgid "Save"
+msgstr "Talleta"
+
+msgid "Session"
+msgstr "Istunto"
+
+msgid "Styles"
+msgstr "Tyylit"
+
+msgid "About Ion"
+msgstr "Tietoja Ionista"
+
+msgid "Help"
+msgstr "Ohjeet"
+
+msgid "Lock screen"
+msgstr "Lukitse näyttö"
+
+msgid "Terminal"
+msgstr "Pääteohjelma"
 
 #
-msgid "At root"
-msgstr "Juuressa"
-
-msgid "Below"
-msgstr "Alapuolella"
-
-msgid "Above"
-msgstr "Yläpuolella"
-
-msgid "At right"
-msgstr "Oikealla"
-
-msgid "At left"
-msgstr "Vasemmalla"
-
-msgid "Float split"
-msgstr "Kelluta"
-
-msgid "Untile"
-msgstr "Hajoita laatoitus"
+msgid "Run..."
+msgstr "Suorita..."
 
 #
-msgid "Destroy frame"
-msgstr "Tuhoa kehys"
+msgid "Move in specified direction."
+msgstr "Liiku vastaavaan suuntaan."
 
-msgid "Tile frame, if no tiling exists on the workspace"
-msgstr "Laatoita kehys, jos työpöydällä ei ole kehystä"
+msgid "Shrink in specified direction."
+msgstr "Kutista vastaavaan suuntaan."
 
-msgid "Destroy current frame."
-msgstr "Tuhoa tämänhetkinen kehys."
+#
+msgid "Grow in specified direction."
+msgstr "Kasvata vastaavaan suuntaan."
 
-msgid "Split current frame horizontally."
-msgstr "Halkaise tämänhetkinen kehys vaakasuunnassa."
+msgid "End the resize mode."
+msgstr "Siirry tilasta pois."
 
-msgid "Go to frame above/below/right/left of current frame."
+msgid "Cancel the resize mode."
+msgstr "Peruuta tilasta."
+
+msgid "Move the frame."
+msgstr "Siirrä kehystä."
+
+msgid "Lower the frame."
+msgstr "Alenna kehystä."
+
+#
+msgid "Raise the frame."
+msgstr "Nosta kehys."
+
+msgid "Toggle shade mode"
+msgstr "Kytke litistys päälle/pois."
+
+msgid "Attach tagged objects to this frame."
+msgstr "Liitä merkityt kappaleet tähän kehykseen."
+
+msgid "Maximize the frame horizontally/vertically."
+msgstr "Maksimoi kehys vaaka/pystysuunnassa."
+
+msgid "Move current object within the frame left/right."
 msgstr ""
-"Siirry tämänhetkisen kehyksen yllä/alla/vasemmalle/oikealla olevaan "
-"kehykseen."
+"Siirrä kehyksessä tällä hetkellä näytettävää kappaletta vasemmalle/oikealle."
 
-msgid "Split current frame vertically."
-msgstr "Halkaise tämänhetkinen kehys pystysuunnassa."
+msgid "Switch to next/previous object within the frame."
+msgstr "Siirry seuraavaan/edelliseen kehyksen jakavaan kappaleeseen."
 
-msgid "Failed to create statusbar."
-msgstr "Epäonnistuttiin tilarivin luonnissa"
+msgid "Switch to n:th object within the frame."
+msgstr "Siirry n:teen kehyksen jakavaan kappaleeseen."
 
-msgid "Screen already has an stdisp. Refusing to create a statusbar."
-msgstr "Ruudulla on jo tilanäyttö. Kieltäydytään luomasta tilariviä."
+#
+msgid "Query for a client window to attach."
+msgstr "Kysy liitettävää asiakasikkunaa."
 
-msgid "Screen not found."
-msgstr "Ruutua ei löytynyt."
+msgid "Move objects between frames by dragging and dropping the tab."
+msgstr ""
+"Siirrä kappaletta kehysten välillä raahaamalla ja pudottamalla välilehti."
 
-msgid "Failed to start ion-statusd."
-msgstr "Ion-statusd:n käynnistys eopäonnistui."
+msgid "Resize the frame."
+msgstr "Muuta kehyksen kokoa."
 
-msgid "Errors starting ion-statusd:\n"
-msgstr "Ion-statusd:n käynnistysvirheet:\n"
+msgid "Switch the frame to display the object indicated by the tab."
+msgstr "Vaihda kehys näyttämään välilehden ilmoittama kappale."
 
-msgid "Could not find %s"
-msgstr "Ei löydettyä %s:ää."
+msgid "Begin move/resize mode."
+msgstr "Aloita siirto ja koonmuutostila."
 
-msgid "ion-statusd quit."
-msgstr "ion-statusd päätti suorituksen."
+msgid "Display context menu."
+msgstr "Näytä kontekstivalikko."
+
+#
+msgid "Query for a client window to go to."
+msgstr "Kysy asiakasikkunaa, johon siirtyä."
+
+msgid "Query for workspace to go to or create a new one."
+msgstr "Kysy työpöytää jolle siirtyä, tai luo uusi."
+
+msgid "Query for file to view."
+msgstr "Kysy tiedostoa näytettäväksi."
+
+msgid "Query for file to edit."
+msgstr "Kysy tiedostoa muokattavaksi."
+
+msgid "Query for host to connect to with SSH."
+msgstr "Ota SSH-yhteys kyseltävään koneeseen."
+
+msgid "Query for Lua code to execute."
+msgstr "Kysy Lua-koodia ajettavaksi."
+
+msgid "Query for command line to execute."
+msgstr "Kysy komentoriviä suoritettavaksi."
+
+#
+msgid "Run a terminal emulator."
+msgstr "Käynnistä pääte-emulaattori."
+
+msgid "Show the Ion manual page."
+msgstr "Näytä Ionin ohjesivu."
+
+msgid "Query for manual page to be displayed."
+msgstr "Kysy ohjesivua näytettäväksi."
+
+msgid "Toggle tag of current object."
+msgstr "Merkitse aktiivinen kappale."
+
+msgid "Detach (float) or reattach an object to its previous location."
+msgstr ""
+"Irroita (kelluta) tai uudelleenliitä kappale sen edelliseen sijaintiin."
+
+msgid "Close current object."
+msgstr "Sulje aktiivinen kappale."
+
+msgid "Toggle client window group full-screen mode"
+msgstr "Muuta asiakasikkunaryhmän kokoruudun tilaa"
+
+#
+msgid ""
+"Send next key press to the client window. Some programs may not allow this "
+"by default."
+msgstr ""
+"Lähetä seuraava näppäinpainallus aktiiviselle asiakasikkunalle. Kaikki "
+"ohjelmat eivät välttämättä salli tätä oletuksena."
+
+#
+msgid "Kill client owning the client window."
+msgstr "Tapa aktiivisen asiakasikkunan omistava ohjelma."
+
+#
+msgid ""
+"Nudge the client window. This might help with some programs' resizing "
+"problems."
+msgstr ""
+"Tönäise aktiivista asiakasikkunaa. Tämä saattaa auttaa joidenkin ohjelmien "
+"koko-ongelmien kanssa."
+
+msgid "Raise focused object, if possible."
+msgstr "Nosta aktiivista kappaletta, jos mahdollista."
+
+msgid "Backward-circulate focus."
+msgstr "Kierrätä fokusta taaksepäin"
+
+msgid "Forward-circulate focus."
+msgstr "Kierrätä fokusta eteenpäin."
+
+msgid "Display the window list menu."
+msgstr "Näytä ikkunavalikko."
+
+msgid "Display the main menu."
+msgstr "Näytä päävalikko."
+
+#
+#
+msgid "Create a new workspace of chosen default type."
+msgstr "Luo uusi työpöytä ennalta asetettua tyyppiä."
+
+#
+msgid "Go to next/previous screen on multihead setup."
+msgstr "Mene seuraavalle/edelliselle näytölle usean näytön järjestelmässä."
+
+#
+msgid "Go to n:th screen on multihead setup."
+msgstr "Siirry näytölle n usean näytön järjestelmässä."
+
+#
+msgid "Clear all tags."
+msgstr "Poista kaikki merkinnät."
+
+msgid "Go to first region demanding attention or previously active one."
+msgstr ""
+"Mene ensimmäiseen huomiota vaativaan alueeseen, tai edelliseen aktiiviseen."
+
+#
+msgid "Switch to next/previous object within current screen."
+msgstr ""
+"Siirry seuraavaan/edelliseen tämänhetkisen näytön lomittamaan kappaleeseen."
+
+#
+msgid ""
+"Switch to n:th object (workspace, full screen client window) within current "
+"screen."
+msgstr ""
+"Siirry n:teen tämänhetkisen näytön lomittamaan kappaleeseen (työpöytä, "
+"kokoruudun asiakasikkuna)."
+
+msgid "List"
+msgstr "Lista"
+
+msgid "New"
+msgstr "Uusi"
+
+msgid "Dillo"
+msgstr ""
+
+msgid "Konqueror"
+msgstr ""
+
+msgid "Links"
+msgstr ""
+
+msgid "Opera"
+msgstr ""
+
+msgid "Rxvt"
+msgstr ""
+
+msgid "W3M"
+msgstr ""
+
+msgid "XTerm"
+msgstr ""
+
+#
+msgid "Workspaces"
+msgstr "Työpöydät"
+
+msgid "Programs"
+msgstr "Ohjelmat"
+
+msgid "Show the PWM manual page."
+msgstr "Näytä PWM:n ohjesivu."
+
+msgid "Toggle scratchpad."
+msgstr "Kytke suttausalue päälle/pois"
+
+msgid ""
+"\n"
+"%sClass: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
+msgstr ""
+"\n"
+"Luokka(class): %s\n"
+"Rooli(role): %s\n"
+"Instanssi(instance): %s\n"
+"XID: 0x%x"
+
+msgid "No entry '%s'"
+msgstr "Tuntematon valinta '%s'."
+
+msgid "%s:"
+msgstr ""
+
+msgid "Missing submenu "
+msgstr "Puuttuva alivalikko "
+
+msgid "Unknown menu %s."
+msgstr "Tuntematon valikko %s."
+
+msgid "Lua code:"
+msgstr "Lua-koodia:"
+
+msgid "Manual page (%s):"
+msgstr "Ohjesivu (%s):"
+
+msgid "SSH to:"
+msgstr "Avaa SSH-yhteys:"
+
+msgid "Failed to open ~/.ssh/config"
+msgstr "Tiedoston ~/.ssh/config avaaminen epäonnistui."
+
+msgid "Failed to open ~/.ssh/known_hosts"
+msgstr "Tiedostoa ~/.ssh/known_hosts avaaminen epäonnistui."
+
+msgid "Run:"
+msgstr "Suorita:"
+
+msgid "View file:"
+msgstr "Näytä tiedosto:"
+
+msgid "Edit file:"
+msgstr "Muokkaa tiedostoa:"
+
+msgid "Workspace name:"
+msgstr "Työpöydän nimi:"
+
+msgid "Frame name:"
+msgstr "Kehyksen nimi:"
+
+msgid "Restart Ion (y/n)?"
+msgstr "Uudelleenkäynnistä Ion (kyllä: y, ei: n)?"
+
+msgid "Exit Ion/Shutdown session (y/n)?"
+msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
+
+msgid "Go to or create workspace:"
+msgstr "Mene tai luo työpöytä:"
+
+msgid "Attach window:"
+msgstr "Liitä ikkuna:"
+
+msgid "Go to window:"
+msgstr "Mene ikkunaan:"
+
+msgid "New workspace layout (default):"
+msgstr "Uuden työpöydän sijoitelma (default):"
+
+msgid "Unknown error"
+msgstr "Tuntematon virhe"
+
+msgid "Unknown layout"
+msgstr "Tuntematon sijoittelu."
+
+msgid "Cannot attach: different root windows."
+msgstr "Ei voida liittää: eri juuri-ikkunat."
+
+msgid "Could not find client window %s."
+msgstr "Asiakasikkunaa %s ei löytynyt."
 
 msgid "Too much result data"
 msgstr "Liian suuri vastaus"
 
-msgid "Save look selection in %s?"
-msgstr "Talletaanko ulkonäköasetus tiedostoon %s?"
+msgid "Could not find %s"
+msgstr "Ei löydettyä %s:ää."
 
-msgid "Cannot save selection."
-msgstr "Ei voida tallettaa valintaa."
+msgid "Not a directory."
+msgstr "Ei hakemisto."
 
-msgid "Unable to append to non-table menu"
-msgstr "Ei voida lisätä valikkoon, koska sitä ei ole määritelty tauluna "
+msgid "Invalid command"
+msgstr "Virheellinen komento"
+
+msgid "Error in command string: "
+msgstr "Virhe komentojonossa:"
+
+msgid "Error compiling guard: %s"
+msgstr "Virhe vahdin käännössä. %s"
+
+msgid "Invalid guard %s."
+msgstr "Virheellinen vahti %s."
+
+msgid "Main menu:"
+msgstr "Päävalikko:"
+
+msgid "Context menu:"
+msgstr "Kontekstivalikko:"
+
+msgid "Floating frame"
+msgstr "Kelluva kehys"
+
+msgid "Tiled frame"
+msgstr "Laatoitettu kehys"
+
+msgid "Tiling"
+msgstr "Laatoitus"
+
+#
+msgid "Workspace"
+msgstr "Työpöytä"
+
+msgid "Screen"
+msgstr "Näyttö"
+
+msgid "Frame"
+msgstr "Kehys"
+
+msgid "Recursive table - unable to deepcopy"
+msgstr "Rekursiivinen taulu - ei voida syväkopioida."
 
 msgid ""
 "Making the following minimal emergency mappings:\n"
@@ -1092,475 +1435,137 @@ msgstr ""
 "  Mod1+C -> sulkeminen\n"
 "  Mod1+K P/N -> vaihto kehyksen sisällä\n"
 
-msgid "Recursive table - unable to deepcopy"
-msgstr "Rekursiivinen taulu - ei voida syväkopioida."
+msgid "Unable to append to non-table menu"
+msgstr "Ei voida lisätä valikkoon, koska sitä ei ole määritelty tauluna "
 
-msgid "Frame"
-msgstr "Kehys"
+msgid "Cannot save selection."
+msgstr "Ei voida tallettaa valintaa."
 
-msgid "Screen"
-msgstr "Näyttö"
+msgid "Save look selection in %s?"
+msgstr "Talletaanko ulkonäköasetus tiedostoon %s?"
 
-#
-msgid "Workspace"
-msgstr "Työpöytä"
+msgid "ion-statusd quit."
+msgstr "ion-statusd päätti suorituksen."
 
-msgid "Tiling"
-msgstr "Laatoitus"
+msgid "Errors starting ion-statusd:\n"
+msgstr "Ion-statusd:n käynnistysvirheet:\n"
 
-msgid "Tiled frame"
-msgstr "Laatoitettu kehys"
+msgid "Failed to start ion-statusd."
+msgstr "Ion-statusd:n käynnistys eopäonnistui."
 
-msgid "Floating frame"
-msgstr "Kelluva kehys"
+msgid "Screen not found."
+msgstr "Ruutua ei löytynyt."
 
-msgid "Context menu:"
-msgstr "Kontekstivalikko:"
+msgid "Screen already has an stdisp. Refusing to create a statusbar."
+msgstr "Ruudulla on jo tilanäyttö. Kieltäydytään luomasta tilariviä."
 
-msgid "Main menu:"
-msgstr "Päävalikko:"
+msgid "Failed to create statusbar."
+msgstr "Epäonnistuttiin tilarivin luonnissa"
 
-msgid "Invalid guard %s."
-msgstr "Virheellinen vahti %s."
+msgid "Split current frame vertically."
+msgstr "Halkaise tämänhetkinen kehys pystysuunnassa."
 
-msgid "Error compiling guard: %s"
-msgstr "Virhe vahdin käännössä. %s"
-
-msgid "Error in command string: "
-msgstr "Virhe komentojonossa:"
-
-msgid "Invalid command"
-msgstr "Virheellinen komento"
-
-msgid "Unknown layout"
-msgstr "Tuntematon sijoittelu."
-
-msgid "Not a directory."
-msgstr "Ei hakemisto."
-
-msgid "Could not find client window %s."
-msgstr "Asiakasikkunaa %s ei löytynyt."
-
-msgid "Cannot attach: different root windows."
-msgstr "Ei voida liittää: eri juuri-ikkunat."
-
-msgid "Unknown error"
-msgstr "Tuntematon virhe"
-
-msgid "New workspace layout (default):"
-msgstr "Uuden työpöydän sijoitelma (default):"
-
-msgid "Go to window:"
-msgstr "Mene ikkunaan:"
-
-msgid "Attach window:"
-msgstr "Liitä ikkuna:"
-
-msgid "Go to or create workspace:"
-msgstr "Mene tai luo työpöytä:"
-
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
-
-msgid "Restart Ion (y/n)?"
-msgstr "Uudelleenkäynnistä Ion (kyllä: y, ei: n)?"
-
-msgid "Frame name:"
-msgstr "Kehyksen nimi:"
-
-msgid "Workspace name:"
-msgstr "Työpöydän nimi:"
-
-msgid "Edit file:"
-msgstr "Muokkaa tiedostoa:"
-
-msgid "View file:"
-msgstr "Näytä tiedosto:"
-
-msgid "Run:"
-msgstr "Suorita:"
-
-msgid "Failed to open ~/.ssh/known_hosts"
-msgstr "Tiedostoa ~/.ssh/known_hosts avaaminen epäonnistui."
-
-msgid "Failed to open ~/.ssh/config"
-msgstr "Tiedoston ~/.ssh/config avaaminen epäonnistui."
-
-msgid "SSH to:"
-msgstr "Avaa SSH-yhteys:"
-
-msgid "Manual page (%s):"
-msgstr "Ohjesivu (%s):"
-
-msgid "Lua code:"
-msgstr "Lua-koodia:"
-
-msgid "Unknown menu %s."
-msgstr "Tuntematon valikko %s."
-
-msgid "Missing submenu "
-msgstr "Puuttuva alivalikko "
-
-msgid "%s:"
+msgid "Go to frame above/below/right/left of current frame."
 msgstr ""
+"Siirry tämänhetkisen kehyksen yllä/alla/vasemmalle/oikealla olevaan "
+"kehykseen."
 
-msgid "No entry '%s'"
-msgstr "Tuntematon valinta '%s'."
+msgid "Split current frame horizontally."
+msgstr "Halkaise tämänhetkinen kehys vaakasuunnassa."
 
-msgid ""
-"\n"
-"%sClass: %s\n"
-"%sRole: %s\n"
-"%sInstance: %s\n"
-"%sXID: 0x%x"
-msgstr ""
-"\n"
-"Luokka(class): %s\n"
-"Rooli(role): %s\n"
-"Instanssi(instance): %s\n"
-"XID: 0x%x"
+msgid "Destroy current frame."
+msgstr "Tuhoa tämänhetkinen kehys."
 
-msgid "Toggle scratchpad."
-msgstr "Kytke suttausalue päälle/pois"
-
-msgid "Programs"
-msgstr "Ohjelmat"
-
-msgid "Lock screen"
-msgstr "Lukitse näyttö"
-
-msgid "Help"
-msgstr "Ohjeet"
+msgid "Tile frame, if no tiling exists on the workspace"
+msgstr "Laatoita kehys, jos työpöydällä ei ole kehystä"
 
 #
-msgid "Workspaces"
-msgstr "Työpöydät"
-
-msgid "Styles"
-msgstr "Tyylit"
-
-msgid "Session"
-msgstr "Istunto"
-
-msgid "XTerm"
-msgstr ""
-
-msgid "W3M"
-msgstr ""
-
-msgid "Rxvt"
-msgstr ""
-
-msgid "Opera"
-msgstr ""
-
-msgid "Links"
-msgstr ""
-
-msgid "Konqueror"
-msgstr ""
-
-msgid "Dillo"
-msgstr ""
-
-#
-msgid "Run..."
-msgstr "Suorita..."
-
-msgid "New"
-msgstr "Uusi"
-
-msgid "Close"
-msgstr "Sulje"
-
-msgid "List"
-msgstr "Lista"
-
-#
-msgid ""
-"Switch to n:th object (workspace, full screen client window) within current "
-"screen."
-msgstr ""
-"Siirry n:teen tämänhetkisen näytön lomittamaan kappaleeseen "
-"(työpöytä, kokoruudun asiakasikkuna)."
-
-#
-msgid "Switch to next/previous object within current screen."
-msgstr "Siirry seuraavaan/edelliseen tämänhetkisen näytön lomittamaan "
-"kappaleeseen."
-
-msgid "Go to first region demanding attention or previously active one."
-msgstr ""
-"Mene ensimmäiseen huomiota vaativaan alueeseen, tai edelliseen aktiiviseen."
-
-#
-msgid "Clear all tags."
-msgstr "Poista kaikki merkinnät."
-
-#
-msgid "Go to n:th screen on multihead setup."
-msgstr "Siirry näytölle n usean näytön järjestelmässä."
-
-#
-msgid "Go to next/previous screen on multihead setup."
-msgstr "Mene seuraavalle/edelliselle näytölle usean näytön järjestelmässä."
+msgid "Destroy frame"
+msgstr "Tuhoa kehys"
 
 #
 #
-msgid "Create a new workspace of chosen default type."
-msgstr "Luo uusi työpöytä ennalta asetettua tyyppiä."
-
-msgid "Display the main menu."
-msgstr "Näytä päävalikko."
-
-msgid "Display the window list menu."
-msgstr "Näytä ikkunavalikko."
-
-msgid "Forward-circulate focus."
-msgstr "Kierrätä fokusta eteenpäin."
-
-msgid "Backward-circulate focus."
-msgstr "Kierrätä fokusta taaksepäin"
-
-msgid "Raise focused object, if possible."
-msgstr "Nosta aktiivista kappaletta, jos mahdollista."
+msgid "Split vertically"
+msgstr "Jaa pystysuunnassa"
 
 #
-msgid ""
-"Nudge the client window. This might help with some programs' resizing "
-"problems."
-msgstr ""
-"Tönäise aktiivista asiakasikkunaa. Tämä saattaa auttaa joidenkin ohjelmien "
-"koko-ongelmien kanssa."
+#
+msgid "Split horizontally"
+msgstr "Jaa vaakasuunnassa"
 
 #
-msgid "Kill client owning the client window."
-msgstr "Tapa aktiivisen asiakasikkunan omistava ohjelma."
+msgid "Flip"
+msgstr "Peilaa"
 
 #
-msgid ""
-"Send next key press to the client window. Some programs may not allow this "
-"by default."
-msgstr ""
-"Lähetä seuraava näppäinpainallus aktiiviselle asiakasikkunalle. Kaikki "
-"ohjelmat eivät välttämättä salli tätä oletuksena."
+msgid "Transpose"
+msgstr "Käännä"
 
-msgid "Toggle client window group full-screen mode"
-msgstr "Muuta asiakasikkunaryhmän kokoruudun tilaa"
+msgid "Untile"
+msgstr "Hajoita laatoitus"
 
-msgid "Close current object."
-msgstr "Sulje aktiivinen kappale."
+msgid "Float split"
+msgstr "Kelluta"
 
-msgid "Detach (float) or reattach an object to its previous location."
-msgstr "Irroita (kelluta) tai uudelleenliitä kappale sen edelliseen sijaintiin."
+msgid "At left"
+msgstr "Vasemmalla"
 
-msgid "Toggle tag of current object."
-msgstr "Merkitse aktiivinen kappale."
+msgid "At right"
+msgstr "Oikealla"
 
-msgid "Query for manual page to be displayed."
-msgstr "Kysy ohjesivua näytettäväksi."
+msgid "Above"
+msgstr "Yläpuolella"
 
-msgid "Show the Ion manual page."
-msgstr "Näytä Ionin ohjesivu."
+msgid "Below"
+msgstr "Alapuolella"
 
 #
-msgid "Run a terminal emulator."
-msgstr "Käynnistä pääte-emulaattori."
+msgid "At root"
+msgstr "Juuressa"
 
-msgid "Query for command line to execute."
-msgstr "Kysy komentoriviä suoritettavaksi."
+msgid "New tiling"
+msgstr "Uusi laatoitus"
 
-msgid "Query for Lua code to execute."
-msgstr "Kysy Lua-koodia ajettavaksi."
-
-msgid "Query for host to connect to with SSH."
-msgstr "Ota SSH-yhteys kyseltävään koneeseen."
-
-msgid "Query for file to edit."
-msgstr "Kysy tiedostoa muokattavaksi."
-
-msgid "Query for file to view."
-msgstr "Kysy tiedostoa näytettäväksi."
-
-msgid "Query for workspace to go to or create a new one."
-msgstr "Kysy työpöytää jolle siirtyä, tai luo uusi."
+msgid "Close the menu."
+msgstr "Sulje valikko."
 
 #
-msgid "Query for a client window to go to."
-msgstr "Kysy asiakasikkunaa, johon siirtyä."
-
-msgid "Display context menu."
-msgstr "Näytä kontekstivalikko."
-
-msgid "Maximize the frame horizontally/vertically."
-msgstr "Maksimoi kehys vaaka/pystysuunnassa."
-
-msgid "Begin move/resize mode."
-msgstr "Aloita siirto ja koonmuutostila."
-
-msgid "Switch the frame to display the object indicated by the tab."
-msgstr "Vaihda kehys näyttämään välilehden ilmoittama kappale."
-
-msgid "Resize the frame."
-msgstr "Muuta kehyksen kokoa."
-
-msgid "Move the frame."
-msgstr "Siirrä kehystä."
-
-msgid "Move objects between frames by dragging and dropping the tab."
-msgstr "Siirrä kappaletta kehysten välillä raahaamalla ja pudottamalla "
-"välilehti."
-
-msgid "Tag current object within the frame."
-msgstr "Merkitse kehyksen tällä hetkellä näyttämä kappale."
-
 #
-msgid "Query for a client window to attach."
-msgstr "Kysy liitettävää asiakasikkunaa."
+msgid "Activate current menu entry."
+msgstr "Suorita valinta."
 
-msgid "Switch to n:th object within the frame."
-msgstr "Siirry n:teen kehyksen jakavaan kappaleeseen."
+msgid "Select next/previous menu entry."
+msgstr "Siirry seuraavaan/edelliseen valintaan."
 
-msgid "Switch to next/previous object within the frame."
-msgstr "Siirry seuraavaan/edelliseen kehyksen jakavaan kappaleeseen."
+msgid "Clear the menu's typeahead find buffer."
+msgstr "Tyhjää valikon hakupuskuri."
 
-msgid "Move current object within the frame left/right."
-msgstr ""
-"Siirrä kehyksessä tällä hetkellä näytettävää kappaletta vasemmalle/oikealle."
+msgid "Toggle floating dock."
+msgstr "Näytä/piiloita kelluva laituri (dock)."
 
-msgid "Attach tagged objects to this frame."
-msgstr "Liitä merkityt kappaleet tähän kehykseen."
+msgid "Pos-TL"
+msgstr "Paikka: ylävasen"
 
-msgid "Toggle shade mode"
-msgstr "Kytke litistys päälle/pois."
+msgid "Pos-TR"
+msgstr "Paikka: yläoikea"
 
-#
-msgid "Raise the frame."
-msgstr "Nosta kehys."
+msgid "Pos-BL"
+msgstr "Paikka: alavasen"
 
-msgid "Lower the frame."
-msgstr "Alenna kehystä."
+msgid "Pos-BR"
+msgstr "Paikka: alaoikea"
 
-msgid "Cancel the resize mode."
-msgstr "Peruuta tilasta."
+msgid "Grow-L"
+msgstr "Kasvu: vasemmalle"
 
-msgid "End the resize mode."
-msgstr "Siirry tilasta pois."
+msgid "Grow-R"
+msgstr "Kasvu: oikealle"
 
-#
-msgid "Grow in specified direction."
-msgstr "Kasvata vastaavaan suuntaan."
+msgid "Grow-U"
+msgstr "Kasvu: ylös"
 
-msgid "Shrink in specified direction."
-msgstr "Kutista vastaavaan suuntaan."
-
-#
-msgid "Move in specified direction."
-msgstr "Liiku vastaavaan suuntaan."
-
-msgid "Terminal"
-msgstr "Pääteohjelma"
-
-msgid "About Ion"
-msgstr "Tietoja Ionista"
-
-msgid "Save"
-msgstr "Talleta"
-
-msgid "Restart"
-msgstr "Uudelleenkäynnistä"
-
-msgid "Restart TWM"
-msgstr "Käynnistä TWM"
-
-msgid "Exit"
-msgstr "Poistu"
-
-msgid "Attach tagged"
-msgstr "Liitä merkityt"
-
-msgid "Clear tags"
-msgstr "Poista merkinnät"
-
-msgid "Window info"
-msgstr "Ikkunan tiedot"
-
-msgid "Toggle tag"
-msgstr "Muuta merkintää"
-
-msgid "De/reattach"
-msgstr "Irroita/liitä"
-
-msgid "Rename"
-msgstr "Uudelleennimeä"
-
-msgid "Kill"
-msgstr "Tapa"
-
-msgid "Move one character forward/backward."
-msgstr "Siirry yksi merkki eteen/taakse."
-
-msgid "Go to end/beginning."
-msgstr "Mene rivin alkuun/loppuun."
-
-msgid "Skip one word forward/backward."
-msgstr "Ohita yksi sana eteen/taaksepäin"
-
-msgid "Delete next character."
-msgstr "Poista seuraava merkki."
-
-msgid "Delete previous character."
-msgstr "Tuhoa edellinen merkki."
-
-msgid "Delete one word forward/backward."
-msgstr "Tuhoa yksi sana eteen/taakse."
-
-msgid "Delete to end of line."
-msgstr "Tuhoa merkit rivin loppuun saakka."
-
-msgid "Delete the whole line."
-msgstr "Tuhoa koko rivi."
-
-msgid "Transpose characters."
-msgstr "Transponoi merkit."
-
-#
-msgid "Select next/previous (matching) history entry."
-msgstr "Näytä seuraava/edellinen vastaus muistista."
-
-msgid "Paste from the clipboard."
-msgstr "Liimaa teksti leikelaudalta."
-
-#
-msgid "Set mark/begin selection."
-msgstr "Aloita tekstin valinta."
-
-#
-msgid "Cut selection."
-msgstr "Leikkaa valittu teksti."
-
-#
-msgid "Copy selection."
-msgstr "Kopioi valittu teksti."
-
-#
-msgid "Clear mark/cancel selection."
-msgstr "Lopeta tekstin valinta."
-
-msgid "Try to complete the entered text or cycle through completions."
-msgstr "Yritä täydentää syötetty teksti tai selaa täydennyksiä."
-
-msgid "Complete from history"
-msgstr "Täydennä historiasta"
-
-msgid "Close the query and execute bound action."
-msgstr "Sulje kysely ja suorita sidottu toiminta."
-
-msgid "Close the query/message box, not executing bound actions."
-msgstr "Sulje kysely/viesti suorittamatta sidottuja toimintoja."
-
-msgid "Scroll the message or completions up/down."
-msgstr "Vieritä viestiä tai täydennyksiä ylös/alas."
+msgid "Grow-D"
+msgstr "Kasvu: alas"
 
 msgid "press"
 msgstr "painallus"
@@ -1579,6 +1584,9 @@ msgstr ""
 
 msgid "%s %s at %s"
 msgstr "%s %s osassa %s"
+
+#~ msgid "Tag current object within the frame."
+#~ msgstr "Merkitse kehyksen tällä hetkellä näyttämä kappale."
 
 #~ msgid "Xinerama sanity check failed; overlapping screens detected."
 #~ msgstr "Xinerama-tiedon järkevyystarkastus havaitsi päällekkäisiä ruutuja."
@@ -1728,8 +1736,8 @@ msgstr "%s %s osassa %s"
 #~ msgid "Restart PWM"
 #~ msgstr "Käynnistä PWM"
 
-#~ msgid "Refresh list"
-#~ msgstr "Virkistä lista"
+msgid "Refresh list"
+msgstr "Virkistä lista"
 
 #~ msgid "Unable to create workspace: no screen."
 #~ msgstr "Ei voida luoda työpöytää: ei ruutua."
