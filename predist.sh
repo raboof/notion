@@ -64,13 +64,6 @@ mkdist Makefile system.mk
 mv build/libs.mk.dist build/libs.mk
 
 ##
-## Autoconf
-##
-
-#autoconf
-#rm -rf autom4te.cache
-
-##
 ## Scripts
 ##
 
