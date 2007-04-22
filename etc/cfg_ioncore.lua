@@ -222,9 +222,6 @@ defbindings("WFrame", {
 -- Frames for transient windows ignore this bindmap
 
 defbindings("WFrame.toplevel", {
-    bdoc("Tag current object within the frame."),
-    kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
-    
     bdoc("Query for a client window to attach."),
     kpress(META.."A", "mod_query.query_attachclient(_)"),
     
