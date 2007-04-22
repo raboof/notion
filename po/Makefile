@@ -89,5 +89,3 @@ update_fi: pot
 update_cs: pot
 	$(MSGMERGE) -U cs.po $(POTFILE)
 
-update_ru: pot
-	$(MSGMERGE) -U ru.po $(POTFILE)
