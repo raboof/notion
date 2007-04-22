@@ -13,7 +13,7 @@ MSGMERGE = msgmerge
 MSGCAT = msgcat
 LXGETTEXT = lua-xgettext
 
-TRANSLATIONS := fi cs de ru
+TRANSLATIONS := fi cs
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 PO_FILES := $(patsubst %,%.po, $(TRANSLATIONS))
 
