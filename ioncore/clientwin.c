@@ -294,11 +294,11 @@ static void set_sane_gravity(Window win)
 
 
 static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
-                           XWindowAttributes *attr, int initflags)
+                           XWindowAttributes *attr)
 {
     WFitParams fp;
 
-    cwin->flags=initflags;
+    cwin->flags=0;
     cwin->win=win;
     cwin->state=WithdrawnState;
     
@@ -352,9 +352,9 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
 
 static WClientWin *create_clientwin(WWindow *par, Window win,
-                                    XWindowAttributes *attr, int initflags)
+                                    XWindowAttributes *attr)
 {
-    CREATEOBJ_IMPL(WClientWin, clientwin, (p, par, win, attr, initflags));
+    CREATEOBJ_IMPL(WClientWin, clientwin, (p, par, win, attr));
 }
 
 
@@ -447,7 +447,6 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
     int init_state=NormalState;
     WManageParams param=MANAGEPARAMS_INIT;
     void *mrshpm[2];
-    int initflags=0;
 
     param.dockapp=FALSE;
     
@@ -480,13 +479,31 @@ again:
         
         xwindow_unmanaged_selectinput(win, 0);
         
-        win=hints->icon_window;
+        /* Copy WM_CLASS as _ION_DOCKAPP_HACK */
+        {
+            char **p=NULL;
+            int n=0;
+            
+            p=xwindow_get_text_property(win, XA_WM_CLASS, &n);
+            
+            if(p!=NULL){
+                xwindow_set_text_property(hints->icon_window, 
+                                          ioncore_g.atom_dockapp_hack,
+                                          (const char **)p, n);
+                XFreeStringList(p);
+            }else{
+                const char *pdummy[2]={"unknowndockapp", "UnknownDockapp"};
+                xwindow_set_text_property(hints->icon_window, 
+                                          ioncore_g.atom_dockapp_hack,
+                                          pdummy, 2);
+            }
+        }
         
         /* It is a dockapp, do everything again from the beginning, now
          * with the icon window.
          */
+        win=hints->icon_window;
         param.dockapp=TRUE;
-        initflags|=CLIENTWIN_IS_DOCKAPP_HACK;
         goto again;
     }
     
@@ -520,7 +537,7 @@ again:
     }
 
     /* Allocate and initialize */
-    cwin=create_clientwin((WWindow*)rootwin, win, &attr, initflags);
+    cwin=create_clientwin((WWindow*)rootwin, win, &attr);
     
     if(cwin==NULL){
         warn_err();
@@ -1045,8 +1062,15 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
     int n=0, n2=0, n3=0, tmp=0;
     Window tforwin=None;
     ExtlTab tab;
+    bool dockapp_hack=FALSE;
     
     p=xwindow_get_text_property(cwin->win, XA_WM_CLASS, &n);
+    
+    if(n==0){
+        p=xwindow_get_text_property(cwin->win, ioncore_g.atom_dockapp_hack, &n);
+        dockapp_hack=(n>0);
+    }
+    
     wrole=xwindow_get_string_property(cwin->win, ioncore_g.atom_wm_window_role, &n2);
     
     tab=extl_create_table();
@@ -1062,7 +1086,7 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
         extl_table_sets_b(tab, "is_transient", TRUE);
     }
     
-    if(cwin->flags&CLIENTWIN_IS_DOCKAPP_HACK)
+    if(dockapp_hack)
         extl_table_sets_b(tab, "is_dockapp", TRUE);
     
     if(p!=NULL)
@@ -1245,9 +1269,6 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
 
     extl_table_sets_d(tab, "windowid", (double)(cwin->win));
     
-    if(cwin->flags&CLIENTWIN_IS_DOCKAPP_HACK)
-        extl_table_sets_b(tab, "is_dockapp_hack", TRUE);
-    
     if(last_checkcode!=0){
         chkc=last_checkcode++;
         xwindow_set_integer_property(cwin->win, ioncore_g.atom_checkcode, 
@@ -1273,7 +1294,6 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     XWindowAttributes attr;
     WRectangle rg;
     bool got_chkc=FALSE;
-    int initflags=0;
     
     if(!extl_table_gets_d(tab, "windowid", &wind) ||
        !extl_table_gets_i(tab, "checkcode", &chkc)){
@@ -1307,11 +1327,8 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         warn(TR("Saved client window does not want to be managed."));
         return NULL;
     }
-
-    if(extl_table_is_bool_set(tab, "is_dockapp_hack"))
-        initflags|=CLIENTWIN_IS_DOCKAPP_HACK;
     
-    cwin=create_clientwin(par, win, &attr, initflags);
+    cwin=create_clientwin(par, win, &attr);
     
     if(cwin==NULL)
         return FALSE;

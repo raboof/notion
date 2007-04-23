@@ -67,7 +67,8 @@ DECLSTRUCT(WGlobal){
     Atom atom_checkcode;
     Atom atom_selection;
     Atom atom_mwm_hints;
-
+    Atom atom_dockapp_hack;
+    
     WRootWin *rootwins;
     WScreen *screens;
     WRegion *focus_next;
