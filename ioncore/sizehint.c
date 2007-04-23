@@ -70,11 +70,11 @@ static void correct_aspect(int max_w, int max_h, const WSizeHints *hints,
 void sizehints_correct(const WSizeHints *hints, int *wp, int *hp, 
                        bool min, bool override_no_constrain)
 {
-    int w=*wp, wa;
-    int h=*hp, ha;
+    int w=*wp, tw, bw=(hints->base_set ? hints->base_width : 0);
+    int h=*hp, th, bh=(hints->base_set ? hints->base_height : 0);
     int bs=0;
     
-    if(min){
+    if(min && hints->min_set){
         w=maxof(w, hints->min_width);
         h=maxof(h, hints->min_height);
     }
@@ -84,29 +84,26 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
         *hp=h;
         return;
     }
-
-    wa=w-hints->base_width;
-    ha=h-hints->base_height;
     
-    if(wa>=0 && ha>=0){
-        correct_aspect(wa, ha, hints, &wa, &ha);
-        w=wa+hints->base_width;
-        h=ha+hints->base_height;
+    tw=w-bw;
+    th=h-bh;
+    
+    if(tw>=0 && th>=0)
+        correct_aspect(tw, th, hints, &tw, &th);
+    
+    if(hints->inc_set){
+        if(tw>0)
+            tw=(tw/hints->width_inc)*hints->width_inc;
+        if(th>0)
+            th=(th/hints->height_inc)*hints->height_inc;
     }
+    
+    w=tw+bw;
+    h=th+bh;
     
     if(hints->max_set){
         w=minof(w, hints->max_width);
         h=minof(h, hints->max_height);
-    }
-
-    if(hints->inc_set){
-        /* base size should be set to 0 if none given by user program */
-        bs=(hints->base_set ? hints->base_width : 0);
-        if(w>bs)
-            w=((w-bs)/hints->width_inc)*hints->width_inc+bs;
-        bs=(hints->base_set ? hints->base_height : 0);
-        if(h>bs)
-            h=((h-bs)/hints->height_inc)*hints->height_inc+bs;
     }
     
     *wp=w;
@@ -132,22 +129,17 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
         }
     }
 
-    if(hints->min_width<0)
-        hints->min_width=0;
-    if(hints->min_height<0)
-        hints->min_height=0;
+    hints->min_width=maxof(hints->min_width, 0);
+    hints->min_height=maxof(hints->min_height, 0);
 
     if(!(hints->flags&PBaseSize) || hints->base_width<0)
-        hints->base_width=0;
+        hints->base_width=hints->min_width;
     if(!(hints->flags&PBaseSize) || hints->base_height<0)
-        hints->base_height=0;
-
+        hints->base_height=hints->min_height;
     
     if(hints->flags&PMaxSize){
-        if(hints->max_width<hints->min_width)
-            hints->max_width=hints->min_width;
-        if(hints->max_height<hints->min_height)
-            hints->max_height=hints->min_height;
+        hints->max_width=maxof(hints->max_width, hints->min_width);
+        hints->max_height=maxof(hints->max_height, hints->min_height);
     }
     
     hints->flags|=(PBaseSize|PMinSize);
