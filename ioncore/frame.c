@@ -847,12 +847,15 @@ bool frame_set_grattr(WFrame *frame, GrAttr a, int sp)
     bool set=gr_stylespec_isset(&frame->baseattr, a);
     bool nset=libtu_do_setparam(sp, set);
     
-    if(set && !nset)
-        gr_stylespec_set(&frame->baseattr, a);
-    else if(!set && set)
-        gr_stylespec_unset(&frame->baseattr, a);
+    if(XOR(set, nset)){
+        if(nset)
+            gr_stylespec_set(&frame->baseattr, a);
+        else
+            gr_stylespec_unset(&frame->baseattr, a);
+        window_draw((WWindow*)frame, TRUE);
+    }
     
-    return set;
+    return nset;
 }
 
 

@@ -298,6 +298,9 @@ static void copy_masked(DEBrush *brush, Drawable src, Drawable dst,
 
 
 
+#define ISSET(S, A) ((S)!=NULL && gr_stylespec_isset(S, A))
+
+
 GR_DEFATTR(dragged);
 GR_DEFATTR(tagged);
 GR_DEFATTR(submenu);
@@ -342,9 +345,7 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
     ensure_attrs();
     
     if(pre){
-        if(!gr_stylespec_isset(a1, GR_ATTR(dragged)) &&
-           !gr_stylespec_isset(a2, GR_ATTR(dragged))){
-           
+        if(ISSET(a2, GR_ATTR(dragged)) || ISSET(a1, GR_ATTR(dragged))){
             tmp=d->normal_gc;
             d->normal_gc=d->stipple_gc;
             d->stipple_gc=tmp;
@@ -354,19 +355,9 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
         return;
     }
     
-    if(gr_stylespec_isset(a1, GR_ATTR(tagged)) ||
-       gr_stylespec_isset(a2, GR_ATTR(tagged))){
-       
-        XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
-            
-        copy_masked(brush, d->tag_pixmap, brush->win, 0, 0,
-                    d->tag_pixmap_w, d->tag_pixmap_h,
-                    g->x+g->w-bdw->right-d->tag_pixmap_w, 
-                    g->y+bdw->top);
-    }
     
-    if((gr_stylespec_isset(a1, GR_ATTR(numbered)) ||
-        gr_stylespec_isset(a2, GR_ATTR(numbered))) && index>=0){
+    if((ISSET(a1, GR_ATTR(numbered)) || ISSET(a2, GR_ATTR(numbered))) 
+       && index>=0){
         
         DEColourGroup *cg;
         GrStyleSpec tmp;
@@ -380,22 +371,32 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
         gr_stylespec_unalloc(&tmp);
 
         if(cg!=NULL){
-            int ty, tx, l;
             char *s=NULL;
             
             libtu_asprintf(&s, "[%d]", index+1);
             
             if(s!=NULL){
-                l=strlen(s);
-                ty=get_ty(g, bdw, fnte);
-                tx=g->x+g->w-bdw->right-debrush_get_text_width(brush, s, l);
-                if(tx>=(int)bdw->left)
+                int l=strlen(s);
+                if(debrush_get_text_width(brush, s, l) < 
+                   g->w-bdw->right-bdw->left){
+                    int ty=get_ty(g, bdw, fnte);
+                    int tx=g->x+bdw->left;
                     debrush_do_draw_string(brush, tx, ty, s, l, TRUE, cg);
+                }
                 free(s);
             }
         }
     }
-
+    
+    if(ISSET(a2, GR_ATTR(tagged)) || ISSET(a1, GR_ATTR(tagged))){
+        XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
+            
+        copy_masked(brush, d->tag_pixmap, brush->win, 0, 0,
+                    d->tag_pixmap_w, d->tag_pixmap_h,
+                    g->x+g->w-bdw->right-d->tag_pixmap_w, 
+                    g->y+bdw->top);
+    }
+    
     if(swapped){
         tmp=d->normal_gc;
         d->normal_gc=d->stipple_gc;
@@ -425,9 +426,7 @@ void debrush_menuentry_extras(DEBrush *brush,
     
     ensure_attrs();
     
-    if(gr_stylespec_isset(a1, GR_ATTR(submenu)) ||
-       gr_stylespec_isset(a2, GR_ATTR(submenu))){
-
+    if(ISSET(a2, GR_ATTR(submenu)) || ISSET(a1, GR_ATTR(submenu))){
         ty=get_ty(g, bdw, fnte);
         tx=g->x+g->w-bdw->right;
 
