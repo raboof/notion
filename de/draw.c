@@ -15,6 +15,7 @@
 #include <ioncore/global.h>
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
+#include <ioncore/gr-util.h>
 #include "brush.h"
 #include "font.h"
 #include "private.h"
@@ -296,9 +297,20 @@ static void copy_masked(DEBrush *brush, Drawable src, Drawable dst,
 }
 
 
-static GrStyleSpec dragged_spec=GR_STYLESPEC_INIT;
-static GrStyleSpec tagged_spec=GR_STYLESPEC_INIT;
-static GrStyleSpec submenu_spec=GR_STYLESPEC_INIT;
+
+GR_DEFATTR(dragged);
+GR_DEFATTR(tagged);
+GR_DEFATTR(submenu);
+
+
+static void ensure_attrs()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(dragged);
+    GR_ALLOCATTR(tagged);
+    GR_ALLOCATTR(submenu);
+    GR_ALLOCATTR_END;
+}
 
 
 void debrush_tab_extras(DEBrush *brush, const WRectangle *g, 
@@ -315,22 +327,24 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
      */
     static bool swapped=FALSE;
 
-    ENSURE_INITSPEC(dragged_spec, "dragged");
-    ENSURE_INITSPEC(tagged_spec, "tagged");
+    ensure_attrs();
     
     if(pre){
-        if(!MATCHES2(dragged_spec, a1, a2))
-            return;
-        
-        tmp=d->normal_gc;
-        d->normal_gc=d->stipple_gc;
-        d->stipple_gc=tmp;
-        swapped=TRUE;
-        XClearArea(ioncore_g.dpy, brush->win, g->x, g->y, g->w, g->h, False);
+        if(!gr_stylespec_isset(a1, GR_ATTR(dragged)) &&
+           !gr_stylespec_isset(a2, GR_ATTR(dragged))){
+           
+            tmp=d->normal_gc;
+            d->normal_gc=d->stipple_gc;
+            d->stipple_gc=tmp;
+            swapped=TRUE;
+            XClearArea(ioncore_g.dpy, brush->win, g->x, g->y, g->w, g->h, False);
+        }
         return;
     }
     
-    if(MATCHES2(tagged_spec, a1, a2)){
+    if(gr_stylespec_isset(a1, GR_ATTR(tagged)) ||
+       gr_stylespec_isset(a2, GR_ATTR(tagged))){
+       
         XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
             
         copy_masked(brush, d->tag_pixmap, brush->win, 0, 0,
@@ -366,17 +380,18 @@ void debrush_menuentry_extras(DEBrush *brush,
     if(pre)
         return;
     
-    ENSURE_INITSPEC(submenu_spec, "submenu");
+    ensure_attrs();
     
-    if(!MATCHES2(submenu_spec, a1, a2))
-        return;
-        
-    ty=(g->y+bdw->top+fnte->baseline
-        +(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
-    tx=g->x+g->w-bdw->right;
+    if(gr_stylespec_isset(a1, GR_ATTR(submenu)) ||
+       gr_stylespec_isset(a2, GR_ATTR(submenu))){
 
-    debrush_do_draw_string(brush, tx, ty, DE_SUB_IND, DE_SUB_IND_LEN, 
-                           FALSE, cg);
+        ty=(g->y+bdw->top+fnte->baseline
+            +(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
+        tx=g->x+g->w-bdw->right;
+
+        debrush_do_draw_string(brush, tx, ty, DE_SUB_IND, DE_SUB_IND_LEN, 
+                               FALSE, cg);
+    }
 }
 
 
