@@ -110,6 +110,7 @@ extern uint gr_stylespec_score2(const GrStyleSpec *spec, const GrStyleSpec *attr
 
 extern void gr_stylespec_init(GrStyleSpec *spec);
 extern bool gr_stylespec_set(GrStyleSpec *spec, GrAttr a);
+extern bool gr_stylespec_isset(GrStyleSpec *spec, GrAttr a);
 extern void gr_stylespec_unset(GrStyleSpec *spec, GrAttr a);
 extern bool gr_stylespec_add(GrStyleSpec *spec, GrAttr a, uint score);
 extern bool gr_stylespec_append(GrStyleSpec *dst, const GrStyleSpec *src);

@@ -315,6 +315,15 @@ static bool gr_stylespec_find_(GrStyleSpec *spec, GrAttr a, int *idx_ge)
     return found;
 }
 
+
+bool gr_stylespec_isset(GrStyleSpec *spec, GrAttr a)
+{
+    int idx_ge;
+    
+    return gr_stylespec_find_(spec, a, &idx_ge);
+}
+
+
 bool gr_stylespec_add(GrStyleSpec *spec, GrAttr a, uint score)
 {
     static const uint sz=sizeof(GrAttrScore);
