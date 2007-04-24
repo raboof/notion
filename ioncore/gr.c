@@ -299,7 +299,7 @@ void gr_stylespec_init(GrStyleSpec *spec)
 }
 
 
-static bool gr_stylespec_find_(GrStyleSpec *spec, GrAttr a, int *idx_ge)
+static bool gr_stylespec_find_(const GrStyleSpec *spec, GrAttr a, int *idx_ge)
 {
     bool found=FALSE;
     uint i;
@@ -316,7 +316,7 @@ static bool gr_stylespec_find_(GrStyleSpec *spec, GrAttr a, int *idx_ge)
 }
 
 
-bool gr_stylespec_isset(GrStyleSpec *spec, GrAttr a)
+bool gr_stylespec_isset(const GrStyleSpec *spec, GrAttr a)
 {
     int idx_ge;
     
