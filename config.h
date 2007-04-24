@@ -21,7 +21,6 @@
 
 #define CF_MAX_MOVERES_STR_SIZE 32
 
-#define CF_TAB_TEXT_ALIGN ALIGN_CENTER
 #define CF_RESIZE_DELAY 1500
 
 #define CF_XMESSAGE "xmessage -file "
