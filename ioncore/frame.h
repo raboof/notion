@@ -68,6 +68,7 @@ DECLCLASS(WFrame){
     
     GrBrush *brush;
     GrBrush *bar_brush;
+    GrStyleSpec baseattr;
     GrTransparency tr_mode;
     GrTextElem *titles;
     int titles_n;

@@ -85,6 +85,8 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->tab_min_w=0;
     frame->bar_max_width_q=1.0;
     
+    gr_stylespec_init(&frame->baseattr);
+    
     if(!mplex_init((WMPlex*)frame, parent, fp))
         return FALSE;
     
@@ -117,6 +119,7 @@ void frame_deinit(WFrame *frame)
 {
     frame_free_titles(frame);
     frame_release_brushes(frame);
+    gr_stylespec_unalloc(&frame->baseattr);
     mplex_deinit((WMPlex*)frame);
 }
 
@@ -511,19 +514,7 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
 /*{{{ Focus  */
 
 
-void frame_inactivated(WFrame *frame)
-{
-    window_draw((WWindow*)frame, FALSE);
-}
-
-
-void frame_activated(WFrame *frame)
-{
-    window_draw((WWindow*)frame, FALSE);
-}
-
-
-void frame_quasiactivation(WFrame *frame, WRegion *reg, bool act)
+static void frame_quasiactivation(WFrame *frame, WRegion *reg, bool act)
 {
     bool was, is;
     
@@ -534,8 +525,8 @@ void frame_quasiactivation(WFrame *frame, WRegion *reg, bool act)
                                        
     is=(frame->quasiactive_count>0);
     
-    if(was!=is && !REGION_IS_ACTIVE(frame))
-        window_draw((WWindow*)frame, FALSE);
+    if(was!=is)
+        frame_quasiactivity_change(frame);
 }
 
 

@@ -39,4 +39,8 @@ extern void frame_update_attr(WFrame *frame, int i, WRegion *reg);
 
 extern void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab);
 
+extern void frame_inactivated(WFrame *frame);
+extern void frame_activated(WFrame *frame);
+extern void frame_quasiactivity_change(WFrame *frame);
+
 #endif /* ION_IONCORE_FRAME_DRAW_H */

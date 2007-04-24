@@ -340,19 +340,6 @@ void frame_recalc_bar(WFrame *frame)
 }
 
 
-static void set_common_attrs(const WFrame *frame, GrBrush *brush)
-{
-    ensure_create_attrs();
-    
-    grbrush_set_attr(brush, REGION_IS_ACTIVE(frame) 
-                            ? GR_ATTR(active) 
-                            : GR_ATTR(inactive));
-    grbrush_set_attr(brush, frame->quasiactive_count>0 
-                            ? GR_ATTR(quasiactive)
-                            : GR_ATTR(not_quasiactive));
-}
-
-                      
 void frame_draw_bar(const WFrame *frame, bool complete)
 {
     WRectangle geom;
@@ -367,7 +354,7 @@ void frame_draw_bar(const WFrame *frame, bool complete)
 
     grbrush_begin(frame->bar_brush, &geom, GRBRUSH_AMEND);
     
-    set_common_attrs(frame, frame->bar_brush);
+    grbrush_init_attr(frame->bar_brush, &frame->baseattr);
     
     grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, 
                            frame->titles, complete);
@@ -386,7 +373,7 @@ void frame_draw(const WFrame *frame, bool complete)
     
     grbrush_begin(frame->brush, &geom, (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
     
-    set_common_attrs(frame, frame->brush);
+    grbrush_init_attr(frame->brush, &frame->baseattr);
     
     grbrush_draw_border(frame->brush, &geom);
     
@@ -564,14 +551,55 @@ bool frame_set_background(WFrame *frame, bool set_always)
 
 void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab)
 {
+    gr_stylespec_append(spec, &frame->baseattr);
     gr_stylespec_append(spec, &frame->titles[tab].attr);
+}
+
+
+/*}}}*/
+
+
+/*{{{ Activated/inactivated */
+
+
+void frame_inactivated(WFrame *frame)
+{
+    ensure_create_attrs();
     
-    gr_stylespec_set(spec, REGION_IS_ACTIVE(frame) 
-                           ? GR_ATTR(active) 
-                           : GR_ATTR(inactive));
-    gr_stylespec_set(spec, frame->quasiactive_count>0 
-                           ? GR_ATTR(quasiactive)
-                           : GR_ATTR(not_quasiactive));
+    gr_stylespec_set(&frame->baseattr, GR_ATTR(inactive));
+    gr_stylespec_unset(&frame->baseattr, GR_ATTR(active));
+
+    window_draw((WWindow*)frame, FALSE);
+}
+
+
+void frame_activated(WFrame *frame)
+{
+    ensure_create_attrs();
+    
+    gr_stylespec_set(&frame->baseattr, GR_ATTR(active));
+    gr_stylespec_unset(&frame->baseattr, GR_ATTR(inactive));
+    
+    window_draw((WWindow*)frame, FALSE);
+}
+
+
+void frame_quasiactivity_change(WFrame *frame)
+{
+    bool is=(frame->quasiactive_count>0);
+    
+    ensure_create_attrs();
+    
+    if(is){
+        gr_stylespec_set(&frame->baseattr, GR_ATTR(quasiactive));
+        gr_stylespec_unset(&frame->baseattr, GR_ATTR(not_quasiactive));
+    }else{
+        gr_stylespec_set(&frame->baseattr, GR_ATTR(not_quasiactive));
+        gr_stylespec_unset(&frame->baseattr, GR_ATTR(quasiactive));
+    }
+    
+    if(!REGION_IS_ACTIVE(frame))
+        window_draw((WWindow*)frame, FALSE);
 }
 
 
