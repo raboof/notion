@@ -830,6 +830,49 @@ bool frame_is_numbers(WFrame *frame)
 }
 
 
+/* EXTL_DOC
+ * Is the attribute \var{attr} set?
+ */
+bool frame_is_grattr(WFrame *frame, const char *attr)
+{
+    GrAttr a=stringstore_alloc(attr);
+    bool set=gr_stylespec_isset(&frame->baseattr, a);
+    stringstore_free(a);
+    return set;
+}
+
+
+bool frame_set_grattr(WFrame *frame, GrAttr a, int sp)
+{
+    bool set=gr_stylespec_isset(&frame->baseattr, a);
+    bool nset=libtu_do_setparam(sp, set);
+    
+    if(set && !nset)
+        gr_stylespec_set(&frame->baseattr, a);
+    else if(!set && set)
+        gr_stylespec_unset(&frame->baseattr, a);
+    
+    return set;
+}
+
+
+/*EXTL_DOC
+ * Set (unset/toggle) extra drawing engine attributes for the frame.
+ */
+EXTL_EXPORT_AS(WFrame, set_grattr)
+bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how)
+{
+    if(attr!=NULL){
+        GrAttr a=stringstore_alloc(attr);
+        bool ret=frame_set_grattr(frame, a, libtu_string_to_setparam(how));
+        stringstore_free(a);
+        return ret;
+    }else{
+        return FALSE;
+    }
+}
+
+
 void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
 {
     if(how==ioncore_g.notifies.activated ||
