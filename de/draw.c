@@ -301,6 +301,8 @@ static void copy_masked(DEBrush *brush, Drawable src, Drawable dst,
 GR_DEFATTR(dragged);
 GR_DEFATTR(tagged);
 GR_DEFATTR(submenu);
+GR_DEFATTR(numbered);
+GR_DEFATTR(tabnumber);
 
 
 static void ensure_attrs()
@@ -309,16 +311,26 @@ static void ensure_attrs()
     GR_ALLOCATTR(dragged);
     GR_ALLOCATTR(tagged);
     GR_ALLOCATTR(submenu);
+    GR_ALLOCATTR(numbered);
+    GR_ALLOCATTR(tabnumber);
     GR_ALLOCATTR_END;
 }
 
 
+static int get_ty(const WRectangle *g, const GrBorderWidths *bdw, 
+                  const GrFontExtents *fnte)
+{
+    return (g->y+bdw->top+fnte->baseline
+            +(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
+}
+
+
 void debrush_tab_extras(DEBrush *brush, const WRectangle *g, 
-                        DEColourGroup *cg, GrBorderWidths *bdw,
-                        GrFontExtents *fnte,
+                        DEColourGroup *cg, const GrBorderWidths *bdw,
+                        const GrFontExtents *fnte,
                         const GrStyleSpec *a1, 
                         const GrStyleSpec *a2,
-                        bool pre)
+                        bool pre, int index)
 {
     DEStyle *d=brush->d;
     GC tmp;
@@ -352,6 +364,37 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
                     g->x+g->w-bdw->right-d->tag_pixmap_w, 
                     g->y+bdw->top);
     }
+    
+    if((gr_stylespec_isset(a1, GR_ATTR(numbered)) ||
+        gr_stylespec_isset(a2, GR_ATTR(numbered))) && index>=0){
+        
+        DEColourGroup *cg;
+        GrStyleSpec tmp;
+        
+        gr_stylespec_init(&tmp);
+        gr_stylespec_append(&tmp, a2);
+        gr_stylespec_set(&tmp, GR_ATTR(tabnumber));
+        
+        cg=debrush_get_colour_group2(brush, a1, &tmp);
+        
+        gr_stylespec_unalloc(&tmp);
+
+        if(cg!=NULL){
+            int ty, tx, l;
+            char *s=NULL;
+            
+            libtu_asprintf(&s, "[%d]", index+1);
+            
+            if(s!=NULL){
+                l=strlen(s);
+                ty=get_ty(g, bdw, fnte);
+                tx=g->x+g->w-bdw->right-debrush_get_text_width(brush, s, l);
+                if(tx>=(int)bdw->left)
+                    debrush_do_draw_string(brush, tx, ty, s, l, TRUE, cg);
+                free(s);
+            }
+        }
+    }
 
     if(swapped){
         tmp=d->normal_gc;
@@ -369,11 +412,11 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
 void debrush_menuentry_extras(DEBrush *brush, 
                               const WRectangle *g, 
                               DEColourGroup *cg, 
-                              GrBorderWidths *bdw,
-                              GrFontExtents *fnte,
+                              const GrBorderWidths *bdw,
+                              const GrFontExtents *fnte,
                               const GrStyleSpec *a1, 
                               const GrStyleSpec *a2, 
-                              bool pre)
+                              bool pre, int index)
 {
     int tx, ty;
 
@@ -385,8 +428,7 @@ void debrush_menuentry_extras(DEBrush *brush,
     if(gr_stylespec_isset(a1, GR_ATTR(submenu)) ||
        gr_stylespec_isset(a2, GR_ATTR(submenu))){
 
-        ty=(g->y+bdw->top+fnte->baseline
-            +(g->h-bdw->top-bdw->bottom-fnte->max_height)/2);
+        ty=get_ty(g, bdw, fnte);
         tx=g->x+g->w-bdw->right;
 
         debrush_do_draw_string(brush, tx, ty, DE_SUB_IND, DE_SUB_IND_LEN, 
@@ -416,7 +458,8 @@ static void debrush_do_draw_textbox(DEBrush *brush,
                                     DEColourGroup *cg, 
                                     bool needfill,
                                     const GrStyleSpec *a1, 
-                                    const GrStyleSpec *a2)
+                                    const GrStyleSpec *a2,
+                                    int index)
 {
     uint len;
     GrBorderWidths bdw;
@@ -427,7 +470,7 @@ static void debrush_do_draw_textbox(DEBrush *brush,
     grbrush_get_font_extents(&(brush->grbrush), &fnte);
     
     if(brush->extras_fn!=NULL)
-        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, TRUE);
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, TRUE, index);
     
     debrush_do_draw_box(brush, geom, cg, needfill);
     
@@ -451,14 +494,13 @@ static void debrush_do_draw_textbox(DEBrush *brush,
             tx=geom->x+bdw.left;
         }
         
-        ty=(geom->y+bdw.top+fnte.baseline
-            +(geom->h-bdw.top-bdw.bottom-fnte.max_height)/2);
+        ty=get_ty(geom, &bdw, &fnte);
         
         debrush_do_draw_string(brush, tx, ty, text, len, FALSE, cg);
     }while(0);
     
     if(brush->extras_fn!=NULL)
-        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, FALSE);
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, FALSE, index);
 }
 
 
@@ -470,7 +512,7 @@ void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
     
     if(cg!=NULL){
         debrush_do_draw_textbox(brush, geom, text, cg, needfill, 
-                                attr, NULL);
+                                attr, NULL, -1);
     }
 }
 
@@ -495,7 +537,7 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
         
         if(cg!=NULL){
             debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
-                                    common_attrib, &elem[i].attr);
+                                    common_attrib, &elem[i].attr, i);
         }
         
         if(i==n-1)

@@ -27,11 +27,11 @@ INTRCLASS(DEBrush);
 typedef void DEBrushExtrasFn(DEBrush *brush, 
                              const WRectangle *g, 
                              DEColourGroup *cg,
-                             GrBorderWidths *bdw,
-                             GrFontExtents *fnte,
+                             const GrBorderWidths *bdw,
+                             const GrFontExtents *fnte,
                              const GrStyleSpec *a1,
                              const GrStyleSpec *a2,
-                             bool pre);
+                             bool pre, int index);
 
 DECLCLASS(DEBrush){
     GrBrush grbrush;
