@@ -1058,7 +1058,7 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
-    char **p=NULL, *wrole=NULL;
+    char **p=NULL, **p2=NULL, *wrole=NULL;
     int n=0, n2=0, n3=0, tmp=0;
     Window tforwin=None;
     ExtlTab tab;
@@ -1066,12 +1066,19 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
     
     p=xwindow_get_text_property(cwin->win, XA_WM_CLASS, &n);
     
-    if(n==0){
-        p=xwindow_get_text_property(cwin->win, ioncore_g.atom_dockapp_hack, &n);
-        dockapp_hack=(n>0);
+    p2=xwindow_get_text_property(cwin->win, ioncore_g.atom_dockapp_hack, &n2);
+    
+    dockapp_hack=(n2>0);
+    
+    if(p==NULL){
+        /* Some dockapps do actually have WM_CLASS, so use it. */
+        p=p2;
+        n=n2;
+        p2=NULL;
     }
     
-    wrole=xwindow_get_string_property(cwin->win, ioncore_g.atom_wm_window_role, &n2);
+    wrole=xwindow_get_string_property(cwin->win, ioncore_g.atom_wm_window_role, 
+                                      &n3);
     
     tab=extl_create_table();
     if(n>=2 && p[1]!=NULL)
@@ -1091,6 +1098,8 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
     
     if(p!=NULL)
         XFreeStringList(p);
+    if(p2!=NULL)
+        XFreeStringList(p2);
     if(wrole!=NULL)
         free(wrole);
     
