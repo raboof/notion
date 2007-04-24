@@ -27,6 +27,11 @@ de.defstyle("tab-frame", {
         background_colour = "#b03030",
         foreground_colour = "#ffffff",
     }),
+    
+    de.substyle("*-*-*-tabnumber", {
+        background_colour = "black",
+        foreground_colour = "green",
+    }),
 })
 
 de.defstyle("tab-frame-tiled", {
