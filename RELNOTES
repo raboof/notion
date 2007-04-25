@@ -1,4 +1,31 @@
 
+ion-3rc-20070???
+----------------
+
+This is the first "rc" or "(stable) release candidate" release of 
+Ion3. This means that there will not be any further major changes 
+to it. Bugs will be fixed, and as an exception to the general 
+feature freeze, some hooks may still be added, if deemed useful.
+Translations may also be included. After no new bugs (that can not
+be deemed features) have been found in this or following "rc" 
+releases, the stable Ion3 will be released.
+
+Most of the changes in this release to the previous one already
+are bug fixes, in addition to some general clean-up. Other notable
+changes are:
+
+  * Winprop matching improvements: it is possible to match against
+    `is_dockapp` and `is_transient` (booleans), and there's a hack
+    to support `class` and `instance` for dockapps too.
+
+  * The default configuration puts dockapps in the statusbar's
+    tray area.
+
+  * The autoconf kludge has been removed, as I will have nothing
+    to do with it, and nobody else seems to support or maintain 
+    it either.
+
+
 ion-3ds-20070318
 ----------------
 
