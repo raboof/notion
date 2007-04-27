@@ -109,8 +109,6 @@ Credits
 
 Ion was written by Tuomo Valkonen.
 
-The autoconf script written by Tom Payne for the most part.
-
 The dock module was written by Tom Payne and Per Olofsson.
 
 `utils/ion-completefile/ion-completefile.c` is based on editline, (c)
