@@ -97,5 +97,8 @@ extern void de_deinit_styles();
 
 extern DEStyle *de_get_style(WRootWin *rootwin, const GrStyleSpec *spec);
 
+extern void destyle_add(DEStyle *style);
+extern void destyle_dump(DEStyle *style);
+
 
 #endif /* ION_DE_STYLE_H */

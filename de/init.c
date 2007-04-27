@@ -292,40 +292,26 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 EXTL_EXPORT
 bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
-    DEStyle *style;
+    DEStyle *style, *based_on=NULL;
+    int based_on_score=-1;
     char *fnt;
     uint n;
-    char *based_on_name;
-    DEStyle *based_on=NULL;
-    GrStyleSpec based_on_spec;
 
     if(name==NULL)
         return FALSE;
     
     style=de_create_style(rootwin, name);
-
+    
     if(style==NULL)
         return FALSE;
-
-    if(get_spec(tab, "based_on", &based_on_spec, &based_on_name)){
-        based_on=de_get_style(rootwin, &based_on_spec);
-        
-        gr_stylespec_unalloc(&based_on_spec);
-
-        if(based_on==style){
-            warn(TR("'based_on' for %s points back to the style itself."),
-                 name);
-        }else if(based_on==NULL){
-            warn(TR("Unknown base style. \"%s\""), based_on_name);
-        }else{
-            style->based_on=based_on;
-            based_on->usecount++;
-            /* Copy simple parameters */
-        }
-        
-        free(based_on_name);
+    
+    based_on=de_get_style(rootwin, &style->spec);
+    
+    if(based_on!=NULL){
+        style->based_on=based_on;
+        based_on->usecount++;
     }
-
+    
     de_get_nonfont(rootwin, style, tab);
 
     if(extl_table_gets_s(tab, "font", &fnt)){
@@ -337,6 +323,44 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     
     if(style->font==NULL)
         de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
+    
+    if(based_on!=NULL && 
+       gr_stylespec_equals(&based_on->spec, &style->spec)){
+       
+        uint nb=based_on->n_extra_cgrps;
+        uint ns=style->n_extra_cgrps;
+        
+        /* The new style eplaces based_on, so it may be dumped. */
+        if(!based_on->is_fallback)
+            destyle_dump(based_on);
+        
+        if(nb>0 && based_on->usecount==1){
+            /* Nothing else is using based_on: optimise and move
+             * extra colour groups here, so that based_on can be freed.
+             */
+             
+            DEColourGroup *cgs=ALLOC_N(DEColourGroup, nb+ns);
+                
+            if(cgs!=NULL){
+                memcpy(cgs, based_on->extra_cgrps, sizeof(DEColourGroup)*nb);
+                memcpy(cgs+nb, style->extra_cgrps, sizeof(DEColourGroup)*ns);
+                
+                free(style->extra_cgrps);
+                style->extra_cgrps=cgs;
+                style->n_extra_cgrps=nb+ns;
+                
+                free(based_on->extra_cgrps);
+                based_on->extra_cgrps=NULL;
+                based_on->n_extra_cgrps=0;
+                
+                based_on->usecount--;
+                style->based_on=NULL;
+            }
+        }
+        
+    }
+
+    destyle_add(style);
     
     return TRUE;
 }

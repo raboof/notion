@@ -192,7 +192,7 @@ void destyle_deinit(DEStyle *style)
 }
 
 
-static void dump_style(DEStyle *style)
+void destyle_dump(DEStyle *style)
 {
     /* Allow the style still be used but get if off the list. */
     UNLINK_ITEM(styles, style, next, prev);
@@ -248,7 +248,7 @@ bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
 }
 
 
-static DEStyle *do_create_style(WRootWin *rootwin, const char *name)
+DEStyle *de_create_style(WRootWin *rootwin, const char *name)
 {
     DEStyle *style=ALLOC(DEStyle);
     if(style!=NULL){
@@ -261,31 +261,10 @@ static DEStyle *do_create_style(WRootWin *rootwin, const char *name)
 }
 
 
-DEStyle *de_create_style(WRootWin *rootwin, const char *name)
+void destyle_add(DEStyle *style)
 {
-    DEStyle *oldstyle, *style;
-    uint score;
-    
-    style=do_create_style(rootwin, name);
-    
-    if(style==NULL)
-        return NULL;
-    
-    for(oldstyle=styles; oldstyle!=NULL; oldstyle=oldstyle->next){
-        if(oldstyle->rootwin!=rootwin)
-            continue;
-        if(gr_stylespec_equals(&oldstyle->spec, &style->spec))
-            break;
-    }
-    
-    if(oldstyle!=NULL && !oldstyle->is_fallback)
-        dump_style(oldstyle);
-    
     LINK_ITEM_FIRST(styles, style, next, prev);
-    
-    return style;
 }
-
 
 
 /*EXTL_DOC
@@ -298,7 +277,7 @@ void de_reset()
     for(style=styles; style!=NULL; style=next){
         next=style->next;
         if(!style->is_fallback)
-            dump_style(style);
+            destyle_dump(style);
     }
 }
 
@@ -312,7 +291,7 @@ void de_deinit_styles()
             warn(TR("Style is still in use [%d] but the module "
                     "is being unloaded!"), style->usecount);
         }
-        dump_style(style);
+        destyle_dump(style);
     }
 }
 
