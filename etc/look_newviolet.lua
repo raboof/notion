@@ -28,7 +28,6 @@ de.defstyle("*", {
 
 
 de.defstyle("tab", {
-    based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     
     de.substyle("active-selected", {
@@ -48,7 +47,6 @@ de.defstyle("tab", {
 
 
 de.defstyle("input", {
-    based_on = "*",
     text_align = "left",
     highlight_colour = "#eeeeff",
     shadow_colour = "#eeeeff",
@@ -66,7 +64,6 @@ de.defstyle("input", {
 
 
 de.defstyle("input-menu", {
-    based_on = "input",
     highlight_pixels = 0,
     shadow_pixels = 0,
     padding_pixels = 0,
@@ -74,7 +71,6 @@ de.defstyle("input-menu", {
 
 
 de.defstyle("frame", {
-    based_on = "*",
     background_colour = "#000000",
     transparent_background = false,
     shadow_pixels = 1,
@@ -88,25 +84,21 @@ de.defstyle("frame", {
 })
 
 de.defstyle("frame-tiled", {
-    based_on = "frame",
     shadow_pixels = 0,
     highlight_pixels = 0,
     padding_pixels = 1,
 })
 
 de.defstyle("frame-tiled-alt", {
-    based_on = "frame-tiled",
     bar = "none",
 })
 
 de.defstyle("frame-floating", {
-    based_on = "frame",
     bar = "shaped",
     padding_pixels = 0,
 })
 
 de.defstyle("frame-transient", {
-    based_on = "frame",
     bar = "none",
     padding_pixels = 1,
 })

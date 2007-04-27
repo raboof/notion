@@ -18,7 +18,6 @@ de.defstyle("*", {
 })
 
 de.defstyle("frame", {
-    based_on = "*",
     shadow_colour = "black",
     highlight_colour = "black",
     padding_colour = "black",
@@ -36,7 +35,6 @@ de.defstyle("frame", {
 })
 
 de.defstyle("tab", {
-    based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     de.substyle("active-selected", {
         shadow_colour = "black",
@@ -66,7 +64,6 @@ de.defstyle("tab", {
 })
 
 de.defstyle("input", {
-    based_on = "*",
     shadow_colour = "black",
     highlight_colour = "black",
     background_colour = "#3f3f3f",
@@ -86,7 +83,6 @@ de.defstyle("input", {
 })
 
 de.defstyle("input-menu", {
-    based_on = "input",
     padding_pixels=0,
 })
 

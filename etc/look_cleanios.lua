@@ -19,7 +19,6 @@ de.defstyle("*", {
 })
 
 de.defstyle("tab", {
-    based_on = "*",
     font = "-*-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*",
     de.substyle("active-selected", {
         shadow_colour = "#f0f066",
@@ -49,7 +48,6 @@ de.defstyle("tab", {
 })
 
 de.defstyle("input-edln", {
-    based_on = "*",
     de.substyle("*-cursor", {
         background_colour = "#000000",
         foreground_colour = "#d8d8d8",
