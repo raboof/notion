@@ -353,8 +353,9 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
                 based_on->extra_cgrps=NULL;
                 based_on->n_extra_cgrps=0;
                 
-                based_on->usecount--;
-                style->based_on=NULL;
+                style->based_on=based_on->based_on;
+                based_on->based_on=NULL;
+                destyle_unref(based_on);
             }
         }
         
