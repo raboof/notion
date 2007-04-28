@@ -294,7 +294,7 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
     DEStyle *style, *based_on=NULL;
     int based_on_score=-1;
-    char *fnt;
+    char *fnt, *bss;
     uint n;
 
     if(name==NULL)
@@ -305,7 +305,18 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     if(style==NULL)
         return FALSE;
     
-    based_on=de_get_style(rootwin, &style->spec);
+    if(extl_table_gets_s(tab, "based_on", &bss)){
+        GrStyleSpec bs;
+        
+        gr_stylespec_load(&bs, bss);
+        
+        based_on=de_get_style(rootwin, &bs);
+        
+        gr_stylespec_unalloc(&bs);
+        free(bss);
+    }else{
+        based_on=de_get_style(rootwin, &style->spec);
+    }
     
     if(based_on!=NULL){
         style->based_on=based_on;
