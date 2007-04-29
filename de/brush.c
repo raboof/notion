@@ -189,6 +189,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
     uint tmp=0;
     uint tbf=1, lrf=1;
     uint pad=bd->pad;
+    uint spc=style->spacing;
     
     switch(bd->sides){
     case DEBORDER_TB:
@@ -199,16 +200,22 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
         break;
     }
     
+    /* Ridge/groove styles use 'padding' for the spacing between the
+     * 'highlight' and 'shadow' portions of the border, and 'spacing'
+     * between the border and contents. Inlaid style also uses 'spacing'
+     * between the contents and the border, and padding as its outer
+     * component. Elevated style does not use spacing.
+     */
     switch(bd->style){
     case DEBORDER_RIDGE:
     case DEBORDER_GROOVE:
-        tmp=bd->sh+bd->hl;
-        bdw->top=tbf*tmp+pad; bdw->bottom=tbf*tmp+pad; 
-        bdw->left=lrf*tmp+pad; bdw->right=lrf*tmp+pad;
+        tmp=bd->sh+bd->hl+pad;
+        bdw->top=tbf*tmp+spc; bdw->bottom=tbf*tmp+spc; 
+        bdw->left=lrf*tmp+spc; bdw->right=lrf*tmp+spc;
         break;
     case DEBORDER_INLAID:
-        tmp=bd->sh; bdw->top=tbf*tmp+pad; bdw->left=lrf*tmp+pad;
-        tmp=bd->hl; bdw->bottom=tbf*tmp+pad; bdw->right=lrf*tmp+pad;
+        tmp=bd->sh+pad; bdw->top=tbf*tmp+spc; bdw->left=lrf*tmp+spc;
+        tmp=bd->hl+pad; bdw->bottom=tbf*tmp+spc; bdw->right=lrf*tmp+spc;
         break;
     case DEBORDER_ELEVATED:
     default:
