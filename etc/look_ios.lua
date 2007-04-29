@@ -17,23 +17,6 @@ de.defstyle("*", {
     text_align = "center",
 })
 
-de.defstyle("frame", {
-    shadow_colour = "#606060",
-    highlight_colour = "#ffffff",
-    padding_colour = "#d8d8d8",
-    background_colour = "#000000",
-    foreground_colour = "#000000",
-    padding_pixels = 2,
-    highlight_pixels = 1,
-    shadow_pixels = 1,
-    de.substyle("active", {
-        shadow_colour = "#606060",
-        highlight_colour = "#ffffff",
-        background_colour = "#d8d8d8",
-        foreground_colour = "#000000",
-    }),
-})
-
 de.defstyle("tab", {
     font = "-*-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*",
     de.substyle("active-selected", {
@@ -64,14 +47,6 @@ de.defstyle("tab", {
 })
 
 de.defstyle("input", {
-    shadow_colour = "#606060",
-    highlight_colour = "#ffffff",
-    background_colour = "#d8d8d8",
-    foreground_colour = "#000000",
-    padding_pixels = 1,
-    highlight_pixels = 1,
-    shadow_pixels = 1,
-    border_style = "elevated",
     de.substyle("*-cursor", {
         background_colour = "#000000",
         foreground_colour = "#d8d8d8",

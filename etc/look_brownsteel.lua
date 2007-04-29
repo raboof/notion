@@ -17,17 +17,6 @@ de.defstyle("*", {
     text_align = "center",
 })
 
-de.defstyle("frame", {
-    shadow_colour = "#404040",
-    highlight_colour = "#707070",
-    padding_colour = "#505050",
-    background_colour = "#000000",
-    foreground_colour = "#ffffff",
-    padding_pixels = 1,
-    highlight_pixels = 1,
-    shadow_pixels = 1,
-})
-
 de.defstyle("tab", {
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
     de.substyle("active-selected", {
@@ -56,7 +45,6 @@ de.defstyle("tab", {
     }),
     text_align = "center",
 })
-
 
 de.defstyle("input", {
     shadow_colour = "#404040",
