@@ -19,15 +19,20 @@ de.defstyle("frame", {
 de.defstyle("frame-tiled", {
     border_style = "inlaid",
     padding_pixels = 1,
-    spacing = 1,
-})
-
-de.defstyle("frame-floating", {
-    bar = "shaped",
 })
 
 de.defstyle("frame-tiled-alt", {
     bar = "none",
+})
+
+de.defstyle("frame-floating", {
+    bar = "shaped",
+    spacing = 0,
+})
+
+de.defstyle("frame-transient", {
+    bar = "none",
+    spacing = 0,
 })
 
 de.defstyle("actnotify", {
@@ -58,11 +63,16 @@ de.defstyle("tab", {
     }),
 })
 
+
 de.defstyle("tab-frame", {
     spacing = 1,
 })
 
 de.defstyle("tab-frame-floating", {
+    spacing = 0,
+})
+
+de.defstyle("tab-frame-transient", {
     spacing = 0,
 })
 

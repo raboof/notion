@@ -59,5 +59,17 @@ de.defstyle("input", {
 
 dopath("lookcommon_emboss")
 
+de.defstyle("frame-tiled", {
+    spacing = 0,
+})
+
+de.defstyle("frame-tiled-alt", {
+    spacing = 0,
+})
+
+de.defstyle("tab-frame-tiled", {
+    spacing = 0,
+})
+
 gr.refresh()
 
