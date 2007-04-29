@@ -127,45 +127,58 @@ void de_get_border(DEBorder *border, ExtlTab tab)
 /*{{{ Colours */
 
 
-bool de_get_colour(WRootWin *rootwin, DEColour *ret, 
-                   ExtlTab tab, DEStyle *based_on,
-                   const char *what, DEColour substitute)
+static bool de_get_colour_(WRootWin *rootwin, DEColour *ret, 
+                           ExtlTab tab, const char *what, 
+                           DEColour substitute, DEColour inherit)
 {
     char *name=NULL;
-    bool ok=FALSE;
+    bool set=FALSE;
     
     if(extl_table_gets_s(tab, what, &name)){
-        ok=de_alloc_colour(rootwin, ret, name);
+        if(strcmp(name, "inherit")==0){
+            set=de_duplicate_colour(rootwin, inherit, ret);
+        }else{
+            set=de_alloc_colour(rootwin, ret, name);
     
-        if(!ok)
-            warn(TR("Unable to allocate colour \"%s\"."), name);
-
+            if(!set)
+                warn(TR("Unable to allocate colour \"%s\"."), name);
+        }
         free(name);
-    }else if(based_on!=NULL){
-        return de_get_colour(rootwin, ret, based_on->data_table,
-                             based_on->based_on, what, substitute);
     }
     
-    if(!ok)
-        ok=de_duplicate_colour(rootwin, substitute, ret);
+    if(!set)
+        de_duplicate_colour(rootwin, substitute, ret);
     
-    return ok;
+    return set;
 }
 
+
+static bool de_get_colour(WRootWin *rootwin, DEColour *ret, 
+                          ExtlTab tab, const char *what, DEColour substitute)
+{
+    return de_get_colour_(rootwin, ret, tab, what, substitute, substitute);
+}
+                          
 
 void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, 
                          ExtlTab tab, DEStyle *based_on)
 {
-    de_get_colour(rootwin, &(cg->hl), tab, based_on, "highlight_colour",
-                  DE_WHITE(rootwin));
-    de_get_colour(rootwin, &(cg->sh), tab, based_on, "shadow_colour",
-                  DE_WHITE(rootwin));
-    de_get_colour(rootwin, &(cg->bg), tab, based_on, "background_colour",
-                  DE_BLACK(rootwin));
-    de_get_colour(rootwin, &(cg->fg), tab, based_on, "foreground_colour",
-                  DE_WHITE(rootwin));
-    de_get_colour(rootwin, &(cg->pad), tab, based_on, "padding_colour", 
-                  cg->bg);
+    bool bgset;
+    DEColour padinh;
+    
+    de_get_colour(rootwin, &(cg->hl), tab, "highlight_colour",
+                  (based_on ? based_on->cgrp.hl : DE_WHITE(rootwin)));
+    de_get_colour(rootwin, &(cg->sh), tab, "shadow_colour",
+                  (based_on ? based_on->cgrp.sh : DE_WHITE(rootwin)));
+    de_get_colour(rootwin, &(cg->fg), tab, "foreground_colour",
+                  (based_on ? based_on->cgrp.fg : DE_WHITE(rootwin)));
+    bgset=de_get_colour(rootwin, &(cg->bg), tab, "background_colour",
+                        (based_on ? based_on->cgrp.bg : DE_BLACK(rootwin)));
+                        
+    padinh=(based_on ? based_on->cgrp.pad : DE_WHITE(rootwin));
+    
+    de_get_colour_(rootwin, &(cg->pad), tab, "padding_colour", 
+                   (bgset ? cg->bg : padinh), padinh);
 }
 
 

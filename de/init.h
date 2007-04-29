@@ -17,9 +17,6 @@ extern void de_get_border_val(uint *val, ExtlTab tab, const char *what);
 extern void de_get_border_style(uint *ret, ExtlTab tab);
 extern void de_get_border(DEBorder *border, ExtlTab tab);
 
-extern bool de_get_colour(WRootWin *rootwin, DEColour *ret, 
-                          ExtlTab tab, DEStyle *based_on,
-                          const char *what, DEColour substitute);
 extern void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg, 
                                 ExtlTab tab, DEStyle *based_on);
 extern void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, 
