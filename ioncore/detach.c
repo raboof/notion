@@ -104,7 +104,7 @@ static bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode,
 }
 
 
-static WRegion *check_mplex(WRegion *reg, WFrameMode *mode, uint *level)
+static WRegion *check_mplex(WRegion *reg, WFrameMode *mode)
 {
     WMPlex *mplex=REGION_MANAGER_CHK(reg, WMPlex);
     
@@ -117,25 +117,26 @@ static WRegion *check_mplex(WRegion *reg, WFrameMode *mode, uint *level)
     
     if(OBJ_IS(mplex, WFrame)
        && frame_mode((WFrame*)mplex)==FRAME_MODE_TRANSIENT){
-        WStacking *st=ioncore_find_stacking((WRegion*)mplex);
-        if(st!=NULL)
-            *level=st->level;
         *mode=FRAME_MODE_TRANSIENT;
-        
     }
     
     return (WRegion*)mplex;
 }
 
 
-static WGroup *find_group(WRegion *reg)
+static WGroup *find_group(WRegion *reg, uint *level)
 {
     WRegion *mgr=REGION_MANAGER(reg);
     
     while(mgr!=NULL){
+        reg=mgr;
         mgr=REGION_MANAGER(mgr);
-        if(OBJ_IS(mgr, WGroup))
+        if(OBJ_IS(mgr, WGroup)){
+            WStacking *st=ioncore_find_stacking((WRegion*)reg);
+            if(st!=NULL)
+                *level=st->level;
             break;
+        }
     }
     
     return (WGroup*)mgr;
@@ -152,7 +153,7 @@ bool ioncore_detach(WRegion *reg, int sp)
     
     reg=region_groupleader_of(reg);
     
-    grp=find_group(check_mplex(reg, &mode, &level));
+    grp=find_group(check_mplex(reg, &mode), &level);
     
     /* reg is only considered detached if there's no higher-level group
      * to attach to, thus causing 'toggle' to cycle.
