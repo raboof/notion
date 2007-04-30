@@ -214,8 +214,8 @@ void do_unsqueeze(WRegion *reg)
     if(!h.min_set)
         return;
         
-    if((h.base_set ? h.base_width : 0)+h.min_width<=REGION_GEOM(reg).w &&
-       (h.base_set ? h.base_height : 0)+h.min_height<=REGION_GEOM(reg).h){
+    if(h.min_width<=REGION_GEOM(reg).w && 
+       h.min_height<=REGION_GEOM(reg).h){
         return;
     }
     
