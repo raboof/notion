@@ -351,36 +351,37 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     if(based_on!=NULL && 
        gr_stylespec_equals(&based_on->spec, &style->spec)){
        
-        uint nb=based_on->n_extra_cgrps;
-        uint ns=style->n_extra_cgrps;
-        
-        /* The new style eplaces based_on, so it may be dumped. */
+        /* The new style replaces based_on, so it may be dumped. */
         if(!based_on->is_fallback)
             destyle_dump(based_on);
         
-        if(nb>0 && based_on->usecount==1){
+        if(based_on->usecount==1){
+            uint nb=based_on->n_extra_cgrps;
+            uint ns=style->n_extra_cgrps;
             /* Nothing else is using based_on: optimise and move
              * extra colour groups here, so that based_on can be freed.
              */
-             
-            DEColourGroup *cgs=ALLOC_N(DEColourGroup, nb+ns);
+            
+            if(nb>0){
+                DEColourGroup *cgs=ALLOC_N(DEColourGroup, nb+ns);
                 
-            if(cgs!=NULL){
-                memcpy(cgs, based_on->extra_cgrps, sizeof(DEColourGroup)*nb);
-                memcpy(cgs+nb, style->extra_cgrps, sizeof(DEColourGroup)*ns);
+                if(cgs!=NULL){
+                    memcpy(cgs, based_on->extra_cgrps, sizeof(DEColourGroup)*nb);
+                    memcpy(cgs+nb, style->extra_cgrps, sizeof(DEColourGroup)*ns);
                 
-                free(style->extra_cgrps);
-                style->extra_cgrps=cgs;
-                style->n_extra_cgrps=nb+ns;
+                    free(style->extra_cgrps);
+                    style->extra_cgrps=cgs;
+                    style->n_extra_cgrps=nb+ns;
                 
-                free(based_on->extra_cgrps);
-                based_on->extra_cgrps=NULL;
-                based_on->n_extra_cgrps=0;
-                
-                style->based_on=based_on->based_on;
-                based_on->based_on=NULL;
-                destyle_unref(based_on);
+                    free(based_on->extra_cgrps);
+                    based_on->extra_cgrps=NULL;
+                    based_on->n_extra_cgrps=0;
+                }
             }
+                
+            style->based_on=based_on->based_on;
+            based_on->based_on=NULL;
+            destyle_unref(based_on);
         }
         
     }
