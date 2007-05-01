@@ -95,7 +95,7 @@ static bool gr_do_select_engine(const char *engine)
 
 
 /*EXTL_DOC
- * Future requests for ''brushes'' are to be forwarded to the drawing engine
+ * Future requests for ``brushes'' are to be forwarded to the drawing engine
  * \var{engine}. If no engine of such name is known, a module with that name
  * is attempted to be loaded. This function is only intended to be called from
  * colour scheme etc. configuration files and can not be used to change the
@@ -638,7 +638,7 @@ void grbrush_unset_attr(GrBrush *brush, GrAttr attr)
 
 
 /*EXTL_DOC
- * Read drawing engine configuration file \file{draw.lua}.
+ * Read drawing engine configuration file \file{look.lua}.
  */
 EXTL_EXPORT_AS(gr, read_config)
 void gr_read_config()

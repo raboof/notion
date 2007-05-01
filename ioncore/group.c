@@ -496,7 +496,7 @@ static void group_do_set_bottom(WGroup *grp, WStacking *st)
 
 
 /*EXTL_DOC
- * Sets the 'bottom' of \var{ws}. The region \var{reg} must already
+ * Sets the `bottom' of \var{ws}. The region \var{reg} must already
  * be managed by \var{ws}, unless \code{nil}.
  */
 EXTL_EXPORT_MEMBER
@@ -518,7 +518,7 @@ bool group_set_bottom(WGroup *ws, WRegion *reg)
 
 
 /*EXTL_DOC
- * Returns the 'bottom' of \var{ws}.
+ * Returns the `bottom' of \var{ws}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER

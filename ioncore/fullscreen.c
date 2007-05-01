@@ -156,8 +156,9 @@ WScreen *clientwin_fullscreen_chkrq(WClientWin *cwin, int w, int h)
 
 /*EXTL_DOC
  * Set client window \var{reg} full screen state according to the 
- * parameter \var{how} (set/unset/toggle). Resulting state is returned,
- * which may not be what was requested.
+ * parameter \var{how} (one of \codestr{set}, \codestr{unset}, or 
+ * \codestr{toggle}). Resulting state is returned, which may not be
+ * what was requested.
  */
 EXTL_EXPORT_AS(WGroup, set_fullscreen)
 bool group_set_fullscreen_extl(WGroup *grp, const char *how)

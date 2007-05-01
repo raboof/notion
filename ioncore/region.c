@@ -232,7 +232,7 @@ void region_managed_remove(WRegion *mgr, WRegion *reg)
 
 
 /*EXTL_DOC
- * Return the object, if any, that is considered ''currently active''
+ * Return the object, if any, that is considered ``currently active''
  * within the objects managed by \var{mplex}.
  */
 EXTL_SAFE
@@ -379,8 +379,8 @@ static void region_rqclose_default(WRegion *reg, bool relocate)
  * the client supports the \code{WM_DELETE} protocol (see also
  * \fnref{WClientWin.kill}). The region will not be destroyed when
  * this function returns. To find out if and when it is destroyed,
- * use the "deinit" notification. If \var{relocate} is not set, and
- * \var{reg} manages other regions, it will not be closed. Otherwise
+ * use the \codestr{deinit} notification. If \var{relocate} is not set, 
+ * and \var{reg} manages other regions, it will not be closed. Otherwise
  * the managed regions will be attempted to be relocated.
  */
 EXTL_EXPORT_MEMBER
@@ -739,7 +739,7 @@ bool region_rqorder(WRegion *reg, WRegionOrder order)
 
 /*EXTL_DOC
  * Request ordering. Currently supported values for \var{ord}
- * are 'front' and 'back'.
+ * are \codestr{front} and \codestr{back}.
  */
 EXTL_EXPORT_AS(WRegion, rqorder)
 bool region_rqorder_extl(WRegion *reg, const char *ord)

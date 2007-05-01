@@ -333,7 +333,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 /*EXTL_DOC
  * Start dragging the tab that the user pressed on with the pointing device.
  * This function should only be used by binding it to \emph{mpress} or
- * \emph{mdrag} action with area ''tab''.
+ * \emph{mdrag} action with area \codestr{tab}.
  */
 EXTL_EXPORT_MEMBER
 void frame_p_tabdrag(WFrame *frame)

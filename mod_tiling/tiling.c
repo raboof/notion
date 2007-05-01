@@ -999,9 +999,10 @@ static WFrame *tiling_do_split(WTiling *ws, WSplit *node,
 
 
 /*EXTL_DOC
- * Create a new frame on \var{ws} above/below/left of/right of
- * \var{node} as indicated by \var{dirstr}. If \var{dirstr} is 
- * prefixed with ''floating:'' a floating split is created.
+ * Create a new frame on \var{ws} \codestr{above}, \codestr{below}
+ * \codestr{left} of, or \codestr{right} of \var{node} as indicated
+ *  by \var{dirstr}. If \var{dirstr} is  prefixed with 
+ * \codestr{floating:} a floating split is created.
  */
 EXTL_EXPORT_MEMBER
 WFrame *tiling_split(WTiling *ws, WSplit *node, const char *dirstr)
@@ -1027,11 +1028,12 @@ WFrame *tiling_split_top(WTiling *ws, const char *dirstr)
 
 /*EXTL_DOC
  * Split \var{frame} creating a new frame to direction \var{dirstr}
- * (one of ''left'', ''right'', ''top'' or ''bottom'') of \var{frame}.
+ * (one of \codestr{left}, \codestr{right}, \codestr{top} or 
+ * \codestr{bottom}) of \var{frame}.
  * If \var{attach_current} is set, the region currently displayed in
  * \var{frame}, if any, is moved to thenew frame.
- * If \var{dirstr} is prefixed with ''floating:'' a floating split is
- * created.
+ * If \var{dirstr} is prefixed with \codestr{floating:}, a floating
+ * split is created.
  */
 EXTL_EXPORT_MEMBER
 WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr, 
@@ -1155,7 +1157,8 @@ WSplit *tiling_split_tree(WTiling *ws)
 
 /*EXTL_DOC
  * Return the most previously active region next to \var{reg} in
- * direction \var{dirstr} (left/right/up/down). The region \var{reg}
+ * direction \var{dirstr} (\codestr{left}, \codestr{right}, \codestr{up},
+ * or \codestr{down}). The region \var{reg}
  * must be managed by \var{ws}. If \var{any} is not set, the status display
  * is not considered.
  */
@@ -1176,8 +1179,8 @@ WRegion *tiling_nextto(WTiling *ws, WRegion *reg, const char *dirstr,
 /*EXTL_DOC
  * Return the most previously active region on \var{ws} with no
  * other regions next to it in  direction \var{dirstr} 
- * (left/right/up/down). If \var{any} is not set, the status 
- * display is not considered.
+ * (\codestr{left}, \codestr{right}, \codestr{up}, or \codestr{down}). 
+ * If \var{any} is not set, the status display is not considered.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
@@ -1353,8 +1356,8 @@ WSplitSplit *tiling_set_floating(WTiling *ws, WSplitSplit *split, int sp)
 
 /*EXTL_DOC
  * Toggle floating of a split's sides at \var{split} as indicated by the 
- * parameter \var{how} (set/unset/toggle). A split of the appropriate is 
- * returned, if there was a change.
+ * parameter \var{how} (\codestr{set}, \codestr{unset}, or \codestr{toggle}).
+ * A split of the appropriate is returned, if there was a change.
  */
 EXTL_EXPORT_AS(WTiling, set_floating)
 WSplitSplit *tiling_set_floating_extl(WTiling *ws, WSplitSplit *split, 
@@ -1368,9 +1371,10 @@ WSplitSplit *tiling_set_floating_extl(WTiling *ws, WSplitSplit *split,
 
 /*EXTL_DOC
  * Toggle floating of the sides of a split containin \var{reg} as indicated 
- * by the parameters \var{how} (set/unset/toggle) and \var{dirstr}
- * (left/right/up/down/any). The new status is returned (and \code{false}
- * also on error).
+ * by the parameters \var{how} (\codestr{set}, \codestr{unset}, or 
+ * \codestr{toggle}) and \var{dirstr} (\codestr{left}, \codestr{right}, 
+ * \codestr{up}, or \codestr{down}). The new status is returned 
+ * (and \code{false} also on error).
  */
 EXTL_EXPORT_AS(WTiling, set_floating_at)
 bool tiling_set_floating_at_extl(WTiling *ws, WRegion *reg, const char *how,

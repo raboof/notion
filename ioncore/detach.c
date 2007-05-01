@@ -184,11 +184,12 @@ bool ioncore_detach(WRegion *reg, int sp)
 
 /*EXTL_DOC
  * Detach or reattach \var{reg}, depending on whether \var{how}
- * is 'set'/'unset'/'toggle'. (Detaching means making \var{reg} 
- * managed by its nearest ancestor \type{WGroup}, framed if \var{reg} is
- * not itself \type{WFrame}. Reattaching means making it managed where
- * it used to be managed, if a return-placeholder exists.)
- * If \var{reg} is the 'bottom' of some group, the whole group is
+ * is \codestr{set}, \codestr{unset} or \codestr{toggle}. (Detaching 
+ * means making \var{reg} managed by its nearest ancestor \type{WGroup},
+ * framed if \var{reg} is not itself \type{WFrame}. Reattaching means 
+ * making it managed where it used to be managed, if a return-placeholder
+ * exists.)
+ * If \var{reg} is the `bottom' of some group, the whole group is
  * detached. If \var{reg} is a \type{WWindow}, it is put into a 
  * frame.
  */

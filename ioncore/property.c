@@ -337,7 +337,7 @@ static bool get_mode(const char *mode, int *m)
 
 /*EXTL_DOC
  * Modify a window property. The \var{mode} is one of
- * \code{"replace"}, \code{"prepend"} or \code{"append"}, and format
+ * \codestr{replace}, \codestr{prepend} or \codestr{append}, and format
  * is either 8, 16 or 32. Also see \fnref{ioncore.x_get_window_property}
  * and the \code{XChangeProperty}(3) manual page.
  */

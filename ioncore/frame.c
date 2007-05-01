@@ -788,7 +788,8 @@ bool frame_set_shaded(WFrame *frame, int sp)
 
 /*EXTL_DOC
  * Set shading state according to the parameter \var{how} 
- * (set/unset/toggle). Resulting state is returned, which may not be
+ * (\codestr{set}, \codestr{unset}, or \codestr{toggle}). 
+ * Resulting state is returned, which may not be
  * what was requested.
  */
 EXTL_EXPORT_AS(WFrame, set_shaded)
@@ -825,7 +826,9 @@ bool frame_set_numbers(WFrame *frame, int sp)
 
 
 /*EXTL_DOC
- * Control whether tabs show numbers (set/unset/toggle). 
+ * Control whether tabs show numbers. The parameter
+ * \var{how} is one of \codestr{set}, \codestr{unset} 
+ * or \codestr{toggle}.
  * Resulting state is returned, which may not be what was 
  * requested.
  */
@@ -875,7 +878,9 @@ bool frame_set_grattr(WFrame *frame, GrAttr a, int sp)
 
 
 /*EXTL_DOC
- * Set (unset/toggle) extra drawing engine attributes for the frame.
+ * Set extra drawing engine attributes for the frame.
+ * The parameter \var{attr} is the attribute, and \var{how} is
+ * one of \codestr{set}, \codestr{unset}, or \codestr{toggle}.
  */
 EXTL_EXPORT_AS(WFrame, set_grattr)
 bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how)

@@ -1815,8 +1815,8 @@ WSplit *splitsplit_br(WSplitSplit *split)
 }
 
 /*EXTL_DOC
- * Returns the direction of \var{split}; either ''vertical'' or
- * ''horizontal''.
+ * Returns the direction of \var{split}; either \codestr{vertical} or
+ * \codestr{horizontal}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER

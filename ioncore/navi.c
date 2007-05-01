@@ -227,8 +227,9 @@ static WRegion *release(WRegionNaviData *data, WRegion *res)
 
 /*EXTL_DOC
  * Find region next from \var{reg} in direction \var{dirstr}
- * (up/down/left/right/next/prev/any). The table \var{param} may
- * contain the boolean field \var{nowrap}, instructing not to wrap 
+ * (\codestr{up}, \codestr{down}, \codestr{left}, \codestr{right}, 
+ * \codestr{next}, \codestr{prev}, or \codestr{any}). The table \var{param}
+ * may contain the boolean field \var{nowrap}, instructing not to wrap 
  * around, and the \type{WRegion}s \var{no_ascend} and \var{no_descend},
  * and boolean functions \var{ascend_filter} and \var{descend_filter} 
  * on \var{WRegion} pairs (\var{to}, \var{from}), are used to decide when
@@ -261,9 +262,8 @@ WRegion *ioncore_navi_next(WRegion *reg, const char *dirstr, ExtlTab param)
 
 
 /*EXTL_DOC
- * Find first region within \var{reg} in direction \var{dirstr}
- * (up/down/left/right/beg/end/any). For information on \var{param},
- * see \fnref{ioncore.navi_next}.
+ * Find first region within \var{reg} in direction \var{dirstr}.
+ * For information on \var{param}, see \fnref{ioncore.navi_next}.
  */
 EXTL_EXPORT
 WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
@@ -293,11 +293,10 @@ static WRegion *do_goto(WRegion *res)
 
 
 /*EXTL_DOC
- * Go to region next from \var{reg} in direction \var{dirstr}
- * (up/down/left/right/next/prev/any). For information on \var{param},
- * see \fnref{ioncore.navi_next}. Additionally this function supports
- * the boolean \var{nofront} field, for not bringing the object to
- * front.
+ * Go to region next from \var{reg} in direction \var{dirstr}.
+ * For information on \var{param}, see \fnref{ioncore.navi_next}.
+ * Additionally this function supports the boolean \var{nofront}
+ * field, for not bringing the object to front.
  */
 EXTL_EXPORT
 WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, ExtlTab param)
@@ -307,11 +306,10 @@ WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, ExtlTab param)
 
 
 /*EXTL_DOC
- * Go to first region within \var{reg} in direction \var{dirstr}
- * (up/down/left/right/beg/end/any). For information on \var{param},
- * see \fnref{ioncore.navi_next}. Additionally this function supports
- * the boolean \var{nofront} field, for not bringing the object to
- * front.
+ * Go to first region within \var{reg} in direction \var{dirstr}.
+ * For information on \var{param}, see \fnref{ioncore.navi_next}. 
+ * Additionally this function supports the boolean \var{nofront} field,
+ * for not bringing the object to front.
  */
 EXTL_EXPORT
 WRegion *ioncore_goto_first(WRegion *reg, const char *dirstr, ExtlTab param)

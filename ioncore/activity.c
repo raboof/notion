@@ -93,8 +93,8 @@ bool region_set_activity(WRegion *reg, int sp)
 
 
 /*EXTL_DOC
- * Set activity flag of \var{reg}. The \var{how} parameter most be
- * one of (set/unset/toggle).
+ * Set activity flag of \var{reg}. The \var{how} parameter must be
+ * one of \codestr{set}, \codestr{unset} or \codestr{toggle}.
  */
 EXTL_EXPORT_AS(WRegion, set_activity)
 bool region_set_activity_extl(WRegion *reg, const char *how)

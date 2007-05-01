@@ -1035,7 +1035,8 @@ bool statusbar_set_systray(WStatusBar *sb, int sp)
 
 /*EXTL_DOC
  * Enable or disable use of \var{sb} as systray.
- * The parameter \var{how} can be one of (set/unset/toggle). 
+ * The parameter \var{how} can be one of 
+ * \codestr{set}, \codestr{unset}, or \codestr{toggle}.
  * Resulting state is returned.
  */
 EXTL_EXPORT_AS(WStatusBar, set_systray)

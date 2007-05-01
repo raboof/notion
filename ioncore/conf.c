@@ -58,7 +58,8 @@ static ExtlFn get_layout_fn;
  *                        for hidden workspaces with activity? \\
  *  \var{frame_default_index} & (string) Specifies where to add new regions
  *                        on the mutually exclusive list of a frame. One of
- *                        ''last'', ''next'' (for after current), ''next-act''
+ *                        \codestr{last}, \codestr{next}, (for after current),
+ *                        or \codestr{next-act}
  *                        (for after current and anything with activity right
  *                        after it). \\
  *  \var{dblclick_delay} & (integer) Delay between clicks of a double click.\\
@@ -71,9 +72,11 @@ static ExtlFn get_layout_fn;
  *  \var{kbresize_maxacc} & (floating point) See below. \\
  *  \var{framed_transients} & (boolean) Put transients in nested frames. \\
  *  \var{float_placement_method} & (string) How to place floating frames.
- *                          One of ''udlr'' (up-down, then left-right), 
- *                          ''lrud'' (left-right, then up-down) or ''random''. \\
- *  \var{mousefocus} & String: ''disable'' or ''sloppy''. \\
+ *                          One of \codestr{udlr} (up-down, then left-right), 
+ *                          \codestr{lrud} (left-right, then up-down), or 
+ *                          \codestr{random}. \\
+ *  \var{mousefocus} & (string) Mouse focus mode: 
+ *                     \codestr{disable} or \codestr{sloppy}. \\
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
  *  \var{autoraise} & (boolean) Autoraise regions in groups on goto. \\
  * \end{tabularx}
@@ -206,7 +209,8 @@ ExtlTab ioncore_get_layout(const char *layout)
     
 
 /*EXTL_DOC
- * Get important directories (userdir, sessiondir, searchpath).
+ * Get important directories (the fields \var{userdir}, 
+ * \var{sessiondir}, \var{searchpath} in the returned table).
  */
 EXTL_SAFE
 EXTL_EXPORT
@@ -221,7 +225,8 @@ ExtlTab ioncore_get_paths(ExtlTab tab)
 
 
 /*EXTL_DOC
- * Set important directories (sessiondir, searchpath).
+ * Set important directories (the fields \var{sessiondir}, \var{searchpath}
+ * of \var{tab}).
  */
 EXTL_EXPORT
 bool ioncore_set_paths(ExtlTab tab)

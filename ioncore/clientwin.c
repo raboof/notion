@@ -768,8 +768,8 @@ static bool send_clientmsg(Window win, Atom a, Time stmp)
 
 
 /*EXTL_DOC
- * Attempt to kill (with XKillWindow) the client that owns the X
- * window correspoding to \var{cwin}.
+ * Attempt to kill (with \code{XKillWindow}) the client that owns 
+ * the X window correspoding to \var{cwin}.
  */
 EXTL_EXPORT_MEMBER
 void clientwin_kill(WClientWin *cwin)

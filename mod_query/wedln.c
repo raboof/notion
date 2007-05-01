@@ -784,11 +784,12 @@ bool wedln_prev_completion(WEdln *wedln)
 /*EXTL_DOC
  * Call completion handler with the text between the beginning of line and
  * current cursor position, or select next/previous completion from list if in
- * auto-show-completions mode and \var{cycle} is set to ``next'' or ``prev'',
- * respectively. The \var{mode} may be ``history'' or ``normal''. If it is 
+ * auto-show-completions mode and \var{cycle} is set to \codestr{next} or 
+ * \codestr{prev}, respectively. 
+ * The \var{mode} may be \codestr{history} or \codestr{normal}. If it is 
  * not set, the previous mode is used. Normally next entry is not cycled to
  * despite the setting of \var{cycle} if mode switch occurs. To override
- * this, use ``next-always'' and ``prev-always'' for \var{cycle}.
+ * this, use \codestr{next-always} and \codestr{prev-always} for \var{cycle}.
  */
 EXTL_EXPORT_MEMBER
 void wedln_complete(WEdln *wedln, const char *cycle, const char *mode)

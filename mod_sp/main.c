@@ -144,7 +144,9 @@ static bool is_scratchpad(WRegion *reg)
 
 /*EXTL_DOC
  * Change displayed status of some scratchpad on \var{mplex} if one is 
- * found. The parameter \var{how} is one of (set/unset/toggle).
+ * found. The parameter \var{how} is one of 
+ * \codestr{set}, \codestr{unset}, or \codestr{toggle}.
+ * The resulting status is returned.
  */
 EXTL_EXPORT
 bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
@@ -173,7 +175,9 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
 
 /*EXTL_DOC
  * Toggle displayed status of \var{sp}.
- * The parameter \var{how} is one of (set/unset/toggle).
+ * The parameter \var{how} is one of 
+ * \codestr{set}, \codestr{unset}, or \codestr{toggle}.
+ * The resulting status is returned.
  */
 EXTL_EXPORT
 bool mod_sp_set_shown(WFrame *sp, const char *how)

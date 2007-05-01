@@ -43,7 +43,8 @@ bool region_set_tagged(WRegion *reg, int sp)
 
 /*EXTL_DOC
  * Change tagging state of \var{reg} as defined by \var{how}
- * (set/unset/toggle). Resulting state is returned.
+ * (one of \codestr{set}, \codestr{unset}, or \codestr{toggle}).
+ * The resulting state is returned.
  */
 EXTL_EXPORT_AS(WRegion, set_tagged)
 bool region_set_tagged_extl(WRegion *reg, const char *how)

@@ -343,7 +343,7 @@ int mplex_get_index(WMPlex *mplex, WRegion *reg)
 
 
 /*EXTL_DOC
- * Move \var{r} ''right'' within objects managed by \var{mplex} on list 1.
+ * Move \var{r} ``right'' within objects managed by \var{mplex} on list 1.
  */
 EXTL_EXPORT_MEMBER
 void mplex_inc_index(WMPlex *mplex, WRegion *r)
@@ -356,7 +356,7 @@ void mplex_inc_index(WMPlex *mplex, WRegion *r)
 
 
 /*EXTL_DOC
- * Move \var{r} ''right'' within objects managed by \var{mplex} on list 1.
+ * Move \var{r} ``left'' within objects managed by \var{mplex} on list 1.
  */
 EXTL_EXPORT_MEMBER
 void mplex_dec_index(WMPlex *mplex, WRegion *r)
@@ -880,7 +880,8 @@ bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp)
 
 /*EXTL_DOC
  * Set the visibility of the region \var{reg} on \var{mplex}
- * as specified with the parameter \var{how} (set/unset/toggle).
+ * as specified with the parameter \var{how} 
+ * (one of \codestr{set}, \codestr{unset}, or \codestr{toggle}).
  * The resulting state is returned.
  */
 EXTL_EXPORT_AS(WMPlex, set_hidden)
@@ -1659,12 +1660,13 @@ static bool do_attach_stdisp(WRegion *mplex, WRegion *reg, void *unused)
  * \begin{tabularx}{\linewidth}{lX}
  *   \tabhead{Field & Description}
  *   \var{pos} & The corner of the screen to place the status display
- *               in. One of \code{tl}, \code{tr}, \var{bl} or \var{br}. \\
- *   \var{action} & If this field is set to \code{keep}, \var{corner}
+ *               in: one of \codestr{tl}, \codestr{tr}, \codestr{bl} 
+ *               or \codestr{br}. \\
+ *   \var{action} & If this field is set to \codestr{keep}, \var{corner}
  *                  and \var{orientation} are changed for the existing
- *                  status display. If this field is set to \var{remove},
+ *                  status display. If this field is set to \codestr{remove},
  *                  the existing status display is removed. If this
- *                  field is not set or is set to \code{replace}, a 
+ *                  field is not set or is set to \codestr{replace}, a 
  *                  new status display is created and the old, if any,
  *                  removed. \\
  * \end{tabularx}

@@ -446,7 +446,7 @@ bool clientwin_register(WClientWin *cwin)
 
 /*EXTL_DOC
  * Set the name of \var{reg} to \var{p}. If the name is already in use,
- * an instance number suffix \code{<n>} will be attempted. If \var{p} has
+ * an instance number suffix \codestr{<n>} will be attempted. If \var{p} has
  * such a suffix, it will be modified, otherwise such a suffix will be
  * added. Setting \var{p} to nil will cause current name to be removed.
  */
@@ -463,7 +463,7 @@ bool region_set_name(WRegion *reg, const char *p)
 /*EXTL_DOC
  * Similar to \fnref{WRegion.set_name} except if the name is already in use,
  * other instance numbers will not be attempted. The string \var{p} should
- * not contain a \code{<n>} suffix or this function will fail.
+ * not contain a \codestr{<n>} suffix or this function will fail.
  */
 EXTL_EXPORT_MEMBER
 bool region_set_name_exact(WRegion *reg, const char *p)
