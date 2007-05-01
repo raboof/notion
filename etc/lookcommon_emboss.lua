@@ -9,6 +9,10 @@ de.defstyle("frame", {
         -- Something detached from the frame is active
         padding_colour = "#901010",
     }),
+    de.substyle("userattr1", {
+        -- For user scripts
+        padding_colour = "#009010",
+    }),
     border_style = "ridge",
     padding_pixels = 2,
     highlight_pixels = 1,
