@@ -268,6 +268,63 @@ void de_get_transparent_background(uint *mode, ExtlTab tab)
 /*}}}*/
 
 
+/*{{{ Extras filter/copy */
+
+
+static const char * const known_values[]={
+    "based_on",
+    "font",
+    "shadow_pixels",
+    "highlight_pixels",
+    "padding_pixels",
+    "border_style",
+    "border_sides",
+    "spacing",
+    "foreground_colour",
+    "background_colour",
+    "shadow_colour",
+    "highlight_colour",
+    "padding_colour",
+    "text_align",
+    NULL
+};
+
+
+static bool filter_extras_iter_fn(ExtlAny k, ExtlAny v, void *p)
+{
+    ExtlTab *tgt=(ExtlTab*)p;
+    const char *s;
+    int i;
+    
+    if(k.type!='s' && k.type!='S')
+        return TRUE;
+    
+    for(i=0; known_values[i]; i++){
+        if(strcmp(known_values[i], k.value.s)==0)
+            return TRUE;
+    }
+    
+    if(*tgt==extl_table_none())
+        *tgt=extl_create_table();
+        
+    extl_table_set(*tgt, 'a', 'a', k, v);
+    
+    return TRUE;
+}
+
+
+static void filter_extras(ExtlTab *tgt, ExtlTab src)
+{
+    /* Copy any unknown string-keyed values from src to tgt,
+     * possibly creating tgt.
+     */
+    extl_table_iter(src, filter_extras_iter_fn, tgt);
+}
+
+
+/*}}}*/
+
+
 /*{{{ de_defstyle */
 
 
@@ -275,8 +332,6 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 {
     DEStyle *based_on=style->based_on;
     
-    style->data_table=extl_ref_table(tab);
-
     if(based_on!=NULL){
         style->border=based_on->border;
         style->transparency_mode=based_on->transparency_mode;
@@ -376,16 +431,24 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
                     free(based_on->extra_cgrps);
                     based_on->extra_cgrps=NULL;
                     based_on->n_extra_cgrps=0;
+                    
                 }
             }
-                
+            
+            /* style->extras_table should be none still */
+            style->extras_table=based_on->extras_table;
+            based_on->extras_table=extl_table_none();
+            
             style->based_on=based_on->based_on;
             based_on->based_on=NULL;
+            
             destyle_unref(based_on);
         }
         
     }
-
+    
+    filter_extras(&style->extras_table, tab);
+    
     destyle_add(style);
     
     return TRUE;

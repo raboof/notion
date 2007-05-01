@@ -236,7 +236,7 @@ bool debrush_get_extra(DEBrush *brush, const char *key, char type, void *data)
 {
     DEStyle *style=brush->d;
     while(style!=NULL){
-        if(extl_table_get(style->data_table, 's', type, key, data))
+        if(extl_table_get(style->extras_table, 's', type, key, data))
             return TRUE;
         style=style->based_on;
     }

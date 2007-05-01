@@ -173,7 +173,7 @@ void destyle_deinit(DEStyle *style)
     if(style->extra_cgrps!=NULL)
         free(style->extra_cgrps);
     
-    extl_unref_table(style->data_table);
+    extl_unref_table(style->extras_table);
     
     XFreeGC(ioncore_g.dpy, style->normal_gc);
     
@@ -238,7 +238,7 @@ bool destyle_init(DEStyle *style, WRootWin *rootwin, const char *name)
     style->n_extra_cgrps=0;
     style->extra_cgrps=NULL;
     
-    style->data_table=extl_table_none();
+    style->extras_table=extl_table_none();
     
     create_normal_gc(style, rootwin);
     

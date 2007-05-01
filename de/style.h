@@ -70,7 +70,7 @@ DECLSTRUCT(DEStyle){
     int textalign;
     uint spacing;
     
-    ExtlTab data_table;
+    ExtlTab extras_table;
 
     /* Only initialised if used as a DETabBrush */
     bool tabbrush_data_ok;
