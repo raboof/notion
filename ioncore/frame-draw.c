@@ -583,7 +583,7 @@ void frame_activated(WFrame *frame)
 
 void frame_quasiactivity_change(WFrame *frame)
 {
-    bool is=(frame->quasiactive_count>0);
+    bool is=(frame->quasiact_source!=NULL);
     
     ensure_create_attrs();
     
@@ -594,9 +594,6 @@ void frame_quasiactivity_change(WFrame *frame)
         gr_stylespec_set(&frame->baseattr, GR_ATTR(not_quasiactive));
         gr_stylespec_unset(&frame->baseattr, GR_ATTR(quasiactive));
     }
-    
-    if(!REGION_IS_ACTIVE(frame))
-        window_draw((WWindow*)frame, FALSE);
 }
 
 

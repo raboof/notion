@@ -81,6 +81,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->mode=mode;
     frame->tab_min_w=0;
     frame->bar_max_width_q=1.0;
+    frame->quasiact_source=NULL;
     
     gr_stylespec_init(&frame->baseattr);
     
@@ -511,38 +512,55 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
 /*{{{ Focus  */
 
 
-static void frame_quasiactivation(WFrame *frame, WRegion *reg, bool act)
+static void frame_quasiactivation(WFrame *frame, Obj *src, bool act)
 {
-    bool was, is;
+    if(frame->quasiact_source==src || act){
+        bool was, is;
+        
+        was=(frame->quasiact_source!=NULL);
     
-    was=(frame->quasiactive_count>0);
+        frame->quasiact_source=(act ? src : NULL);
     
-    frame->quasiactive_count=maxof(0, frame->quasiactive_count 
-                                       + (act ? 1 : -1));
-                                       
-    is=(frame->quasiactive_count>0);
-    
-    if(was!=is)
-        frame_quasiactivity_change(frame);
+        is=(frame->quasiact_source!=NULL);
+        
+        if(was!=is){
+            frame_quasiactivity_change(frame);
+            if(!REGION_IS_ACTIVE(frame))
+                window_draw((WWindow*)frame, FALSE);
+        }
+    }
 }
 
 
 static bool actinact(WRegion *reg, bool act)
 {
     WPHolder *returnph=region_get_return(reg);
-    WFrame *frame;
+    WFrame *frame=NULL;
+    Obj *src=NULL;
+    WRegion *tgt;
     
     if(returnph==NULL || pholder_stale(returnph))
         return FALSE;
     
-    frame=OBJ_CAST(pholder_target(returnph), WFrame);
+    tgt=pholder_target(returnph);
+
+    frame=OBJ_CAST(tgt, WFrame);
     
     if(frame!=NULL){
-        /* Ok, reg has return placeholder set to a frame: 
-         * do quasiactivation/inactivation 
+        src=(Obj*)returnph;
+    }else{
+        /* Show quasiactivation for stuff detached from
+         * groups contained in the frame as well.
          */
-        frame_quasiactivation(frame, reg, act);
+        WGroup *grp=OBJ_CAST(tgt, WGroup);
+        if(grp!=NULL){
+            frame=REGION_MANAGER_CHK(grp, WFrame);
+            src=(Obj*)grp;
+        }
     }
+    
+    if(frame!=NULL)
+        frame_quasiactivation(frame, src, act);
     
     return TRUE;
 }
@@ -908,6 +926,14 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
                                   WRegion *reg)
 {
     bool need_draw=TRUE;
+    
+    if(mode==MPLEX_CHANGE_REMOVE && (Obj*)reg==frame->quasiact_source){
+        /* Reset indirect quasiactivation through group that
+         * is being removed.
+         */
+        frame->quasiact_source=NULL;
+        frame_quasiactivity_change(frame);
+    }
     
     if(mode!=MPLEX_CHANGE_SWITCHONLY)
         frame_initialise_titles(frame);

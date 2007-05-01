@@ -61,7 +61,7 @@ DECLCLASS(WFrame){
     int saved_x, saved_y;
     
     int tab_dragged_idx;
-    uint quasiactive_count;
+    void *quasiact_source;
     
     GrBrush *brush;
     GrBrush *bar_brush;
