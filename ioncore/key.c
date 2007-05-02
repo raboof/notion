@@ -186,15 +186,14 @@ bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
 }
 
 
-/* Return value TRUE = grab needed */
-static bool do_key(WRegion *reg, XKeyEvent *ev)
+enum{GRAB_NONE, GRAB_SUBMAP, GRAB_WAITRELEASE};
+
+
+static int do_key(WRegion *reg, XKeyEvent *ev)
 {
     WBinding *binding=NULL;
-    WRegion *oreg=NULL, *binding_owner=NULL, *subreg=NULL;
-    bool grabbed;
-    
-    oreg=reg;
-    grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
+    WRegion *oreg=reg, *binding_owner=NULL, *subreg=NULL;
+    bool grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
     
     if(grabbed){
         /* Find the deepest nested active window grabbing this key. */
@@ -221,7 +220,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
     if(binding!=NULL){
         if(binding->submap!=NULL){
             if(add_sub(oreg, ev->keycode, ev->state))
-                return grabbed;
+                return (grabbed ? GRAB_SUBMAP : GRAB_NONE);
             else
                 clear_subs(oreg);
         }else if(binding_owner!=NULL){
@@ -245,7 +244,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             current_kcb=0;
             
             if(ev->state!=0 && !subs && binding->wait)
-                waitrelease(oreg);
+                return GRAB_WAITRELEASE;
         }
     }else if(oreg->submapstat!=NULL){
         clear_subs(oreg);
@@ -253,7 +252,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
         insstr((WWindow*)oreg, ev);
     }
     
-    return FALSE;
+    return GRAB_NONE;
 }
 
 
@@ -264,7 +263,7 @@ static bool submapgrab_handler(WRegion* reg, XEvent *xev)
         return FALSE;
     if(ioncore_ismod(ev->keycode))
         return FALSE;
-    return !do_key(reg, ev);
+    return (do_key(reg, ev)==GRAB_SUBMAP);
 }
 
 
@@ -280,7 +279,23 @@ void ioncore_do_handle_keypress(XKeyEvent *ev)
     WRegion *reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
     
     if(reg!=NULL){
-        if(do_key(reg, ev))
-            submapgrab(reg);
+        Watch w;
+        int grab;
+        
+        /* reg might be destroyed by binding handlers */
+        watch_setup(&w, (Obj*)reg, NULL);
+        
+        grab=do_key(reg, ev);
+        
+        reg=(WRegion*)w.obj;
+        
+        if(reg!=NULL){
+            if(grab==GRAB_SUBMAP)
+                submapgrab(reg);
+            else if(grab==GRAB_WAITRELEASE)
+                waitrelease(reg);
+        }
+        
+        watch_reset(&w);
     }
 }
