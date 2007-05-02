@@ -114,7 +114,8 @@ bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action,
     d->action=action;
     d->list=list;
     d->fn=extl_fn_none();
-    
+    watch_init(&(d->watch));
+
     if(obj!=NULL)
         watch_setup(&(d->watch), obj, defer_watch_handler);
     
@@ -153,7 +154,6 @@ bool mainloop_defer_extl_on_list(ExtlFn fn, WDeferred **list)
     d->action=NULL;
     d->list=list;
     d->fn=extl_ref_fn(fn);
-    
     watch_init(&(d->watch));
     
     LINK_ITEM(*list, d, next, prev);

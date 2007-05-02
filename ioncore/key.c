@@ -279,7 +279,7 @@ void ioncore_do_handle_keypress(XKeyEvent *ev)
     WRegion *reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
     
     if(reg!=NULL){
-        Watch w;
+        Watch w=WATCH_INIT;
         int grab;
         
         /* reg might be destroyed by binding handlers */
