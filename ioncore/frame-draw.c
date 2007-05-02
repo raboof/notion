@@ -318,18 +318,7 @@ void frame_recalc_bar(WFrame *frame)
     FRAME_MX_FOR_ALL(sub, frame, tmp){
         textw=init_title(frame, i);
         if(textw>0){
-            if(frame->flags&FRAME_SHOW_NUMBERS){
-                char *s=NULL;
-                libtu_asprintf(&s, "[%d]", i+1);
-                if(s!=NULL){
-                    title=grbrush_make_label(frame->bar_brush, s, textw);
-                    free(s);
-                }else{
-                    title=NULL;
-                }
-            }else{
-                title=region_make_label(sub, textw, frame->bar_brush);
-            }
+            title=region_make_label(sub, textw, frame->bar_brush);
             frame->titles[i].text=title;
         }
         i++;

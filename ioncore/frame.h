@@ -33,7 +33,6 @@
 /*#define FRAME_SZH_USEMINMAX 0x1000 */
 /*#define FRAME_FWD_CWIN_RQGEOM 0x2000 */
 
-#define FRAME_SHOW_NUMBERS 0x4000
 
 typedef enum{
     FRAME_MODE_UNKNOWN,
