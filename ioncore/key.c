@@ -263,7 +263,7 @@ static bool submapgrab_handler(WRegion* reg, XEvent *xev)
         return FALSE;
     if(ioncore_ismod(ev->keycode))
         return FALSE;
-    return (do_key(reg, ev)==GRAB_SUBMAP);
+    return (do_key(reg, ev)!=GRAB_SUBMAP);
 }
 
 
