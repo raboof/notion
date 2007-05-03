@@ -215,13 +215,8 @@ void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
     if(!ioncore_g.use_mb){
         st=XStringListToTextProperty((char **)&ptr, n, &prop);
     }else{
-#ifdef X_HAVE_UTF8_STRING        
-        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
-                                     XUTF8StringStyle, &prop);
-#else        
         st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
                                      XTextStyle, &prop);
-#endif        
         st=!st;
     }
     
@@ -379,8 +374,7 @@ void ioncore_x_delete_property(int win, int atom)
 
 
 /*EXTL_DOC
- * Get a text property for a window (\code{STRING}, \code{COMPOUND_TEXT},
- * or \code{UTF8_STRING} property converted). The fields in the returned
+ * Get a text property for a window. The fields in the returned
  * table (starting from 1) are the null-separated parts of the property.
  * See the \code{XGetTextProperty}(3) manual page for more information.
  */
