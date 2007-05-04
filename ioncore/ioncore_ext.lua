@@ -25,6 +25,7 @@ dopath('ioncore_winprops')
 dopath('ioncore_misc')
 dopath('ioncore_wd')
 dopath('ioncore_menudb')
+dopath('ioncore_tabnum')
 
 -- Modifier setup compatibility kludge
 local oldindex
@@ -54,6 +55,7 @@ setmetatable(_G, newmeta)
 -- Export some important functions into global namespace.
 export(ioncore, 
        "submap",
+       "submap_enter",
        "kpress",
        "kpress_wait",
        "mpress",

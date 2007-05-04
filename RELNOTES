@@ -25,6 +25,9 @@ changes are:
     to do with it, and nobody else seems to support or maintain 
     it either.
 
+  * Automatically displayed tab numbers, when entering the
+    `Mod1+K` submap.
+
 Distributors should pay heed to the name policy notice in the
 LICENSE file.
 
