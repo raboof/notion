@@ -374,10 +374,12 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
             
             if(s!=NULL){
                 int l=strlen(s);
-                if(debrush_get_text_width(brush, s, l) < 
-                   g->w-bdw->right-bdw->left){
+                uint w=debrush_get_text_width(brush, s, l);
+                if(w < g->w-bdw->right-bdw->left){
                     int ty=get_ty(g, bdw, fnte);
-                    int tx=g->x+bdw->left;
+                    int tx=(d->textalign==DEALIGN_RIGHT
+                            ? g->x+bdw->left
+                            : g->x+g->w-bdw->right-w);
                     debrush_do_draw_string(brush, tx, ty, s, l, TRUE, cg);
                 }
                 free(s);
