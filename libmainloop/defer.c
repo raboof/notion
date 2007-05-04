@@ -183,8 +183,11 @@ static void do_execute(WDeferred *d)
     free_defer(d);
     
     if(a!=NULL){
-        if(obj!=NULL)
-            a(obj);
+        /* The deferral should not be on the list, if there
+         * was an object, and it got destroyed.
+         */
+        /*if(obj!=NULL)*/
+        a(obj);
     }else if(fn!=extl_fn_none()){
         extl_call(fn, NULL, NULL);
         extl_unref_fn(fn);
