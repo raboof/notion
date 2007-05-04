@@ -97,9 +97,7 @@ void clientwin_quote_next(WClientWin *cwin)
 
 static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 {
-    if(!ioncore_unmod(ev->xkey.state, ev->xkey.keycode))
-        return TRUE;
-    return FALSE;
+    return (ioncore_unmod(ev->xkey.state, ev->xkey.keycode)!=0);
 }
 
 
@@ -228,10 +226,10 @@ bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
 enum{GRAB_NONE, GRAB_SUBMAP, GRAB_WAITRELEASE};
 
 
-static WBinding *lookup_binding(WRegion *reg, 
-                                int act, uint state, uint kcb, 
-                                WSubmapState *st,
-                                WRegion **binding_owner, WRegion **subreg)
+static WBinding *lookup_binding_(WRegion *reg, 
+                                 int act, uint state, uint kcb, 
+                                 WSubmapState *st,
+                                 WRegion **binding_owner, WRegion **subreg)
 {
     WBinding *binding;
     
@@ -254,7 +252,32 @@ static WBinding *lookup_binding(WRegion *reg,
     return binding;
 }
 
-                                 
+static WBinding *lookup_binding(WRegion *oreg, 
+                                int act, uint state, uint kcb, 
+                                WRegion **binding_owner, WRegion **subreg)
+{
+    WRegion *reg=oreg;
+        
+    /* Find the deepest nested active window grabbing this key. */
+    while(reg->active_sub!=NULL)
+        reg=reg->active_sub;
+        
+    return lookup_binding_(reg, act, state, kcb, oreg->submapstat, 
+                           binding_owner, subreg);
+}
+
+
+static void do_call_binding(WBinding *binding, WRegion *reg, WRegion *subreg)
+{
+    WRegion *mgd=region_managed_within(reg, subreg);
+
+    /* TODO: having to pass both mgd and subreg for some handlers
+     * to work is ugly and complex.
+     */
+    extl_call(binding->func, "ooo", NULL, reg, mgd, subreg);
+}
+
+
 static int do_key(WRegion *oreg, XKeyEvent *ev)
 {
     WBinding *binding=NULL;
@@ -263,14 +286,8 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
     int ret=GRAB_NONE;
     
     if(grabbed){
-        WRegion *reg=oreg;
-        
-        /* Find the deepest nested active window grabbing this key. */
-        while(reg->active_sub!=NULL)
-            reg=reg->active_sub;
-        
-        binding=lookup_binding(reg, BINDING_KEYPRESS, ev->state, ev->keycode,
-                               oreg->submapstat, &binding_owner, &subreg);
+        binding=lookup_binding(oreg, BINDING_KEYPRESS, ev->state, ev->keycode,
+                               &binding_owner, &subreg);
     }else{
         binding=region_lookup_keybinding(oreg, BINDING_KEYPRESS, 
                                          ev->state, ev->keycode, 
@@ -295,9 +312,9 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
                     watch_setup(&s->leave_reg, (Obj*)own2, NULL);
                 }*/
                 
-                call=lookup_binding(binding_owner, BINDING_SUBMAP_ENTER, 0, 0,
-                                    oreg->submapstat, 
-                                    &binding_owner, &subreg);
+                call=lookup_binding_(binding_owner, BINDING_SUBMAP_ENTER, 0, 0,
+                                     oreg->submapstat, 
+                                     &binding_owner, &subreg);
                 
                 ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE);
             }
@@ -312,16 +329,11 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
         }
         
         if(call!=NULL){
-            WRegion *mgd=region_managed_within(binding_owner, subreg);
-            
             current_kcb=ev->keycode;
             current_state=ev->state;
             current_submap=subs;
             
-            /* TODO: having to pass both mgd and subreg for some handlers
-             * to work is ugly and complex.
-             */
-            extl_call(call->func, "ooo", NULL, binding_owner, mgd, subreg);
+            do_call_binding(call, binding_owner, subreg);
             
             current_kcb=0;
         }
@@ -336,8 +348,21 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
 static bool submapgrab_handler(WRegion* reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
-    if(ev->type!=KeyPress)
+    if(ev->type!=KeyPress){
+        if(ioncore_unmod(ev->state, ev->keycode)==0){
+            WBinding *binding;
+            WRegion *binding_owner, *subreg;
+            
+            binding=lookup_binding(reg, 
+                                   BINDING_SUBMAP_RELEASEMOD, 0, 0,
+                                   &binding_owner, &subreg);
+            
+            if(binding!=NULL)
+                do_call_binding(binding, binding_owner, subreg);
+        }
         return FALSE;
+    }
+
     if(ioncore_ismod(ev->keycode))
         return FALSE;
     if(do_key(reg, ev)!=GRAB_SUBMAP){

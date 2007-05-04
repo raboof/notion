@@ -238,6 +238,7 @@ static StringIntMap action_map[]={
     {"mdblclick", BINDING_BUTTONDBLCLICK},
     {"mdrag", BINDING_BUTTONMOTION},
     {"submap_enter", BINDING_SUBMAP_ENTER},
+    {"submap_wait", BINDING_SUBMAP_RELEASEMOD},
     /*{"submap_leave", BINDING_SUBMAP_LEAVE},*/
     {NULL, 0}
 };

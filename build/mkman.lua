@@ -78,13 +78,12 @@ local function dobindings(fn, bindings)
     p.defctxmenu=dummy
     p.menuentry=dummy
     p.submenu=dummy
-    --p.submap_enter=dummy
-    --p.submap_leave=dummy
+    p.submap_enter=dummy
+    p.submap_leave=dummy
+    p.submap_wait=dummy
     
     p.ioncore={
         set=dummy,
-        submap_enter=dummy,
-        submap_leave=dummy
     }
     
     function p.bdoc(text)

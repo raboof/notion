@@ -56,6 +56,7 @@ setmetatable(_G, newmeta)
 export(ioncore, 
        "submap",
        "submap_enter",
+       "submap_wait",
        "kpress",
        "kpress_wait",
        "mpress",

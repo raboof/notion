@@ -143,6 +143,12 @@ function ioncore.submap_enter(cmd, guard)
     return putcmd(cmd, guard, {action = "submap_enter"})
 end
 
+--DOC
+-- Submap modifier release event for bindings.
+function ioncore.submap_wait(cmd, guard)
+    return putcmd(cmd, guard, {action = "submap_wait"})
+end
+
 -- DOC
 -- Submap leave event for bindings.
 --function ioncore.submap_leave(cmd, guard)
