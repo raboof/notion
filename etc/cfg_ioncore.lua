@@ -227,7 +227,7 @@ defbindings("WFrame.toplevel", {
     
     submap(META.."K", {
         -- Display tab numbers on submap activation
-        ioncore.submap_enter("ioncore.tabnum.delayed_show(_, 150)"),
+        ioncore.submap_enter("ioncore.tabnum.delayed_show(_, 250)"),
         
         bdoc("Switch to n:th object within the frame."),
         kpress("1", "WFrame.switch_nth(_, 0)"),

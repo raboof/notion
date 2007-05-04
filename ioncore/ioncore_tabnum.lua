@@ -22,13 +22,13 @@ end
 -- Show tab numbers on \var{frame} after a delay, clearing them
 -- when submap grab is released the next time. If the numbers
 -- have not been shown before this, they will not be shown.
--- The \var{delay} is in milliseconds and defaults to 150.
+-- The \var{delay} is in milliseconds and defaults to 250.
 function ioncore.tabnum.delayed_show(frame, delay)
     local tmr=ioncore.create_timer()
     
     framestate[frame]=tmr
     
-    tmr:set(delay or 150, function() ioncore.tabnum.show(frame) end)
+    tmr:set(delay or 250, function() ioncore.tabnum.show(frame) end)
 end
 
 --DOC
