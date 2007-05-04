@@ -10,25 +10,24 @@ ioncore.tabnum={}
 
 local framestate={}
 
---DOC
--- Show tab numbers on \var{frame}, clearing them when submap 
--- grab is released the next time.
-function ioncore.tabnum.show(frame)
+local function do_show(frame)
     frame:set_grattr('numbered', 'set')
     framestate[frame]='set'
 end
 
 --DOC
--- Show tab numbers on \var{frame} after a delay, clearing them
--- when submap grab is released the next time. If the numbers
--- have not been shown before this, they will not be shown.
--- The \var{delay} is in milliseconds and defaults to 250.
-function ioncore.tabnum.delayed_show(frame, delay)
-    local tmr=ioncore.create_timer()
-    
-    framestate[frame]=tmr
-    
-    tmr:set(delay or 250, function() ioncore.tabnum.show(frame) end)
+-- Show tab numbers on \var{frame}, clearing them when submap
+-- grab is released the next time. If \var{delay} is given, in
+-- milliseconds, the numbers are not actually displayed until this
+-- time has passed.
+function ioncore.tabnum.show(frame, delay)
+    if delay and delay>0 then
+        local tmr=ioncore.create_timer()
+        framestate[frame]=tmr
+        tmr:set(delay, function() do_show(frame) end)
+    else
+        do_show(frame)
+    end
 end
 
 --DOC
