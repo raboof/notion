@@ -196,7 +196,8 @@ void region_remove_bindings(WRegion *reg)
 }
 
 
-WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
+WBinding *region_lookup_keybinding(WRegion *reg, 
+                                   int act, uint state, uint kcb, 
                                    const WSubmapState *sc,
                                    WRegion **binding_owner_ret)
 {
@@ -230,7 +231,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
             continue;
         }
 
-        binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, ev->state, ev->keycode);
+        binding=bindmap_lookup_binding(bindmap, act, state, kcb);
         
         if(binding!=NULL)
             break;

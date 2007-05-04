@@ -7,7 +7,11 @@
  */
 
 #include <ctype.h>
+
 #include <libtu/objp.h>
+#include <libextl/extl.h>
+#include <libmainloop/defer.h>
+
 #include "common.h"
 #include "key.h"
 #include "binding.h"
@@ -16,7 +20,6 @@
 #include "cursor.h"
 #include "grab.h"
 #include "regbind.h"
-#include <libextl/extl.h>
 #include "strings.h"
 #include "xwindow.h"
 
@@ -117,29 +120,63 @@ static void waitrelease(WRegion *reg)
 }
 
 
-static void free_subs(WSubmapState *p)
+static void free_sub(WSubmapState *p)
 {
-    WSubmapState *next;
+    /*extl_unref_fn(p->leave);
+    watch_reset(&p->leave_reg);
+    */
     
-    while(p!=NULL){
-        next=p->next;
-        free(p);
-        p=next;
+    free(p);
+}
+
+
+void region_free_submapstat(WRegion *reg)
+{
+    while(reg->submapstat!=NULL){
+        WSubmapState *p=reg->submapstat;
+        reg->submapstat=p->next;
+        free_sub(p);
     }
+}
+
+
+WHook *ioncore_submap_ungrab_hook=NULL;
+
+
+static void call_submap_ungrab_hook()
+{
+    hook_call_v(ioncore_submap_ungrab_hook); 
 }
 
 
 static void clear_subs(WRegion *reg)
 {
-    while(reg->submapstat!=NULL){
-        WSubmapState *tmp=reg->submapstat;
-        reg->submapstat=tmp->next;
-        free(tmp);
+    region_free_submapstat(reg);
+    mainloop_defer_action(NULL, (WDeferredAction*)call_submap_ungrab_hook);
+/*
+    while(reg!=NULL && reg->submapstat!=NULL){
+        WSubmapState *p=reg->submapstat;
+        reg->submapstat=p->next;
+        
+        if(p->leave!=extl_fn_none() && p->leave_reg.obj!=NULL){
+            Watch regw=WATCH_INIT;
+                
+            watch_setup(&regw, (Obj*)reg, NULL);
+                
+            extl_call(p->leave, "o", NULL, p->leave_reg.obj);
+            
+            reg=(WRegion*)regw.obj;
+            
+            watch_reset(&regw);
+        }
+        
+        free_sub(p);
     }
+*/
 }
 
 
-static bool add_sub(WRegion *reg, uint key, uint state)
+static WSubmapState *add_sub(WRegion *reg, uint key, uint state)
 {
     WSubmapState **p;
     WSubmapState *s;
@@ -156,14 +193,16 @@ static bool add_sub(WRegion *reg, uint key, uint state)
     s=ALLOC(WSubmapState);
     
     if(s==NULL)
-        return FALSE;
+        return NULL;
     
     s->key=key;
     s->state=state;
+    /*s->leave=extl_fn_none();
+    watch_init(&s->leave_reg);*/
     
     *p=s;
     
-    return TRUE;
+    return s;
 
 }
 
@@ -189,48 +228,91 @@ bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
 enum{GRAB_NONE, GRAB_SUBMAP, GRAB_WAITRELEASE};
 
 
-static int do_key(WRegion *reg, XKeyEvent *ev)
+static WBinding *lookup_binding(WRegion *reg, 
+                                int act, uint state, uint kcb, 
+                                WSubmapState *st,
+                                WRegion **binding_owner, WRegion **subreg)
+{
+    WBinding *binding;
+    
+    *subreg=NULL;
+    
+    do{
+        binding=region_lookup_keybinding(reg, act, state, kcb, st,
+                                         binding_owner);
+        
+        if(binding!=NULL)
+            break;
+            
+        if(OBJ_IS(reg, WRootWin))
+            break;
+        
+        *subreg=reg;
+        reg=REGION_PARENT_REG(reg);
+    }while(reg!=NULL);
+    
+    return binding;
+}
+
+                                 
+static int do_key(WRegion *oreg, XKeyEvent *ev)
 {
     WBinding *binding=NULL;
-    WRegion *oreg=reg, *binding_owner=NULL, *subreg=NULL;
+    WRegion *binding_owner=NULL, *subreg=NULL;
     bool grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
+    int ret=GRAB_NONE;
     
     if(grabbed){
+        WRegion *reg=oreg;
+        
         /* Find the deepest nested active window grabbing this key. */
         while(reg->active_sub!=NULL)
             reg=reg->active_sub;
         
-        do{
-            binding=region_lookup_keybinding(reg, ev, oreg->submapstat, 
-                                             &binding_owner);
-            
-            if(binding!=NULL)
-                break;
-            if(OBJ_IS(reg, WRootWin))
-                break;
-            
-            subreg=reg;
-            reg=REGION_PARENT_REG(reg);
-        }while(reg!=NULL);
+        binding=lookup_binding(reg, BINDING_KEYPRESS, ev->state, ev->keycode,
+                               oreg->submapstat, &binding_owner, &subreg);
     }else{
-        binding=region_lookup_keybinding(oreg, ev, oreg->submapstat, 
+        binding=region_lookup_keybinding(oreg, BINDING_KEYPRESS, 
+                                         ev->state, ev->keycode, 
+                                         oreg->submapstat, 
                                          &binding_owner);
     }
     
     if(binding!=NULL){
+        bool subs=(oreg->submapstat!=NULL);
+        WBinding *call=NULL;
+        
         if(binding->submap!=NULL){
-            if(add_sub(oreg, ev->keycode, ev->state))
-                return (grabbed ? GRAB_SUBMAP : GRAB_NONE);
-            else
-                clear_subs(oreg);
-        }else if(binding_owner!=NULL){
-            WRegion *mgd=region_managed_within(binding_owner, subreg);
-            bool subs=(oreg->submapstat!=NULL);
-            
-            clear_subs(oreg);
+            WSubmapState *s=add_sub(oreg, ev->keycode, ev->state);
+            if(s!=NULL){
+                /*WRegion *own2, *subreg2;
+                
+                call=lookup_binding(binding_owner, BINDING_SUBMAP_LEAVE, 0, 0,
+                                    oreg->submapstat, &own2, &subreg2);
+                                    
+                if(call!=NULL){
+                    s->leave=extl_ref_fn(call->func);
+                    watch_setup(&s->leave_reg, (Obj*)own2, NULL);
+                }*/
+                
+                call=lookup_binding(binding_owner, BINDING_SUBMAP_ENTER, 0, 0,
+                                    oreg->submapstat, 
+                                    &binding_owner, &subreg);
+                
+                ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE);
+            }
+        }else{
+            call=binding;
             
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
+            
+            if(ev->state!=0 && !subs && binding->wait)
+                ret=GRAB_WAITRELEASE;
+        }
+        
+        if(call!=NULL){
+            WRegion *mgd=region_managed_within(binding_owner, subreg);
             
             current_kcb=ev->keycode;
             current_state=ev->state;
@@ -239,20 +321,15 @@ static int do_key(WRegion *reg, XKeyEvent *ev)
             /* TODO: having to pass both mgd and subreg for some handlers
              * to work is ugly and complex.
              */
-            extl_call(binding->func, "ooo", NULL, binding_owner, mgd, subreg);
+            extl_call(call->func, "ooo", NULL, binding_owner, mgd, subreg);
             
             current_kcb=0;
-            
-            if(ev->state!=0 && !subs && binding->wait)
-                return GRAB_WAITRELEASE;
         }
-    }else if(oreg->submapstat!=NULL){
-        clear_subs(oreg);
-    }else if(OBJ_IS(oreg, WWindow)){
+    }else if(oreg->submapstat==NULL && OBJ_IS(oreg, WWindow)){
         insstr((WWindow*)oreg, ev);
     }
     
-    return GRAB_NONE;
+    return ret;
 }
 
 
@@ -263,8 +340,15 @@ static bool submapgrab_handler(WRegion* reg, XEvent *xev)
         return FALSE;
     if(ioncore_ismod(ev->keycode))
         return FALSE;
-    return (do_key(reg, ev)!=GRAB_SUBMAP);
+    if(do_key(reg, ev)!=GRAB_SUBMAP){
+        clear_subs(reg);
+        return TRUE;
+    }else{
+        return FALSE;
+    }
 }
+
+
 
 
 static void submapgrab(WRegion *reg)
@@ -294,6 +378,8 @@ void ioncore_do_handle_keypress(XKeyEvent *ev)
                 submapgrab(reg);
             else if(grab==GRAB_WAITRELEASE)
                 waitrelease(reg);
+            else if(grab==GRAB_NONE && reg->submapstat!=NULL)
+                clear_subs(reg);
         }
         
         watch_reset(&w);

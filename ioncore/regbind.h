@@ -18,6 +18,8 @@
 DECLSTRUCT(WSubmapState){
     uint key, state;
     WSubmapState *next;
+    /* ExtlFn leave; */
+    /* Watch leave_reg; */
 };
 
 
@@ -26,7 +28,8 @@ extern void region_remove_bindmap(WRegion *reg, WBindmap *bindmap);
 
 extern void region_remove_bindings(WRegion *reg);
 
-extern WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
+extern WBinding *region_lookup_keybinding(WRegion *reg, 
+                                          int act, uint state, uint kcb, 
                                           const WSubmapState *sc,
                                           WRegion **binding_owner_ret);
 extern WBinding *region_lookup_binding(WRegion *reg, int act, uint state,

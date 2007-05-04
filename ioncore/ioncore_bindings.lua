@@ -137,6 +137,18 @@ function ioncore.kpress_wait(keyspec, cmd, guard)
     return putcmd(cmd, guard, {action = "kpress_wait", kcb = keyspec})
 end
 
+--DOC
+-- Submap enter event for bindings.
+function ioncore.submap_enter(cmd, guard)
+    return putcmd(cmd, guard, {action = "submap_enter"})
+end
+
+-- DOC
+-- Submap leave event for bindings.
+--function ioncore.submap_leave(cmd, guard)
+--    return putcmd(cmd, guard, {action = "submap_leave"})
+--end
+
 local function mact(act_, kcb_, cmd, guard)
     local st, en, kcb2_, area_=string.find(kcb_, "([^@]*)@(.*)")
     return putcmd(cmd, guard, {

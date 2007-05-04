@@ -483,6 +483,11 @@ static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
     
     binding=search_binding(bindmap, &tmp);
 
+    if(BINDING_IS_PSEUDO(act)){
+        /* No use trying anything else */
+        return binding;
+    }
+    
     if(binding==NULL){
         tmp.state=AnyModifier;
         binding=search_binding(bindmap, &tmp);

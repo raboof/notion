@@ -196,12 +196,13 @@ static bool do_submap(WBindmap *bindmap, const char *str,
                       ExtlTab subtab, uint action, uint mod, uint ksb)
 {
     WBinding binding, *bnd;
-    uint kcb;
+    uint kcb=0;
 
     if(action!=BINDING_KEYPRESS)
         return FALSE;
     
     kcb=XKeysymToKeycode(ioncore_g.dpy, ksb);
+    
     bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
     
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
@@ -236,6 +237,8 @@ static StringIntMap action_map[]={
     {"mclick", BINDING_BUTTONCLICK},
     {"mdblclick", BINDING_BUTTONDBLCLICK},
     {"mdrag", BINDING_BUTTONMOTION},
+    {"submap_enter", BINDING_SUBMAP_ENTER},
+    /*{"submap_leave", BINDING_SUBMAP_LEAVE},*/
     {NULL, 0}
 };
 
@@ -268,14 +271,16 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
             goto fail;
         }
     }
+    
+    if(!BINDING_IS_PSEUDO(action)){
+        if(!extl_table_gets_s(tab, "kcb", &ksb_str))
+            goto fail;
 
-    if(!extl_table_gets_s(tab, "kcb", &ksb_str))
-        goto fail;
-
-    if(!ioncore_parse_keybut(ksb_str, &mod, &ksb,
-                             (action!=BINDING_KEYPRESS && action!=-1), 
-                             init_any)){
-        goto fail;
+        if(!ioncore_parse_keybut(ksb_str, &mod, &ksb,
+                                 (action!=BINDING_KEYPRESS && action!=-1), 
+                                 init_any)){
+            goto fail;
+        }
     }
     
     if(extl_table_gets_t(tab, "submap", &subtab)){

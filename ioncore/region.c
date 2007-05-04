@@ -24,6 +24,7 @@
 #include "activity.h"
 #include "region-iter.h"
 #include "return.h"
+#include "key.h"
 
 
 #define D2(X)
@@ -109,7 +110,9 @@ void region_deinit(WRegion *reg)
         D(warn("Region to be focused next destroyed[1]."));
         ioncore_g.focus_next=NULL;
     }
-
+    
+    assert(reg->submapstat==NULL);
+    /*region_free_submapstat(reg);*/
     region_detach_manager(reg);
     region_unset_return(reg);
     region_unset_parent(reg);
