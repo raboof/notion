@@ -82,7 +82,7 @@ void ioncore_tagged_clear()
 
 
 /*EXTL_DOC
- * Returns first tagged object, untagging it as well if \var{untag}is set.
+ * Returns first tagged object, untagging it as well if \var{untag} is set.
  */
 EXTL_SAFE
 EXTL_EXPORT

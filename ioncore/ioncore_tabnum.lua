@@ -31,8 +31,7 @@ function ioncore.tabnum.show(frame, delay)
 end
 
 --DOC
--- Clear all tab numbers set by \fnref{ioncore.tabnum.show}
--- or \fnref{ioncore.tabnum.delayed_show}.
+-- Clear all tab numbers set by \fnref{ioncore.tabnum.show}.
 function ioncore.tabnum.clear()
     local st=framestate
     framestate={}

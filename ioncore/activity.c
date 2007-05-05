@@ -134,7 +134,7 @@ bool ioncore_activity_i(ExtlFn iterfn)
 
 
 /*EXTL_DOC
- * Return first regio non activity list.
+ * Returns first region on activity list.
  */
 EXTL_SAFE
 EXTL_EXPORT
