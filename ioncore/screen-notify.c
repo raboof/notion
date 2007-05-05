@@ -374,11 +374,10 @@ void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how)
 void ioncore_screen_activity_notify(WRegion *reg, WRegionNotify how)
 {
     if(how==ioncore_g.notifies.activity){
-        WScreen *scr=region_screen_of(reg);
-        
-        screen_update_infowin(scr);
-        screen_update_notifywin(scr);
-
+        screen_update_notifywin(region_screen_of(reg));
+    }else if(how==ioncore_g.notifies.name){
+        if(region_is_activity(reg))
+            screen_update_notifywin(region_screen_of(reg));
     }
 }
 
