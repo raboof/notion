@@ -9,10 +9,10 @@ the names Ion, Ion3, and other derived names:
     Derived works and altered versions that significantly differ from the
     original copyright holder's versions, must either a) be given names 
     that can not be associated with the "Ion" project, or b) be qualified
-    as "Ion soup", and still be considerable customised versions of this
-    software. Executables must also be given names that do not conflict
-    with the original copyright holder's version, and the copyright holder
-    may not be referred to for support.
+    as "Ion soup", and still be considerable as customised versions of this
+    software. In both cases, executables must also be given names that do 
+    not conflict with the original copyright holder's version, and the 
+    copyright holder may not be referred to for support.
 
     Modules and other (standalone) extensions to Ion must also be named 
     so that they can not be confused to be supported by the copyright 
@@ -29,10 +29,13 @@ the names Ion, Ion3, and other derived names:
     b) The holders of physical distribution media are provided ways to 
     upgrade to the latest release within this same delay.
 
-    This name policy notice may not be altered or removed. The copyright
-    holder and the Ion project retain the same rights to your modifications
-    that it would have under the LGPL or GPL without these or similar
-    additional terms.
+    This name policy notice may not be altered, and must be included in
+    any altered versions and binary redistributions. It may only be
+    removed when using small portions of the code in unrelated projects. 
+
+    The copyright holder and the Ion project retain the same rights to
+    your modifications that it would have under the LGPL or GPL without
+    these or similar additional terms.
 
 Explanations:
 
