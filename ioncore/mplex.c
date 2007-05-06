@@ -698,7 +698,11 @@ static WStacking *mplex_to_focus(WMPlex *mplex)
     
     st=mplex_do_to_focus(mplex, to_try, NULL);
     
-    return (st!=NULL ? st : mplex->mx_current->st);
+    return (st!=NULL 
+            ? st 
+            : (mplex->mx_current!=NULL
+               ? mplex->mx_current->st
+               : NULL));
 }
 
 
