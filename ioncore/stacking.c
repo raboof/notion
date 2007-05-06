@@ -7,6 +7,7 @@
  */
 
 #include <libtu/rb.h>
+#include <libtu/minmax.h>
 
 #include "common.h"
 #include "region.h"
@@ -518,8 +519,8 @@ uint stacking_min_level(WStacking *stacking,
                         WStackingFilter *include_filt, 
                         void *filt_data)
 {
+    uint min_level=STACKING_LEVEL_BOTTOM;
     WStacking *st=NULL;
-    uint min_level=0;
     
     if(stacking==NULL)
         return STACKING_LEVEL_BOTTOM;
@@ -543,35 +544,39 @@ uint stacking_min_level(WStacking *stacking,
 }
 
 
-WStacking *stacking_find_to_focus(WStacking *stacking, WStacking *to_try,
+WStacking *stacking_find_to_focus(WStacking *stacking, 
+                                  WStacking *to_try,
                                   WStackingFilter *include_filt, 
                                   WStackingFilter *approve_filt, 
                                   void *filt_data)
 {
+    uint min_level=STACKING_LEVEL_BOTTOM;
     WStacking *st=NULL;
-    uint min_level=0;
     
     if(stacking==NULL)
         return NULL;
-    
-    min_level=stacking_min_level(stacking, include_filt, filt_data);
-    
-    if(to_try!=NULL && to_try->level>=min_level)
-        return to_try;
     
     st=stacking;
     do{
         st=st->prev;
         
-        if(st->level<min_level)
-            break;
+        if(st->reg==NULL)
+            continue;
         
-        if(st->reg!=NULL 
-           && !(st->reg->flags&REGION_SKIP_FOCUS)
-           && cf(include_filt, filt_data, st)
-           && cf(approve_filt, filt_data, st)){
-            return st;
+        if(st!=to_try && (st->reg->flags&REGION_SKIP_FOCUS ||
+                          !cf(include_filt, filt_data, st))){
+            /* skip */
+            continue;
         }
+        
+        if(st->level<min_level)
+            break; /* no luck */
+            
+        if(st==to_try || cf(approve_filt, filt_data, st))
+            return st;
+            
+        if(st->level>=STACKING_LEVEL_MODAL1)
+            min_level=maxof(min_level, st->level);
     }while(st!=stacking);
     
     return NULL;
