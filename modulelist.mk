@@ -3,8 +3,8 @@
 ##
 
 MODULE_LIST = mod_tiling mod_query mod_menu \
-	      mod_dock mod_sp mod_sm de \
-	      mod_mgmtmode mod_statusbar
+	      mod_dock mod_sp mod_sm mod_statusbar \
+	      de
 
 # Modules to -dlpreload into pwm if statically linking.
 
