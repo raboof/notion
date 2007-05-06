@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if test "$ION_REPOS" = ""; then
+    ION_REPOS=http://modeemi.fi/~tuomov/repos
+fi
+
 do_darcs_export() {
 	url="$1"
 	project="$2"
@@ -49,8 +53,8 @@ EOF
 
 }
 
-getlib http://modeemi.fi/~tuomov/repos/libtu-3 libtu
-getlib http://modeemi.fi/~tuomov/repos/libextl-3 libextl
+getlib $ION_REPOS/libtu-3 libtu
+getlib $ION_REPOS/libextl-3 libextl
 
 ##
 ## Makefiles
