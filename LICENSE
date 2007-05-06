@@ -4,27 +4,27 @@ Copyright (c) Tuomo Valkonen 1999-2007.
 The code of this project is "essentially" licensed under the LGPL, version
 2.1, unless otherwise indicated in components taken from elsewhere. It is
 reproduced below. Additionally, the following terms apply to the use of 
-the names Ion, Ion3, and other derived names:
+the names Ion(tm), Ion3(tm), and other derived names:
 
     Derived works and altered versions that significantly differ from the
-    original copyright holder's versions, must either a) be given names 
-    that can not be associated with the "Ion" project, or b) be qualified
-    as "Ion soup", and still be considerable as customised versions of this
-    software. In both cases, executables must also be given names that do 
-    not conflict with the original copyright holder's version, and the 
-    copyright holder may not be referred to for support.
+    original author's versions, must either a) be given names that can not
+    be associated with the "Ion" project, or b) be qualified as "Ion soup",
+    and still be considerable as customised versions of this software. In 
+    both cases, executables must also be given names that do not conflict
+    with the original author's version, and this author may not be referred
+    to for support.
 
     Modules and other (standalone) extensions to Ion must also be named 
-    so that they can not be confused to be supported by the copyright 
-    holder. If "Ion" occurs in the name, it must be in the form
+    so that they can not be confused to be supported by the original
+    author. If "Ion" occurs in the name, it must be in the form
     "Foo for Ion" instead of "Ion Foo", etc.
     
     If the name of the project (Ion), resp. names of particular branches
     (Ion1, Ion2, Ion3, etc.), are used without further prominent version
     qualifiers and notices of possible out-datedness to distribute this
     software, then the following conditions must hold: a) The version
-    distributed online may not significantly differ from the copyright
-    holder's latest release marked stable, resp. latest release on a 
+    distributed online may not significantly differ from the original
+    author's latest release marked stable, resp. latest release on a 
     branch, within a reasonable delay (normally 28 days) from the release.
     b) The holders of physical distribution media are provided ways to 
     upgrade to the latest release within this same delay.
@@ -33,7 +33,7 @@ the names Ion, Ion3, and other derived names:
     any altered versions and binary redistributions. It may only be
     removed when using small portions of the code in unrelated projects. 
 
-    The copyright holder and the Ion project retain the same rights to
+    The original author and the Ion project retain the same rights to
     your modifications that it would have under the LGPL or GPL without
     these or similar additional terms.
 
@@ -44,12 +44,11 @@ Basic changes that are needed to install or run the software on a target
 platform are a priori insignificant. Additionally, basic configuration
 changes to better integrate the software with the target platform, 
 without obstructing the standard behaviour, are a priori insignificant.
-The copyright holder, however, reserves the right to refine the 
-definition of significant changes on a per-case basis. Please consult
-when in doubt. 
+The author, however, reserves the right to refine the definition of 
+significant changes on a per-case basis. Please consult when in doubt. 
 
 Distributions: For example, suppose an aggregate distribution of software
-provides a `installpkg` command for installing packages. Then the action
+provides an `installpkg` command for installing packages. Then the action
 `installpkg ion3` (resp. `installpkg ion`)  should always install the 
 latest release of Ion3 (resp. the latest stable release), online 
 connectivity provided. The action `installpkg ion-3ds-20070318` may
