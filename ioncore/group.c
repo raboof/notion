@@ -1003,12 +1003,6 @@ static WStacking *prv(WGroup *ws, WStacking *st, bool wrap)
 typedef WStacking *NxtFn(WGroup *ws, WStacking *st, bool wrap);
 
 
-static bool mapped_filt(WStacking *st, void *unused)
-{
-    return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
-}
-
-
 static bool focusable(WGroup *ws, WStacking *st, uint min_level)
 {
     return (st->reg!=NULL
@@ -1027,7 +1021,7 @@ static WStacking *do_get_next(WGroup *ws, WStacking *sti,
     stacking=group_get_stacking(ws);
     
     if(stacking!=NULL)
-        min_level=stacking_min_level(stacking, mapped_filt, NULL);
+        min_level=stacking_min_level_mapped(stacking);
 
     st=sti;
     while(1){
