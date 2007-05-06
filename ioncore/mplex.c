@@ -1488,7 +1488,7 @@ WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par,
  *  \var{pseudomodal} & (boolean) The attached region is ``pseudomodal''
  *                      if the stacking level dictates it to be modal.
  *                      This means that the region may be hidden to display
- *                      regions with lesser stacking levels.
+ *                      regions with lesser stacking levels. \\
  *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}. \\
  *  \var{geom} & (table) Geometry specification. \\
  * \end{tabularx}
