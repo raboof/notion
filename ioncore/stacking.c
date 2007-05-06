@@ -30,6 +30,7 @@ WStacking *create_stacking()
         st->szplcy=SIZEPOLICY_DEFAULT;
         st->hidden=FALSE;
         st->lnode=NULL;
+        st->pseudomodal=FALSE;
     }
     
     return st;

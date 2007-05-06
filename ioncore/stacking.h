@@ -19,8 +19,8 @@
 #define STACKING_LEVEL_ON_TOP 2
 #define STACKING_LEVEL_MODAL1 1024
 
-
 #define STACKING_IS_HIDDEN(ST) ((ST)->hidden)
+#define STACKING_IS_PSEUDOMODAL(ST) ((ST)->pseudomodal)
 
 
 DECLSTRUCT(WStacking){
@@ -34,6 +34,7 @@ DECLSTRUCT(WStacking){
     /* flags */
     uint to_unweave:2;
     uint hidden:1;
+    uint pseudomodal:1;
     
     /* WMPlex stuff */
     WLListNode *lnode;

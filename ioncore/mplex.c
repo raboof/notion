@@ -511,25 +511,153 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 /*{{{ Focus  */
 
 
-static WStacking *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try)
+typedef struct{
+    WMPlex *mplex;
+    WStacking *to_try;
+    WStacking *group_st;
+    PtrList **hidelist;
+    bool try_hard;
+} FiltData;
+
+
+static WRegion *manager_within(WMPlex *mplex, WStacking *st)
 {
+    return region_managed_within((WRegion*)mplex, st->reg);
+}
+
+
+static WStacking *stacking_within(WMPlex *mplex, WStacking *st)
+{
+    WRegion *reg=manager_within(mplex, st);
+    
+    return (reg==NULL 
+            ? NULL
+            : (reg==st->reg
+               ? st
+               : ioncore_find_stacking(reg)));
+}
+
+
+/* Mutually exclusive regions can't be pseudomodal */
+#define IS_PSEUDOMODAL(ST) ((ST)->lnode==NULL && (ST)->pseudomodal)
+
+
+static bool mapped_pseudomodal_include_filt(WStacking *st, void *data_)
+{
+    FiltData *data=(FiltData*)data_;
+    WStacking *stw;
+    
+    if(st->reg==NULL || !REGION_IS_MAPPED(st->reg))
+        return FALSE;
+        
+    if(!data->hidelist
+       || (data->to_try==NULL && data->group_st==NULL) 
+       || st->level<STACKING_LEVEL_MODAL1){
+        return TRUE;
+    }
+    
+    /* Ok, modal node in the way. Let's see if it is pseudomodal
+     * and can be hidden.
+     */
+    
+    stw=stacking_within(data->mplex, st);
+    
+    /* This should not happen */
+    if(stw==NULL || stw->reg==NULL)
+        return FALSE;
+    
+    /* The node is within the same group, so it can not be hidden. 
+     * Latter case should not happen.
+     */
+    if(stw==data->group_st || stw==data->to_try)
+        return TRUE;
+    
+    if(IS_PSEUDOMODAL(stw)){
+        /* Don't insert multiple times. */
+        return !ptrlist_reinsert_first(data->hidelist, stw);
+    }
+        
+    return TRUE;
+}
+
+
+static bool mgr_pseudomodal_approve_filt(WStacking *st, void *data_)
+{
+    FiltData *data=(FiltData*)data_;
+    
+    return (data->group_st==NULL || st==data->group_st ||
+            manager_within(data->mplex, st)==data->group_st->reg);
+}
+
+
+WStacking *mplex_find_to_focus(WMPlex *mplex,
+                               WStacking *to_try,
+                               WStacking *group_st,
+                               PtrList **hidelist)
+{
+    WStackingFilter *fi=mapped_pseudomodal_include_filt;
+    WStackingFilter *fa=mgr_pseudomodal_approve_filt;
     WStacking *stacking=mplex_get_stacking(mplex);
-    WStacking *st=NULL;
+    FiltData data;
+    WStacking *st;
     
     if(stacking==NULL)
         return NULL;
-
+    
     if(to_try!=NULL && (to_try->reg==NULL || !REGION_IS_MAPPED(to_try->reg)))
         to_try=NULL;
-
-    st=stacking_find_to_focus_mapped(stacking, to_try, NULL);
     
-    if(st!=NULL)
+    data.mplex=mplex;
+    data.to_try=to_try;
+    data.group_st=group_st;
+    data.hidelist=hidelist;
+    
+    st=stacking_find_to_focus(stacking, to_try, fi, fa, &data);
+    
+    if(st==NULL && hidelist!=NULL)
+        ptrlist_clear(hidelist);
+    
+    return st;
+}
+
+
+static WStacking *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try,
+                                    PtrList **hidelist)
+{
+    return mplex_find_to_focus(mplex, to_try, NULL, hidelist);
+}
+
+
+static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
+                                       WStacking *to_try, 
+                                       PtrList **hidelist)
+{
+    WGroup *grp=OBJ_CAST(node->reg, WGroup);
+    WStacking *st;
+    
+    if(grp!=NULL){
+        if(to_try==NULL)
+            to_try=grp->current_managed;
+        st=mplex_find_to_focus(mplex, to_try, node, hidelist);
+        if(st!=NULL || to_try!=NULL)
+            return st;
+        if(hidelist!=NULL)
+            ptrlist_clear(hidelist);
+        /* We don't know whether something is blocking focus here,
+         * or if there was nothing to focus (as node->reg itself
+         * isn't on the stacking list).
+         */
+    }
+    
+    st=mplex_do_to_focus(mplex, node, hidelist);
+    
+    if(st==node)
         return st;
-    else if(mplex->mx_current!=NULL)
-        return mplex->mx_current->st;
-    else
-        return NULL;
+        
+    if(hidelist!=NULL)
+        ptrlist_clear(hidelist);
+    
+    return NULL;
 }
 
 
@@ -542,11 +670,11 @@ static WStacking *maybe_focusable(WRegion *reg)
 }
 
 
-static WStacking *stacking_within(WMPlex *mplex, WRegion *reg)
+static WStacking *has_stacking_within(WMPlex *mplex, WRegion *reg)
 {
     while(reg!=NULL && REGION_MANAGER(reg)!=(WRegion*)mplex)
         reg=REGION_MANAGER(reg);
-    
+                
     return maybe_focusable(reg);
 }
 
@@ -555,58 +683,22 @@ static WStacking *mplex_to_focus(WMPlex *mplex)
 {
     WStacking *to_try=NULL;
     WRegion *reg=NULL;
+    WStacking *st;
     
     to_try=maybe_focusable(REGION_ACTIVE_SUB(mplex));
     
     if(to_try==NULL){
         /* Search focus history */
         for(reg=ioncore_g.focus_current; reg!=NULL; reg=reg->active_next){
-            to_try=stacking_within(mplex, reg);
+            to_try=has_stacking_within(mplex, reg);
             if(to_try!=NULL)
                 break;
         }
     }
     
-    return mplex_do_to_focus(mplex, to_try);
-}
-
-
-static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
-                                       WStacking *to_try)
-{
-    WStacking *stacking=mplex_get_stacking(mplex);
-    WStacking *st=NULL;
+    st=mplex_do_to_focus(mplex, to_try, NULL);
     
-    if(stacking==NULL)
-        return NULL;
-
-    if(to_try!=NULL && (to_try->reg==NULL || !REGION_IS_MAPPED(to_try->reg)))
-        to_try=NULL;
-    
-    return stacking_find_to_focus_mapped(stacking, to_try, node->reg);
-}
-
-
-static WStacking *mplex_to_focus_on(WMPlex *mplex, WStacking *node,
-                                    WStacking *to_try)
-{
-    WGroup *grp=OBJ_CAST(node->reg, WGroup);
-    WStacking *st;
-    
-    if(grp!=NULL){
-        if(to_try==NULL)
-            to_try=grp->current_managed;
-        st=mplex_do_to_focus_on(mplex, node, to_try);
-        if(st!=NULL || to_try!=NULL)
-            return st;
-        /* We don't know whether something is blocking focus here,
-         * or if there was nothing to focus (as node->reg itself
-         * isn't on the stacking list).
-         */
-    }
-    
-    st=mplex_do_to_focus(mplex, node);
-    return (st==node ? st : NULL);
+    return (st!=NULL ? st : mplex->mx_current->st);
 }
 
 
@@ -723,7 +815,7 @@ static bool mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
     bool ret=TRUE;
     
     if(node!=NULL){
-        foc=mplex_to_focus_on(mplex, node, NULL);
+        foc=mplex_do_to_focus_on(mplex, node, NULL, NULL);
         ret=(foc!=NULL);
     }
         
@@ -743,24 +835,33 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
                             WStacking *sub, int flags, 
                             WPrepareFocusResult *res)
 {
+    bool ew=(flags&REGION_GOTO_ENTERWINDOW);
+    PtrList *hidelist=NULL;
+    PtrList **hidelistp=(ew ? NULL : &hidelist);
     WStacking *foc;
     
     if(sub==NULL && node==NULL)
         return FALSE;
     
     /* Display the node in any case */
-    if(node!=NULL && !(flags&REGION_GOTO_ENTERWINDOW))
+    if(node!=NULL && !ew)
         mplex_do_node_display(mplex, node, TRUE);
     
     if(!region_prepare_focus((WRegion*)mplex, flags, res))
         return FALSE;
 
     if(node!=NULL)
-        foc=mplex_to_focus_on(mplex, node, sub);
+        foc=mplex_do_to_focus_on(mplex, node, sub, hidelistp);
     else
-        foc=mplex_do_to_focus(mplex, sub);
+        foc=mplex_do_to_focus(mplex, sub, hidelistp);
 
     if(foc!=NULL){
+        while(hidelist!=NULL){
+            WStacking *st=(WStacking*)ptrlist_take_first(&hidelist);
+            st->hidden=TRUE;
+            region_unmap(st->reg);
+        }
+        
         if(ioncore_g.autoraise && 
            !(flags&REGION_GOTO_ENTERWINDOW) &&
            foc->level>STACKING_LEVEL_BOTTOM){
@@ -1155,6 +1256,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     node->hidden=TRUE;
     node->szplcy=szplcy;
     node->level=level;
+    node->pseudomodal=(param->flags&MPLEX_ATTACH_PSEUDOMODAL ? 1 : 0);
     
     if(lnode!=NULL){
         llist_link_after(&(mplex->mx_list), 
@@ -1301,6 +1403,9 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
 
     if(extl_table_is_bool_set(tab, "hidden"))
         par->flags|=MPLEX_ATTACH_HIDDEN&ok;
+        
+    if(extl_table_is_bool_set(tab, "pseudomodal"))
+        par->flags|=MPLEX_ATTACH_PSEUDOMODAL&ok;
 
     if(extl_table_gets_i(tab, "index", &(par->index)))
         par->flags|=MPLEX_ATTACH_INDEX&ok;
@@ -1380,6 +1485,10 @@ WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par,
  *  \var{hidden} & (boolean) Attach hidden, if not prevented
  *                  by e.g. the mutually exclusive list being empty.
  *                  This option overrides \var{switchto}. \\
+ *  \var{pseudomodal} & (boolean) The attached region is ``pseudomodal''
+ *                      if the stacking level dictates it to be modal.
+ *                      This means that the region may be hidden to display
+ *                      regions with lesser stacking levels.
  *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}. \\
  *  \var{geom} & (table) Geometry specification. \\
  * \end{tabularx}
@@ -1905,6 +2014,8 @@ static void save_node(WMPlex *mplex, ExtlTab subs, int *n,
         extl_unref_table(g);
         if(STACKING_IS_HIDDEN(node))
             extl_table_sets_b(st, "hidden", TRUE);
+        if(STACKING_IS_PSEUDOMODAL(node))
+            extl_table_sets_b(st, "pseudomodal", TRUE);
         if(unnumbered)
             extl_table_sets_b(st, "unnumbered", TRUE);
         
