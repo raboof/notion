@@ -298,8 +298,8 @@ end
 --   Variable & Type & Description \\
 --   \var{template} & string & The template; see
 --                             Section \ref{sec:statusbar}. \\
---   \var{pos} & string & Position: \code{"tl"}, \code{"tr"}, 
---                        \code{"bl"} or \code{"br"}
+--   \var{pos} & string & Position: \codestr{tl}, \codestr{tr}, 
+--                        \codestr{bl} or \codestr{br}
 --                        (for the obvious combinations of 
 --                        top/left/bottom/right). \\
 --   \var{screen} & integer & Screen number to create the statusbar on. \\
