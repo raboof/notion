@@ -32,6 +32,20 @@ ioncore.set{
     -- Movement commands warp the pointer to frames instead of just
     -- changing focus. Enabled by default.
     --warp=true,
+    
+    -- Switch frames to display newly mapped windows
+    --switchto=true,
+    
+    -- Default index for windows in frames: one of 'last', 'next' (for
+    -- after current), or 'next-act' (for after current and anything with
+    -- activity right after it).
+    --frame_default_index='next',
+    
+    -- Auto-unsqueeze transients/menus/queries.
+    --unsqueeze=true,
+    
+    -- Display notification tooltips for activity on hidden workspace.
+    --screen_notify=true,
 }
 
 
@@ -39,6 +53,8 @@ ioncore.set{
 -- commented out below, except mod_dock. If you do not want to load
 -- something, comment out this line, and uncomment the lines corresponding
 -- the the modules or configuration files that you want, below.
+-- The modules' configuration files correspond to the names of the 
+-- modules with 'mod' replaced by 'cfg'.
 dopath("cfg_defaults")
 
 -- Load configuration of the Ion 'core'
