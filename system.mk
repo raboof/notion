@@ -67,8 +67,8 @@ LUAC=$(LUA_DIR)/bin/luac
 # what you want.
 #LUA_LIBS=`pkg-config --libs lua5.1`
 #LUA_INCLUDES=`pkg-config --cflags lua5.1`
-#LUA=`which lua5.1`
-#LUAC=`which luac5.1`
+#LUA=/usr/bin/lua5.1
+#LUAC=/usr/bin/luac5.1
 
 
 ##
