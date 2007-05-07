@@ -233,6 +233,7 @@ function mod_statusbar.rcv_statusd_err(str)
     end
 end
 
+local tried_to_launch=false
 
 --DOC
 -- Load modules and launch \file{ion-statusd} with configuration 
@@ -242,6 +243,8 @@ function mod_statusbar.launch_statusd(cfg)
     if statusd_pid>0 then
         return
     end
+    
+    tried_to_launch=true
     
     local mods=get_modules()
     
@@ -351,6 +354,6 @@ package.loaded["mod_statusbar"]=true
 dopath('cfg_statusbar', true)
 
 -- Launch statusd if the user didn't launch it.
-if statusd_pid<=0 then
+if not tried_to_launch then
     mod_statusbar.launch_statusd()
 end
