@@ -253,9 +253,10 @@ function mod_statusbar.launch_statusd(cfg)
     end
 
     -- Lookup ion-statusd
-    local statusd=ioncore.lookup_script("ion-statusd")
+    local statusd_script="ion-statusd"
+    local statusd=ioncore.lookup_script(statusd_script)
     if not statusd then
-        ioncore.warn(TR("Could not find %s", script))
+        ioncore.warn(TR("Could not find %s", statusd_script))
         return
     end
 
