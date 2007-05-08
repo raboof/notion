@@ -660,6 +660,7 @@ void tiling_do_managed_remove(WTiling *ws, WRegion *reg)
     }
 
     region_unset_manager(reg, (WRegion*)ws);
+    splittree_set_node_of(reg, NULL);
 }
 
 
@@ -701,6 +702,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
             
             if(other!=NULL){
                 node->reg=other;
+                splittree_set_node_of(other, node);
                 tiling_managed_add(ws, other);
                 reused=TRUE;
             }else{
