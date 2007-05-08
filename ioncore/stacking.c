@@ -552,7 +552,7 @@ WStacking *stacking_find_to_focus(WStacking *stacking,
                                   void *filt_data)
 {
     uint min_level=STACKING_LEVEL_BOTTOM;
-    WStacking *st=NULL;
+    WStacking *st=NULL, *found=NULL;
     
     if(stacking==NULL)
         return NULL;
@@ -572,15 +572,21 @@ WStacking *stacking_find_to_focus(WStacking *stacking,
         
         if(st->level<min_level)
             break; /* no luck */
-            
-        if(st==to_try || cf(approve_filt, filt_data, st))
+        
+        if(st==to_try)
             return st;
+            
+        if(found==NULL && cf(approve_filt, filt_data, st)){
+            found=st;
+            if(to_try==NULL)
+                break;
+        }
             
         if(st->level>=STACKING_LEVEL_MODAL1)
             min_level=maxof(min_level, st->level);
     }while(st!=stacking);
     
-    return NULL;
+    return found;
 }
 
 
