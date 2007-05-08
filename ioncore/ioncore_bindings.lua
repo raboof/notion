@@ -110,29 +110,30 @@ end
 -- Returns a function that creates a submap binding description table.
 -- When the key press action \var{keyspec} occurs, Ioncore will wait for
 -- a further key presse and act according to the submap.
--- For details, see section \ref{sec:bindings}.
-function ioncore.submap(kcb_, list)
+-- For details, see Section \ref{sec:bindings}.
+function ioncore.submap(keyspec, list)
     if not list then
         return function(lst)
-                   return submap(kcb_, lst)
+                   return submap(keyspec, lst)
                end
     end
-    return {action = "kpress", kcb = kcb_, submap = list}
+    return {action = "kpress", kcb = keyspec, submap = list}
 end
 
 --DOC
 -- Creates a binding description table for the action of pressing a key given 
--- by \var{keyspec} (with possible modifiers) to the function \var{func}.
--- For more information on bindings, see section \ref{sec:bindings}.
+-- by \var{keyspec} (with possible modifiers) to the function \var{cmd}.
+-- The \var{guard} controls when the binding can be called.
+-- For more informationp see Section \ref{sec:bindings}.
 function ioncore.kpress(keyspec, cmd, guard)
     return putcmd(cmd, guard, {action = "kpress", kcb = keyspec})
 end
 
 --DOC
--- This is similar to \fnref{kpress} but after calling \var{cmd}, 
+-- This is similar to \fnref{ioncore.kpress} but after calling \var{cmd}, 
 -- Ioncore waits for all modifiers to be released before processing
 -- any further actions.
--- For more information on bindings, see section \ref{sec:bindings}.
+-- For more information on bindings, see Section \ref{sec:bindings}.
 function ioncore.kpress_wait(keyspec, cmd, guard)
     return putcmd(cmd, guard, {action = "kpress_wait", kcb = keyspec})
 end
@@ -167,22 +168,22 @@ end
 --DOC
 -- Creates a binding description table for the action of clicking a mouse 
 -- button while possible modifier keys are pressed,
--- both given by \var{buttonspec}, to the function \var{func}.
--- For more information, see section \ref{sec:bindings}.
+-- both given by \var{buttonspec}, to the function \var{cmd}.
+-- For more information, see Section \ref{sec:bindings}.
 function ioncore.mclick(buttonspec, cmd, guard)
     return mact("mclick", buttonspec, cmd, guard)
 end
 
 --DOC
--- Similar to \fnref{mclick} but for double-click.
--- Also see section \ref{sec:bindings}.
+-- Similar to \fnref{ioncore.mclick} but for double-click.
+-- Also see Section \ref{sec:bindings}.
 function ioncore.mdblclick(buttonspec, cmd, guard)
     return mact("mdblclick", buttonspec, cmd, guard)
 end
 
 --DOC
--- Similar to \fnref{mclick} but for just pressing the mouse button.
--- Also see section \ref{sec:bindings}.
+-- Similar to \fnref{ioncore.mclick} but for just pressing the mouse button.
+-- Also see Section \ref{sec:bindings}.
 function ioncore.mpress(buttonspec, cmd, guard)
     return mact("mpress", buttonspec, cmd, guard)
 end
@@ -200,7 +201,7 @@ end
 --DOC
 -- Define bindings for context \var{context}. Here \var{binding} is
 -- a table composed of entries created with \fnref{ioncore.kpress}, 
--- etc.; see section \ref{sec:bindings} for details.
+-- etc.; see Section \ref{sec:bindings} for details.
 function ioncore.defbindings(context, bindings)
     local function filterdoc(b)
         local t={}
