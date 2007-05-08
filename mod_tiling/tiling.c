@@ -1069,34 +1069,6 @@ WFrame *tiling_split_at(WTiling *ws, WFrame *frame, const char *dirstr,
 }
 
 
-void do_unsplit(WRegion *reg)
-{
-    WTiling *ws=REGION_MANAGER_CHK(reg, WTiling);
-    WPHolder *ph;
-    bool res;
-    
-    if(ws==NULL)
-        return;
-    
-    ph=region_get_rescue_pholder_for((WRegion*)ws, reg);
-    
-    if(ph==NULL){
-        res=!region_rescue_needed(reg);
-    }else{
-        res=region_rescue(reg, ph);
-        destroy_obj((Obj*)ph);
-    }
-    
-    if(!res){
-        warn(TR("Unable to unsplit: Could not move client windows "
-                "elsewhere within the tiling."));
-        return;
-    }
-    
-    destroy_obj((Obj*)reg);
-}
-
-
 /*EXTL_DOC
  * Try to relocate regions managed by \var{reg} to another frame
  * and, if possible, destroy it.
@@ -1104,10 +1076,19 @@ void do_unsplit(WRegion *reg)
 EXTL_EXPORT_MEMBER
 void tiling_unsplit_at(WTiling *ws, WRegion *reg)
 {
+    WPHolder *ph;
+    
     if(reg==NULL || REGION_MANAGER(reg)!=(WRegion*)ws)
         return;
-        
-    mainloop_defer_action((Obj*)reg, (WDeferredAction*)do_unsplit);
+    
+    ph=region_get_rescue_pholder_for((WRegion*)ws, reg);
+    
+    if(ph!=NULL){
+        region_rescue(reg, ph);
+        destroy_obj((Obj*)ph);
+    }
+    
+    region_defer_rqdispose(reg);
 }
 
 
