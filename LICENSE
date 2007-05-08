@@ -44,8 +44,9 @@ Basic changes that are needed to install or run the software on a target
 platform are a priori insignificant. Additionally, basic configuration
 changes to better integrate the software with the target platform, 
 without obstructing the standard behaviour, are a priori insignificant.
-The author, however, reserves the right to refine the definition of 
-significant changes on a per-case basis. Please consult when in doubt. 
+Everything else is significant. The author reserves the right to refine
+the definition of significant changes on a per-case basis. Please consult
+when in doubt. 
 
 Distributions: For example, suppose an aggregate distribution of software
 provides an `installpkg` command for installing packages. Then the action
