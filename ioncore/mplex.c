@@ -231,8 +231,8 @@ WRegion *mplex_mx_current(WMPlex *mplex)
 
 
 /*EXTL_DOC
- * Returns the \var{n}:th object managed by \var{mplex} on the
- * \var{l}:th layer.
+ * Returns the \var{n}:th object on the mutually exclusive
+ * list of \var{mplex}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
@@ -1382,7 +1382,6 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
                        WMPlexAttachParams *par)
 {
-    int layer=1;
     int tmp;
     char *tmpstr;
     int ok=~mask;

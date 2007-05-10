@@ -183,7 +183,7 @@ void mplexpholder_deinit(WMPlexPHolder *ph)
 /*}}}*/
 
 
-/*{{{ Move, attach, layer */
+/*{{{ Move, attach */
 
 
 typedef struct{

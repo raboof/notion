@@ -26,8 +26,7 @@ DECLCLASS(WMPlexPHolder){
 };
 
 
-/* If 'after' is set, it is used, otherwise 'or_after', 
- * and finally 'or_layer' if this is also unset
+/* If 'either_st' is set, it is used, otherwise 'or_param', is used. 
  */
 
 extern WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
@@ -38,8 +37,6 @@ extern bool mplexpholder_init(WMPlexPHolder *ph,
                               WStacking *either_st,
                               WMPlexAttachParams *or_param);
 extern void mplexpholder_deinit(WMPlexPHolder *ph);
-
-extern int mplexpholder_layer(WMPlexPHolder *ph);
 
 extern WRegion *mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
                                        WRegionAttachData *data);
