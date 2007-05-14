@@ -223,7 +223,7 @@ bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
 }
 
 
-enum{GRAB_NONE, GRAB_SUBMAP, GRAB_WAITRELEASE};
+enum{GRAB_NONE, GRAB_NONE_SUBMAP, GRAB_SUBMAP, GRAB_WAITRELEASE};
 
 
 static WBinding *lookup_binding_(WRegion *reg, 
@@ -316,7 +316,7 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
                                      oreg->submapstat, 
                                      &binding_owner, &subreg);
                 
-                ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE);
+                ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE_SUBMAP);
             }
         }else{
             call=binding;
@@ -403,6 +403,8 @@ void ioncore_do_handle_keypress(XKeyEvent *ev)
                 submapgrab(reg);
             else if(grab==GRAB_WAITRELEASE)
                 waitrelease(reg);
+            else if(grab==GRAB_NONE_SUBMAP)
+                /* nothing */;
             else if(grab==GRAB_NONE && reg->submapstat!=NULL)
                 clear_subs(reg);
         }
