@@ -63,7 +63,8 @@ int frame_press(WFrame *frame, XButtonEvent *ev, WRegion **reg_ret)
         g.y=0;
     }
 
-    if(rectangle_contains(&g, ev->x, ev->y)){
+    if(frame->barmode!=FRAME_BAR_NONE && 
+       rectangle_contains(&g, ev->x, ev->y)){
         p_tabnum=frame_tab_at_x(frame, ev->x);
 
         region_rootpos((WRegion*)frame, &p_tab_x, &p_tab_y);
