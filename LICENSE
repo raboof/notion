@@ -37,6 +37,9 @@ the names Ion(tm), Ion3(tm), and other derived names:
     your modifications that it would have under the LGPL or GPL without
     these or similar additional terms.
 
+    If you fail to follow these terms, you lose the rights granted to
+    you by the LGPL.
+
 Explanations:
 
 Significant change: Bug fixes are a priori insignificant as additions. 
@@ -50,12 +53,21 @@ when in doubt.
 
 Distributions: For example, suppose an aggregate distribution of software
 provides an `installpkg` command for installing packages. Then the action
-`installpkg ion3` (resp. `installpkg ion`)  should always install the 
-latest release of Ion3 (resp. the latest stable release), online 
-connectivity provided. The action `installpkg ion-3ds-20070318` may
-at any date install this particular mentioned release. Likewise 
-`installpkg ion-soup` may install any non-conflicting customised
-version.
+`installpkg ion3` (resp. `installpkg ion`) should within a reasonable delay
+install the latest release of Ion3 (resp. the latest stable release), or
+prominently notify the user that the provided version is not or may not
+be the latest. The action `installpkg ion-3ds-20070318` may at any date 
+install this particular mentioned release. Likewise `installpkg ion-soup` 
+may install any non-conflicting customised version.
+
+The intent of these terms is to curb the power that "distributions", as
+the primary sources of software for many users, have in defining what
+is perceived as Ion. By providing significantly modified versions and
+out-dated development snapshots without prominently mentioning this fact,
+they do not present the work in a light that the author can agree with,
+and create a burden of dealing with (new) users seeking for support for
+such versions.
+
 
 ---
 
