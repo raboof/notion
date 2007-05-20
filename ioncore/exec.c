@@ -126,7 +126,8 @@ int ioncore_exec(const char *cmd)
  * Run \var{cmd} with a read pipe connected to its stdout and stderr.
  * When data is received through one of these pipes, \var{h} or \var{errh} 
  * is called with that data. When the pipe is closed, the handler is called
- * with \code{nil} argument.
+ * with \code{nil} argument. The PID of the new process is returned, or
+ * -1 on error.
  */
 EXTL_SAFE
 EXTL_EXPORT
