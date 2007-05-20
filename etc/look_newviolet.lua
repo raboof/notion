@@ -77,14 +77,9 @@ de.defstyle("frame", {
     border_sides = "all",
 })
 
-de.defstyle("frame-transient", {
-    bar = "none",
-    padding_pixels = 1,
-})
-
 
 dopath("lookcommon_clean")
 
-    
+
 -- Refresh objects' brushes.
 gr.refresh()

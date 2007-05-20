@@ -10,12 +10,12 @@ de.defstyle("frame", {
         -- For user scripts
         padding_colour = "#009010",
     }),
+    padding_pixels = 1,
 })
 
 de.defstyle("frame-tiled", {
     shadow_pixels = 0,
     highlight_pixels = 0,
-    padding_pixels = 1,
     spacing = 1,
 })
 
@@ -25,6 +25,11 @@ de.defstyle("frame-tiled-alt", {
 
 de.defstyle("frame-floating", {
     bar = "shaped",
+    padding_pixels = 0,
+})
+
+de.defstyle("frame-transient", {
+    bar = "none",
     padding_pixels = 0,
 })
 
