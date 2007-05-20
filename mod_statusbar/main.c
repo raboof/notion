@@ -19,12 +19,13 @@
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/global.h>
+#include <ioncore/ioncore.h>
 
 #include "statusbar.h"
 #include "exports.h"
 
 
-#define CF_STATUSD_TIMEOUT_SEC 5
+#define CF_STATUSD_TIMEOUT_SEC 3
 
 
 /*{{{ Module information */
@@ -153,8 +154,13 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     return TRUE;
     
 timeout:
-    warn(TR("ion-statusd timed out."));
-    return FALSE;
+    /* Just complain to stderr, not startup error log, and do not fail.
+     * The system might just be a bit slow. We can continue, but without
+     * initial values for the meters, geometry adjustments may be necessary
+     * when we finally get that information.
+     */
+    ioncore_warn_nolog(TR("ion-statusd timed out."));
+    return TRUE;
 }
 
 
