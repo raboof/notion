@@ -10,7 +10,7 @@ include $(TOPDIR)/build/system-inc.mk
 
 LIBS += $(LIBTU_LIBS)
 INCLUDES += $(LIBTU_INCLUDES)
-CFLAGS += $(XOPEN_SOURCE)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=ion-completefile.c
 
