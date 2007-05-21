@@ -13,7 +13,7 @@ MSGMERGE = msgmerge
 MSGCAT = msgcat
 LXGETTEXT = lua-xgettext
 
-TRANSLATIONS := fi cs
+TRANSLATIONS := fi cs fr
 MO_FILES := $(patsubst %,%.mo, $(TRANSLATIONS))
 PO_FILES := $(patsubst %,%.po, $(TRANSLATIONS))
 
@@ -88,4 +88,7 @@ update_fi: pot
 
 update_cs: pot
 	$(MSGMERGE) -U cs.po $(POTFILE)
+
+update_fr: pot
+	$(MSGMERGE) -U fr.po $(POTFILE)
 

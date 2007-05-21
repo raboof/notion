@@ -1,0 +1,1550 @@
+# translation of ion3.po to
+#
+# french language translations for Ion3.
+#
+# Copyright (c) Pierre-Henri RAMBOZ 2007.
+#
+# This file is distributed under the same license as the Ion3 package.
+#
+#cf ligne 770 pour welcome.fr.txt
+msgid ""
+msgstr ""
+"Project-Id-Version: ion3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-04-22 15:41+0200\n"
+"PO-Revision-Date: 2007-05-21 14:12+0200\n"
+"Last-Translator: Pierre-Henri RAMBOZ DidouPh@gmail.com\n"
+"Language-Team:  <pclos-il8n-dev@lists.berlios.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: ../ioncore/conf-bindings.c:96
+msgid "Insane key combination."
+msgstr "Combinaison de touche démente"
+
+#: ../ioncore/conf-bindings.c:100
+msgid "Could not convert keysym to keycode."
+msgstr "Ne peut convertir keysym en keycode."
+
+#: ../ioncore/conf-bindings.c:111
+#, c-format
+msgid "Unknown button \"%s\"."
+msgstr "Bouton inconnu \"%s\"."
+
+#: ../ioncore/conf-bindings.c:116
+msgid "Insane button combination."
+msgstr "Combinaison de boutons démente."
+
+#: ../ioncore/conf-bindings.c:123 ../ioncore/conf-bindings.c:130
+msgid "Insane modifier combination."
+msgstr "Combinaison de modificateur démente."
+
+#: ../ioncore/conf-bindings.c:168
+#, c-format
+msgid "Can not wait on modifiers when no modifiers set in \"%s\"."
+msgstr "Ne peut attendre les modificateurs quand aucun modificateur définis dans \"%s\"."
+
+#: ../ioncore/conf-bindings.c:186
+#, c-format
+msgid "Unable to add binding %s."
+msgstr "Ne peut ajouter de liaison %s."
+
+#: ../ioncore/conf-bindings.c:191
+#, c-format
+msgid "Unable to remove binding %s."
+msgstr "Ne peut enlever une liaison %s."
+
+#: ../ioncore/conf-bindings.c:230
+#, c-format
+msgid "Unable to add submap for binding %s."
+msgstr "Ne peut ajouter de sousmappage pour la liaison %s."
+
+#
+#: ../ioncore/conf-bindings.c:260
+msgid "Binding type not set."
+msgstr "Type de liaison indéfinis."
+
+#: ../ioncore/conf-bindings.c:270
+#, c-format
+msgid "Unknown binding type \"%s\"."
+msgstr "Type de liaison inconnu \"%s\"."
+
+#: ../ioncore/conf-bindings.c:292
+#, c-format
+msgid "Unknown area \"%s\" for binding %s."
+msgstr "Zone inconnue \"%s\" pour la liaison %s."
+
+#: ../ioncore/conf-bindings.c:333
+#, c-format
+msgid "Unable to get bindmap entry %d."
+msgstr "Incapable d'obtenir la liaison de mappage pour %d."
+
+#: ../ioncore/conf-bindings.c:375
+msgid "Unable to convert keysym to string."
+msgstr "Incapable de convertir keysym en string."
+
+#: ../ioncore/conf-bindings.c:389
+msgid "Unable to convert button to string."
+msgstr "Incapable de convertir le bouton en string."
+
+#
+#: ../ioncore/event.c:113
+msgid "Time request from X server failed."
+msgstr "Requète temporelle pour le serveur X échouée."
+
+#
+#: ../ioncore/exec.c:186
+msgid "Not saving state: running under session manager."
+msgstr "Ne sauvegarde pas l'état : s'exécute dans le gestionnaire de session"
+
+#: ../ioncore/strings.c:107 ../ioncore/strings.c:143 ../ioncore/strings.c:176
+msgid "Invalid multibyte string."
+msgstr "String multibyte invalide."
+
+#: ../ioncore/strings.c:267
+#, c-format
+msgid "Error compiling regular expression: %s"
+msgstr "Erreur enc compilant l'expression régulière: %s"
+
+#: ../ioncore/modules.c:158
+msgid "Invalid module name."
+msgstr "Nom de module invalide."
+
+#
+#: ../ioncore/modules.c:170
+msgid "The module is already loaded."
+msgstr "Le module est déjà chargé."
+
+#: ../ioncore/modules.c:185
+msgid "Module version information not found or version mismatch. Refusing to use."
+msgstr "Information de version de module non trouvée ou erreur de version. Refus d'utilisation."
+
+#: ../ioncore/modules.c:196
+#, c-format
+msgid "Unable to initialise module %s."
+msgstr "Incapable d'initialiser le module %s."
+
+#: ../ioncore/modules.c:220 ../libextl/readconfig.c:388
+#, c-format
+msgid "Unable to find '%s' on search path."
+msgstr "Incapable de trouver '%s' dans le chemin de recherche."
+
+#: ../ioncore/modules.c:291
+msgid "Unknown module."
+msgstr "Module inconnu."
+
+#: ../ioncore/modules.c:299
+msgid "Unable to initialise module."
+msgstr "Incapable d'initialiser le module."
+
+#: ../ioncore/modules.c:344
+msgid "No module to load given."
+msgstr "Pas de module à charger spécifié"
+
+#: ../ioncore/property.c:355 ../ioncore/property.c:364
+msgid "Invalid arguments."
+msgstr "Argument invalide."
+
+#: ../ioncore/screen.c:385
+msgid "Only workspace may not be destroyed/detached."
+msgstr "Seuls les espace de travail ne peuvent être détruits/détachés"
+
+#: ../ioncore/screen.c:396
+msgid "Screens may not be destroyed."
+msgstr "Les écrans ne seront pas détruits."
+
+#: ../ioncore/screen.c:432
+msgid "Invalid offset."
+msgstr "Offset invalide"
+
+#: ../ioncore/screen.c:471
+#, c-format
+msgid "Unable to create a workspace on screen %d."
+msgstr "Incapable de créer un espace de travail sur l'écran %d."
+
+#: ../ioncore/sizehint.c:157
+msgid "Invalid client-supplied width/height increment."
+msgstr "Incrémentation de hauteur/largeur envoyée par le client invalide."
+
+#: ../ioncore/sizehint.c:165
+msgid "Invalid client-supplied aspect-ratio."
+msgstr "Rapport d'aspect envoyé par le client invalide."
+
+#: ../ioncore/ioncore.c:78
+msgid ""
+"This program is free software; you can redistribute it and/or\n"
+"modify it under the terms of the GNU Lesser General Public\n"
+"License as published by the Free Software Foundation; either\n"
+"version 2.1 of the License, or (at your option) any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
+"Lesser General Public License for more details.\n"
+msgstr ""
+"Ce programme est un logiciel libre; vous pouvez le redistribuer et/ou\n"
+"le modifier sous les termes de la GNU Lesser General Public\n"
+"Licence comme publiée par la Free Software Foundation; soit\n"
+"en version 2.1 de la licence, ou (a votre convenance) une version ulterrieure.\n"
+"\n"
+"Ce programme est distribué dans l'espoir qu'il sera utile\n"
+"Mais sans aucune garantie; sans même la garantie implicite que\n"
+"celui-ci soit commercialisable ou adapté a un usage quelconque. référez vous\n"
+"à la GNU Lesser General Public Licence pour plus de détails.\n"
+
+#: ../ioncore/ioncore.c:159
+msgid "No encoding given in LC_CTYPE."
+msgstr "Pas d'encodage donné dans LC_CTYPE"
+
+#: ../ioncore/ioncore.c:470
+#, c-format
+msgid "Could not connect to X display '%s'"
+msgstr "Incapable de se connecter a l'affichage X \"%s\""
+
+#: ../ioncore/ioncore.c:522
+msgid "Could not find a screen to manage."
+msgstr "N'a pas trouvé d'écran à gérer."
+
+#: ../ioncore/xic.c:38
+msgid "Failed to open input method."
+msgstr "Echec d'ouverture d'une méthode d'entrée."
+
+#: ../ioncore/xic.c:43
+msgid "Input method doesn't support any style."
+msgstr "La méthode d'entrée ne suporte aucun style."
+
+#: ../ioncore/xic.c:58
+msgid "input method doesn't support my preedit type."
+msgstr "La méthode d'entrée ne suporte pas mes types preedit."
+
+#: ../ioncore/xic.c:86
+msgid "Failed to create input context."
+msgstr "Echec de création du contexte d'entrée."
+
+#: ../ioncore/clientwin.c:379
+#, c-format
+msgid "The transient_for hint for \"%s\" points to itself."
+msgstr "Le transcient_for hint vers \"%s\" pointe vers lui-même."
+
+#: ../ioncore/clientwin.c:383
+#, c-format
+msgid ""
+"Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" "
+"multi-parent brain damage?)"
+msgstr ""
+"La fenêtre de client \"%s\" a rompu le transient_for hint. (\"WM hints étendus\" "
+"domages cérébraux multi parents?)"
+
+#: ../ioncore/clientwin.c:388
+#, c-format
+msgid "The transient_for window for \"%s\" is not on the same screen."
+msgstr "La fenêtre transcient_for pour \"%s\" n'est pas sur le même écran."
+
+#: ../ioncore/clientwin.c:408 ../ioncore/clientwin.c:496
+#: ../ioncore/clientwin.c:1292
+#, c-format
+msgid "Window %#x disappeared."
+msgstr "la fenêtre %#x a disparue."
+
+#: ../ioncore/clientwin.c:516
+msgid "Unable to find a matching root window!"
+msgstr "Incapable de trouver une fenêtre racine correspondante!"
+
+#: ../ioncore/clientwin.c:555
+#, c-format
+msgid "Unable to manage client window %#x."
+msgstr "incapable de gérer la fenêtre du client %#x."
+
+#: ../ioncore/clientwin.c:604
+msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
+msgstr "Le changement est WM_TRANSCIENT_FOR propriété non supportée."
+
+#
+#: ../ioncore/clientwin.c:776
+msgid "Client does not support the WM_DELETE protocol."
+msgstr "Le client ne supporte pas le protocole WM_DELETE."
+
+#: ../ioncore/clientwin.c:1298
+msgid "Saved client window does not want to be managed."
+msgstr "La fenêtre de client sauvegardée ne veut pas être gérée."
+
+#
+#: ../ioncore/colormap.c:96
+msgid "Unable to store colourmap watch info."
+msgstr "Incapable de stocker les infos de la palette de couleur"
+
+#: ../ioncore/region.c:47
+msgid "Creating region with negative width or height!"
+msgstr "Création de région avec une largeur ou hauteur négative!"
+
+#: ../ioncore/region.c:95
+#, c-format
+msgid "Destroying object \"%s\" with client windows as children."
+msgstr "Destruction de l'objet \"%s\" avec une fenêtre de client comme fille."
+
+#: ../ioncore/region.c:434
+#, c-format
+msgid "Can not destroy %s: contains client windows."
+msgstr "Ne peut détruire %s: contiend des fenêtres client."
+
+#: ../ioncore/region.c:435
+msgid "(unknown)"
+msgstr "(inconnu)"
+
+#: ../ioncore/region.c:498
+msgid "Failed to rescue some client windows - not closing."
+msgstr "Echec de sauvetage de quelques fenêtres de client - ne ferme pas."
+
+#: ../ioncore/attach.c:58 ../ioncore/frame-pointer.c:280
+#, c-format
+msgid "Attempt to make region %s manage its ancestor %s."
+msgstr "Temptative de faire que la région %s gère ses ancètres %s."
+
+#: ../ioncore/attach.c:83
+msgid "Unable to reparent."
+msgstr "Incapable de réaparenter."
+
+#: ../ioncore/attach.c:92
+msgid "Unexpected attach error: trying to recover by attaching to screen."
+msgstr "Erreur d'atachement inattendue: essai de récupération par attachement à l'écran."
+
+#: ../ioncore/attach.c:111
+msgid "Failed recovery."
+msgstr "Récupération échouée."
+
+#: ../ioncore/manage.c:193
+msgid "Unable to find a screen for a new client window."
+msgstr "Incapable de trouver un écran pour une nouvelle fenêtre de client."
+
+#: ../ioncore/rootwin.c:218
+#, c-format
+msgid "Unable to redirect root window events for screen %d."
+msgstr "Incapable de rediriger les évènement de la fenêtre racine pour l'écran %d."
+
+#: ../ioncore/names.c:91
+#, c-format
+msgid "Corrupt instance number %s."
+msgstr "Numéro d'instance corrompu %s."
+
+#: ../ioncore/saveload.c:98
+#, c-format
+msgid "Unknown class \"%s\", cannot create region."
+msgstr "classe inconnue \"%s\", ne peut créer de région."
+
+#: ../ioncore/saveload.c:202
+#, c-format
+msgid ""
+"There were errors loading layout. Backing up current layout savefile as\n"
+"%s.\n"
+"If you are _not_ running under a session manager and wish to restore your\n"
+"old layout, copy this backup file over the layout savefile found in the\n"
+"same directory while Ion is not running and after having fixed your other\n"
+"configuration files that are causing this problem. (Maybe a missing\n"
+"module?)"
+msgstr ""
+"Il y a eu des erreurs en changeant la mise en place. Sauvegarde de la \n"
+"mise en place courrante en tant que savefile %s.\n"
+"Si vous _n'utilisez_ pas de gestionnaire de session et voulez restaurer\n"
+"votre ancienne mise en place, copiez ce fichier de sauvegarde sur le\n"
+"savefile situé dans le même répertoire pendant que Ion ne fonctionne pas\n"
+"et après avoir fixé vos autresfichiers de configuration causant des\n"
+"problèmes. (peut-être un module manquant"
+
+#: ../ioncore/saveload.c:253
+msgid "Unable to get file for layout backup."
+msgstr "Incapable d'obtenir le fichier de sauvegarde de la mise en place."
+
+#: ../ioncore/saveload.c:257
+#, c-format
+msgid "Backup file %s already exists."
+msgstr "Le fichier de sauvegarde %s existe déjà."
+
+#: ../ioncore/saveload.c:263
+msgid "Failed backup."
+msgstr "Sauvegarde échouée."
+
+#
+#: ../ioncore/saveload.c:268
+msgid "Unable to initialise layout on any screen."
+msgstr "Incapable d'initialiser la mise en place sur aucun écran."
+
+#: ../ioncore/saveload.c:295
+#, c-format
+msgid "Unable to get configuration for screen %d."
+msgstr "Incapable d'obtenir la configuration pour l'écran %d."
+
+#: ../ioncore/saveload.c:308
+msgid "Unable to save layout."
+msgstr "Incapable de sauvegarder la mise en place"
+
+#: ../ioncore/conf.c:235
+msgid "User directory can not be set."
+msgstr "Le répertoire d'utilisateur ne peut être définis."
+
+#: ../ioncore/conf.c:309
+msgid "Some bindmaps were empty, loading ioncore_efbb."
+msgstr "Certaines bindmaps étaient vides, chargement de ioncore_efbb."
+
+#: ../ioncore/fullscreen.c:49
+msgid "Failed to enter full screen mode."
+msgstr "Echec d'entrée dans le mode plein écran."
+
+#: ../ioncore/fullscreen.c:83
+msgid ""
+"Failed to return from full screen mode; remaining manager or parent from "
+"previous location refused to manage us."
+msgstr ""
+"Echec de retour du mode plein écran; reliquat de gestionaire ou parent de "
+"la position précédente ayant refusé de nous gérer."
+
+#
+#: ../ioncore/mplex.c:1685
+msgid "Invalid position setting."
+msgstr "Réglages de position invalides."
+
+#
+#: ../ioncore/mplex.c:1725
+msgid "Invalid action setting."
+msgstr "Réglage d'action invalide."
+
+#: ../ioncore/gr.c:120
+#, c-format
+msgid "Drawing engine %s is not registered!"
+msgstr "Gestionnaire de rendu %s non enregistré!"
+
+#: ../ioncore/gr.c:139
+#, c-format
+msgid "Unable to find brush for style '%s'."
+msgstr "Incapable de trouver les pinceaux pour le style \"%s\"."
+
+#: ../ioncore/gr.c:646
+msgid "No drawing engines loaded, trying \"de\"."
+msgstr "Pas de moteur de rendu chagé, éssai avec \"de\"."
+
+#: ../ioncore/frame-draw.c:314
+msgid "<empty frame>"
+msgstr "<cadre vide>"
+
+#: ../ioncore/group.c:186 ../mod_tiling/tiling.c:92
+#, c-format
+msgid "Error reparenting %s."
+msgstr "Erreur de réapparissage %s."
+
+#: ../ioncore/group.c:711
+msgid "'bottom' already set."
+msgstr "'bottom' déjà définis."
+
+#: ../ioncore/navi.c:45
+msgid "Invalid parameter."
+msgstr "paramètre invalide"
+
+#: ../ioncore/navi.c:72
+msgid "Invalid direction parameter."
+msgstr "Paramètre de direction invalide."
+
+#: ../ioncore/group-ws.c:51
+#, c-format
+msgid "Unknown placement method \"%s\"."
+msgstr "Méthode de placement inconnue \"%s\"."
+
+#: ../ioncore/detach.c:176
+msgid "Failed to reattach."
+msgstr "Incapable de réattacher."
+
+#: ../ioncore/screen-notify.c:190
+msgid "act: "
+msgstr "acte: "
+
+#
+#: ../mod_tiling/tiling.c:73
+msgid "Split not on workspace."
+msgstr "Division hors de l'espace de travail."
+
+#: ../mod_tiling/tiling.c:348
+msgid "Unable to create a node for status display."
+msgstr "Incapable de créer un noeud pour l'affichage du status."
+
+#: ../mod_tiling/tiling.c:361
+msgid "Unable to create new split for status display."
+msgstr "Incapable de créer de nouvelles divisions pour l'affichage de status"
+
+#: ../mod_tiling/tiling.c:710
+msgid "Tiling in useless state."
+msgstr "Empilement en mode inutile."
+
+#: ../mod_tiling/tiling.c:924
+msgid "Invalid direction"
+msgstr "Direction invalide"
+
+#
+#: ../mod_tiling/tiling.c:957 ../mod_tiling/split.c:1018
+msgid "Invalid node."
+msgstr "Noeud invalide."
+
+#
+#: ../mod_tiling/tiling.c:976
+msgid "Unable to split."
+msgstr "Incapable de diviser."
+
+#: ../mod_tiling/tiling.c:1090
+msgid "Unable to unsplit: Could not move client windows elsewhere within the tiling."
+msgstr "Incapable de diviser : N'a pas pu déplacer la fenêtre cliente ailleur dans l'empilement."
+
+#: ../mod_tiling/tiling.c:1207
+msgid "Nil parameter."
+msgstr "Paramètre Nul."
+
+#: ../mod_tiling/tiling.c:1212
+msgid "Manager doesn't match."
+msgstr "Les gestionnaires ne correspondent pas"
+
+#: ../mod_tiling/tiling.c:1249
+msgid "The status display is not a valid parameter for this routine."
+msgstr "L'affichage du status n'est pas un paramètre valide pour cette routine."
+
+#: ../mod_tiling/tiling.c:1340
+msgid "Refusing to float split directly containing the status display."
+msgstr "Refus de rendre directement flotant la division contenant l'affichage du status."
+
+#: ../mod_tiling/tiling.c:1403
+msgid "No suitable split here."
+msgstr "Pas d'arbre de division acceptable ici."
+
+#
+#: ../mod_tiling/tiling.c:1439
+msgid "Could not get split tree."
+msgstr "N'a pus obtenir l'arbre de divisions"
+
+#: ../mod_tiling/tiling.c:1460
+msgid "Workspace already has a status display node."
+msgstr "L'Espace de travail a déja un noeud d'affichage de status."
+
+#
+#: ../mod_tiling/tiling.c:1498
+msgid "Missing region parameters."
+msgstr "Paramètre de région invalide."
+
+#: ../mod_tiling/tiling.c:1542 ../mod_tiling/splitfloat.c:780
+msgid "Invalid direction."
+msgstr "Direction invalide."
+
+#
+#: ../mod_tiling/tiling.c:1617
+msgid "No split type given."
+msgstr "Pas de typde de division donné."
+
+#: ../mod_tiling/tiling.c:1630
+msgid "Unknown split type."
+msgstr "Type de division inconnue."
+
+#
+#
+#: ../mod_tiling/tiling.c:1670
+msgid "The workspace is empty."
+msgstr "L'espace de travail est vide"
+
+#: ../mod_tiling/placement.c:104
+#, c-format
+msgid "Ooops... could not find a region to attach client window to on workspace %s."
+msgstr ""
+"Ooops... n'a pas trouvé de région pour atacher la fenêtre cliente sur l'espace"
+"de travail %s."
+
+#
+#: ../mod_tiling/split.c:524
+msgid "Unable to move the status display out of way."
+msgstr "Incapable d'enlever l'affichage du status du passage."
+
+#: ../mod_tiling/split.c:937
+msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
+msgstr "REGION_RQGEOM_TRYONLY non suporté pour l'affichage de status."
+
+#
+#: ../mod_tiling/split.c:1083
+msgid "Splitting the status display is not allowed."
+msgstr "Diviser l'affichage de status n'est pas autorisé."
+
+#: ../mod_tiling/split.c:1114 ../mod_tiling/splitfloat.c:903
+msgid "Unable to split: not enough free space."
+msgstr "Incapable de diviser: pas assez d'espace libre."
+
+#: ../mod_tiling/split.c:1865
+#, c-format
+msgid "Unable to get configuration for %s."
+msgstr "Incapable d'obtenir la configuration pour %s."
+
+#: ../mod_tiling/split-stdisp.c:602 ../mod_tiling/split-stdisp.c:627
+msgid "Status display in bad split configuration."
+msgstr "Affichage de status dans une configuration divisée défectueuse"
+
+#: ../mod_tiling/split-stdisp.c:667
+msgid "Status display badly located in split tree."
+msgstr "Affichage de status mal situé dans l'arbre divisé"
+
+#: ../mod_tiling/ops.c:72 ../mod_tiling/ops.c:120
+msgid "Not member of a group"
+msgstr "N'est pas membre d'un groupe"
+
+#: ../mod_tiling/ops.c:77
+msgid "Manager group already has bottom"
+msgstr "Le groupe de gestion est déjà déscendu"
+
+#: ../mod_tiling/ops.c:154
+msgid "Unable to move a region from tiling to group."
+msgstr "Incapable de déplacer une région de l'empilement vers un groupe."
+
+#: ../mod_query/wedln.c:813
+msgid "history"
+msgstr "historique"
+
+#: ../mod_query/fwarn.c:35
+msgid "Error:\n"
+msgstr "Erreur:\n"
+
+#
+#: ../mod_menu/menu.c:601
+msgid "Empty menu."
+msgstr "Menu vide."
+
+#
+#: ../mod_sm/sm.c:111
+msgid "Failed to set session directory."
+msgstr "Echec de définition du répertoire de sessions"
+
+#: ../mod_sm/sm_session.c:86
+msgid "Too many ICE connections."
+msgstr "Trop de connexions ICE."
+
+#: ../mod_sm/sm_session.c:228
+msgid "Failed to save session state"
+msgstr "Echec de sauvegarde l'état de la session"
+
+#: ../mod_sm/sm_session.c:247
+msgid "Failed to request save-yourself-phase2 from session manager."
+msgstr "Echec de requète save-yourself-phase2 depuis le gestionnaire de sessions"
+
+#
+#: ../mod_sm/sm_session.c:296
+msgid "SESSION_MANAGER environment variable not set."
+msgstr "Variable d'environnement SESSION_MANAGER non définie."
+
+#: ../mod_sm/sm_session.c:301
+msgid "Session Manager: IceAddConnectionWatch failed."
+msgstr "Gestionnaire de session: IceAddConnectionWatch échoué."
+
+#
+#: ../mod_sm/sm_session.c:326
+msgid "Unable to connect to the session manager."
+msgstr "Incapable de se connecter au gestionnaire de sessions"
+
+#: ../mod_sp/main.c:126
+msgid "Unable to create scratchpad."
+msgstr "Incapable de créer le bloc note."
+
+#: ../mod_statusbar/main.c:75
+msgid "reading a pipe"
+msgstr "lecture du tunnel (pipe)"
+
+#: ../mod_statusbar/main.c:159
+msgid "ion-statusd timed out."
+msgstr "ion-statusd n'a pas répondu à temps."
+
+#: ../mod_statusbar/statusbar.c:1081
+#, c-format
+msgid "[ %date || load: %load ] %filler%systray"
+msgstr "[ %date || charge: %load ] %filler%systray"
+
+#: ../de/init.c:68
+#, c-format
+msgid "Border attribute %s sanity check failed."
+msgstr "Le test de salubrité de l'attribut de bordure %s a échoué."
+
+#: ../de/init.c:91
+#, c-format
+msgid "Unknown border style \"%s\"."
+msgstr "Style de bordure inconnu \"%s\"."
+
+#: ../de/init.c:111
+#, c-format
+msgid "Unknown border side configuration \"%s\"."
+msgstr "Configuration des côtés de bordure inconnue \"%s\"."
+
+#: ../de/init.c:144
+#, c-format
+msgid "Unable to allocate colour \"%s\"."
+msgstr "Incapable d'allouer la couleur \"%s\"."
+
+#: ../de/init.c:210
+#, c-format
+msgid "Corrupt substyle table %d."
+msgstr "Table de soustyle inconnue %d."
+
+#: ../de/init.c:243
+#, c-format
+msgid "Unknown text alignment \"%s\"."
+msgstr "Alignement de texte inconnu \"%s\"."
+
+#: ../de/init.c:319
+#, c-format
+msgid "'based_on' for %s points back to the style itself."
+msgstr "'based_on' pour %s pointe vers le style lui-même."
+
+#: ../de/init.c:322
+#, c-format
+msgid "Unknown base style. \"%s\""
+msgstr "Style de base inconnu. \"%s\""
+
+#: ../de/font.c:47
+#, c-format
+msgid ""
+"Fontset for font pattern '%s' implements context dependent drawing, which is "
+"unsupported. Expect clutter."
+msgstr ""
+"Fontset pour le modèle de police '%s' implémentant les dessins dépendant du contexte"
+"ce qui n'est pas supporté. Cafouillages attendus."
+
+#: ../de/font.c:59
+#, c-format
+msgid "Could not load font \"%s\", trying \"%s\""
+msgstr "N'a pu charger la police \"%s\", essai avec \"%s\"."
+
+#: ../de/font.c:63
+msgid "Failed to load fallback font."
+msgstr "Echec de chargement de la police de secours."
+
+#: ../de/style.c:315
+#, c-format
+msgid "Style is still in use [%d] but the module is being unloaded!"
+msgstr "Le style est toujours utilisé [%d], mais le module est déchargé!"
+
+#: ../ion/ion.c:42 ../pwm/pwm.c:42
+msgid "X display to use"
+msgstr "Affichage X a utiliser"
+
+#: ../ion/ion.c:45 ../pwm/pwm.c:45
+msgid "Configuration file"
+msgstr "Fichier de configuration"
+
+#: ../ion/ion.c:48 ../pwm/pwm.c:48
+msgid "Add directory to search path"
+msgstr "Ajouter le répertoire au chemin de la recherche"
+
+#: ../ion/ion.c:51 ../pwm/pwm.c:51
+msgid "Manage default screen only"
+msgstr "Gérer l'écra par défault seulement"
+
+#: ../ion/ion.c:54 ../pwm/pwm.c:54
+msgid "Name of session (affects savefiles)"
+msgstr "Nom de session (affecte les savefiles)"
+
+#: ../ion/ion.c:57 ../pwm/pwm.c:57
+msgid "Session manager client ID"
+msgstr "ID client du gestionnaire de sessions"
+
+#: ../ion/ion.c:60 ../pwm/pwm.c:60
+msgid "Do not create startup error log and display it with xmessage."
+msgstr "Ne pas crée de journal d'erreurs de démarrage et les afficher avec xmessage."
+
+#: ../ion/ion.c:64 ../pwm/pwm.c:64
+msgid "Show this help"
+msgstr "Affiche cette aide"
+
+#: ../ion/ion.c:67 ../pwm/pwm.c:67
+msgid "Show program version"
+msgstr "Afficher la version du programme"
+
+#: ../ion/ion.c:70 ../pwm/pwm.c:70
+msgid "Show about text"
+msgstr "Afficher le text à propos"
+
+#: ../ion/ion.c:85
+msgid "Could not get user configuration file directory."
+msgstr "N'a pas trouvé le répertoire de fichier de configuration utilisateur"
+
+#: ../ion/ion.c:99
+#, c-format
+msgid "%s/welcome.txt"
+msgstr "%s/welcome.txt"
+
+#: ../ion/ion.c:132 ../pwm/pwm.c:79
+#, c-format
+msgid ""
+"Usage: %s [options]\n"
+"\n"
+msgstr ""
+"Usage: %s [options]\n"
+"\n"
+
+#
+#: ../ion/ion.c:200 ../pwm/pwm.c:150
+msgid "Invalid command line."
+msgstr "Ligne de commande invalide."
+
+#: ../ion/ion.c:222
+msgid "Ion startup error log:\n"
+msgstr "Registre d'erreurs Ion:\n"
+
+#: ../ion/ion.c:233 ../pwm/pwm.c:183
+msgid "Refusing to start due to encountered errors."
+msgstr "Refus de démarrage en raison des erreurs rencontrées."
+
+#: ../pwm/pwm.c:172
+msgid "PWM startup error log:\n"
+msgstr "Registre d'erreurs PWM:\n"
+
+#: ../libextl/readconfig.c:86
+msgid "$HOME not set"
+msgstr "$HOME non définis"
+
+#: ../libextl/readconfig.c:113
+msgid "User directory not set. Unable to set session directory."
+msgstr "Répertoire d'utilisateur non définis. Incapable de définir le répertoire de sessions"
+
+#: ../libextl/readconfig.c:254
+#, c-format
+msgid "Falling back to %s."
+msgstr "Retour forcé à %s"
+
+#: ../libextl/readconfig.c:474
+#, c-format
+msgid "Unable to create session directory \"%s\"."
+msgstr "Incapable de créer le répertoire de session \"%s\"."
+
+#: ../libextl/luaextl.c:117
+msgid "Lua stack full."
+msgstr "Pile Lua pleine."
+
+#
+#: ../libextl/luaextl.c:143
+msgid "Unknown Lua error."
+msgstr "Erreur Lua inconnue."
+
+#: ../libextl/luaextl.c:490
+msgid "Stack trace:"
+msgstr "tracage de pile:"
+
+#: ../libextl/luaextl.c:497
+#, c-format
+msgid ""
+"\n"
+"(Unable to get debug info for level %d)"
+msgstr ""
+"\n"
+"(Incapable d'obtenir les informations de déboggage pour le niveau %d)"
+
+#: ../libextl/luaextl.c:515
+msgid ""
+"\n"
+"  [Skipping unnamed C functions.]"
+msgstr ""
+"\n"
+"  [Evitement de la fonction C annonyme.]"
+
+#: ../libextl/luaextl.c:566
+msgid "Internal error."
+msgstr "Erreur interne"
+
+#: ../libextl/luaextl.c:585
+msgid "Unable to initialize Lua."
+msgstr "Incapable d'initialiser Lua."
+
+#: ../libextl/luaextl.c:1336
+msgid "Too many return values. Use a C compiler that has va_copy to support more."
+msgstr "Trop de valeurs renvoyées. Utilisez un compileur C qui a un va_copy pour en suporter plus"
+
+#: ../libextl/luaextl.c:1356
+msgid "Returned dead object."
+msgstr "A renvoyé un objet mort."
+
+#: ../libextl/luaextl.c:1359
+#, c-format
+msgid "Invalid return value (expected '%c', got lua type \"%s\")."
+msgstr "Valeur retournée invalide (attendu %c, de type lua \"%s\")."
+
+#: ../libextl/luaextl.c:1395 ../libextl/luaextl.c:1750
+msgid "Stack full."
+msgstr "Pile pleine."
+
+#: ../libextl/luaextl.c:1761
+#, c-format
+msgid "Argument %d to %s is a dead object."
+msgstr "Argument %d à %s est un objet mort."
+
+#: ../libextl/luaextl.c:1764
+#, c-format
+msgid ""
+"Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
+"type %s)."
+msgstr ""
+"Argument %d à %s est de type invalide. (Le modèle d'argument est '%s', ave le "
+"type lua %s)."
+
+#: ../libextl/luaextl.c:1827
+msgid "L1 call handler upvalues corrupt."
+msgstr "upvalue niveau 1 de la pile d'appel corrompue"
+
+#: ../libextl/luaextl.c:1832
+msgid "Called function has been unregistered."
+msgstr "La fonction invoquée a été désenregistrée."
+
+#: ../libextl/luaextl.c:1843
+#, c-format
+msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
+msgstr "Temptative d'appel d'une fonction non-sécurisée \"%s\" en mode restreint."
+
+#: ../libextl/luaextl.c:1956
+#, c-format
+msgid "Function '%s' has more parameters than the level 1 call handler can handle"
+msgstr "La fonction '%s' a plus de paramètres que le niveau 1 de la pile d'appel puisse supporter"
+
+#
+#: ../libextl/luaextl.c:2347
+msgid "Maximal serialisation depth reached."
+msgstr "Profondeur de sérialisation maximale atteinte."
+
+#: ../libextl/luaextl.c:2368
+#, c-format
+msgid "Unable to serialise type %s."
+msgstr "Incapable de sérialiser le type %s."
+
+#: ../libextl/luaextl.c:2399
+msgid "-- This file has been generated by Ion. Do not edit.\n"
+msgstr "-- Ce fichier a été généré par Ion, Ne pas éditer.\n"
+
+#: ../libextl/misc.c:17
+#, c-format
+msgid ""
+"Type checking failed in level 2 call handler for parameter %d (got %s, "
+"expected %s)."
+msgstr ""
+"Le contrôle de type a échoué au niveau 2 de la pile d'appel au paramètre %d "
+"(obtenu %s, attendu %s)."
+
+msgid "Scroll the message or completions up/down."
+msgstr "Parcourrir le message ou les complétions en haut/bas."
+
+msgid "Close the query/message box, not executing bound actions."
+msgstr "Fermer la boite de requètes/messages, ne pas exécuter les actions lièes."
+
+msgid "Close the query and execute bound action."
+msgstr "Fermer la requète et exécuter les actions liées."
+
+msgid "Complete from history"
+msgstr "Compléter depuis l'historique."
+
+msgid "Try to complete the entered text or cycle through completions."
+msgstr "Essayer de compléter le texte entré ou parcourrir les complétions."
+
+#
+msgid "Clear mark/cancel selection."
+msgstr "Effacer/annuler la sélection"
+
+#
+msgid "Copy selection."
+msgstr "Copier la sélection."
+
+#
+msgid "Cut selection."
+msgstr "Couper la sélection."
+
+#
+msgid "Set mark/begin selection."
+msgstr "Définir le début de la sélection."
+
+msgid "Paste from the clipboard."
+msgstr "Coller depuis le presse papier."
+
+msgid "Select next/previous (matching) history entry."
+msgstr "Sélectionner l'entrèe (correspondante) suivante/précédente dans l'historique"
+
+msgid "Transpose characters."
+msgstr "Transposer le caractère."
+
+msgid "Delete the whole line."
+msgstr "Effacer toute la ligne."
+
+msgid "Delete to end of line."
+msgstr "Effacer jusqu'a la fin de la ligne."
+
+msgid "Delete one word forward/backward."
+msgstr "Effacer un mot en avant/arrière."
+
+msgid "Delete previous character."
+msgstr "Effacer le caractère précédent."
+
+msgid "Delete next character."
+msgstr "Effacer le caractère suivant."
+
+msgid "Skip one word forward/backward."
+msgstr "Sauter un mot en avant/arrière."
+
+msgid "Go to end/beginning."
+msgstr "Aller au début / à la fin"
+
+msgid "Move one character forward/backward."
+msgstr "Déplacer d'un caractère en avant/arrière."
+
+msgid "Kill"
+msgstr "Tuer"
+
+msgid "Attach tagged"
+msgstr "Attacher Marqués"
+
+msgid "Rename"
+msgstr "Renommer"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "De/reattach"
+msgstr "Dé/attacher"
+
+msgid "Toggle tag"
+msgstr "(dès)Activer le marquage"
+
+msgid "Window info"
+msgstr "Informations fenêtre"
+
+msgid "Clear tags"
+msgstr "Effacer les marqueurs"
+
+msgid "Exit"
+msgstr "Sortir"
+
+msgid "Restart TWM"
+msgstr "Redémarrer TWM"
+
+msgid "Restart"
+msgstr "Redémarrer"
+
+msgid "Save"
+msgstr "Sauvegarder"
+
+msgid "Session"
+msgstr "Sessions"
+
+msgid "Styles"
+msgstr "Styles"
+
+msgid "About Ion"
+msgstr "A Propos de Ion"
+
+msgid "Help"
+msgstr "Aide"
+
+msgid "Lock screen"
+msgstr "Vérouiller l'écran"
+
+msgid "Terminal"
+msgstr "Termial"
+
+#
+msgid "Run..."
+msgstr "Exécuter..."
+
+#
+msgid "Move in specified direction."
+msgstr "Déplacer dans la direction spécifiée."
+
+msgid "Shrink in specified direction."
+msgstr "Réduire dans la direction spécifiée."
+
+#
+msgid "Grow in specified direction."
+msgstr "Agrandir dans la dimension spécifiée."
+
+msgid "End the resize mode."
+msgstr "mettre fin au mode de redimensionnement."
+
+msgid "Cancel the resize mode."
+msgstr "Annuler le mode redimensionnement."
+
+msgid "Move the frame."
+msgstr "Déplacer le cadre."
+
+msgid "Lower the frame."
+msgstr "Descendre le cadre"
+
+#
+msgid "Raise the frame."
+msgstr "Monter le cadre"
+
+msgid "Toggle shade mode"
+msgstr "basculer l'état shade"
+
+msgid "Attach tagged objects to this frame."
+msgstr "Attacher les objets marqués à ce cadre."
+
+msgid "Maximize the frame horizontally/vertically."
+msgstr "Maximiser le cadre horizontalement/verticalement"
+
+msgid "Move current object within the frame left/right."
+msgstr "Déplacer l'objet courrant dans le cadre à gauche/droite."
+
+msgid "Switch to next/previous object within the frame."
+msgstr "Basculer vers l'objet suivan,t/précédent dans le cadre."
+
+msgid "Switch to n:th object within the frame."
+msgstr "Basculer vers l'objet n:th dans le cadre."
+
+#
+msgid "Query for a client window to attach."
+msgstr "Demande pour une fenêtre cliente a attacher."
+
+msgid "Move objects between frames by dragging and dropping the tab."
+msgstr "Déplacer les objets entre les cadres en glissant et déposant le signet."
+
+msgid "Resize the frame."
+msgstr "Redimensionner le cadre."
+
+msgid "Switch the frame to display the object indicated by the tab."
+msgstr "Activer le cadre pour afficher l'objet indiqué part le signet."
+
+msgid "Begin move/resize mode."
+msgstr "Démarrer le mode déplacer/redimensionner."
+
+msgid "Display context menu."
+msgstr "Afficher le menu contextuel."
+
+#
+msgid "Query for a client window to go to."
+msgstr "Demande pour une fençetre cliente vers laquelle aller."
+
+msgid "Query for workspace to go to or create a new one."
+msgstr "Demande d'un espace de travail vers lequel aller ou de cration d'un nouveau."
+
+msgid "Query for file to view."
+msgstr "Demande d'un fichier pour visualisation."
+
+msgid "Query for file to edit."
+msgstr "Demande d'un fichier pour l'édition."
+
+msgid "Query for host to connect to with SSH."
+msgstr "Demande de connexion de l'hôte via SSH."
+
+msgid "Query for Lua code to execute."
+msgstr "Demande d'exécution d'un code Lua."
+
+msgid "Query for command line to execute."
+msgstr "Demande d'exécution d'une ligne de commande."
+
+#
+msgid "Run a terminal emulator."
+msgstr "Lancer un émulateur de terminal."
+
+msgid "Show the Ion manual page."
+msgstr "Afficher la page de manuel de Ion."
+
+msgid "Query for manual page to be displayed."
+msgstr "Demande pour l'affichage de pages de manuel."
+
+msgid "Toggle tag of current object."
+msgstr "Basculer le marqueur de l'objet courrant."
+
+msgid "Detach (float) or reattach an object to its previous location."
+msgstr "Détacher (float) ou réattacher un objet à sa position précédente."
+
+msgid "Close current object."
+msgstr "Fermer l'objet courrant."
+
+msgid "Toggle client window group full-screen mode"
+msgstr "Basculer le groupe de fenêtre client en mode plein écran."
+
+#
+msgid ""
+"Send next key press to the client window. Some programs may not allow this "
+"by default."
+msgstr ""
+"Envoyer le prochain pressage de touche a la fenêtre de client. certains programmes"
+"n'autoriseront pas celà par default"
+
+#
+msgid "Kill client owning the client window."
+msgstr "Tuer le client qui gère la fenêtre de client."
+
+#
+msgid ""
+"Nudge the client window. This might help with some programs' resizing "
+"problems."
+msgstr ""
+"Secouer la fenêtre de client. Celà peut aider pour les problèmes de "
+"redimentionnement de certains programmes."
+
+msgid "Raise focused object, if possible."
+msgstr "Remonter l'objet ayant le focus, si possible."
+
+msgid "Backward-circulate focus."
+msgstr "Décrémenter le focus."
+
+msgid "Forward-circulate focus."
+msgstr "Incrémenter le focus."
+
+msgid "Display the window list menu."
+msgstr "Affiche le menu de listage des fenêtres."
+
+msgid "Display the main menu."
+msgstr "Affiche le menu principal."
+
+#
+#
+msgid "Create a new workspace of chosen default type."
+msgstr "Créer un nouvel espace de travail du type par défault choisis."
+
+#
+msgid "Go to next/previous screen on multihead setup."
+msgstr "Aller sur l'écran suivant/précédent sur une configuration multihead."
+
+#
+msgid "Go to n:th screen on multihead setup."
+msgstr "Aller sur l'écran n:th sur une configuration multihead."
+
+#
+msgid "Clear all tags."
+msgstr "Effacer tous les marqueurs."
+
+msgid "Go to first region demanding attention or previously active one."
+msgstr "Aller dans la première région qui demande de l'attention ou la dernière active."
+
+#
+msgid "Switch to next/previous object within current screen."
+msgstr "basculer vers l'objet suivant/précédent dans l'écran en cours."
+
+#
+msgid ""
+"Switch to n:th object (workspace, full screen client window) within current "
+"screen."
+msgstr ""
+"Basculer vers l'objet n:th (Espace de travail, fenêtre de clien plein écran) dans l'écran"
+"courrant."
+
+msgid "List"
+msgstr "Liste"
+
+msgid "New"
+msgstr "Nouveau"
+
+msgid "Dillo"
+msgstr "Dillo"
+
+msgid "Konqueror"
+msgstr "Konqueror"
+
+msgid "Links"
+msgstr "Links"
+
+msgid "Opera"
+msgstr "Opera"
+
+msgid "Rxvt"
+msgstr "Rxvt"
+
+msgid "W3M"
+msgstr "W3M"
+
+msgid "XTerm"
+msgstr "XTerm"
+
+#
+msgid "Workspaces"
+msgstr "Espaces de travail"
+
+msgid "Programs"
+msgstr "Programmes"
+
+msgid "Show the PWM manual page."
+msgstr "Afficher le manuel de PWM."
+
+msgid "Toggle scratchpad."
+msgstr "Basculer vers le Bloc note."
+
+msgid ""
+"\n"
+"%sClass: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
+msgstr ""
+"\n"
+"%sClasse: %s\n"
+"%sRole: %s\n"
+"%sInstance: %s\n"
+"%sXID: 0x%x"
+
+msgid "No entry '%s'"
+msgstr "pas d'entrée '%s'"
+
+msgid "%s:"
+msgstr "%s:"
+
+msgid "Missing submenu "
+msgstr "Sous menu manquant"
+
+msgid "Unknown menu %s."
+msgstr "Menu Inconnu %s."
+
+msgid "Lua code:"
+msgstr "code Lua:"
+
+msgid "Manual page (%s):"
+msgstr "Page de manuel (%s):"
+
+msgid "SSH to:"
+msgstr "SSH vers:"
+
+msgid "Failed to open ~/.ssh/config"
+msgstr "Echec d'ouverture ~/.ssh/config"
+
+msgid "Failed to open ~/.ssh/known_hosts"
+msgstr "Echec d'ouverture ~/.ssh/known_hosts"
+
+msgid "Run:"
+msgstr "Exécuter:"
+
+msgid "View file:"
+msgstr "Voir le fichier:"
+
+msgid "Edit file:"
+msgstr "Editer le fichier:"
+
+msgid "Workspace name:"
+msgstr "Nom de l'espace de travail:"
+
+msgid "Frame name:"
+msgstr "Nom du cadre:"
+
+msgid "Restart Ion (y/n)?"
+msgstr "Redémarrer Ion (y/n)?"
+
+msgid "Exit Ion/Shutdown session (y/n)?"
+msgstr "Quiter Ion/Fermer la session (y/n)?"
+
+msgid "Go to or create workspace:"
+msgstr "Aller à ou créer l'espace de travail:"
+
+msgid "Attach window:"
+msgstr "Attacher la fenêtre:"
+
+msgid "Go to window:"
+msgstr "Aller à la fenêtre:"
+
+msgid "New workspace layout (default):"
+msgstr "Nouvelle disposition d'espace de travail (default):"
+
+msgid "Unknown error"
+msgstr "Erreur inconnue"
+
+msgid "Unknown layout"
+msgstr "Disposition inconnue"
+
+msgid "Cannot attach: different root windows."
+msgstr "Ne peut attacher: différentes fenêtres racine."
+
+msgid "Could not find client window %s."
+msgstr "Ne peut trouver la fenêtre de client %s."
+
+msgid "Too much result data"
+msgstr "Trop de donnée résultantes"
+
+msgid "Could not find %s"
+msgstr "Ne peut trouver %s"
+
+msgid "Not a directory."
+msgstr "N'est pas un répertoire."
+
+msgid "Invalid command"
+msgstr "Commande invalide"
+
+msgid "Error in command string: "
+msgstr "Erreur dans la ligne de commande: "
+
+msgid "Error compiling guard: %s"
+msgstr "Erreur de compilation du garde: %s"
+
+msgid "Invalid guard %s."
+msgstr "Garde invalide %s."
+
+msgid "Main menu:"
+msgstr "Menu Principal:"
+
+msgid "Context menu:"
+msgstr "Menu Contextuel:"
+
+msgid "Floating frame"
+msgstr "Cadre flottant"
+
+msgid "Tiled frame"
+msgstr "Cadre Empilé"
+
+msgid "Tiling"
+msgstr "Empilement"
+
+#
+msgid "Workspace"
+msgstr "Espace de travail"
+
+msgid "Screen"
+msgstr "Ecran"
+
+msgid "Frame"
+msgstr "Cadre"
+
+msgid "Recursive table - unable to deepcopy"
+msgstr "Table récursive - incapable de deepcopy"
+
+msgid ""
+"Making the following minimal emergency mappings:\n"
+"  F2 -> xterm\n"
+"  F11 -> restart\n"
+"  F12 -> exit\n"
+"  Mod1+C -> close\n"
+"  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
+msgstr ""
+"Application des mappages d'urgence suivants:\n"
+"  F2 -> xterm\n"
+"  F11 -> restart\n"
+"  F12 -> exit\n"
+"  Mod1+C -> close\n"
+"  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
+
+msgid "Unable to append to non-table menu"
+msgstr "Incapable d'associer a un menu non-table"
+
+msgid "Cannot save selection."
+msgstr "Ne peut sauver la sélection."
+
+msgid "Save look selection in %s?"
+msgstr "Sauvegarder la sélection de look dans %s?"
+
+msgid "ion-statusd quit."
+msgstr "ion-statusd quite."
+
+msgid "Errors starting ion-statusd:\n"
+msgstr "Erreur de lancement de ion-statusd:\n"
+
+msgid "Failed to start ion-statusd."
+msgstr "Echec de lancement de ion-statusd."
+
+msgid "Screen not found."
+msgstr "Ecran non trouvé."
+
+msgid "Screen already has an stdisp. Refusing to create a statusbar."
+msgstr "L'écra a déja un stdisp. Refus de création d'une barre de status."
+
+msgid "Failed to create statusbar."
+msgstr "Echec de la création de la barre de status."
+
+msgid "Split current frame vertically."
+msgstr "Scinder le cadre courrant verticalement"
+
+msgid "Go to frame above/below/right/left of current frame."
+msgstr "Aller au cadre sous/sur/droite/gauche du cadre courrant."
+
+msgid "Split current frame horizontally."
+msgstr "Sciender le cadre courrant horizontalement"
+
+msgid "Destroy current frame."
+msgstr "Detruire le cadre courrant."
+
+msgid "Tile frame, if no tiling exists on the workspace"
+msgstr "Empiler le cadre, si aucun empuilement n'existe sur l'espace de travail"
+
+msgid "Destroy frame"
+msgstr "Detruire le cadre"
+
+msgid "Split vertically"
+msgstr "Scinder Verticalement"
+
+msgid "Split horizontally"
+msgstr "Sciender Horizontalement"
+
+msgid "Flip"
+msgstr "Tourner"
+
+msgid "Transpose"
+msgstr "Transposer"
+
+msgid "Untile"
+msgstr "Désempiler"
+
+msgid "Float split"
+msgstr "Rupture flotante"
+
+msgid "At left"
+msgstr "A gauche"
+
+msgid "At right"
+msgstr "A droite"
+
+msgid "Above"
+msgstr "Dessus"
+
+msgid "Below"
+msgstr "Sous"
+
+msgid "At root"
+msgstr "A la racine"
+
+msgid "New tiling"
+msgstr "Nouvel empilement"
+
+msgid "Close the menu."
+msgstr "fermer le menu."
+
+#
+#
+msgid "Activate current menu entry."
+msgstr "Activer l'entrée courrante du menu."
+
+msgid "Select next/previous menu entry."
+msgstr "Choisir l'entrée suivante/précédente du menu."
+
+msgid "Clear the menu's typeahead find buffer."
+msgstr "Effacer le tampon d'autocomplétion du menu."
+
+msgid "Toggle floating dock."
+msgstr "(dès)activer le doc flottant."
+
+msgid "Pos-TL"
+msgstr "position HG"
+
+msgid "Pos-TR"
+msgstr "position HD"
+
+msgid "Pos-BL"
+msgstr "position BG"
+
+msgid "Pos-BR"
+msgstr "position BD"
+
+msgid "Grow-L"
+msgstr "Agrandir vers la gauche"
+
+msgid "Grow-R"
+msgstr "Agrandir vers le droite"
+
+msgid "Grow-U"
+msgstr "Agrandir vers le haut"
+
+msgid "Grow-D"
+msgstr "Agrandir vers le bas"
+
+msgid "press"
+msgstr "presser"
+
+msgid "click"
+msgstr "clic"
+
+msgid "drag"
+msgstr "glisser"
+
+msgid "double click"
+msgstr "double clic"
+
+msgid "%s %s"
+msgstr "%s %s"
+
+msgid "%s %s at %s"
+msgstr "%s %s na %s"
+
