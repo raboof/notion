@@ -1771,11 +1771,12 @@ static bool do_attach_stdisp(WRegion *mplex, WRegion *reg, void *unused)
  * 
  * \begin{tabularx}{\linewidth}{lX}
  *   \tabhead{Field & Description}
- *   \var{pos} & The corner of the screen to place the status display
- *               in: one of \codestr{tl}, \codestr{tr}, \codestr{bl} 
+ *   \var{pos} & (string) The corner of the screen to place the status 
+ *               display in: one of \codestr{tl}, \codestr{tr}, \codestr{bl} 
  *               or \codestr{br}. \\
- *   \var{action} & If this field is set to \codestr{keep}, \var{corner}
- *                  and \var{orientation} are changed for the existing
+ *   \var{fullsize} & (boolean) Waste all available space. \\
+ *   \var{action} & (string) If this field is set to \codestr{keep}, 
+ *                  \var{pos} and \var{fullsize} are changed for the existing
  *                  status display. If this field is set to \codestr{remove},
  *                  the existing status display is removed. If this
  *                  field is not set or is set to \codestr{replace}, a 
