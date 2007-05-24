@@ -42,6 +42,24 @@ WHook *mainloop_sigusr2_hook=NULL;
 static WTimer *queue=NULL;
 
 
+int mainloop_gettime(struct timeval *val)
+{
+#ifdef _POSIX_MONOTONIC_CLOCK
+    struct timespec spec;
+    int ret;
+    
+    ret=clock_gettime(CLOCK_MONOTONIC, &spec);
+    
+    val->tv_sec=spec.tv_sec;
+    val->tv_usec=spec.tv_nsec/1000;
+    
+    return ret;
+#else
+    return gettimeofday(&val, NULL);
+#endif
+}
+
+
 #define TIMEVAL_LATER(a, b) \
     ((a.tv_sec > b.tv_sec) || \
     ((a.tv_sec == b.tv_sec) && \
@@ -60,7 +78,7 @@ static void do_timer_set()
     }
 
     /* Subtract queue time from current time, don't go below zero */
-    gettimeofday(&(val.it_value), NULL);
+    mainloop_gettime(&(val.it_value));
     if(TIMEVAL_LATER((queue)->when, val.it_value)){
         if(queue->when.tv_usec<val.it_value.tv_usec){
             queue->when.tv_usec+=USECS_IN_SEC;
@@ -190,7 +208,7 @@ bool mainloop_check_signals()
     /* Check for timer events in the queue */
     while(had_tmr && queue!=NULL){
         had_tmr=FALSE;
-        gettimeofday(&current_time, NULL);
+        mainloop_gettime(&current_time);
         while(queue!=NULL){
             if(TIMEVAL_LATER(current_time, queue->when)){
                 q=queue;
@@ -225,7 +243,7 @@ static void add_to_current_time(struct timeval *when, uint msecs)
 {
     long tmp_usec;
 
-    gettimeofday(when, NULL);
+    mainloop_gettime(when);
     tmp_usec=when->tv_usec + (msecs * 1000);
     when->tv_usec=tmp_usec % 1000000;
     when->tv_sec+=tmp_usec / 1000000;

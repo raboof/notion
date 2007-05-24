@@ -54,4 +54,7 @@ extern void mainloop_trap_signals(const sigset_t *set);
 extern WHook *mainloop_sigchld_hook;
 extern WHook *mainloop_sigusr2_hook;
 
+/* Returns monotonic time if possible */
+extern int mainloop_gettime(struct timeval *val);
+
 #endif /* ION_LIBMAINLOOP_SIGNAL_H */

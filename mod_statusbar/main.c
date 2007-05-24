@@ -16,6 +16,7 @@
 #include <libextl/readconfig.h>
 #include <libmainloop/exec.h>
 #include <libmainloop/select.h>
+#include <libmainloop/signal.h>
 #include <ioncore/saveload.h>
 #include <ioncore/bindmaps.h>
 #include <ioncore/global.h>
@@ -93,7 +94,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     int retval;
     bool dummy, doneseen, eagain=FALSE;
     
-    if(gettimeofday(&endtime, NULL)!=0){
+    if(mainloop_gettime(&endtime)!=0){
         warn_err();
         return FALSE;
     }
@@ -145,7 +146,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
             goto timeout;
         }
         
-        if(gettimeofday(&now, NULL)!=0){
+        if(mainloop_gettime(&now)!=0){
             warn_err();
             return FALSE;
         }

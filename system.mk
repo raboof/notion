@@ -116,6 +116,9 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 #EXTRA_LIBS += -lintl
 #EXTRA_INCLUDES +=
 
+# clock_gettime for monotonic time
+EXTRA_LIBS += -lrt
+
 
 ##
 ## C compiler

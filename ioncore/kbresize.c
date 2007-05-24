@@ -98,7 +98,8 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
     struct timeval tv;
     long adiff, udiff;
     
-    gettimeofday(&tv, NULL);
+    if(mainloop_gettime(&tv)!=0)
+        return;
     
     adiff=tvdiffmsec(&tv, &last_action_tv);
     udiff=tvdiffmsec(&tv, &last_update_tv);
