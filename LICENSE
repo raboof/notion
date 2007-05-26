@@ -2,7 +2,7 @@
 Copyright (c) Tuomo Valkonen 1999-2007.
 
 The code of this project is "essentially" licensed under the LGPL, version
-n2.1, unless otherwise indicated in components taken from elsewhere. It is
+2.1, unless otherwise indicated in components taken from elsewhere. It is
 reproduced below. Additionally, the following terms apply to the use of 
 the name of the project, Ion(tm), names of particular "branches" such as
 Ion3(tm), and other derived names:
@@ -15,11 +15,11 @@ Ion3(tm), and other derived names:
 
     - When there are no further prominent notices of possible out-datedness, 
       and no prominent original author's version qualifiers present (resp. 
-      only branch qualifier is present), then the author's version used must
-      be the latest stable release (resp. latest release on the branch)
-      within a reasonable delay (normally 28 days). The holders of physical
-      distribution media must be provided ways to upgrade to the latest
-      release within this delay.
+      only branch qualifier is present), then the version distributed online
+      may not significantly differ from the original author's latest stable
+      release (resp. latest release on the branch) within a reasonable delay
+      (normally 28 days). The holders of physical distribution media must 
+      be provided ways to upgrade to the latest release within this delay.
 
     - Significantly altered versions may be provided only if the user
       explicitly requests for those modifications to be applied, and 
