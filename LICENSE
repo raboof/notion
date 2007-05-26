@@ -2,43 +2,53 @@
 Copyright (c) Tuomo Valkonen 1999-2007.
 
 The code of this project is "essentially" licensed under the LGPL, version
-2.1, unless otherwise indicated in components taken from elsewhere. It is
+n2.1, unless otherwise indicated in components taken from elsewhere. It is
 reproduced below. Additionally, the following terms apply to the use of 
-the names Ion(tm), Ion3(tm), and other derived names:
+the name of the project, Ion(tm), names of particular "branches" such as
+Ion3(tm), and other derived names:
 
-    Derived works and altered versions that significantly differ from the
-    original author's versions, must either a) be given names that can not
-    be associated with the "Ion" project, or b) be qualified as "Ion soup",
-    and still be considerable as customised versions of this software. In 
-    both cases, executables must also be given names that do not conflict
-    with the original author's version, and this author may not be referred
-    to for support.
+  If the name Ion(tm) or other names that can be associated with the Ion
+  project are used to distribute this software, then:
 
-    Modules and other (standalone) extensions to Ion must also be named 
-    so that they can not be confused to be supported by the original
-    author. If "Ion" occurs in the name, it must be in the form
-    "Foo for Ion" instead of "Ion Foo", etc.
-    
-    If the name of the project (Ion), resp. names of particular branches
-    (Ion1, Ion2, Ion3, etc.), are used without further prominent version
-    qualifiers and notices of possible out-datedness to distribute this
-    software, then the following conditions must hold: a) The version
-    distributed online may not significantly differ from the original
-    author's latest release marked stable, resp. latest release on a 
-    branch, within a reasonable delay (normally 28 days) from the release.
-    b) The holders of physical distribution media are provided ways to 
-    upgrade to the latest release within this same delay.
+    - A version that does not significantly differ from one of the
+      original author's versions must be provided by default. 
 
-    This name policy notice may not be altered, and must be included in
-    any altered versions and binary redistributions. It may only be
-    removed when using small portions of the code in unrelated projects. 
+    - When there are no further prominent notices of possible out-datedness, 
+      and no prominent original author's version qualifiers present (resp. 
+      only branch qualifier is present), then the author's version used must
+      be the latest stable release (resp. latest release on the branch)
+      within a reasonable delay (normally 28 days). The holders of physical
+      distribution media must be provided ways to upgrade to the latest
+      release within this delay.
 
-    The original author and the Ion project retain the same rights to
-    your modifications that it would have under the LGPL or GPL without
-    these or similar additional terms.
+    - Significantly altered versions may be provided only if the user
+      explicitly requests for those modifications to be applied, and 
+      is prominently notified that the software is no longer considered 
+      the standard version, and is not supported by the original author. 
+      The version string displayed by the program must describe these
+      modifications and the "support void" status, and the original
+      author may not be pointed to for support.
 
-    If you fail to follow these terms, you lose the rights granted to
-    you by the LGPL.
+  Derived works that do not satisfy the above terms must be renamed so
+  that they can not be associated with the Ion project, their executables
+  must be given names that do not conflict with the original author's 
+  version, and this author may not be referred to for support.
+
+  Modules and other (standalone) extensions to Ion must also be named 
+  so that they can not be confused to be supported by the original
+  author. If "Ion" occurs in the name, it must be in the form
+  "Foo for Ion" instead of "Ion Foo", etc.
+
+  This name policy notice may not be altered, and must be included in
+  any altered versions and binary redistributions. It may only be
+  removed when using small portions of the code in unrelated projects. 
+
+  The original author and the Ion project retain the same rights to
+  your modifications that it would have under the LGPL or GPL without
+  these or similar additional terms.
+
+  If you fail to follow these terms, you lose the rights granted to
+  you by the LGPL.
 
 Explanations:
 
@@ -53,12 +63,13 @@ when in doubt.
 
 Distributions: For example, suppose an aggregate distribution of software
 provides an `installpkg` command for installing packages. Then the action
-`installpkg ion3` (resp. `installpkg ion`) should within a reasonable delay
-install the latest release of Ion3 (resp. the latest stable release), or
-prominently notify the user that the provided version is not or may not
+`installpkg ion3` (resp. `installpkg ion`) should within a reasonable 
+delay install the latest release of Ion3 (resp. the latest stable release),
+or prominently notify the user that the provided version is not or may not
 be the latest. The action `installpkg ion-3ds-20070318` may at any date 
-install this particular mentioned release. Likewise `installpkg ion-soup` 
-may install any non-conflicting customised version.
+install this particular mentioned release. Likewise, the action `installpkg
+--support-void-featurex ion3` may apply additional patches to the latest
+Ion3, within the further constraints set above.
 
 The intent of these terms is to curb the power that "distributions", as
 the primary sources of software for many users, have in defining what
