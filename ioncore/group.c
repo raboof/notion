@@ -825,6 +825,8 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
  *  \var{level} & (integer) Stacking level; default is 1. \\
  *  \var{modal} & (boolean) Make object modal; ignored if level is set. \\
  *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}. \\
+ *  \var{bottom} & (boolean) Mark the attached region as the
+ *                 ``bottom'' of \var{ws}. \\
  * \end{tabularx}
  * 
  * In addition parameters to the region to be created are passed in this 
