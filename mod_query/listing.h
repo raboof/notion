@@ -12,6 +12,7 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include <ioncore/rectangle.h>
+#include <libtu/minmax.h>
 
 INTRSTRUCT(WListing);
 INTRSTRUCT(WListingItemInfo);
@@ -33,6 +34,13 @@ DECLSTRUCT(WListing){
     bool onecol;
 };
 
+
+#define LISTING_DRAW_COMPLETE 1
+#define LISTING_DRAW_ALL 0
+#define LISTING_DRAW_SELECTED(X) minof(-1, -(X)-2)
+#define LISTING_DRAW_GET_SELECTED(X) (-(X)-2)
+
+    
 extern void init_listing(WListing *l);
 extern void setup_listing(WListing *l, char **strs, int nstrs, bool onecol);
 extern void deinit_listing(WListing *l);

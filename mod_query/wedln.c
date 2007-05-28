@@ -374,7 +374,7 @@ void wedln_size_hints(WEdln *wedln, WSizeHints *hints_ret)
 /*{{{ Draw */
 
 
-void wedln_draw_completions(WEdln *wedln, bool complete)
+void wedln_draw_completions(WEdln *wedln, int mode)
 {
     WRectangle geom;
     
@@ -382,7 +382,7 @@ void wedln_draw_completions(WEdln *wedln, bool complete)
         get_completions_geom(wedln, G_CURRENT, &geom);
         
         draw_listing(WEDLN_BRUSH(wedln), &geom, &(wedln->compl_list), 
-                     complete, GR_ATTR(selection));
+                     mode, GR_ATTR(selection));
     }
 }
 
@@ -449,7 +449,7 @@ static void wedln_draw_(WEdln *wedln, bool complete, bool completions)
                                          : GR_ATTR(inactive));
 
     if(completions)
-        wedln_draw_completions(wedln, FALSE);
+        wedln_draw_completions(wedln, LISTING_DRAW_ALL);
     
     wedln_draw_textarea(wedln);
     
@@ -519,7 +519,7 @@ static void wedln_show_completions(WEdln *wedln, char **strs, int nstrs,
 
     input_refit((WInput*)wedln);
     if(w==REGION_GEOM(wedln).w && h==REGION_GEOM(wedln).h)
-        wedln_draw_completions(wedln, TRUE);
+        wedln_draw_completions(wedln, LISTING_DRAW_COMPLETE);
 }
 
 
@@ -537,7 +537,7 @@ void wedln_scrollup_completions(WEdln *wedln)
     if(wedln->compl_list.strs==NULL)
         return;
     if(scrollup_listing(&(wedln->compl_list)))
-        wedln_draw_completions(wedln, TRUE);
+        wedln_draw_completions(wedln, LISTING_DRAW_COMPLETE);
 }
 
 
@@ -546,7 +546,7 @@ void wedln_scrolldown_completions(WEdln *wedln)
     if(wedln->compl_list.strs==NULL)
         return;
     if(scrolldown_listing(&(wedln->compl_list)))
-        wedln_draw_completions(wedln, TRUE);
+        wedln_draw_completions(wedln, LISTING_DRAW_COMPLETE);
 }
 
 
@@ -640,8 +640,8 @@ allocfail:
 
 static void wedln_do_select_completion(WEdln *wedln, int n)
 {
-    bool complredraw=listing_select(&(wedln->compl_list), n);
-    wedln_draw_completions(wedln, complredraw);
+    bool redraw=listing_select(&(wedln->compl_list), n);
+    wedln_draw_completions(wedln, redraw);
 
     update_nocompl++;
     edln_set_completion(&(wedln->edln), wedln->compl_list.strs[n],

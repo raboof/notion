@@ -345,7 +345,7 @@ void init_listing(WListing *l)
 
 
 static void do_draw_listing(GrBrush *brush, const WRectangle *geom, 
-                            WListing *l, GrAttr selattr)
+                            WListing *l, GrAttr selattr, int mode)
 {
     int wrapw=grbrush_get_text_width(brush, "\\", 1);
     int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
@@ -368,15 +368,20 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
             if(i>=l->nstrs)
                 return;
             
-            if(i==l->selected_str)
-                grbrush_set_attr(brush, selattr);
-                
-            draw_multirow(brush, geom->x+x, y, l->itemh, l->strs[i],
-                          (l->iteminfos!=NULL ? &(l->iteminfos[i]) : NULL),
-                          geom->w-x, ciw, wrapw);
+            if(mode>=0 || 
+               l->selected_str==i ||
+               LISTING_DRAW_GET_SELECTED(mode)==i){
             
-            if(i==l->selected_str)
-                grbrush_unset_attr(brush, selattr);
+                if(i==l->selected_str)
+                    grbrush_set_attr(brush, selattr);
+                    
+                draw_multirow(brush, geom->x+x, y, l->itemh, l->strs[i],
+                              (l->iteminfos!=NULL ? &(l->iteminfos[i]) : NULL),
+                              geom->w-x, ciw, wrapw);
+                
+                if(i==l->selected_str)
+                    grbrush_unset_attr(brush, selattr);
+            }
 
             y+=l->itemh*ITEMROWS(l, i);
             r+=ITEMROWS(l, i);
@@ -388,8 +393,16 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
 }
 
 
+static int prevsel=-1;
+
+static bool filteridx_sel(WListing *l, int i)
+{
+    return (i==prevsel || i==l->selected_str);
+}
+
+
 void draw_listing(GrBrush *brush, const WRectangle *geom,
-                  WListing *l, bool complete, GrAttr selattr)
+                  WListing *l, int mode, GrAttr selattr)
 {
     WRectangle geom2;
     GrBorderWidths bdw;
@@ -397,7 +410,7 @@ void draw_listing(GrBrush *brush, const WRectangle *geom,
     grbrush_begin(brush, geom, GRBRUSH_AMEND|GRBRUSH_KEEP_ATTR
                                |GRBRUSH_NEED_CLIP);
     
-    if(complete)
+    if(mode==LISTING_DRAW_COMPLETE)
         grbrush_clear_area(brush, geom);
     
     grbrush_draw_border(brush, geom);
@@ -409,7 +422,7 @@ void draw_listing(GrBrush *brush, const WRectangle *geom,
     geom2.w=geom->w-bdw.left-bdw.right;
     geom2.h=geom->h-bdw.top-bdw.bottom;
     
-    do_draw_listing(brush, &geom2, l, selattr);
+    do_draw_listing(brush, &geom2, l, selattr, mode);
     
     grbrush_end(brush);
 }
@@ -491,14 +504,16 @@ static int listing_first_visible_row(WListing *l)
 }
 
 
-bool listing_select(WListing *l, int i)
+int listing_select(WListing *l, int i)
 {
     int irow, frow, lrow;
-    bool complredraw=FALSE;
+    int redraw;
+    
+    redraw=LISTING_DRAW_SELECTED(l->selected_str);
     
     if(i<0){
         l->selected_str=-1;
-        return FALSE;
+        return redraw;
     }
     
     assert(i<l->nstrs);
@@ -513,7 +528,7 @@ bool listing_select(WListing *l, int i)
     while(irow<frow){
         one_row_up(l, &(l->firstitem), &(l->firstoff));
         frow--;
-        complredraw=TRUE;
+        redraw=LISTING_DRAW_COMPLETE;
     }
 
     irow+=ITEMROWS(l, i)-1;
@@ -522,9 +537,9 @@ bool listing_select(WListing *l, int i)
     while(irow>lrow){
         one_row_down(l, &(l->firstitem), &(l->firstoff));
         lrow++;
-        complredraw=TRUE;
+        redraw=LISTING_DRAW_COMPLETE;
     }
     
-    return complredraw;
+    return redraw;
 }
 
