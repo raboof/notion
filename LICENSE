@@ -26,8 +26,7 @@ Ion3(tm), and other derived names:
       is prominently notified that the software is no longer considered 
       the standard version, and is not supported by the original author. 
       The version string displayed by the program must describe these
-      modifications and the "support void" status, and the original
-      author may not be pointed to for support.
+      modifications and the "support void" status.
 
   Derived works that do not satisfy the above terms must be renamed so
   that they can not be associated with the Ion project, their executables
