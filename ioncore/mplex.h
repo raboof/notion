@@ -30,7 +30,7 @@
 #define MPLEX_ATTACH_SWITCHTO     0x0001 /* switch to region */
 #define MPLEX_ATTACH_UNNUMBERED   0x0002 /* do not put on mut.ex list */
 #define MPLEX_ATTACH_HIDDEN       0x0004 /* should be hidden */
-#define MPLEX_ATTACH_PSEUDOMODAL  0x0004 /* pseudomodal (if modal) */
+#define MPLEX_ATTACH_PSEUDOMODAL  0x0008 /* pseudomodal (if modal) */
 #define MPLEX_ATTACH_LEVEL        0x0010 /* level field set */
 #define MPLEX_ATTACH_GEOM         0x0020 /* geometry field is set */
 #define MPLEX_ATTACH_SIZEPOLICY   0x0040 /* size policy field is set */
