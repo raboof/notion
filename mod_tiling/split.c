@@ -471,28 +471,28 @@ void splittree_scan_stdisp_rootward(WSplit *node)
 }
 
 
-static WSplitSplit *splittree_scan_stdisp_parent(WSplit *node_, bool set_saw)
+static WSplitST *splittree_scan_stdisp(WSplit *node_, bool set_saw)
 {
-    WSplitSplit *r, *node=OBJ_CAST(node_, WSplitSplit);
+    WSplitST *r=NULL;
+    WSplitSplit *node=OBJ_CAST(node_, WSplitSplit);
     
     if(node==NULL)
         return NULL;
     
-    if(OBJ_IS(node->tl, WSplitST)){
-        if(set_saw)
-            saw_stdisp=(WSplitST*)node->tl;
-        return node;
-    }
-
-    if(OBJ_IS(node->br, WSplitST)){
-        if(set_saw)
-            saw_stdisp=(WSplitST*)node->br;
-        return node;
-    }
-
-    r=splittree_scan_stdisp_parent(node->tl, set_saw);
+    r=OBJ_CAST(node->tl, WSplitST);
     if(r==NULL)
-        r=splittree_scan_stdisp_parent(node->br, set_saw);
+        r=OBJ_CAST(node->br, WSplitST);
+    
+    if(r!=NULL){
+        if(set_saw)
+            saw_stdisp=r;
+        return r;
+    }
+    
+    r=splittree_scan_stdisp(node->tl, set_saw);
+    if(r==NULL)
+        r=splittree_scan_stdisp(node->br, set_saw);
+    
     return r;
 }
 
@@ -504,26 +504,41 @@ static bool stdisp_immediate_child(WSplitSplit *node)
 }
 
 
-static WSplit *move_stdisp_out_of_way(WSplit *node)
+static WSplit *dodge_stdisp(WSplit *node, bool keep_within)
 {
+    WSplitST *stdisp;
     WSplitSplit *stdispp;
     
-    if(!OBJ_IS(node, WSplitSplit))
+    stdisp=splittree_scan_stdisp(node, TRUE);
+    
+    if(stdisp==NULL)
         return node;
     
-    stdispp=splittree_scan_stdisp_parent(node, TRUE);
-        
+    stdispp=OBJ_CAST(((WSplit*)stdisp)->parent, WSplitSplit);
+    
     if(stdispp==NULL)
         return node;
-        
-    while(stdispp->tl!=node && stdispp->br!=node){
+    
+    if((WSplit*)stdispp==node){
+        /* Node itself immediately contains stdisp. Due to the way
+         * try_unsink works, stdisp this will not change, so another
+         * node must be used, if we want to fully dodge stdisp.
+         */
+        return (keep_within
+                ? node
+                : (stdispp->tl==(WSplit*)stdisp 
+                   ? stdispp->br 
+                   : stdispp->tl));
+    }
+    
+    do{
         if(!split_try_unsink_stdisp(stdispp, FALSE, TRUE)){
             warn(TR("Unable to move the status display out of way."));
             return NULL;
         }
-    }
+    }while(stdispp->tl!=node && stdispp->br!=node);
     
-    return (WSplit*)stdispp;
+    return node;
 }
 
 
@@ -1076,15 +1091,17 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
     
     assert(node!=NULL && parent!=NULL);
     
+    splittree_begin_resize();
+    
+    node=dodge_stdisp(node, FALSE);
+    
+    if(node==NULL)
+        return NULL;
+    
     if(OBJ_IS(node, WSplitST)){
         warn(TR("Splitting the status display is not allowed."));
         return NULL;
     }
-
-    splittree_begin_resize();
-    
-    if(!move_stdisp_out_of_way(node))
-        return NULL;
 
     if(primn!=PRIMN_TL && primn!=PRIMN_BR)
         primn=PRIMN_BR;
@@ -1637,14 +1654,16 @@ static void splitsplit_flip_(WSplitSplit *split)
 
 
 /*EXTL_DOC
- * Flip contents of \var{node}.
+ * Flip contents of \var{split}.
  */
 EXTL_EXPORT_MEMBER
 void splitsplit_flip(WSplitSplit *split)
 {
     splittree_begin_resize();
 
-    if(!move_stdisp_out_of_way((WSplit*)split))
+    split=OBJ_CAST(dodge_stdisp((WSplit*)split, FALSE), WSplitSplit);
+    
+    if(split==NULL)
         return;
     
     splitsplit_flip_(split);
@@ -1707,19 +1726,19 @@ static bool split_fliptrans_to(WSplit *node, const WRectangle *geom,
      * geometry calculation we move it immediately below node, and
      * resize stdisp's fixed parent node instead.
      */
-    node2=move_stdisp_out_of_way(node);
+    node2=dodge_stdisp(node, TRUE);
     
-    if(node2==NULL)
+    if(node==NULL || node2!=node)
         return FALSE;
     
-    split_update_bounds(node2, TRUE);
+    split_update_bounds(node, TRUE);
     
-    split_do_rqgeom_(node2, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
+    split_do_rqgeom_(node, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
     
-    split_do_resize(node2, &rg, PRIMN_ANY, PRIMN_ANY, trans);
+    split_do_resize(node, &rg, PRIMN_ANY, PRIMN_ANY, trans);
     
     if(flip!=FLIP_NONE)
-        splittree_flip_dir(node2, flip);
+        splittree_flip_dir(node, flip);
 
     splittree_end_resize();
     
