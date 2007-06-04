@@ -64,7 +64,7 @@ static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp,
 {
     WRegion *reg;
     WRegionAttachData data;
-    WGroupAttachParams par;
+    WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
     WGroupWS *ws;
     
     ws=create_groupws(parent, fp);
@@ -108,8 +108,8 @@ static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp,
 static WRegion *create(WMPlex *mplex, int flags)
 {
     WRegion *sp;
-    WMPlexAttachParams par;
-
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+    
     par.flags=(flags
                |MPLEX_ATTACH_UNNUMBERED
                |MPLEX_ATTACH_SIZEPOLICY
