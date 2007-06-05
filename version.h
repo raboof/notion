@@ -1,2 +1,2 @@
 #define ION_VERSION "(snapshot)"
-#define ION_API_VERSION "3-"ION_VERSION
+#define ION_API_VERSION "3"
