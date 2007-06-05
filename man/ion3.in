@@ -150,7 +150,7 @@ User default main configuration file (overrides system default)
 .SH SEE ALSO
 The Ion home page, \fIhttp://iki.fi/tuomov/ion/\fP
 .PP
-The document "Ion: Configuring and extending with Lua" found on the
+The document "Configuring and extending Ion3 with Lua" found on the
 Ion home page.
 .PP
 .I DOCDIR/
