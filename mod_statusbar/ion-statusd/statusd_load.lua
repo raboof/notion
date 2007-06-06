@@ -18,50 +18,16 @@
 
 local defaults={
     update_interval=10*1000,
-    load_hint=1,
+    load_hint="1min",
     important_threshold=1.5,
     critical_threshold=4.0
 }
 
 local settings=table.join(statusd.get_config("load"), defaults)
 
-local loadpat='^(%d+%.%d+).*(%d+%.%d+).*(%d+%.%d+)'
+local load_timer
 
-local function get_load_proc()
-    local f=io.open('/proc/loadavg', 'r')
-    if not f then
-        return ""
-    end
-    local s=f:read('*l')
-    f:close()
-    local st, en, load=string.find(s, '^(%d+%.%d+ %d+%.%d+ %d+%.%d+)')
-    
-    return string.gsub((load or ""), " ", ", ")
-end
-
-local function get_load_uptime()
-    local f=io.popen('uptime', 'r')
-    if not f then
-        return "??"
-    end
-    local s=f:read('*l')
-    f:close()
-    local st, en, load=string.find(s, 'load averages?:%s*(.*)')
-    return (load or "")
-end
-
-local function detect_load_fn()
-    if get_load_proc()~="" then
-        return get_load_proc
-    else
-        return get_load_uptime
-    end
-end
-
-local get_load, load_timer
-
-local function get_hint(l)
-    local v=tonumber(l)
+local function get_hint(v)
     local i="normal"
     if v then
         if v>settings.critical_threshold then
@@ -73,26 +39,31 @@ local function get_hint(l)
     return i
 end
 
-local l1min, l5min, l15min=2+1, 2+2, 2+3
+local function fmt(l)
+    if not l then
+        return "?"
+    else
+        return string.format("%0.2f", l)
+    end
+end
 
 local function update_load()
-    local l = get_load()    
-    local lds={string.find(l, loadpat)}
-    statusd.inform("load", l)
-    statusd.inform("load_hint", get_hint(lds[settings.load_hint+2]))
-    statusd.inform("load_1min", lds[l1min])
-    statusd.inform("load_1min_hint", get_hint(lds[l1min]))
-    statusd.inform("load_5min", lds[l5min])
-    statusd.inform("load_5min_hint", get_hint(lds[l5min]))
-    statusd.inform("load_15min", lds[l15min])
-    statusd.inform("load_15min_hint", get_hint(lds[l15min]))
+    local lds = statusd.getloadavg()
+    f1, f5, f15 = fmt(lds["1min"]), fmt(lds["5min"]), fmt(lds["15min"])
+    statusd.inform("load", f1..", "..f5..", "..f15)
+    statusd.inform("load_hint", get_hint(lds[settings.load_hint]))
+    statusd.inform("load_1min", f1)
+    statusd.inform("load_1min_hint", get_hint(lds["1min"]))
+    statusd.inform("load_5min", f5)
+    statusd.inform("load_5min_hint", get_hint(lds["5min"]))
+    statusd.inform("load_15min", f15)
+    statusd.inform("load_15min_hint", get_hint(lds["15min"]))
     load_timer:set(settings.update_interval, update_load)
 end
 
 -- Init
 --statusd.inform("load_template", "0.00, 0.00, 0.00");
 
-get_load=detect_load_fn()
 load_timer=statusd.create_timer()
 update_load()
 

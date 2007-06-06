@@ -289,3 +289,23 @@ double statusd_last_modified(const char *fname)
     return (double)(st.st_mtime>st.st_ctime ? st.st_mtime : st.st_ctime);
 }
 
+
+EXTL_EXPORT
+ExtlTab statusd_getloadavg()
+{
+    ExtlTab t=extl_create_table();
+    double l[3];
+    int n;
+    
+    n=getloadavg(l, 3);
+    
+    if(n>=1)
+        extl_table_sets_d(t, "1min", l[0]);
+    if(n>=2)
+        extl_table_sets_d(t, "5min", l[1]);
+    if(n>=3)
+        extl_table_sets_d(t, "15min", l[2]);
+        
+    return t;
+}
+
