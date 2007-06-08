@@ -7,7 +7,6 @@
  */
 
 #include <X11/Xmd.h>
-#include <X11/Xmu/Atoms.h>
 #include <string.h>
 
 #include "common.h"
@@ -23,6 +22,17 @@ static bool continuation_set=FALSE;
 static ExtlFn continuation;
 
 #define CLIPATOM(X) XA_PRIMARY
+
+static Atom XA_COMPOUND_TEXT(Display *unused)
+{
+    static Atom a=None;
+    
+    if(a==None)
+        a=XInternAtom(ioncore_g.dpy, "COMPOUND_TEXT", False);
+        
+    return a;
+}
+
 
 void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
 {
