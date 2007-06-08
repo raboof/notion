@@ -79,7 +79,7 @@ X11_PREFIX=/usr/X11R6
 # SunOS/Solaris
 #X11_PREFIX=/usr/openwin
 
-X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext
+X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext -lXmu
 X11_INCLUDES=-I$(X11_PREFIX)/include
 
 # XFree86 libraries up to 4.3.0 have a bug that can cause a segfault.

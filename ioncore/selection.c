@@ -7,6 +7,7 @@
  */
 
 #include <X11/Xmd.h>
+#include <X11/Xmu/Atoms.h>
 #include <string.h>
 
 #include "common.h"
@@ -21,24 +22,56 @@ static int selection_length;
 static bool continuation_set=FALSE;
 static ExtlFn continuation;
 
+#define CLIPATOM(X) XA_PRIMARY
+
 void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
 {
     XSelectionEvent sev;
+    XTextProperty prop;
     const char *p[1];
+    bool ok=FALSE;
     
-    if(selection_data==NULL)
-        return;
+    sev.property=None;
+    sev.target=None;
+    
+    if(selection_data==NULL || ev->property==None)
+        goto refuse;
     
     p[0]=selection_data;
     
-    xwindow_set_text_property(ev->requestor, ev->property, p, 1);
+    if(!ioncore_g.use_mb && ev->target==XA_STRING){
+        Status st=XStringListToTextProperty((char **)&p, 1, &prop);
+        ok=st;
+    }else if(ioncore_g.use_mb){
+        XICCEncodingStyle style;
+        
+        if(ev->target==XA_STRING){
+            style=XStringStyle;
+            ok=TRUE;
+        }else if(ev->target==XA_COMPOUND_TEXT(ioncore_g.dpy)){
+            style=XCompoundTextStyle;
+            ok=TRUE;
+        }
+        
+        if(ok){
+            Status st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)p, 1,
+                                                style, &prop);
+            ok=!st;
+        }
+    }
     
+    if(ok){
+        XSetTextProperty(ioncore_g.dpy, ev->requestor, &prop, ev->property);
+        sev.target=prop.encoding;
+        sev.property=ev->property;
+        XFree(prop.value);
+    }
+
+refuse:    
     sev.type=SelectionNotify;
     sev.requestor=ev->requestor;
     sev.selection=ev->selection;
-    sev.target=ev->target;
     sev.time=ev->time;
-    sev.property=ev->property;
     XSendEvent(ioncore_g.dpy, ev->requestor, False, 0L, (XEvent*)&sev);
 }
 
@@ -128,7 +161,7 @@ void ioncore_set_selection_n(const char *p, int n)
     
     XStoreBytes(ioncore_g.dpy, p, n);
     
-    XSetSelectionOwner(ioncore_g.dpy, XA_PRIMARY,
+    XSetSelectionOwner(ioncore_g.dpy, CLIPATOM(ioncore_g.dpy),
                        DefaultRootWindow(ioncore_g.dpy),
                        CurrentTime);
 }
@@ -156,15 +189,10 @@ void ioncore_request_selection_for(Window win)
         continuation_set=FALSE;
     }
     
-    if(ioncore_g.use_mb){
-#ifdef X_HAVE_UTF8_STRING
-        a=XInternAtom(ioncore_g.dpy, "UTF8_STRING", True);
-#else
-        a=XInternAtom(ioncore_g.dpy, "COMPOUND_TEXT", True);
-#endif
-    }
+    if(ioncore_g.use_mb)
+        a=XA_COMPOUND_TEXT(ioncore_g.dpy);
     
-    XConvertSelection(ioncore_g.dpy, XA_PRIMARY, a,
+    XConvertSelection(ioncore_g.dpy, CLIPATOM(ioncore_g.dpy), a,
                       ioncore_g.atom_selection, win, CurrentTime);
 }
 
