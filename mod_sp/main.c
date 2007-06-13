@@ -155,11 +155,11 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
     int setpar=libtu_setparam_invert(libtu_string_to_setparam(how));
     WMPlexIterTmp tmp;
     WRegion *reg;
-    bool found=FALSE;
+    bool found=FALSE, res=FALSE;
     
     FOR_ALL_MANAGED_BY_MPLEX(mplex, reg, tmp){
         if(is_scratchpad(reg)){
-            mplex_set_hidden(mplex, reg, setpar);
+            res=!mplex_set_hidden(mplex, reg, setpar);
             found=TRUE;
         }
     }
@@ -168,9 +168,10 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
         int sp=libtu_string_to_setparam(how);
         if(sp==SETPARAM_SET || sp==SETPARAM_TOGGLE)
             found=(create(mplex, 0)!=NULL);
+            res=found;
     }
     
-    return found;
+    return res;
 }
 
 
