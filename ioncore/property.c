@@ -169,7 +169,8 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret)
     XTextProperty prop;
     char **list=NULL;
     int n=0;
-    Status st=0;
+    Status st;
+    bool ok;
     
     st=XGetTextProperty(ioncore_g.dpy, win, &prop, a);
 
@@ -189,15 +190,16 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret)
 #endif
 
     if(!ioncore_g.use_mb){
-        st=XTextPropertyToStringList(&prop, &list, &n);
+        Status st=XTextPropertyToStringList(&prop, &list, &n);
+        ok=(st==0);
     }else{
-        st=XmbTextPropertyToTextList(ioncore_g.dpy, &prop, &list, &n);
-        st=!st;
+        int st=XmbTextPropertyToTextList(ioncore_g.dpy, &prop, &list, &n);
+        ok=(st>=0);
     }
 
     XFree(prop.value);
     
-    if(!st || n==0 || list==NULL)
+    if(!ok || n==0 || list==NULL)
         return NULL;
     
     if(nret)
@@ -210,17 +212,18 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret)
 void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
 {
     XTextProperty prop;
-    Status st;
-
+    bool ok;
+    
     if(!ioncore_g.use_mb){
-        st=XStringListToTextProperty((char **)&ptr, n, &prop);
+        Status st=XStringListToTextProperty((char **)ptr, n, &prop);
+        ok=(st!=0);
     }else{
-        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
-                                     XTextStyle, &prop);
-        st=!st;
+        int st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
+                                         XTextStyle, &prop);
+        ok=(st>=0);
     }
     
-    if(!st)
+    if(!ok)
         return;
     
     XSetTextProperty(ioncore_g.dpy, win, &prop, a);

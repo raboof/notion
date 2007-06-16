@@ -50,8 +50,8 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
     p[0]=selection_data;
     
     if(!ioncore_g.use_mb && ev->target==XA_STRING){
-        Status st=XStringListToTextProperty((char **)&p, 1, &prop);
-        ok=st;
+        Status st=XStringListToTextProperty((char **)p, 1, &prop);
+        ok=(st!=0);
     }else if(ioncore_g.use_mb){
         XICCEncodingStyle style;
         
@@ -64,15 +64,15 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
         }
         
         if(ok){
-            Status st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)p, 1,
-                                                style, &prop);
-            ok=!st;
+            int st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)p, 1,
+                                             style, &prop);
+            ok=(st>=0);
         }
     }
     
     if(ok){
         XSetTextProperty(ioncore_g.dpy, ev->requestor, &prop, ev->property);
-        sev.target=prop.encoding;
+        sev.target=ev->target;
         sev.property=ev->property;
         XFree(prop.value);
     }
