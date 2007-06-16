@@ -112,29 +112,13 @@ static void insert_selection(Window win, Atom prop)
 }
 
 
-static void insert_cutbuffer(Window win)
-{
-    char *p;
-    int n;
-    
-    p=XFetchBytes(ioncore_g.dpy, &n);
-    
-    if(n<=0 || p==NULL)
-        return;
-    
-    ins(win, p, n);
-}
-
-
 void ioncore_handle_selection(XSelectionEvent *ev)
 {
     Atom prop=ev->property;
     Window win=ev->requestor;
     WWindow *wwin;
     
-    if(prop==None){
-        insert_cutbuffer(win);
-    }else{
+    if(prop!=None){
         insert_selection(win, prop);
         XDeleteProperty(ioncore_g.dpy, win, prop);
     }
@@ -168,8 +152,6 @@ void ioncore_set_selection_n(const char *p, int n)
     memcpy(selection_data, p, n);
     selection_data[n]='\0';
     selection_length=n;
-    
-    XStoreBytes(ioncore_g.dpy, p, n);
     
     XSetSelectionOwner(ioncore_g.dpy, CLIPATOM(ioncore_g.dpy),
                        DefaultRootWindow(ioncore_g.dpy),
