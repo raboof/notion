@@ -73,7 +73,7 @@ system. On PC:s with XFree86 it is probably bound to the left Alt key
 (\fBMeta_L\fP, \fBMeta_R\fP). Use \fIxmodmap(1x)\fP to find out.
 
 The string in square brackets after a binding group heading below indicates
-the module that whose configuration file defines these bindings.
+the module whose configuration file defines these bindings.
 
 .SS Globally available bindings
 
