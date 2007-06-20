@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <libtu/objp.h>
 #include <libtu/types.h>
@@ -47,16 +48,24 @@ int mainloop_gettime(struct timeval *val)
 #ifdef _POSIX_MONOTONIC_CLOCK
     struct timespec spec;
     int ret;
+    static int checked=0;
     
-    ret=clock_gettime(CLOCK_MONOTONIC, &spec);
+    if(checked>=0){
+        ret=clock_gettime(CLOCK_MONOTONIC, &spec);
     
-    val->tv_sec=spec.tv_sec;
-    val->tv_usec=spec.tv_nsec/1000;
-    
-    return ret;
-#else
-    return gettimeofday(&val, NULL);
+        if(ret==-1 && errno==EINVAL && checked==0){
+            checked=-1;
+        }else{
+            checked=1;
+            
+            val->tv_sec=spec.tv_sec;
+            val->tv_usec=spec.tv_nsec/1000;
+        
+            return ret;
+        }
+    }
 #endif
+    return gettimeofday(val, NULL);
 }
 
 
