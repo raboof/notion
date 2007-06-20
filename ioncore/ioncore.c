@@ -18,6 +18,8 @@
 #ifndef CF_NO_LOCALE
 #include <locale.h>
 #include <langinfo.h>
+#endif
+#ifndef CF_NO_GETTEXT
 #include <libintl.h>
 #endif
 
@@ -229,6 +231,10 @@ static bool init_locale()
     return FALSE;
 }
 
+#endif
+
+#ifndef CF_NO_GETTEXT
+
 #define TEXTDOMAIN "ion3"
 
 static bool init_messages(const char *localedir)
@@ -384,6 +390,8 @@ bool ioncore_init(const char *prog, int argc, char *argv[],
 
 #ifndef CF_NO_LOCALE    
     init_locale();
+#endif
+#ifndef CF_NO_GETTEXT
     init_messages(localedir);
 #endif
 

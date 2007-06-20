@@ -110,7 +110,7 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # If you're on an archaic system (such as relatively recent *BSD releases)
 # without even dummy multibyte/widechar and localisation support, you may 
 # have to uncomment the following line:
-#DEFINES += -DCF_NO_LOCALE
+#DEFINES += -DCF_NO_LOCALE -DCF_NO_GETTEXT
 
 # On some other systems you may something like this:
 #EXTRA_LIBS += -lintl
