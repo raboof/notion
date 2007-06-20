@@ -45,7 +45,7 @@ static WTimer *queue=NULL;
 
 int mainloop_gettime(struct timeval *val)
 {
-#ifdef _POSIX_MONOTONIC_CLOCK
+#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK>=0)
     struct timespec spec;
     int ret;
     static int checked=0;
@@ -64,6 +64,8 @@ int mainloop_gettime(struct timeval *val)
             return ret;
         }
     }
+#else
+    #warning "Monotonic clock unavailable; please fix your operating system."
 #endif
     return gettimeofday(val, NULL);
 }
