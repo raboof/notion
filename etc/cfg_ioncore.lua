@@ -50,7 +50,7 @@ defbindings("WScreen", {
         --kpress("I", "ioncore.goto_activity()"),
         
         bdoc("Clear all tags."),
-        kpress("T", "ioncore.clear_tags()"),
+        kpress("T", "ioncore.tagged_clear()"),
     }),
 
     bdoc("Go to n:th screen on multihead setup."),
@@ -356,7 +356,7 @@ defctxmenu("WFrame", "Frame", {
     menuentry("Close",          "WRegion.rqclose_propagate(_, _sub)"),
     -- Low-priority entries
     menuentry("Attach tagged", "ioncore.tagged_attach(_)", { priority = 0 }),
-    menuentry("Clear tags",    "ioncore.clear_tags()", { priority = 0 }),
+    menuentry("Clear tags",    "ioncore.tagged_clear()", { priority = 0 }),
     menuentry("Window info",   "mod_query.show_tree(_, _sub)", { priority = 0 }),
 })
 
