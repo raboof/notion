@@ -50,6 +50,10 @@ bool mod_xinerama_init()
     int nRects;
     int i;
 
+    /* Only keep track of mod_xinerama screens in ioncore_g.screens
+     * so that ioncore.goto_next_screen and goto_prev_screen wrap
+     * properly.
+     */
     ioncore_g.screens = NULL;
 
     if(XineramaQueryExtension(dpy,&xinerama_event_base, &xinerama_error_base))
