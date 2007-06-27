@@ -50,6 +50,8 @@ bool mod_xinerama_init()
     int nRects;
     int i;
 
+    ioncore_g.screens = NULL;
+
     if(XineramaQueryExtension(dpy,&xinerama_event_base, &xinerama_error_base))
     {
         XineramaScreenInfo* sInfo;
