@@ -924,7 +924,7 @@ WRegion *frame_managed_disposeroot(WFrame *frame, WRegion *reg)
     if(DEST_EMPTY(frame) &&
        frame->mplex.mgd!=NULL && 
        frame->mplex.mgd->reg==reg && 
-       frame->mplex.mgd->next==NULL){
+       frame->mplex.mgd->mgr_next==NULL){
         WRegion *tmp=region_disposeroot((WRegion*)frame);
         return (tmp!=NULL ? tmp : reg);
     }
