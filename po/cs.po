@@ -9,224 +9,225 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ion3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-04-22 15:41+0200\n"
-"PO-Revision-Date: 2007-04-22 15:42+0200\n"
+"POT-Creation-Date: 2007-07-01 20:27+0300\n"
+"PO-Revision-Date: 2007-07-02 19:12+0200\n"
 "Last-Translator: Miroslav Kure <kurem at debian.cz>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../ioncore/conf-bindings.c:96
+#: ../ioncore/conf-bindings.c:93
 msgid "Insane key combination."
 msgstr "©ílená klávesová kombinace."
 
-#: ../ioncore/conf-bindings.c:100
+#: ../ioncore/conf-bindings.c:97
 msgid "Could not convert keysym to keycode."
 msgstr "Nemohu pøevést keysym na keycode."
 
-#: ../ioncore/conf-bindings.c:111
+#: ../ioncore/conf-bindings.c:108
 #, c-format
 msgid "Unknown button \"%s\"."
 msgstr "Neznámé tlaèítko \"%s\"."
 
-#: ../ioncore/conf-bindings.c:116
+#: ../ioncore/conf-bindings.c:113
 msgid "Insane button combination."
 msgstr "©ílená kombinace tlaèítek."
 
-#: ../ioncore/conf-bindings.c:123 ../ioncore/conf-bindings.c:130
+#: ../ioncore/conf-bindings.c:120 ../ioncore/conf-bindings.c:127
 msgid "Insane modifier combination."
 msgstr "©ílená kombinace modifikátorù."
 
-#: ../ioncore/conf-bindings.c:168
+#: ../ioncore/conf-bindings.c:165
 #, c-format
 msgid "Can not wait on modifiers when no modifiers set in \"%s\"."
 msgstr "Nemohu èekat na modifikátory, kdy¾ ¾ádné nebyly nastaveny v \"%s\"."
 
-#: ../ioncore/conf-bindings.c:186
+#: ../ioncore/conf-bindings.c:183
 #, c-format
 msgid "Unable to add binding %s."
 msgstr "Nemohu pøidat vazbu %s."
 
-#: ../ioncore/conf-bindings.c:191
+#: ../ioncore/conf-bindings.c:188
 #, c-format
 msgid "Unable to remove binding %s."
 msgstr "Nemohu odstranit vazbu %s."
 
-#: ../ioncore/conf-bindings.c:230
+#: ../ioncore/conf-bindings.c:228
 #, c-format
 msgid "Unable to add submap for binding %s."
 msgstr "Nemohu pøidat **** pro vazbu %s."
 
 #
-#: ../ioncore/conf-bindings.c:260
+#: ../ioncore/conf-bindings.c:261
 msgid "Binding type not set."
 msgstr "Typ vazby není nastaven."
 
-#: ../ioncore/conf-bindings.c:270
+#: ../ioncore/conf-bindings.c:271
 #, c-format
 msgid "Unknown binding type \"%s\"."
 msgstr "Neznámý typ vazby \"%s\"."
 
-#: ../ioncore/conf-bindings.c:292
+#: ../ioncore/conf-bindings.c:295
 #, c-format
 msgid "Unknown area \"%s\" for binding %s."
 msgstr "Neznámá oblast \"%s\" pro vazbu %s."
 
-#: ../ioncore/conf-bindings.c:333
+#: ../ioncore/conf-bindings.c:336
 #, c-format
 msgid "Unable to get bindmap entry %d."
 msgstr "Nemohu získat záznam o vazbì %d."
 
-#: ../ioncore/conf-bindings.c:375
+#: ../ioncore/conf-bindings.c:378
 msgid "Unable to convert keysym to string."
 msgstr "Nemohu pøevést keysym na øetìzec."
 
-#: ../ioncore/conf-bindings.c:389
+#: ../ioncore/conf-bindings.c:392
 msgid "Unable to convert button to string."
 msgstr "Nemohu pøevést tlaèítko na øetìzec."
 
 #
-#: ../ioncore/event.c:113
+#: ../ioncore/event.c:110
 msgid "Time request from X server failed."
 msgstr "Èasový po¾adavek od X serveru selhal."
 
 #
-#: ../ioncore/exec.c:186
+#: ../ioncore/exec.c:185
 msgid "Not saving state: running under session manager."
 msgstr "Neukládám stav: bì¾ím pod správcem sezení."
 
-#: ../ioncore/strings.c:107 ../ioncore/strings.c:143 ../ioncore/strings.c:176
+#: ../ioncore/strings.c:104 ../ioncore/strings.c:140 ../ioncore/strings.c:173
 msgid "Invalid multibyte string."
 msgstr "Neplatný vícebajtový øetìzec."
 
-#: ../ioncore/strings.c:267
+#: ../ioncore/strings.c:264
 #, c-format
 msgid "Error compiling regular expression: %s"
 msgstr "Chyba pøi kompilaci regulárního výrazu: %s"
 
-#: ../ioncore/modules.c:158
+#: ../ioncore/modules.c:155
 msgid "Invalid module name."
 msgstr "Neplatné jméno modulu."
 
 #
-#: ../ioncore/modules.c:170
+#: ../ioncore/modules.c:167
 msgid "The module is already loaded."
 msgstr "Modul je ji¾ zaveden."
 
-#: ../ioncore/modules.c:185
+#: ../ioncore/modules.c:182
 msgid ""
 "Module version information not found or version mismatch. Refusing to use."
 msgstr ""
 "Nemohu najít informace o verzi modulu, nebo verze nesouhlasí. Odmítám modul "
 "pou¾ít."
 
-#: ../ioncore/modules.c:196
+#: ../ioncore/modules.c:193
 #, c-format
 msgid "Unable to initialise module %s."
 msgstr "Nemohu inicializovat modul %s."
 
-#: ../ioncore/modules.c:220 ../libextl/readconfig.c:388
+#: ../ioncore/modules.c:217 ../../libextl-3/readconfig.c:388
 #, c-format
 msgid "Unable to find '%s' on search path."
 msgstr "V prohledávané cestì nemohu najít \"%s\"."
 
-#: ../ioncore/modules.c:291
+#: ../ioncore/modules.c:288
 msgid "Unknown module."
 msgstr "Neznámý modul."
 
-#: ../ioncore/modules.c:299
+#: ../ioncore/modules.c:296
 msgid "Unable to initialise module."
 msgstr "Nemohu inicializovat modul."
 
-#: ../ioncore/modules.c:344
+#: ../ioncore/modules.c:341
 msgid "No module to load given."
 msgstr "Nebyl zadán modul pro zavedení."
 
-#: ../ioncore/property.c:355 ../ioncore/property.c:364
+#: ../ioncore/property.c:350 ../ioncore/property.c:359
 msgid "Invalid arguments."
 msgstr "Neplatné argumenty."
 
-#: ../ioncore/screen.c:385
+#: ../ioncore/screen.c:382
 msgid "Only workspace may not be destroyed/detached."
 msgstr "Jediná pracovní plocha nemù¾e být zru¹ena."
 
-#: ../ioncore/screen.c:396
+#: ../ioncore/screen.c:393
 msgid "Screens may not be destroyed."
 msgstr "Obrazovky nesmí být znièeny."
 
-#: ../ioncore/screen.c:432
+#: ../ioncore/screen.c:429
 msgid "Invalid offset."
 msgstr "Neplatné odsazení"
 
-#: ../ioncore/screen.c:471
+#: ../ioncore/screen.c:468
 #, c-format
 msgid "Unable to create a workspace on screen %d."
 msgstr "Nemohu vytvoøit pracovní plochu na obrazovce %d."
 
-#: ../ioncore/sizehint.c:157
+#: ../ioncore/sizehint.c:146
 msgid "Invalid client-supplied width/height increment."
 msgstr "Klient zadal neplatný pøírùstek ¹íøky/vý¹ky."
 
-#: ../ioncore/sizehint.c:165
+#: ../ioncore/sizehint.c:154
 msgid "Invalid client-supplied aspect-ratio."
 msgstr "Klient zadal neplatný pomìr stran."
 
-#: ../ioncore/ioncore.c:78
+#: ../ioncore/ioncore.c:79
 msgid ""
-"This program is free software; you can redistribute it and/or\n"
-"modify it under the terms of the GNU Lesser General Public\n"
-"License as published by the Free Software Foundation; either\n"
-"version 2.1 of the License, or (at your option) any later version.\n"
+"The software is essentially licensed under the GNU Lesser General\n"
+"Public License (LGPL), version 2.1, unless otherwise indicated in\n"
+"components taken from elsewhere. Additional terms apply to the use\n"
+"of the name of the project, Ion(tm). For details, see the file\n"
+"LICENSE that you should have received with this software.\n"
 "\n"
 "This program is distributed in the hope that it will be useful,\n"
 "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
-"Lesser General Public License for more details.\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
-"Tento program je svobodný software; mù¾ete jej ¹íøit a/nebo upravovat\n"
-"podle podmínek licence GNU Lesser General Public Licence verze 2.1 nebo\n"
-"(podle va¹eho uvá¾ení) novìj¹í, jak ji publikuje Free Software Foundation.\n"
+"Tento program je v podstatì licencovaný pod licencí GNU Lesser\n"
+"General Public Licence (LGPL) verze 2.1, s mo¾nou výjimkou\n"
+"komponent získaných jinde. Na pou¾ití jména projektu, Ion(tm),\n"
+"se vztahují dal¹í podmínky. Podrobnosti naleznete v souboru\n"
+"LICENSE, který byste mìli obdr¾et spolu s tímto softwarem.\n"
 "\n"
-"Tento program je distribuovaný v nadìji, ¾e bude u¾iteèný, ale BEZ\n"
-"JAKÉKOLIV ZÁRUKY. Pro více podrobností se podívejte do licence GNU\n"
-"Lesser General Public License.\n"
+"Tento program je distribuovaný v nadìji, ¾e bude u¾iteèný, ale\n"
+"BEZ JAKÉKOLIV ZÁRUKY.\n"
 
-#: ../ioncore/ioncore.c:159
+#: ../ioncore/ioncore.c:160
 msgid "No encoding given in LC_CTYPE."
 msgstr "V LC_CTYPE není zadáno kódování."
 
-#: ../ioncore/ioncore.c:470
+#: ../ioncore/ioncore.c:478
 #, c-format
 msgid "Could not connect to X display '%s'"
 msgstr "Nemohu se pøipojit na X displej \"%s\""
 
-#: ../ioncore/ioncore.c:522
+#: ../ioncore/ioncore.c:531
 msgid "Could not find a screen to manage."
 msgstr "Nemohu najít obrazovku, kterou bych mohl spravovat."
 
-#: ../ioncore/xic.c:38
+#: ../ioncore/xic.c:35
 msgid "Failed to open input method."
 msgstr "Selhalo otevøení vstupní metody."
 
-#: ../ioncore/xic.c:43
+#: ../ioncore/xic.c:40
 msgid "Input method doesn't support any style."
 msgstr "Vstupní metoda nepodporuje ¾ádný styl."
 
-#: ../ioncore/xic.c:58
+#: ../ioncore/xic.c:55
 msgid "input method doesn't support my preedit type."
 msgstr "Vstupní metoda nepodporuje mùj pøedpøipravený typ."
 
-#: ../ioncore/xic.c:86
+#: ../ioncore/xic.c:83
 msgid "Failed to create input context."
 msgstr "Selhalo vytvoøení vstupního kontextu."
 
-#: ../ioncore/clientwin.c:379
+#: ../ioncore/clientwin.c:376
 #, c-format
 msgid "The transient_for hint for \"%s\" points to itself."
 msgstr "Nápovìda transient_for pro \"%s\" ukazuje sama na sebe."
 
-#: ../ioncore/clientwin.c:383
+#: ../ioncore/clientwin.c:380
 #, c-format
 msgid ""
 "Client window \"%s\" has broken transient_for hint. (\"Extended WM hints\" "
@@ -235,49 +236,49 @@ msgstr ""
 "Klientské okno \"%s\" má poru¹enou nápovìdu transient_for. (Schizofrenie "
 "více rodièù \"Extended WM hints\"?)"
 
-#: ../ioncore/clientwin.c:388
+#: ../ioncore/clientwin.c:385
 #, c-format
 msgid "The transient_for window for \"%s\" is not on the same screen."
 msgstr "Okno transient_for pro \"%s\" není na stejné obrazovce."
 
-#: ../ioncore/clientwin.c:408 ../ioncore/clientwin.c:496
-#: ../ioncore/clientwin.c:1292
+#: ../ioncore/clientwin.c:405 ../ioncore/clientwin.c:512
+#: ../ioncore/clientwin.c:1327
 #, c-format
 msgid "Window %#x disappeared."
 msgstr "Okno %#x zmizelo."
 
-#: ../ioncore/clientwin.c:516
+#: ../ioncore/clientwin.c:532
 msgid "Unable to find a matching root window!"
 msgstr "Nemohu najít odpovídající koøenové okno!"
 
-#: ../ioncore/clientwin.c:555
+#: ../ioncore/clientwin.c:571
 #, c-format
 msgid "Unable to manage client window %#x."
 msgstr "Nemohu spravovat klientské okno %#x."
 
-#: ../ioncore/clientwin.c:604
+#: ../ioncore/clientwin.c:620
 msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
 msgstr "Zmìny vlastnosti WM_TRANSIENT_FOR nejsou podporovány."
 
 #
-#: ../ioncore/clientwin.c:776
+#: ../ioncore/clientwin.c:792
 msgid "Client does not support the WM_DELETE protocol."
 msgstr "Klient nepodporuje protokol WM_DELETE."
 
-#: ../ioncore/clientwin.c:1298
+#: ../ioncore/clientwin.c:1333
 msgid "Saved client window does not want to be managed."
 msgstr "Ulo¾ené klientské okno nechce být spravováno."
 
 #
-#: ../ioncore/colormap.c:96
+#: ../ioncore/colormap.c:93
 msgid "Unable to store colourmap watch info."
 msgstr "Nemohu ulo¾it informace o barevné mapì."
 
-#: ../ioncore/region.c:47
+#: ../ioncore/region.c:45
 msgid "Creating region with negative width or height!"
 msgstr "Vytváøím oblast se zápornou ¹íøkou nebo vý¹kou!"
 
-#: ../ioncore/region.c:95
+#: ../ioncore/region.c:93
 #, c-format
 msgid "Destroying object \"%s\" with client windows as children."
 msgstr "Nièím objekt \"%s\" spoleènì s klientskými okny jako dìtmi."
@@ -295,43 +296,43 @@ msgstr "(neznámý)"
 msgid "Failed to rescue some client windows - not closing."
 msgstr "Záchrana nìkterých klientských oken selhala - nezavírám."
 
-#: ../ioncore/attach.c:58 ../ioncore/frame-pointer.c:280
+#: ../ioncore/attach.c:55 ../ioncore/frame-pointer.c:278
 #, c-format
 msgid "Attempt to make region %s manage its ancestor %s."
 msgstr "Pokus, aby oblast %s spravovala svého pøedka %s."
 
-#: ../ioncore/attach.c:83
+#: ../ioncore/attach.c:80
 msgid "Unable to reparent."
 msgstr "Nemohu zmìnit rodièe."
 
-#: ../ioncore/attach.c:92
+#: ../ioncore/attach.c:89
 msgid "Unexpected attach error: trying to recover by attaching to screen."
 msgstr "Neoèekávaná chyba pøipojení: zkou¹ím obnovit pøipojením k obrazovce."
 
-#: ../ioncore/attach.c:111
+#: ../ioncore/attach.c:108
 msgid "Failed recovery."
 msgstr "Obnovení selhalo."
 
-#: ../ioncore/manage.c:193
+#: ../ioncore/manage.c:190
 msgid "Unable to find a screen for a new client window."
 msgstr "Nemohu najít obrazovku pro nové klientské okno."
 
-#: ../ioncore/rootwin.c:218
+#: ../ioncore/rootwin.c:215
 #, c-format
 msgid "Unable to redirect root window events for screen %d."
 msgstr "Nemohu pøesmìrovat události koøenového okna na obrazovce %d."
 
-#: ../ioncore/names.c:91
+#: ../ioncore/names.c:88
 #, c-format
 msgid "Corrupt instance number %s."
 msgstr "Poru¹ená instance èíslo %s."
 
-#: ../ioncore/saveload.c:98
+#: ../ioncore/saveload.c:95
 #, c-format
 msgid "Unknown class \"%s\", cannot create region."
 msgstr "Neznámá tøída \"%s\", nemohu vytvoøit oblast."
 
-#: ../ioncore/saveload.c:202
+#: ../ioncore/saveload.c:199
 #, c-format
 msgid ""
 "There were errors loading layout. Backing up current layout savefile as\n"
@@ -349,46 +350,46 @@ msgstr ""
 "Pøedtím nezapomeòte opravit konfiguraèní soubory, které zpùsobily tyto\n"
 "problémy. (Mo¾ná chybìjící modul?)"
 
-#: ../ioncore/saveload.c:253
+#: ../ioncore/saveload.c:250
 msgid "Unable to get file for layout backup."
 msgstr "Nemohu získat soubor pro zálohu rozlo¾ení."
 
-#: ../ioncore/saveload.c:257
+#: ../ioncore/saveload.c:254
 #, c-format
 msgid "Backup file %s already exists."
 msgstr "Zálo¾ní soubor %s ji¾ existuje."
 
-#: ../ioncore/saveload.c:263
+#: ../ioncore/saveload.c:260
 msgid "Failed backup."
 msgstr "Selhala záloha."
 
 #
-#: ../ioncore/saveload.c:268
+#: ../ioncore/saveload.c:265
 msgid "Unable to initialise layout on any screen."
 msgstr "Na ¾ádné obrazovce nemohu inicializovat rozlo¾ení."
 
-#: ../ioncore/saveload.c:295
+#: ../ioncore/saveload.c:292
 #, c-format
 msgid "Unable to get configuration for screen %d."
 msgstr "Nemohu získat nastavení pro obrazovku %d."
 
-#: ../ioncore/saveload.c:308
+#: ../ioncore/saveload.c:305
 msgid "Unable to save layout."
 msgstr "Nemohu ulo¾it rozlo¾ení."
 
-#: ../ioncore/conf.c:235
+#: ../ioncore/conf.c:237
 msgid "User directory can not be set."
 msgstr "U¾ivatelský adresáø nemù¾e být nastaven."
 
-#: ../ioncore/conf.c:309
+#: ../ioncore/conf.c:311
 msgid "Some bindmaps were empty, loading ioncore_efbb."
 msgstr "Nìkteré tabulky kláves jsou prázdné, nahrávám ioncore_efbb."
 
-#: ../ioncore/fullscreen.c:49
+#: ../ioncore/fullscreen.c:46
 msgid "Failed to enter full screen mode."
 msgstr "Selhal pøechod do celoobrazovkového re¾imu."
 
-#: ../ioncore/fullscreen.c:83
+#: ../ioncore/fullscreen.c:80
 msgid ""
 "Failed to return from full screen mode; remaining manager or parent from "
 "previous location refused to manage us."
@@ -397,153 +398,148 @@ msgstr ""
 "z pøedchozího umístìní nás nechce spravovat."
 
 #
-#: ../ioncore/mplex.c:1685
+#: ../ioncore/mplex.c:1797
 msgid "Invalid position setting."
 msgstr "Neplatné nastavení pozice."
 
 #
-#: ../ioncore/mplex.c:1725
+#: ../ioncore/mplex.c:1837
 msgid "Invalid action setting."
 msgstr "Neplatné nastavení akce."
 
-#: ../ioncore/gr.c:120
+#: ../ioncore/gr.c:117
 #, c-format
 msgid "Drawing engine %s is not registered!"
 msgstr "Vykreslovací jednotka %s není registrována!"
 
-#: ../ioncore/gr.c:139
+#: ../ioncore/gr.c:136
 #, c-format
 msgid "Unable to find brush for style '%s'."
 msgstr "Nemohu najít ¹tìtec pro styl \"%s\"."
 
-#: ../ioncore/gr.c:646
+#: ../ioncore/gr.c:652
 msgid "No drawing engines loaded, trying \"de\"."
 msgstr "Nebyly nahrány ¾ádné vykreslovací jednotky, zkou¹ím \"%s\"."
 
-#: ../ioncore/frame-draw.c:314
+#: ../ioncore/frame-draw.c:311
 msgid "<empty frame>"
 msgstr "<prázdný rám>"
 
-#: ../ioncore/group.c:186 ../mod_tiling/tiling.c:92
+#: ../ioncore/group.c:183 ../mod_tiling/tiling.c:89
 #, c-format
 msgid "Error reparenting %s."
 msgstr "Chyba zmìny rodièe %s."
 
-#: ../ioncore/group.c:711
+#: ../ioncore/group.c:708
 msgid "'bottom' already set."
 msgstr "'bottom' je ji¾ nastaven."
 
-#: ../ioncore/navi.c:45
+#: ../ioncore/navi.c:42
 msgid "Invalid parameter."
 msgstr "Neplatný parametr"
 
-#: ../ioncore/navi.c:72
+#: ../ioncore/navi.c:69
 msgid "Invalid direction parameter."
 msgstr "Neplatný parametr smìru."
 
-#: ../ioncore/group-ws.c:51
+#: ../ioncore/group-ws.c:48
 #, c-format
 msgid "Unknown placement method \"%s\"."
 msgstr "Neznámý zpùsob umístìní \"%s\"."
 
-#: ../ioncore/detach.c:176
+#: ../ioncore/detach.c:174
 msgid "Failed to reattach."
 msgstr "Znovupøipojení selhalo."
 
-#: ../ioncore/screen-notify.c:190
+#: ../ioncore/screen-notify.c:187
 msgid "act: "
 msgstr "akt: "
 
 #
-#: ../mod_tiling/tiling.c:73
+#: ../mod_tiling/tiling.c:70
 msgid "Split not on workspace."
 msgstr "Rozdìlení není na pracovní plo¹e."
 
-#: ../mod_tiling/tiling.c:348
+#: ../mod_tiling/tiling.c:345
 msgid "Unable to create a node for status display."
 msgstr "Nemohu vytvoøit uzel pro stavový øádek."
 
-#: ../mod_tiling/tiling.c:361
+#: ../mod_tiling/tiling.c:358
 msgid "Unable to create new split for status display."
 msgstr "Nemohu vytvoøit nové rozdìlení pro stavový øádek."
 
-#: ../mod_tiling/tiling.c:710
+#: ../mod_tiling/tiling.c:709
 msgid "Tiling in useless state."
 msgstr "Dl¾dice v neu¾iteèném stavu."
 
-#: ../mod_tiling/tiling.c:924
+#: ../mod_tiling/tiling.c:923
 msgid "Invalid direction"
 msgstr "Neplatný smìr"
 
 #
-#: ../mod_tiling/tiling.c:957 ../mod_tiling/split.c:1018
+#: ../mod_tiling/tiling.c:956 ../mod_tiling/split.c:1030
 msgid "Invalid node."
 msgstr "Neplatný uzel."
 
 #
-#: ../mod_tiling/tiling.c:976
+#: ../mod_tiling/tiling.c:975
 msgid "Unable to split."
 msgstr "Nemohu rozdìlit."
 
-#: ../mod_tiling/tiling.c:1090
-msgid ""
-"Unable to unsplit: Could not move client windows elsewhere within the tiling."
-msgstr "Nemohu slouèit: Nemohu pøesunout klientské okno nìkam do dla¾dic."
-
-#: ../mod_tiling/tiling.c:1207
+#: ../mod_tiling/tiling.c:1190
 msgid "Nil parameter."
 msgstr "Prázdný parametr."
 
-#: ../mod_tiling/tiling.c:1212
+#: ../mod_tiling/tiling.c:1195
 msgid "Manager doesn't match."
 msgstr "Správce se neshoduje."
 
-#: ../mod_tiling/tiling.c:1249
+#: ../mod_tiling/tiling.c:1232
 msgid "The status display is not a valid parameter for this routine."
 msgstr "Stavový displej není v této rutinì platným parametrem."
 
-#: ../mod_tiling/tiling.c:1340
+#: ../mod_tiling/tiling.c:1323
 msgid "Refusing to float split directly containing the status display."
 msgstr "Odmítám rozdìlit pøímo prvek obsahující stavový displej."
 
-#: ../mod_tiling/tiling.c:1403
+#: ../mod_tiling/tiling.c:1387
 msgid "No suitable split here."
 msgstr "®ádné vhodné rozdìlení."
 
 #
-#: ../mod_tiling/tiling.c:1439
+#: ../mod_tiling/tiling.c:1423
 msgid "Could not get split tree."
 msgstr "Nemohu získat strom rozdìlení"
 
-#: ../mod_tiling/tiling.c:1460
+#: ../mod_tiling/tiling.c:1444
 msgid "Workspace already has a status display node."
 msgstr "Pracovní plocha ji¾ obsahuje stavový displej."
 
 #
-#: ../mod_tiling/tiling.c:1498
+#: ../mod_tiling/tiling.c:1482
 msgid "Missing region parameters."
 msgstr "Chybìjící parametry oblasti."
 
-#: ../mod_tiling/tiling.c:1542 ../mod_tiling/splitfloat.c:780
+#: ../mod_tiling/tiling.c:1526 ../mod_tiling/splitfloat.c:777
 msgid "Invalid direction."
 msgstr "Neplatný smìr."
 
 #
-#: ../mod_tiling/tiling.c:1617
+#: ../mod_tiling/tiling.c:1601
 msgid "No split type given."
 msgstr "Nebyl zadán typ rozdìlení."
 
-#: ../mod_tiling/tiling.c:1630
+#: ../mod_tiling/tiling.c:1614
 msgid "Unknown split type."
 msgstr "Neznámý typ rozdìlení."
 
 #
 #
-#: ../mod_tiling/tiling.c:1670
+#: ../mod_tiling/tiling.c:1654
 msgid "The workspace is empty."
 msgstr "Pracovní plocha je prázdná."
 
-#: ../mod_tiling/placement.c:104
+#: ../mod_tiling/placement.c:101
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
@@ -552,63 +548,63 @@ msgstr ""
 "klientské okno."
 
 #
-#: ../mod_tiling/split.c:524
+#: ../mod_tiling/split.c:536
 msgid "Unable to move the status display out of way."
 msgstr "Nemohu pøesunout stavový øádek tak, aby nezavazel."
 
-#: ../mod_tiling/split.c:937
+#: ../mod_tiling/split.c:949
 msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
 msgstr "REGION_RQGEOM_TRYONLY není stavovým displejem podporován."
 
 #
-#: ../mod_tiling/split.c:1083
+#: ../mod_tiling/split.c:1102
 msgid "Splitting the status display is not allowed."
 msgstr "Rozdìlení stavového displeje není povoleno."
 
-#: ../mod_tiling/split.c:1114 ../mod_tiling/splitfloat.c:903
+#: ../mod_tiling/split.c:1128 ../mod_tiling/splitfloat.c:900
 msgid "Unable to split: not enough free space."
 msgstr "Nelze rozdìlit: nedostatek volného místa."
 
-#: ../mod_tiling/split.c:1865
+#: ../mod_tiling/split.c:1881
 #, c-format
 msgid "Unable to get configuration for %s."
 msgstr "Nemohu získat nastavení pro %s."
 
-#: ../mod_tiling/split-stdisp.c:602 ../mod_tiling/split-stdisp.c:627
+#: ../mod_tiling/split-stdisp.c:599 ../mod_tiling/split-stdisp.c:624
 msgid "Status display in bad split configuration."
 msgstr "Stavový øádek se nachází v chybné konfiguraci rozdìlení."
 
-#: ../mod_tiling/split-stdisp.c:667
+#: ../mod_tiling/split-stdisp.c:664
 msgid "Status display badly located in split tree."
 msgstr "Stavový øádek je ve stromu rozdìlení umístìn na ¹patném místì."
 
-#: ../mod_tiling/ops.c:72 ../mod_tiling/ops.c:120
+#: ../mod_tiling/ops.c:69 ../mod_tiling/ops.c:117
 msgid "Not member of a group"
 msgstr "Není èlenem skupiny"
 
-#: ../mod_tiling/ops.c:77
+#: ../mod_tiling/ops.c:74
 msgid "Manager group already has bottom"
 msgstr "Øídící skupina ji¾ má dno"
 
-#: ../mod_tiling/ops.c:154
+#: ../mod_tiling/ops.c:151
 msgid "Unable to move a region from tiling to group."
 msgstr "Nemohu pøesunout regiion z dlá¾dìní do skupiny."
 
-#: ../mod_query/wedln.c:813
+#: ../mod_query/wedln.c:811
 msgid "history"
 msgstr "historie"
 
-#: ../mod_query/fwarn.c:35
+#: ../mod_query/fwarn.c:32
 msgid "Error:\n"
 msgstr "Chyba:\n"
 
 #
-#: ../mod_menu/menu.c:601
+#: ../mod_menu/menu.c:598
 msgid "Empty menu."
 msgstr "Prázdné menu."
 
 #
-#: ../mod_sm/sm.c:111
+#: ../mod_sm/sm.c:108
 msgid "Failed to set session directory."
 msgstr "Selhalo nastavení adresáøe s relací."
 
@@ -638,34 +634,34 @@ msgstr "Správce sezení: IceAddConnectionWatch selhalo."
 msgid "Unable to connect to the session manager."
 msgstr "Nemohu se pøipojit ke správci sezení."
 
-#: ../mod_sp/main.c:126
+#: ../mod_sp/main.c:124
 msgid "Unable to create scratchpad."
 msgstr "Nemohu vytvoøit poznámkový blok."
 
-#: ../mod_statusbar/main.c:75
+#: ../mod_statusbar/main.c:74
 msgid "reading a pipe"
 msgstr "ètu rouru"
 
-#: ../mod_statusbar/main.c:159
+#: ../mod_statusbar/main.c:163
 msgid "ion-statusd timed out."
 msgstr "Èas ion-statusd vypr¹el."
 
-#: ../mod_statusbar/statusbar.c:1081
+#: ../mod_statusbar/statusbar.c:1079
 #, c-format
 msgid "[ %date || load: %load ] %filler%systray"
 msgstr "[ %date || vytí¾ení: %load ] %filler%systray"
 
-#: ../de/init.c:68
+#: ../de/init.c:65
 #, c-format
 msgid "Border attribute %s sanity check failed."
 msgstr "Selhala kontrola atributu okraje %s."
 
-#: ../de/init.c:91
+#: ../de/init.c:88
 #, c-format
 msgid "Unknown border style \"%s\"."
 msgstr "Neznámý styl okraje \"%s\"."
 
-#: ../de/init.c:111
+#: ../de/init.c:108
 #, c-format
 msgid "Unknown border side configuration \"%s\"."
 msgstr "Neznámé nastavení okraje \"%s\"."
@@ -675,27 +671,17 @@ msgstr "Neznámé nastavení okraje \"%s\"."
 msgid "Unable to allocate colour \"%s\"."
 msgstr "Nemohu alokovat barvu \"%s\"."
 
-#: ../de/init.c:210
+#: ../de/init.c:220
 #, c-format
 msgid "Corrupt substyle table %d."
 msgstr "Poru¹ená tabulka stylù %d."
 
-#: ../de/init.c:243
+#: ../de/init.c:253
 #, c-format
 msgid "Unknown text alignment \"%s\"."
 msgstr "Neznámý textový prvek \"%s\"."
 
-#: ../de/init.c:319
-#, c-format
-msgid "'based_on' for %s points back to the style itself."
-msgstr "Èást 'based_on' stylu %s ukazuje sama na sebe."
-
-#: ../de/init.c:322
-#, c-format
-msgid "Unknown base style. \"%s\""
-msgstr "Neznámý základní styl. \"%s\""
-
-#: ../de/font.c:47
+#: ../de/font.c:44
 #, c-format
 msgid ""
 "Fontset for font pattern '%s' implements context dependent drawing, which is "
@@ -704,71 +690,71 @@ msgstr ""
 "Sada fontù pro vzor '%s' implementuje kontextovì závislé kreslení, co¾ není "
 "podporováno. Oèekávejte nesmysly."
 
-#: ../de/font.c:59
+#: ../de/font.c:56
 #, c-format
 msgid "Could not load font \"%s\", trying \"%s\""
 msgstr "Nemohu nahrát font \"%s\", zkou¹ím \"%s\"."
 
-#: ../de/font.c:63
+#: ../de/font.c:60
 msgid "Failed to load fallback font."
 msgstr "Nahrání zálo¾ního fontu selhalo."
 
-#: ../de/style.c:315
+#: ../de/style.c:291
 #, c-format
 msgid "Style is still in use [%d] but the module is being unloaded!"
 msgstr "Styl se stále pou¾ívá [%d], ale modul se ji¾ ru¹í z pamìti!"
 
-#: ../ion/ion.c:42 ../pwm/pwm.c:42
+#: ../ion/ion.c:39 ../pwm/pwm.c:39
 msgid "X display to use"
 msgstr "X displej, který se má pou¾ít"
 
-#: ../ion/ion.c:45 ../pwm/pwm.c:45
+#: ../ion/ion.c:42 ../pwm/pwm.c:42
 msgid "Configuration file"
 msgstr "Konfiguraèní soubor"
 
-#: ../ion/ion.c:48 ../pwm/pwm.c:48
+#: ../ion/ion.c:45 ../pwm/pwm.c:45
 msgid "Add directory to search path"
 msgstr "Pøidá adresáø do prohledávané cesty"
 
-#: ../ion/ion.c:51 ../pwm/pwm.c:51
+#: ../ion/ion.c:48 ../pwm/pwm.c:48
 msgid "Manage default screen only"
 msgstr "Spravuje pouze výchozí obrazovku"
 
-#: ../ion/ion.c:54 ../pwm/pwm.c:54
+#: ../ion/ion.c:51 ../pwm/pwm.c:51
 msgid "Name of session (affects savefiles)"
 msgstr "Jméno sezení (ovlivní místo ulo¾ení)"
 
-#: ../ion/ion.c:57 ../pwm/pwm.c:57
+#: ../ion/ion.c:54 ../pwm/pwm.c:54
 msgid "Session manager client ID"
 msgstr "Klientské ID správce sezení"
 
-#: ../ion/ion.c:60 ../pwm/pwm.c:60
+#: ../ion/ion.c:57 ../pwm/pwm.c:57
 msgid "Do not create startup error log and display it with xmessage."
 msgstr ""
 "Nevytváøet záznam o chybách pøi startu a nezobrazovat jej pomocí xmessage."
 
-#: ../ion/ion.c:64 ../pwm/pwm.c:64
+#: ../ion/ion.c:61 ../pwm/pwm.c:61
 msgid "Show this help"
 msgstr "Zobrazí tuto nápovìdu"
 
-#: ../ion/ion.c:67 ../pwm/pwm.c:67
+#: ../ion/ion.c:64 ../pwm/pwm.c:64
 msgid "Show program version"
 msgstr "Zobrazí verzi programu"
 
-#: ../ion/ion.c:70 ../pwm/pwm.c:70
+#: ../ion/ion.c:67 ../pwm/pwm.c:67
 msgid "Show about text"
 msgstr "Zobrazí nìco o programu"
 
-#: ../ion/ion.c:85
+#: ../ion/ion.c:82
 msgid "Could not get user configuration file directory."
 msgstr "Nemohu získat u¾ivatelùv adresáø s nastavením."
 
-#: ../ion/ion.c:99
+#: ../ion/ion.c:96
 #, c-format
 msgid "%s/welcome.txt"
 msgstr "%s/welcome.cs.txt"
 
-#: ../ion/ion.c:132 ../pwm/pwm.c:79
+#: ../ion/ion.c:129 ../pwm/pwm.c:76
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -778,54 +764,54 @@ msgstr ""
 "\n"
 
 #
-#: ../ion/ion.c:200 ../pwm/pwm.c:150
+#: ../ion/ion.c:197 ../pwm/pwm.c:147
 msgid "Invalid command line."
 msgstr "Neplatná pøíkazová øádka."
 
-#: ../ion/ion.c:222
+#: ../ion/ion.c:219
 msgid "Ion startup error log:\n"
 msgstr "Záznam chyb pøi startu Ionu:\n"
 
-#: ../ion/ion.c:233 ../pwm/pwm.c:183
+#: ../ion/ion.c:230 ../pwm/pwm.c:180
 msgid "Refusing to start due to encountered errors."
 msgstr "Odmítám se spustit kvùli zaznamenaným chybám."
 
-#: ../pwm/pwm.c:172
+#: ../pwm/pwm.c:169
 msgid "PWM startup error log:\n"
 msgstr "Záznam chyb pøi startu PWM:\n"
 
-#: ../libextl/readconfig.c:86
+#: ../../libextl-3/readconfig.c:86
 msgid "$HOME not set"
 msgstr "Promìnná $HOME není nastavená"
 
-#: ../libextl/readconfig.c:113
+#: ../../libextl-3/readconfig.c:113
 msgid "User directory not set. Unable to set session directory."
 msgstr "U¾ivatelský adresáø není nastaven. Nemohu nastavit adresáø pro sezení."
 
-#: ../libextl/readconfig.c:254
+#: ../../libextl-3/readconfig.c:254
 #, c-format
 msgid "Falling back to %s."
 msgstr "Nouzovì pou¾ívám %s."
 
-#: ../libextl/readconfig.c:474
+#: ../../libextl-3/readconfig.c:474
 #, c-format
 msgid "Unable to create session directory \"%s\"."
 msgstr "Nemohu vytvoøit adresáø pro sezení \"%s\"."
 
-#: ../libextl/luaextl.c:117
+#: ../../libextl-3/luaextl.c:117
 msgid "Lua stack full."
 msgstr "Lua zásobník je plný."
 
 #
-#: ../libextl/luaextl.c:143
+#: ../../libextl-3/luaextl.c:143
 msgid "Unknown Lua error."
 msgstr "Neznámá Lua chyba."
 
-#: ../libextl/luaextl.c:490
+#: ../../libextl-3/luaextl.c:490
 msgid "Stack trace:"
 msgstr "Výpis zásobníku:"
 
-#: ../libextl/luaextl.c:497
+#: ../../libextl-3/luaextl.c:497
 #, c-format
 msgid ""
 "\n"
@@ -834,7 +820,7 @@ msgstr ""
 "\n"
 "(Nemohu získat ladicí informace pro úroveò %d)"
 
-#: ../libextl/luaextl.c:515
+#: ../../libextl-3/luaextl.c:515
 msgid ""
 "\n"
 "  [Skipping unnamed C functions.]"
@@ -842,40 +828,40 @@ msgstr ""
 "\n"
 "  [Pøeskakuji nepojmenované C funkce.]"
 
-#: ../libextl/luaextl.c:566
+#: ../../libextl-3/luaextl.c:566
 msgid "Internal error."
 msgstr "Interní chyba."
 
-#: ../libextl/luaextl.c:585
+#: ../../libextl-3/luaextl.c:585
 msgid "Unable to initialize Lua."
 msgstr "Nemohu inicializovat Lua."
 
-#: ../libextl/luaextl.c:1336
+#: ../../libextl-3/luaextl.c:1469
 msgid ""
 "Too many return values. Use a C compiler that has va_copy to support more."
 msgstr ""
 "Pøíli¹ mnoho návratových hodnot. Pou¾ijte kompilátor C, který obsahuje "
 "va_copy."
 
-#: ../libextl/luaextl.c:1356
+#: ../../libextl-3/luaextl.c:1489
 msgid "Returned dead object."
 msgstr "Vrácen mrtvý objekt."
 
-#: ../libextl/luaextl.c:1359
+#: ../../libextl-3/luaextl.c:1492
 #, c-format
 msgid "Invalid return value (expected '%c', got lua type \"%s\")."
 msgstr "Neplatná návratová hodnota (oèekávána %c, obdr¾en lua typ \"%s\")."
 
-#: ../libextl/luaextl.c:1395 ../libextl/luaextl.c:1750
+#: ../../libextl-3/luaextl.c:1528 ../../libextl-3/luaextl.c:1883
 msgid "Stack full."
 msgstr "Zásobník je plný."
 
-#: ../libextl/luaextl.c:1761
+#: ../../libextl-3/luaextl.c:1894
 #, c-format
 msgid "Argument %d to %s is a dead object."
 msgstr "Argument %d pro %s je mrtvý objekt."
 
-#: ../libextl/luaextl.c:1764
+#: ../../libextl-3/luaextl.c:1897
 #, c-format
 msgid ""
 "Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
@@ -884,40 +870,40 @@ msgstr ""
 "Argument %d pro %s má neplatný typ. (©ablona argumentu je '%s', dostal jsem "
 "lua typ %s)."
 
-#: ../libextl/luaextl.c:1827
+#: ../../libextl-3/luaextl.c:1960
 msgid "L1 call handler upvalues corrupt."
 msgstr "Obsluha volání L1 je poru¹ená."
 
-#: ../libextl/luaextl.c:1832
+#: ../../libextl-3/luaextl.c:1965
 msgid "Called function has been unregistered."
 msgstr "Volaná funkce byla byla odregistrována."
 
-#: ../libextl/luaextl.c:1843
+#: ../../libextl-3/luaextl.c:1976
 #, c-format
 msgid "Attempt to call an unsafe function \"%s\" in restricted mode."
 msgstr "Pokus o volání nebezpeèné funkce \"%s\" v omezeném re¾imu."
 
-#: ../libextl/luaextl.c:1956
+#: ../../libextl-3/luaextl.c:2089
 #, c-format
 msgid ""
 "Function '%s' has more parameters than the level 1 call handler can handle"
 msgstr "Funkce '%s' má víc parametrù, ne¾ lze zpracovat obsluhou v 1. úrovni"
 
 #
-#: ../libextl/luaextl.c:2347
+#: ../../libextl-3/luaextl.c:2480
 msgid "Maximal serialisation depth reached."
 msgstr "Dosa¾ena maximální hloubka serializace."
 
-#: ../libextl/luaextl.c:2368
+#: ../../libextl-3/luaextl.c:2501
 #, c-format
 msgid "Unable to serialise type %s."
 msgstr "Nemohu serializovat typ %s."
 
-#: ../libextl/luaextl.c:2399
+#: ../../libextl-3/luaextl.c:2532
 msgid "-- This file has been generated by Ion. Do not edit.\n"
 msgstr "-- Tento soubor byl vytvoøen Ionem. Neupravujte jej.\n"
 
-#: ../libextl/misc.c:17
+#: ../../libextl-3/misc.c:17
 #, c-format
 msgid ""
 "Type checking failed in level 2 call handler for parameter %d (got %s, "
@@ -1353,51 +1339,14 @@ msgstr "Nemohu najít klientské okno %s."
 msgid "Too much result data"
 msgstr "Pøíli¹ mnoho výsledkù"
 
-msgid "Could not find %s"
-msgstr "Nemohu najít %s"
+msgid "Save look selection in %s?"
+msgstr "Ulo¾it nastavení vzhledu do %s?"
 
-msgid "Not a directory."
-msgstr "Není adresáøem."
+msgid "Cannot save selection."
+msgstr "Nemohu ulo¾it výbìr."
 
-msgid "Invalid command"
-msgstr "Neplatný pøíkaz"
-
-msgid "Error in command string: "
-msgstr "Chyba v pøíkazu: "
-
-msgid "Error compiling guard: %s"
-msgstr "Chyba pøi sestavení strá¾ce: %s"
-
-msgid "Invalid guard %s."
-msgstr "Neplatná ochrana %s."
-
-msgid "Main menu:"
-msgstr "Hlavní menu:"
-
-msgid "Context menu:"
-msgstr "Kontextové menu:"
-
-msgid "Floating frame"
-msgstr "Plovoucí rám"
-
-msgid "Tiled frame"
-msgstr "Dla¾dicový rám"
-
-msgid "Tiling"
-msgstr "Dla¾dice"
-
-#
-msgid "Workspace"
-msgstr "Pracovní plocha"
-
-msgid "Screen"
-msgstr "Obrazovka"
-
-msgid "Frame"
-msgstr "Rám"
-
-msgid "Recursive table - unable to deepcopy"
-msgstr "Rekurzivní tabulka - nemohu provést hlubokou kopii"
+msgid "Unable to append to non-table menu"
+msgstr "Nelze pøidat do netabulkového menu"
 
 msgid ""
 "Making the following minimal emergency mappings:\n"
@@ -1414,14 +1363,51 @@ msgstr ""
 "  Mod1+C -> close\n"
 "  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
 
-msgid "Unable to append to non-table menu"
-msgstr "Nelze pøidat do netabulkového menu"
+msgid "Recursive table - unable to deepcopy"
+msgstr "Rekurzivní tabulka - nemohu provést hlubokou kopii"
 
-msgid "Cannot save selection."
-msgstr "Nemohu ulo¾it výbìr."
+msgid "Frame"
+msgstr "Rám"
 
-msgid "Save look selection in %s?"
-msgstr "Ulo¾it nastavení vzhledu do %s?"
+msgid "Screen"
+msgstr "Obrazovka"
+
+#
+msgid "Workspace"
+msgstr "Pracovní plocha"
+
+msgid "Tiling"
+msgstr "Dla¾dice"
+
+msgid "Tiled frame"
+msgstr "Dla¾dicový rám"
+
+msgid "Floating frame"
+msgstr "Plovoucí rám"
+
+msgid "Context menu:"
+msgstr "Kontextové menu:"
+
+msgid "Main menu:"
+msgstr "Hlavní menu:"
+
+msgid "Invalid guard %s."
+msgstr "Neplatná ochrana %s."
+
+msgid "Error compiling guard: %s"
+msgstr "Chyba pøi sestavení strá¾ce: %s"
+
+msgid "Error in command string: "
+msgstr "Chyba v pøíkazu: "
+
+msgid "Invalid command"
+msgstr "Neplatný pøíkaz"
+
+msgid "Not a directory."
+msgstr "Není adresáøem."
+
+msgid "Could not find %s"
+msgstr "Nemohu najít %s"
 
 msgid "ion-statusd quit."
 msgstr "ion-statusd konèí."
@@ -1554,6 +1540,17 @@ msgstr "%s %s"
 
 msgid "%s %s at %s"
 msgstr "%s %s na %s"
+
+#~ msgid ""
+#~ "Unable to unsplit: Could not move client windows elsewhere within the "
+#~ "tiling."
+#~ msgstr "Nemohu slouèit: Nemohu pøesunout klientské okno nìkam do dla¾dic."
+
+#~ msgid "'based_on' for %s points back to the style itself."
+#~ msgstr "Èást 'based_on' stylu %s ukazuje sama na sebe."
+
+#~ msgid "Unknown base style. \"%s\""
+#~ msgstr "Neznámý základní styl. \"%s\""
 
 #~ msgid "Tag current object within the frame."
 #~ msgstr "Oznaèí aktuální objekt v rámu."
