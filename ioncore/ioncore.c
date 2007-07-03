@@ -76,7 +76,7 @@ static const char ioncore_copy[]=
     "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2007.";
 
 static const char ioncore_license[]=DUMMY_TR(
-    "The software is essentially licensed under the GNU Lesser General\n"
+    "This software is essentially licensed under the GNU Lesser General\n"
     "Public License (LGPL), version 2.1, unless otherwise indicated in\n"
     "components taken from elsewhere. Additional terms apply to the use\n"
     "of the name of the project, Ion(tm). For details, see the file\n"
