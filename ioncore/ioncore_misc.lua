@@ -82,7 +82,10 @@ end
 -- depends on the types of attached regions and whether \var{reg} 
 -- implements \code{attach_framed} and \code{attach}. If \var{param}
 -- is not set, the default of \verb!{switchto=true}! is used.
+-- The function returns \code{true} if all tagged regions were
+-- succesfully attached, and \code{false} otherwisse.
 function ioncore.tagged_attach(reg, param)
+    local errors=false
     if not param then
         param={switchto=true}
     end
@@ -92,9 +95,9 @@ function ioncore.tagged_attach(reg, param)
                   or reg.attach)
         
         if not (fn and fn(reg, r, param)) then
-            return false
+            errors=true
         end
     end
-    return true
+    return not errors
 end
 
