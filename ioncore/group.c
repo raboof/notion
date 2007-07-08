@@ -45,6 +45,8 @@ static void group_place_stdisp(WGroup *ws, WWindow *parent,
 
 static void group_remanage_stdisp(WGroup *ws);
 
+static void group_do_set_bottom(WGroup *grp, WStacking *st);
+
 
 /*{{{ Stacking list stuff */
 
@@ -311,18 +313,14 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     st=group_find_stacking(ws, reg);
 
     if(st!=NULL){
-        next_st=stacking_unstack(REGION_PARENT(ws), st);
-        
-        UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
+        if(st==ws->bottom){
+            was_bottom=TRUE;
+            group_do_set_bottom(ws, NULL);
+        }
         
         if(st==ws->managed_stdisp){
             ws->managed_stdisp=NULL;
             was_stdisp=TRUE;
-        }
-        
-        if(st==ws->bottom){
-            ws->bottom=NULL;
-            was_bottom=TRUE;
         }
             
         if(st==ws->current_managed){
@@ -330,32 +328,25 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
             was_current=TRUE;
         }
         
+        next_st=stacking_unstack(REGION_PARENT(ws), st);
+        UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
         stacking_unassoc(st);
         stacking_free(st);
     }
     
     region_unset_manager(reg, (WRegion*)ws);
     
-    if(!OBJ_IS_BEING_DESTROYED(ws)){
-        if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
-            /* We should probably be managing any stdisp, that 'bottom' 
-             * was managing.
-             */
-            group_remanage_stdisp(ws);
-        }
-        
-        if(was_current){
-            /* This may still potentially cause problems when focus
-             * change is pending. Perhaps we should use region_await_focus,
-             * if it is pointing to our child (and region_may_control_focus 
-             * fail if it is pointing somewhere else).
-             */
-            WStacking *stf=find_to_focus(ws, next_st, TRUE);
-            if(stf!=NULL && mcf){
-                region_maybewarp_now(stf->reg, FALSE);
-            }else{
-                ws->current_managed=stf;
-            }
+    if(!OBJ_IS_BEING_DESTROYED(ws) && was_current){
+        /* This may still potentially cause problems when focus
+         * change is pending. Perhaps we should use region_await_focus,
+         * if it is pointing to our child (and region_may_control_focus 
+         * fail if it is pointing somewhere else).
+         */
+        WStacking *stf=find_to_focus(ws, next_st, TRUE);
+        if(stf!=NULL && mcf){
+            region_maybewarp_now(stf->reg, FALSE);
+        }else{
+            ws->current_managed=stf;
         }
     }
 }
@@ -484,13 +475,20 @@ static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
 static void group_do_set_bottom(WGroup *grp, WStacking *st)
 {
     WStacking *was=grp->bottom;
+    WStacking *std=grp->managed_stdisp;
     
     grp->bottom=st;
     
-    if(st!=was){
-        if(st==NULL || HAS_DYN(st->reg, region_manage_stdisp))
-            group_remanage_stdisp(grp);
+    if(!OBJ_IS_BEING_DESTROYED(grp)){
+        bool noremanage=((was==st) ||
+                         (was==NULL && std==NULL) || 
+                         (st!=NULL && st==std) || 
+                         (st==NULL && was==std));
         
+        if(!noremanage &&
+           (st==NULL || HAS_DYN(st->reg, region_manage_stdisp))){
+            group_remanage_stdisp(grp);
+        }
     }
 }
 
