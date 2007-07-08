@@ -472,6 +472,12 @@ static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
 /*{{{ Bottom */
 
 
+void group_bottom_set(WGroup *grp)
+{
+    CALL_DYN(group_bottom_set, grp, (grp));
+}
+
+
 static void group_do_set_bottom(WGroup *grp, WStacking *st)
 {
     WStacking *was=grp->bottom;
@@ -489,6 +495,8 @@ static void group_do_set_bottom(WGroup *grp, WStacking *st)
            (st==NULL || HAS_DYN(st->reg, region_manage_stdisp))){
             group_remanage_stdisp(grp);
         }
+        
+        group_bottom_set(grp);
     }
 }
 

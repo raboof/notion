@@ -91,6 +91,7 @@ extern void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how);
 
 extern WRegion *group_bottom(WGroup *ws);
 extern bool group_set_bottom(WGroup *ws, WRegion *reg);
+DYNFUN void group_bottom_set(WGroup *grp);
 
 extern bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info);
 

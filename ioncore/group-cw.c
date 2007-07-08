@@ -182,6 +182,12 @@ void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, WRegionNotify how)
 }
 
 
+void groupcw_bottom_set(WGroupCW *cwg)
+{
+    region_notify_change((WRegion*)cwg, ioncore_g.notifies.name);
+}
+
+
 /*}}}*/
 
 
@@ -277,6 +283,9 @@ static DynFunTab groupcw_dynfuntab[]={
     
     {region_managed_notify,
      groupcw_managed_notify},
+     
+    {group_bottom_set,
+     groupcw_bottom_set},
     
     END_DYNFUNTAB
 };
