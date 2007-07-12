@@ -191,7 +191,7 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret)
 
     if(!ioncore_g.use_mb){
         Status st=XTextPropertyToStringList(&prop, &list, &n);
-        ok=(st==0);
+        ok=(st!=0);
     }else{
         int st=XmbTextPropertyToTextList(ioncore_g.dpy, &prop, &list, &n);
         ok=(st>=0);
