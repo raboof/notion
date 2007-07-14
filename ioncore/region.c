@@ -596,6 +596,9 @@ void region_unset_manager(WRegion *reg, WRegion *mgr)
     
     reg->manager=NULL;
     
+    /* Reset status, as it is set by manager */
+    reg->flags&=~REGION_SKIP_FOCUS;
+
     if(region_is_activity_r(reg))
         region_clear_mgd_activity(mgr);
     

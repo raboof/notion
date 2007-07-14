@@ -432,6 +432,8 @@ void tiling_manage_stdisp(WTiling *ws, WRegion *stdisp,
         tiling_unmanage_stdisp(ws, TRUE, TRUE);
         return;
     }
+
+    stdisp->flags|=REGION_SKIP_FOCUS;
     
     dg=((WSplit*)(ws->stdispnode))->geom;
     

@@ -36,6 +36,7 @@
 #define MPLEX_ATTACH_SIZEPOLICY   0x0040 /* size policy field is set */
 #define MPLEX_ATTACH_INDEX        0x0080 /* index field is set */
 #define MPLEX_ATTACH_WHATEVER     0x0100 /* set REGION_FIT_WHATEVER */
+#define MPLEX_ATTACH_PASSIVE      0x0200 /* sets SKIP_FOCUS */
 
 
 enum{

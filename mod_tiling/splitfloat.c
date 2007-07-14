@@ -64,6 +64,9 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
         return FALSE;
     }
     
+    ((WRegion*)split->brpwin)->flags|=REGION_SKIP_FOCUS;
+    ((WRegion*)split->tlpwin)->flags|=REGION_SKIP_FOCUS;
+    
     if(!splitsplit_init(&(split->ssplit), geom, dir)){
         destroy_obj((Obj*)split->brpwin);
         destroy_obj((Obj*)split->tlpwin);

@@ -76,8 +76,6 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
 
     region_add_bindmap((WRegion*)p, mod_statusbar_statusbar_bindmap);
     
-    ((WRegion*)p)->flags|=REGION_SKIP_FOCUS;
-
     LINK_ITEM(statusbars, p, sb_next, sb_prev);
     
     return TRUE;

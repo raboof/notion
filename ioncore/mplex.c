@@ -1280,6 +1280,9 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     
     region_set_manager(reg, (WRegion*)mplex);
     
+    if(param->flags&MPLEX_ATTACH_PASSIVE)
+        reg->flags|=REGION_SKIP_FOCUS;
+    
     if(!(param->flags&MPLEX_ATTACH_WHATEVER)){
         WFitParams fp;
         
@@ -1407,6 +1410,9 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
     if(extl_table_is_bool_set(tab, "hidden"))
         par->flags|=MPLEX_ATTACH_HIDDEN&ok;
         
+    if(extl_table_is_bool_set(tab, "passive"))
+        par->flags|=MPLEX_ATTACH_PASSIVE&ok;
+        
     if(extl_table_is_bool_set(tab, "pseudomodal"))
         par->flags|=MPLEX_ATTACH_PSEUDOMODAL&ok;
 
@@ -1488,6 +1494,7 @@ WRegion *mplex_attach_new_(WMPlex *mplex, WMPlexAttachParams *par,
  *  \var{hidden} & (boolean) Attach hidden, if not prevented
  *                  by e.g. the mutually exclusive list being empty.
  *                  This option overrides \var{switchto}. \\
+ *  \var{passive} & (boolean) Skip in certain focusing operations. \\
  *  \var{pseudomodal} & (boolean) The attached region is ``pseudomodal''
  *                      if the stacking level dictates it to be modal.
  *                      This means that the region may be hidden to display

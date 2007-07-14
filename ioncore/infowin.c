@@ -51,8 +51,6 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
     if(p->brush==NULL)
         goto fail3;
     
-    p->wwin.region.flags|=REGION_SKIP_FOCUS;
-    
     /* Enable save unders */
     attr.save_under=True;
     XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win, CWSaveUnder, &attr);

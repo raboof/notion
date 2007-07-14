@@ -1124,8 +1124,6 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     
     region_add_bindmap((WRegion*)dock, dock_bindmap);
 
-    ((WRegion*)dock)->flags|=REGION_SKIP_FOCUS;
-
     window_select_input(&(dock->win), IONCORE_EVENTMASK_CWINMGR);
 
     dock_brush_get(dock);
@@ -1208,7 +1206,8 @@ WDock *mod_dock_create(ExtlTab tab)
         
         par.flags=(MPLEX_ATTACH_UNNUMBERED
                    |MPLEX_ATTACH_SIZEPOLICY
-                   |MPLEX_ATTACH_GEOM);
+                   |MPLEX_ATTACH_GEOM
+                   |MPLEX_ATTACH_PASSIVE);
         
         par.szplcy=SIZEPOLICY_FREE;
         par.geom.x=0;

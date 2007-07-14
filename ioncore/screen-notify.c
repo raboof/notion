@@ -41,7 +41,8 @@ static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, uint pos,
         param.flags=(MPLEX_ATTACH_UNNUMBERED|
                      MPLEX_ATTACH_SIZEPOLICY|
                      MPLEX_ATTACH_GEOM|
-                     MPLEX_ATTACH_LEVEL);
+                     MPLEX_ATTACH_LEVEL|
+                     MPLEX_ATTACH_PASSIVE);
         param.level=STACKING_LEVEL_ON_TOP;
         
         param.geom.x=0;
