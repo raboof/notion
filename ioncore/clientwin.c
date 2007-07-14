@@ -121,6 +121,7 @@ static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
 static void clientwin_get_winprops(WClientWin *cwin)
 {
     ExtlTab tab, tab2;
+    char *s;
     int i1, i2;
     
     tab=ioncore_get_winprop(cwin);
@@ -154,13 +155,13 @@ static void clientwin_get_winprops(WClientWin *cwin)
     if(extl_table_is_bool_set(tab, "ignore_cfgrq"))
         cwin->flags|=CLIENTWIN_PROP_IGNORE_CFGRQ;
 
-#if 0    
-    cwin->szplcy=get_sizepolicy_winprop(cwin, "sizepolicy", 
-                                        SIZEPOLICY_DEFAULT);
-    cwin->transient_szplcy=get_sizepolicy_winprop(cwin, 
-                                                  "transient_sizepolicy",
-                                                  DFLT_SZPLCY);
-#endif
+    if(extl_table_gets_s(tab, "orientation", &s)){
+        if(strcmp(s, "vertical")==0)
+            cwin->flags|=CLIENTWIN_PROP_O_VERT;
+        else if(strcmp(s, "horizontal")==0)
+            cwin->flags|=CLIENTWIN_PROP_O_HORIZ;
+        free(s);
+    }
 }
 
 
@@ -1039,6 +1040,16 @@ static void clientwin_size_hints(WClientWin *cwin, WSizeHints *hints_ret)
 }
 
 
+static int clientwin_orientation(WClientWin *cwin)
+{
+    return (cwin->flags&CLIENTWIN_PROP_O_VERT
+            ? REGION_ORIENTATION_VERTICAL
+            : (cwin->flags&CLIENTWIN_PROP_O_HORIZ
+               ? REGION_ORIENTATION_HORIZONTAL
+               : REGION_ORIENTATION_NONE));
+}
+
+
 /*}}}*/
 
 
@@ -1390,6 +1401,9 @@ static DynFunTab clientwin_dynfuntab[]={
     
     {region_size_hints, 
      clientwin_size_hints},
+     
+    {(DynFun*)region_orientation, 
+     (DynFun*)clientwin_orientation},
     
     {(DynFun*)region_rqclose, 
      (DynFun*)clientwin_rqclose},

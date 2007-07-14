@@ -39,7 +39,8 @@
 #define CLIENTWIN_FS_RQ              0x20000
 #define CLIENTWIN_UNMAP_RQ           0x40000
 #define CLIENTWIN_NEED_CFGNTFY       0x80000
-
+#define CLIENTWIN_PROP_O_VERT       0x100000
+#define CLIENTWIN_PROP_O_HORIZ      0x200000
 
 DECLCLASS(WClientWin){
     WRegion region;
