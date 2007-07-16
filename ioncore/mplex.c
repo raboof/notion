@@ -505,6 +505,27 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
 }
 
 
+void mplex_set_szplcy(WMPlex *mplex, WRegion *sub, WSizePolicy szplcy)
+{
+    WStacking *node;
+
+    node=mplex_find_stacking(mplex, sub);
+    
+    if(node!=NULL)
+        node->szplcy=szplcy;
+}
+
+
+WSizePolicy mplex_get_szplcy(WMPlex *mplex, WRegion *sub)
+{
+    WStacking *node;
+
+    node=mplex_find_stacking(mplex, sub);
+    
+    return (node==NULL ? SIZEPOLICY_DEFAULT : node->szplcy);
+}
+
+
 /*}}}*/
 
 

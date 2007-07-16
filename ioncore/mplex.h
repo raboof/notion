@@ -185,6 +185,12 @@ extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook,
 
 extern void mplex_remanage_stdisp(WMPlex *mplex);
 
+/* Note: only the size policy field is changed; actual geometry is not
+ * yet changed.
+ */
+extern void mplex_set_szplcy(WMPlex *mplex, WRegion *sub, WSizePolicy szplcy);
+extern WSizePolicy mplex_get_szplcy(WMPlex *mplex, WRegion *sub);
+
 /* Dynfuns */
 
 DYNFUN void mplex_managed_geom(const WMPlex *mplex, WRectangle *geom);
