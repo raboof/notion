@@ -46,7 +46,8 @@ function ioncore.compile_cmd(cmd, guard)
         end
         
         local gfncode="return function(_, _sub, _chld) "..guardcode.." return true end"
-        local gfn, gerr=loadstring(gfncode, guardcode)
+        local gerr
+        gfn, gerr=loadstring(gfncode, guardcode)
         if not gfn then
             ioncore.warn_traced(TR("Error compiling guard: %s", gerr))
         end
@@ -59,7 +60,7 @@ function ioncore.compile_cmd(cmd, guard)
         else
             return function(_, _sub, _chld) 
                 if gfn(_, _sub, _chld) then 
-                    cmd(_, _sub, _chld) 
+                    fn(_, _sub, _chld) 
                 end
             end
         end
