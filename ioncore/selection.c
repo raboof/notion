@@ -42,7 +42,6 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
     bool ok=FALSE;
     
     sev.property=None;
-    sev.target=None;
     
     if(selection_data==NULL || ev->property==None)
         goto refuse;
@@ -72,7 +71,6 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
     
     if(ok){
         XSetTextProperty(ioncore_g.dpy, ev->requestor, &prop, ev->property);
-        sev.target=ev->target;
         sev.property=ev->property;
         XFree(prop.value);
     }
@@ -81,6 +79,7 @@ refuse:
     sev.type=SelectionNotify;
     sev.requestor=ev->requestor;
     sev.selection=ev->selection;
+    sev.target=ev->target;
     sev.time=ev->time;
     XSendEvent(ioncore_g.dpy, ev->requestor, False, 0L, (XEvent*)&sev);
 }
