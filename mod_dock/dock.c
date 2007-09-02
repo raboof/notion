@@ -983,7 +983,11 @@ static void mplexszplcy(int pos, WSizePolicy *szplcy)
                 ? SIZEPOLICY_GRAVITY_SOUTHEAST
                 : SIZEPOLICY_GRAVITY_SOUTHWEST)
              : SIZEPOLICY_GRAVITY_SOUTH))
-       : SIZEPOLICY_GRAVITY_CENTER);
+       : (hp!=DOCK_HPOS_CENTER
+          ? (hp==DOCK_HPOS_RIGHT
+             ? SIZEPOLICY_GRAVITY_EAST
+             : SIZEPOLICY_GRAVITY_WEST)
+          : SIZEPOLICY_GRAVITY_CENTER));
     
     *szplcy=p;
 }
