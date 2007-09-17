@@ -488,7 +488,10 @@ function mod_query.workspace_handler(mplex, name)
                 local scr=mplex:screen_of()
                 
                 local function mkws()
-                    local tmpl={name=name, switchto=true}
+                    local tmpl={
+                        name=(name~="" and name),
+                        switchto=true
+                    } 
                     if not ioncore.create_ws(scr, tmpl, layout) then
                         error(TR("Unknown error"))
                     end
