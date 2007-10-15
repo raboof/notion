@@ -85,7 +85,6 @@ extern void tiling_managed_rqgeom(WTiling *ws, WRegion *reg,
                                   const WRQGeomParams *rq,
                                   WRectangle *geomret);
 extern void tiling_managed_remove(WTiling *ws, WRegion *reg);
-extern void tiling_managed_activated(WTiling *ws, WRegion *reg);
 extern bool tiling_rescue_clientwins(WTiling *ws, WRescueInfo *ph);
 extern WPHolder *tiling_get_rescue_pholder_for(WTiling *ws, WRegion *mgd);
 extern void tiling_do_set_focus(WTiling *ws, bool warp);
