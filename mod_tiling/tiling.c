@@ -993,10 +993,6 @@ static WFrame *tiling_do_split(WTiling *ws, WSplit *node,
         destroy_obj((Obj*)newframe);
         return NULL;
     }
-
-    /* Restack */
-    if(ws->split_tree!=NULL)
-        split_restack(ws->split_tree, ws->dummywin, Above);
     
     return newframe;
 }
