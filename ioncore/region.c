@@ -283,7 +283,9 @@ bool region_prepare_focus(WRegion *reg, int flags,
                           WPrepareFocusResult *res)
 {
 
-    if(!REGION_IS_ACTIVE(reg) || !REGION_IS_MAPPED(reg)){
+    if(TRUE /* !REGION_IS_ACTIVE(reg) || 
+       !REGION_IS_MAPPED(reg) ||
+       ioncore_g.focus_next!=NULL*/){
         WRegion *mgr=REGION_MANAGER(reg);
         WRegion *par=REGION_PARENT_REG(reg);
         
