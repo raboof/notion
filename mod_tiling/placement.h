@@ -24,9 +24,7 @@ typedef struct{
     WFrame *res_frame;
 } WTilingPlacementParams;
 
-/* Handlers of this hook should take (WClientWin*, WTiling*, WManageParams*) 
- * as parameter. 
- */
+/* Handlers of this hook should take WTilingPlacementParams* as parameter. */
 extern WHook *tiling_placement_alt;
 
 extern WPHolder *tiling_prepare_manage(WTiling *ws, const WClientWin *cwin,
