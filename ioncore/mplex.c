@@ -1270,14 +1270,19 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     node->pseudomodal=(param->flags&MPLEX_ATTACH_PSEUDOMODAL ? 1 : 0);
     
     if(lnode!=NULL){
+        WMPlexPHolder *ph2, *phn, *php;
+        
         llist_link_after(&(mplex->mx_list), 
                          (ph!=NULL ? ph->after : NULL), 
                          lnode);
         mplex->mx_count++;
         
-        /* Move following placeholders after new node */
-        while(ph->next!=NULL)
-            mplexpholder_move(ph->next, mplex, NULL, lnode);
+        
+        /* Move placeholders after new node */
+        for(php=NULL, ph2=ph; ph2!=NULL; php=ph2, ph2=phn){
+            phn=ph2->next;
+            mplexpholder_move(ph2, mplex, php, lnode);
+        }
     }
     
     LINK_ITEM(mplex->mgd, node, mgr_next, mgr_prev);

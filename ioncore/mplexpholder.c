@@ -440,8 +440,12 @@ WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
 WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
 {
     WStacking *st=mplex_find_stacking(mplex, mgd);
+    WMPlexAttachParams param;
     
-    return create_mplexpholder(mplex, st, NULL);
+    param.flags=MPLEX_ATTACH_INDEX;
+    param.index=LLIST_INDEX_LAST;
+    
+    return create_mplexpholder(mplex, st, &param);
 }
 
 
