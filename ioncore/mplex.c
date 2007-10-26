@@ -1666,7 +1666,20 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
 {
     bool ret1, ret2;
     WMPlexIterTmp tmp;
+    WLListIterTmp ltmp;
+    WLListNode *lnode, *was_current=mplex->mx_current;
     
+    /* First all mx stuff to move them nicely to another mplex (when that 
+     * is the case), switching to the current region in the target if 
+     * allowed by ph_flags_mask region_rescue.
+     */
+    FOR_ALL_NODES_ON_LLIST(lnode, mplex->mx_list, ltmp){
+        bool sw=(lnode==was_current ? PHOLDER_ATTACH_SWITCHTO : 0);
+        region_do_rescue_this(lnode->st->reg, info, sw);
+    }
+    
+    /* Then the rest (possibly retrying failed mx stuff).
+     */
     mplex_iter_init(&tmp, mplex);
     ret1=region_rescue_some_clientwins((WRegion*)mplex, info,
                                        (WRegionIterator*)mplex_iter,

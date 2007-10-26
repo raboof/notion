@@ -1082,7 +1082,7 @@ void tiling_unsplit_at(WTiling *ws, WRegion *reg)
     ph=region_get_rescue_pholder_for((WRegion*)ws, reg);
     
     if(ph!=NULL){
-        region_rescue(reg, ph);
+        region_rescue(reg, ph, PHOLDER_ATTACH_SWITCHTO);
         destroy_obj((Obj*)ph);
     }
     

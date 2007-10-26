@@ -101,12 +101,13 @@ extern WPHolder *region_prepare_manage_transient_default(WRegion *reg,
 INTRSTRUCT(WRescueInfo);
 
 /* if ph is given, it is used, otherwise one is looked for when needed */
-extern bool region_rescue(WRegion *reg, WPHolder *ph);
+extern bool region_rescue(WRegion *reg, WPHolder *ph, int ph_flags_mask);
 extern bool region_rescue_needed(WRegion *reg);
 extern bool region_rescue_clientwins(WRegion *reg, WRescueInfo *info);
 extern bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info);
 extern bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                                           WRegionIterator *iter, void *st);
+extern bool region_do_rescue_this(WRegion *tosave, WRescueInfo *info, int flags);
 
 
 #endif /* ION_IONCORE_MANAGE_H */

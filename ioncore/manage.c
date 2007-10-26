@@ -319,6 +319,7 @@ DECLSTRUCT(WRescueInfo){
     WRegion *get_rescue;
     bool failed_get;
     bool test;
+    int ph_flags_mask;
 };
 
 
@@ -338,6 +339,30 @@ bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
+bool region_do_rescue_this(WRegion *tosave, WRescueInfo *info, int flags)
+{
+    WClientWin *cwin=OBJ_CAST(tosave, WClientWin);
+    
+    if(cwin==NULL){
+        return region_rescue_clientwins(tosave, info);
+    }else if(info->test){
+        return FALSE;
+    }else if(cwin->flags&CLIENTWIN_UNMAP_RQ){
+        return TRUE;
+    }else{
+        if(info->ph==NULL){
+            info->ph=region_get_rescue_pholder(info->get_rescue);
+            if(info->ph==NULL){
+                info->failed_get=TRUE;
+                return FALSE;
+            }
+        }
+        return pholder_attach(info->ph, flags&info->ph_flags_mask, 
+                              (WRegion*)cwin);
+    }
+}
+
+
 bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                                    WRegionIterator *iter, void *st)
 {
@@ -351,32 +376,14 @@ bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
     
     while(TRUE){
         WRegion *tosave=iter(st);
-        WClientWin *cwin;
         
         if(tosave==NULL)
             break;
-        
-        cwin=OBJ_CAST(tosave, WClientWin);
-        
-        if(cwin==NULL){
-            if(!region_rescue_clientwins(tosave, info)){
-                fails++;
-                if(info->failed_get)
-                    break;
-            }
-        }else if(info->test){
+
+        if(!region_do_rescue_this(tosave, info, 0)){
             fails++;
-            break;
-        }else if(!(cwin->flags&CLIENTWIN_UNMAP_RQ)){
-            if(info->ph==NULL){
-                info->ph=region_get_rescue_pholder(info->get_rescue);
-                if(info->ph==NULL){
-                    info->failed_get=TRUE;
-                    break;
-                }
-            }
-            if(!pholder_attach(info->ph, 0, (WRegion*)cwin))
-                fails++;
+            if(info->failed_get)
+                break;
         }
     }
     
@@ -394,19 +401,20 @@ bool region_rescue_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
-bool region_rescue(WRegion *reg, WPHolder *ph_param)
+bool region_rescue(WRegion *reg, WPHolder *ph, int ph_flags_mask)
 {
     WRescueInfo info;
     bool ret;
     
-    info.ph=ph_param;
+    info.ph=ph;
+    info.ph_flags_mask=ph_flags_mask;
     info.test=FALSE;
     info.get_rescue=reg;
     info.failed_get=FALSE;
     
     ret=region_rescue_clientwins(reg, &info);
     
-    if(info.ph!=ph_param)
+    if(info.ph!=ph)
         destroy_obj((Obj*)info.ph);
     
     return ret;
@@ -418,6 +426,7 @@ bool region_rescue_needed(WRegion *reg)
     WRescueInfo info;
     
     info.ph=NULL;
+    info.ph_flags_mask=0;
     info.test=TRUE;
     info.get_rescue=reg;
     info.failed_get=FALSE;
