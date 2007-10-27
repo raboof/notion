@@ -11,8 +11,12 @@ ioncore.tabnum={}
 local framestate={}
 
 local function do_show(frame)
-    frame:set_grattr('numbered', 'set')
-    framestate[frame]='set'
+    if obj_exists(frame) then
+        frame:set_grattr('numbered', 'set')
+        framestate[frame]='set'
+    else
+        framestate[frame]=nil
+    end
 end
 
 --DOC
@@ -38,7 +42,9 @@ function ioncore.tabnum.clear()
     
     for f, s in pairs(st) do
         if s=='set' then
-            f:set_grattr('numbered', 'unset')
+            if obj_exists(f) then
+                f:set_grattr('numbered', 'unset')
+            end
         elseif obj_is(s, "WTimer") then
             s:reset()
         end
