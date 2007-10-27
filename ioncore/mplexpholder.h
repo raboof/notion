@@ -60,7 +60,7 @@ extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node);
 
 extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 
                                                 WRegion *mgd);
-extern WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, 
-                                                       WRegion *mgd);
+extern WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, 
+                                              WRegion *mgd);
 
 #endif /* ION_IONCORE_MPLEXPHOLDER_H */

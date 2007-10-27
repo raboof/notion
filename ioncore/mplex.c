@@ -1679,7 +1679,7 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
      * allowed by ph_flags_mask region_rescue.
      */
     FOR_ALL_NODES_ON_LLIST(lnode, mplex->mx_list, ltmp){
-        bool sw=(lnode==was_current ? PHOLDER_ATTACH_SWITCHTO : 0);
+        int sw=(lnode==was_current ? PHOLDER_ATTACH_SWITCHTO : 0);
         region_do_rescue_this(lnode->st->reg, info, sw);
     }
     

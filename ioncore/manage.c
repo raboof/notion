@@ -319,7 +319,7 @@ DECLSTRUCT(WRescueInfo){
     WRegion *get_rescue;
     bool failed_get;
     bool test;
-    int ph_flags_mask;
+    int flags;
 };
 
 
@@ -339,17 +339,31 @@ bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
-bool region_do_rescue_this(WRegion *tosave, WRescueInfo *info, int flags)
+/* Bah, unsplitissä oikestaan pitäisi tehä non-deep rescue */
+
+bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
 {
-    WClientWin *cwin=OBJ_CAST(tosave, WClientWin);
+    WClientWin *cwin=OBJ_CAST(tosave_, WClientWin);
+    WRegion *tosave;
     
-    if(cwin==NULL){
-        return region_rescue_clientwins(tosave, info);
+    if(cwin!=NULL){
+        if(cwin->flags&CLIENTWIN_UNMAP_RQ)
+            return TRUE;
+        tosave=(WRegion*)cwin;
+    }else if(info->flags&REGION_RESCUE_NODEEP){
+        tosave=tosave_;
+    }else{
+        /* Try to rescue whole groups. */
+        tosave=(WRegion*)OBJ_CAST(tosave_, WGroupCW);
+    }
+    
+    if(tosave==NULL){
+        return region_rescue_clientwins(tosave_, info);
     }else if(info->test){
         return FALSE;
-    }else if(cwin->flags&CLIENTWIN_UNMAP_RQ){
-        return TRUE;
     }else{
+        int phf=(info->flags&REGION_RESCUE_PHFLAGS_OK ? ph_flags : 0);
+        
         if(info->ph==NULL){
             info->ph=region_get_rescue_pholder(info->get_rescue);
             if(info->ph==NULL){
@@ -357,8 +371,7 @@ bool region_do_rescue_this(WRegion *tosave, WRescueInfo *info, int flags)
                 return FALSE;
             }
         }
-        return pholder_attach(info->ph, flags&info->ph_flags_mask, 
-                              (WRegion*)cwin);
+        return pholder_attach(info->ph, phf, tosave);
     }
 }
 
@@ -401,13 +414,13 @@ bool region_rescue_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
-bool region_rescue(WRegion *reg, WPHolder *ph, int ph_flags_mask)
+bool region_rescue(WRegion *reg, WPHolder *ph, int flags)
 {
     WRescueInfo info;
     bool ret;
     
     info.ph=ph;
-    info.ph_flags_mask=ph_flags_mask;
+    info.flags=flags;
     info.test=FALSE;
     info.get_rescue=reg;
     info.failed_get=FALSE;
@@ -426,7 +439,7 @@ bool region_rescue_needed(WRegion *reg)
     WRescueInfo info;
     
     info.ph=NULL;
-    info.ph_flags_mask=0;
+    info.flags=0;
     info.test=TRUE;
     info.get_rescue=reg;
     info.failed_get=FALSE;

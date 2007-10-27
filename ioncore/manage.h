@@ -98,16 +98,19 @@ extern WPHolder *region_prepare_manage_transient_default(WRegion *reg,
 
 /* Rescue */
 
+#define REGION_RESCUE_PHFLAGS_OK 0x01
+#define REGION_RESCUE_NODEEP     0x02
+
 INTRSTRUCT(WRescueInfo);
 
 /* if ph is given, it is used, otherwise one is looked for when needed */
-extern bool region_rescue(WRegion *reg, WPHolder *ph, int ph_flags_mask);
+extern bool region_rescue(WRegion *reg, WPHolder *ph, int flags);
 extern bool region_rescue_needed(WRegion *reg);
 extern bool region_rescue_clientwins(WRegion *reg, WRescueInfo *info);
 extern bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info);
 extern bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                                           WRegionIterator *iter, void *st);
-extern bool region_do_rescue_this(WRegion *tosave, WRescueInfo *info, int flags);
+extern bool region_do_rescue_this(WRegion *tosave, WRescueInfo *info, int ph_flags);
 
 
 #endif /* ION_IONCORE_MANAGE_H */

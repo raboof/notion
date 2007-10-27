@@ -15,6 +15,7 @@
 #include "mplexpholder.h"
 #include "llist.h"
 #include "framedpholder.h"
+#include "basicpholder.h"
 
 
 static void mplex_watch_handler(Watch *watch, Obj *mplex);
@@ -102,7 +103,18 @@ static void mplex_watch_handler(Watch *watch, Obj *mplex)
 }
 
 
-static WMPlexAttachParams dummy_param={0, 0, {0, 0, 0, 0}, 0, 0};
+static void mplex_get_attach_params(WMPlex *mplex, WStacking *st,
+                                    WMPlexAttachParams *param)
+{
+    param->flags=(MPLEX_ATTACH_SIZEPOLICY|
+                  MPLEX_ATTACH_GEOM|
+                  MPLEX_ATTACH_LEVEL|
+                  (st->hidden ? MPLEX_ATTACH_HIDDEN : 0)|
+                  (st->lnode==NULL ? MPLEX_ATTACH_UNNUMBERED : 0));
+    param->szplcy=st->szplcy;
+    param->geom=REGION_GEOM(st->reg);
+    param->level=st->level;
+}
 
 
 bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
@@ -122,25 +134,20 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
         return FALSE;
     }
 
-    if(param==NULL)
-        param=&dummy_param;
-    
     if(st!=NULL){
-        if(st->lnode!=NULL)
+        mplex_get_attach_params(mplex, st, &ph->param);
+        
+        if(st->lnode!=NULL){
             mplexpholder_do_link(ph, mplex, 
                                  LIST_LAST(st->lnode->phs, next, prev), 
                                  st->lnode);
-        else
-            ph->param.flags|=MPLEX_ATTACH_UNNUMBERED;
-        
-        ph->param.flags|=(MPLEX_ATTACH_SIZEPOLICY|
-                          MPLEX_ATTACH_GEOM|
-                          MPLEX_ATTACH_LEVEL|
-                          (st->hidden ? MPLEX_ATTACH_HIDDEN : 0));
-        ph->param.szplcy=st->szplcy;
-        ph->param.geom=REGION_GEOM(st->reg);
-        ph->param.level=st->level;
+        }
     }else{
+        static WMPlexAttachParams dummy_param={0, 0, {0, 0, 0, 0}, 0, 0};
+        
+        if(param==NULL)
+            param=&dummy_param;
+        
         ph->param=*param;
         
         if(!(param->flags&MPLEX_ATTACH_UNNUMBERED)){
@@ -437,8 +444,40 @@ WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
 }
 
 
-WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
+/*}}}*/
+
+
+/*{{ Rescue */
+
+
+WRegion *mplex_rescue_attach(WMPlex *mplex, int flags, WRegionAttachData *data)
 {
+    WMPlexAttachParams param;
+    
+    param.flags=0;
+    
+    /* Improved attach parametrisation hack for WMPlex source */
+    if(data->type==REGION_ATTACH_REPARENT){
+        WRegion *reg=data->u.reg;
+        WMPlex *src_mplex=REGION_MANAGER_CHK(reg, WMPlex);
+        if(src_mplex!=NULL){
+            WStacking *st=ioncore_find_stacking(reg);
+            if(st!=NULL)
+                mplex_get_attach_params(src_mplex, st, &param);
+        }
+    }
+    
+    param.flags|=(MPLEX_ATTACH_INDEX|
+                  (flags&PHOLDER_ATTACH_SWITCHTO ? MPLEX_ATTACH_SWITCHTO : 0));
+    param.index=LLIST_INDEX_LAST;
+
+    return mplex_do_attach(mplex, &param, data);
+}
+
+
+WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
+{
+#if 0
     WStacking *st=mplex_find_stacking(mplex, mgd);
     WMPlexAttachParams param;
     
@@ -446,6 +485,10 @@ WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
     param.index=LLIST_INDEX_LAST;
     
     return create_mplexpholder(mplex, st, &param);
+#else
+    return (WPHolder*)create_basicpholder((WRegion*)mplex, 
+                                          (WBasicPHolderHandler*)mplex_rescue_attach);
+#endif
 }
 
 
