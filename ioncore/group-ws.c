@@ -295,6 +295,33 @@ WPHolder *groupws_get_rescue_pholder_for(WGroupWS *ws,
 }
 
 
+static bool group_empty_for_bottom_stdisp(WGroup *ws)
+{
+    WGroupIterTmp tmp;
+    WStacking *st;
+    
+    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
+        if(st!=ws->bottom && st!=ws->managed_stdisp)
+            return FALSE;
+    }
+    
+    return TRUE;
+}
+
+
+static WRegion *groupws_managed_disposeroot(WGroupWS *ws, WRegion *reg)
+{
+    if(group_bottom(&ws->grp)==reg){
+        if(group_empty_for_bottom_stdisp(&ws->grp)){
+            WRegion *tmpr=region_disposeroot((WRegion*)ws);
+            return (tmpr!=NULL ? tmpr : reg);
+        }
+    }
+    
+    return reg;
+}
+
+
 /*}}}*/
 
 
@@ -348,6 +375,9 @@ static DynFunTab groupws_dynfuntab[]={
     
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)groupws_prepare_manage_transient},
+     
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)groupws_managed_disposeroot},
     
     {(DynFun*)region_handle_drop,
      (DynFun*)groupws_handle_drop},

@@ -116,6 +116,23 @@ WPHolder *groupcw_prepare_manage_transient(WGroupCW *cwg,
 }
 
 
+static WRegion *groupcw_managed_disposeroot(WGroupCW *ws, WRegion *reg)
+{
+    WGroupIterTmp tmp;
+    WStacking *st;
+    WRegion *tmpr;
+    
+    FOR_ALL_NODES_IN_GROUP(&ws->grp, st, tmp){
+        if(st!=ws->grp.managed_stdisp && st->reg!=reg){
+            return reg;
+        }
+    }
+    
+    tmpr=region_disposeroot((WRegion*)ws);
+    return (tmpr!=NULL ? tmpr : reg);
+}
+
+
 /*}}}*/
 
 
@@ -277,6 +294,9 @@ static DynFunTab groupcw_dynfuntab[]={
 
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)groupcw_prepare_manage_transient},
+     
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)groupcw_managed_disposeroot},
     
     {(DynFun*)region_displayname,
      (DynFun*)groupcw_displayname},

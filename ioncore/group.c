@@ -441,31 +441,6 @@ bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info)
 }
 
 
-static bool group_empty_for_bottom_stdisp(WGroup *ws)
-{
-    WGroupIterTmp tmp;
-    WStacking *st;
-    
-    FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
-        if(st!=ws->bottom && st!=ws->managed_stdisp)
-            return FALSE;
-    }
-    
-    return TRUE;
-}
-
-
-static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
-{
-    if(group_bottom(ws)==reg){
-        if(group_empty_for_bottom_stdisp(ws))
-            return region_disposeroot((WRegion*)ws);
-    }
-    
-    return reg;
-}
-
-
 /*}}}*/
 
 
@@ -1381,9 +1356,6 @@ static DynFunTab group_dynfuntab[]={
     
     {(DynFun*)region_get_configuration, 
      (DynFun*)group_get_configuration},
-
-    {(DynFun*)region_managed_disposeroot,
-     (DynFun*)group_managed_disposeroot},
 
     {(DynFun*)region_current,
      (DynFun*)group_current},
