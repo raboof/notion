@@ -344,7 +344,7 @@ bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
 {
     WClientWin *cwin=OBJ_CAST(tosave_, WClientWin);
-    WRegion *tosave;
+    WRegion *tosave=NULL;
     
     if(cwin!=NULL){
         if(cwin->flags&CLIENTWIN_UNMAP_RQ)
@@ -354,7 +354,7 @@ bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
         tosave=tosave_;
     }else{
         /* Try to rescue whole groups. */
-        tosave=(WRegion*)OBJ_CAST(tosave_, WGroupCW);
+        /*tosave=(WRegion*)OBJ_CAST(tosave_, WGroupCW);*/
     }
     
     if(tosave==NULL){
