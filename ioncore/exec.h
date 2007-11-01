@@ -35,7 +35,8 @@ DECLSTRUCT(WExecP){
 extern bool ioncore_exec(const char *cmd);
 extern int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
                               ExtlFn errh);
-extern bool ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh);
+extern bool ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh,
+                                 const char *wd);
 extern void ioncore_setup_environ(const WExecP *p);
 extern void ioncore_setup_display(int xscr);
 
