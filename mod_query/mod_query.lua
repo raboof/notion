@@ -238,13 +238,14 @@ mod_query.COLLECT_THRESHOLD=2000
 --DOC
 -- This function can be used to read completions from an external source.
 -- The parameter \var{cp} is the completion proxy to be used,
--- and the string \var{cmd} the shell command to be executed. To its stdout, 
--- the command should on the first line write the \var{common_beg} 
+-- and the string \var{cmd} the shell command to be executed, in the directory
+-- \var{wd}. 
+-- To its stdout, the command should on the first line write the \var{common_beg}
 -- parameter of \fnref{WComplProxy.set_completions} (which \var{fn} maybe used
 -- to override) and a single actual completion on each of the successive lines.
 -- The function \var{reshnd} may be used to override a result table
 -- building routine.
-function mod_query.popen_completions(cp, cmd, fn, reshnd)
+function mod_query.popen_completions(cp, cmd, fn, reshnd, wd)
     
     local pst={cp=cp, maybe_stalled=0}
     
@@ -317,7 +318,7 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
     
     if not found_clean then
         pipes[rcv]=pst
-        ioncore.popen_bgread(cmd, coroutine.wrap(rcv))
+        ioncore.popen_bgread(cmd, coroutine.wrap(rcv), nil, wd)
     end
 end
 
@@ -746,7 +747,7 @@ local function find_point(strs, point)
 end
 
 
-function mod_query.exec_completor(wedln, str, point)
+function mod_query.exec_completor_(wd, wedln, str, point)
     local parts=break_cmdline(str)
     local complidx=find_point(parts, point+1)
     
@@ -804,8 +805,13 @@ function mod_query.exec_completor(wedln, str, point)
     if ic then
         mod_query.popen_completions(wedln,
                                    ic..wp..string.shell_safe(s_compl),
-                                   set_fn, filter_fn)
+                                   set_fn, filter_fn, wd)
     end
+end
+
+
+function mod_query.exec_completor(...)
+    mod_query.exec_completor_(nil, ...)
 end
 
 
@@ -838,9 +844,12 @@ end
 -- \file{ion-runinxterm}. Two colons ('::') will ask you to press 
 -- enter after the command has finished.
 function mod_query.query_exec(mplex)
-    mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler, 
-                    mod_query.exec_completor,
-                    "run")
+    local function compl(...)
+        local wd=ioncore.get_dir_for(mplex)
+        mod_query.exec_completor_(wd, ...)
+    end
+    mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler,
+                    compl, "run")
 end
 
 
