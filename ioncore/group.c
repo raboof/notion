@@ -728,7 +728,7 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     
     if(extl_table_gets_i(tab, "level", &tmp)){
         if(tmp>=0){
-            par->level_set=STACKING_LEVEL_NORMAL;
+            par->level_set=1;
             par->level=tmp;
         }
     }
