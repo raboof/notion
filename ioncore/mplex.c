@@ -855,7 +855,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
     PtrList *hidelist=NULL;
     PtrList **hidelistp=(ew ? NULL : &hidelist);
     WStacking *foc;
-    bool within=FALSE;
+    /*bool within=FALSE;*/
     
     if(sub==NULL && node==NULL)
         return FALSE;
@@ -867,7 +867,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
     if(!region_prepare_focus((WRegion*)mplex, flags, res))
         return FALSE;
 
-    foc=mplex_do_to_focus_on(mplex, node, sub, hidelistp, &within);
+    foc=mplex_do_to_focus_on(mplex, node, sub, hidelistp, NULL /*&within*/);
 
     if(foc!=NULL){
         while(hidelist!=NULL){
@@ -886,7 +886,7 @@ bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *node,
         res->reg=foc->reg;
         res->flags=flags;
         
-        return within;
+        return (foc==sub || (sub==NULL && foc==node));
     }else{
         return FALSE;
     }
