@@ -234,26 +234,9 @@ static WStacking *find_to_focus(WGroup *ws, WStacking *st, bool group_only)
 }
 
 
-static bool group_refocus_(WGroup *ws, WStacking *st)
-{
-    if(st!=ws->current_managed && st->reg!=NULL){
-        if(region_may_control_focus((WRegion*)ws))
-            region_set_focus(st->reg);
-        else
-            ws->current_managed=st;
-        return TRUE;
-    }
-    
-    return FALSE;
-}
-
-
 static void group_do_set_focus(WGroup *ws, bool warp)
 {
-    WStacking *st=ws->current_managed;
-    
-    if(st==NULL || st->reg==NULL)
-        st=find_to_focus(ws, NULL, TRUE);
+    WStacking *st=find_to_focus(ws, ws->current_managed, FALSE);
     
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
@@ -580,6 +563,14 @@ static void geom_group_to_parent(WGroup *ws, const WRectangle *g,
 }
 
 
+static int group_must_focus(WGroup *ws, WStacking *st)
+{
+    WStacking *stacking=group_get_stacking(ws);
+    
+    return (stacking!=NULL && stacking_must_focus(stacking, st));
+}
+
+
 bool group_do_attach_final(WGroup *ws, 
                            WRegion *reg,
                            const WGroupAttachParams *param)
@@ -662,15 +653,15 @@ bool group_do_attach_final(WGroup *ws,
         group_do_set_bottom(ws, st);
     
     /* Focus */
-    sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
+    sw=((param->switchto_set ? param->switchto : ioncore_g.switchto_new)
+        ? st==find_to_focus(ws, st, FALSE)
+        : group_must_focus(ws, st));
     
-    if(sw || st->level>=STACKING_LEVEL_MODAL1){
-        WStacking *stf=find_to_focus(ws, st, FALSE);
-        
-        if(stf==st){
-            /* Ok, the new region can be focused */
-            group_refocus_(ws, stf);
-        }
+    if(sw){
+        if(region_may_control_focus((WRegion*)ws))
+            region_set_focus(st->reg);
+        else
+            ws->current_managed=st;
     }
     
     return TRUE;

@@ -98,6 +98,7 @@ uint stacking_min_level(WStacking *stacking,
 
 uint stacking_min_level_mapped(WStacking *stacking);
 
+bool stacking_must_focus(WStacking *stacking, WStacking *st);
 
 WStacking *ioncore_find_stacking(WRegion *reg);
 void stacking_unassoc(WStacking *stacking);

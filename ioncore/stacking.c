@@ -596,6 +596,12 @@ static bool mapped_filt(WStacking *st, void *unused)
 }
 
 
+static bool mapped_filt_neq(WStacking *st, void *st_neq)
+{
+    return (st!=(WStacking*)st_neq && mapped_filt(st, NULL));
+}
+
+
 static bool mgr_filt(WStacking *st, void *mgr_)
 {
     return (st->reg!=NULL && REGION_MANAGER(st->reg)==(WRegion*)mgr_);
@@ -619,6 +625,17 @@ WStacking *stacking_find_to_focus_mapped(WStacking *stacking,
 uint stacking_min_level_mapped(WStacking *stacking)
 {
     return stacking_min_level(stacking, mapped_filt, NULL);
+}
+
+
+bool stacking_must_focus(WStacking *stacking, WStacking *st)
+{
+    WStacking *stf=stacking_find_to_focus(stacking, NULL, 
+                                          mapped_filt_neq, NULL, st);
+    
+    return (stf==NULL || 
+            (st->level>stf->level &&
+             st->level>=STACKING_LEVEL_MODAL1));
 }
 
 

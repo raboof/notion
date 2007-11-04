@@ -1169,7 +1169,6 @@ bool mplex_managed_rqorder(WMPlex *mplex, WRegion *reg, WRegionOrder order)
 static bool mplex_stack(WMPlex *mplex, WStacking *st)
 {
     WStacking *tmp=NULL;
-    Window bottom=None, top=None;
     WStacking **stackingp=mplex_get_stackingp(mplex);
     
     if(stackingp==NULL)
@@ -1232,7 +1231,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     
     sw=(!hidden && (param->flags&MPLEX_ATTACH_SWITCHTO 
                     || (param->flags&MPLEX_ATTACH_UNNUMBERED
-                        ? modal
+                        ? FALSE
                         : (mplex_current_node(mplex)==NULL))));
     
     hidden=(hidden || (!sw && !(param->flags&MPLEX_ATTACH_UNNUMBERED)));
@@ -1312,9 +1311,20 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
         mplex_do_node_display(mplex, node, FALSE);
     else
         region_unmap(reg);
-    
-    if(sw && mcf)
-        mplex_refocus(mplex, node, FALSE);
+        
+    if(mcf){
+        if(sw){
+            mplex_refocus(mplex, node, FALSE);
+        }else if(!hidden && 
+                 (level>=STACKING_LEVEL_MODAL1 || OBJ_IS(reg, WGroup))){
+            /* New modal regions may require focusing, so try to
+             * give focus back to currently active object.
+             * (There seems to be some problem with uncontained
+             * client windows still..)
+             */
+            mplex_refocus(mplex, NULL, FALSE);
+        }
+    }
     
     if(lnode!=NULL)
         mplex_managed_changed(mplex, MPLEX_CHANGE_ADD, sw, reg);
