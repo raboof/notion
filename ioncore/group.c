@@ -708,9 +708,11 @@ WRegion *group_do_attach(WGroup *ws,
 }
 
 
-static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
+void group_get_attach_params(WGroup *ws, ExtlTab tab, 
+                             WGroupAttachParams *par)
 {
     int tmp;
+    bool tmpb;
     char *tmps;
     ExtlTab g;
     
@@ -738,9 +740,11 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
         par->level_set=1;
     }
     
-    if(extl_table_is_bool_set(tab, "switchto"))
-        par->switchto=1;
-
+    if(extl_table_gets_b(tab, "switchto", &tmpb)){
+        par->switchto=(tmpb!=0);
+        par->switchto_set=1;
+    }
+    
     if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
         par->szplcy_set=1;
         par->szplcy=tmp;
@@ -785,7 +789,7 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
     if(reg==NULL)
         return NULL;
     
-    get_params(ws, param, &par);
+    group_get_attach_params(ws, param, &par);
     
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
@@ -819,7 +823,7 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
     WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
 
-    get_params(ws, param, &par);
+    group_get_attach_params(ws, param, &par);
     
     data.type=REGION_ATTACH_LOAD;
     data.u.tab=param;

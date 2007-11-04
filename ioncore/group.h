@@ -72,6 +72,9 @@ DYNFUN WStacking *group_do_add_managed(WGroup *ws, WRegion *reg,
 extern WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, 
                                                int level, WSizePolicy szplcy);
 
+extern void group_get_attach_params(WGroup *ws, ExtlTab tab, 
+                                    WGroupAttachParams *par);
+
 extern WRegion *group_do_attach(WGroup *ws, 
                                 WGroupAttachParams *param,
                                 WRegionAttachData *data);

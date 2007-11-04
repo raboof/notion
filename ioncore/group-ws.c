@@ -120,44 +120,26 @@ EXTL_EXPORT_AS(WGroupWS, attach_framed)
 bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
-    WFramedParam fp=FRAMEDPARAM_INIT;
-    ExtlTab gt;
+    WFramedParam frp=FRAMEDPARAM_INIT;
     
     if(reg==NULL)
         return FALSE;
     
-    fp.gravity=ForgetGravity;
+    group_get_attach_params(&ws->grp, t, &ap);
     
-    if(extl_table_is_bool_set(t, "switchto")){
-        ap.switchto_set=TRUE;
-        ap.switchto=TRUE;
+    /* Sensible size is given in framedparams */
+    if(ap.geom_set){
+        ap.geom_set=0;
+        ap.geom_weak_set=1;
+        ap.geom_weak=0;
+        
+        frp.inner_geom_gravity_set=1;
+        frp.inner_geom=ap.geom;
+        frp.gravity=NorthWestGravity;
+        extl_table_gets_i(t, "gravity", &frp.gravity);
     }
     
-    if(extl_table_gets_t(t, "geom", &gt)){
-        int pos=0, size=0;
-        
-        fp.inner_geom.x=0;
-        fp.inner_geom.y=0;
-
-        if(extl_table_gets_i(gt, "x", &(ap.geom.x)))
-            pos++;
-        if(extl_table_gets_i(gt, "y", &(ap.geom.y)))
-            pos++;
-    
-        if(extl_table_gets_i(gt, "w", &(ap.geom.w)))
-            size++;
-        if(extl_table_gets_i(gt, "h", &(ap.geom.h)))
-            size++;
-        
-        fp.inner_geom.w=maxof(fp.inner_geom.w, 1);
-        fp.inner_geom.h=maxof(fp.inner_geom.h, 1);
-        
-        fp.inner_geom_gravity_set=(size==2 && pos==2);
-        
-        extl_unref_table(gt);
-    }
-    
-    return groupws_attach_framed(ws, &ap, &fp, reg);
+    return groupws_attach_framed(ws, &ap, &frp, reg);
 }
 
 
