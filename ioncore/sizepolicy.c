@@ -198,6 +198,18 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
 }
 
 
+static WSizePolicy org(WSizePolicy base, WSizePolicy g)
+{
+    if((base&SIZEPOLICY_VERT_MASK)==0)
+        base|=g&SIZEPOLICY_VERT_MASK;
+        
+    if((base&SIZEPOLICY_HORIZ_MASK)==0)
+        base|=g&SIZEPOLICY_HORIZ_MASK;
+    
+    return base;
+}
+
+
 void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
                 const WRectangle *rq_geom, int rq_flags,
                 WFitParams *fp)
@@ -231,27 +243,27 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         break;
         
     case SIZEPOLICY_STRETCH_LEFT:
-        gravity_stretch_policy(SIZEPOLICY_HORIZ_LEFT|SIZEPOLICY_VERT_CENTER, 
+        gravity_stretch_policy(org(*szplcy, SIZEPOLICY_HORIZ_LEFT|SIZEPOLICY_VERT_CENTER), 
                                reg, &tmp, fp, FALSE, TRUE);
         break;
         
     case SIZEPOLICY_STRETCH_RIGHT:
-        gravity_stretch_policy(SIZEPOLICY_HORIZ_RIGHT|SIZEPOLICY_VERT_CENTER, 
+        gravity_stretch_policy(org(*szplcy, SIZEPOLICY_HORIZ_RIGHT|SIZEPOLICY_VERT_CENTER), 
                                reg, &tmp, fp, FALSE, TRUE);
         break;
         
     case SIZEPOLICY_STRETCH_TOP:
-        gravity_stretch_policy(SIZEPOLICY_VERT_TOP|SIZEPOLICY_HORIZ_CENTER, 
+        gravity_stretch_policy(org(*szplcy, SIZEPOLICY_VERT_TOP|SIZEPOLICY_HORIZ_CENTER), 
                                reg, &tmp, fp, TRUE, FALSE);
         break;
         
     case SIZEPOLICY_STRETCH_BOTTOM:
-        gravity_stretch_policy(SIZEPOLICY_VERT_BOTTOM|SIZEPOLICY_HORIZ_CENTER, 
+        gravity_stretch_policy(org(*szplcy, SIZEPOLICY_VERT_BOTTOM|SIZEPOLICY_HORIZ_CENTER), 
                                reg, &tmp, fp, TRUE, FALSE);
         break;
         
     case SIZEPOLICY_FULL_EXACT:
-        gravity_stretch_policy(SIZEPOLICY_VERT_CENTER|SIZEPOLICY_HORIZ_CENTER, 
+        gravity_stretch_policy(org(*szplcy, SIZEPOLICY_VERT_CENTER|SIZEPOLICY_HORIZ_CENTER), 
                                reg, &tmp, fp, TRUE, TRUE);
         break;
         
