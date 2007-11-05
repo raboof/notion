@@ -1234,13 +1234,23 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child,
     static int nstdisp=0;
     WSplitInner *parent;
     WSplit *other;
+    int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
     
     assert(node->tl==child || node->br==child);
     
-    if(node->tl==child)
+    if(node->tl==child){
         other=node->br;
-    else
+        if(node->dir==SPLIT_VERTICAL)
+            vprimn=PRIMN_TL;
+        else
+            hprimn=PRIMN_TL;
+    }else{
         other=node->tl;
+        if(node->dir==SPLIT_VERTICAL)
+            vprimn=PRIMN_BR;
+        else
+            hprimn=PRIMN_BR;
+    }
     
     assert(other!=NULL);
 
@@ -1262,7 +1272,7 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child,
         splittree_changeroot((WSplit*)node, other);
     
     if(reclaim_space)
-        split_resize(other, &(((WSplit*)node)->geom), PRIMN_ANY, PRIMN_ANY);
+        split_resize(other, &(((WSplit*)node)->geom), hprimn, vprimn);
     
     child->parent=NULL;
     
