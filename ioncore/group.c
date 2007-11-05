@@ -832,29 +832,34 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
 static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
 {
     int pos=di->pos;
+    int policy=0, gravity=0;
     
     if(di->fullsize){
         if(region_orientation(stdisp)==REGION_ORIENTATION_VERTICAL){
             if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_BL)
-                return SIZEPOLICY_STRETCH_LEFT;
+                policy=SIZEPOLICY_STRETCH_LEFT;
             else
-                return SIZEPOLICY_STRETCH_RIGHT;
+                policy=SIZEPOLICY_STRETCH_RIGHT;
         }else{
             if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_TR)
-                return SIZEPOLICY_STRETCH_TOP;
+                policy=SIZEPOLICY_STRETCH_TOP;
             else
-                return SIZEPOLICY_STRETCH_BOTTOM;
+                policy=SIZEPOLICY_STRETCH_BOTTOM;
         }
     }else{
-        if(pos==MPLEX_STDISP_TL)
-            return SIZEPOLICY_GRAVITY_NORTHWEST;
-        else if(pos==MPLEX_STDISP_BL)
-            return SIZEPOLICY_GRAVITY_SOUTHWEST;
-        else if(pos==MPLEX_STDISP_TR)
-            return SIZEPOLICY_GRAVITY_NORTHEAST;
-        else /*if(pos=MPLEX_STDISP_BR)*/
-            return SIZEPOLICY_GRAVITY_SOUTHEAST;
+        policy=SIZEPOLICY_GRAVITY;
     }
+    
+    if(pos==MPLEX_STDISP_TL)
+        gravity=SIZEPOLICY_VERT_TOP|SIZEPOLICY_HORIZ_LEFT;
+    else if(pos==MPLEX_STDISP_BL)
+        gravity=SIZEPOLICY_VERT_BOTTOM|SIZEPOLICY_HORIZ_LEFT;
+    else if(pos==MPLEX_STDISP_TR)
+        gravity=SIZEPOLICY_VERT_TOP|SIZEPOLICY_HORIZ_RIGHT;
+    else /*if(pos=MPLEX_STDISP_BR)*/
+        gravity=SIZEPOLICY_VERT_BOTTOM|SIZEPOLICY_HORIZ_RIGHT;
+    
+    return (policy|gravity);
 }
 
 
