@@ -1,5 +1,5 @@
 /*
- * ion/mod_statusbar/ion-statusd/exec.c
+ * ion/utils/ion-statusd/exec.c
  *
  * Copyright (c) Tuomo Valkonen 2005-2006. 
  *

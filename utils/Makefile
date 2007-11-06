@@ -8,7 +8,7 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-SUBDIRS=ion-completefile
+SUBDIRS=ion-completefile ion-statusd
 INSTALL_SUBDIRS=$(SUBDIRS)
 
 SHELLSCRIPTS = ion-runinxterm ion-completeman

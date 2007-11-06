@@ -191,7 +191,7 @@ function mod_statusbar.rcv_statusd(str)
 end
 
 
-local function get_modules()
+function mod_statusbar.get_modules()
     local mods={}
     local specials={["filler"]=true, ["systray"]=true}
     
@@ -233,8 +233,6 @@ function mod_statusbar.rcv_statusd_err(str)
     end
 end
 
-local tried_to_launch=false
-
 --DOC
 -- Load modules and launch \file{ion-statusd} with configuration 
 -- table \var{cfg}. The options for each \file{ion-statusd} monitor
@@ -244,9 +242,11 @@ function mod_statusbar.launch_statusd(cfg)
         return
     end
     
-    tried_to_launch=true
+    -- Launch tried, don't do it automatically after reading
+    -- configuration.
+    mod_statusbar.no_autolaunch=true
     
-    local mods=get_modules()
+    local mods=mod_statusbar.get_modules()
     
     -- Load modules
     for m in pairs(mods) do
@@ -354,6 +354,6 @@ package.loaded["mod_statusbar"]=true
 dopath('cfg_statusbar', true)
 
 -- Launch statusd if the user didn't launch it.
-if not tried_to_launch then
+if not mod_statusbar.no_autolaunch then
     mod_statusbar.launch_statusd()
 end

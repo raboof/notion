@@ -11,10 +11,7 @@ include $(TOPDIR)/build/system-inc.mk
 INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
-SOURCES = main.c statusbar.c draw.c
-
-SUBDIRS = ion-statusd
-INSTALL_SUBDIRS = $(SUBDIRS)
+SOURCES = main.c statusbar.c draw.c statusd-launch.c
 
 MAKE_EXPORTS = mod_statusbar
 
