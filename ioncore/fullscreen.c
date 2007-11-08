@@ -167,16 +167,5 @@ bool group_set_fullscreen_extl(WGroup *grp, const char *how)
 }
 
 
-/*EXTL_DOC
- * Is \var{reg} in full screen mode?
- */
-EXTL_SAFE
-EXTL_EXPORT_MEMBER
-bool group_is_fullscreen(WGroup *grp)
-{
-    return REGION_IS_FULLSCREEN(grp);
-}
-
-
 /*}}}*/
 
