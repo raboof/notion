@@ -145,7 +145,6 @@ static WGroup *find_group(WRegion *reg, uint *level)
 
 bool ioncore_detach(WRegion *reg, int sp)
 {
-    WPHolder *ph=region_get_return(reg);
     WFrameMode mode;
     WGroup *grp;
     bool set, nset;
@@ -183,21 +182,28 @@ bool ioncore_detach(WRegion *reg, int sp)
 
 
 /*EXTL_DOC
- * Detach or reattach \var{reg}, depending on whether \var{how}
- * is \codestr{set}, \codestr{unset} or \codestr{toggle}. (Detaching 
- * means making \var{reg} managed by its nearest ancestor \type{WGroup},
- * framed if \var{reg} is not itself \type{WFrame}. Reattaching means 
- * making it managed where it used to be managed, if a return-placeholder
- * exists.)
- * If \var{reg} is the `bottom' of some group, the whole group is
- * detached. If \var{reg} is a \type{WWindow}, it is put into a 
- * frame.
+ * Detach or reattach \var{reg} or any group it is the leader of
+ * (see \fnref{WRegion.groupleader_of}), depending on whether \var{how} 
+ * is \codestr{set}, \codestr{unset} or \codestr{toggle}. If this
+ * region is not a window, it is put into a frame.
+ *
+ * Detaching a region means having it managed by its nearest ancestor
+ * \type{WGroup}. Reattaching means having it managed where it used 
+ * to be managed, if a ``return placeholder'' exists.
+ *
+ * Additionally, setting \var{how} to \codestr{forget}, can be used to
+ * clear this return placeholder of the group leader of \var{reg}.
  */
 EXTL_EXPORT_AS(ioncore, detach)
 bool ioncore_detach_extl(WRegion *reg, const char *how)
 {
     if(how==NULL)
         how="set";
+    
+    if(strcmp(how, "forget")==0){
+        region_unset_return(region_groupleader_of(reg));
+        return FALSE;
+    }
     
     return ioncore_detach(reg, libtu_string_to_setparam(how));
 }
