@@ -1,4 +1,16 @@
 
+ion-3rc-20071109
+----------------
+
+It seems people are a bit slow, or only scaring them with a final
+release makes them report issues. So, still no stable release but
+a candidate, with many minor fixes and improvements wrt. important
+omissions. The most important changes are better behaviour of the 
+unsplit operation, better handling of main window being closed
+before a transient, and use of the workspace's working directory
+for run query file name completion.
+
+
 ion-3rc-20070927
 ----------------
 
