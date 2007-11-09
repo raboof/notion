@@ -147,11 +147,13 @@ int main(int argc, char*argv[])
     char *efnam=NULL;
     bool may_continue=FALSE;
     bool noerrorlog=FALSE;
-    char *localedir=ion_prefix(LOCALEDIR);
+    char *localedir;
 
     libtu_init(argv[0]);
     
     get_prefix(argv[0], ION3_LOCATION);
+    
+    localedir=ion_prefix(LOCALEDIR);
     
     if(!ioncore_init("ion3", argc, argv, localedir))
         return EXIT_FAILURE;
