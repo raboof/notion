@@ -2,6 +2,18 @@
 ## System settings
 ##
 
+##
+## Make relocatable binary?
+##
+
+RELOCATABLE=0
+
+ifeq ($(RELOCATABLE),1)
+
+DEFINES += -DCF_RELOCATABLE
+PREFIX=
+
+else
 
 ##
 ## Installation paths
@@ -9,6 +21,8 @@
 
 #DIST: PREFIX=/usr/local
 PREFIX=/usr/local/ion-3
+
+endif
 
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:

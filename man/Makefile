@@ -18,7 +18,13 @@ TARGETS=ion3.1 $(foreach tr, $(TRANSLATIONS), ion3.$(tr).1) \
 	pwm3.1 $(foreach tr, $(TRANSLATIONS), pwm3.$(tr).1) \
 	$(WELCOME_TARGETS)
 
-MKMAN=$(LUA) ../build/mkman.lua
+MKMAN=$(LUA) ../build/mkman.lua $(MKMAN_DEFS)
+MKMAN_DEFS=-D ETCDIR $(REL)$(ETCDIR) -D DOCDIR $(REL)$(DOCDIR)
+
+ifeq ($(RELOCATABLE),1)
+REL="/..."
+endif
+
 NROFF=nroff -man -Tlatin1
 #FILTERCRAP=perl -p -i -e 's/.\10//g'
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
@@ -41,16 +47,16 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 ion3.1: ion3.in $(CONFIGS)
-	$(MKMAN) -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
+	$(MKMAN) -i $< -o $@ $(CONFIGS)
 
 pwm3.1: pwm3.in $(PWM_CONFIGS)
-	$(MKMAN) -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(PWM_CONFIGS)
+	$(MKMAN) -i $< -o $@ $(PWM_CONFIGS)
 
 ion3.%.1: ion3.%.in $(CONFIGS) ../po/%.po
-	$(MKMAN) -po ../po/$*.po -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
+	$(MKMAN) -po ../po/$*.po -i $< -o $@ $(CONFIGS)
 
 pwm3.%.1: pwm3.%.in $(PWM_CONFIGS) ../po/%.po
-	$(MKMAN) -po ../po/$*.po -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(PWM_CONFIGS)
+	$(MKMAN) -po ../po/$*.po -i $< -o $@ $(PWM_CONFIGS)
 
 welcome%txt: welcome%head ion3%1
 	(cat welcome$*head; \
