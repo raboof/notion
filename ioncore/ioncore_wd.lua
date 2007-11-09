@@ -51,7 +51,7 @@ end
 --DOC
 -- Change default working directory for new programs started in \var{reg}.
 function ioncore.chdir_for(reg, dir)
-    assert(type(dir)=="string")
+    assert(dir==nil or type(dir)=="string")
     if dir=="" or dir==nil then
         dirs[reg]=nil
         return true
