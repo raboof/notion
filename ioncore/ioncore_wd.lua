@@ -26,13 +26,12 @@ local function checkdir(d)
             if not d2 then
                 return nil, err
             else
-                print('follow')
                 return checkdir(d2)
             end
         elseif t=="directory" then
             return true
         else
-            return TR("Not a directory.")
+            return nil, TR("Not a directory.")
         end
     end
 end
