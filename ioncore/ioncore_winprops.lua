@@ -92,8 +92,8 @@ function ioncore.match_winprop_dflt(prop, cwin, id)
         if p==nil then
             return true
         else
-            return (p==(i and true)) 
-                           -- hack for nil
+            return (p==(i and true or false)) 
+                           -- hack for nil i
         end
     end
     
