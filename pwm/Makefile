@@ -38,11 +38,12 @@ WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
 
-EXT_OBJS += ../ioncore/ioncore.a
+EXT_OBJS += ../ioncore/ioncore.a ../prefix.o
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
+	   -DPWM3_LOCATION=\"$(BINDIR)/pwm3\"
 
 ifndef PWM_ETCDIR
 PWM_ETCDIR = $(ETCDIR)

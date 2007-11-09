@@ -107,7 +107,9 @@ if test "x$HOME" != x; then
     usercache="$HOME/.ion3/mancache"
 fi
 
-syscache="@VARDIR@/mancache"
+vardir=${ION_VAR_PATH-@VARDIR@}
+syscache="$vardir/mancache"
+
 
 case "$action" in
     complete)
@@ -134,7 +136,7 @@ case "$action" in
         fi
         ;;
     mksyscache)
-        mkdir -p "@VARDIR@"
+        mkdir -p "$vardir"
         scan > "$syscache"
         ;;
 esac

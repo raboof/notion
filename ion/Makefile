@@ -36,11 +36,12 @@ WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
 
-EXT_OBJS += ../ioncore/ioncore.a
+EXT_OBJS += ../ioncore/ioncore.a ../prefix.o
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
+	   -DION3_LOCATION=\"$(BINDIR)/ion3\"
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 

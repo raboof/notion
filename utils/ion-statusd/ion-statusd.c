@@ -29,6 +29,7 @@
 #endif
 
 #include "../../version.h"
+#include "../../prefix.h"
 
 
 static OptParserOpt ion_opts[]={
@@ -159,16 +160,19 @@ int main(int argc, char*argv[])
     configtab=extl_table_none();
     
     libtu_init(argv[0]);
+    
+    get_prefix(argv[0], STATUSD_LOCATION);
+    
     extl_init();
-
+    
     if(!statusd_register_exports())
         return EXIT_FAILURE;
 
-    extl_add_searchdir(EXTRABINDIR);
-    extl_add_searchdir(MODULEDIR);
-    extl_add_searchdir(ETCDIR);
-    extl_add_searchdir(SHAREDIR);
-    extl_add_searchdir(LCDIR);
+    wrap_extl_add_searchdir(EXTRABINDIR);
+    wrap_extl_add_searchdir(MODULEDIR);
+    wrap_extl_add_searchdir(ETCDIR);
+    wrap_extl_add_searchdir(SHAREDIR);
+    wrap_extl_add_searchdir(LCDIR);
     extl_set_userdirs("ion3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);

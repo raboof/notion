@@ -28,6 +28,7 @@
 #include <ioncore/exec.h>
 #include <ioncore/event.h>
 #include "../version.h"
+#include "../prefix.h"
 
 
 /* Options. Getopt is not used because getopt_long is quite gnu-specific
@@ -93,20 +94,26 @@ int main(int argc, char*argv[])
     char *efnam=NULL;
     bool may_continue=FALSE;
     bool noerrorlog=FALSE;
-
+    char *localedir=ion_prefix(LOCALEDIR);
+    
     libtu_init(argv[0]);
+    
+    get_prefix(argv[0], PWM3_LOCATION);
 
-    if(!ioncore_init("pwm3", argc, argv, LOCALEDIR))
+    if(!ioncore_init("pwm3", argc, argv, localedir))
         return EXIT_FAILURE;
 
-    extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
-    extl_add_searchdir(MODULEDIR);
-    extl_add_searchdir(ETCDIR);
+    if(localedir!=NULL)
+        free(localedir);
+    
+    wrap_extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
+    wrap_extl_add_searchdir(MODULEDIR);
+    wrap_extl_add_searchdir(ETCDIR);
 #ifdef PWM_ETCDIR    
-    extl_add_searchdir(PWM_ETCDIR);
+    wrap_extl_add_searchdir(PWM_ETCDIR);
 #endif
-    extl_add_searchdir(SHAREDIR);
-    extl_add_searchdir(LCDIR);
+    wrap_extl_add_searchdir(SHAREDIR);
+    wrap_extl_add_searchdir(LCDIR);
     extl_set_userdirs("pwm3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts);

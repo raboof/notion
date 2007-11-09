@@ -28,6 +28,7 @@
 #include <ioncore/exec.h>
 #include <ioncore/event.h>
 #include "../version.h"
+#include "../prefix.h"
 
 
 /* Options. Getopt is not used because getopt_long is quite gnu-specific
@@ -146,17 +147,23 @@ int main(int argc, char*argv[])
     char *efnam=NULL;
     bool may_continue=FALSE;
     bool noerrorlog=FALSE;
+    char *localedir=ion_prefix(LOCALEDIR);
 
     libtu_init(argv[0]);
-
-    if(!ioncore_init("ion3", argc, argv, LOCALEDIR))
+    
+    get_prefix(argv[0], ION3_LOCATION);
+    
+    if(!ioncore_init("ion3", argc, argv, localedir))
         return EXIT_FAILURE;
+    
+    if(localedir!=NULL)
+        free(localedir);
 
-    extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
-    extl_add_searchdir(MODULEDIR);
-    extl_add_searchdir(ETCDIR);
-    extl_add_searchdir(SHAREDIR);
-    extl_add_searchdir(LCDIR);
+    wrap_extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
+    wrap_extl_add_searchdir(MODULEDIR);
+    wrap_extl_add_searchdir(ETCDIR);
+    wrap_extl_add_searchdir(SHAREDIR);
+    wrap_extl_add_searchdir(LCDIR);
     extl_set_userdirs("ion3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);

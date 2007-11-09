@@ -14,13 +14,16 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
-
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
+           -DSTATUSD_LOCATION=\"$(EXTRABINDIR)/ion-statusd\"
+           
 SOURCES = ion-statusd.c exec.c extlrx.c
 
 TARGETS = ion-statusd
 
 LUA_SOURCES = statusd_date.lua statusd_mail.lua statusd_load.lua
+
+EXT_OBJS = ../../prefix.o
 
 MAKE_EXPORTS = statusd
 
