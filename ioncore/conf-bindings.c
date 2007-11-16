@@ -185,7 +185,7 @@ static bool do_action(WBindmap *bindmap, const char *str,
         binding.func=func;
         if(bindmap_remove_binding(bindmap, &binding))
             return TRUE;
-        warn(TR("Unable to remove binding %s."), str);
+        /*warn(TR("Unable to remove binding %s."), str);*/
     }
 
     return FALSE;
