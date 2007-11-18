@@ -146,7 +146,10 @@ end
 local function save_config()
     local t={}
     for r, d in pairs(dirs) do
-        t[r:name()]=d
+        local nm=obj_exists(r) and r:name()
+        if nm then
+            t[nm]=d
+        end
     end
     ioncore.write_savefile(savefile, t)
 end
