@@ -1,49 +1,45 @@
 
 Copyright (c) Tuomo Valkonen 1999-2007.
 
-The code of this project is "essentially" licensed under the LGPL, version
-2.1, unless otherwise indicated in components taken from elsewhere. It is
-reproduced below. Additionally, the following terms apply to the use of 
-the name of the project, Ion(tm), names of particular "branches" such as
-Ion3(tm), and other derived names, in relation to this software, including
-derived works:
+Unless otherwise indicated in components taken from elsewhere, this project
+is licensed under the LGPL, version 2.1 (reproduced below), extended with 
+the following (copyright and trademark related) terms applying to the use 
+of the name of the project, Ion(tm), names of particular "branches" such 
+as Ion3(tm), and other derived names, in relation to this software, 
+including modified versions:
 
   If the name Ion(tm) or other names that can be associated with the Ion
   project are used to distribute this software, then:
 
     - A version that does not significantly differ from one of the
-      original author's versions must be provided by default. 
+      copyright holder's releases, must be provided by default.
 
-    - When there are no further prominent notices of possible out-datedness, 
-      and no prominent original author's version qualifiers present (resp. 
-      only branch qualifier is present), then the version distributed online
-      may not significantly differ from the original author's latest stable
-      release (resp. latest release on the branch) within a reasonable delay
-      (normally 28 days). The holders of physical distribution media must 
-      be provided ways to upgrade to the latest release within this delay.
+    - Versions older than the copyright holder's latest release (on the
+      corresponding branch) must be prominently marked as (potentially)
+      obsolete and unsupported within 28 days.
 
     - Significantly altered versions may be provided only if the user
       explicitly requests for those modifications to be applied, and 
       is prominently notified that the software is no longer considered 
-      the standard version, and is not supported by the original author. 
+      the standard version, and is not supported by the copyright holder.
       The version string displayed by the program must describe these
       modifications and the "support void" status.
 
-  Derived works that do not satisfy the above terms must be renamed so
+  Modified versions that do not satisfy the above terms must be renamed so
   that they can not be associated with the Ion project, their executables
-  must be given names that do not conflict with the original author's 
+  must be given names that do not conflict with the copyright holder's
   version, and this author may not be referred to for support.
 
-  Modules and other (standalone) extensions to Ion must also be named 
-  so that they can not be confused to be supported by the original
-  author. If "Ion" occurs in the name, it must be in the form
-  "Foo for Ion" instead of "Ion Foo", etc.
+  Modules and other extensions to Ion must also be named so that they 
+  can not be confused to be supported by the copyright holder. If "Ion"
+  occurs in the name, it must be in the form "Foo for Ion" instead of
+  "Ion Foo", etc.
 
-  This name policy notice may not be altered, and must be included in
-  any altered versions and binary redistributions. It may only be
-  removed when using small portions of the code in unrelated projects. 
+  You must keep intact this license and all the notices referring to it,
+  as well as distribute a copy of this license along with all altered
+  versions and binary redistributions.
 
-  The original author and the Ion project retain the same rights to
+  The copyright holder and the Ion project retain the same rights to
   your modifications that it would have under the LGPL or GPL without
   these or similar additional terms.
 
@@ -57,9 +53,9 @@ Basic changes that are needed to install or run the software on a target
 platform are a priori insignificant. Additionally, basic configuration
 changes to better integrate the software with the target platform, 
 without obstructing the standard behaviour, are a priori insignificant.
-Everything else is significant. The author reserves the right to refine
-the definition of significant changes on a per-case basis. Please consult
-when in doubt. 
+Everything else is significant. The copyright holder reserves the right 
+to refine the definition of significant changes on a per-case basis. 
+Please consult when in doubt. 
 
 Distributions: For example, suppose an aggregate distribution of software
 provides an `installpkg` command for installing packages. Then the action
