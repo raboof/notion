@@ -448,7 +448,6 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
 
     param.dockapp=FALSE;
     
-again:
     /* Is the window already being managed? */
     cwin=XWINDOW_REGION_OF_T(win, WClientWin);
     if(cwin!=NULL)
@@ -459,69 +458,87 @@ again:
      */
     xwindow_unmanaged_selectinput(win, StructureNotifyMask);
 
-    
-    /* Is it a dockapp?
-     */
-    hints=XGetWMHints(ioncore_g.dpy, win);
-
-    if(hints!=NULL && hints->flags&StateHint)
-        init_state=hints->initial_state;
-    
-    if(!param.dockapp && init_state==WithdrawnState && 
-       hints->flags&IconWindowHint && hints->icon_window!=None){
-        /* The dockapp might be displaying its "main" window if no
-         * wm that understands dockapps has been managing it.
-         */
-        if(!maprq)
-            XUnmapWindow(ioncore_g.dpy, win);
-        
-        xwindow_unmanaged_selectinput(win, 0);
-        
-        /* Copy WM_CLASS as _ION_DOCKAPP_HACK */
-        {
-            char **p=NULL;
-            int n=0;
-            
-            p=xwindow_get_text_property(win, XA_WM_CLASS, &n);
-            
-            if(p!=NULL){
-                xwindow_set_text_property(hints->icon_window, 
-                                          ioncore_g.atom_dockapp_hack,
-                                          (const char **)p, n);
-                XFreeStringList(p);
-            }else{
-                const char *pdummy[2]={"unknowndockapp", "UnknownDockapp"};
-                xwindow_set_text_property(hints->icon_window, 
-                                          ioncore_g.atom_dockapp_hack,
-                                          pdummy, 2);
-            }
-        }
-        
-        /* It is a dockapp, do everything again from the beginning, now
-         * with the icon window.
-         */
-        win=hints->icon_window;
-        param.dockapp=TRUE;
-        goto again;
-    }
-    
-    if(hints!=NULL)
-        XFree((void*)hints);
-
     if(!XGetWindowAttributes(ioncore_g.dpy, win, &attr)){
         if(maprq)
             warn(TR("Window %#x disappeared."), win);
         goto fail2;
     }
     
-    attr.width=maxof(attr.width, 1);
-    attr.height=maxof(attr.height, 1);
+    /* Is it a dockapp?
+     */
+    hints=XGetWMHints(ioncore_g.dpy, win);
+    
+    if(hints!=NULL){
+        if(hints->flags&StateHint)
+            init_state=hints->initial_state;
+    
+        if(!param.dockapp && init_state==WithdrawnState && 
+           hints->flags&IconWindowHint && hints->icon_window!=None){
+            Window icon_win=hints->icon_window;
+            XWindowAttributes icon_attr;
+            
+            if(!XGetWindowAttributes(ioncore_g.dpy, icon_win, &icon_attr)){
+                if(maprq)
+                    warn(TR("Window %#x disappeared."), win);
+                XFree((void*)hints);
+                goto fail2;
+            }
+             
+            if(!maprq){
+                if(attr.map_state==IsViewable){
+                    /* The dockapp might be displaying its "main" window if no
+                     * wm that understands dockapps has been managing it.
+                     */
+                    XUnmapWindow(ioncore_g.dpy, win);
+                    param.dockapp=TRUE;
+                }else{
+                    /* Main window is unmapped on initial scan, but icon window
+                     * is mapped. Let's hope it's a dockapp left by e.g. us.
+                     */
+                    if(icon_attr.map_state==IsViewable)
+                        param.dockapp=TRUE;
+                }
+            }else{
+                param.dockapp=TRUE;
+            }
 
+            if(param.dockapp){
+                char **p=NULL;
+                int n=0;
+                
+                xwindow_unmanaged_selectinput(win, 0);
+                xwindow_unmanaged_selectinput(icon_win, StructureNotifyMask);
+
+                win=icon_win;
+                attr=icon_attr;
+
+                /* Copy WM_CLASS as _ION_DOCKAPP_HACK */
+
+                p=xwindow_get_text_property(win, XA_WM_CLASS, &n);
+                
+                if(p!=NULL){
+                    xwindow_set_text_property(icon_win, ioncore_g.atom_dockapp_hack,
+                                              (const char **)p, n);
+                    XFreeStringList(p);
+                }else{
+                    const char *pdummy[2]={"unknowndockapp", "UnknownDockapp"};
+                    xwindow_set_text_property(icon_win, ioncore_g.atom_dockapp_hack,
+                                              pdummy, 2);
+                }
+            }
+        }
+        
+        XFree((void*)hints);
+    }
+    
     /* Do we really want to manage it? */
     if(!param.dockapp && (attr.override_redirect || 
         (!maprq && attr.map_state!=IsViewable))){
         goto fail2;
     }
+
+    attr.width=maxof(attr.width, 1);
+    attr.height=maxof(attr.height, 1);
 
     /* Find root window */
     FOR_ALL_ROOTWINS(rootwin){
