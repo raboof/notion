@@ -897,6 +897,8 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
     stdisp->flags|=REGION_SKIP_FOCUS;
     
     fp.g=REGION_GEOM(ws);
+    fp.mode=0;
+    
     sizepolicy(&ws->managed_stdisp->szplcy, stdisp, NULL, 0, &fp);
 
     region_fitrep(stdisp, NULL, &fp);
@@ -935,6 +937,7 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
         fp.mode=REGION_FIT_EXACT;
     }else{
         fp.g=REGION_GEOM(ws);
+        fp.mode=0;
         sizepolicy(&st->szplcy, reg, &rq->geom, rq->flags, &fp);
     }
     

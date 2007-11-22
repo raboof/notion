@@ -163,7 +163,8 @@ void groupcw_toggle_transients_pos(WGroupCW *cwg)
         
         if(st->reg!=NULL){
             WFitParams fp;
-
+            
+            fp.mode=0;
             fp.g=REGION_GEOM(cwg);
             
             sizepolicy(&st->szplcy, st->reg, NULL, 
