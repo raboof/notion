@@ -662,8 +662,10 @@ bool group_do_attach_final(WGroup *ws,
             region_set_focus(st->reg);
         else
             ws->current_managed=st;
+    }else if(region_is_fully_mapped(reg)){
+        region_pointer_focus_hack(reg);
     }
-    
+
     return TRUE;
 }
 

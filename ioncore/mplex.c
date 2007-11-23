@@ -1325,7 +1325,11 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
              * client windows still..)
              */
             mplex_refocus(mplex, NULL, FALSE);
+        }else if(!hidden){
+            region_pointer_focus_hack(reg);
         }
+    }else if(!hidden){
+        region_pointer_focus_hack(reg);
     }
     
     if(lnode!=NULL)
