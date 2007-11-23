@@ -14,9 +14,9 @@ including modified versions:
     - A version that does not significantly differ from one of the
       copyright holder's releases, must be provided by default.
 
-    - Versions older than the copyright holder's latest release (on the
-      corresponding branch) must be prominently marked as (potentially)
-      obsolete and unsupported within 28 days.
+    - Versions not based on the copyright holder's latest release (on the
+      corresponding branch), must within 28 days be prominently marked as
+      (potentially) obsolete and unsupported.
 
     - Significantly altered versions may be provided only if the user
       explicitly requests for those modifications to be applied, and 
