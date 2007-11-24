@@ -14,9 +14,9 @@ including modified versions:
     - A version that does not significantly differ from one of the
       copyright holder's releases, must be provided by default.
 
-    - Versions not based on the copyright holder's latest release (on the
-      corresponding branch), must within 28 days be prominently marked as
-      (potentially) obsolete and unsupported.
+    - Versions not based on the copyright holder's latest release (on 
+      the corresponding branch), must within 28 days of this release,
+      be prominently marked as (potentially) obsolete and unsupported.
 
     - Significantly altered versions may be provided only if the user
       explicitly requests for those modifications to be applied, and 
@@ -25,26 +25,22 @@ including modified versions:
       The version string displayed by the program must describe these
       modifications and the "support void" status.
 
-  Modified versions that do not satisfy the above terms must be renamed so
-  that they can not be associated with the Ion project, their executables
-  must be given names that do not conflict with the copyright holder's
-  version, and this author may not be referred to for support.
+  Versions for which the above conditions are not satisfied, must be
+  renamed so that they can not be associated with the Ion project, their
+  executables must be given names that do not conflict with the copyright
+  holder's version, and this author may not be referred to for support.
 
   Modules and other extensions to Ion must also be named so that they 
   can not be confused to be supported by the copyright holder. If "Ion"
   occurs in the name, it must be in the form "Foo for Ion" instead of
   "Ion Foo", etc.
 
-  You must keep intact this license and all the notices referring to it,
-  as well as distribute a copy of this license along with all altered
-  versions and binary redistributions.
+  In the text of sections 0-2, 4-12, and 14-16 of the LGPL, "this License" 
+  is to be understood to refer to the LGPL extended with these terms and,
+  where applicable, possible similar terms related to the names of other
+  works forming a whole. Sections 3 and 13 of the LGPL are void. Where
+  contradictory, these additional terms are primary to the LGPL.
 
-  The copyright holder and the Ion project retain the same rights to
-  your modifications that it would have under the LGPL or GPL without
-  these or similar additional terms.
-
-  If you fail to follow these terms, you lose the rights granted to
-  you by the LGPL.
 
 Explanations:
 
@@ -59,13 +55,13 @@ Please consult when in doubt.
 
 Distributions: For example, suppose an aggregate distribution of software
 provides an `installpkg` command for installing packages. Then the action
-`installpkg ion3` (resp. `installpkg ion`) should within a reasonable 
-delay install the latest release of Ion3 (resp. the latest stable release),
-or prominently notify the user that the provided version is not or may not
-be the latest. The action `installpkg ion-3ds-20070318` may at any date 
-install this particular mentioned release. Likewise, the action `installpkg
---support-void-featurex ion3` may apply additional patches to the latest
-Ion3, within the further constraints set above.
+`installpkg ion3` (resp. `installpkg ion`) should after 28 days provide the
+latest release of Ion3 (resp. the latest stable release), or prominently 
+notify the user that the provided version is (likely to be) obsolete and
+unsupported. Specific versions (including modified versions) may be provided
+if the user explicitly requests for those, within the constraints set above.
+The latest release being provided by default, or prominently appearing in
+a listing, constitutes prominent marking of earlier releases as obsolete.
 
 The intent of these terms is to curb the power that "distributions", as
 the primary sources of software for many users, have in defining what
