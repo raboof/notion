@@ -1,12 +1,16 @@
 
 Copyright (c) Tuomo Valkonen 1999-2007.
 
-Unless otherwise indicated in components taken from elsewhere, this project
-is licensed under the LGPL, version 2.1 (reproduced below), extended with 
-the following (copyright and trademark related) terms applying to the use 
-of the name of the project, Ion(tm), names of particular "branches" such 
-as Ion3(tm), and other derived names, in relation to this software, 
-including modified versions:
+Unless otherwise indicated in components taken from elsewhere, this software
+is licensed under the GNU Lesser General Public License, version 2.1 ("LGPL",
+reproduced below), extended with the following terms governing the use of
+the name of the project, Ion(tm), the names of particular "branches", such
+as Ion3(tm), and other derived names, in relation to redistribution of this
+software, including modifications. (The use of these names in other contexts
+is outside the scope of this license and governed by trademark or other
+applicable laws. With this license primarily appealing to copyright law,
+should any of these trademarks be found invalid, does not excuse you from
+the conditions imposed herein.)
 
   If the name Ion(tm) or other names that can be associated with the Ion
   project are used to distribute this software, then:
