@@ -117,9 +117,10 @@ static WRegion *check_mplex(WRegion *reg, WFrameMode *mode)
         
     *mode=FRAME_MODE_FLOATING;
     
-    if(OBJ_IS(mplex, WFrame)
-       && frame_mode((WFrame*)mplex)==FRAME_MODE_TRANSIENT){
-        *mode=FRAME_MODE_TRANSIENT;
+    if(OBJ_IS(mplex, WFrame)){
+        WFrameMode mode2=frame_mode((WFrame*)mplex);
+        if(framemode_unalt(mode2)==FRAME_MODE_TRANSIENT)
+            *mode=mode2;
     }
     
     return (WRegion*)mplex;

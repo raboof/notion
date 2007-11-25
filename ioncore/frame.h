@@ -39,7 +39,10 @@ typedef enum{
     FRAME_MODE_TILED,
     FRAME_MODE_TILED_ALT,
     FRAME_MODE_FLOATING,
-    FRAME_MODE_TRANSIENT
+    FRAME_MODE_TRANSIENT,
+    FRAME_MODE_UNKNOWN_ALT,
+    FRAME_MODE_FLOATING_ALT,
+    FRAME_MODE_TRANSIENT_ALT
 } WFrameMode;
 
 typedef enum{
@@ -131,5 +134,7 @@ extern WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 extern void frame_do_load(WFrame *frame, ExtlTab tab);
 
 extern WHook *frame_managed_changed_hook;
+
+extern WFrameMode framemode_unalt(WFrameMode mode);
 
 #endif /* ION_IONCORE_FRAME_H */

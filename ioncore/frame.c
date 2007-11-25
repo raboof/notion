@@ -50,11 +50,32 @@ static void frame_add_mode_bindmaps(WFrame *frame);
 
 WHook *frame_managed_changed_hook=NULL;
 
-#define IS_FLOATING_MODE(FRAME) \
-    ((FRAME)->mode==FRAME_MODE_FLOATING || (FRAME)->mode==FRAME_MODE_TRANSIENT)
-#define FORWARD_CWIN_RQGEOM(FRAME) IS_FLOATING_MODE(FRAME)
-#define USE_MINMAX(FRAME) IS_FLOATING_MODE(FRAME)
-#define DEST_EMPTY(FRAME) IS_FLOATING_MODE(FRAME)
+#define FORWARD_CWIN_RQGEOM(FRAME) framemode_is_floating(frame_mode(FRAME))
+#define USE_MINMAX(FRAME) framemode_is_floating(frame_mode(FRAME))
+#define DEST_EMPTY(FRAME) framemode_is_floating(frame_mode(FRAME))
+
+
+WFrameMode framemode_unalt(WFrameMode mode)
+{
+    if(mode==FRAME_MODE_UNKNOWN_ALT)
+        return FRAME_MODE_UNKNOWN;
+    else if(mode==FRAME_MODE_TILED_ALT)
+        return FRAME_MODE_TILED;
+    else if(mode==FRAME_MODE_FLOATING_ALT)
+        return FRAME_MODE_FLOATING;
+    else if(mode==FRAME_MODE_TRANSIENT_ALT)
+        return FRAME_MODE_TRANSIENT;
+    else
+        return mode;
+}
+
+
+static WFrameMode framemode_is_floating(WFrameMode mode)
+{
+    WFrameMode modea=framemode_unalt(mode);
+    
+    return (modea==FRAME_MODE_FLOATING || modea==FRAME_MODE_TRANSIENT);
+}
 
 
 /*{{{ Destroy/create frame */
@@ -130,13 +151,13 @@ void frame_deinit(WFrame *frame)
 
 static void frame_add_mode_bindmaps(WFrame *frame)
 {
-    WFrameMode mode=frame->mode;
+    WFrameMode modea=framemode_unalt(frame->mode);
     
-    if(mode==FRAME_MODE_FLOATING){
+    if(modea==FRAME_MODE_FLOATING){
 	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
 	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
-    }else if(mode==FRAME_MODE_TRANSIENT){
+    }else if(modea==FRAME_MODE_TRANSIENT){
         region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else{
@@ -181,12 +202,15 @@ WFrameMode frame_mode(WFrame *frame)
 }
 
 
-StringIntMap frame_modes[]={
+static StringIntMap frame_modes[]={
     {"unknown", FRAME_MODE_UNKNOWN},
+    {"unknown-alt", FRAME_MODE_UNKNOWN_ALT},
     {"tiled", FRAME_MODE_TILED},
     {"tiled-alt", FRAME_MODE_TILED_ALT},
     {"floating", FRAME_MODE_FLOATING},
+    {"floating-alt", FRAME_MODE_FLOATING_ALT},
     {"transient", FRAME_MODE_TRANSIENT},
+    {"transient-alt", FRAME_MODE_TRANSIENT_ALT},
     END_STRINGINTMAP
 };
 
@@ -203,7 +227,9 @@ const char *frame_mode_extl(WFrame *frame)
 
 
 /*EXTL_DOC
- * Set frame mode.
+ * Set frame mode (one of
+ * \codestr{unknown}, \codestr{tiled}, \codestr{floating}, \codestr{transient},
+ * or any of these suffixed with \codestr{-alt}).
  */
 EXTL_EXPORT_AS(WFrame, set_mode)
 bool frame_set_mode_extl(WFrame *frame, const char *modestr)
@@ -953,7 +979,7 @@ WPHolder *frame_prepare_manage_transient(WFrame *frame,
     /* Transient manager searches should not cross tiled frames
      * unless explicitly floated.
      */
-    if(IS_FLOATING_MODE(frame) ||
+    if(framemode_is_floating(frame_mode(frame)) ||
        extl_table_is_bool_set(transient->proptab, "float")){
         return region_prepare_manage_transient_default((WRegion*)frame,
                                                        transient,

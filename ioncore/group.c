@@ -531,8 +531,7 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     
     frame=OBJ_CAST(reg, WFrame);
     if(frame!=NULL){
-        WFrameMode m=frame_mode(frame);
-        if(m==FRAME_MODE_TILED || m==FRAME_MODE_TILED_ALT)
+        if(framemode_unalt(frame_mode(frame))==FRAME_MODE_TILED)
             frame_set_mode(frame, FRAME_MODE_FLOATING);
     }
 

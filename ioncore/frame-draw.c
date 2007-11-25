@@ -371,19 +371,21 @@ void frame_draw(const WFrame *frame, bool complete)
 
 void frame_brushes_updated(WFrame *frame)
 {
-    WFrameBarMode barmode=FRAME_BAR_INSIDE;
+    WFrameBarMode barmode;
     ExtlTab tab;
     char *s;
 
     if(frame->brush==NULL)
         return;
     
-    if(frame->mode==FRAME_MODE_FLOATING)
+    if(frame->mode==FRAME_MODE_FLOATING){
         barmode=FRAME_BAR_SHAPED;
-    else if(frame->mode==FRAME_MODE_TRANSIENT)
+    }else if(frame->mode==FRAME_MODE_TILED || frame->mode==FRAME_MODE_UNKNOWN ||
+            frame->mode==FRAME_MODE_TRANSIENT_ALT){
+        barmode=FRAME_BAR_INSIDE;
+    }else{
         barmode=FRAME_BAR_NONE;
-    else if(frame->mode==FRAME_MODE_TILED_ALT)
-        barmode=FRAME_BAR_NONE;
+    }
     
     if(grbrush_get_extra(frame->brush, "bar", 's', &s)){
         if(strcmp(s, "inside")==0)
@@ -450,11 +452,15 @@ void frame_updategr(WFrame *frame)
 }
 
 
-StringIntMap frame_tab_styles[]={
+static StringIntMap frame_tab_styles[]={
+    {"tab-frame-unknown", FRAME_MODE_UNKNOWN},
+    {"tab-frame-unknown-alt", FRAME_MODE_UNKNOWN_ALT},
     {"tab-frame-tiled", FRAME_MODE_TILED},
     {"tab-frame-tiled-alt", FRAME_MODE_TILED_ALT},
     {"tab-frame-floating", FRAME_MODE_FLOATING},
+    {"tab-frame-floating-alt", FRAME_MODE_FLOATING_ALT},
     {"tab-frame-transient", FRAME_MODE_TRANSIENT},
+    {"tab-frame-transient-alt", FRAME_MODE_TRANSIENT_ALT},
     END_STRINGINTMAP
 };
 
