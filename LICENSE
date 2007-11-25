@@ -12,7 +12,7 @@ reproduced below), extended and modified with the following terms:
       copyright holder's releases, must be provided by default.
 
     - Versions not based on the copyright holder's latest release (on 
-      the corresponding branch, such as Ion3(tm)), must within 28 days
+      the corresponding "branch", such as Ion3(tm)), must within 28 days
       of this release, be prominently marked as (potentially) obsolete
       and unsupported.
 
@@ -50,7 +50,8 @@ trademark or other laws.
   With regard to modules and other extensions to Ion(tm), the permission
   is hereby granted to use "Ion" as part of the name, provided that it
   occurs in a form suggesting that the work is supported by neither the
-  copyright nor the Ion project: "Foo for Ion" instead of "Ion Foo", etc.
+  copyright holder nor the Ion project: "Foo for Ion" instead of "Ion Foo",
+  etc.
 
 Significant change: Bug fixes are a priori insignificant as additions. 
 Basic changes that are needed to install or run the software on a target
