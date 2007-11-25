@@ -19,17 +19,17 @@ de.defstyle("frame-tiled", {
     spacing = 1,
 })
 
-de.defstyle("frame-tiled-alt", {
-    bar = "none",
-})
+--de.defstyle("frame-tiled-alt", {
+--    bar = "none",
+--})
 
 de.defstyle("frame-floating", {
-    bar = "shaped",
+    --bar = "shaped",
     padding_pixels = 0,
 })
 
 de.defstyle("frame-transient", {
-    bar = "none",
+    --bar = "none",
     padding_pixels = 0,
 })
 
