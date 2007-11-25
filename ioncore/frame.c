@@ -170,7 +170,7 @@ void frame_set_mode(WFrame *frame, WFrameMode mode)
     frame_initialise_gr(frame);
     
     mplex_fit_managed(&frame->mplex);
-    frame_recalc_bar(frame);
+    frame_recalc_bar(frame, TRUE);
     frame_set_background(frame, TRUE);
 }
 
@@ -386,7 +386,7 @@ static bool frame_initialise_titles(WFrame *frame)
         }
     }
     
-    frame_recalc_bar(frame);
+    frame_recalc_bar(frame, FALSE);
 
     return TRUE;
 }
@@ -868,7 +868,7 @@ void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
        how==ioncore_g.notifies.tag){
        
         frame_update_attrs(frame);
-        frame_recalc_bar(frame);
+        frame_recalc_bar(frame, FALSE);
         frame_draw_bar(frame, FALSE);
     }
 }
@@ -880,7 +880,7 @@ static void frame_size_changed_default(WFrame *frame,
     int bar_w=frame->bar_w;
     
     if(wchg)
-        frame_recalc_bar(frame);
+        frame_recalc_bar(frame, TRUE);
     
     if(frame->barmode==FRAME_BAR_SHAPED &&
        ((!wchg && hchg) || (wchg && bar_w==frame->bar_w))){

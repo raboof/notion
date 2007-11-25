@@ -214,7 +214,7 @@ void frame_clear_shape(WFrame *frame)
 #define CF_TAB_MAX_TEXT_X_OFF 10
 
 
-static void frame_shaped_recalc_bar_size(WFrame *frame)
+static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
 {
     int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
     WLListIterTmp itmp;
@@ -268,7 +268,7 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
             bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
     }
 
-    if(frame->bar_w!=bar_w){
+    if(complete || frame->bar_w!=bar_w){
         frame->bar_w=bar_w;
         frame_set_shape(frame);
     }
@@ -290,7 +290,7 @@ static int init_title(WFrame *frame, int i)
 }
 
 
-void frame_recalc_bar(WFrame *frame)
+void frame_recalc_bar(WFrame *frame, bool complete)
 {
     int textw, i;
     WLListIterTmp tmp;
@@ -301,7 +301,7 @@ void frame_recalc_bar(WFrame *frame)
         return;
     
     if(frame->barmode==FRAME_BAR_SHAPED)
-        frame_shaped_recalc_bar_size(frame);
+        frame_shaped_recalc_bar_size(frame, complete);
     
     i=0;
     
@@ -445,7 +445,7 @@ void frame_updategr(WFrame *frame)
     region_updategr_default((WRegion*)frame);
     
     mplex_fit_managed(&frame->mplex);
-    frame_recalc_bar(frame);
+    frame_recalc_bar(frame, TRUE);
     frame_set_background(frame, TRUE);
 }
 

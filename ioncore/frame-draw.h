@@ -14,7 +14,7 @@
 
 extern void frame_draw(const WFrame *frame, bool complete);
 extern void frame_draw_bar(const WFrame *frame, bool complete);
-extern void frame_recalc_bar(WFrame *frame);
+extern void frame_recalc_bar(WFrame *frame, bool complete);
 extern void frame_bar_geom(const WFrame *frame, WRectangle *geom);
 extern void frame_border_geom(const WFrame *frame, WRectangle *geom);
 extern void frame_border_inner_geom(const WFrame *frame, WRectangle *geom);
