@@ -3,14 +3,7 @@ Copyright (c) Tuomo Valkonen 1999-2007.
 
 Unless otherwise indicated in components taken from elsewhere, this software
 is licensed under the GNU Lesser General Public License, version 2.1 ("LGPL",
-reproduced below), extended with the following terms governing the use of
-the name of the project, Ion(tm), the names of particular "branches", such
-as Ion3(tm), and other derived names, in relation to redistribution of this
-software, including modifications. (The use of these names in other contexts
-is outside the scope of this license and governed by trademark or other
-applicable laws. With this license primarily appealing to copyright law,
-should any of these trademarks be found invalid, does not excuse you from
-the conditions imposed herein.)
+reproduced below), extended and modified with the following terms:
 
   If the name Ion(tm) or other names that can be associated with the Ion
   project are used to distribute this software, then:
@@ -19,8 +12,9 @@ the conditions imposed herein.)
       copyright holder's releases, must be provided by default.
 
     - Versions not based on the copyright holder's latest release (on 
-      the corresponding branch), must within 28 days of this release,
-      be prominently marked as (potentially) obsolete and unsupported.
+      the corresponding branch, such as Ion3(tm)), must within 28 days
+      of this release, be prominently marked as (potentially) obsolete
+      and unsupported.
 
     - Significantly altered versions may be provided only if the user
       explicitly requests for those modifications to be applied, and 
@@ -32,12 +26,8 @@ the conditions imposed herein.)
   Versions for which the above conditions are not satisfied, must be
   renamed so that they can not be associated with the Ion project, their
   executables must be given names that do not conflict with the copyright
-  holder's version, and this author may not be referred to for support.
-
-  Modules and other extensions to Ion must also be named so that they 
-  can not be confused to be supported by the copyright holder. If "Ion"
-  occurs in the name, it must be in the form "Foo for Ion" instead of
-  "Ion Foo", etc.
+  holder's version, and neither the copyright holder nor the Ion project
+  may be referred to for support.
 
   In the text of sections 0-2, 4-12, and 14-16 of the LGPL, "this License" 
   is to be understood to refer to the LGPL extended with these terms and,
@@ -45,8 +35,22 @@ the conditions imposed herein.)
   works forming a whole. Sections 3 and 13 of the LGPL are void. Where
   contradictory, these additional terms are primary to the LGPL.
 
+End of terms.
 
-Explanations:
+
+Explanations
+
+Trademarks: With the terms above primarily appealing to copyright law,
+should any of the indicated trademarks be found invalid, does not excuse
+you from the conditions imposed by those terms. The use of these names
+in contexts other than redistribution of this software and modifications,
+is outside the scope of the terms above, and governed by applicable
+trademark or other laws. 
+
+  With regard to modules and other extensions to Ion(tm), the permission
+  is hereby granted to use "Ion" as part of the name, provided that it
+  occurs in a form suggesting that the work is supported by neither the
+  copyright nor the Ion project: "Foo for Ion" instead of "Ion Foo", etc.
 
 Significant change: Bug fixes are a priori insignificant as additions. 
 Basic changes that are needed to install or run the software on a target
