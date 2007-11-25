@@ -6,6 +6,8 @@
  * See the included file LICENSE for details.
  */
 
+#include <string.h>
+
 #include <libtu/objp.h>
 #include <libtu/setparam.h>
 #include <libtu/minmax.h>
