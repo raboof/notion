@@ -86,6 +86,7 @@ end
 local function lookup_runinxterm_warn(prog, title, wait)
     local rx=lookup_script_warn("ion-runinxterm")
     if rx then
+        rx="exec "..rx
         if wait then
             rx=rx.." -w"
         end
