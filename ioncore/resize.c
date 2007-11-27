@@ -139,14 +139,14 @@ static void moveres_draw_infowin(WMoveresMode *mode)
         w=mode->geom.w;
         h=mode->geom.h;
         
-        if((mode->hints.inc_set) &&
-           (mode->hints.width_inc>1 || mode->hints.height_inc>1)){
-            if(mode->hints.base_set){
-                w-=mode->hints.base_width;
-                h-=mode->hints.base_height;
-            }
-            w/=mode->hints.width_inc;
-            h/=mode->hints.height_inc;
+        if(mode->hints.base_set){
+            w=maxof(0, w-mode->hints.base_width);
+            h=maxof(0, h-mode->hints.base_height);
+        }
+        
+        if(mode->hints.inc_set){
+            w/=maxof(1, mode->hints.width_inc);
+            h/=maxof(1, mode->hints.height_inc);
         }
         
         snprintf(buf, INFOWIN_BUFFER_LEN, "%dx%d", w, h);

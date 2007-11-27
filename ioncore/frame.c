@@ -479,34 +479,34 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
     hoff=maxof(REGION_GEOM(frame).h-subgeom.h, 0);
 
-    if(FRAME_CURRENT(frame)!=NULL){
+    if(FRAME_CURRENT(frame)!=NULL)
         region_size_hints(FRAME_CURRENT(frame), hints_ret);
-        if(!USE_MINMAX(frame)){
-            hints_ret->max_set=0;
-            hints_ret->min_set=0;
-            /*hints_ret->base_set=0;*/
-            hints_ret->aspect_set=0;
-            hints_ret->no_constrain=FALSE;
-            /*hints_ret->no_constrain=TRUE;*/
-        }
-    }else{
+    else
         sizehints_clear(hints_ret);
-    }
     
     FRAME_MX_FOR_ALL(sub, frame, tmp){
         sizehints_adjust_for(hints_ret, sub);
+    }
+    
+    if(!USE_MINMAX(frame)){
+        hints_ret->max_set=0;
+        hints_ret->min_set=0;
+        /*hints_ret->base_set=0;*/
+        hints_ret->aspect_set=0;
+        hints_ret->no_constrain=FALSE;
+        /*hints_ret->no_constrain=TRUE;*/
+    }
+    
+    if(!hints_ret->min_set){
+        hints_ret->min_width=0;
+        hints_ret->min_height=0;
+        hints_ret->min_set=TRUE;
     }
     
     if(!hints_ret->base_set){
         hints_ret->base_width=0;
         hints_ret->base_height=0;
         hints_ret->base_set=TRUE;
-    }
-
-    if(!hints_ret->min_set){
-        hints_ret->min_width=0;
-        hints_ret->min_height=0;
-        hints_ret->min_set=TRUE;
     }
     
     hints_ret->base_width+=woff;
