@@ -249,10 +249,9 @@ static bool moveresmode_init(WMoveresMode *mode, WRegion *reg,
         if(mgr==(WRegion*)parent){
             mode->snapgeom.x=0;
             mode->snapgeom.y=0;    
-            mode->snap_enabled=FALSE;
-        }else if(REGION_PARENT(mgr)==parent){
-            mode->snap_enabled=TRUE;
+            /*mode->snap_enabled=FALSE;*/
         }
+        mode->snap_enabled=TRUE;
     }
     
     if(!mode->hints.min_set || mode->hints.min_width<1)
@@ -341,12 +340,19 @@ static void moveresmode_do_newgeom(WMoveresMode *mode, WRQGeomParams *rq)
 }
 
 
+static int clamp_up(int t, int low, int high)
+{
+    return (t < high && t > low ? high : t);
+}
+
+    
 static void moveresmode_delta(WMoveresMode *mode, 
                               int dx1, int dx2, int dy1, int dy2,
                               WRectangle *rret)
 {
     int realdx1, realdx2, realdy1, realdy2;
     WRQGeomParams rq=RQGEOMPARAMS_INIT;
+    int er=CF_EDGE_RESISTANCE;
     int w=0, h=0;
     
     realdx1=(mode->dx1+=dx1);
@@ -358,7 +364,6 @@ static void moveresmode_delta(WMoveresMode *mode,
     /* snap */
     if(mode->snap_enabled){
         WRectangle *sg=&mode->snapgeom;
-        int er=CF_EDGE_RESISTANCE;
         
         if(mode->dx1!=0 && rq.geom.x+mode->dx1<sg->x && rq.geom.x+mode->dx1>sg->x-er)
             realdx1=sg->x-rq.geom.x;
@@ -370,14 +375,15 @@ static void moveresmode_delta(WMoveresMode *mode,
             realdy2=sg->y+sg->h-rq.geom.y-rq.geom.h;
     }
     
-    w=mode->origgeom.w-realdx1+realdx2;
-    h=mode->origgeom.h-realdy1+realdy2;
+    w=maxof(1, mode->origgeom.w-realdx1+realdx2);
+    h=maxof(1, mode->origgeom.h-realdy1+realdy2);
+        
+    if(mode->snap_enabled && mode->hints.base_set){
+        w=clamp_up(w, mode->hints.base_width-er, mode->hints.base_width);
+        h=clamp_up(h, mode->hints.base_height-er, mode->hints.base_height);
+    }
     
-    if(w<=0)
-        w=mode->hints.min_width;
-    if(h<=0)
-        h=mode->hints.min_height;
-    
+    /* Correct size */
     sizehints_correct(&mode->hints, &w, &h, TRUE, TRUE);
     
     /* Do not modify coordinates and sizes that were not requested to be
