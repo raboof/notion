@@ -70,6 +70,7 @@ static ExtlFn get_layout_fn;
  *  \var{kbresize_t_min} & (integer) See below. \\
  *  \var{kbresize_step} & (floating point) See below. \\
  *  \var{kbresize_maxacc} & (floating point) See below. \\
+ *  \var{edge_resistance} & (integer) Resize edge resistance in pixels. \\
  *  \var{framed_transients} & (boolean) Put transients in nested frames. \\
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of \codestr{udlr} (up-down, then left-right), 

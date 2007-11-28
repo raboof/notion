@@ -33,6 +33,8 @@ static int last_accel_mode=0;
 static double accel=1, accelinc=30, accelmax=100*100;
 static long actmax=200, uptmin=50;
 static int resize_delay=CF_RESIZE_DELAY;
+/* Here to not have to write other set callback for resize code... */
+int ioncore_edge_resistance=CF_EDGE_RESISTANCE;
 
 
 static void accel_reset()
@@ -46,7 +48,7 @@ static void accel_reset()
 
 void ioncore_set_moveres_accel(ExtlTab tab)
 {
-    int t_max, t_min, rd;
+    int t_max, t_min, rd, er;
     double step, maxacc;
     
     if(extl_table_gets_i(tab, "kbresize_t_max", &t_max))
@@ -59,6 +61,8 @@ void ioncore_set_moveres_accel(ExtlTab tab)
        accelmax=(maxacc>0 ? maxacc*maxacc : 1);
     if(extl_table_gets_i(tab, "kbresize_delay", &rd))
         resize_delay=maxof(0, rd);
+    if(extl_table_gets_i(tab, "edge_resistance", &er))
+        ioncore_edge_resistance=maxof(0, er);
 }
 
 
@@ -69,6 +73,7 @@ void ioncore_get_moveres_accel(ExtlTab tab)
     extl_table_sets_d(tab, "kbresize_step", accelinc);
     extl_table_sets_d(tab, "kbresize_maxacc", accelmax);
     extl_table_sets_d(tab, "kbresize_delay", resize_delay);
+    extl_table_sets_i(tab, "edge_resistance", ioncore_edge_resistance);
 }
 
 

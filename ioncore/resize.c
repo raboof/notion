@@ -30,6 +30,9 @@
 #define XOR_RESIZE (!ioncore_g.opaque_resize)
 
 
+extern int ioncore_edge_resistance;
+
+
 /*{{{ Size/position display and rubberband */
 
 
@@ -352,7 +355,7 @@ static void moveresmode_delta(WMoveresMode *mode,
 {
     int realdx1, realdx2, realdy1, realdy2;
     WRQGeomParams rq=RQGEOMPARAMS_INIT;
-    int er=CF_EDGE_RESISTANCE;
+    int er=ioncore_edge_resistance;
     int w=0, h=0;
     
     realdx1=(mode->dx1+=dx1);
