@@ -233,17 +233,6 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
     if(reg==NULL)
         return FALSE;
 
-    if(ev->subwindow!=None){
-        XButtonEvent ev2=*ev;
-        ev2.window=ev->subwindow;
-        if(XTranslateCoordinates(ioncore_g.dpy, ev->window, ev2.window,
-                                 ev->x, ev->y, &(ev2.x), &(ev2.y),
-                                 &(ev2.subwindow))){
-            if(ioncore_do_handle_buttonpress(&ev2))
-                return TRUE;
-        }
-    }
-
     dblclick=(p_clickcnt==1 && time_in_threshold(ev->time) && 
               p_button==button && p_state==state && reg==p_reg);
     
