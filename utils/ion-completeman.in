@@ -113,9 +113,7 @@ case "$action" in
     complete)
         if test "x$usercache" != x -a -f "$usercache"; then
             cachefile="$usercache"
-        fi
-        
-        if test -f "$syscache"; then
+        elif test -f "$syscache"; then
             cachefile="$syscache"
         fi
         
