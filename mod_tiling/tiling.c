@@ -478,7 +478,7 @@ bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
     
     frame=OBJ_CAST(reg, WFrame);
     if(frame!=NULL){
-        if(framemode_unalt(frame_mode(frame))==FRAME_MODE_TILED)
+        if(framemode_unalt(frame_mode(frame))!=FRAME_MODE_TILED)
             frame_set_mode(frame, FRAME_MODE_TILED);
     }
     
