@@ -381,7 +381,7 @@ void binding_grab_on(const WBinding *binding, Window win)
        binding->act!=BINDING_BUTTONMOTION)
         return;
     
-    if(binding->state==0)
+    if(binding->state==0 || binding->area!=0)
         return;
     
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
@@ -412,7 +412,7 @@ void binding_ungrab_on(const WBinding *binding, Window win)
        binding->act!=BINDING_BUTTONMOTION)
         return;
     
-    if(binding->state==0)
+    if(binding->state==0 || binding->area!=0)
         return;
 
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS

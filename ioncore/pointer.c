@@ -217,13 +217,30 @@ static void pointer_grab_killed(WRegion *unused)
 }
 
 
-bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
+static bool listens_to(WRegion *reg, uint state, uint button, int area)
+{
+    static const int acts[]={BINDING_BUTTONMOTION, BINDING_BUTTONCLICK, 
+                             BINDING_BUTTONDBLCLICK};
+    static const int n_acts=3;
+    int i;
+    
+    for(i=0; i<n_acts; i++){
+        if(region_lookup_binding(reg, acts[i], state, button, area))
+            return TRUE;
+    }
+    
+    return FALSE;
+}
+
+
+static bool ioncore_dodo_handle_buttonpress(XButtonEvent *ev, bool sub)
 {
     WBinding *pressbind=NULL;
     WRegion *reg=NULL;
     WRegion *subreg=NULL;
     uint button, state;
     bool dblclick;
+    int area;
     
     state=ev->state;
     button=ev->button;
@@ -232,20 +249,37 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
     
     if(reg==NULL)
         return FALSE;
-
-    if(ev->subwindow!=None){
-        XButtonEvent ev2=*ev;
-        ev2.window=ev->subwindow;
-        if(XTranslateCoordinates(ioncore_g.dpy, ev->window, ev2.window,
-                                 ev->x, ev->y, &(ev2.x), &(ev2.y),
-                                 &(ev2.subwindow))){
-            if(ioncore_do_handle_buttonpress(&ev2))
-                return TRUE;
-        }
-    }
-
+    
     dblclick=(p_clickcnt==1 && time_in_threshold(ev->time) && 
-              p_button==button && p_state==state && reg==p_reg);
+              p_button==button && p_state==state);
+    
+    if(dblclick && p_reg!=reg){
+        if(sub)
+            return FALSE;
+        dblclick=FALSE;
+    }
+    
+    subreg=region_current(reg);
+    area=window_press((WWindow*)reg, ev, &subreg);
+    
+    if(dblclick){
+        pressbind=region_lookup_binding(reg, BINDING_BUTTONDBLCLICK, state,
+                                             button, area);
+    }
+    
+    if(pressbind==NULL){
+        pressbind=region_lookup_binding(reg, BINDING_BUTTONPRESS, state,
+                                             button, area);
+    }
+    
+    if(pressbind==NULL && sub){
+        /* If subwindow doesn't listen to state/button(/area) at all, return and
+         * let the parent that has the event grabbed, handle it. Otherwise we 
+         * fully block the parent.
+         */
+        if(!dblclick && !listens_to(reg, state, button, area))
+            return FALSE;
+    }
     
     p_motion=FALSE;
     p_motion_begin_handler=NULL;
@@ -260,30 +294,41 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
     p_orig_y=p_y=ev->y_root;
     p_time=ev->time;
     p_clickcnt=0;
-
-    watch_setup(&p_regwatch, (Obj*)reg, NULL);
+    p_area=area;
     
-    subreg=region_current(reg);
-    p_area=window_press((WWindow*)reg, ev, &subreg);
+    watch_setup(&p_regwatch, (Obj*)reg, NULL);
     if(subreg!=NULL)
         watch_setup(&p_subregwatch, (Obj*)subreg, NULL);
 
-    if(dblclick){
-        pressbind=region_lookup_binding(reg, BINDING_BUTTONDBLCLICK, state,
-                                             button, p_area);
-    }
-    
-    if(pressbind==NULL){
-        pressbind=region_lookup_binding(reg, BINDING_BUTTONPRESS, state,
-                                             button, p_area);
-    }
-    
     ioncore_grab_establish(reg, handle_key, pointer_grab_killed, 0);
     p_grabstate=ST_HELD;
     
-    call_button(pressbind, ev);
+    if(pressbind!=NULL)
+        call_button(pressbind, ev);
     
     return TRUE;
+}
+
+
+bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
+{
+    /* Only one level of subwindows is supported... more would require
+     * searching through the trees thanks to grabbed events being reported
+     * relative to the outermost grabbing window.
+     */
+    if(ev->subwindow!=None && ev->state!=0){
+        XButtonEvent ev2=*ev;
+        ev2.window=ev->subwindow;
+        ev2.subwindow=None;
+        if(XTranslateCoordinates(ioncore_g.dpy, ev->window, ev2.window,
+                                 ev->x, ev->y, &(ev2.x), &(ev2.y),
+                                 &(ev2.subwindow))){
+            if(ioncore_dodo_handle_buttonpress(&ev2, TRUE))
+                return TRUE;
+        }
+    }
+    
+    return ioncore_dodo_handle_buttonpress(ev, FALSE);
 }
 
 
@@ -299,7 +344,8 @@ bool ioncore_do_handle_buttonrelease(XButtonEvent *ev)
             p_clickcnt=1;
             binding=region_lookup_binding(p_reg, BINDING_BUTTONCLICK,
                                                p_state, p_button, p_area);
-            call_button(binding, ev);
+            if(binding!=NULL)
+                call_button(binding, ev);
         }else{
             call_motion_end(ev);
         }
