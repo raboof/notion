@@ -187,6 +187,22 @@ void frame_managed_geom(const WFrame *frame, WRectangle *geom)
 }
 
 
+int frame_shaded_height(const WFrame *frame)
+{
+    if(frame->barmode==FRAME_BAR_NONE){
+        return 0;
+    }else if(!BAR_INSIDE_BORDER(frame)){
+        return frame->bar_h;
+    }else {
+        GrBorderWidths bdw;
+        
+        grbrush_get_border_widths(frame->brush, &bdw);
+        
+        return frame->bar_h+bdw.top+bdw.bottom;
+    }
+}
+
+
 void frame_set_shape(WFrame *frame)
 {
     WRectangle gs[2];

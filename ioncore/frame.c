@@ -516,13 +516,14 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     hints_ret->min_width+=woff;
     hints_ret->min_height+=hoff;
     
-    if(frame->barmode==FRAME_BAR_SHAPED){
+    /* shaded */ {
         int f=frame->flags&(FRAME_SHADED|FRAME_SHADED_TOGGLE);
         
         if(f==FRAME_SHADED || f==FRAME_SHADED_TOGGLE){
-            hints_ret->min_height=frame->bar_h;
-            hints_ret->max_height=frame->bar_h;
-            hints_ret->base_height=frame->bar_h;
+            int h=frame_shaded_height(frame);
+            hints_ret->min_height=h;
+            hints_ret->max_height=h;
+            hints_ret->base_height=h;
             if(!hints_ret->max_set){
                 hints_ret->max_width=INT_MAX;
                 hints_ret->max_set=TRUE;
@@ -789,17 +790,9 @@ bool frame_set_shaded(WFrame *frame, int sp)
             return FALSE;
         rq.geom.h=frame->saved_h;
     }else{
-        if(frame->barmode==FRAME_BAR_NONE){
+        if(frame->barmode==FRAME_BAR_NONE)
             return FALSE;
-        }else if(frame->barmode==FRAME_BAR_SHAPED){
-            rq.geom.h=frame->bar_h;
-        }else{
-            WRectangle tmp;
-            
-            frame_border_inner_geom(frame, &tmp);
-            
-            rq.geom.h=rq.geom.h-tmp.h;
-        }
+        rq.geom.h=frame_shaded_height(frame);
     }
     
     frame->flags|=FRAME_SHADED_TOGGLE;

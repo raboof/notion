@@ -20,6 +20,7 @@ extern void frame_border_geom(const WFrame *frame, WRectangle *geom);
 extern void frame_border_inner_geom(const WFrame *frame, WRectangle *geom);
 extern void frame_brushes_updated(WFrame *frame);
 extern void frame_managed_geom(const WFrame *frame, WRectangle *geom);
+extern int frame_shaded_height(const WFrame *frame);
 
 extern void frame_initialise_gr(WFrame *frame);
 extern void frame_release_brushes(WFrame *frame);
