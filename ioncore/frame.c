@@ -185,14 +185,10 @@ void frame_set_mode(WFrame *frame, WFrameMode mode)
     region_remove_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
     
     frame->mode=mode;
-
+    
     frame_add_mode_bindmaps(frame);
     
-    frame_initialise_gr(frame);
-    
-    mplex_fit_managed(&frame->mplex);
-    frame_recalc_bar(frame, TRUE);
-    frame_set_background(frame, TRUE);
+    frame_updategr(frame);
 }
 
 

@@ -318,6 +318,8 @@ void frame_recalc_bar(WFrame *frame, bool complete)
     
     if(frame->barmode==FRAME_BAR_SHAPED)
         frame_shaped_recalc_bar_size(frame, complete);
+    else if(complete)
+        frame_clear_shape(frame);
     
     i=0;
     
