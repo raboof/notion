@@ -16,13 +16,6 @@
 /*{{{ Init/deinit */
 
 
-static void basicpholder_watch_handler(Watch *watch, Obj *reg)
-{
-    WBasicPHolder *ph=FIELD_TO_STRUCT(WBasicPHolder, reg_watch, watch);
-    pholder_redirect(&(ph->ph), (WRegion*)reg);
-}
-
-
 bool basicpholder_init(WBasicPHolder *ph, WRegion *reg, 
                        WBasicPHolderHandler *hnd)
 {
@@ -32,7 +25,7 @@ bool basicpholder_init(WBasicPHolder *ph, WRegion *reg,
 
     watch_init(&(ph->reg_watch));
     
-    if(!watch_setup(&(ph->reg_watch), (Obj*)reg, basicpholder_watch_handler)){
+    if(!watch_setup(&(ph->reg_watch), (Obj*)reg, NULL)){
         pholder_deinit(&(ph->ph));
         return FALSE;
     }

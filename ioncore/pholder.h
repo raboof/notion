@@ -21,7 +21,6 @@
 
 DECLCLASS(WPHolder){
     Obj obj;
-    WPHolder *redirect;
 };
 
 
@@ -55,8 +54,6 @@ extern bool pholder_check_reparent(WPHolder *ph, WRegion *reg);
 DYNFUN bool pholder_do_goto(WPHolder *ph);
 
 extern bool pholder_goto(WPHolder *ph);
-
-extern bool pholder_redirect(WPHolder *ph, WRegion *old_target);
 
 extern WPHolder *pholder_either(WPHolder *a, WPHolder *b);
 

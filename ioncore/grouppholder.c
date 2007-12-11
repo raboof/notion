@@ -20,15 +20,6 @@ static void group_watch_handler(Watch *watch, Obj *ws);
 
 /*{{{ Init/deinit */
 
-
-static void group_watch_handler(Watch *watch, Obj *ws)
-{
-    WGroupPHolder *ph=FIELD_TO_STRUCT(WGroupPHolder, 
-                                      group_watch, watch);
-    pholder_redirect(&(ph->ph), (WRegion*)ws);
-}
-
-
 static WGroupAttachParams dummy_param=GROUPATTACHPARAMS_INIT;
 
 
@@ -42,8 +33,7 @@ bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
     watch_init(&(ph->stack_above_watch));
     
     if(ws!=NULL){
-        if(!watch_setup(&(ph->group_watch), (Obj*)ws, 
-                        group_watch_handler)){
+        if(!watch_setup(&(ph->group_watch), (Obj*)ws, NULL)){
             pholder_deinit(&(ph->ph));
             return FALSE;
         }

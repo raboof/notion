@@ -18,9 +18,6 @@
 #include "basicpholder.h"
 
 
-static void mplex_watch_handler(Watch *watch, Obj *mplex);
-
-
 /*{{{ Primitives */
 
 
@@ -95,14 +92,6 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 /*{{{ Init/deinit */
 
 
-static void mplex_watch_handler(Watch *watch, Obj *mplex)
-{
-    WMPlexPHolder *ph=FIELD_TO_STRUCT(WMPlexPHolder, mplex_watch, watch);
-    mplexpholder_do_unlink(ph, (WMPlex*)mplex);
-    pholder_redirect(&(ph->ph), (WRegion*)mplex);
-}
-
-
 static void mplex_get_attach_params(WMPlex *mplex, WStacking *st,
                                     WMPlexAttachParams *param)
 {
@@ -129,7 +118,7 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
     ph->param.flags=0;
     ph->recreate_pholder=NULL;
     
-    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler)){
+    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, NULL)){
         pholder_deinit(&(ph->ph));
         return FALSE;
     }
@@ -219,7 +208,7 @@ WRegion *recreate_handler(WWindow *par,
     frame->mplex.mx_phs=ph_head;
     
     for(phtmp=frame->mplex.mx_phs; phtmp!=NULL; phtmp=phtmp->next)
-        watch_setup(&(phtmp->mplex_watch), (Obj*)frame, mplex_watch_handler);
+        watch_setup(&(phtmp->mplex_watch), (Obj*)frame, NULL);
         
     /* Attach */
     if(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER))
@@ -331,7 +320,7 @@ bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
     if(mplex==NULL)
         return TRUE;
     
-    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, mplex_watch_handler))
+    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, NULL))
         return FALSE;
 
     mplexpholder_do_link(ph, mplex, after, or_after);

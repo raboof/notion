@@ -15,15 +15,12 @@
 
 bool pholder_init(WPHolder *ph)
 {
-    ph->redirect=NULL;
     return TRUE;
 }
 
 
 void pholder_deinit(WPHolder *ph)
 {
-    if(ph->redirect!=NULL)
-        destroy_obj((Obj*)ph->redirect);
 }
 
 
@@ -86,9 +83,7 @@ WRegion *pholder_do_target(WPHolder *ph)
 
 WRegion *pholder_target(WPHolder *ph)
 {
-    return (ph->redirect!=NULL
-            ? pholder_target(ph->redirect)
-            : pholder_do_target(ph));
+    return pholder_do_target(ph);
 }
 
 
@@ -112,10 +107,7 @@ DYNFUN bool pholder_do_check_reparent(WPHolder *ph, WRegion *reg)
 
 bool pholder_check_reparent(WPHolder *ph, WRegion *reg)
 {
-    if(ph->redirect!=NULL)
-        return pholder_check_reparent(ph->redirect, reg);
-    else
-        return pholder_do_check_reparent(ph, reg);
+    return pholder_do_check_reparent(ph, reg);
 }
     
 
@@ -129,9 +121,7 @@ bool pholder_do_goto(WPHolder *ph)
 
 bool pholder_goto(WPHolder *ph)
 {
-    return (ph->redirect!=NULL
-            ? pholder_goto(ph->redirect)
-            : pholder_do_goto(ph));
+    return pholder_do_goto(ph);
 }
 
 
@@ -151,31 +141,13 @@ WPHolder *pholder_do_root(WPHolder *ph)
 
 WPHolder *pholder_root(WPHolder *ph)
 {
-    return (ph->redirect!=NULL
-            ? pholder_root(ph->redirect)
-            : pholder_do_root(ph));
+    return pholder_do_root(ph);
 }
 
 
 bool pholder_stale(WPHolder *ph)
 {
     return (pholder_root(ph)!=ph);
-}
-
-
-bool pholder_redirect(WPHolder *ph, WRegion *old_target)
-{
-    WPHolder *ph2=region_get_rescue_pholder(old_target);
-    
-    if(ph2==NULL)
-        return FALSE;
-    
-    if(ph->redirect!=NULL)
-        destroy_obj((Obj*)ph->redirect);
-
-    ph->redirect=ph2;
-    
-    return TRUE;
 }
 
 
