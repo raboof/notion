@@ -45,7 +45,7 @@ extern void framedpholder_deinit(WFramedPHolder *ph);
 
 extern bool framedpholder_do_goto(WFramedPHolder *ph);
 
-extern WPHolder *framedpholder_do_root(WFramedPHolder *ph);
+extern bool framedpholder_stale(WFramedPHolder *ph);
 
 extern WRegion *framedpholder_do_target(WFramedPHolder *ph);
 

@@ -34,20 +34,6 @@ WRegion *pholder_do_attach(WPHolder *ph, int flags,
 }
 
 
-WRegion *pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
-{
-    WPHolder *root=pholder_root(ph);
-    
-    /* Use the root, so that extra containers are not added from
-     * stale chains.
-     */
-    
-    return (root==NULL
-            ? NULL
-            : pholder_do_attach(root, flags, data));
-}
-
-
 bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
 {
     WRegionAttachData data;
@@ -55,7 +41,7 @@ bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
     
-    return (pholder_attach_(ph, flags, &data)!=NULL);
+    return (pholder_do_attach(ph, flags, &data)!=NULL);
 }
 
 
@@ -125,29 +111,17 @@ bool pholder_goto(WPHolder *ph)
 }
 
 
-WPHolder *pholder_do_root_default(WPHolder *ph)
+bool pholder_stale_default(WPHolder *ph)
 {
-    return ph;
-}
-
-
-WPHolder *pholder_do_root(WPHolder *ph)
-{
-    WPHolder *ret=NULL;
-    CALL_DYN_RET(ret, WPHolder*, pholder_do_root, ph, (ph));
-    return ret;
-}
-
-
-WPHolder *pholder_root(WPHolder *ph)
-{
-    return pholder_do_root(ph);
+    return (pholder_target(ph)!=NULL);
 }
 
 
 bool pholder_stale(WPHolder *ph)
 {
-    return (pholder_root(ph)!=ph);
+    bool ret=TRUE;
+    CALL_DYN_RET(ret, bool, pholder_stale, ph, (ph));
+    return ret;
 }
 
 
@@ -203,8 +177,8 @@ static DynFunTab pholder_dynfuntab[]={
     {(DynFun*)pholder_do_check_reparent, 
      (DynFun*)pholder_do_check_reparent_default},
      
-    {(DynFun*)pholder_do_root, 
-     (DynFun*)pholder_do_root_default},
+    {(DynFun*)pholder_stale, 
+     (DynFun*)pholder_stale_default},
 
     END_DYNFUNTAB
 };

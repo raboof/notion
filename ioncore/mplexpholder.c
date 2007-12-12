@@ -361,24 +361,16 @@ WRegion *mplexpholder_do_target(WMPlexPHolder *ph)
 }
 
 
-WPHolder *mplexpholder_do_root(WMPlexPHolder *ph)
+bool mplexpholder_stale(WMPlexPHolder *ph)
 {
     WRegion *reg=(WRegion*)ph->mplex_watch.obj;
     
     if(reg!=NULL){
-        return &ph->ph;
+        return FALSE;
     }else{
         WFramedPHolder *fph=get_recreate_ph(ph);
-        WPHolder *root;
         
-        if(fph==NULL)
-            return NULL;
-    
-        root=pholder_root((WPHolder*)fph);
-    
-        return (root!=(WPHolder*)fph
-                ? root
-                : &ph->ph);
+        return (fph==NULL || pholder_stale((WPHolder*)fph));
     }
 }
 
@@ -497,8 +489,8 @@ static DynFunTab mplexpholder_dynfuntab[]={
     {(DynFun*)pholder_do_target, 
      (DynFun*)mplexpholder_do_target},
      
-    {(DynFun*)pholder_do_root, 
-     (DynFun*)mplexpholder_do_root},
+    {(DynFun*)pholder_stale, 
+     (DynFun*)mplexpholder_stale},
 
     END_DYNFUNTAB
 };

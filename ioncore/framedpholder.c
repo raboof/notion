@@ -190,18 +190,9 @@ WRegion *framedpholder_do_target(WFramedPHolder *ph)
 }
 
 
-WPHolder *framedpholder_do_root(WFramedPHolder *ph)
+bool framedpholder_stale(WFramedPHolder *ph)
 {
-    WPHolder *root;
-    
-    if(ph->cont==NULL)
-        return NULL;
-    
-    root=pholder_root(ph->cont);
-    
-    return (root!=ph->cont 
-            ? root
-            : &ph->ph);
+    return (ph->cont==NULL || pholder_stale(ph->cont));
 }
 
 
@@ -221,8 +212,8 @@ static DynFunTab framedpholder_dynfuntab[]={
     {(DynFun*)pholder_do_target, 
      (DynFun*)framedpholder_do_target},
      
-    {(DynFun*)pholder_do_root, 
-     (DynFun*)framedpholder_do_root},
+    {(DynFun*)pholder_stale, 
+     (DynFun*)framedpholder_stale},
     
     END_DYNFUNTAB
 };

@@ -30,7 +30,7 @@ extern bool groupedpholder_do_goto(WGroupedPHolder *ph);
 
 extern WRegion *groupedpholder_do_target(WGroupedPHolder *ph);
 
-extern WPHolder *groupedpholder_do_root(WGroupedPHolder *ph);
+extern bool groupedpholder_stale(WGroupedPHolder *ph);
 
 extern WRegion *groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
                                          WRegionAttachData *data);

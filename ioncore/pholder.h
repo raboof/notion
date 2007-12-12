@@ -41,11 +41,7 @@ DYNFUN WRegion *pholder_do_target(WPHolder *ph);
 
 extern WRegion *pholder_target(WPHolder *ph);
 
-extern WPHolder *pholder_do_root(WPHolder *ph);
-
-extern WPHolder *pholder_root(WPHolder *ph);
-
-extern bool pholder_stale(WPHolder *ph);
+DYNFUN bool pholder_stale(WPHolder *ph);
 
 DYNFUN bool pholder_do_check_reparent(WPHolder *ph, WRegion *reg);
 
