@@ -1727,25 +1727,6 @@ void mplex_child_removed(WMPlex *mplex, WRegion *sub)
 
 /*{{{ Status display support */
 
-#ifndef offsetof
-# define offsetof(T,F) ((size_t)((char*)&((T*)0L)->F-(char*)0L))
-#endif
-
-#define STRUCTOF(T, F, FADDR) \
-        ((T*)((char*)(FADDR)-offsetof(T, F)))
-
-
-static void stdisp_watch_handler(Watch *watch, Obj *obj)
-{
-    /*WMPlex *mplex=STRUCTOF(WMPlex, stdispinfo, 
-     STRUCTOF(WMPlexSTDispInfo, regwatch, watch));
-     WMPlexSTDispInfo *di=&(mplex->stdispinfo);
-     WGenWS *ws=OBJ_CAST(REGION_MANAGER(obj), WGenWS);
-     * 
-     if(ioncore_g.opmode!=IONCORE_OPMODE_DEINIT && ws!=NULL)
-     genws_unmanage_stdisp(ws, TRUE, FALSE);*/
-}
-
 
 bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg, 
                       const WMPlexSTDispInfo *din)
@@ -1776,7 +1757,7 @@ bool mplex_set_stdisp(WMPlex *mplex, WRegion *reg,
                 region_detach_manager(oldstdisp);
         }
     }else{
-        watch_setup(&(mplex->stdispwatch), (Obj*)reg, stdisp_watch_handler);
+        watch_setup(&(mplex->stdispwatch), (Obj*)reg, NULL);
         
         mplex_remanage_stdisp(mplex);
     }
