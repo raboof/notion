@@ -122,7 +122,8 @@ bool region_is_activity_r(WRegion *reg)
 
 /*EXTL_DOC
  * Iterate over activity list until \var{iterfn} returns \code{false}.
- * The function itself returns \code{true} if it reaches the end of list
+ * The function is called in protected mode.
+ * This routine returns \code{true} if it reaches the end of list
  * without this happening.
  */
 EXTL_SAFE

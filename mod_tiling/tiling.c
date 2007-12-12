@@ -1109,7 +1109,8 @@ WRegion *tiling_current(WTiling *ws)
 /*EXTL_DOC
  * Iterate over managed regions of \var{ws} until \var{iterfn} returns
  * \code{false}.
- * The function itself returns \code{true} if it reaches the end of list
+ * The function is called in protected mode.
+ * This routine returns \code{true} if it reaches the end of list
  * without this happening.
  */
 EXTL_SAFE

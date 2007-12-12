@@ -246,7 +246,8 @@ WRegion *mplex_mx_nth(WMPlex *mplex, uint n)
 /*EXTL_DOC
  * Iterate over numbered/mutually exclusive region list of \var{mplex} 
  * until \var{iterfn} returns \code{false}.
- * The function itself returns \code{true} if it reaches the end of list
+ * The function is called in protected mode.
+ * This routine returns \code{true} if it reaches the end of list
  * without this happening.
  */
 EXTL_SAFE
@@ -263,7 +264,8 @@ bool mplex_mx_i(WMPlex *mplex, ExtlFn iterfn)
 /*EXTL_DOC
  * Iterate over managed regions of \var{mplex} until \var{iterfn} returns
  * \code{false}.
- * The function itself returns \code{true} if it reaches the end of list
+ * The function is called in protected mode.
+ * This routine returns \code{true} if it reaches the end of list
  * without this happening.
  */
 EXTL_SAFE
