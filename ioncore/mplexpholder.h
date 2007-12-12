@@ -18,7 +18,7 @@
 
 DECLCLASS(WMPlexPHolder){
     WPHolder ph;
-    Watch mplex_watch;
+    WMPlex *mplex;
     WFramedPHolder *recreate_pholder; /* only on first of list */
     WLListNode *after;
     WMPlexPHolder *next, *prev;
@@ -57,6 +57,8 @@ extern void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                            WMPlexPHolder *after,
                            WLListNode *or_after);
 extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node);
+extern void mplex_migrate_phs(WMPlex *src, WMPlex *dst);
+extern void mplex_flatten_phs(WMPlex *mplex);
 
 extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 
                                                 WRegion *mgd);

@@ -103,6 +103,8 @@ extern WPHolder *region_prepare_manage_transient_default(WRegion *reg,
 
 INTRSTRUCT(WRescueInfo);
 
+extern WPHolder *rescueinfo_pholder(WRescueInfo *info, bool take);
+
 /* if ph is given, it is used, otherwise one is looked for when needed */
 extern bool region_rescue(WRegion *reg, WPHolder *ph, int flags);
 extern bool region_rescue_needed(WRegion *reg);

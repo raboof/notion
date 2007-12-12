@@ -94,7 +94,7 @@ DECLCLASS(WMPlex){
     int mx_count;
     WLListNode *mx_current;
     WLListNode *mx_list;
-    WMPlexPHolder *mx_phs;
+    WMPlexPHolder *misc_phs;
     
     Watch stdispwatch;
     WMPlexSTDispInfo stdispinfo;

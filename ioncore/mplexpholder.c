@@ -32,7 +32,7 @@ static void mplexpholder_do_link(WMPlexPHolder *ph,
                                  WMPlexPHolder *after,
                                  WLListNode *or_after)
 {
-    assert(mplex==(WMPlex*)ph->mplex_watch.obj && mplex!=NULL);
+    assert(mplex==(WMPlex*)ph->mplex && mplex!=NULL);
     
     if(after!=NULL){
         assert(after->after==or_after);
@@ -40,15 +40,15 @@ static void mplexpholder_do_link(WMPlexPHolder *ph,
         if(after->after!=NULL){
             LINK_ITEM_AFTER(after->after->phs, after, ph, next, prev);
         }else{
-            assert(on_ph_list(mplex->mx_phs, after));
-            LINK_ITEM_AFTER(mplex->mx_phs, after, ph, next, prev);
+            assert(on_ph_list(mplex->misc_phs, after));
+            LINK_ITEM_AFTER(mplex->misc_phs, after, ph, next, prev);
         }
         ph->after=after->after;
     }else if(or_after!=NULL){
         LINK_ITEM_FIRST(or_after->phs, ph, next, prev);
         ph->after=or_after;
     }else{
-        LINK_ITEM_FIRST(mplex->mx_phs, ph, next, prev);
+        LINK_ITEM_FIRST(mplex->misc_phs, ph, next, prev);
         ph->after=NULL;
     }
 }
@@ -66,13 +66,12 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
     
     if(ph->after!=NULL){
         UNLINK_ITEM(ph->after->phs, ph, next, prev);
-    }else if(mplex!=NULL && on_ph_list(mplex->mx_phs, ph)){
-        UNLINK_ITEM(mplex->mx_phs, ph, next, prev);
+    }else if(mplex!=NULL && on_ph_list(mplex->misc_phs, ph)){
+        UNLINK_ITEM(mplex->misc_phs, ph, next, prev);
     }else{
         WMPlexPHolder *next=ph->next;
     
-        assert((ph->next==NULL && ph->prev==NULL)
-               || ph->mplex_watch.obj==NULL);
+        assert((ph->next==NULL && ph->prev==NULL) || ph->mplex==NULL);
         
         if(ph->next!=NULL)
             ph->next->prev=ph->prev;
@@ -109,27 +108,24 @@ static void mplex_get_attach_params(WMPlex *mplex, WStacking *st,
 bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
                        WMPlexAttachParams *param)
 {
+    WLListNode *or_after=NULL;
+    WMPlexPHolder *after=NULL;
+    
     pholder_init(&(ph->ph));
 
-    watch_init(&(ph->mplex_watch));
+    ph->mplex=mplex;
     ph->after=NULL;
     ph->next=NULL;
     ph->prev=NULL;
     ph->param.flags=0;
     ph->recreate_pholder=NULL;
-    
-    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, NULL)){
-        pholder_deinit(&(ph->ph));
-        return FALSE;
-    }
 
     if(st!=NULL){
         mplex_get_attach_params(mplex, st, &ph->param);
         
         if(st->lnode!=NULL){
-            mplexpholder_do_link(ph, mplex, 
-                                 LIST_LAST(st->lnode->phs, next, prev), 
-                                 st->lnode);
+            after=LIST_LAST(st->lnode->phs, next, prev);
+            or_after=st->lnode;
         }
     }else{
         static WMPlexAttachParams dummy_param={0, 0, {0, 0, 0, 0}, 0, 0};
@@ -143,18 +139,17 @@ bool mplexpholder_init(WMPlexPHolder *ph, WMPlex *mplex, WStacking *st,
             int index=(param->flags&MPLEX_ATTACH_INDEX
                        ? param->index
                        : mplex_default_index(mplex));
-            WLListNode *or_after=llist_index_to_after(mplex->mx_list, 
-                                                      mplex->mx_current, 
-                                                      index);
-            WMPlexPHolder *after=(index==LLIST_INDEX_LAST
-                                  ? (or_after!=NULL
-                                     ? LIST_LAST(or_after->phs, next, prev) 
-                                     : LIST_LAST(mplex->mx_phs, next, prev))
-                                  : NULL);
-
-            mplexpholder_do_link(ph, mplex, after, or_after);
+            or_after=llist_index_to_after(mplex->mx_list, 
+                                          mplex->mx_current, index);
+            after=(index==LLIST_INDEX_LAST
+                   ? (or_after!=NULL
+                      ? LIST_LAST(or_after->phs, next, prev) 
+                      : LIST_LAST(mplex->misc_phs, next, prev))
+                   : NULL);
         }
     }
+
+    mplexpholder_do_link(ph, mplex, after, or_after);
     
     return TRUE;
 }
@@ -170,8 +165,7 @@ WMPlexPHolder *create_mplexpholder(WMPlex *mplex,
 
 void mplexpholder_deinit(WMPlexPHolder *ph)
 {
-    mplexpholder_do_unlink(ph, (WMPlex*)ph->mplex_watch.obj);
-    watch_reset(&(ph->mplex_watch));
+    mplexpholder_do_unlink(ph, ph->mplex);
     pholder_deinit(&(ph->ph));
 }
 
@@ -205,10 +199,10 @@ WRegion *recreate_handler(WWindow *par,
         return NULL;
     
     /* Move pholders to frame */
-    frame->mplex.mx_phs=ph_head;
+    frame->mplex.misc_phs=ph_head;
     
-    for(phtmp=frame->mplex.mx_phs; phtmp!=NULL; phtmp=phtmp->next)
-        watch_setup(&(phtmp->mplex_watch), (Obj*)frame, NULL);
+    for(phtmp=frame->mplex.misc_phs; phtmp!=NULL; phtmp=phtmp->next)
+        phtmp->mplex=&frame->mplex;
         
     /* Attach */
     if(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER))
@@ -220,9 +214,10 @@ WRegion *recreate_handler(WWindow *par,
 
     if(reg==NULL){
         /* Try to recover */
-        for(phtmp=frame->mplex.mx_phs; phtmp!=NULL; phtmp=phtmp->next)
-            watch_reset(&(phtmp->mplex_watch));
-        frame->mplex.mx_phs=NULL;
+        for(phtmp=frame->mplex.misc_phs; phtmp!=NULL; phtmp=phtmp->next)
+            phtmp->mplex=NULL;
+        
+        frame->mplex.misc_phs=NULL;
     
         destroy_obj((Obj*)frame);
         
@@ -294,7 +289,7 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
 WRegion *mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
                                 WRegionAttachData *data)
 {
-    WMPlex *mplex=(WMPlex*)ph->mplex_watch.obj;
+    WMPlex *mplex=ph->mplex;
     
     if(mplex==NULL)
         return mplexpholder_attach_recreate(ph, flags, data);
@@ -311,18 +306,14 @@ WRegion *mplexpholder_do_attach(WMPlexPHolder *ph, int flags,
 bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
                        WMPlexPHolder *after,
                        WLListNode *or_after)
-
 {
-    mplexpholder_do_unlink(ph, (WMPlex*)ph->mplex_watch.obj);
+    mplexpholder_do_unlink(ph, ph->mplex);
 
-    watch_reset(&(ph->mplex_watch));
-    
+    ph->mplex=mplex;
+        
     if(mplex==NULL)
         return TRUE;
     
-    if(!watch_setup(&(ph->mplex_watch), (Obj*)mplex, NULL))
-        return FALSE;
-
     mplexpholder_do_link(ph, mplex, after, or_after);
     
     return TRUE;
@@ -331,7 +322,7 @@ bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
 
 bool mplexpholder_do_goto(WMPlexPHolder *ph)
 {
-    WRegion *reg=(WRegion*)ph->mplex_watch.obj;
+    WRegion *reg=(WRegion*)ph->mplex;
     
     if(reg!=NULL){
         return region_goto(reg);
@@ -347,7 +338,7 @@ bool mplexpholder_do_goto(WMPlexPHolder *ph)
 
 WRegion *mplexpholder_do_target(WMPlexPHolder *ph)
 {
-    WRegion *reg=(WRegion*)ph->mplex_watch.obj;
+    WRegion *reg=(WRegion*)ph->mplex;
     
     if(reg!=NULL){
         return reg;
@@ -363,7 +354,7 @@ WRegion *mplexpholder_do_target(WMPlexPHolder *ph)
 
 bool mplexpholder_stale(WMPlexPHolder *ph)
 {
-    WRegion *reg=(WRegion*)ph->mplex_watch.obj;
+    WRegion *reg=(WRegion*)ph->mplex;
     
     if(reg!=NULL){
         return FALSE;
@@ -408,7 +399,7 @@ void mplex_move_phs_before(WMPlex *mplex, WLListNode *node)
                          
     after=(or_after!=NULL
            ? LIST_LAST(or_after->phs, next, prev)
-           : LIST_LAST(mplex->mx_phs, next, prev));
+           : LIST_LAST(mplex->misc_phs, next, prev));
         
     mplex_move_phs(mplex, node, after, or_after);
 }
@@ -422,6 +413,33 @@ WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, WRegion *mgd)
         return NULL;
     else
         return create_mplexpholder(mplex, st, NULL);
+}
+
+
+void mplex_flatten_phs(WMPlex *mplex)
+{
+    WLListNode *node;
+    WLListIterTmp tmp;
+
+    FOR_ALL_NODES_ON_LLIST(node, mplex->mx_list, tmp){
+        WMPlexPHolder *last=(mplex->misc_phs==NULL ? NULL : mplex->misc_phs->prev);
+        mplex_move_phs(mplex, node, last, NULL);
+    }
+}
+
+
+void mplex_migrate_phs(WMPlex *src, WMPlex *dst)
+{
+    WLListNode *or_after=LIST_LAST(dst->mx_list, next, prev);
+    WMPlexPHolder *after=(or_after!=NULL
+                          ? LIST_LAST(or_after->phs, next, prev)
+                          : LIST_LAST(dst->misc_phs, next, prev));
+    
+    while(src->misc_phs!=NULL){
+        WMPlexPHolder *ph=src->misc_phs;
+        mplexpholder_move(ph, dst, after, or_after);
+        after=ph;
+    }
 }
 
 

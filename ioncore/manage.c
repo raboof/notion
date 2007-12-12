@@ -339,6 +339,30 @@ bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
+WPHolder *rescueinfo_pholder(WRescueInfo *info, bool take)
+{
+    WPHolder *ph;
+    
+    if(info->test)
+        return NULL;
+        
+    if(info->ph==NULL){
+        info->ph=region_get_rescue_pholder(info->get_rescue);
+        if(info->ph==NULL){
+            info->failed_get=TRUE;
+            return NULL;
+        }
+    }
+    
+    ph=info->ph;
+    
+    if(take)
+        info->ph=NULL;
+    
+    return ph;
+}
+
+
 /* Bah, unsplitissä oikestaan pitäisi tehä non-deep rescue */
 
 bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
@@ -359,19 +383,13 @@ bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
     
     if(tosave==NULL){
         return region_rescue_clientwins(tosave_, info);
-    }else if(info->test){
-        return FALSE;
     }else{
         int phf=(info->flags&REGION_RESCUE_PHFLAGS_OK ? ph_flags : 0);
+        WPHolder *ph=rescueinfo_pholder(info, FALSE);
         
-        if(info->ph==NULL){
-            info->ph=region_get_rescue_pholder(info->get_rescue);
-            if(info->ph==NULL){
-                info->failed_get=TRUE;
-                return FALSE;
-            }
-        }
-        return pholder_attach(info->ph, phf, tosave);
+        return (ph==NULL
+                ? FALSE
+                : pholder_attach(info->ph, phf, tosave));
     }
 }
 

@@ -98,7 +98,7 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent,
     
     mplex->mx_list=NULL;
     mplex->mx_current=NULL;
-    mplex->mx_phs=NULL;
+    mplex->misc_phs=NULL;
     mplex->mx_count=0;
     
     mplex->mgd=NULL;
@@ -147,8 +147,8 @@ void mplex_deinit(WMPlex *mplex)
     assert(mplex->mgd==NULL);
     assert(mplex->mx_list==NULL);
 
-    while(mplex->mx_phs!=NULL){
-        assert(mplexpholder_move(mplex->mx_phs, NULL, NULL, NULL));
+    while(mplex->misc_phs!=NULL){
+        assert(mplexpholder_move(mplex->misc_phs, NULL, NULL, NULL));
     }
     
     window_deinit((WWindow*)mplex);
@@ -1683,13 +1683,43 @@ void mplex_managed_remove(WMPlex *mplex, WRegion *sub)
 }
 
 
+void mplex_child_removed(WMPlex *mplex, WRegion *sub)
+{
+    if(sub!=NULL && sub==(WRegion*)(mplex->stdispwatch.obj)){
+        watch_reset(&(mplex->stdispwatch));
+        mplex_set_stdisp(mplex, NULL, NULL);
+    }
+}
+
+
+/*}}}*/
+
+
+/*{{{ Rescue */
+
+
+static void mplex_migrate_phs_to_fph(WMPlex *mplex, WFramedPHolder *fph)
+{
+    WMPlexPHolder *phs, *ph;
+    
+    phs=mplex->misc_phs;
+    mplex->misc_phs=NULL;
+    
+    phs->recreate_pholder=fph;
+    
+    for(ph=phs; ph!=NULL; ph=ph->next)
+        ph->mplex=NULL;
+}
+
+
 bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
 {
     bool ret1, ret2;
     WMPlexIterTmp tmp;
     WLListIterTmp ltmp;
     WLListNode *lnode, *was_current=mplex->mx_current;
-    
+
+     
     /* First all mx stuff to move them nicely to another mplex (when that 
      * is the case), switching to the current region in the target if 
      * allowed by ph_flags_mask region_rescue.
@@ -1708,17 +1738,37 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
     
     ret2=region_rescue_child_clientwins((WRegion*)mplex, info);
     
-    return (ret1 && ret2);
-}
-
-
-
-void mplex_child_removed(WMPlex *mplex, WRegion *sub)
-{
-    if(sub!=NULL && sub==(WRegion*)(mplex->stdispwatch.obj)){
-        watch_reset(&(mplex->stdispwatch));
-        mplex_set_stdisp(mplex, NULL, NULL);
+    /* Now, do placeholders. 
+     * We can't currently be arsed to keep them ordered with regions...
+     */
+    mplex_flatten_phs(mplex);
+    
+    if(mplex->misc_phs!=NULL){
+        WPHolder *rescueph=rescueinfo_pholder(info, FALSE);
+        
+        if(rescueph!=NULL){
+            WRegion *target=pholder_target(rescueph);
+            WMPlex *other_mplex=OBJ_CAST(target, WMPlex);
+            
+            if(other_mplex!=NULL){
+                assert(other_mplex!=mplex);
+                mplex_migrate_phs(mplex, other_mplex);
+            }else{
+                WFramedPHolder *fph=OBJ_CAST(rescueph, WFramedPHolder);
+                if(fph!=NULL){
+                    /* Steal the pholder... can't currently share it */
+                    assert(rescueinfo_pholder(info, TRUE)==rescueph);
+                    mplex_migrate_phs_to_fph(mplex, fph);
+                }
+            }
+            /* Should something be done if rescueph is WGroupedPHolder 
+             * or WGroupPHolder (or group target)? ATM groups return
+             * WFramePHolder for get_rescue_pholder_for, however.
+             */
+        }
     }
+    
+    return (ret1 && ret2);
 }
 
 

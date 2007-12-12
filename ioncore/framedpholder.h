@@ -32,6 +32,7 @@ DECLCLASS(WFramedPHolder){
     WPHolder ph;
     WPHolder *cont;
     WFramedParam param;
+    Watch frame_watch;
 };
 
 

@@ -28,6 +28,8 @@ bool framedpholder_init(WFramedPHolder *ph, WPHolder *cont,
     ph->cont=cont;
     ph->param=*param;
     
+    watch_init(&ph->frame_watch);
+    
     return TRUE;
 }
  
@@ -47,6 +49,7 @@ void framedpholder_deinit(WFramedPHolder *ph)
     }
     
     pholder_deinit(&(ph->ph));
+    watch_reset(&ph->frame_watch);
 }
 
 
@@ -59,6 +62,7 @@ void framedpholder_deinit(WFramedPHolder *ph)
 typedef struct{
     WRegionAttachData *data;
     WFramedParam *param;
+    WRegion *reg_ret;
 } AP;
 
 
@@ -119,6 +123,8 @@ WRegion *framed_handler(WWindow *par,
 
     reg=mplex_do_attach(&frame->mplex, &mp, ap->data);
     
+    ap->reg_ret=reg;
+    
     if(reg==NULL){
         destroy_obj((Obj*)frame);
         return NULL;
@@ -143,6 +149,7 @@ WRegion *region_attach_framed(WRegion *reg, WFramedParam *param,
     
     ap.data=data;
     ap.param=param;
+    ap.reg_ret=NULL;
     
     return fn(reg, fn_param, &data2);
 }
@@ -152,7 +159,15 @@ WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
                                  WRegionAttachData *data)
 {
     WRegionAttachData data2;
+    WFrame *frame;
     AP ap;
+    
+    frame=(WFrame*)ph->frame_watch.obj;
+    
+    if(frame!=NULL){
+        WMPlexAttachParams mp=MPLEXATTACHPARAMS_INIT;
+        return mplex_do_attach(&frame->mplex, &mp, data);
+    }
     
     if(ph->cont==NULL)
         return FALSE;
@@ -163,8 +178,16 @@ WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
     
     ap.data=data;
     ap.param=&ph->param;
+    ap.reg_ret=NULL;
         
-    return pholder_do_attach(ph->cont, flags, &data2);
+    frame=(WFrame*)pholder_do_attach(ph->cont, flags, &data2);
+    
+    if(frame!=NULL){
+        assert(OBJ_IS(frame, WFrame));
+        watch_setup(&ph->frame_watch, (Obj*)frame, NULL);
+    }
+    
+    return ap.reg_ret;
 }
 
 
@@ -176,23 +199,34 @@ WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
 
 bool framedpholder_do_goto(WFramedPHolder *ph)
 {
-    return (ph->cont!=NULL
-            ? pholder_goto(ph->cont)
-            : FALSE);
+    WRegion *frame=(WRegion*)ph->frame_watch.obj;
+    
+    if(frame!=NULL)
+        return region_goto((WRegion*)frame);
+    else if(ph->cont!=NULL)
+        return pholder_goto(ph->cont);
+    else
+        return FALSE;
 }
 
 
 WRegion *framedpholder_do_target(WFramedPHolder *ph)
 {
-    return (ph->cont!=NULL
-            ? pholder_target(ph->cont)
-            : NULL);
+    WRegion *frame=(WRegion*)ph->frame_watch.obj;
+    
+    return (frame!=NULL
+            ? frame
+            : (ph->cont!=NULL
+               ? pholder_target(ph->cont)
+               : NULL));
 }
 
 
 bool framedpholder_stale(WFramedPHolder *ph)
 {
-    return (ph->cont==NULL || pholder_stale(ph->cont));
+    WRegion *frame=(WRegion*)ph->frame_watch.obj;
+    
+    return (frame==NULL && (ph->cont==NULL || pholder_stale(ph->cont)));
 }
 
 

@@ -717,50 +717,6 @@ static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame)
 }
 
 
-static void mplex_flatten_phs(WMPlex *mplex)
-{
-    WLListNode *node;
-    WLListIterTmp tmp;
-
-    FOR_ALL_NODES_ON_LLIST(node, mplex->mx_list, tmp){
-        WMPlexPHolder *last=(mplex->mx_phs==NULL ? NULL : mplex->mx_phs->prev);
-        mplex_move_phs(mplex, node, last, NULL);
-    }
-}
-
-
-static void frame_modify_pholders(WFrame *frame)
-{
-    WFramedPHolder *fph;
-    WMPlexPHolder *phs, *ph;
-    
-    mplex_flatten_phs(&frame->mplex);
-    
-    if(frame->mplex.mx_phs==NULL)
-        return;
-    
-    fph=frame_make_recreate_pholder(frame);
-    
-    if(fph==NULL)
-        return;
-    
-    phs=frame->mplex.mx_phs;
-    frame->mplex.mx_phs=NULL;
-    
-    phs->recreate_pholder=fph;
-    
-    for(ph=phs; ph!=NULL; ph=ph->next)
-        watch_reset(&ph->mplex_watch);
-}
-
-
-bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info)
-{
-    frame_modify_pholders(frame);
-    return mplex_rescue_clientwins(&frame->mplex, info);
-}
-
-    
 /*}}}*/
 
 
@@ -1096,9 +1052,6 @@ static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)frame_prepare_manage_transient},
      
-    {(DynFun*)region_rescue_clientwins,
-     (DynFun*)frame_rescue_clientwins},
-    
     END_DYNFUNTAB
 };
                                        
