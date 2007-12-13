@@ -31,6 +31,8 @@ INTRCLASS(WGroupWS);
 INTRCLASS(WPHolder);
 INTRCLASS(WMPlexPHolder);
 INTRCLASS(WFramedPHolder);
+INTRCLASS(WGroupPHolder);
+INTRCLASS(WGroupedPHolder);
 
 INTRSTRUCT(WStacking);
 INTRSTRUCT(WLListNode);

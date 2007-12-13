@@ -13,13 +13,14 @@
 #include <ioncore/pholder.h>
 #include "group.h"
 
-INTRCLASS(WGroupPHolder);
 
 DECLCLASS(WGroupPHolder){
     WPHolder ph;
-    Watch group_watch;
+    WGroup *group;
     Watch stack_above_watch;
     WGroupAttachParams param;
+    WGroupPHolder *next, *prev;
+    WPHolder *recreate_pholder;
 };
 
 extern WGroupPHolder *create_grouppholder(WGroup *group, 
@@ -42,5 +43,9 @@ extern WRegion *grouppholder_do_attach(WGroupPHolder *ph, int flags,
 
 extern WGroupPHolder *group_managed_get_pholder(WGroup *group, 
                                                 WRegion *mgd);
+
+extern void grouppholder_do_unlink(WGroupPHolder *ph);
+extern void grouppholder_do_link(WGroupPHolder *ph, WGroup *group, 
+                                 WRegion *stack_above);
 
 #endif /* ION_IONCORE_GROUPPHOLDER_H */

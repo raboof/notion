@@ -356,6 +356,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     ws->managed_stdisp=NULL;
     ws->bottom=NULL;
     ws->managed_list=NULL;
+    ws->phs=NULL;
     
     ws->dummywin=XCreateWindow(ioncore_g.dpy, par->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
@@ -406,12 +407,14 @@ void group_deinit(WGroup *ws)
     XDeleteContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context);
     XDestroyWindow(ioncore_g.dpy, ws->dummywin);
     ws->dummywin=None;
-
+    
+    while(ws->phs!=NULL)
+        grouppholder_do_unlink(ws->phs);
+    
     region_deinit(&ws->reg);
 }
 
 
-    
 bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info)
 {
     WGroupIterTmp tmp;
@@ -422,6 +425,39 @@ bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info)
                                          (WRegionIterator*)group_iter,
                                          &tmp);
 }
+
+
+WPHolder *group_get_rescue_pholder_for(WGroup *ws, 
+                                       WRegion *forwhat)
+{
+    WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
+    WFramedParam fp=FRAMEDPARAM_INIT;
+    WPHolder *ph;
+    
+    ap.geom_set=TRUE;
+    ap.geom=REGION_GEOM(forwhat);
+
+    ap.geom_weak_set=1;
+    
+    if(REGION_PARENT(forwhat)==REGION_PARENT(ws)){
+        ap.geom.x-=REGION_GEOM(ws).x;
+        ap.geom.y-=REGION_GEOM(ws).y;
+    }else{
+        ap.geom_weak=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    }
+    
+    /* frame mode */
+    /*{
+        WFrame *frame=OBJ_CAST(forwhat, WFrame);
+        if(frame!=NULL)
+            fp.mode=frame->mode;
+    }*/
+    
+    ph=(WPHolder*)create_grouppholder(ws, NULL, &ap);
+    
+    return pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
+}
+
 
 
 /*}}}*/
@@ -1400,6 +1436,9 @@ static DynFunTab group_dynfuntab[]={
     
     {(DynFun*)region_managed_rqorder,
      (DynFun*)group_managed_rqorder},
+     
+    {(DynFun*)region_get_rescue_pholder_for,
+     (DynFun*)group_get_rescue_pholder_for},
     
     END_DYNFUNTAB
 };

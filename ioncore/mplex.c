@@ -33,13 +33,13 @@
 #include "saveload.h"
 #include "xwindow.h"
 #include "mplexpholder.h"
+#include "grouppholder.h"
 #include "llist.h"
 #include "names.h"
 #include "sizepolicy.h"
 #include "stacking.h"
 #include "group.h"
 #include "navi.h"
-#include "groupedpholder.h"
 
 
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
@@ -1600,9 +1600,19 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     mph=create_mplexpholder(mplex, NULL, &ap);
     
     if(mph!=NULL){
-        WGroupedPHolder *gph=create_groupedpholder((WPHolder*)mph);
-        if(gph!=NULL)
+        WGroupPHolder *gph;
+        WGroupAttachParams gp=GROUPATTACHPARAMS_INIT;
+        
+        gp.switchto_set=1;
+        gp.switchto=1;
+        gp.bottom=1;
+        
+        gph=create_grouppholder(NULL, NULL, &gp);
+        
+        if(gph!=NULL){
+            gph->recreate_pholder=(WPHolder*)mph;
             return (WPHolder*)gph;
+        }
     }
     
     return (WPHolder*)mph;
@@ -1700,20 +1710,6 @@ void mplex_child_removed(WMPlex *mplex, WRegion *sub)
 /*{{{ Rescue */
 
 
-static void mplex_migrate_phs_to_fph(WMPlex *mplex, WFramedPHolder *fph)
-{
-    WMPlexPHolder *phs, *ph;
-    
-    phs=mplex->misc_phs;
-    mplex->misc_phs=NULL;
-    
-    phs->recreate_pholder=fph;
-    
-    for(ph=phs; ph!=NULL; ph=ph->next)
-        ph->mplex=NULL;
-}
-
-
 bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
 {
     bool ret1, ret2;
@@ -1739,36 +1735,6 @@ bool mplex_rescue_clientwins(WMPlex *mplex, WRescueInfo *info)
                                        &tmp);
     
     ret2=region_rescue_child_clientwins((WRegion*)mplex, info);
-    
-    /* Now, do placeholders. 
-     * We can't currently be arsed to keep them ordered with regions...
-     */
-    mplex_flatten_phs(mplex);
-    
-    if(mplex->misc_phs!=NULL){
-        WPHolder *rescueph=rescueinfo_pholder(info, FALSE);
-        
-        if(rescueph!=NULL){
-            WRegion *target=pholder_target(rescueph);
-            WMPlex *other_mplex=OBJ_CAST(target, WMPlex);
-            
-            if(other_mplex!=NULL){
-                assert(other_mplex!=mplex);
-                mplex_migrate_phs(mplex, other_mplex);
-            }else{
-                WFramedPHolder *fph=OBJ_CAST(rescueph, WFramedPHolder);
-                if(fph!=NULL){
-                    /* Steal the pholder... can't currently share it */
-                    assert(rescueinfo_pholder(info, TRUE)==rescueph);
-                    mplex_migrate_phs_to_fph(mplex, fph);
-                }
-            }
-            /* Should something be done if rescueph is WGroupedPHolder 
-             * or WGroupPHolder (or group target)? ATM groups return
-             * WFramePHolder for get_rescue_pholder_for, however.
-             */
-        }
-    }
     
     return (ret1 && ret2);
 }

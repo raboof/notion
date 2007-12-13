@@ -54,11 +54,24 @@ static void mplexpholder_do_link(WMPlexPHolder *ph,
 }
 
 
+static WMPlexPHolder *get_head(WMPlexPHolder *ph)
+{
+    while(1){
+        /* ph->prev==NULL should not happen.. */
+        if(ph->prev==NULL || ph->prev->next==NULL)
+            break;
+        ph=ph->prev;
+    }
+    
+    return ph;
+}
+
+
 void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 {
     if(ph->recreate_pholder!=NULL){
-        if(ph->prev!=NULL)
-            ph->prev->recreate_pholder=ph->recreate_pholder;
+        if(ph->next!=NULL)
+            ph->next->recreate_pholder=ph->recreate_pholder;
         else
             destroy_obj((Obj*)ph->recreate_pholder);
         ph->recreate_pholder=NULL;
@@ -70,13 +83,15 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
         UNLINK_ITEM(mplex->misc_phs, ph, next, prev);
     }else{
         WMPlexPHolder *next=ph->next;
-    
-        assert((ph->next==NULL && ph->prev==NULL) || ph->mplex==NULL);
         
-        if(ph->next!=NULL)
-            ph->next->prev=ph->prev;
         if(ph->prev!=NULL)
             ph->prev->next=next;
+
+        if(next==NULL){
+            next=get_head(ph);
+            assert(next->prev==ph);
+        }
+        next->prev=ph->prev;
     }
     
     ph->after=NULL;
@@ -180,18 +195,18 @@ typedef struct{
     WMPlexPHolder *ph, *ph_head;
     WRegionAttachData *data;
     WFramedParam *param;
+    WRegion *reg_ret;
 } RP;
 
 
-WRegion *recreate_handler(WWindow *par, 
-                          const WFitParams *fp, 
-                          void *rp_)
+static WRegion *recreate_handler(WWindow *par, 
+                                 const WFitParams *fp, 
+                                 void *rp_)
 {
     RP *rp=(RP*)rp_;
     WMPlexPHolder *ph=rp->ph, *ph_head=rp->ph_head, *phtmp;
     WFramedParam *param=rp->param;
     WFrame *frame;
-    WRegion *reg;
     
     frame=create_frame(par, fp, param->mode);
     
@@ -208,11 +223,11 @@ WRegion *recreate_handler(WWindow *par,
     if(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER))
         ph->param.flags|=MPLEX_ATTACH_WHATEVER;
     
-    reg=mplex_do_attach_pholder(&frame->mplex, ph, rp->data);
+    rp->reg_ret=mplex_do_attach_pholder(&frame->mplex, ph, rp->data);
 
     ph->param.flags&=~MPLEX_ATTACH_WHATEVER;
 
-    if(reg==NULL){
+    if(rp->reg_ret==NULL){
         /* Try to recover */
         for(phtmp=frame->mplex.misc_phs; phtmp!=NULL; phtmp=phtmp->next)
             phtmp->mplex=NULL;
@@ -223,23 +238,10 @@ WRegion *recreate_handler(WWindow *par,
         
         return NULL;
     }else{
-        frame_adjust_to_initial(frame, fp, param, reg);
+        frame_adjust_to_initial(frame, fp, param, rp->reg_ret);
         
         return (WRegion*)frame;
     }
-}
-
-
-static WMPlexPHolder *get_head(WMPlexPHolder *ph)
-{
-    while(1){
-        /* ph->prev==NULL should not happen.. */
-        if(ph->prev==NULL || ph->prev->next==NULL)
-            break;
-        ph=ph->prev;
-    }
-    
-    return ph;
 }
 
 
@@ -255,7 +257,7 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     WRegionAttachData data2;
     WFramedPHolder *fph;
     WPHolder *root;
-    WRegion *reg;
+    WRegion *frame;
     RP rp;
     
     rp.ph_head=get_head(ph);
@@ -270,19 +272,20 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     rp.ph=ph;
     rp.data=data;
     rp.param=&fph->param;
+    rp.reg_ret=NULL;
     
     data2.type=REGION_ATTACH_NEW;
     data2.u.n.fn=recreate_handler;
     data2.u.n.param=&rp;
     
-    reg=pholder_do_attach(fph->cont, flags, &data2); /* == frame */
+    frame=pholder_do_attach(fph->cont, flags, &data2);
     
-    if(reg!=NULL){
-        destroy_obj((Obj*)fph);
+    if(frame!=NULL){
         rp.ph_head->recreate_pholder=NULL;
+        destroy_obj((Obj*)fph);
     }
-
-    return reg;
+    
+    return rp.reg_ret;
 }
 
 

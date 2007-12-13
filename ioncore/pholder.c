@@ -113,7 +113,7 @@ bool pholder_goto(WPHolder *ph)
 
 bool pholder_stale_default(WPHolder *ph)
 {
-    return (pholder_target(ph)!=NULL);
+    return (pholder_target(ph)==NULL);
 }
 
 

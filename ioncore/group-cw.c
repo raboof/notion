@@ -22,6 +22,7 @@
 #include "names.h"
 #include "framedpholder.h"
 #include "grouppholder.h"
+#include "return.h"
 
 
 #define DFLT_SZPLCY SIZEPOLICY_FREE_GLUE__SOUTH
@@ -209,6 +210,47 @@ void groupcw_bottom_set(WGroupCW *cwg)
 /*}}}*/
 
 
+/*{{{ Rescue */
+
+
+static void group_migrate_phs_to_gph(WGroup *group, WPHolder *rph)
+{
+    WGroupPHolder *phs, *ph;
+    
+    phs=group->phs;
+    group->phs=NULL;
+    
+    phs->recreate_pholder=rph;
+    
+    for(ph=phs; ph!=NULL; ph=ph->next)
+        ph->group=NULL;
+}
+
+
+bool groupcw_rescue_clientwins(WGroupCW *cwg, WRescueInfo *info)
+{
+    bool ret=group_rescue_clientwins(&cwg->grp, info);
+    
+    if(cwg->grp.phs!=NULL){
+        WPHolder *rph=region_make_return_pholder((WRegion*)cwg);
+        
+        /*
+        if(rph==NULL)
+            rph=rescueinfo_pholder(info, TRUE);
+        */
+        
+        if(rph!=NULL)
+            group_migrate_phs_to_gph(&cwg->grp, rph);
+    }
+    
+    return ret;
+}
+
+
+/*}}}*/
+
+
+
 /*{{{ WGroupCW class */
 
 
@@ -307,6 +349,9 @@ static DynFunTab groupcw_dynfuntab[]={
      
     {group_bottom_set,
      groupcw_bottom_set},
+     
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)groupcw_rescue_clientwins},
     
     END_DYNFUNTAB
 };

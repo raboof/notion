@@ -695,25 +695,77 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
 static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame)
 {
     WPHolder *ph;
-    WFramedPHolder *fph;
+    WFramedPHolder *fph=NULL;
     WFramedParam fparam=FRAMEDPARAM_INIT;
     
     ph=region_make_return_pholder((WRegion*)frame);
     
-    if(ph==NULL){
-        return NULL;
-    }
+    if(ph!=NULL){
+        fparam.mode=frame->mode;
     
-    fparam.mode=frame->mode;
+        fph=create_framedpholder(ph, &fparam);
     
-    fph=create_framedpholder(ph, &fparam);
-    
-    if(fph==NULL){
-        destroy_obj((Obj*)ph);
-        return NULL;
+        if(fph==NULL)
+            destroy_obj((Obj*)ph);
     }
     
     return fph;
+}
+
+
+static void mplex_migrate_phs_to_fph(WMPlex *mplex, WFramedPHolder *fph)
+{
+    WMPlexPHolder *phs, *ph;
+    
+    phs=mplex->misc_phs;
+    mplex->misc_phs=NULL;
+    
+    phs->recreate_pholder=fph;
+    
+    for(ph=phs; ph!=NULL; ph=ph->next)
+        ph->mplex=NULL;
+}
+
+
+
+bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info)
+{
+    bool ret;
+    
+    ret=mplex_rescue_clientwins(&frame->mplex, info);
+    
+    /* Now, do placeholders. 
+     * We can't currently be arsed to keep them ordered with regions...
+     */
+    mplex_flatten_phs(&frame->mplex);
+    
+    if(frame->mplex.misc_phs!=NULL){
+        WFramedPHolder *fph=frame_make_recreate_pholder(frame);
+        WPHolder *rescueph=NULL;
+        
+        if(fph==NULL){
+            rescueph=rescueinfo_pholder(info, FALSE);
+            fph=OBJ_CAST(rescueph, WFramedPHolder);
+            if(fph!=NULL){
+                /* Steal the pholder... can't currently share it */
+                assert(rescueinfo_pholder(info, TRUE)==rescueph);
+            }
+        }
+        
+        if(fph!=NULL){
+            mplex_migrate_phs_to_fph(&frame->mplex, fph);
+        }else if(rescueph!=NULL){
+            WRegion *target=pholder_target(rescueph);
+            WMPlex *other_mplex=OBJ_CAST(target, WMPlex);
+                
+            if(other_mplex!=NULL){
+                assert(other_mplex!=&frame->mplex);
+                mplex_migrate_phs(&frame->mplex, other_mplex);
+            }
+        }
+    }
+    
+    return ret;
 }
 
 
@@ -1052,6 +1104,9 @@ static DynFunTab frame_dynfuntab[]={
     {(DynFun*)region_prepare_manage_transient,
      (DynFun*)frame_prepare_manage_transient},
      
+    {(DynFun*)region_rescue_clientwins,
+     (DynFun*)frame_rescue_clientwins},
+    
     END_DYNFUNTAB
 };
                                        

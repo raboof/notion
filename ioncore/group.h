@@ -17,7 +17,6 @@
 #include <ioncore/rectangle.h>
 #include <ioncore/pholder.h>
 #include <ioncore/stacking.h>
-#include <ioncore/framedpholder.h>
 
 
 INTRSTRUCT(WGroupAttachParams);
@@ -54,6 +53,7 @@ DECLCLASS(WGroup){
     WStacking *current_managed;
     WStacking *bottom;
     Window dummywin;
+    WGroupPHolder *phs;
 };
 
 

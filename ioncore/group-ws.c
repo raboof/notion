@@ -22,7 +22,6 @@
 #include "group-ws.h"
 #include "group-cw.h"
 #include "grouppholder.h"
-#include "groupedpholder.h"
 #include "framedpholder.h"
 #include "float-placement.h"
 #include "resize.h"
@@ -171,8 +170,21 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
     if(ph!=NULL)
         ph=pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
     
-    if(ph!=NULL)
-        ph=pholder_either((WPHolder*)create_groupedpholder((WPHolder*)ph), ph);
+    if(ph!=NULL){
+        WGroupPHolder *gph;
+        WGroupAttachParams gp=GROUPATTACHPARAMS_INIT;
+        
+        gp.switchto_set=1;
+        gp.switchto=1;
+        gp.bottom=1;
+        
+        gph=create_grouppholder(NULL, NULL, &gp);
+        
+        if(gph!=NULL){
+            gph->recreate_pholder=ph;
+            return (WPHolder*)gph;
+        }
+    }
     
     return ph;
 }
@@ -249,27 +261,6 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     
     ap.geom_weak_set=1;
     ap.geom_weak=0;
-
-    ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
-    
-    return pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);
-}
-
-
-WPHolder *groupws_get_rescue_pholder_for(WGroupWS *ws, 
-                                         WRegion *forwhat)
-{
-    WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
-    WFramedParam fp=FRAMEDPARAM_INIT;
-    WPHolder *ph;
-    
-    ap.geom_set=TRUE;
-    ap.geom=REGION_GEOM(forwhat);
-
-    ap.geom_weak_set=1;
-    ap.geom_weak=(REGION_PARENT(forwhat)!=REGION_PARENT(ws)
-                  ? REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y
-                  : 0);
 
     ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
     
@@ -363,9 +354,6 @@ static DynFunTab groupws_dynfuntab[]={
     
     {(DynFun*)region_handle_drop,
      (DynFun*)groupws_handle_drop},
-    
-    {(DynFun*)region_get_rescue_pholder_for,
-     (DynFun*)groupws_get_rescue_pholder_for},
     
     {region_manage_stdisp,
      group_manage_stdisp},

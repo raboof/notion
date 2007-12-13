@@ -12,10 +12,83 @@
 
 #include <ioncore/common.h>
 #include "group.h"
+#include "group-cw.h"
 #include "grouppholder.h"
 
 
 static void group_watch_handler(Watch *watch, Obj *ws);
+
+
+/*{{{ Primitives */
+
+
+void grouppholder_do_link(WGroupPHolder *ph, WGroup *group, WRegion *stack_above)
+{
+    ph->group=group;
+    
+    if(group!=NULL){
+        LINK_ITEM_FIRST(group->phs, ph, next, prev);
+    }else{
+        /* This seems very crucial for detached pholders... */
+        ph->next=NULL;
+        ph->prev=ph;
+    }
+    
+    /* We must move stack_above pointer into a Watch. */
+    if(stack_above!=NULL)
+        watch_setup(&(ph->stack_above_watch), (Obj*)stack_above, NULL);
+}
+
+
+static WGroupPHolder *get_head(WGroupPHolder *ph)
+{
+    while(1){
+        /* ph->prev==NULL should not happen.. */
+        if(ph->prev==NULL || ph->prev->next==NULL)
+            break;
+        ph=ph->prev;
+    }
+    
+    return ph;
+}
+
+
+void grouppholder_do_unlink(WGroupPHolder *ph)
+{
+    WGroup *group=ph->group;
+    
+    watch_reset(&(ph->stack_above_watch));
+    
+    if(ph->recreate_pholder!=NULL){
+        if(ph->next!=NULL)
+            ph->next->recreate_pholder=ph->recreate_pholder;
+        else
+            destroy_obj((Obj*)ph->recreate_pholder);
+        ph->recreate_pholder=NULL;
+    }
+    
+    if(group!=NULL){
+        UNLINK_ITEM(group->phs, ph, next, prev);
+    }else{
+        WGroupPHolder *next=ph->next;
+        
+        if(ph->prev!=NULL)
+            ph->prev->next=next;
+
+        if(next==NULL){
+            next=get_head(ph);
+            assert(next->prev==ph);
+        }
+        next->prev=ph->prev;
+    }
+    
+    ph->group=NULL;
+    ph->next=NULL;
+    ph->prev=NULL;
+}
+
+
+/*}}}*/
 
 
 /*{{{ Init/deinit */
@@ -27,21 +100,17 @@ bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
                        const WStacking *st,
                        const WGroupAttachParams *param)
 {
+    WRegion *stack_above=NULL;
+    
     pholder_init(&(ph->ph));
 
-    watch_init(&(ph->group_watch));
     watch_init(&(ph->stack_above_watch));
-    
-    if(ws!=NULL){
-        if(!watch_setup(&(ph->group_watch), (Obj*)ws, NULL)){
-            pholder_deinit(&(ph->ph));
-            return FALSE;
-        }
-    }
-    
-    if(param==NULL)
-        param=&dummy_param;
-    
+    ph->next=NULL;
+    ph->prev=NULL;
+    ph->group=NULL;
+    ph->recreate_pholder=NULL;
+    ph->param=(param==NULL ? dummy_param : *param);
+
     if(st!=NULL){
         /* TODO? Just link to the stacking structure to remember 
          * stacking order? 
@@ -61,22 +130,18 @@ bool grouppholder_init(WGroupPHolder *ph, WGroup *ws,
             ph->param.stack_above=st->above->reg;
         
         ph->param.bottom=(st==ws->bottom);
-    }else{
-        ph->param=*param;
     }
-
+    
     ph->param.switchto_set=FALSE;
-
-    if(ph->param.stack_above!=NULL){
-        /* We must move stack_above pointer into a Watch. */
-        watch_setup(&(ph->stack_above_watch), 
-                    (Obj*)ph->param.stack_above, NULL);
-        ph->param.stack_above=NULL;
-    }
+    
+    stack_above=ph->param.stack_above;
+    ph->param.stack_above=NULL;
+    
+    grouppholder_do_link(ph, ws, stack_above);
     
     return TRUE;
 }
- 
+
 
 WGroupPHolder *create_grouppholder(WGroup *ws,
                                    const WStacking *st,
@@ -88,8 +153,8 @@ WGroupPHolder *create_grouppholder(WGroup *ws,
 
 void grouppholder_deinit(WGroupPHolder *ph)
 {
-    watch_reset(&(ph->group_watch));
-    watch_reset(&(ph->stack_above_watch));
+    grouppholder_do_unlink(ph);
+    
     pholder_deinit(&(ph->ph));
 }
 
@@ -100,15 +165,95 @@ void grouppholder_deinit(WGroupPHolder *ph)
 /*{{{ Dynfuns */
 
 
+static WPHolder *get_recreate_ph(WGroupPHolder *ph)
+{
+    return get_head(ph)->recreate_pholder;
+}
+
+
+typedef struct{
+    WGroupPHolder *ph, *ph_head;
+    WRegionAttachData *data;
+    WRegion *reg_ret;
+} RP;
+
+
+static WRegion *recreate_handler(WWindow *par, 
+                                 const WFitParams *fp, 
+                                 void *rp_)
+{
+    WGroupPHolder *phtmp;
+    RP *rp=(RP*)rp_;
+    WGroup *grp;
+    
+    grp=(WGroup*)create_groupcw(par, fp);
+    
+    if(grp==NULL)
+        return NULL;
+    
+    rp->reg_ret=group_do_attach(grp, &rp->ph->param, rp->data);
+    
+    if(rp->reg_ret==NULL){
+        destroy_obj((Obj*)grp);
+        return NULL;
+    }else{
+        grp->phs=rp->ph_head;
+        
+        for(phtmp=grp->phs; phtmp!=NULL; phtmp=phtmp->next)
+            phtmp->group=grp;
+    }
+    
+    return (WRegion*)grp;
+}
+
+
+
+static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
+                                             WRegionAttachData *data)
+{
+    WRegionAttachData data2;
+    WPHolder *root, *rph;
+    WGroup *grp;
+    RP rp;
+    
+    rp.ph_head=get_head(ph);
+    
+    assert(rp.ph_head!=NULL);
+    
+    rph=rp.ph_head->recreate_pholder;
+    
+    if(rph==NULL)
+        return NULL;
+    
+    rp.ph=ph;
+    rp.data=data;
+    rp.reg_ret=NULL;
+    
+    data2.type=REGION_ATTACH_NEW;
+    data2.u.n.fn=recreate_handler;
+    data2.u.n.param=&rp;
+    
+    grp=(WGroup*)pholder_do_attach(rph, flags, &data2);
+    
+    if(grp!=NULL){
+        assert(OBJ_IS(grp, WGroup));
+        rp.ph_head->recreate_pholder=NULL;
+        destroy_obj((Obj*)rph);
+    }
+
+    return rp.reg_ret;
+}
+
+
 WRegion *grouppholder_do_attach(WGroupPHolder *ph, int flags,
                                 WRegionAttachData *data)
 {
-    WGroup *ws=(WGroup*)ph->group_watch.obj;
+    WGroup *ws=ph->group;
     WRegion *reg;
 
     if(ws==NULL)
-        return FALSE;
-
+        return grouppholder_attach_recreate(ph, flags, data);
+    
     ph->param.switchto_set=1;
     ph->param.switchto=(flags&PHOLDER_ATTACH_SWITCHTO ? 1 : 0);
     
@@ -125,7 +270,7 @@ WRegion *grouppholder_do_attach(WGroupPHolder *ph, int flags,
 
 bool grouppholder_do_goto(WGroupPHolder *ph)
 {
-    WGroup *ws=(WGroup*)ph->group_watch.obj;
+    WGroup *ws=ph->group;
     
     if(ws!=NULL)
         return region_goto((WRegion*)ws);
@@ -136,7 +281,7 @@ bool grouppholder_do_goto(WGroupPHolder *ph)
 
 WRegion *grouppholder_do_target(WGroupPHolder *ph)
 {
-    return (WRegion*)ph->group_watch.obj;
+    return (WRegion*)ph->group;
 }
 
 
