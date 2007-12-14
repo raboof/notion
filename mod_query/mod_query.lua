@@ -324,6 +324,8 @@ end
 
 
 local function mk_completion_test(str, sub_ok, casei_ok)
+    local settings=mod_query.get()
+    
     if not str then
         return function(s) return true end
     end
@@ -337,9 +339,10 @@ local function mk_completion_test(str, sub_ok, casei_ok)
         end
     end
     
-    local casei=(casei_ok and mod_query.get().caseicompl)
+    casei_ok=(casei_ok and settings.caseicompl)
+    sub_ok=(sub_ok and settings.substrcompl)
     
-    if not casei then
+    if not casei_ok then
         return mk(str, sub_ok)
     else
         local fn=mk(string.lower(str), sub_ok)
@@ -931,7 +934,7 @@ function mod_query.complete_ssh(str)
     end
     
     local res = {}
-    local tst = mk_completion_test(host, true, false)
+    local tst = mk_completion_test(host, true, true)
     
     for _, v in ipairs(mod_query.ssh_completions) do
         if tst(v) then
@@ -1212,8 +1215,7 @@ function mod_query.query_menu(mplex, sub, themenu, prompt)
     local ntab=xform_menu({}, menu, "")
     
     local function complete(str)
-        -- casei_ok false, because everything is already in lower case
-        return mod_query.complete_keys(ntab, str, true, false)
+        return mod_query.complete_keys(ntab, str, true, true)
     end
     
     local function handle(mplex, str)

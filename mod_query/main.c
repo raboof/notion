@@ -53,7 +53,8 @@ WBindmap *mod_query_wedln_bindmap=NULL;
 ModQueryConfig mod_query_config={
     250,
     TRUE,
-    FALSE
+    FALSE,
+    TRUE
 };
 
 
@@ -68,6 +69,8 @@ ModQueryConfig mod_query_config={
  *      in milliseconds (default: 250). \\
  *  \var{caseicompl} & (boolean) Turn some completions case-insensitive
  *      (default: false). \\
+ *  \var{substrcompl} & (boolean) Complete on sub-strings in some cases
+ *      (default: ftrue). \\
  * \end{tabularx}
  */
 EXTL_EXPORT
@@ -77,6 +80,7 @@ void mod_query_set(ExtlTab tab)
 
     extl_table_gets_b(tab, "autoshowcompl", &c->autoshowcompl);
     extl_table_gets_b(tab, "caseicompl", &c->caseicompl);
+    extl_table_gets_b(tab, "substrcompl", &c->substrcompl);
     
     if(extl_table_gets_i(tab, "autoshowcompl_delay",
                          &c->autoshowcompl_delay)){
@@ -96,8 +100,9 @@ ExtlTab mod_query_get()
     ExtlTab tab=extl_create_table();
     
     extl_table_sets_b(tab, "autoshowcompl", c->autoshowcompl);
-    extl_table_sets_b(tab, "caseicompl", c->caseicompl);
     extl_table_sets_i(tab, "autoshowcompl_delay", c->autoshowcompl_delay);
+    extl_table_sets_b(tab, "caseicompl", c->caseicompl);
+    extl_table_sets_b(tab, "substrcompl", c->substrcompl);
     
     return tab;
 }

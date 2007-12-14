@@ -117,5 +117,8 @@ mod_query.set{
      
      -- Case-insensitive completion? (Some queries only.)
      caseicompl=true,
+     
+     -- Sub-string completion? (Some queries only.)
+     caseicompl=true,
 }
 --]]

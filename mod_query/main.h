@@ -18,6 +18,7 @@ DECLSTRUCT(ModQueryConfig){
     int autoshowcompl_delay;
     bool autoshowcompl;
     bool caseicompl;
+    bool substrcompl;
 };
 
 
