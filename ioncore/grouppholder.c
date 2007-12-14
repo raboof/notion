@@ -9,6 +9,7 @@
 #include <libtu/objp.h>
 #include <libtu/obj.h>
 #include <libtu/pointer.h>
+#include <libmainloop/defer.h>
 
 #include <ioncore/common.h>
 #include "group.h"
@@ -60,10 +61,12 @@ void grouppholder_do_unlink(WGroupPHolder *ph)
     watch_reset(&(ph->stack_above_watch));
     
     if(ph->recreate_pholder!=NULL){
-        if(ph->next!=NULL)
+        if(ph->next!=NULL){
             ph->next->recreate_pholder=ph->recreate_pholder;
-        else
-            destroy_obj((Obj*)ph->recreate_pholder);
+        }else{
+            /* It might be in use in attach chain! So defer. */
+            mainloop_defer_destroy((Obj*)ph->recreate_pholder);
+        }
         ph->recreate_pholder=NULL;
     }
     
@@ -238,7 +241,8 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
     if(grp!=NULL){
         assert(OBJ_IS(grp, WGroup));
         rp.ph_head->recreate_pholder=NULL;
-        destroy_obj((Obj*)rph);
+        /* It might be in use in attach chain! So defer. */
+        mainloop_defer_destroy((Obj*)rph);
     }
 
     return rp.reg_ret;

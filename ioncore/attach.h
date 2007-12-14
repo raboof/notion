@@ -51,6 +51,11 @@ extern WRegion *region_attach_helper(WRegion *mgr,
                                      WRegionDoAttachFn *fn, void *fn_param,
                                      const WRegionAttachData *data);
 
+extern WRegion *region_attach_load_helper(WRegion *mgr,
+                                          WWindow *par, const WFitParams *fp,
+                                          WRegionDoAttachFn *fn, void *fn_param,
+                                          ExtlTab tab, WPHolder **sm_ph);
+
 extern bool region_ancestor_check(WRegion *dst, WRegion *reg);
 
 extern void region_postdetach_dispose(WRegion *reg, WRegion *disposeroot);

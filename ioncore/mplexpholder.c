@@ -9,6 +9,7 @@
 #include <libtu/objp.h>
 #include <libtu/obj.h>
 #include <libtu/pointer.h>
+#include <libmainloop/defer.h>
 
 #include "common.h"
 #include "mplex.h"
@@ -70,10 +71,12 @@ static WMPlexPHolder *get_head(WMPlexPHolder *ph)
 void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 {
     if(ph->recreate_pholder!=NULL){
-        if(ph->next!=NULL)
+        if(ph->next!=NULL){
             ph->next->recreate_pholder=ph->recreate_pholder;
-        else
-            destroy_obj((Obj*)ph->recreate_pholder);
+        }else{
+            /* It might be in use in attach chain! So defer. */
+            mainloop_defer_destroy((Obj*)ph->recreate_pholder);
+        }
         ph->recreate_pholder=NULL;
     }
     
@@ -282,7 +285,8 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     
     if(frame!=NULL){
         rp.ph_head->recreate_pholder=NULL;
-        destroy_obj((Obj*)fph);
+        /* It might be in use in attach chain! So defer. */
+        mainloop_defer_destroy((Obj*)fph);
     }
     
     return rp.reg_ret;

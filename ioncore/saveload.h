@@ -14,9 +14,10 @@
 #include "region.h"
 #include "screen.h"
 #include "pholder.h"
+#include "attach.h"
 
 extern WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
-                                   ExtlTab tab);
+                                   ExtlTab tab, WPHolder **sm_ph_p);
 
 extern bool region_supports_save(WRegion *reg);
 DYNFUN ExtlTab region_get_configuration(WRegion *reg);
@@ -29,12 +30,11 @@ extern bool ioncore_save_layout();
 
 typedef bool SMAddCallback(WPHolder *ph, ExtlTab tab);
 typedef void SMCfgCallback(WClientWin *cwin, ExtlTab tab);
-typedef WPHolder *SMPHolderCallback();
     
 extern void ioncore_set_sm_callbacks(SMAddCallback *add, SMCfgCallback *cfg);
 extern void ioncore_get_sm_callbacks(SMAddCallback **add, SMCfgCallback **cfg);
-extern void ioncore_set_sm_pholder_callback(SMPHolderCallback *phcb);
-extern void ioncore_clientwin_load_missing();
+
+extern WPHolder *ioncore_get_load_pholder();
 
 #endif /* ION_IONCORE_SAVELOAD_H */
 

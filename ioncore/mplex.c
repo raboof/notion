@@ -1341,18 +1341,24 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
 }
 
 
+static void mplex_attach_fp(WMPlex *mplex, const WMPlexAttachParams *param,
+                            WFitParams *fp)
+{
+    if(param->flags&MPLEX_ATTACH_GEOM)
+        fp->g=param->geom;
+    else
+        mplex_managed_geom(mplex, &(fp->g));
+    
+    fp->mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
+}
+
+
 WRegion *mplex_do_attach_pholder(WMPlex *mplex, WMPlexPHolder *ph,
                                  WRegionAttachData *data)
 {
-    WMPlexAttachParams *param=&(ph->param);
     WFitParams fp;
     
-    if(param->flags&MPLEX_ATTACH_GEOM)
-        fp.g=param->geom;
-    else
-        mplex_managed_geom(mplex, &(fp.g));
-    
-    fp.mode=REGION_FIT_WHATEVER|REGION_FIT_BOUNDS;
+    mplex_attach_fp(mplex, &ph->param, &fp);
     
     return region_attach_helper((WRegion*)mplex, 
                                 (WWindow*)mplex, &fp,
@@ -1869,7 +1875,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
         
         data.type=REGION_ATTACH_LOAD;
         data.u.tab=t;
-            
+        
         stdisp=region_attach_helper((WRegion*)mplex, 
                                     (WWindow*)mplex, &fp,
                                     do_attach_stdisp, NULL,
@@ -2112,16 +2118,6 @@ ExtlTab mplex_get_configuration(WMPlex *mplex)
 }
 
 
-static WMPlex *tmp_mplex=NULL;
-static WMPlexAttachParams *tmp_par=NULL;
-
-static WPHolder *pholder_callback()
-{
-    assert(tmp_mplex!=NULL);
-    return (WPHolder*)create_mplexpholder(tmp_mplex, NULL, tmp_par);
-}
-
-
 void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 {
     ExtlTab substab, subtab;
@@ -2137,27 +2133,26 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
         n=extl_table_get_n(substab);
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
-                /*mplex_attach_new(mplex, subtab);*/
                 WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
-                WRegionAttachData data;
-                char *tmp=NULL;
+                WFitParams fp;
+                WPHolder *ph;
                 
                 get_params(mplex, subtab, 0, &par);
+                mplex_attach_fp(mplex, &par, &fp);
                 
                 par.flags|=MPLEX_ATTACH_INDEX;
                 par.index=LLIST_INDEX_LAST;
                 
-                tmp_par=&par;
-                tmp_mplex=mplex;
+                ph=(WPHolder*)create_mplexpholder(mplex, NULL, &par);
                 
-                data.type=REGION_ATTACH_LOAD;
-                data.u.tab=subtab;
-                
-                ioncore_set_sm_pholder_callback(pholder_callback);
-    
-                mplex_do_attach(mplex, &par, &data);
-
-                tmp_mplex=NULL;
+                if(ph!=NULL){
+                    region_attach_load_helper((WRegion*)mplex, (WWindow*)mplex, &fp,
+                                              (WRegionDoAttachFn*)mplex_do_attach_final,
+                                              (void*)ph, subtab, &ph);
+                                              
+                    if(ph!=NULL)
+                        destroy_obj((Obj*)ph);
+                }
                 
                 extl_unref_table(subtab);
             }

@@ -692,21 +692,18 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
 /*{{{ Frame recreate pholder stuff */
 
 
-static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame)
+static WFramedPHolder *frame_make_recreate_pholder(WFrame *frame, WPHolder *rph)
 {
-    WPHolder *ph;
-    WFramedPHolder *fph=NULL;
     WFramedParam fparam=FRAMEDPARAM_INIT;
+    WFramedPHolder *fph=NULL;
     
-    ph=region_make_return_pholder((WRegion*)frame);
-    
-    if(ph!=NULL){
+    if(rph!=NULL){
         fparam.mode=frame->mode;
     
-        fph=create_framedpholder(ph, &fparam);
+        fph=create_framedpholder(rph, &fparam);
     
         if(fph==NULL)
-            destroy_obj((Obj*)ph);
+            destroy_obj((Obj*)rph);
     }
     
     return fph;
@@ -740,7 +737,8 @@ bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info)
     mplex_flatten_phs(&frame->mplex);
     
     if(frame->mplex.misc_phs!=NULL){
-        WFramedPHolder *fph=frame_make_recreate_pholder(frame);
+        WPHolder *ret_ph=region_make_return_pholder((WRegion*)frame);
+        WFramedPHolder *fph=frame_make_recreate_pholder(frame, ret_ph);
         WPHolder *rescueph=NULL;
         
         if(fph==NULL){
@@ -1051,6 +1049,14 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         frame_do_load(frame, tab);
     
     if(DEST_EMPTY(frame) && frame->mplex.mgd==NULL){
+        if(frame->mplex.misc_phs!=NULL){
+            /* Session management hack */
+            WFramedPHolder *fph;
+            fph=frame_make_recreate_pholder(frame, ioncore_get_load_pholder());
+            if(fph!=NULL)
+                mplex_migrate_phs_to_fph(&frame->mplex, fph);
+        }
+        
         destroy_obj((Obj*)frame);
         return NULL;
     }

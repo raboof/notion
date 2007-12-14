@@ -1319,6 +1319,25 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
 }
 
 
+static void do_sm(ExtlTab tab)
+{
+    SMAddCallback *add_cb;
+    SMCfgCallback *cfg_cb;
+    WPHolder *ph;
+    
+    ioncore_get_sm_callbacks(&add_cb, &cfg_cb);
+    
+    if(add_cb!=NULL){
+        ph=ioncore_get_load_pholder();
+    
+        if(ph!=NULL){
+            if(!add_cb(ph, tab))
+                destroy_obj((Obj*)ph);
+        }
+    }
+}
+
+    
 WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     double wind=0;
@@ -1345,7 +1364,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
                                           &real_chkc);
     
     if(!got_chkc || real_chkc!=chkc){
-        ioncore_clientwin_load_missing();
+        do_sm(tab);
         return NULL;
     }
 

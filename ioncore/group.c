@@ -705,12 +705,24 @@ bool group_do_attach_final(WGroup *ws,
 }
 
 
+static void group_attach_fp(WGroup *ws, const WGroupAttachParams *param,
+                            WFitParams *fp)
+{
+    if(param->geom_set){
+        geom_group_to_parent(ws, &param->geom, &fp->g);
+        fp->mode=REGION_FIT_EXACT;
+    }else{
+        fp->g=REGION_GEOM(ws);
+        fp->mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
+    }
+}
+
+
 WRegion *group_do_attach(WGroup *ws, 
                          /*const*/ WGroupAttachParams *param,
                          WRegionAttachData *data)
 {
     WFitParams fp;
-    WWindow *par;
     WRegion *reg;
     
     if(ws->bottom!=NULL && param->bottom){
@@ -718,18 +730,9 @@ WRegion *group_do_attach(WGroup *ws,
         return NULL;
     }
     
-    par=REGION_PARENT(ws);
-    assert(par!=NULL);
-
-    if(param->geom_set){
-        geom_group_to_parent(ws, &param->geom, &fp.g);
-        fp.mode=REGION_FIT_EXACT;
-    }else{
-        fp.g=REGION_GEOM(ws);
-        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
-    }
+    group_attach_fp(ws, param, &fp);
     
-    return region_attach_helper((WRegion*) ws, par, &fp, 
+    return region_attach_helper((WRegion*) ws, REGION_PARENT(ws), &fp, 
                                 (WRegionDoAttachFn*)group_do_attach_final,
                                 /*(const WRegionAttachParams*)*/param, data);
     /*                            ^^^^ doesn't seem to work. */
@@ -1332,7 +1335,7 @@ static ExtlTab group_get_configuration(WGroup *ws)
     return tab;
 }
 
-
+    
 void group_do_load(WGroup *ws, ExtlTab tab)
 {
     ExtlTab substab, subtab;
@@ -1342,7 +1345,23 @@ void group_do_load(WGroup *ws, ExtlTab tab)
         n=extl_table_get_n(substab);
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
-                group_attach_new(ws, subtab);
+                WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
+                WRegionAttachData data;
+                WFitParams fp;
+                WPHolder *ph;
+                
+                group_get_attach_params(ws, subtab, &par);
+                group_attach_fp(ws, &par, &fp);
+                
+                ph=(WPHolder*)create_grouppholder(ws, NULL, &par);
+                
+                region_attach_load_helper((WRegion*)ws, REGION_PARENT(ws), &fp,
+                                          (WRegionDoAttachFn*)group_do_attach_final,
+                                          (void*)&par, subtab, &ph);
+                                              
+                if(ph!=NULL)
+                    destroy_obj((Obj*)ph);
+                
                 extl_unref_table(subtab);
             }
         }

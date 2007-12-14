@@ -35,8 +35,6 @@ static bool layout_load_error=FALSE;
 
 static SMAddCallback *add_cb;
 static SMCfgCallback *cfg_cb;
-static SMPHolderCallback *ph_cb;
-static bool clientwin_was_missing=FALSE;
 
 
 void ioncore_set_sm_callbacks(SMAddCallback *add, SMCfgCallback *cfg)
@@ -53,26 +51,29 @@ void ioncore_get_sm_callbacks(SMAddCallback **add, SMCfgCallback **cfg)
 }
 
 
-void ioncore_set_sm_pholder_callback(SMPHolderCallback *phcb)
-{
-    ph_cb=phcb;
-}
-
-
-void ioncore_clientwin_load_missing()
-{
-    clientwin_was_missing=TRUE;
-}
-
-
 /*}}}*/
 
 
 /*{{{ Load support functions */
 
 
+static WPHolder **current_ph_p=NULL;
+
+
+WPHolder *ioncore_get_load_pholder()
+{
+    if(current_ph_p==NULL){
+        return NULL;
+    }else{
+        WPHolder *ph=*current_ph_p;
+        *current_ph_p=NULL;
+        return ph;
+    }
+}
+
+
 WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
-                            ExtlTab tab)
+                            ExtlTab tab, WPHolder **sm_ph_p)
 {
     char *objclass=NULL, *name=NULL;
     WRegionLoadCreateFn* fn=NULL;
@@ -80,6 +81,7 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     WRegion *reg=NULL;
     bool grouped=FALSE;
     char *grouped_name=NULL;
+    WPHolder **old_ph_p;
     
     if(!extl_table_gets_s(tab, "type", &objclass))
         return NULL;
@@ -100,19 +102,14 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
 
     free(objclass);
     
-    clientwin_was_missing=FALSE;
+    old_ph_p=current_ph_p;
+    current_ph_p=sm_ph_p;
     
     reg=fn(par, fp, tab);
     
-    if(reg==NULL){
-        if(clientwin_was_missing && add_cb!=NULL && ph_cb!=NULL){
-            WPHolder *ph=ph_cb();
-            if(ph!=NULL){
-                if(!add_cb(ph, tab))
-                    destroy_obj((Obj*)ph);
-            }
-        }
-    }else{
+    current_ph_p=old_ph_p;
+    
+    if(reg!=NULL){
         if(!OBJ_IS(reg, WClientWin)){
             if(extl_table_gets_s(tab, "name", &name)){
                 region_set_name(reg, name);
@@ -120,8 +117,6 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
             }
         }
     }
-    
-    ph_cb=NULL;
     
     return reg;
 }

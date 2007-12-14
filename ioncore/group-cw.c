@@ -23,6 +23,7 @@
 #include "framedpholder.h"
 #include "grouppholder.h"
 #include "return.h"
+#include "saveload.h"
 
 
 #define DFLT_SZPLCY SIZEPOLICY_FREE_GLUE__SOUTH
@@ -213,7 +214,7 @@ void groupcw_bottom_set(WGroupCW *cwg)
 /*{{{ Rescue */
 
 
-static void group_migrate_phs_to_gph(WGroup *group, WPHolder *rph)
+static void group_migrate_phs_to_ph(WGroup *group, WPHolder *rph)
 {
     WGroupPHolder *phs, *ph;
     
@@ -240,7 +241,7 @@ bool groupcw_rescue_clientwins(WGroupCW *cwg, WRescueInfo *info)
         */
         
         if(rph!=NULL)
-            group_migrate_phs_to_gph(&cwg->grp, rph);
+            group_migrate_phs_to_ph(&cwg->grp, rph);
     }
     
     return ret;
@@ -281,34 +282,29 @@ void groupcw_deinit(WGroupCW *cwg)
 
 WRegion *groupcw_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
-    WGroupCW *ws;
+    WGroupCW *cwg;
     ExtlTab substab, subtab;
     int i, n;
     
-    ws=create_groupcw(par, fp);
+    cwg=create_groupcw(par, fp);
     
-    if(ws==NULL)
+    if(cwg==NULL)
         return NULL;
-        
-    if(!extl_table_gets_t(tab, "managed", &substab))
-        return (WRegion*)ws;
 
-    n=extl_table_get_n(substab);
-    for(i=1; i<=n; i++){
-        if(extl_table_geti_t(substab, i, &subtab)){
-            group_attach_new(&ws->grp, subtab);
-            extl_unref_table(subtab);
+    group_do_load(&cwg->grp, tab);
+    
+    if(cwg->grp.managed_list==NULL){
+        if(cwg->grp.phs!=NULL){
+            /* Session management hack */
+            WPHolder *ph=ioncore_get_load_pholder();
+            if(ph!=NULL)
+                group_migrate_phs_to_ph(&cwg->grp, ph);
         }
-    }
-    
-    extl_unref_table(substab);
-    
-    if(ws->grp.managed_list==NULL){
-        destroy_obj((Obj*)ws);
+        destroy_obj((Obj*)cwg);
         return NULL;
     }
 
-    return (WRegion*)ws;
+    return (WRegion*)cwg;
 }
 
 
