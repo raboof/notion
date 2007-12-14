@@ -339,10 +339,8 @@ bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 }
 
 
-WPHolder *rescueinfo_pholder(WRescueInfo *info, bool take)
+WPHolder *rescueinfo_pholder(WRescueInfo *info)
 {
-    WPHolder *ph;
-    
     if(info->test)
         return NULL;
         
@@ -354,12 +352,7 @@ WPHolder *rescueinfo_pholder(WRescueInfo *info, bool take)
         }
     }
     
-    ph=info->ph;
-    
-    if(take)
-        info->ph=NULL;
-    
-    return ph;
+    return info->ph;
 }
 
 
@@ -385,7 +378,7 @@ bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
         return region_rescue_clientwins(tosave_, info);
     }else{
         int phf=(info->flags&REGION_RESCUE_PHFLAGS_OK ? ph_flags : 0);
-        WPHolder *ph=rescueinfo_pholder(info, FALSE);
+        WPHolder *ph=rescueinfo_pholder(info);
         
         return (ph==NULL
                 ? FALSE

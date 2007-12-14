@@ -232,13 +232,12 @@ bool groupcw_rescue_clientwins(WGroupCW *cwg, WRescueInfo *info)
 {
     bool ret=group_rescue_clientwins(&cwg->grp, info);
     
+    /* If this group can be recreated, arrange remaining placeholders
+     * to do so. This takes care of e.g. recreating client window groups
+     * when recreating layout delayedly under a session manager.
+     */
     if(cwg->grp.phs!=NULL){
         WPHolder *rph=region_make_return_pholder((WRegion*)cwg);
-        
-        /*
-        if(rph==NULL)
-            rph=rescueinfo_pholder(info, TRUE);
-        */
         
         if(rph!=NULL)
             group_migrate_phs_to_ph(&cwg->grp, rph);

@@ -733,32 +733,29 @@ bool frame_rescue_clientwins(WFrame *frame, WRescueInfo *info)
     
     /* Now, do placeholders. 
      * We can't currently be arsed to keep them ordered with regions...
+     * First we check if we can simply recreate this frame, which takes
+     * care of e.g. floating frames being destroyed when entering full
+     * screen mode. If not, we check if the target would be a WMPlex, and
+     * migrate there. This takes care of frames destroyed in tilings.
      */
     mplex_flatten_phs(&frame->mplex);
     
     if(frame->mplex.misc_phs!=NULL){
         WPHolder *ret_ph=region_make_return_pholder((WRegion*)frame);
         WFramedPHolder *fph=frame_make_recreate_pholder(frame, ret_ph);
-        WPHolder *rescueph=NULL;
-        
-        if(fph==NULL){
-            rescueph=rescueinfo_pholder(info, FALSE);
-            fph=OBJ_CAST(rescueph, WFramedPHolder);
-            if(fph!=NULL){
-                /* Steal the pholder... can't currently share it */
-                assert(rescueinfo_pholder(info, TRUE)==rescueph);
-            }
-        }
         
         if(fph!=NULL){
             mplex_migrate_phs_to_fph(&frame->mplex, fph);
-        }else if(rescueph!=NULL){
-            WRegion *target=pholder_target(rescueph);
-            WMPlex *other_mplex=OBJ_CAST(target, WMPlex);
-                
-            if(other_mplex!=NULL){
-                assert(other_mplex!=&frame->mplex);
-                mplex_migrate_phs(&frame->mplex, other_mplex);
+        }else{
+            WPHolder *rescueph=rescueinfo_pholder(info);
+            if(rescueph!=NULL){
+                WRegion *target=pholder_target(rescueph);
+                WMPlex *other_mplex=OBJ_CAST(target, WMPlex);
+                    
+                if(other_mplex!=NULL){
+                    assert(other_mplex!=&frame->mplex);
+                    mplex_migrate_phs(&frame->mplex, other_mplex);
+                }
             }
         }
     }
