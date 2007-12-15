@@ -42,8 +42,6 @@ GR_DEFATTR(dragged);
 GR_DEFATTR(not_dragged);
 GR_DEFATTR(activity);
 GR_DEFATTR(no_activity);
-GR_DEFATTR(quasiactive);
-GR_DEFATTR(not_quasiactive);
 
 
 static void ensure_create_attrs()
@@ -59,8 +57,6 @@ static void ensure_create_attrs()
     GR_ALLOCATTR(not_dragged);
     GR_ALLOCATTR(no_activity);
     GR_ALLOCATTR(activity);
-    GR_ALLOCATTR(quasiactive);
-    GR_ALLOCATTR(not_quasiactive);
     GR_ALLOCATTR_END;
 }
     
@@ -591,22 +587,6 @@ void frame_activated(WFrame *frame)
     gr_stylespec_unset(&frame->baseattr, GR_ATTR(inactive));
     
     window_draw((WWindow*)frame, FALSE);
-}
-
-
-void frame_quasiactivity_change(WFrame *frame)
-{
-    bool is=(frame->quasiact_source!=NULL);
-    
-    ensure_create_attrs();
-    
-    if(is){
-        gr_stylespec_set(&frame->baseattr, GR_ATTR(quasiactive));
-        gr_stylespec_unset(&frame->baseattr, GR_ATTR(not_quasiactive));
-    }else{
-        gr_stylespec_set(&frame->baseattr, GR_ATTR(not_quasiactive));
-        gr_stylespec_unset(&frame->baseattr, GR_ATTR(quasiactive));
-    }
 }
 
 

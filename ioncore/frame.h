@@ -119,8 +119,6 @@ extern int frame_default_index(WFrame *frame);
 extern void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how);
 extern bool frame_managed_rqdispose(WFrame *frame, WRegion *reg);
 
-extern void ioncore_frame_quasiactivation_notify(WRegion *reg, WRegionNotify how);
-
 extern WPHolder *frame_prepare_manage_transient(WFrame *frame,
                                                 const WClientWin *transient,
                                                 const WManageParams *param,

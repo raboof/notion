@@ -281,7 +281,6 @@ static bool init_hooks()
     INIT_HOOK_(ioncore_submap_ungrab_hook);
     
     INIT_HOOK_(region_notify_hook);
-    ADD_HOOK_(region_notify_hook, ioncore_frame_quasiactivation_notify);
     ADD_HOOK_(region_notify_hook, ioncore_screen_activity_notify);
     
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);

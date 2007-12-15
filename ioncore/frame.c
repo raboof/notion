@@ -102,7 +102,6 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->mode=mode;
     frame->tab_min_w=0;
     frame->bar_max_width_q=1.0;
-    frame->quasiact_source=NULL;
     
     gr_stylespec_init(&frame->baseattr);
     
@@ -532,97 +531,6 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
 /*}}}*/
 
 
-/*{{{ Focus  */
-
-
-static void frame_quasiactivation(WFrame *frame, Obj *src, bool act)
-{
-    if(frame->quasiact_source==src || act){
-        bool was, is;
-        
-        was=(frame->quasiact_source!=NULL);
-    
-        frame->quasiact_source=(act ? src : NULL);
-    
-        is=(frame->quasiact_source!=NULL);
-        
-        if(was!=is){
-            frame_quasiactivity_change(frame);
-            if(!REGION_IS_ACTIVE(frame))
-                window_draw((WWindow*)frame, FALSE);
-        }
-    }
-}
-
-
-static bool actinact(WRegion *reg, bool act)
-{
-    WPHolder *returnph=region_get_return(reg);
-    WFrame *frame=NULL;
-    Obj *src=NULL;
-    WRegion *tgt;
-    
-    if(returnph==NULL || pholder_stale(returnph))
-        return FALSE;
-    
-    tgt=pholder_target(returnph);
-
-    frame=OBJ_CAST(tgt, WFrame);
-    
-    if(frame!=NULL){
-        src=(Obj*)returnph;
-    }else{
-        /* Show quasiactivation for stuff detached from
-         * groups contained in the frame as well.
-         */
-        WGroup *grp=OBJ_CAST(tgt, WGroup);
-        if(grp!=NULL){
-            frame=REGION_MANAGER_CHK(grp, WFrame);
-            src=(Obj*)grp;
-        }
-    }
-    
-    if(frame!=NULL)
-        frame_quasiactivation(frame, src, act);
-    
-    return TRUE;
-}
-
-
-static bool activated(WRegion *reg)
-{
-    return actinact(reg, TRUE);
-}
-
-
-static bool inactivated(WRegion *reg)
-{
-    return actinact(reg, FALSE);
-}
-
-
-void ioncore_frame_quasiactivation_notify(WRegion *reg, 
-                                          WRegionNotify how)
-{
-    if(how==ioncore_g.notifies.activated || 
-       how==ioncore_g.notifies.pseudoactivated){
-        activated(reg);
-    }else if(how==ioncore_g.notifies.inactivated ||
-             how==ioncore_g.notifies.pseudoinactivated){
-        inactivated(reg);
-    }else if(how==ioncore_g.notifies.set_return){
-        if(REGION_IS_ACTIVE(reg) || REGION_IS_PSEUDOACTIVE(reg))
-            activated(reg);
-    }else if(how==ioncore_g.notifies.unset_return){
-        if(REGION_IS_ACTIVE(reg) || REGION_IS_PSEUDOACTIVE(reg))
-            inactivated(reg);
-    }
-}
-
-
-/*}}}*/
-
-
 /*{{{ Client window rqgeom */
 
 
@@ -911,14 +819,6 @@ static void frame_managed_changed(WFrame *frame, int mode, bool sw,
                                   WRegion *reg)
 {
     bool need_draw=TRUE;
-    
-    if(mode==MPLEX_CHANGE_REMOVE && (Obj*)reg==frame->quasiact_source){
-        /* Reset indirect quasiactivation through group that
-         * is being removed.
-         */
-        frame->quasiact_source=NULL;
-        frame_quasiactivity_change(frame);
-    }
     
     if(mode!=MPLEX_CHANGE_SWITCHONLY)
         frame_initialise_titles(frame);

@@ -41,7 +41,7 @@ extern void region_lost_focus(WRegion *reg);
 extern bool region_may_control_focus(WRegion *reg);
 
 /* Does reg have focus? */
-extern bool region_is_active(WRegion *reg);
+extern bool region_is_active(WRegion *reg, bool pseudoact_ok);
 
 /* Focus history */
 extern void region_focuslist_remove_with_mgrs(WRegion *reg);

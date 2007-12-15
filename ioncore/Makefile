@@ -29,7 +29,8 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c         \
 LUA_SOURCES=\
 	ioncore_ext.lua ioncore_luaext.lua ioncore_bindings.lua \
 	ioncore_winprops.lua ioncore_misc.lua ioncore_efbb.lua \
-	ioncore_wd.lua ioncore_menudb.lua ioncore_tabnum.lua
+	ioncore_wd.lua ioncore_menudb.lua ioncore_tabnum.lua \
+	ioncore_quasiact.lua
 
 ifeq ($(PRELOAD_MODULES),1)
 CFLAGS += -DCF_PRELOAD_MODULES

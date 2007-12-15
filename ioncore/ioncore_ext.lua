@@ -26,6 +26,7 @@ dopath('ioncore_misc')
 dopath('ioncore_wd')
 dopath('ioncore_menudb')
 dopath('ioncore_tabnum')
+dopath('ioncore_quasiact')
 
 -- Modifier setup compatibility kludge
 local oldindex

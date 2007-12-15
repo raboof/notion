@@ -155,3 +155,18 @@ void region_unset_return(WRegion *reg)
 
 /*}}}*/
 
+
+/*{{{ Internal Lua exports */
+
+
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+WRegion *region___return_target(WRegion *reg)
+{
+    WPHolder *ph=region_get_return(reg);
+    return (ph!=NULL ? pholder_target(ph) : NULL);
+}
+
+
+/*}}}*/
+

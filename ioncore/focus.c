@@ -301,9 +301,10 @@ void region_lost_focus(WRegion *reg)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-bool region_is_active(WRegion *reg)
+bool region_is_active(WRegion *reg, bool pseudoact_ok)
 {
-    return REGION_IS_ACTIVE(reg);
+    return (REGION_IS_ACTIVE(reg) || 
+            (pseudoact_ok && REGION_IS_PSEUDOACTIVE(reg)));
 }
 
 
