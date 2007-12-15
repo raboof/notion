@@ -8,26 +8,19 @@
 
 local savefile="saved_wd"
 local dirs={}
-local px
+local lfs
 
-if pcall(function() return require('posix') end) then
-    px=posix
+if pcall(function() return require('lfs') end) then
+    lfs=_G["lfs"]
 end
 
 local function checkdir(d)
-    if not px then
+    if not lfs then
         return true
     else
-        local t, err=px.stat(d, "type")
+        local t, err=lfs.attributes(d, "mode")
         if not t then
             return nil, err
-        elseif t=="link" then
-            local d2, err=px.readlink(d)
-            if not d2 then
-                return nil, err
-            else
-                return checkdir(d2)
-            end
         elseif t=="directory" then
             return true
         else
