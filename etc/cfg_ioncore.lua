@@ -129,19 +129,9 @@ defbindings("WGroupCW", {
 defbindings("WMPlex", {
     bdoc("Close current object."),
     kpress_wait(META.."C", "WRegion.rqclose_propagate(_, _sub)"),
-    
-    submap(META.."K", {
-        bdoc("Detach (float) or reattach an object to its previous location."),
-        -- By using _chld instead of _sub, we can detach/reattach queries
-        -- attached to a group. The detach code checks if the parameter 
-        -- (_chld) is a group 'bottom' and detaches the whole group in that
-        -- case.
-        kpress("D", "ioncore.detach(_chld, 'toggle')", "_chld:non-nil"),
-    }),
 })
 
 -- Frames for transient windows ignore this bindmap
-
 defbindings("WMPlex.toplevel", {
     bdoc("Toggle tag of current object."),
     kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
@@ -181,6 +171,15 @@ defbindings("WMPlex.toplevel", {
     bdoc("Display context menu."),
     --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
     kpress(META.."M", "mod_query.query_menu(_, _sub, 'ctxmenu', 'Context menu:')"),
+    
+    submap(META.."K", {
+        bdoc("Detach (float) or reattach an object to its previous location."),
+        -- By using _chld instead of _sub, we can detach/reattach queries
+        -- attached to a group. The detach code checks if the parameter 
+        -- (_chld) is a group 'bottom' and detaches the whole group in that
+        -- case.
+        kpress("D", "ioncore.detach(_chld, 'toggle')", "_chld:non-nil"),
+    }),
 })
 
 
