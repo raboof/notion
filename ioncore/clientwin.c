@@ -1375,6 +1375,9 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
     }
     
+    if(attr.root!=region_root_of((WRegion*)par))
+        return NULL;
+        
     if(attr.override_redirect || 
        (ioncore_g.opmode==IONCORE_OPMODE_INIT && attr.map_state!=IsViewable)){
         warn(TR("Saved client window does not want to be managed."));

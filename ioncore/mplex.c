@@ -434,7 +434,8 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
     bool wchg=(REGION_GEOM(mplex).w!=fp->g.w);
     bool hchg=(REGION_GEOM(mplex).h!=fp->g.h);
     
-    window_do_fitrep(&(mplex->win), par, &(fp->g));
+    if(!window_fitrep(&(mplex->win), par, fp))
+        return FALSE;
     
     if(wchg || hchg){
         mplex_fit_managed(mplex);

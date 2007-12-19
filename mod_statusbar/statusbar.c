@@ -635,7 +635,8 @@ bool statusbar_fitrep(WStatusBar *sb, WWindow *par, const WFitParams *fp)
     bool wchg=(REGION_GEOM(sb).w!=fp->g.w);
     bool hchg=(REGION_GEOM(sb).h!=fp->g.h);
     
-    window_do_fitrep(&(sb->wwin), par, &(fp->g));
+    if(!window_fitrep(&(sb->wwin), par, fp))
+        return FALSE;
     
     if(wchg || hchg){
         statusbar_calculate_xs(sb);

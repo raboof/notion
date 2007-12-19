@@ -427,7 +427,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     
     old_geom=REGION_GEOM(frame);
     
-    window_do_fitrep(&(frame->mplex.win), par, &(fp->g));
+    if(!window_fitrep(&(frame->mplex.win), par, fp))
+        return FALSE;
 
     mplex_managed_geom((WMPlex*)frame, &mg);
     
