@@ -87,9 +87,12 @@ static bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode,
             ap.szplcy=st->szplcy;
             ap.szplcy_set=TRUE;
             
-            ap.level_set=TRUE;
-            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);
+            /*ap.level_set=TRUE;
+            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);*/
         }
+        
+        ap.level_set=TRUE;
+        ap.level=framelevel+1;
         
         ap.geom_set=TRUE;
         get_relative_geom(&ap.geom, reg, (WRegion*)grp);
