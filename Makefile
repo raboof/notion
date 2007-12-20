@@ -34,3 +34,6 @@ _install:
 	for i in $(DOCS); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(DOCDIR); \
 	done
+
+relocatable_build:
+	$(MAKE) RELOCATABLE=1 PREFIX=

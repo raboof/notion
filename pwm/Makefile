@@ -38,7 +38,7 @@ WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
 
-EXT_OBJS += ../ioncore/ioncore.a ../prefix.o
+EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \

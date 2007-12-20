@@ -19,6 +19,7 @@
 #include <libtu/errorlog.h>
 #include <libtu/locale.h>
 #include <libtu/misc.h>
+#include <libtu/prefix.h>
 #include <libextl/readconfig.h>
 #include <libmainloop/select.h>
 #include <libmainloop/signal.h>
@@ -29,7 +30,6 @@
 #endif
 
 #include "../../version.h"
-#include "../../prefix.h"
 
 
 static OptParserOpt ion_opts[]={
@@ -160,19 +160,21 @@ int main(int argc, char*argv[])
     configtab=extl_table_none();
     
     libtu_init(argv[0]);
-    
-    get_prefix(argv[0], STATUSD_LOCATION);
-    
+
+#ifdef CF_RELOCATABLE    
+    prefix_set(argv[0], STATUSD_LOCATION);
+#endif
+
     extl_init();
     
     if(!statusd_register_exports())
         return EXIT_FAILURE;
 
-    wrap_extl_add_searchdir(EXTRABINDIR);
-    wrap_extl_add_searchdir(MODULEDIR);
-    wrap_extl_add_searchdir(ETCDIR);
-    wrap_extl_add_searchdir(SHAREDIR);
-    wrap_extl_add_searchdir(LCDIR);
+    prefix_wrap_simple(extl_add_searchdir, EXTRABINDIR);
+    prefix_wrap_simple(extl_add_searchdir, MODULEDIR);
+    prefix_wrap_simple(extl_add_searchdir, ETCDIR);
+    prefix_wrap_simple(extl_add_searchdir, SHAREDIR);
+    prefix_wrap_simple(extl_add_searchdir, LCDIR);
     extl_set_userdirs("ion3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);

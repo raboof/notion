@@ -19,6 +19,7 @@
 #include <libtu/util.h>
 #include <libtu/optparser.h>
 #include <libtu/errorlog.h>
+#include <libtu/prefix.h>
 #include <libextl/readconfig.h>
 #include <libmainloop/exec.h>
 
@@ -28,7 +29,6 @@
 #include <ioncore/exec.h>
 #include <ioncore/event.h>
 #include "../version.h"
-#include "../prefix.h"
 
 
 /* Options. Getopt is not used because getopt_long is quite gnu-specific
@@ -97,10 +97,12 @@ int main(int argc, char*argv[])
     char *localedir;
     
     libtu_init(argv[0]);
-    
-    get_prefix(argv[0], PWM3_LOCATION);
 
-    localedir=ion_prefix(LOCALEDIR);
+#ifdef CF_RELOCATABLE    
+    prefix_set(argv[0], PWM3_LOCATION);
+#endif
+
+    localedir=prefix_add(LOCALEDIR);
     
     if(!ioncore_init("pwm3", argc, argv, localedir))
         return EXIT_FAILURE;
@@ -108,14 +110,14 @@ int main(int argc, char*argv[])
     if(localedir!=NULL)
         free(localedir);
     
-    wrap_extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
-    wrap_extl_add_searchdir(MODULEDIR);
-    wrap_extl_add_searchdir(ETCDIR);
+    prefix_wrap_simple(extl_add_searchdir, EXTRABINDIR); /* ion-completefile */
+    prefix_wrap_simple(extl_add_searchdir, MODULEDIR);
+    prefix_wrap_simple(extl_add_searchdir, ETCDIR);
 #ifdef PWM_ETCDIR    
-    wrap_extl_add_searchdir(PWM_ETCDIR);
+    prefix_wrap_simple(extl_add_searchdir, PWM_ETCDIR);
 #endif
-    wrap_extl_add_searchdir(SHAREDIR);
-    wrap_extl_add_searchdir(LCDIR);
+    prefix_wrap_simple(extl_add_searchdir, SHAREDIR);
+    prefix_wrap_simple(extl_add_searchdir, LCDIR);
     extl_set_userdirs("pwm3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts);
