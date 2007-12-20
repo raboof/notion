@@ -53,24 +53,23 @@ trademark or other laws.
   copyright holder nor the Ion project: "Foo for Ion" instead of "Ion Foo",
   etc.
 
-Significant change: Bug fixes are a priori insignificant as additions. 
-Basic changes that are needed to install or run the software on a target
-platform are a priori insignificant. Additionally, basic configuration
-changes to better integrate the software with the target platform, 
-without obstructing the standard behaviour, are a priori insignificant.
-Everything else is significant. The copyright holder reserves the right 
-to refine the definition of significant changes on a per-case basis. 
-Please consult when in doubt. 
+Significant change: Bug fixes are insignificant as additions. Basic changes
+that are needed to install or run the software on a target platform, are 
+insignificant. Additionally, basic/small configuration changes to better 
+integrate the software with the target platform, without obstructing the
+standard behaviour, are insignificant. Everything else is significant, 
+unless expressly declared otherwise by the copyright holder. 
 
 Distributions: For example, suppose an aggregate distribution of software
 provides an `installpkg` command for installing packages. Then the action
-`installpkg ion3` (resp. `installpkg ion`) should after 28 days provide the
-latest release of Ion3 (resp. the latest stable release), or prominently 
-notify the user that the provided version is (likely to be) obsolete and
-unsupported. Specific versions (including modified versions) may be provided
-if the user explicitly requests for those, within the constraints set above.
-The latest release being provided by default, or prominently appearing in
-a listing, constitutes prominent marking of earlier releases as obsolete.
+`installpkg ion3` (resp. `installpkg ion`) should provide the latest release
+of Ion3 (resp. the latest stable release) 28 days from release date at the
+latest, or prominently notify the user that the provided version is (likely
+to be) obsolete and unsupported. The latest release being provided by
+default, or prominently appearing in a listing, constitutes prominent
+marking of earlier releases as obsolete. Specific versions (including
+modified versions) may be provided if the user explicitly requests for
+those, within the constraints set above.
 
 The intent of these terms is to curb the power that "distributions", as
 the primary sources of software for many users, have in defining what
