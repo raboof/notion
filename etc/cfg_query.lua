@@ -119,6 +119,6 @@ mod_query.set{
      caseicompl=true,
      
      -- Sub-string completion? (Some queries only.)
-     caseicompl=true,
+     substrcompl=true,
 }
 --]]
