@@ -1,4 +1,11 @@
 
+ion-3rc-20071220
+----------------
+
+There are a few minor fixes in this RC, plus a major one related to
+layout restore under a session manager.
+
+
 ion-3rc-20071130
 ----------------
 
