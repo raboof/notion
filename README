@@ -73,9 +73,9 @@ Some optional installation steps
 
         15 05 * * * $SHAREDIR/ion-completeman -mksyscache
 
-   Replace `$SHAREDIR` with the setting from `system.mk` (or `system-ac.mk`
-   if you used autoconf). This example runs daily at 05:15, but you may 
-   modify the  run times to your needs; see the crontab manual. 
+   Replace `$SHAREDIR` with the setting from `system.mk`. This example 
+   runs daily at 05:15, but you may modify the  run times to your needs;
+   see the crontab manual. 
    
    If you can't or do not want to build a system-wide man page cache, run
    `crontab -e` as your normal user and replace `-mksyscache` with
@@ -85,7 +85,7 @@ Some optional installation steps
    `-mk*cache` argument once manually to build the initial cache.
    
    If the `MANPATH` environment variable is not set on your system and it
-    does not have the `manpath` command (or it does not print anything 
+   does not have the `manpath` command (or it does not print anything 
    sensible), you may also want to set the `ION_MANPATH` environment
    variable to the list of paths where the system stores manual pages.
 
