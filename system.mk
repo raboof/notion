@@ -6,12 +6,10 @@
 ## Installation paths
 ##
 
+# Installation path prefix. Unless you know what you're doing, the default
+# of /usr/local is likely the correct choice.
 #DIST: PREFIX=/usr/local
 PREFIX=/usr/local/ion-3
-
-# For relocatable build, use the following, and start with absolute path.
-# RELOCATABLE=1
-# PREFIX=
 
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
@@ -50,7 +48,8 @@ LOCALEDIR=$(PREFIX)/share/locale
 # modules through 'libdl' or has non-standard naming conventions.
 #PRELOAD_MODULES=1
 
-# Flags to link with libdl.
+# Flags to link with libdl. Even if PRELOAD_MODULES=1, you may need this
+# setting (for e.g. Lua, when not instructed by pkg-config).
 DL_LIBS=-ldl
 
 
@@ -78,6 +77,7 @@ LUAC=$(LUA_DIR)/bin/luac
 ## X libraries, includes and options
 ##
 
+# Paths
 X11_PREFIX=/usr/X11R6
 # SunOS/Solaris
 #X11_PREFIX=/usr/openwin
@@ -101,14 +101,8 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 
 ##
-## libc
+## Localisation
 ##
-
-# You may uncomment this if you know your system has
-# asprintf and vasprintf in the c library. (gnu libc has.)
-# If HAS_SYSTEM_ASPRINTF is not defined, an implementation
-# in sprintf_2.2/ is used.
-#HAS_SYSTEM_ASPRINTF=1
 
 # If you're on an archaic system (such as relatively recent *BSD releases)
 # without even dummy multibyte/widechar and localisation support, you may 
@@ -119,12 +113,32 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 #EXTRA_LIBS += -lintl
 #EXTRA_INCLUDES +=
 
-# clock_gettime for monotonic time
+
+##
+## libc
+##
+
+# You may uncomment this if you know your system has
+# asprintf and vasprintf in the c library. (GNU libc has.)
+# If HAS_SYSTEM_ASPRINTF is not defined, an implementation
+# in sprintf_2.2/ is used.
+#HAS_SYSTEM_ASPRINTF=1
+
+# The following setting is needed with GNU libc for clock_gettime and the
+# monotonic clock. Other systems may not need it, or may not provide a
+# monotonic clock at all (which Ion can live with, and usually detect).
 EXTRA_LIBS += -lrt
 
 
+#
+# If you're using/have gcc, it is unlikely that you need to modify
+# any of the settings below this line.
+#
+#####################################################################
+
+
 ##
-## C compiler
+## C compiler. 
 ##
 
 CC=gcc
