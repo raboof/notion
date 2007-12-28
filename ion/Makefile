@@ -62,4 +62,4 @@ preload.c:
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ion3 $(BINDIR)
+	$(INSTALLBIN) ion3 $(BINDIR)

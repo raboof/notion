@@ -185,6 +185,7 @@ DEPEND_FILE=.depend
 DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
 MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
 
+
 ##
 ## AR
 ##
@@ -199,11 +200,19 @@ RANLIB=ranlib
 ##
 
 INSTALL=sh $(TOPDIR)/install-sh -c
+INSTALL_STRIP=-s
 INSTALLDIR=mkdir -p
 
 BIN_MODE=755
 DATA_MODE=644
 
-STRIP=strip
-
 RM=rm
+
+
+##
+## Debugging
+##
+
+#INSTALL_STRIP =
+#CFLAGS += -g
+

@@ -70,7 +70,7 @@ preload.c:
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) pwm3 $(BINDIR)
+	$(INSTALLBIN) pwm3 $(BINDIR)
 	$(INSTALLDIR) $(PWM_ETCDIR)
 	for i in $(ETC); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(PWM_ETCDIR); \

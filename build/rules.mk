@@ -103,7 +103,7 @@ $(MODULE).so: $(OBJS) $(EXT_OBJS)
 
 module_install: module_stub_install
 	$(INSTALLDIR) $(MODULEDIR)
-	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+	$(INSTALLBIN) $(MODULE).so $(MODULEDIR)
 
 else # PRELOAD_MODULES
 
@@ -216,3 +216,9 @@ TO_CLEAN += potfiles_c potfiles_lua
 _potfiles:
 	echo "$(SOURCES)"|tr ' ' '\n' > potfiles_c
 	echo "$(LUA_SOURCES) $(ETC)"|tr ' ' '\n' > potfiles_lua
+
+# Defaults
+######################################
+
+INSTALL_STRIP ?= -s
+INSTALLBIN ?= $(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE)

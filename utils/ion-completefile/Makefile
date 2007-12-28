@@ -27,4 +27,4 @@ ion-completefile: $(SOURCES)
 
 _install:
 	$(INSTALLDIR) $(EXTRABINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) ion-completefile $(EXTRABINDIR)
+	$(INSTALLBIN) ion-completefile $(EXTRABINDIR)
