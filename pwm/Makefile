@@ -38,12 +38,15 @@ WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
 
+ifeq ($(RELOCATABLE),1)
+DEFINES += -DCF_RELOCATABLE_PWM3_LOCATION=\"$(BINDIR)/pwm3\"
+endif
+
 EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
 	   -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
-	   -DPWM3_LOCATION=\"$(BINDIR)/pwm3\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 ifndef PWM_ETCDIR
 PWM_ETCDIR = $(ETCDIR)

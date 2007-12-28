@@ -2,10 +2,6 @@
 ## Some make rules
 ##
 
-ifdef RELOCATABLE
-DEFINES += -DCF_RELOCATABLE
-endif
-
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
 MODULE_TARGETS := $(MODULE).a $(MODULE).lc

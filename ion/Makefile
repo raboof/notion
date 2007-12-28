@@ -36,12 +36,15 @@ WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
 
+ifeq ($(RELOCATABLE),1)
+DEFINES += -DCF_RELOCATABLE_ION3_LOCATION=\"$(BINDIR)/ion3\"
+endif
+
 EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
-	   -DION3_LOCATION=\"$(BINDIR)/ion3\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
