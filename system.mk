@@ -46,6 +46,7 @@ LOCALEDIR=$(PREFIX)/share/locale
 
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
 # modules through 'libdl' or has non-standard naming conventions.
+# You will likely need this option on e.g. Cygwin and Mac OS X.
 #PRELOAD_MODULES=1
 
 # Flags to link with libdl. Even if PRELOAD_MODULES=1, you may need this
@@ -109,19 +110,20 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # have to uncomment the following line:
 #DEFINES += -DCF_NO_LOCALE -DCF_NO_GETTEXT
 
-# On some other systems you may something like this:
+# On some other systems you may need to explicitly link against libintl.
 #EXTRA_LIBS += -lintl
-#EXTRA_INCLUDES +=
+# You may also need to give the location of its headers. The following
+# should work on Mac OS X (which needs the above option as well).
+#EXTRA_INCLUDES += -I/opt/local/include
 
 
 ##
 ## libc
 ##
 
-# You may uncomment this if you know your system has
-# asprintf and vasprintf in the c library. (GNU libc has.)
-# If HAS_SYSTEM_ASPRINTF is not defined, an implementation
-# in sprintf_2.2/ is used.
+# You may uncomment this if you know that your system C libary provides
+# asprintf and  vasprintf. (GNU libc does.) If HAS_SYSTEM_ASPRINTF is not
+# defined, an implementation provided in libtu/sprintf_2.2/ is used. 
 #HAS_SYSTEM_ASPRINTF=1
 
 # The following setting is needed with GNU libc for clock_gettime and the
