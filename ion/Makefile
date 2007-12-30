@@ -31,7 +31,7 @@ SOURCES += preload.c
 TO_CLEAN += preload.c
 LIBS += -lSM -lICE
 else
-LINKOPTS = $(EXPORT_DYNAMIC)
+LDFLAGS += $(EXPORT_DYNAMIC)
 WHOLEA = -Wl,-whole-archive
 NO_WHOLEA = -Wl,-no-whole-archive
 endif
@@ -55,7 +55,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 ion3: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
+	$(CC) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
 
 preload.c:
 	$(LUA) ../build/mkpreload.lua $(MODULE_LIST) > preload.c
