@@ -274,18 +274,21 @@ WRegion *grouppholder_do_attach(WGroupPHolder *ph, int flags,
 
 bool grouppholder_do_goto(WGroupPHolder *ph)
 {
-    WGroup *ws=ph->group;
-    
-    if(ws!=NULL)
-        return region_goto((WRegion*)ws);
-    
-    return FALSE;
+    return (ph->group!=NULL
+            ? region_goto((WRegion*)ph->group)
+            : (ph->recreate_pholder!=NULL
+               ? pholder_do_goto(ph->recreate_pholder)
+               : FALSE));
 }
 
 
 WRegion *grouppholder_do_target(WGroupPHolder *ph)
 {
-    return (WRegion*)ph->group;
+    return (ph->group!=NULL
+            ? (WRegion*)ph->group
+            : (ph->recreate_pholder!=NULL
+               ? pholder_do_target(ph->recreate_pholder)
+               : NULL));
 }
 
 
