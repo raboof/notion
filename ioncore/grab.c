@@ -2,7 +2,7 @@
  * ion/ioncore/grab.c
  * 
  * Copyright (c) Lukas Schroeder 2002,
- *               Tuomo Valkonen 2003-2007.
+ *               Tuomo Valkonen 2003-2008.
  *
  * See the included file LICENSE for details.
  * 

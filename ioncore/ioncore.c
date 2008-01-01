@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/ioncore.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2008. 
  *
  * See the included file LICENSE for details.
  */
@@ -73,7 +73,7 @@ WGlobal ioncore_g;
 static const char *progname="ion";
 
 static const char ioncore_copy[]=
-    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2007.";
+    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2008.";
 
 static const char ioncore_license[]=DUMMY_TR(
     "This software is licensed under the GNU Lesser General Public License\n"

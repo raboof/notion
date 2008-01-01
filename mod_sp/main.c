@@ -1,7 +1,7 @@
 /*
  * ion/mod_sp/main.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
+ * Copyright (c) Tuomo Valkonen 2004-2008. 
  *
  * See the included file LICENSE for details.
  */

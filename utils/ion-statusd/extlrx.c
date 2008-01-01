@@ -1,7 +1,7 @@
 /*
  * ion/utils/ion-statusd/extlrx.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2006.
+ * Copyright (c) Tuomo Valkonen 2004-2008.
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by

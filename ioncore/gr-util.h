@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/gr-util.h
  *
- * Copyright (c) Tuomo Valkonen 2007. 
+ * Copyright (c) Tuomo Valkonen 2007-2008. 
  *
  * See the included file LICENSE for details.
  */

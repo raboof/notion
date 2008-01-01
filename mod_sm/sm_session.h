@@ -1,7 +1,7 @@
 /*
  * ion/mod_sm/sm_session.h
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
+ * Copyright (c) Tuomo Valkonen 2004-2008. 
  * 
  * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
  *

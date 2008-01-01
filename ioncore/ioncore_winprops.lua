@@ -1,7 +1,7 @@
 --
 -- ion/share/ioncore_winprops.lua
 -- 
--- Copyright (c) Tuomo Valkonen 2004-2007.
+-- Copyright (c) Tuomo Valkonen 2004-2008.
 --
 -- See the included file LICENSE for details.
 --

@@ -1,9 +1,9 @@
 /*
  * config.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2008.
  *
- * FOOBARBAZQUK
+ * See the included file LICENSE for details.
  */
 
 #ifndef ION_CONFIG_H
