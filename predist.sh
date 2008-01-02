@@ -31,9 +31,9 @@ if test "$1" != "-snapshot"; then
         echo "Invalid package name $dir."
         exit 1
     else
-        versdef="#define ION_VERSION \"${release}\""
-        perl -p -i -e "s/^#define ION_VERSION.*/$versdef/" version.h
-        perl -p -i -e "s/ION_VERSION/$release/" build/ac/configure.ac
+        versdef="#define ION_RELEASE \"${release}\""
+        perl -p -i -e "s/^#define ION_RELEASE.*/$versdef/" version.h
+        perl -p -i -e "s/ION_RELEASE/$release/" build/ac/configure.ac
     fi
 fi
 
