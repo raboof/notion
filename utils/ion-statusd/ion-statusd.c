@@ -161,7 +161,7 @@ int main(int argc, char*argv[])
     
     libtu_init(argv[0]);
 
-#ifdef CF_RELOCATABLE    
+#ifdef STATUSD_LOCATION
     prefix_set(argv[0], STATUSD_LOCATION);
 #endif
 
