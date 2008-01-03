@@ -63,6 +63,7 @@ static bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode,
     }
     
     if(framemode!=FRAME_MODE_UNKNOWN){
+        /* TODO: remove/obsolete this special case */
         WFramedParam fpa=FRAMEDPARAM_INIT;
         
         fpa.mode=framemode;
@@ -83,16 +84,19 @@ static bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode,
     }else{
         WStacking *st=ioncore_find_stacking(reg);
         
+        ap.level_set=TRUE;
+        ap.level=framelevel+1;
+
         if(st!=NULL){
             ap.szplcy=st->szplcy;
             ap.szplcy_set=TRUE;
             
-            /*ap.level_set=TRUE;
-            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);*/
+            /* Hack for modal detached queries, while transients become
+             * non-modal detached.
+             */
+            if(st->level>STACKING_LEVEL_MODAL1)
+                ap.level=st->level;
         }
-        
-        ap.level_set=TRUE;
-        ap.level=framelevel+1;
         
         ap.geom_set=TRUE;
         get_relative_geom(&ap.geom, reg, (WRegion*)grp);
