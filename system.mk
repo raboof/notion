@@ -113,7 +113,8 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # On some other systems you may need to explicitly link against libintl.
 #EXTRA_LIBS += -lintl
 # You may also need to give the location of its headers. The following
-# should work on Mac OS X (which needs the above option as well).
+# should work on Mac OS X (which needs the above option as well) with
+# macports.
 #EXTRA_INCLUDES += -I/opt/local/include
 
 
