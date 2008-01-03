@@ -3,10 +3,7 @@
  *
  * Copyright (c) Tuomo Valkonen 2004-2008.
  *
- * Ion is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
+ * See the included file LICENSE for details.
  */
 
 #include <string.h>
@@ -69,15 +66,15 @@ static const char statusd_copy[]=
 
 
 static const char statusd_license[]=DUMMY_TR(
-    "This program is free software; you can redistribute it and/or\n"
-    "modify it under the terms of the GNU Lesser General Public\n"
-    "License as published by the Free Software Foundation; either\n"
-    "version 2.1 of the License, or (at your option) any later version.\n"
+    "This software is licensed under the GNU Lesser General Public License\n"
+    "(LGPL), version 2.1, extended with terms applying to the use of the name\n"
+    "of the project, Ion(tm), unless otherwise indicated in components taken\n"
+    "from elsewhere. For details, see the file LICENSE that you should have\n"
+    "received with this software.\n"
     "\n"
     "This program is distributed in the hope that it will be useful,\n"
     "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
-    "Lesser General Public License for more details.\n");
+    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"); 
 
 
 /* new_informs=TRUE because we should always print period when 
