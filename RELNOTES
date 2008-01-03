@@ -1,4 +1,12 @@
 
+ion-3rc-20080103
+----------------
+
+This release features a few minor fixes to behavioural regressions
+in the previous release, as well as some build configuration file
+self-documentation improvements.
+
+
 ion-3rc-20071220
 ----------------
 
