@@ -18,6 +18,7 @@
 #include <libtu/dlist.h>
 #include <libtu/output.h>
 #include <libtu/locale.h>
+#include <libtu/debug.h>
 #include "defer.h"
 
 
@@ -78,7 +79,7 @@ static void defer_watch_handler(Watch *w, Obj *obj)
     
     free_defer(d);
     
-    warn(TR("Object destroyed while deferred actions are still pending."));
+    D(warn(TR("Object destroyed while deferred actions are still pending.")));
 }
 
 
