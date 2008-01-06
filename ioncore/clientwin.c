@@ -508,10 +508,7 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
                 
                 xwindow_unmanaged_selectinput(win, 0);
                 xwindow_unmanaged_selectinput(icon_win, StructureNotifyMask);
-
-                win=icon_win;
-                attr=icon_attr;
-
+                
                 /* Copy WM_CLASS as _ION_DOCKAPP_HACK */
 
                 p=xwindow_get_text_property(win, XA_WM_CLASS, &n);
@@ -525,6 +522,9 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
                     xwindow_set_text_property(icon_win, ioncore_g.atom_dockapp_hack,
                                               pdummy, 2);
                 }
+                
+                win=icon_win;
+                attr=icon_attr;
             }
         }
         
