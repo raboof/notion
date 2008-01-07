@@ -11,34 +11,20 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-SOURCES=ion.c
+EXECUTABLE = ion3
 
-TARGETS=ion3
+SOURCES = ion.c
 
-INCLUDES += $(X11_INCLUDES) 
+INCLUDES += $(X11_INCLUDES)
 INCLUDES += $(LIBMAINLOOP_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
 INCLUDES += -I..
 
-LIBS += $(X11_LIBS)
+LIBS += $(X11_LIBS) -lSM -lICE
 LIBS += $(WHOLEA) $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS) $(NO_WHOLEA)
 LIBS += $(LUA_LIBS) $(DL_LIBS)
 LIBS += -lm
 
-ifeq ($(PRELOAD_MODULES),1)
-EXT_OBJS += $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
-DEPEND_DEPENDS += preload.c
-SOURCES += preload.c
-TO_CLEAN += preload.c
-LIBS += -lSM -lICE
-else
-LDFLAGS += $(EXPORT_DYNAMIC)
-WHOLEA = -Wl,-whole-archive
-NO_WHOLEA = -Wl,-no-whole-archive
-endif
-
-ifeq ($(RELOCATABLE),1)
-DEFINES += -DCF_RELOCATABLE_ION3_LOCATION=\"$(BINDIR)/ion3\"
-endif
+MODULE_PATH = $(TOPDIR)
 
 EXT_OBJS += ../ioncore/ioncore.a
 
@@ -54,12 +40,6 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-ion3: $(OBJS) $(EXT_OBJS)
-	$(CC) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
 
-preload.c:
-	$(LUA) ../build/mkpreload.lua $(MODULE_LIST) > preload.c
+_install: executable_install
 
-_install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALLBIN) ion3 $(BINDIR)

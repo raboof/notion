@@ -158,8 +158,8 @@ int main(int argc, char*argv[])
     
     libtu_init(argv[0]);
 
-#ifdef CF_RELOCATABLE_STATUSD_LOCATION
-    prefix_set(argv[0], CF_RELOCATABLE_STATUSD_LOCATION);
+#ifdef CF_RELOCATABLE_BIN_LOCATION
+    prefix_set(argv[0], CF_RELOCATABLE_BIN_LOCATION);
 #endif
 
     extl_init();

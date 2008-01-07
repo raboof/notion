@@ -39,6 +39,9 @@ VARDIR=/var/cache/ion3
 # Message catalogs
 LOCALEDIR=$(PREFIX)/share/locale
 
+# Executable suffix (for Cygwin).
+#BIN_SUFFIX = .exe
+
 
 ##
 ## Modules

@@ -16,6 +16,17 @@ LUA_COMPILED := $(subst .lua,.lc, $(LUA_SOURCES))
 TARGETS := $(TARGETS) $(LUA_COMPILED)
 endif
 
+ifdef EXTRA_EXECUTABLE
+EXECUTABLE := $(EXTRA_EXECUTABLE)
+BINDIR_ := $(EXTRABINDIR)
+endif
+
+ifdef EXECUTABLE
+BINDIR_ ?= $(BINDIR)
+EXECUTABLE_ := $(EXECUTABLE)$(BIN_SUFFIX)
+TARGETS := $(TARGETS) $(EXECUTABLE_)
+endif
+
 
 # Main targets
 ######################################
@@ -86,6 +97,42 @@ endif # !MAKE_EXPORTS
 ######################################
 
 OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
+
+
+ifdef EXECUTABLE
+
+ifdef MODULE_LIST
+ifdef MODULE_PATH
+ifeq ($(PRELOAD_MODULES),1)
+EXT_OBJS += $(foreach mod, $(MODULE_LIST), $(MODULE_PATH)/$(mod)/$(mod).a)
+DEPEND_DEPENDS += preload.c
+SOURCES += preload.c
+TO_CLEAN += preload.c
+else # !PRELOAD_MODULES
+LDFLAGS += $(EXPORT_DYNAMIC)
+WHOLEA = -Wl,-whole-archive
+NO_WHOLEA = -Wl,-no-whole-archive
+endif # !PRELOAD_MODULES
+
+preload.c:
+	$(LUA) $(TOPDIR)/build/mkpreload.lua $(MODULE_LIST) > preload.c
+
+endif # MODULE_PATH
+endif # MODULE_LIST
+
+ifeq ($(RELOCATABLE),1)
+DEFINES += -DCF_RELOCATABLE_BIN_LOCATION=\"$(BINDIR_)/$(EXECUTABLE)\"
+endif
+
+$(EXECUTABLE_): $(OBJS) $(EXT_OBJS)
+	$(CC) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
+
+executable_install:
+	$(INSTALLDIR) $(BINDIR_)
+	$(INSTALLBIN) $(EXECUTABLE_) $(BINDIR_)
+
+endif # EXECUTABLE
+
 
 ifdef MODULE
 
