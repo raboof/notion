@@ -297,6 +297,7 @@ EXTL_EXPORT
 ExtlTab statusd_getloadavg()
 {
     ExtlTab t=extl_create_table();
+#ifndef CF_NO_GETLOADAVG
     double l[3];
     int n;
     
@@ -308,7 +309,7 @@ ExtlTab statusd_getloadavg()
         extl_table_sets_d(t, "5min", l[1]);
     if(n>=3)
         extl_table_sets_d(t, "15min", l[2]);
-        
+#endif
     return t;
 }
 

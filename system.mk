@@ -132,6 +132,9 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # monotonic clock at all (which Ion can live with, and usually detect).
 EXTRA_LIBS += -lrt
 
+# Cygwin needs this.
+#DEFINES += -DCF_NO_GETLOADAVG
+
 
 #
 # If you're using/have gcc, it is unlikely that you need to modify
