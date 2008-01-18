@@ -57,7 +57,7 @@ ioncore.set{
 -- modules with 'mod' replaced by 'cfg'.
 dopath("cfg_defaults")
 
--- Load configuration of the Ion 'core'
+-- Load configuration of the Ion 'core'. Most bindings are here.
 --dopath("cfg_ioncore")
 
 -- Load some kludges to make apps behave better.
@@ -66,7 +66,8 @@ dopath("cfg_defaults")
 -- Define some layouts. 
 --dopath("cfg_layouts")
 
--- Load some modules. 
+-- Load some modules. Bindings and other configuration specific to modules
+-- are in the files cfg_modulename.lua.
 --dopath("mod_query")
 --dopath("mod_menu")
 --dopath("mod_tiling")
