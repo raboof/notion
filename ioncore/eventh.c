@@ -307,8 +307,10 @@ void ioncore_handle_enter_window(XEvent *ev)
     XEnterWindowEvent *eev=&(ev->xcrossing);
     WRegion *reg=NULL;
     
-    if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
+    if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL ||
+       ioncore_g.no_mousefocus){
         return;
+    }
         
     if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
         return;

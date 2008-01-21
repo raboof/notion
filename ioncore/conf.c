@@ -77,7 +77,7 @@ static ExtlFn get_layout_fn;
  *                          \codestr{lrud} (left-right, then up-down), or 
  *                          \codestr{random}. \\
  *  \var{mousefocus} & (string) Mouse focus mode: 
- *                     \codestr{disable} or \codestr{sloppy}. \\
+ *                     \codestr{disabled} or \codestr{sloppy}. \\
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
  *  \var{autoraise} & (boolean) Autoraise regions in groups on goto. \\
  * \end{tabularx}
