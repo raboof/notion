@@ -11,7 +11,7 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-EXECUTABLE = ion3
+EXECUTABLE = ion3plus
 
 SOURCES = ion.c
 

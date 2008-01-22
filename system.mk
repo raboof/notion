@@ -9,7 +9,7 @@
 # Installation path prefix. Unless you know what you're doing, the default
 # of /usr/local is likely the correct choice.
 #DIST: PREFIX=/usr/local
-PREFIX=/usr/local/ion-3
+PREFIX=/usr/local/ion-3plus
 
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
@@ -17,25 +17,25 @@ PREFIX=/usr/local/ion-3
 # Main binaries
 BINDIR=$(PREFIX)/bin
 # Configuration .lua files
-ETCDIR=$(PREFIX)/etc/ion3
+ETCDIR=$(PREFIX)/etc/ion3plus
 # Some .lua files and ion-* shell scripts
-SHAREDIR=$(PREFIX)/share/ion3
+SHAREDIR=$(PREFIX)/share/ion3plus
 # Manual pages
 MANDIR=$(PREFIX)/share/man
 # Some documents
-DOCDIR=$(PREFIX)/share/doc/ion3
+DOCDIR=$(PREFIX)/share/doc/ion3plus
 # Nothing at the moment
-INCDIR=$(PREFIX)/include/ion3
+INCDIR=$(PREFIX)/include/ion3plus
 # Nothing at the moment
 LIBDIR=$(PREFIX)/lib
 # Modules
-MODULEDIR=$(LIBDIR)/ion3/mod
+MODULEDIR=$(LIBDIR)/ion3plus/mod
 # Compiled Lua source code
-LCDIR=$(LIBDIR)/ion3/lc
+LCDIR=$(LIBDIR)/ion3plus/lc
 # ion-completefile (does not belong in SHAREDIR being a binary file)
-EXTRABINDIR=$(LIBDIR)/ion3/bin
+EXTRABINDIR=$(LIBDIR)/ion3plus/bin
 # For ion-completeman system-wide cache
-VARDIR=/var/cache/ion3
+VARDIR=/var/cache/ion3plus
 # Message catalogs
 LOCALEDIR=$(PREFIX)/share/locale
 

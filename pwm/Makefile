@@ -11,7 +11,7 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-EXECUTABLE = pwm3
+EXECUTABLE = pwm3plus
 
 SOURCES = pwm.c
 
