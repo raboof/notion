@@ -561,8 +561,9 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
 
     param.geom=REGION_GEOM(cwin);
     param.maprq=maprq;
-    param.switchto=(init_state!=IconicState && clientwin_get_switchto(cwin));
     param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
+    param.switchto=(init_state!=IconicState && 
+                    (param.jumpto || clientwin_get_switchto(cwin)));
     param.gravity=(cwin->size_hints.flags&PWinGravity
                    ? cwin->size_hints.win_gravity
                    : ForgetGravity);
@@ -597,7 +598,11 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
     }
     
     if(postmanage_check(cwin, &attr)){
-        if(param.jumpto && ioncore_g.focus_next==NULL)
+        /* Check for focus_next==NULL does not play nicely with
+         * pointer_focus_hack.
+         */
+        /*if(param.jumpto && ioncore_g.focus_next==NULL)*/
+        if(param.jumpto && !region_manager_is_focusnext((WRegion*)cwin))
             region_goto((WRegion*)cwin);
         hook_call_o(clientwin_mapped_hook, (Obj*)cwin);
         return cwin;

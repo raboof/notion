@@ -308,7 +308,7 @@ bool region_is_active(WRegion *reg, bool pseudoact_ok)
 }
 
 
-static bool region_manager_is_focusnext(WRegion *reg)
+bool region_manager_is_focusnext(WRegion *reg)
 {
     if(reg==NULL || ioncore_g.focus_next==NULL)
         return FALSE;

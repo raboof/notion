@@ -39,6 +39,7 @@ extern void region_lost_focus(WRegion *reg);
 
 /* May reg transfer focus to its children? */
 extern bool region_may_control_focus(WRegion *reg);
+extern bool region_manager_is_focusnext(WRegion *reg);
 
 /* Does reg have focus? */
 extern bool region_is_active(WRegion *reg, bool pseudoact_ok);
