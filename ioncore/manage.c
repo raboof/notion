@@ -72,6 +72,9 @@ static WPHolder *try_target(WClientWin *cwin, const WManageParams *param,
     if(r==NULL)
         return NULL;
     
+    if(!region_same_rootwin(r, (WRegion*)cwin))
+        return NULL;
+    
     return region_prepare_manage(r, cwin, param, MANAGE_PRIORITY_NONE);
 }
 
