@@ -3,7 +3,14 @@
 --
 -- This file only includes some settings that are rather frequently altered.
 -- The rest of the settings are in cfg_ioncore.lua and individual modules'
--- configuration files (cfg_modulename.lua).
+-- configuration files (cfg_modulename.lua). 
+--
+-- When any binding and other customisations that you want are minor, it is 
+-- recommended that you include them in a copy of this file in ~/.ion3/.
+-- Simply create or copy the relevant settings at the end of this file (from
+-- the other files), recalling that a key can be unbound by passing 'nil' 
+-- (without the quotes) as the callback. For more information, please see 
+-- the Ion configuration manual available from the Ion Web page.
 --
 
 -- Set default modifiers. Alt should usually be mapped to Mod1 on
