@@ -1036,7 +1036,7 @@ static void reset_scroll_timer()
  * 
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
- *  \var{scroll_amount} & Number of pixels to scroll at a time 
+ *  \var{scroll_amount} & Number of pixels to scroll at a time in
  *                        pointer-controlled menus when one extends
  *                        beyond a border of the screen and the pointer
  *                        touches that border. \\
