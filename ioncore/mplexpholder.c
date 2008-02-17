@@ -84,17 +84,21 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
         UNLINK_ITEM(ph->after->phs, ph, next, prev);
     }else if(mplex!=NULL && on_ph_list(mplex->misc_phs, ph)){
         UNLINK_ITEM(mplex->misc_phs, ph, next, prev);
-    }else{
+    }else if(ph->prev!=NULL){
         WMPlexPHolder *next=ph->next;
-        
-        if(ph->prev!=NULL)
-            ph->prev->next=next;
+
+        ph->prev->next=next;
 
         if(next==NULL){
             next=get_head(ph);
             assert(next->prev==ph);
         }
         next->prev=ph->prev;
+    }else{
+        /* ph should not be on a list, if prev pointer is NULL (whereas
+         * next alone can be NULL in our semi-doubly-linked lists).
+         */
+        assert(ph->next==NULL);
     }
     
     ph->after=NULL;

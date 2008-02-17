@@ -72,17 +72,21 @@ void grouppholder_do_unlink(WGroupPHolder *ph)
     
     if(group!=NULL){
         UNLINK_ITEM(group->phs, ph, next, prev);
-    }else{
+    }else if(ph->prev!=NULL){
         WGroupPHolder *next=ph->next;
         
-        if(ph->prev!=NULL)
-            ph->prev->next=next;
+        ph->prev->next=next;
 
         if(next==NULL){
             next=get_head(ph);
             assert(next->prev==ph);
         }
         next->prev=ph->prev;
+    }else{
+        /* ph should not be on a list, if prev pointer is NULL (whereas
+         * next alone can be NULL in our semi-doubly-linked lists).
+         */
+        assert(ph->next==NULL);
     }
     
     ph->group=NULL;
