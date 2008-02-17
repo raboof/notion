@@ -285,10 +285,8 @@ static bool group_empty_for_bottom_stdisp(WGroup *ws)
 static WRegion *groupws_managed_disposeroot(WGroupWS *ws, WRegion *reg)
 {
     if(group_bottom(&ws->grp)==reg){
-        if(group_empty_for_bottom_stdisp(&ws->grp)){
-            WRegion *tmpr=region_disposeroot((WRegion*)ws);
-            return (tmpr!=NULL ? tmpr : reg);
-        }
+        if(group_empty_for_bottom_stdisp(&ws->grp))
+            return region_disposeroot((WRegion*)ws);
     }
     
     return reg;
