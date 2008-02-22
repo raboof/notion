@@ -93,7 +93,7 @@ local function dobindings(fn, bindings)
     function p.submap(kcb_, list)
         if not list then
             return function(lst)
-                       return submap(kcb_, lst)
+                       return p.submap(kcb_, lst)
                    end
         end
         return {action = "kpress", kcb = kcb_, submap = list}
@@ -205,8 +205,11 @@ local function docgroup_bindings(bindings)
     local outi=0
     
     local function parsetable(t, prefix)
-        for _, v in ipairs(t) do
-            if not v.invalid then
+        --for _, v in ipairs(t) do
+        -- ipairs doesn't like nil values, that e.g. submap_wait dummy might generate
+        for i=1,#t do
+            local v=t[i]
+            if v and not v.invalid then
                 if v.kcb then
                     v.kcb=string.gsub(v.kcb, "AnyModifier%+", "")
                 end
