@@ -133,11 +133,11 @@ WRegion *ioncore_newly_created=NULL;
 static WRegion *doit_load(WRegion *mgr,
                           WWindow *par, const WFitParams *fp,
                           WRegionDoAttachFn *cont, void *cont_param,
-                          const WRegionAttachData *data)
+                          ExtlTab tab, WPHolder **sm_ph)
 {
     WRegion *reg=NULL;
     
-    if(extl_table_gets_o(data->u.tab, "reg", (Obj**)&reg)){
+    if(extl_table_gets_o(tab, "reg", (Obj**)&reg)){
         if(!OBJ_IS(reg, WRegion))
             return FALSE;
     }/*else if(extl_table_is_bool_set(tab, "reg_use_new")){
@@ -150,8 +150,8 @@ static WRegion *doit_load(WRegion *mgr,
         return doit_reparent(mgr, par, fp, cont, cont_param, reg);
     }else{
         WLP p;
-        p.tab=data->u.tab;
-        p.sm_ph_p=NULL;
+        p.tab=tab;
+        p.sm_ph_p=sm_ph;
         
         return doit_new(mgr, par, fp, cont, cont_param,
                         (WRegionCreateFn*)wrap_load, &p);
@@ -164,13 +164,8 @@ WRegion *region_attach_load_helper(WRegion *mgr,
                                    WRegionDoAttachFn *fn, void *fn_param,
                                    ExtlTab tab, WPHolder **sm_ph)
 {
-    WLP p;
-    p.tab=tab;
-    p.sm_ph_p=sm_ph;
-    
-    return doit_new(mgr, par, fp, fn, fn_param,
-                    (WRegionCreateFn*)wrap_load, &p);
-}                                   
+    return doit_load(mgr, par, fp, fn, fn_param, tab, sm_ph);
+}
 
 
 WRegion *region_attach_helper(WRegion *mgr,
@@ -182,7 +177,7 @@ WRegion *region_attach_helper(WRegion *mgr,
         return doit_new(mgr, par, fp, fn, fn_param, 
                         data->u.n.fn, data->u.n.param);
     }else if(data->type==REGION_ATTACH_LOAD){
-        return doit_load(mgr, par, fp, fn, fn_param, data);
+        return doit_load(mgr, par, fp, fn, fn_param, data->u.tab, NULL);
     }else if(data->type==REGION_ATTACH_REPARENT){
         return doit_reparent(mgr, par, fp, fn, fn_param, data->u.reg);
     }else{
