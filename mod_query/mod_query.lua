@@ -910,7 +910,7 @@ function mod_query.get_hostnicks(mplex)
                 patterns=pat
             elseif string.find(substr, "^[nN][aA][mM][eE]")
                 and patterns then
-                for s in string.gfind(patterns, "%S+") do
+                for s in string.gmatch(patterns, "%S+") do
                     if not string.find(s, "[*?]") then
                         table.insert(mod_query.hostnicks, s)
                     end
@@ -1068,7 +1068,7 @@ function mod_query.do_complete_lua(env, str)
     
     -- Descend into tables
     if tocomp and string.len(tocomp)>=1 then
-        for t in string.gfind(tocomp, "([^.:]*)[.:]") do
+        for t in string.gmatch(tocomp, "([^.:]*)[.:]") do
             metas=false
             if string.len(t)==0 then
                 comptab=env;
