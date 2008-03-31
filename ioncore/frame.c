@@ -939,7 +939,13 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     int mode=FRAME_MODE_UNKNOWN;
     WFrame *frame;
     
-    extl_table_gets_i(tab, "mode", &mode);
+    if(!extl_table_gets_i(tab, "mode", &mode)){
+        char *tmp;
+        if(extl_table_gets_s(tab, "mode", &tmp)){
+            mode=stringintmap_value(frame_modes, tmp, mode);
+            free(tmp);
+        }
+    }
     
     frame=create_frame(par, fp, mode);
     
