@@ -321,6 +321,7 @@ static StringIntMap szplcy_specs[] = {
     {"free_glue_southwest",  SIZEPOLICY_FREE_GLUE__SOUTHWEST},
     {"free_glue_south",      SIZEPOLICY_FREE_GLUE__SOUTH},
     {"free_glue_southeast",  SIZEPOLICY_FREE_GLUE__SOUTHEAST},
+    {"unconstrained",   SIZEPOLICY_UNCONSTRAINED},
     { NULL,             SIZEPOLICY_DEFAULT}   /* end marker */
 };
 
