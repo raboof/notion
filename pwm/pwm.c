@@ -104,7 +104,7 @@ int main(int argc, char*argv[])
 
     localedir=prefix_add(LOCALEDIR);
     
-    if(!ioncore_init("pwm3", argc, argv, localedir))
+    if(!ioncore_init(CF_EXECUTABLE, argc, argv, localedir))
         return EXIT_FAILURE;
 
     if(localedir!=NULL)
@@ -118,7 +118,7 @@ int main(int argc, char*argv[])
 #endif
     prefix_wrap_simple(extl_add_searchdir, SHAREDIR);
     prefix_wrap_simple(extl_add_searchdir, LCDIR);
-    extl_set_userdirs("pwm3");
+    extl_set_userdirs(CF_EXECUTABLE);
 
     optparser_init(argc, argv, OPTP_MIDLONG, pwm_opts);
     
