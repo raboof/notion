@@ -646,13 +646,6 @@ WStacking *mplex_find_to_focus(WMPlex *mplex,
 }
 
 
-static WStacking *mplex_do_to_focus(WMPlex *mplex, WStacking *to_try,
-                                    PtrList **hidelist)
-{
-    return mplex_find_to_focus(mplex, to_try, NULL, hidelist);
-}
-
-
 static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
                                        WStacking *to_try, 
                                        PtrList **hidelist, bool *within)
@@ -672,7 +665,7 @@ static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
         }
     }
     
-    st=mplex_do_to_focus(mplex, node, hidelist);
+    st=mplex_find_to_focus(mplex, node, NULL, hidelist);
     
     if(st==node && within!=NULL)
         *within=TRUE;
@@ -699,37 +692,55 @@ static WStacking *has_stacking_within(WMPlex *mplex, WRegion *reg)
 }
 
 
-static WStacking *mplex_to_focus(WMPlex *mplex)
+/* 1. Try keep focus in REGION_ACTIVE_SUB.
+ * 2. Try given `node`.
+ * 3. Choose something else, attempting previous in focus history
+ *    (unless `node` was set).
+ */
+static WStacking *mplex_to_focus(WMPlex *mplex, WStacking *node)
 {
-    WStacking *to_try=NULL;
+    WStacking *foc=NULL, *fallback=NULL;
     WRegion *reg=NULL;
+    bool within=FALSE;
     WStacking *st;
     
-    to_try=maybe_focusable(REGION_ACTIVE_SUB(mplex));
+    foc=maybe_focusable(REGION_ACTIVE_SUB(mplex));
     
-    if(to_try==NULL){
-        /* Search focus history */
+    if(foc==NULL && node==NULL){
+        /* Search focus history if no specific attempt set.*/
         for(reg=ioncore_g.focus_current; reg!=NULL; reg=reg->active_next){
-            to_try=has_stacking_within(mplex, reg);
-            if(to_try!=NULL)
+            foc=has_stacking_within(mplex, reg);
+            if(foc!=NULL)
                 break;
         }
     }
     
-    st=mplex_do_to_focus(mplex, to_try, NULL);
+    if(foc!=NULL){
+        fallback=mplex_find_to_focus(mplex, foc, NULL, NULL);
+        if(fallback!=foc)
+            foc=NULL;
+    }
     
-    return (st!=NULL 
-            ? st 
-            : (mplex->mx_current!=NULL
-               ? mplex->mx_current->st
-               : NULL));
+    if(foc==NULL && node!=NULL)
+        foc=mplex_do_to_focus_on(mplex, node, NULL, NULL, &within);
+        
+    if(foc==NULL || !within)
+        foc=fallback;
+    
+    return foc;
 }
 
 
 void mplex_do_set_focus(WMPlex *mplex, bool warp)
 {
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        WStacking *st=mplex_to_focus(mplex);
+        WStacking *st=mplex_to_focus(mplex, NULL);
+        
+        if(st==NULL){
+            st=(mplex->mx_current!=NULL
+                ? mplex->mx_current->st
+                : NULL);
+        }
         
         if(st!=NULL){
             region_do_set_focus(st->reg, warp);
@@ -738,6 +749,15 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
     }
     
     window_do_set_focus((WWindow*)mplex, warp);
+}
+
+
+static void mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
+{
+    WStacking *foc=mplex_to_focus(mplex, node);
+    
+    if(foc!=NULL)
+        region_maybewarp(foc->reg, warp);
 }
 
 
@@ -830,24 +850,6 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
         if(call_changed)
             mplex_managed_changed(mplex, MPLEX_CHANGE_SWITCHONLY, TRUE, sub);
     }
-}
-
-
-static bool mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
-{
-    WStacking *foc=NULL;
-    bool within=FALSE;
-    
-    if(node!=NULL)
-        foc=mplex_do_to_focus_on(mplex, node, NULL, NULL, &within);
-        
-    if(foc==NULL || !within)
-        foc=mplex_to_focus(mplex);
-    
-    if(foc!=NULL)
-        region_maybewarp(foc->reg, warp);
-    
-    return within;
 }
 
 
