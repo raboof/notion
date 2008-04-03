@@ -716,7 +716,11 @@ static WStacking *mplex_to_focus(WMPlex *mplex, WStacking *node)
     }
     
     if(foc!=NULL){
-        fallback=mplex_find_to_focus(mplex, foc, NULL, NULL);
+        /*fallback=mplex_find_to_focus(mplex, foc, NULL, NULL);*/
+        /* In the history search case, 'foc' might point to a group,
+         * since we don't properly try to find a stacking within it...
+         */
+        fallback=mplex_do_to_focus_on(mplex, foc, NULL, NULL, NULL);
         if(fallback!=foc)
             foc=NULL;
     }
