@@ -34,7 +34,7 @@
 void ioncore_groupws_set(ExtlTab tab)
 {
     char *method=NULL;
-    ExtlTab t;
+    int fpp;
     
     if(extl_table_gets_s(tab, "float_placement_method", &method)){
         if(strcmp(method, "udlr")==0)
@@ -47,6 +47,8 @@ void ioncore_groupws_set(ExtlTab tab)
             warn(TR("Unknown placement method \"%s\"."), method);
         free(method);
     }
+    if(extl_table_gets_i(tab, "float_placement_padding", &fpp))
+        ioncore_placement_padding=maxof(0, fpp);
 }
 
 

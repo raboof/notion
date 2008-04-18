@@ -76,6 +76,9 @@ static ExtlFn get_layout_fn;
  *                          One of \codestr{udlr} (up-down, then left-right), 
  *                          \codestr{lrud} (left-right, then up-down), or 
  *                          \codestr{random}. \\
+ *  \var{float_placement_padding} & (integer) Pixels between frames when 
+ *                          \var{float_placement_method} is \codestr{udlr} or
+ *                          \codestr{lrud}. \\
  *  \var{mousefocus} & (string) Mouse focus mode: 
  *                     \codestr{disabled} or \codestr{sloppy}. \\
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\

@@ -14,6 +14,7 @@
 
 
 WFloatPlacement ioncore_placement_method=PLACEMENT_LRUD;
+int ioncore_placement_padding=1;
 
 
 static void random_placement(WRectangle box, WRectangle *g)
@@ -131,7 +132,7 @@ static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
             p=is_occupied(ws, level, &r);
             while(p!=NULL && r.y+r.h<maxy){
                 ggeom(p, &r2);
-                r.y=r2.y+r2.h+1;
+                r.y=r2.y+r2.h+ioncore_placement_padding;
                 p=is_occupied(ws, level, &r);
             }
             if(r.y+r.h<maxy && r.x+r.w<maxx){
@@ -148,7 +149,7 @@ static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
             p=is_occupied(ws, level, &r);
             while(p!=NULL && r.x+r.w<maxx){
                 ggeom(p, &r2);
-                r.x=r2.x+r2.w+1;
+                r.x=r2.x+r2.w+ioncore_placement_padding;
                 p=is_occupied(ws, level, &r);
             }
             if(r.y+r.h<maxy && r.x+r.w<maxx){
