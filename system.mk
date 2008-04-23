@@ -222,6 +222,6 @@ RM=rm
 ## Debugging
 ##
 
-#INSTALL_STRIP =
-#CFLAGS += -g
+INSTALL_STRIP =
+CFLAGS += -g
 
