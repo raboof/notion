@@ -197,8 +197,12 @@ static WRegion *recreate_handler(WWindow *par,
     
     if(grp==NULL)
         return NULL;
+        
+    rp->ph->param.whatever=(fp->mode&REGION_FIT_WHATEVER ? 1 : 0);
     
     rp->reg_ret=group_do_attach(grp, &rp->ph->param, rp->data);
+    
+    rp->ph->param.whatever=0;
     
     if(rp->reg_ret==NULL){
         destroy_obj((Obj*)grp);
@@ -209,6 +213,9 @@ static WRegion *recreate_handler(WWindow *par,
         for(phtmp=grp->phs; phtmp!=NULL; phtmp=phtmp->next)
             phtmp->group=grp;
     }
+    
+    if(fp->mode&REGION_FIT_WHATEVER)
+        REGION_GEOM(grp)=REGION_GEOM(rp->reg_ret);
     
     return (WRegion*)grp;
 }

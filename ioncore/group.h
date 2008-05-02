@@ -33,6 +33,7 @@ DECLSTRUCT(WGroupAttachParams){
     
     uint switchto:1;
     uint bottom:1;
+    uint whatever:1;
     
     int geom_weak;
     WRectangle geom;
@@ -43,7 +44,7 @@ DECLSTRUCT(WGroupAttachParams){
 };
 
 #define GROUPATTACHPARAMS_INIT \
-    {0, 0, 0, 0, 0,  0, 0,   0, {0, 0, 0, 0},  0, 0, NULL}
+    {0, 0, 0, 0, 0,  0, 0, 0,  0, {0, 0, 0, 0},  0, 0, NULL}
 
 
 DECLCLASS(WGroup){

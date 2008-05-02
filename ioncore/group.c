@@ -628,52 +628,54 @@ bool group_do_attach_final(WGroup *ws,
               ? param->level 
               : STACKING_LEVEL_NORMAL));
     
-    /* Fit */
-    szplcy=(param->szplcy_set
-            ? param->szplcy
-            : (param->bottom
-               ? SIZEPOLICY_FULL_EXACT
-               : SIZEPOLICY_UNCONSTRAINED));
-    
-    weak=(param->geom_weak_set
-          ? param->geom_weak
-          : (param->geom_set
-             ? 0
-             : REGION_RQGEOM_WEAK_ALL));
-    
-    if(param->geom_set)
-        geom_group_to_parent(ws, &param->geom, &g);
-    else
-        g=REGION_GEOM(reg);
-    
-    /* If the requested geometry does not overlap the workspaces's geometry, 
-     * position request is never honoured.
-     */
-    if((g.x+g.w<=REGION_GEOM(ws).x) ||
-       (g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w)){
-        weak|=REGION_RQGEOM_WEAK_X;
+    if(!param->whatever){
+        /* Fit */
+        szplcy=(param->szplcy_set
+                ? param->szplcy
+                : (param->bottom
+                   ? SIZEPOLICY_FULL_EXACT
+                   : SIZEPOLICY_UNCONSTRAINED));
+        
+        weak=(param->geom_weak_set
+              ? param->geom_weak
+              : (param->geom_set
+                 ? 0
+                 : REGION_RQGEOM_WEAK_ALL));
+        
+        if(param->geom_set)
+            geom_group_to_parent(ws, &param->geom, &g);
+        else
+            g=REGION_GEOM(reg);
+        
+        /* If the requested geometry does not overlap the workspaces's geometry, 
+         * position request is never honoured.
+         */
+        if((g.x+g.w<=REGION_GEOM(ws).x) ||
+           (g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w)){
+            weak|=REGION_RQGEOM_WEAK_X;
+        }
+           
+        if((g.y+g.h<=REGION_GEOM(ws).y) ||
+           (g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
+            weak|=REGION_RQGEOM_WEAK_Y;
+        }
+
+        if(weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
+            (szplcy==SIZEPOLICY_UNCONSTRAINED ||
+             szplcy==SIZEPOLICY_FREE ||
+             szplcy==SIZEPOLICY_FREE_GLUE /* without flags */)){
+            /* TODO: use 'weak'? */
+            group_calc_placement(ws, level, &g);
+        }
+
+        fp.g=REGION_GEOM(ws);
+        fp.mode=REGION_FIT_EXACT;
+
+        sizepolicy(&szplcy, reg, &g, weak, &fp);
+
+        if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
+            region_fitrep(reg, NULL, &fp);
     }
-       
-    if((g.y+g.h<=REGION_GEOM(ws).y) ||
-       (g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
-        weak|=REGION_RQGEOM_WEAK_Y;
-    }
-
-    if(weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
-        (szplcy==SIZEPOLICY_UNCONSTRAINED ||
-         szplcy==SIZEPOLICY_FREE ||
-         szplcy==SIZEPOLICY_FREE_GLUE /* without flags */)){
-        /* TODO: use 'weak'? */
-        group_calc_placement(ws, level, &g);
-    }
-
-    fp.g=REGION_GEOM(ws);
-    fp.mode=REGION_FIT_EXACT;
-
-    sizepolicy(&szplcy, reg, &g, weak, &fp);
-
-    if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
-        region_fitrep(reg, NULL, &fp);
     
     /* Add */
     st=group_do_add_managed(ws, reg, level, szplcy);
