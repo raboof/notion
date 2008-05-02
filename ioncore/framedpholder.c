@@ -13,6 +13,7 @@
 #include "frame.h"
 #include "framedpholder.h"
 #include "sizehint.h"
+#include "resize.h"
 
 
 /*{{{ Init/deinit */
@@ -70,32 +71,46 @@ void frame_adjust_to_initial(WFrame *frame, const WFitParams *fp,
                              const WFramedParam *param, WRegion *reg)
 {
     WRectangle rqg, mg;
+    WSizeHints szh;
+    int iw, ih;
  
     if(!(fp->mode&(REGION_FIT_BOUNDS|REGION_FIT_WHATEVER)))
         return;
 
     mplex_managed_geom((WMPlex*)frame, &mg);
-
+    
     /* Adjust geometry */
     if(!param->inner_geom_gravity_set){
+        iw=REGION_GEOM(reg).w;
+        ih=REGION_GEOM(reg).h;
         rqg.x=REGION_GEOM(frame).x;
         rqg.y=REGION_GEOM(frame).y;
-        rqg.w=maxof(1, REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w));
-        rqg.h=maxof(1, REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h));
     }else{
         int bl=mg.x;
         int br=REGION_GEOM(frame).w-(mg.x+mg.w);
         int bt=mg.y;
         int bb=REGION_GEOM(frame).h-(mg.y+mg.h);
         
+        iw=param->inner_geom.w;
+        ih=param->inner_geom.h;
+        
         rqg.x=(/*fp->g.x+*/param->inner_geom.x+
                xgravity_deltax(param->gravity, bl, br));
         rqg.y=(/*fp->g.y+*/param->inner_geom.y+
                xgravity_deltay(param->gravity, bt, bb));
-        rqg.w=maxof(1, param->inner_geom.w+(REGION_GEOM(frame).w-mg.w));
-        rqg.h=maxof(1, param->inner_geom.h+(REGION_GEOM(frame).h-mg.h));
     }
-
+    
+    /* Some apps seem to request geometries inconsistent with their size hints,
+     * so correct for that here.
+     * Because WGroup(CW) sets no_constrain on the size hints, we have
+     * to set override_no_constrain to force the frame to have the size
+     * of the 'bottom' of the group.
+     */
+    region_size_hints(reg, &szh);
+    sizehints_correct(&szh, &iw, &ih, TRUE, TRUE);
+    rqg.w=maxof(1, iw+(REGION_GEOM(frame).w-mg.w));
+    rqg.h=maxof(1, ih+(REGION_GEOM(frame).h-mg.h));
+    
     if(!(fp->mode&REGION_FIT_WHATEVER))
         rectangle_constrain(&rqg, &fp->g);
     
