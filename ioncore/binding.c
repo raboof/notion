@@ -95,18 +95,13 @@ static int compare_bindings(const WBinding *a, const WBinding *b)
 }
 
 /* This is only used for searching AnyKey etc. */
-static int compare_bindings_ksb(const WBinding *a, const WBinding *b)
+static int compare_bindings_any(const WBinding *a, const WBinding *b)
 {
-    int r=CVAL(a, b, act);
-    if(r==0){
+    int r=compare_bindings(a, b);
+    
+    if(r==0)
         r=CVAL(a, b, ksb);
-        if(r==0){
-            r=CVAL(a, b, state);
-            if(r==0){
-                r=CVAL(a, b, area);
-            }
-        }
-    }
+    
     return r;
 }
                     
@@ -398,7 +393,7 @@ void binding_grab_on(const WBinding *binding, Window win)
 
 void binding_ungrab_on(const WBinding *binding, Window win)
 {
-    if(binding->act==BINDING_KEYPRESS){
+    if(binding->act==BINDING_KEYPRESS && binding->kcb!=0){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
         XUngrabKey(ioncore_g.dpy, binding->kcb, binding->state, win);
 #else
@@ -444,7 +439,7 @@ static WBinding *search_binding(WBindmap *bindmap, WBinding *binding)
 }
 
 
-static WBinding *search_binding_ksb(WBindmap *bindmap, WBinding *binding)
+static WBinding *search_binding_any(WBindmap *bindmap, WBinding *binding)
 {
     Rb_node node;
     int found=0;
@@ -453,7 +448,7 @@ static WBinding *search_binding_ksb(WBindmap *bindmap, WBinding *binding)
         return NULL;
     
     node=rb_find_gkey_n(bindmap->bindings, binding,
-                        (Rb_compfn*)compare_bindings_ksb, &found);
+                        (Rb_compfn*)compare_bindings_any, &found);
     
     if(found==0)
         return NULL;
@@ -494,13 +489,14 @@ static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
 
         if(binding==NULL){
             tmp.state=state;
+            tmp.kcb=0;
             tmp.ksb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
             
-            binding=search_binding_ksb(bindmap, &tmp);
+            binding=search_binding_any(bindmap, &tmp);
 
             if(binding==NULL){
                 tmp.state=AnyModifier;
-                binding=search_binding_ksb(bindmap, &tmp);
+                binding=search_binding_any(bindmap, &tmp);
             }
         }
     }
