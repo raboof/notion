@@ -82,7 +82,7 @@ end
 --DOC
 -- Export a list of functions from \var{lib} into global namespace.
 function export(lib, ...)
-    for k, v in pairs(arg) do
+    for k, v in pairs({...}) do
         _G[v]=lib[v]
     end
 end

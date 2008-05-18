@@ -11,6 +11,7 @@ local ioncore=_G.ioncore
 local winprops={}
 
 local function ifnil(...)
+    local arg={...}
     local n=#arg
     local function nxt(_, i)
         local j=i+1

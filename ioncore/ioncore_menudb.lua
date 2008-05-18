@@ -45,11 +45,12 @@ end
 -- of menu entries.
 function ioncore.defctxmenu(ctx, ...)
     local tab, add
-    if #arg>1 and type(arg[1])=="string" then
-        tab=arg[2]
-        tab.label=ioncore.gettext(arg[1])
+    local a1, a2 = ...
+    if a2 and type(a1)=="string" then
+        tab=a2
+        tab.label=ioncore.gettext(a1)
     else
-        tab=arg[1]
+        tab=a1
     end
     ioncore.defmenu("ctxmenu-"..ctx, tab)
 end

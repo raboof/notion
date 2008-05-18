@@ -1027,6 +1027,7 @@ function mod_query.do_handle_lua(mplex, env, code)
     local print_res
     local function collect_print(...)
         local tmp=""
+        local arg={...}
         local l=#arg
         for i=1,l do
             tmp=tmp..tostring(arg[i])..(i==l and "\n" or "\t")

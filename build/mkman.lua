@@ -20,7 +20,7 @@ local function gettext(x)
 end
 
 local function TR(x, ...)
-    return string.format(gettext(x), unpack(arg))
+    return string.format(gettext(x), ...)
 end
 
 local function read_translations(pofile)
@@ -314,7 +314,7 @@ local function doargs(a)
     end
 end
 
-doargs(arg)
+doargs({...})
 
 local f, err=io.open(infile)
 if not f then

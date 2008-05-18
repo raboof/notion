@@ -73,7 +73,7 @@ end
 --DOC
 -- gettext+string.format
 function ioncore.TR(s, ...)
-    return string.format(ioncore.gettext(s), unpack(arg))
+    return string.format(ioncore.gettext(s), ...)
 end
 
 
