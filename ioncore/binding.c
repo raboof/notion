@@ -538,6 +538,7 @@ int ioncore_unmod(int state, int keycode)
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
     state&=~evilignoremask;
 #endif
+    state&=KNOWN_MODIFIERS_MASK;
 
     for(j=0; j<N_MODS*modmap->max_keypermod; j++){
         if(modmap->modifiermap[j]==keycode)
@@ -568,6 +569,8 @@ int ioncore_modstate()
 #ifdef CF_HACK_IGNORE_EVIL_LOCKS
     state&=~evilignoremask;
 #endif
+    state&=KNOWN_MODIFIERS_MASK;
+    
     return state;
 }
 
