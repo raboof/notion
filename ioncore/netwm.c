@@ -16,6 +16,7 @@
 #include "clientwin.h"
 #include "netwm.h"
 #include "property.h"
+#include "activity.h"
 #include "focus.h"
 #include "xwindow.h"
 #include "extlconv.h"
@@ -196,6 +197,8 @@ static void netwm_active_window_rq(WClientWin *cwin,
     
     if(!ignore)
         region_goto((WRegion*)cwin);
+    else
+        region_set_activity((WRegion*)cwin, SETPARAM_SET);
 }
 
 
