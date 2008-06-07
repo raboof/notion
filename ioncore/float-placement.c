@@ -91,12 +91,12 @@ static int next_least_x(WGroup *ws, uint level, int x)
             retx=p.x+p.w;
     }
     
-    return retx+1;
+    return retx;
 }
 
 
 
-static int next_lowest_y(WGroup *ws, uint level, int y)
+static int next_least_y(WGroup *ws, uint level, int y)
 {
     WRectangle p;
     int rety=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
@@ -110,7 +110,7 @@ static int next_lowest_y(WGroup *ws, uint level, int y)
             rety=p.y+p.h;
     }
     
-    return rety+1;
+    return rety;
 }
 
 
@@ -140,7 +140,7 @@ static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
                 g->y=r.y;
                 return TRUE;
             }else{
-                r.x=next_least_x(ws, level, r.x);
+                r.x=next_least_x(ws, level, r.x)+ioncore_placement_padding;
                 r.y=0;
             }
         }
@@ -157,7 +157,7 @@ static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
                 g->y=r.y;
                 return TRUE;
             }else{
-                r.y=next_lowest_y(ws, level, r.y);
+                r.y=next_least_y(ws, level, r.y)+ioncore_placement_padding;
                 r.x=0;
             }
         }

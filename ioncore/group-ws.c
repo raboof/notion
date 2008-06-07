@@ -60,6 +60,7 @@ void ioncore_groupws_get(ExtlTab t)
                        : (ioncore_placement_method==PLACEMENT_LRUD
                           ? "lrud" 
                           : "random")));
+    extl_table_sets_i(t, "float_placement_padding", ioncore_placement_padding);
 }
 
 
