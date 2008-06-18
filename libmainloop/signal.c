@@ -112,8 +112,8 @@ static void do_timer_set()
         return;
     }
 
-    val.it_interval.tv_usec=val.it_value.tv_usec;
-    val.it_interval.tv_sec=val.it_value.tv_sec;
+    val.it_interval.tv_usec=0;
+    val.it_interval.tv_sec=0;
     
     if((setitimer(ITIMER_REAL, &val, NULL))){
         had_tmr=TRUE;
