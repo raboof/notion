@@ -36,6 +36,8 @@ static bool had_tmr=FALSE;
 WHook *mainloop_sigchld_hook=NULL;
 WHook *mainloop_sigusr2_hook=NULL;
 
+static sigset_t special_sigs;
+
 
 /*{{{ Timers */
 
@@ -247,6 +249,18 @@ bool mainloop_check_signals()
     }
     
     return ret;
+}
+
+
+void mainloop_block_signals(sigset_t *oldmask)
+{
+    sigprocmask(SIG_BLOCK, &special_sigs, oldmask);
+}
+
+
+bool mainloop_unhandled_signals()
+{
+    return (usr2_sig || wait_sig || kill_sig || had_tmr);
 }
 
 
@@ -475,6 +489,7 @@ static void ignore_handler(int signal_num)
 #define FATAL(X) IFTRAP(X) signal(X, fatal_signal_handler);
 #define IGNORE(X) IFTRAP(X) signal(X, SIG_IGN)
 
+
 void mainloop_trap_signals(const sigset_t *which)
 {
     struct sigaction sa;
@@ -486,6 +501,7 @@ void mainloop_trap_signals(const sigset_t *which)
         which=&dummy;
     }
     
+    sigemptyset(&special_sigs);
     sigemptyset(&set);
     sigemptyset(&oldset);
     sigprocmask(SIG_SETMASK, &set, &oldset);
@@ -509,24 +525,28 @@ void mainloop_trap_signals(const sigset_t *which)
         sa.sa_handler=timer_handler;
         sa.sa_flags=SA_RESTART;
         sigaction(SIGALRM, &sa, NULL);
+        sigaddset(&special_sigs, SIGALRM);
     }
 
     IFTRAP(SIGCHLD){
         sa.sa_handler=chld_handler;
         sa.sa_flags=SA_NOCLDSTOP|SA_RESTART;
         sigaction(SIGCHLD, &sa, NULL);
+        sigaddset(&special_sigs, SIGCHLD);
     }
 
     IFTRAP(SIGUSR2){
         sa.sa_handler=usr2_handler;
         sa.sa_flags=SA_RESTART;
         sigaction(SIGUSR2, &sa, NULL);
+        sigaddset(&special_sigs, SIGUSR2);
     }
 
     IFTRAP(SIGTERM){
         sa.sa_handler=exit_handler;
         sa.sa_flags=SA_RESTART;
         sigaction(SIGTERM, &sa, NULL);
+        sigaddset(&special_sigs, SIGTERM);
     }
     
     IFTRAP(SIGUSR1){

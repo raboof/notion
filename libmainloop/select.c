@@ -1,16 +1,20 @@
 /*
- * ion/libmainloop/mainloop.c
+ * libmainloop/select.c
  * 
  * Partly based on a contributed code.
  *
  * See the included file LICENSE for details.
  */
 
+#include <signal.h>
+#include <sys/select.h>
+
 #include <libtu/types.h>
 #include <libtu/misc.h>
 #include <libtu/dlist.h>
 
 #include "select.h"
+#include "signal.h"
 
 
 /*{{{ File descriptor management */
@@ -94,12 +98,29 @@ void mainloop_select()
 {
     fd_set rfds;
     int nfds=0;
-            
+    int ret=0;
+    
     FD_ZERO(&rfds);
     
     set_input_fds(&rfds, &nfds);
     
-    if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
+#ifdef _POSIX_SELECT
+    {
+        sigset_t oldmask;
+        
+        mainloop_block_signals(&oldmask);
+        
+        if(!mainloop_unhandled_signals())
+            ret=pselect(nfds+1, &rfds, NULL, NULL, NULL, &oldmask);
+        
+        sigprocmask(SIG_SETMASK, &oldmask, NULL);
+    }
+#else
+    #warning "pselect() unavailable"
+    if(!mainloop_unhandled_signals())
+        ret=select(nfds+1, &rfds, NULL, NULL, NULL);
+#endif
+    if(ret>0)
         check_input_fds(&rfds);
 }
 
