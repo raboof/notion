@@ -58,7 +58,7 @@ WMessage *mod_query_do_message(WMPlex *mplex, const char *p)
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_BOUNDS;
-    par.level=STACKING_LEVEL_MODAL1+1;
+    par.level=STACKING_LEVEL_MODAL1+2;
 
     return (WMessage*)mplex_do_attach_new(mplex, &par,
                                           (WRegionCreateFn*)create_wmsg,

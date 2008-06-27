@@ -88,7 +88,7 @@ static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp,
     par.geom.y=(fp->g.h-par.geom.h)/2;
     
     par.level_set=TRUE;
-    par.level=STACKING_LEVEL_MODAL1;
+    par.level=STACKING_LEVEL_MODAL1+1;
     
     par.bottom=TRUE;
     
