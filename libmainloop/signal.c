@@ -81,44 +81,51 @@ int mainloop_gettime(struct timeval *val)
 #define USECS_IN_SEC 1000000
 
 
-static void do_timer_set()
+bool libmainloop_get_timeout(struct timeval *tv)
 {
-    struct itimerval val={{0, 0}, {0, 0}};
-    
-    if(queue==NULL){
-        setitimer(ITIMER_REAL, &val, NULL);
-        return;
-    }
+    if(queue==NULL)
+        return FALSE;
 
     /* Subtract queue time from current time, don't go below zero */
-    mainloop_gettime(&(val.it_value));
-    if(TIMEVAL_LATER((queue)->when, val.it_value)){
-        if(queue->when.tv_usec<val.it_value.tv_usec){
+    mainloop_gettime(tv);
+    if(TIMEVAL_LATER((queue)->when, (*tv))){
+        if(queue->when.tv_usec<tv->tv_usec){
             queue->when.tv_usec+=USECS_IN_SEC;
             queue->when.tv_sec--;
         }
-        val.it_value.tv_usec=queue->when.tv_usec-val.it_value.tv_usec;
-        val.it_value.tv_sec=queue->when.tv_sec-val.it_value.tv_sec;
-        if(val.it_value.tv_usec<0)
-            val.it_value.tv_usec=0;
+        tv->tv_usec=queue->when.tv_usec-tv->tv_usec;
+        tv->tv_sec=queue->when.tv_sec-tv->tv_sec;
+        if(tv->tv_usec<0)
+            tv->tv_usec=0;
         /* POSIX and some kernels have been designed by absolute morons and 
          * contain idiotic artificial restrictions on the value of tv_usec, 
          * that will only cause more code being run and clock cycles being 
          * spent to do the same thing, as the kernel will in any case convert
          * the seconds to some other units.
          */
-         val.it_value.tv_sec+=val.it_value.tv_usec/USECS_IN_SEC;
-         val.it_value.tv_usec%=USECS_IN_SEC;
+         tv->tv_sec+=tv->tv_usec/USECS_IN_SEC;
+         tv->tv_usec%=USECS_IN_SEC;
     }else{
         had_tmr=TRUE;
-        return;
+        return FALSE;
     }
-
-    val.it_interval.tv_usec=0;
-    val.it_interval.tv_sec=0;
     
-    if((setitimer(ITIMER_REAL, &val, NULL))){
-        had_tmr=TRUE;
+    return TRUE;
+}
+
+
+static void do_timer_set()
+{
+    struct itimerval val={{0, 0}, {0, 0}};
+    
+    if(libmainloop_get_timeout(&val.it_value)){
+        val.it_interval.tv_usec=0;
+        val.it_interval.tv_sec=0;
+        
+        if((setitimer(ITIMER_REAL, &val, NULL)))
+            had_tmr=TRUE;
+    }else if(!had_tmr){
+        setitimer(ITIMER_REAL, &val, NULL);
     }
 }
 

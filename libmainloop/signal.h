@@ -52,6 +52,7 @@ extern bool mainloop_check_signals();
 extern void mainloop_trap_signals(const sigset_t *set);
 extern void mainloop_block_signals(sigset_t *oldmask);
 extern bool mainloop_unhandled_signals();
+extern bool libmainloop_get_timeout(struct timeval *tv);
 
 extern WHook *mainloop_sigchld_hook;
 extern WHook *mainloop_sigusr2_hook;

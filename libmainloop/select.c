@@ -116,9 +116,21 @@ void mainloop_select()
         sigprocmask(SIG_SETMASK, &oldmask, NULL);
     }
 #else
-    #warning "pselect() unavailable"
-    if(!mainloop_unhandled_signals())
-        ret=select(nfds+1, &rfds, NULL, NULL, NULL);
+    #warning "pselect() unavailable -- using dirty hacks"
+    {
+        struct timeval tv_={0, 0}, *tv=&tv_;
+        
+        /* If there are timers, make sure we return from select with 
+         * some delay, if the timer signal happens right before
+         * entering select(). Race conditions with other signals
+         * we'll just have to ignore without pselect().
+         */
+        if(!libmainloop_get_timeout(tv))
+            tv=NULL;
+            
+        if(!mainloop_unhandled_signals())
+            ret=select(nfds+1, &rfds, NULL, NULL, tv);
+    }
 #endif
     if(ret>0)
         check_input_fds(&rfds);
