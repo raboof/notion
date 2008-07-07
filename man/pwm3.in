@@ -27,7 +27,7 @@ On X servers with multiple (traditional non-Xinerama) screens, manage only
 default screen (root window), not all, as given by the -display option or
 in the DISPLAY environment variable.
 .TP
-.B \-sessionname session_name
+.B \-session session_name
 Set session name. This option affects where workspace and other save files are
 put (~/.pwm3/session_name if option set).
 .TP

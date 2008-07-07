@@ -26,7 +26,7 @@ Na X serverech s více obrazovkami (ne-Xinerama) bude spravovat pouze výchozí
 obrazovku (koøenové okno). (Tedy ne v¹echny, které byly zadány v parametru
 -display nebo v promìnné DISPLAY.)
 .TP
-.B \-sessionname session_name
+.B \-session session_name
 Nastaví název sezení. Tato volba ovlivní, kam se ulo¾í pracovní plochy
 a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.pwm3/session_name.
 .TP
