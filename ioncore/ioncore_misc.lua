@@ -22,7 +22,7 @@ local layouts={
 -- attach/creation parameters given in \var{tab}. The layout
 -- "empty" may not be defined.
 function ioncore.deflayout(name, tab)
-    assert(layout ~= "empty")
+    assert(name ~= "empty")
     
     if name=="default" and not tab then
         layouts[name] = empty
