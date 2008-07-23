@@ -216,7 +216,8 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     XSetErrorHandler(my_error_handler);
 
     if(redirect_error){
-        warn(TR("Unable to redirect root window events for screen %d."),
+        warn(TR("Unable to redirect root window events for screen %d."
+                "Maybe another window manager is running?"),
              xscr);
         return FALSE;
     }
