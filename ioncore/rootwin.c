@@ -59,9 +59,13 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
     
     /* Just ignore bad window and similar errors; makes the rest of
      * the code simpler.
+     * 
+     * Apparently XGetWindowProperty can return BadMatch on a race
+     * condition where the server is already reusing the XID for a 
+     * non-window drawable, so let's just ignore BadMatch entirely...
      */
     if((ev->error_code==BadWindow ||
-        (ev->error_code==BadMatch && ev->request_code==X_SetInputFocus) ||
+        (ev->error_code==BadMatch /*&& ev->request_code==X_SetInputFocus*/) ||
         (ev->error_code==BadDrawable && ev->request_code==X_GetGeometry)) &&
        ignore_badwindow)
         return 0;
