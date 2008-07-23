@@ -22,6 +22,7 @@
 #ifndef CF_NO_GETTEXT
 #include <libintl.h>
 #endif
+#include <stdarg.h>
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
@@ -99,11 +100,16 @@ WHook *ioncore_deinit_hook=NULL;
 /*{{{ warn_nolog */
 
 
-void ioncore_warn_nolog(const char *str)
+void ioncore_warn_nolog(const char *str, ...)
 {
-    fprintf(stderr, "%s: %s\n", libtu_progname(), str);
+    va_list args;
+    
+    va_start(args, str);
+    fprintf(stderr, "%s: ", libtu_progname());
+    vfprintf(stderr, str, args);
+    fprintf(stderr, "\n");
+    va_end(args);
 }
-
 
 /*}}}*/
 

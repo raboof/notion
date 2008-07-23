@@ -20,6 +20,7 @@
 #include <libextl/extl.h>
 #include "conf-bindings.h"
 #include "bindmaps.h"
+#include "ioncore.h"
 
 
 /*{{{ parse_keybut */
@@ -94,7 +95,8 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
                 break;
             }
             if(XKeysymToKeycode(ioncore_g.dpy, keysym)==0){
-                warn_obj(str, TR("Could not convert keysym to keycode."));
+                ioncore_warn_nolog("%s: %s", str, 
+                                   TR("Could not convert keysym to keycode."));
                 break;
             }
             *ksb_ret=keysym;
