@@ -628,14 +628,14 @@ bool group_do_attach_final(WGroup *ws,
               ? param->level 
               : STACKING_LEVEL_NORMAL));
     
-    if(!param->whatever){
-        /* Fit */
-        szplcy=(param->szplcy_set
-                ? param->szplcy
-                : (param->bottom
-                   ? SIZEPOLICY_FULL_EXACT
-                   : SIZEPOLICY_UNCONSTRAINED));
+    /* Fit */
+    szplcy=(param->szplcy_set
+            ? param->szplcy
+            : (param->bottom
+               ? SIZEPOLICY_FULL_EXACT
+               : SIZEPOLICY_UNCONSTRAINED));
         
+    if(!param->whatever){
         weak=(param->geom_weak_set
               ? param->geom_weak
               : (param->geom_set
