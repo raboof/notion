@@ -13,12 +13,89 @@
 #include "font.h"
 #include "fontset.h"
 #include "brush.h"
+#include "precompose.h"
+
+
+/*{{{ UTF-8 processing */
+
+
+#define UTF_DATA 0x3F
+#define UTF_2_DATA 0x1F
+#define UTF_3_DATA 0x0F
+#define UTF_1 0x80
+#define UTF_2 0xC0
+#define UTF_3 0xE0
+#define UTF_4 0xF0
+#define UTF_5 0xF8
+#define UTF_6 0xFC
+
+static void toucs(const char *str_, int len, XChar2b **str16, int *len16)
+{
+    int i=0;
+    const uchar *str=(const uchar*)str_;
+    wchar_t prev=0;
+    
+    *str16=ALLOC_N(XChar2b, len);
+    *len16=0;
+    
+    while(i<len){
+        wchar_t ch=0;
+        
+        if((str[i] & UTF_3) == UTF_3){
+             if(i+2>=len)
+                 break;
+             ch=((str[i] & UTF_3_DATA) << 12) 
+                 | ((str[i+1] & UTF_DATA) << 6)
+                 | (str[i+2] & UTF_DATA);
+            i+=3;
+        }else if((str[i] & UTF_2) == UTF_2){
+            if(i+1>=len)
+                break;
+            ch = ((str[i] & UTF_2_DATA) << 6) | (str[i+1] & UTF_DATA);
+            i+=2;
+        }else if(str[i] < UTF_1){
+            ch = str[i];
+            i++;
+        }else{
+            ch='?';
+            i++;
+        }
+        
+        if(*len16>0){
+            wchar_t precomp=do_precomposition(prev, ch);
+            if(precomp!=-1){
+                (*len16)--;
+                ch=precomp;
+            }
+        }
+            
+        (*str16)[*len16].byte2=ch&0xff;
+        (*str16)[*len16].byte1=(ch>>8)&0xff;
+        (*len16)++;
+        prev=ch;
+    }
+}
+
+
+/*}}}*/
 
 
 /*{{{ Load/free */
 
 
 static DEFont *fonts=NULL;
+
+
+static bool iso10646_font(const char *fontname)
+{
+    const char *iso;
+    
+    if(strchr(fontname, ',')!=NULL)
+        return FALSE; /* fontset */
+        
+    iso=strstr(fontname, "iso10646-1");
+    return (iso!=NULL && iso[10]=='\0');
+}
 
 
 DEFont *de_load_font(const char *fontname)
@@ -37,7 +114,7 @@ DEFont *de_load_font(const char *fontname)
         }
     }
     
-    if(ioncore_g.use_mb){
+    if(ioncore_g.use_mb && !(ioncore_g.enc_utf8 && iso10646_font(fontname))){
         fontset=de_create_font_set(fontname);
         if(fontset!=NULL){
             if(XContextDependentDrawing(fontset)){
@@ -195,7 +272,20 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
             XmbTextExtents(font->fontset, text, len, NULL, &lext);
         return lext.width;
     }else if(font->fontstruct!=NULL){
-        return XTextWidth(font->fontstruct, text, len);
+        if(ioncore_g.enc_utf8){
+            XChar2b *str16; int len16=0;
+            uint res;
+            
+            toucs(text, len, &str16, &len16);
+            
+            res=XTextWidth16(font->fontstruct, str16, len16);
+            
+            free(str16);
+            
+            return res;
+        }else{
+            return XTextWidth(font->fontstruct, text, len);
+        }
     }else{
         return 0;
     }
@@ -232,7 +322,14 @@ void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
                               brush->d->font->fontset,
                               gc, x, y, str, len);
         }else if(brush->d->font->fontstruct!=NULL){
-            XDrawString(ioncore_g.dpy, brush->win, gc, x, y, str, len);
+            if(ioncore_g.enc_utf8){
+                XChar2b *str16; int len16=0;
+                toucs(str, len, &str16, &len16);
+                XDrawString16(ioncore_g.dpy, brush->win, gc, x, y, str16, len16);
+                free(str16);
+            }else{
+                XDrawString(ioncore_g.dpy, brush->win, gc, x, y, str, len);
+            }
         }
     }else{
         XSetBackground(ioncore_g.dpy, gc, colours->bg);
@@ -248,7 +345,14 @@ void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
                                    brush->d->font->fontset,
                                    gc, x, y, str, len);
         }else if(brush->d->font->fontstruct!=NULL){
-            XDrawImageString(ioncore_g.dpy, brush->win, gc, x, y, str, len);
+            if(ioncore_g.enc_utf8){
+                XChar2b *str16; int len16=0;
+                toucs(str, len, &str16, &len16);
+                XDrawImageString16(ioncore_g.dpy, brush->win, gc, x, y, str16, len16);
+                free(str16);
+            }else{
+                XDrawImageString(ioncore_g.dpy, brush->win, gc, x, y, str, len);
+            }
         }
     }
 }
