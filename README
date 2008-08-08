@@ -123,4 +123,7 @@ unlisted  here. See the mailing list archives and the darcs source
 repository history at <http://iki.fi/tuomov/repos/>. For translators
 see the individual `.po` files in `po/`.
 
+The code in `de/unicode' (producing `de/precompose.c') is taken from
+xterm.
+
 See `libtu/README` for code by others integrated into libtu.
