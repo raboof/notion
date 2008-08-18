@@ -18,7 +18,8 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
+	   -DCF_ION_EXECUTABLE=\"ion3plus\"
            
 LUA_SOURCES = statusd_date.lua statusd_mail.lua statusd_load.lua
 
