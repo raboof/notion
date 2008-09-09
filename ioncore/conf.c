@@ -121,6 +121,7 @@ void ioncore_set(ExtlTab tab)
             ioncore_g.no_mousefocus=TRUE;
         else if(strcmp(tmp, "sloppy")==0)
             ioncore_g.no_mousefocus=FALSE;
+        free(tmp);
     }
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
