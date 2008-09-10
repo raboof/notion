@@ -178,11 +178,10 @@ function mod_query.exec_on_merr(mplex, cmd)
 end
 
 
-function mod_query.file_completor(wedln, str)
+function mod_query.file_completor(cp, str)
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
-        mod_query.popen_completions(wedln,
-                                   ic.." "..string.shell_safe(str))
+        mod_query.popen_completions(cp, ic.." "..string.shell_safe(str))
     end
 end
 
@@ -752,7 +751,7 @@ local function find_point(strs, point)
 end
 
 
-function mod_query.exec_completor_(wd, wedln, str, point)
+function mod_query.exec_completor_(wd, cp, str, point)
     local parts=break_cmdline(str)
     local complidx=find_point(parts, point+1)
     
@@ -808,7 +807,7 @@ function mod_query.exec_completor_(wd, wedln, str, point)
     
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
-        mod_query.popen_completions(wedln,
+        mod_query.popen_completions(cp,
                                    ic..wp..string.shell_safe(s_compl),
                                    set_fn, filter_fn, wd)
     end
@@ -983,13 +982,13 @@ end
 -- Man pages {{{{
 
 
-function mod_query.man_completor(wedln, str)
+function mod_query.man_completor(cp, str)
     local mc=ioncore.lookup_script("ion-completeman")
     local icase=(mod_query.get().caseicompl and " -icase" or "")
     local mid=""
     if mc then
-        mod_query.popen_completions(wedln, (mc..icase..mid.." -complete "
-                                            ..string.shell_safe(str)))
+        mod_query.popen_completions(cp, (mc..icase..mid.." -complete "
+                                         ..string.shell_safe(str)))
     end
 end
 
