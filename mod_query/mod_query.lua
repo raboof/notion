@@ -244,7 +244,9 @@ mod_query.COLLECT_THRESHOLD=2000
 -- parameter of \fnref{WComplProxy.set_completions} (which \var{fn} maybe used
 -- to override) and a single actual completion on each of the successive lines.
 -- The function \var{reshnd} may be used to override a result table
--- building routine.
+-- building routine. Its first argument is the completion table to be
+-- passed to \fnref{WComplProxy.set_completions}, and the second a new
+-- line of output from the command.
 function mod_query.popen_completions(cp, cmd, fn, reshnd, wd)
     
     local pst={cp=cp, maybe_stalled=0}
