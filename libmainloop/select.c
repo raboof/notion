@@ -118,18 +118,20 @@ void mainloop_select()
 #else
     #warning "pselect() unavailable -- using dirty hacks"
     {
-        struct timeval tv_={0, 0}, *tv=&tv_;
+        struct timeval tv={0, 0};
         
         /* If there are timers, make sure we return from select with 
          * some delay, if the timer signal happens right before
          * entering select(). Race conditions with other signals
          * we'll just have to ignore without pselect().
          */
-        if(!libmainloop_get_timeout(tv))
-            tv=NULL;
-            
-        if(!mainloop_unhandled_signals())
-            ret=select(nfds+1, &rfds, NULL, NULL, tv);
+        if(libmainloop_get_timeout(&tv)){
+            if(!mainloop_unhandled_signals())
+                ret=select(nfds+1, &rfds, NULL, NULL, &tv);
+        }
+        
+        if(ret<=0 && !mainloop_unhandled_signals())
+            ret=select(nfds+1, &rfds, NULL, NULL, NULL);
     }
 #endif
     if(ret>0)
