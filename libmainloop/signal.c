@@ -90,13 +90,13 @@ bool libmainloop_get_timeout(struct timeval *tv)
     mainloop_gettime(tv);
     if(TIMEVAL_LATER((queue)->when, (*tv))){
         if(queue->when.tv_usec<tv->tv_usec){
-            queue->when.tv_usec+=USECS_IN_SEC;
-            queue->when.tv_sec--;
+            tv->tv_usec=(queue->when.tv_usec+USECS_IN_SEC)-tv->tv_usec;
+            /* TIMEVAL_LATER ensures >= 0 */
+            tv->tv_sec=(queue->when.tv_sec-1)-tv->tv_sec;
+        }else{
+            tv->tv_usec=queue->when.tv_usec-tv->tv_usec;
+            tv->tv_sec=queue->when.tv_sec-tv->tv_sec;
         }
-        tv->tv_usec=queue->when.tv_usec-tv->tv_usec;
-        tv->tv_sec=queue->when.tv_sec-tv->tv_sec;
-        if(tv->tv_usec<0)
-            tv->tv_usec=0;
         /* POSIX and some kernels have been designed by absolute morons and 
          * contain idiotic artificial restrictions on the value of tv_usec, 
          * that will only cause more code being run and clock cycles being 
