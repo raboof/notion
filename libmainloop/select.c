@@ -8,6 +8,7 @@
 
 #include <signal.h>
 #include <sys/select.h>
+#include <errno.h>
 
 #include <libtu/types.h>
 #include <libtu/misc.h>
@@ -100,13 +101,13 @@ void mainloop_select()
     int nfds=0;
     int ret=0;
     
-    FD_ZERO(&rfds);
-    
-    set_input_fds(&rfds, &nfds);
     
 #ifdef _POSIX_SELECT
     {
         sigset_t oldmask;
+
+        FD_ZERO(&rfds);
+        set_input_fds(&rfds, &nfds);
         
         mainloop_block_signals(&oldmask);
         
@@ -125,13 +126,19 @@ void mainloop_select()
          * entering select(). Race conditions with other signals
          * we'll just have to ignore without pselect().
          */
-        if(libmainloop_get_timeout(&tv)){
-            if(!mainloop_unhandled_signals())
-                ret=select(nfds+1, &rfds, NULL, NULL, &tv);
-        }
-        
-        if(ret<=0 && !mainloop_unhandled_signals())
-            ret=select(nfds+1, &rfds, NULL, NULL, NULL);
+        do{
+            FD_ZERO(&rfds);
+            set_input_fds(&rfds, &nfds);
+            
+            bool to=libmainloop_get_timeout(&tv);
+            
+            if(mainloop_unhandled_signals()){
+                ret=0;
+                break;
+            }
+            
+            ret=select(nfds+1, &rfds, NULL, NULL, to ? &tv : NULL);
+        }while(ret<0 && errno==EINTR && !mainloop_unhandled_signals());
     }
 #endif
     if(ret>0)
