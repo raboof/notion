@@ -226,8 +226,10 @@ bool mainloop_check_signals()
         return kill_sig;
 
     /* Check for timer events in the queue */
-    while(had_tmr && queue!=NULL){
+    while(had_tmr){
         had_tmr=FALSE;
+        if(queue==NULL)
+            break;
         mainloop_gettime(&current_time);
         while(queue!=NULL){
             if(TIMEVAL_LATER(current_time, queue->when)){
