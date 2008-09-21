@@ -667,6 +667,12 @@ static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
     
     st=mplex_find_to_focus(mplex, node, NULL, hidelist);
     
+    /* If 'node' points to a group, it isn't actually on the stacking list. 
+     * Give it the focus, if there's nothing "proper" that could be focussed.
+     */
+    if(st==NULL && grp!=NULL && REGION_IS_MAPPED(grp))
+        st=node;
+    
     if(st==node && within!=NULL)
         *within=TRUE;
         
