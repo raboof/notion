@@ -633,8 +633,8 @@ bool group_do_attach_final(WGroup *ws,
             ? param->szplcy
             : (param->bottom
                ? SIZEPOLICY_FULL_EXACT
-               : SIZEPOLICY_UNCONSTRAINED));
-        
+               : SIZEPOLICY_VISIBILITY_CONSTRAINED));
+    
     if(!param->whatever){
         weak=(param->geom_weak_set
               ? param->geom_weak
@@ -662,6 +662,7 @@ bool group_do_attach_final(WGroup *ws,
 
         if(weak&(REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y) &&
             (szplcy==SIZEPOLICY_UNCONSTRAINED ||
+             szplcy==SIZEPOLICY_VISIBILITY_CONSTRAINED ||
              szplcy==SIZEPOLICY_FREE ||
              szplcy==SIZEPOLICY_FREE_GLUE /* without flags */)){
             /* TODO: use 'weak'? */

@@ -268,9 +268,24 @@ void sizepolicy(WSizePolicy *szplcy, WRegion *reg,
         break;
         
     case SIZEPOLICY_FREE:
-        rectangle_constrain(&tmp, &(fp->g));
         if(reg!=NULL)
             region_size_hints_correct(reg, &tmp.w, &tmp.h, FALSE);
+        rectangle_constrain(&tmp, &(fp->g));
+        fp->g=tmp;
+        break;
+        
+    case SIZEPOLICY_VISIBILITY_CONSTRAINED:
+        if(reg!=NULL)
+            region_size_hints_correct(reg, &tmp.w, &tmp.h, FALSE);
+        { 
+            /* Constraint such that at least min(size, CF_VISIBILITY_CONSTRAINT) 
+             * much is visible at each border.
+             */
+            int dx=maxof(0, tmp.w-CF_VISIBILITY_CONSTRAINT);
+            int dy=maxof(0, tmp.h-CF_VISIBILITY_CONSTRAINT);
+            tmp.x=maxof(fp->g.x-dx, minof(tmp.x, fp->g.x+fp->g.w+dx-tmp.w));
+            tmp.y=maxof(fp->g.y-dy, minof(tmp.y, fp->g.y+fp->g.h+dy-tmp.h));
+        }
         fp->g=tmp;
         break;
         
@@ -321,6 +336,7 @@ static StringIntMap szplcy_specs[] = {
     {"free_glue_southwest",  SIZEPOLICY_FREE_GLUE__SOUTHWEST},
     {"free_glue_south",      SIZEPOLICY_FREE_GLUE__SOUTH},
     {"free_glue_southeast",  SIZEPOLICY_FREE_GLUE__SOUTHEAST},
+    {"visibility_constrained",   SIZEPOLICY_VISIBILITY_CONSTRAINED},
     {"unconstrained",   SIZEPOLICY_UNCONSTRAINED},
     { NULL,             SIZEPOLICY_DEFAULT}   /* end marker */
 };

@@ -28,6 +28,8 @@
 
 #define CF_STATUSBAR_SYSTRAY_HEIGHT 24
 
+#define CF_VISIBILITY_CONSTRAINT 16 /* = CF_EDGE_RESISTANCE */
+
 /* Cursors
  */
 
