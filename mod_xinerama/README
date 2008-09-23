@@ -41,15 +41,15 @@ This can be worked around in lua, though:
 
 function next_wrap()
         scr = ioncore.goto_next_screen()
-        if not obj_is(scr:parent(), "WScreen") then
+        if obj_is(scr, "WRootWin") then
                 ioncore.goto_nth_screen(0)
         end
 end
 
 function prev_wrap() 
         scr = ioncore.goto_prev_screen()
-        if not obj_is(scr:parent(), "WScreen") then
-                ioncore.goto_nth_screen(1)
+        if obj_is(scr, "WRootWin") then
+                ioncore.goto_nth_screen(-1)
         end
 end
                        
