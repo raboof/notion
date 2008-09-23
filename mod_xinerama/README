@@ -25,9 +25,36 @@ INSTALLATION
 
 LIMITATIONS
 
-For some reason, loading the statusbar module _BEFORE_ the Xinerama module hides the 
-status bar. To work around this, load mod_xinerama before loading the statusbar module.
+For some reason, loading the statusbar module _BEFORE_ the Xinerama module hides
+the status bar. To work around this, load mod_xinerama before loading the
+statusbar module.
 
-This does not contain the Sun Xinerama support that was in the original ion3 because
-I don't have a machine running Solaris ready. Adding it should be rather trivial with
-access to the original ion code and a Solaris machine.
+This does not contain the Sun Xinerama support that was in the original ion3
+because I don't have a machine running Solaris ready. Adding it should be rather
+trivial with access to the original ion code and a Solaris machine.
+
+WRAPPING goto_next_scr/goto_prev_scr
+
+Without altering the ion3 source, it doesn't seem possible to get
+goto_next_scr/goto_prev_scr to properly wrap around on the last/first screen.
+This can be worked around in lua, though:
+
+function next_wrap()
+        scr = ioncore.goto_next_screen()
+        if not obj_is(scr:parent(), "WScreen") then
+                ioncore.goto_nth_screen(0)
+        end
+end
+
+function prev_wrap() 
+        scr = ioncore.goto_prev_screen()
+        if not obj_is(scr:parent(), "WScreen") then
+                ioncore.goto_nth_screen(1)
+        end
+end
+                       
+defbindings("WScreen", {
+    bdoc("Go to next/previous screen on multihead setup."),
+    kpress(META.."Shift+comma", "prev_wrap()"),
+    kpress(META.."Shift+period", "next_wrap()"),
+})
