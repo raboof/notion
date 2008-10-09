@@ -105,9 +105,15 @@ void ioncore_warn_nolog(const char *str, ...)
     va_list args;
     
     va_start(args, str);
-    fprintf(stderr, "%s: ", libtu_progname());
-    vfprintf(stderr, str, args);
-    fprintf(stderr, "\n");
+    
+    if(ioncore_g.opmode==IONCORE_OPMODE_INIT){
+        fprintf(stderr, "%s: ", libtu_progname());
+        vfprintf(stderr, str, args);
+        fprintf(stderr, "\n");
+    }else{
+        warn_v(str, args);
+    }
+    
     va_end(args);
 }
 
