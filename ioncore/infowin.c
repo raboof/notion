@@ -200,12 +200,14 @@ void infowin_set_text(WInfoWin *p, const char *str, int maxw)
     
     if(str==NULL){
         INFOWIN_BUFFER(p)[0]='\0';
-    }else if(maxw>0 && p->brush!=NULL){
-        char *tmp=grbrush_make_label(p->brush, str, maxw);
-        if(tmp!=NULL){
-            infowin_do_set_text(p, tmp);
-            free(tmp);
-            set=TRUE;
+    }else{
+        if(maxw>0 && p->brush!=NULL){
+            char *tmp=grbrush_make_label(p->brush, str, maxw);
+            if(tmp!=NULL){
+                infowin_do_set_text(p, tmp);
+                free(tmp);
+                set=TRUE;
+            }
         }
         
         if(!set)
