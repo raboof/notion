@@ -32,6 +32,8 @@
 /*{{{ Add/remove managed */
 
 
+
+
 static WPHolder *groupcw_transient_pholder(WGroupCW *cwg, 
                                            const WClientWin *cwin,
                                            const WManageParams *mp)
@@ -40,17 +42,25 @@ static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
     WFramedParam fp=FRAMEDPARAM_INIT;
     WPHolder *ph;
     
-    param.level_set=1;
-    param.level=STACKING_LEVEL_MODAL1;
+    groupattachparams_get(&param, cwin->proptab, "attach_params");
     
-    param.szplcy_set=1;
-    param.szplcy=cwg->transient_szplcy;
+    if(!param.level_set){
+        param.level_set=1;
+        param.level=STACKING_LEVEL_MODAL1;
+    }
+        
+    if(!param.szplcy_set){
+        param.szplcy_set=1;
+        param.szplcy=cwg->transient_szplcy;
+    }
+    
+    if(!param.geom_weak_set){
+        param.geom_weak_set=1;
+        param.geom_weak=REGION_RQGEOM_WEAK_ALL;
+    }
     
     param.switchto_set=1;
-    param.switchto=1;
-
-    param.geom_weak_set=1;
-    param.geom_weak=REGION_RQGEOM_WEAK_ALL;
+    param.switchto=mp->switchto;
     
     if(!ioncore_g.framed_transients){
         param.geom_set=TRUE;

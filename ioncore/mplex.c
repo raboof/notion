@@ -1469,13 +1469,8 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
         par->flags|=MPLEX_ATTACH_INDEX&ok;
 
     if(ok&MPLEX_ATTACH_SIZEPOLICY){
-        if(extl_table_gets_s(tab, "sizepolicy", &tmpstr)){
-            WSizePolicy tmpp;
-            if(string2sizepolicy(tmpstr, &tmpp)){
-                par->flags|=MPLEX_ATTACH_SIZEPOLICY;
-                par->szplcy=tmpp;
-            }
-            free(tmpstr);
+        if(extl_table_gets_sizepolicy(tab, "sizepolicy", &par->szplcy)){
+            par->flags|=MPLEX_ATTACH_SIZEPOLICY;
         }else if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
             /* Backwards compat. numeric version */
             par->flags|=MPLEX_ATTACH_SIZEPOLICY;

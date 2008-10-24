@@ -127,7 +127,7 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
     if(reg==NULL)
         return FALSE;
     
-    group_get_attach_params(&ws->grp, t, &ap);
+    groupattachparams_get(&ap, t, NULL);
     
     /* Sensible size is given in framedparams */
     if(ap.geom_set){
@@ -153,8 +153,7 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 
 static WPHolder *groupws_do_prepare_manage(WGroupWS *ws, 
                                            const WClientWin *cwin,
-                                           const WManageParams *param, 
-                                           int geom_weak)
+                                           const WManageParams *param)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;
@@ -164,9 +163,17 @@ static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
     fp.inner_geom_gravity_set=TRUE;
     fp.inner_geom=param->geom;
     fp.gravity=param->gravity;
+
+    groupattachparams_get(&ap, cwin->proptab, "attach_params");
     
-    ap.geom_weak_set=1;
-    ap.geom_weak=geom_weak;
+    if(param->userpos ||
+       !param->maprq || ioncore_g.opmode==IONCORE_OPMODE_INIT){
+        ap.geom_weak_set=1;
+        ap.geom_weak=0;
+    }else if(!ap.geom_weak_set){
+        ap.geom_weak_set=1;
+        ap.geom_weak=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
+    }
 
     ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
     
@@ -203,17 +210,6 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     WPHolder *ph=NULL;
     bool act_b=(ws->grp.bottom==ws->grp.current_managed);
     bool use_bottom;
-    int weak=0;
-    
-    if(param->maprq && ioncore_g.opmode!=IONCORE_OPMODE_INIT
-       && !param->userpos){
-        /* When the window is mapped by application request, position
-         * request is only honoured if the position was given by the user
-         * and in case of a transient (the app may know better where to 
-         * place them) or if we're initialising.
-         */
-        weak=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
-    }
 
     if(b!=NULL && !HAS_DYN(b, region_prepare_manage))
         b=NULL;
@@ -236,7 +232,7 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     }
     
     if(ph==NULL && MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_GROUP))
-        ph=groupws_do_prepare_manage(ws, cwin, param, weak);
+        ph=groupws_do_prepare_manage(ws, cwin, param);
     
     if(ph==NULL && b!=NULL && !use_bottom)
         ph=region_prepare_manage(b, cwin, param, cpriority);
@@ -252,6 +248,7 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;
     WPHolder *ph;
+    bool tmp;
     
     ap.stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(ap.stack_above==NULL)
@@ -261,10 +258,15 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     fp.inner_geom=param->geom;
     fp.gravity=param->gravity;
     fp.mode=FRAME_MODE_TRANSIENT;
-    
-    ap.geom_weak_set=1;
-    ap.geom_weak=0;
 
+    groupattachparams_get(&ap, cwin->proptab, "attach_params");
+    
+    if(!ap.geom_weak_set || param->userpos ||
+       !param->maprq || ioncore_g.opmode==IONCORE_OPMODE_INIT){
+        ap.geom_weak_set=1;
+        ap.geom_weak=0;
+    }
+    
     ph=(WPHolder*)create_grouppholder(&ws->grp, NULL, &ap);
     
     return pholder_either((WPHolder*)create_framedpholder(ph, &fp), ph);

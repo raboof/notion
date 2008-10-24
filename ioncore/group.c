@@ -742,8 +742,7 @@ WRegion *group_do_attach(WGroup *ws,
 }
 
 
-void group_get_attach_params(WGroup *ws, ExtlTab tab, 
-                             WGroupAttachParams *par)
+void groupattachparams_get(WGroupAttachParams *par, ExtlTab tab, const char *sub)
 {
     int tmp;
     bool tmpb;
@@ -755,6 +754,15 @@ void group_get_attach_params(WGroup *ws, ExtlTab tab,
     par->szplcy_set=0;
     par->geom_set=0;
     par->bottom=0;
+    
+    if(sub){
+        ExtlTab s;
+        if(extl_table_gets_t(tab, sub, &s)){
+            groupattachparams_get(par, s, NULL);
+            extl_unref_table(s);
+        }
+        return;
+    }
     
     if(extl_table_is_bool_set(tab, "bottom")){
         par->level=STACKING_LEVEL_BOTTOM;
@@ -805,6 +813,11 @@ void group_get_attach_params(WGroup *ws, ExtlTab tab,
         
         extl_unref_table(g);
     }
+    
+    if(extl_table_gets_b(tab, "auto_placement", &tmpb)){
+        par->geom_weak_set=1;
+        par->geom_weak=(tmpb ? REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y : 0);
+    }
 }
 
 
@@ -823,7 +836,7 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
     if(reg==NULL)
         return NULL;
     
-    group_get_attach_params(ws, param, &par);
+    groupattachparams_get(&par, param, NULL);
     
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
@@ -857,7 +870,7 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
     WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
     WRegionAttachData data;
 
-    group_get_attach_params(ws, param, &par);
+    groupattachparams_get(&par, param, NULL);
     
     data.type=REGION_ATTACH_LOAD;
     data.u.tab=param;
@@ -1353,7 +1366,7 @@ void group_do_load(WGroup *ws, ExtlTab tab)
                 WFitParams fp;
                 WPHolder *ph;
                 
-                group_get_attach_params(ws, subtab, &par);
+                groupattachparams_get(&par, subtab, NULL);
                 group_attach_fp(ws, &par, &fp);
                 
                 ph=(WPHolder*)create_grouppholder(ws, NULL, &par);
