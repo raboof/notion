@@ -433,3 +433,25 @@ void ioncore_x_set_text_property(int win, int atom, ExtlTab tab)
 
 /*}}}*/
 
+
+/*{{{ Cardinal */
+
+
+bool xwindow_get_cardinal_property(Window win, Atom a, CARD32 *vret)
+{
+    long *p=NULL;
+    ulong n;
+    
+    n=xwindow_get_property(win, a, XA_CARDINAL, 1L, FALSE, (uchar**)&p);
+    
+    if(n>0 && p!=NULL){
+        *vret=*p;
+        XFree((void*)p);
+        return TRUE;
+    }
+    
+    return FALSE;
+}
+
+
+/*}}}*/

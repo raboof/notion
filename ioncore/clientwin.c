@@ -580,6 +580,9 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
         region_size_hints_correct((WRegion*)cwin, &param.geom.w, &param.geom.h,
                                   FALSE);
     }
+    
+    if(maprq)
+        netwm_check_manage_user_time(cwin, &param);
 
     mrshpm[0]=cwin;
     mrshpm[1]=&param;

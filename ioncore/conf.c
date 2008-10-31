@@ -83,6 +83,8 @@ static ExtlFn get_layout_fn;
  *                     \codestr{disabled} or \codestr{sloppy}. \\
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
  *  \var{autoraise} & (boolean) Autoraise regions in groups on goto. \\
+ *  \var{usertime_diff_current} & (integer) Controls switchto timeout. \\
+ *  \var{usertime_diff_new} & (integer) Controls switchto timeout. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -126,6 +128,12 @@ void ioncore_set(ExtlTab tab)
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
         ioncore_g.dblclick_delay=maxof(0, dd);
+
+    if(extl_table_gets_i(tab, "usertime_diff_current", &dd))
+        ioncore_g.usertime_diff_current=maxof(0, dd);
+
+    if(extl_table_gets_i(tab, "usertime_diff_new", &dd))
+        ioncore_g.usertime_diff_new=maxof(0, dd);
     
     ioncore_set_moveres_accel(tab);
     

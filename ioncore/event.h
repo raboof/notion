@@ -38,6 +38,8 @@
                                   KeyPressMask|KeyReleaseMask|       \
                                   ButtonPressMask|ButtonReleaseMask)
 
+#define IONCORE_CLOCK_SKEW_MS 30000
+
 extern void ioncore_x_connection_handler(int conn, void *unused);
 extern void ioncore_flush();
 extern void ioncore_get_event(XEvent *ev, long mask);

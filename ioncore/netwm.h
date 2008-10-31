@@ -29,4 +29,6 @@ extern char **netwm_get_name(WClientWin *cwin);
 extern void netwm_handle_client_message(const XClientMessageEvent *ev);
 extern bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev);
 
+extern void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param);
+
 #endif /* ION_IONCORE_NETWM_H */

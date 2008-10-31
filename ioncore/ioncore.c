@@ -346,6 +346,8 @@ static bool init_global()
     ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
     ioncore_g.opmode=IONCORE_OPMODE_INIT;
     ioncore_g.dblclick_delay=CF_DBLCLICK_DELAY;
+    ioncore_g.usertime_diff_current=CF_USERTIME_DIFF_CURRENT;
+    ioncore_g.usertime_diff_new=CF_USERTIME_DIFF_NEW;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
     ioncore_g.switchto_new=TRUE;

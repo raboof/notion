@@ -67,7 +67,6 @@ static void check_signals()
 /*{{{ Timestamp stuff */
 
 #define CHKEV(E, T) case E: tm=((T*)ev)->time; break;
-#define CLOCK_SKEW_MS 30000
 
 static Time last_timestamp=CurrentTime;
 
@@ -91,7 +90,7 @@ void ioncore_update_timestamp(XEvent *ev)
         return;
     }
 
-    if(tm>last_timestamp || last_timestamp - tm > CLOCK_SKEW_MS)
+    if(tm>last_timestamp || last_timestamp - tm > IONCORE_CLOCK_SKEW_MS)
         last_timestamp=tm;
 }
 

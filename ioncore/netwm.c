@@ -21,6 +21,7 @@
 #include "xwindow.h"
 #include "extlconv.h"
 #include "group.h"
+#include "event.h"
 
 
 /*{{{ Atoms */
@@ -31,6 +32,7 @@ static Atom atom_net_wm_state_fullscreen=0;
 static Atom atom_net_supporting_wm_check=0;
 static Atom atom_net_virtual_roots=0;
 static Atom atom_net_active_window=0;
+static Atom atom_net_wm_user_time=0;
 
 #define N_NETWM 6
 
@@ -51,6 +53,7 @@ void netwm_init()
     atom_net_supporting_wm_check=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTING_WM_CHECK", False);
     atom_net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     atom_net_active_window=XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
+    atom_net_wm_user_time=XInternAtom(ioncore_g.dpy, "_NET_WM_USER_TIME", False);
 }
 
 
@@ -254,3 +257,53 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 
 /*}}}*/
+
+
+/*{{{ user time */
+
+
+static bool in_before_interval(Time t1, Time t2, Time td)
+{
+    if(t1 < t2)
+        return (t2 - t1 < td);
+    else
+        return (t1 + td > t2);
+}
+
+
+void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
+{
+    WClientWin *cur=OBJ_CAST(ioncore_g.focus_current, WClientWin);
+    Window win=region_xwindow((WRegion*)cwin);
+    Time now=ioncore_get_timestamp(); /* TODO: should really use the event.. */
+    Time ut=0, cut=0;
+    bool got=FALSE, gotcut=FALSE;
+    bool nofocus=FALSE;
+    
+    if(cur!=NULL){
+        Window curwin;
+        if(param->tfor==cur)
+            return;
+        curwin=region_xwindow((WRegion*)cur);
+        gotcut=xwindow_get_cardinal_property(curwin, atom_net_wm_user_time, &cut);
+    }
+    
+    got=xwindow_get_cardinal_property(win, atom_net_wm_user_time, &ut);
+    
+    if(gotcut && ioncore_g.usertime_diff_current!=0){
+        nofocus=((got && ut < cut && !(cut + IONCORE_CLOCK_SKEW_MS <= ut))  ||
+                 (!got && in_before_interval(cut, now, ioncore_g.usertime_diff_current)));
+    }else if(got && ioncore_g.usertime_diff_new!=0){
+        nofocus=((gotcut && ut < cut && !(cut + IONCORE_CLOCK_SKEW_MS <= ut))  ||
+                 (!gotcut && !in_before_interval(ut, now, ioncore_g.usertime_diff_new)));
+    }
+    
+    if(nofocus){
+        param->switchto=FALSE;
+        param->jumpto=FALSE;
+    }
+}
+
+
+/*}}}*/
+
