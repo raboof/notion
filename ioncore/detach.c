@@ -222,7 +222,6 @@ bool ioncore_detach_extl(WRegion *reg, const char *how)
 void do_unsqueeze(WRegion *reg)
 {
     WSizeHints h;
-    WRegion *mgr=REGION_MANAGER(reg);
     
     if(OBJ_IS(reg, WScreen))
         return;
@@ -238,11 +237,6 @@ void do_unsqueeze(WRegion *reg)
     }
     
     ioncore_detach(reg, SETPARAM_SET);
-        
-    if(REGION_MANAGER(reg)==mgr)
-        return;
-    
-    do_unsqueeze(reg);
 }
 
 
@@ -256,7 +250,7 @@ EXTL_EXPORT
 void ioncore_unsqueeze(WRegion *reg, bool override)
 {
     if(ioncore_g.unsqueeze_enabled || override)
-        do_unsqueeze(region_groupleader_of(reg));
+        do_unsqueeze(reg);
 }
 
 

@@ -186,6 +186,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     WPHolder *ph=NULL;
     int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
     bool ok, uq=FALSE;
+    WRegion *createroot=NULL;
 
     /* Find a suitable screen */
     scr=clientwin_find_suitable_screen(cwin, param);
@@ -226,15 +227,20 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         return FALSE;
     
     /* Not in full-screen mode; use the placeholder to attach. */
+    {
+        WRegionAttachData data;
+        data.type=REGION_ATTACH_REPARENT;
+        data.u.reg=(WRegion*)cwin;
     
-    ok=pholder_attach(ph, swf, (WRegion*)cwin);
-    
+        createroot=pholder_do_attach(ph, swf, &data);
+    }
+
     destroy_obj((Obj*)ph);
     
-    if(uq && ok)
-        ioncore_unsqueeze((WRegion*)cwin, FALSE);
+    if(uq && createroot!=NULL)
+        ioncore_unsqueeze(createroot, FALSE);
     
-    return ok;
+    return (createroot!=NULL);
 }
 
 
