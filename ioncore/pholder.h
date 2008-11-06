@@ -15,6 +15,7 @@
 
 
 #define PHOLDER_ATTACH_SWITCHTO 0x0001
+#define PHOLDER_ATTACH_RETURN_CREATEROOT 0x0002
 
 
 /* Note: PHolders should be destroyed by their acquirer. */

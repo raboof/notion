@@ -232,7 +232,9 @@ bool clientwin_do_manage_default(WClientWin *cwin,
         data.type=REGION_ATTACH_REPARENT;
         data.u.reg=(WRegion*)cwin;
     
-        createroot=pholder_do_attach(ph, swf, &data);
+        createroot=pholder_do_attach(ph, 
+                                     swf|PHOLDER_ATTACH_RETURN_CREATEROOT,
+                                     &data);
     }
 
     destroy_obj((Obj*)ph);

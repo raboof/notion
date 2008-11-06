@@ -202,7 +202,9 @@ WRegion *framedpholder_do_attach(WFramedPHolder *ph, int flags,
         watch_setup(&ph->frame_watch, (Obj*)frame, NULL);
     }
     
-    return ap.reg_ret;
+    return (flags&PHOLDER_ATTACH_RETURN_CREATEROOT
+            ? (WRegion*)frame
+            : ap.reg_ret);
 }
 
 

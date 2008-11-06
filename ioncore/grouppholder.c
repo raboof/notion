@@ -256,7 +256,9 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
         mainloop_defer_destroy((Obj*)rph);
     }
 
-    return rp.reg_ret;
+    return (flags&PHOLDER_ATTACH_RETURN_CREATEROOT
+            ? (WRegion*)grp
+            : rp.reg_ret);
 }
 
 

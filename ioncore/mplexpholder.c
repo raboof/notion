@@ -293,7 +293,9 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
         mainloop_defer_destroy((Obj*)fph);
     }
     
-    return rp.reg_ret;
+    return (flags&PHOLDER_ATTACH_RETURN_CREATEROOT
+            ? (WRegion*)frame
+            : rp.reg_ret);
 }
 
 
