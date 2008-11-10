@@ -227,7 +227,7 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
 {
     WRegionAttachData data2;
     WPHolder *root, *rph;
-    WGroup *grp;
+    WRegion *res;
     RP rp;
     
     rp.ph_head=get_head(ph);
@@ -247,17 +247,16 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
     data2.u.n.fn=recreate_handler;
     data2.u.n.param=&rp;
     
-    grp=(WGroup*)pholder_do_attach(rph, flags, &data2);
+    res=pholder_do_attach(rph, flags, &data2);
     
-    if(grp!=NULL){
-        assert(OBJ_IS(grp, WGroup));
+    if(res!=NULL){
         rp.ph_head->recreate_pholder=NULL;
         /* It might be in use in attach chain! So defer. */
         mainloop_defer_destroy((Obj*)rph);
     }
 
     return (flags&PHOLDER_ATTACH_RETURN_CREATEROOT
-            ? (WRegion*)grp
+            ? (WRegion*)res
             : rp.reg_ret);
 }
 

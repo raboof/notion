@@ -264,7 +264,7 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     WRegionAttachData data2;
     WFramedPHolder *fph;
     WPHolder *root;
-    WRegion *frame;
+    WRegion *res;
     RP rp;
     
     rp.ph_head=get_head(ph);
@@ -285,16 +285,16 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
     data2.u.n.fn=recreate_handler;
     data2.u.n.param=&rp;
     
-    frame=pholder_do_attach(fph->cont, flags, &data2);
+    res=pholder_do_attach(fph->cont, flags, &data2);
     
-    if(frame!=NULL){
+    if(res!=NULL){
         rp.ph_head->recreate_pholder=NULL;
         /* It might be in use in attach chain! So defer. */
         mainloop_defer_destroy((Obj*)fph);
     }
     
     return (flags&PHOLDER_ATTACH_RETURN_CREATEROOT
-            ? (WRegion*)frame
+            ? (WRegion*)res
             : rp.reg_ret);
 }
 
