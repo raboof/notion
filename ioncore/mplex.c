@@ -699,20 +699,16 @@ static WStacking *has_stacking_within(WMPlex *mplex, WRegion *reg)
 
 
 /* 1. Try keep focus in REGION_ACTIVE_SUB.
- * 2. Try given `node`.
- * 3. Choose something else, attempting previous in focus history
- *    (unless `node` was set).
+ * 2. Choose something else, attempting previous in focus history.
  */
-static WStacking *mplex_to_focus(WMPlex *mplex, WStacking *node)
+static WStacking *mplex_to_focus(WMPlex *mplex)
 {
     WStacking *foc=NULL, *fallback=NULL;
     WRegion *reg=NULL;
-    bool within=FALSE;
-    WStacking *st;
     
     foc=maybe_focusable(REGION_ACTIVE_SUB(mplex));
     
-    if(foc==NULL && node==NULL){
+    if(foc==NULL){
         /* Search focus history if no specific attempt set.*/
         for(reg=ioncore_g.focus_current; reg!=NULL; reg=reg->active_next){
             foc=has_stacking_within(mplex, reg);
@@ -722,29 +718,20 @@ static WStacking *mplex_to_focus(WMPlex *mplex, WStacking *node)
     }
     
     if(foc!=NULL){
-        /*fallback=mplex_find_to_focus(mplex, foc, NULL, NULL);*/
         /* In the history search case, 'foc' might point to a group,
          * since we don't properly try to find a stacking within it...
          */
-        fallback=mplex_do_to_focus_on(mplex, foc, NULL, NULL, NULL);
-        if(fallback!=foc)
-            foc=NULL;
+        return mplex_do_to_focus_on(mplex, foc, NULL, NULL, NULL);
+    }else{
+        return mplex_find_to_focus(mplex, NULL, NULL, NULL);
     }
-    
-    if(foc==NULL && node!=NULL)
-        foc=mplex_do_to_focus_on(mplex, node, NULL, NULL, &within);
-        
-    if(foc==NULL || !within)
-        foc=fallback;
-    
-    return foc;
 }
 
 
 void mplex_do_set_focus(WMPlex *mplex, bool warp)
 {
     if(!MPLEX_MGD_UNVIEWABLE(mplex)){
-        WStacking *st=mplex_to_focus(mplex, NULL);
+        WStacking *st=mplex_to_focus(mplex);
         
         if(st==NULL){
             st=(mplex->mx_current!=NULL
@@ -764,7 +751,14 @@ void mplex_do_set_focus(WMPlex *mplex, bool warp)
 
 static void mplex_refocus(WMPlex *mplex, WStacking *node, bool warp)
 {
-    WStacking *foc=mplex_to_focus(mplex, node);
+    bool within=FALSE;
+    WStacking *foc=NULL;
+    
+    if(node!=NULL)
+        foc=mplex_do_to_focus_on(mplex, node, NULL, NULL, &within);
+        
+    if(foc==NULL || !within)
+        foc=mplex_to_focus(mplex);
     
     if(foc!=NULL)
         region_maybewarp(foc->reg, warp);
