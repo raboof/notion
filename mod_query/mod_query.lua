@@ -65,9 +65,10 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
         wedln:complete('prev', 'normal')
     end
 
-    -- Check that no other queries are open in the mplex.
-    local ok=mplex:managed_i(function(r) 
-                                 return not obj_is(r, "WEdln") 
+    -- Check that no other queries or message boxes are open in the mplex.
+    local ok=mplex:managed_i(function(r)
+                                 return not (obj_is(r, "WEdln") or
+                                             obj_is(r, "WMessage"))
                              end)
     if not ok then
         return
