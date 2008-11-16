@@ -195,7 +195,7 @@ static bool check_encoding()
     }
 
     if(mbtowc(NULL, NULL, 0)!=0){
-        warn("Statefull encodings are unsupported.");
+        warn(TR("Statefull encodings are unsupported."));
         return FALSE;
     }
     
@@ -205,11 +205,11 @@ static bool check_encoding()
     return TRUE;
     
 integr_err:
-    warn("Cannot verify locale encoding setting integrity "
-         "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s). "
-         "The LC_CTYPE environment variable should be of the form "
-         "language_REGION.encoding (e.g. en_GB.UTF-8), and encoding "
-         "should match the nl_langinfo value above.", ctype, langi);
+    warn(TR("Cannot verify locale encoding setting integrity "
+            "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s). "
+            "The LC_CTYPE environment variable should be of the form "
+            "language_REGION.encoding (e.g. en_GB.UTF-8), and encoding "
+            "should match the nl_langinfo value above."), ctype, langi);
     return FALSE;
 }
 
