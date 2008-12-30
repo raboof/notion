@@ -756,9 +756,11 @@ void frame_maximize_vert(WFrame *frame)
     int oy, oh;
     
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
+        if(frame->flags&FRAME_SHADED)
+            frame->flags|=FRAME_SHADED_TOGGLE;
         if(frame->flags&FRAME_SAVED_VERT)
             rqh(frame, frame->saved_y, frame->saved_h);
-        frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
+        frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
         return;
     }
 
