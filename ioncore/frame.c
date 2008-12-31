@@ -737,9 +737,11 @@ bool frame_is_shaded(WFrame *frame)
 }
 
 
-/* EXTL_DOC
- * Is the attribute \var{attr} set?
+/*EXTL_DOC
+ * Is the attribute \var{attr} set on \var{frame}?
  */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
 bool frame_is_grattr(WFrame *frame, const char *attr)
 {
     GrAttr a=stringstore_alloc(attr);
