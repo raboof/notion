@@ -254,7 +254,13 @@ int ioncore_x_intern_atom(const char *name, bool only_if_exists)
 EXTL_EXPORT
 char *ioncore_x_get_atom_name(int atom)
 {
-    return XGetAtomName(ioncore_g.dpy, atom);
+    char *xatomname, *atomname;
+
+    xatomname = XGetAtomName(ioncore_g.dpy, atom);
+    atomname = scopy(xatomname);
+    XFree(xatomname);
+
+    return atomname;
 }
 
 
