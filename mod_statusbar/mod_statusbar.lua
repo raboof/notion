@@ -1,7 +1,7 @@
 --
 -- ion/mod_statusbar/mod_statusbar.lua
 -- 
--- Copyright (c) Tuomo Valkonen 2004-2008.
+-- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- See the included file LICENSE for details.
 --

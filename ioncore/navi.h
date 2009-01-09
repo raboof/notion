@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/navi.h
  *
- * Copyright (c) Tuomo Valkonen 2006-2008. 
+ * Copyright (c) Tuomo Valkonen 2006-2009. 
  *
  * See the included file LICENSE for details.
  */

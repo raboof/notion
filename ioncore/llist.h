@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/llist.h
  *
- * Copyright (c) Tuomo Valkonen 2005-2008. 
+ * Copyright (c) Tuomo Valkonen 2005-2009. 
  * 
  * See the included file LICENSE for details.
  */

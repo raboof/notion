@@ -1,7 +1,7 @@
 /*
  * ion/utils/ion-statusd/extlrx.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2008.
+ * Copyright (c) Tuomo Valkonen 2004-2009.
  *
  * See the included file LICENSE for details.
  */

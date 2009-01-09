@@ -2,7 +2,7 @@
  * Ion dock module
  * Copyright (C) 2003 Tom Payne
  * Copyright (C) 2003 Per Olofsson
- * Copyright (C) 2004-2008 Tuomo Valkonen
+ * Copyright (C) 2004-2009 Tuomo Valkonen
  *
  * by Tom Payne <ion@tompayne.org>
  * based on code by Per Olofsson <pelle@dsv.su.se>

@@ -1,7 +1,7 @@
 --
 -- ion/share/ioncore_tabnum.lua -- Ioncore tab numbering support
 -- 
--- Copyright (c) Tuomo Valkonen 2007-2008.
+-- Copyright (c) Tuomo Valkonen 2007-2009.
 --
 -- See the included file LICENSE for details.
 --

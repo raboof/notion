@@ -1,7 +1,7 @@
 /*
  * ion/utils/ion-statusd/ion-statusd.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2008.
+ * Copyright (c) Tuomo Valkonen 2004-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -62,7 +62,7 @@ static OptParserOpt ion_opts[]={
 
 
 static const char statusd_copy[]=
-    "Ion-statusd " ION_VERSION ", copyright (c) Tuomo Valkonen 2004-2008.";
+    "Ion-statusd " ION_VERSION ", copyright (c) Tuomo Valkonen 2004-2009.";
 
 
 static const char statusd_license[]=DUMMY_TR(
