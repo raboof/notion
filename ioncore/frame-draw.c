@@ -219,7 +219,8 @@ void frame_set_shape(WFrame *frame)
 
 void frame_clear_shape(WFrame *frame)
 {
-    grbrush_set_window_shape(frame->brush, TRUE, 0, NULL);
+    if(frame->brush!=NULL)
+        grbrush_set_window_shape(frame->brush, TRUE, 0, NULL);
 }
 
 

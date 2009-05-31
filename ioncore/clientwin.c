@@ -1018,10 +1018,11 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
 {
     if(cwin->flags&CLIENTWIN_P_WM_TAKE_FOCUS){
         Time stmp=ioncore_get_timestamp();
+        region_finalise_focusing((WRegion*)cwin, cwin->win, warp, stmp);
         send_clientmsg(cwin->win, ioncore_g.atom_wm_take_focus, stmp);
+    }else{
+        region_finalise_focusing((WRegion*)cwin, cwin->win, warp, CurrentTime);
     }
-
-    region_finalise_focusing((WRegion*)cwin, cwin->win, warp);
     
     XSync(ioncore_g.dpy, 0);
 }

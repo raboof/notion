@@ -182,7 +182,7 @@ void window_unmap(WWindow *wwin)
 
 void window_do_set_focus(WWindow *wwin, bool warp)
 {
-    region_finalise_focusing((WRegion*)wwin, wwin->win, warp);
+    region_finalise_focusing((WRegion*)wwin, wwin->win, warp, CurrentTime);
 }
 
 
