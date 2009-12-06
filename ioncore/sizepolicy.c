@@ -360,5 +360,10 @@ bool string2sizepolicy(const char *szplcy, WSizePolicy *value)
 
 const char *sizepolicy2string(WSizePolicy szplcy)
 {
-    return stringintmap_key(szplcy_specs, szplcy, NULL);
+    const char* str=stringintmap_key(szplcy_specs, szplcy, NULL);
+    if(str==NULL){
+        /* fall back on policy without modifiers if full name not found */
+        str=stringintmap_key(szplcy_specs, szplcy&0xff, NULL);
+    }
+    return str;
 }
