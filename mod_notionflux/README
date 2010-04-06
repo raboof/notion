@@ -1,0 +1,13 @@
+
+This is a simple "remote control" module for Ion. To build it, edit
+IONDIR in system.mk to point to Ion2 top-level source tarball 
+top-level directly. Then run 'make' and 'make install'.
+
+The 'mod_ionflux' module must be loaded before starting any shells
+where the 'ionflux' program is to be used as the unix domain socket
+to use is passed in the IONFLUX_SOCKET environment variable.
+
+***
+*** THIS MODULE IS PROBABLY A GAPING SECURITY HOLE!
+*** USE WITH CAUTION!
+***
