@@ -1,0 +1,28 @@
+The scripts are initially from:
+http://folk.ntnu.no/bronner/temp/ion3/repos/ion-scripts-3/
+
+Please see LICENSE.
+
+
+Installing and using a script
+-----------------------------
+
+To use a script put them into your ~/.notion or your global notion directory and 
+make sure you load the script with
+
+dopath("scriptname")
+
+in your cfg_ion.lua.
+
+
+Statusbar scripts
+-----------------
+
+Statusbar scripts should be added to cfg_statusbar.lua without the prefix "statusd_".
+
+
+Styles
+------
+
+After adding them to your notion directory, do F12->styles/refresh-list. After that the new
+styles will be available in your F12 menu.
