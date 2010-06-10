@@ -2,16 +2,27 @@
 -- Basic functionality by pinko
 -- Extended by Etan Reisner <deryni@gmail.com>
 
--- kpress(META.."W", "autoprop(_sub, _, false)", "_sub:WClientWin")
--- kpress(MOD4.."W", "autoprop(_sub, _, true)", "_sub:WClientWin")
+--defbindings("WFrame", {
+---- add winprop permanentlu
+--    kpress(META.."W", "autoprop(_sub, _, true)", "_sub:WGroupCW"),
+---- add winprop for this session only
+--    kpress(META.."E", "autoprop(_sub, _, false)", "_sub:WGroupCW"),
+---- remove winprop (permanently)
+--    kpress(META.."Q", "autoprop(_sub, nil, X)"),
+--})
 
 -- Use autoprop(_sub, nil, X) to remove a winprop
 
 local savefile="autoprops"
 local autoprops={}
 
-function autoprop(cwin, dest, save)
+function autoprop(cwin_group, dest, save)
+--  if cwin_group.__typename ~= "WGroupCW" then
+--    return
+--  end
   local p={}
+
+  local cwin = cwin_group:bottom()
 
   if type(dest)=="nil" then
     name=nil
