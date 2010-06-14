@@ -18,8 +18,7 @@ in your cfg_ion.lua.
 Statusbar scripts
 -----------------
 
-Statusbar scripts should be added to cfg_statusbar.lua without the prefix "statusd_".
-
+Add the monitor(s) provided by the script into the template in cfg_statusbar.lua. Omit any "statusd_" prefixes of the monitor names.
 
 Styles
 ------
