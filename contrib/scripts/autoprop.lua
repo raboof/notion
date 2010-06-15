@@ -17,7 +17,7 @@ local savefile="autoprops"
 local autoprops={}
 
 function autoprop(cwin_group, dest, save)
---  if cwin_group.__typename ~= "WGroupCW" then
+--  if obj_typename(cwin_group) ~= "WGroupCW" then
 --    return
 --  end
   local p={}

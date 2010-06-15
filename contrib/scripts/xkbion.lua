@@ -149,7 +149,7 @@ function xkbion_set (groups) -- the only global created by xkbion.lua
     
     ioncore.get_hook("region_notify_hook"):add(
         function(reg, action)
-            if (tostring(reg.__typename) == "WClientWin") and (action == "activated") then
+            if (obj_typename(reg) == "WClientWin") and (action == "activated") then
                 set_group(reg)
             end
         end
