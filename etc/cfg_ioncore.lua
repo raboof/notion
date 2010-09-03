@@ -139,7 +139,7 @@ defbindings("WMPlex.toplevel", {
     bdoc("Query for manual page to be displayed."),
     kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
 
-    bdoc("Show the Ion manual page."),
+    bdoc("Show the Notion manual page."),
     kpress(META.."F1", "ioncore.exec_on(_, ':man ion3')"),
 
     bdoc("Run a terminal emulator."),
@@ -332,7 +332,7 @@ defmenu("mainmenu", {
     menuentry("Terminal",       "ioncore.exec_on(_, XTERM or 'xterm')"),
     menuentry("Lock screen",    "ioncore.exec_on(_, 'xlock')"),
     menuentry("Help",           "mod_query.query_man(_)"),
-    menuentry("About Ion",      "mod_query.show_about_ion(_)"),
+    menuentry("About Notion",      "mod_query.show_about_ion(_)"),
     submenu("Styles",           "stylemenu"),
     submenu("Session",          "sessionmenu"),
 })
