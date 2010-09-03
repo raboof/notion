@@ -247,7 +247,7 @@ static bool init_locale()
 
 #ifndef CF_NO_GETTEXT
 
-#define TEXTDOMAIN "ion3"
+#define TEXTDOMAIN "notion"
 
 static bool init_messages(const char *localedir)
 {

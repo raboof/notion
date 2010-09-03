@@ -11,7 +11,7 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-EXECUTABLE = ion3plus
+EXECUTABLE = notion
 
 SOURCES = ion.c
 
