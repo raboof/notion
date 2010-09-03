@@ -1,12 +1,12 @@
-.TH ION 1
+.TH NOTION 1
 .SH NAME
-Ion - an X11 window manager
+Notion - an X11 window manager
 .SH SYNOPSIS
 .B ion3
 .I "[options]"
 .SH "DESCRIPTION"
 
-Ion is a tiling tabbed window manager designed with keyboard users in mind.
+Notion is a tiling tabbed window manager designed with keyboard users in mind.
  
 .SH "OPTIONS"
 .TP
@@ -40,11 +40,11 @@ Show about text (version, author, license)
 .SH BASIC CONCEPTS
 
 This section is an overview of the types objects that appear on an X
-display managed by Ion and their relationships in a standard setup. This
+display managed by Notion and their relationships in a standard setup. This
 information is necessary to understand the operations and availability
 of the different key bindings explained below. For a more detailed 
 explanation, needed for writing custom bindings configuration files,
-see the additional documentation available from the Ion Web page.
+see the additional documentation available from the Notion Web page.
 
 The top-level objects that matter in the case at hand are \fBscreens\fP.
 They correspond to physical screens. Screens contain \fBworkspaces\fP
@@ -56,7 +56,7 @@ Workspaces themselves may contain \fBtilings\fP and detached/floating
 \fBframes\fP. Tilings themselves contain \fBframes\fP tiled to fill the
 screen, and possibly a statusbar or dock. Akin to screens, frames multiplex
 other objects, but in this case mostly client window \fBgroups\fP. Most of 
-the time, frames are the only trace of Ion you see on the screen. Frames 
+the time, frames are the only trace of Notion you see on the screen. Frames 
 may have border decorations, and they have a \fBtab\fP for each multiplexed
 object.
 
@@ -148,7 +148,7 @@ User configuration files
 User default main configuration file (overrides system default)
 
 .SH SEE ALSO
-The Ion home page, \fIhttp://iki.fi/tuomov/ion/\fP
+The Notion home page, \fIhttp://notion.sf.net/\fP
 .PP
 The document "Configuring and extending Ion3 with Lua" found on the
 Ion home page.
@@ -158,4 +158,4 @@ Ion home page.
 \fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
 
 .SH AUTHOR
-Ion was written by Tuomo Valkonen <tuomov at iki.fi>.
+Notion was written by the Notion team, based on Ion which was written by Tuomo Valkonen <tuomov at iki.fi>.

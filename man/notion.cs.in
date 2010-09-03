@@ -1,12 +1,12 @@
-.TH ION 1
+.TH NOTION 1
 .SH NÁZEV
-Ion - správce oken systému X11
+Notion - správce oken systému X11
 .SH PØEHLED
 .B ion3
 .I "[volby]"
 .SH "POPIS"
 
-Ion je dla¾dicový správce oken se zálo¾kami navr¾ený pro klávesnicové u¾ivatele.
+Notion je dla¾dicový správce oken se zálo¾kami navr¾ený pro klávesnicové u¾ivatele.
 
 .SH "VOLBY"
 .TP
@@ -40,10 +40,10 @@ Zobrazí informace o programu (verze, autor, copyright)
 .SH Základní pojetí
 
 Tato sekce pøiná¹í pøehled typù objektù, které se objevují na X displeji
-spravovaném Ionem. To je nezbytné pro pochopení operací s objekty a pro
+spravovaném Notionem. To je nezbytné pro pochopení operací s objekty a pro
 pochopení, proè jsou rùzná klávesová pøiøazení dostupná jen u nìkterých
 objektù. Podrobnìj¹í popis nutný pro psaní vlastních pøizpùsobení naleznete
-na webových stránkách Ionu.
+na webových stránkách Notionu.
 
 Nejvy¹¹ími objekty jsou \fBobrazovky\fP, které odpovídají fyzickým
 obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP (co¾ je nìco jako
@@ -55,11 +55,11 @@ Pracovní plochy mohou obsahovat \fBdla¾dice\fP a odpojené/plovoucí
 (vydlá¾dily) celou obrazovku, a pøípadnì stavový øádek a dok. Podobnì
 jako obrazovky obsahují i rámy dal¹í objekty, ale v tomto pøípadì ji¾
 jde vìt¹inou o \fBskupiny\fP klientských oken. Po vìt¹inu èasu bývají
-rámy jedinou viditelnou èástí Ionu - volitelnì mohou mít kolem sebe
+rámy jedinou viditelnou èástí Notionu - volitelnì mohou mít kolem sebe
 orámování a pro ka¾dého potomka zobrazují \fBzálo¾ku\fP.
 
 Dal¹í viditelnou èástí jsou \fBdotazy\fP. Nejde o nic jiného ne¾ obdélníky,
-které se objeví ve spodní èásti rámù nebo obrazovek v¾dy, kdy¾ se Ion ptá
+které se objeví ve spodní èásti rámù nebo obrazovek v¾dy, kdy¾ se Notion ptá
 na nìjakou informaci (tøeba název okna pro pøipojení, nebo název programu,
 který se má spustit). Vìt¹ina dotazù podporuje doplòování klávesou tab.
 
@@ -148,7 +148,7 @@ U¾ivatelské konfiguraèní soubory
 Hlavní u¾ivatelský konfiguraèní soubor (pøepisuje systémové nastavení)
 
 .SH VIZ TAKÉ
-Domovská stránka Ionu \fIhttp://iki.fi/tuomov/ion/\fP
+Domovská stránka Notionu \fIhttp://notion.sf.net/\fP
 .PP
 Dokument "Configuring and extending Ion3 with Lua" k nalezení
 tamté¾.
@@ -158,6 +158,7 @@ tamté¾.
 \fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
 
 .SH AUTOR
+Notion napsal Notion Team
 Ion napsal Tuomo Valkonen <tuomov at iki.fi>.
 
 .SH PØEKLAD

@@ -14,7 +14,7 @@ WELCOME_TARGETS=\
 	welcome.txt \
 	$(foreach tr, $(TRANSLATIONS), welcome.$(tr).txt)
 
-TARGETS=ion3.1 $(foreach tr, $(TRANSLATIONS), ion3.$(tr).1) \
+TARGETS=notion.1 $(foreach tr, $(TRANSLATIONS), notion.$(tr).1) \
 	pwm3.1 $(foreach tr, $(TRANSLATIONS), pwm3.$(tr).1) \
 	$(WELCOME_TARGETS)
 
@@ -46,29 +46,29 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-ion3.1: ion3.in $(CONFIGS)
+notion.1: notion.in $(CONFIGS)
 	$(MKMAN) -i $< -o $@ $(CONFIGS)
 
 pwm3.1: pwm3.in $(PWM_CONFIGS)
 	$(MKMAN) -i $< -o $@ $(PWM_CONFIGS)
 
-ion3.%.1: ion3.%.in $(CONFIGS) ../po/%.po
+notion.%.1: notion.%.in $(CONFIGS) ../po/%.po
 	$(MKMAN) -po ../po/$*.po -i $< -o $@ $(CONFIGS)
 
 pwm3.%.1: pwm3.%.in $(PWM_CONFIGS) ../po/%.po
 	$(MKMAN) -po ../po/$*.po -i $< -o $@ $(PWM_CONFIGS)
 
-welcome%txt: welcome%head ion3%1
+welcome%txt: welcome%head notion%1
 	(cat welcome$*head; \
-	$(NROFF) ion3$*1 | $(FILTERCRAP)) > $@
+	$(NROFF) notion$*1 | $(FILTERCRAP)) > $@
 
 _install:
 	$(INSTALLDIR) $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) ion3.1 $(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) notion.1 $(MANDIR)/man1
 	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(MANDIR)/man1
 	for tr in $(TRANSLATIONS); do \
 		$(INSTALLDIR) $(MANDIR)/$$tr/man1 ; \
-		$(INSTALL) -m $(DATA_MODE) ion3.$$tr.1 $(MANDIR)/$$tr/man1/ion3.1 ; \
+		$(INSTALL) -m $(DATA_MODE) notion.$$tr.1 $(MANDIR)/$$tr/man1/notion.1 ; \
 		$(INSTALL) -m $(DATA_MODE) pwm3.$$tr.1 $(MANDIR)/$$tr/man1/pwm3.1 ; \
 	done
 	$(INSTALLDIR) $(SHAREDIR)
