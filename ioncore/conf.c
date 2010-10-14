@@ -312,7 +312,7 @@ bool ioncore_read_main_config(const char *cfgfile)
     int unset=0;
 
     if(cfgfile==NULL)
-        cfgfile="cfg_ion";
+        cfgfile="cfg_notion";
     
     ret=extl_read_config(cfgfile, ".", TRUE);
     

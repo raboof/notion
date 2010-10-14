@@ -105,7 +105,7 @@ Hlavní u¾ivatelský konfiguraèní soubor (pøepisuje systémové nastavení)
 .SH VIZ TAKÉ
 
 Více informací naleznete v
-\fIion3(1)\fP.
+\fInotion(1)\fP.
 
 .SH AUTOR
 Programy PWM a Ion napsal Tuomo Valkonen <tuomov at iki.fi>.

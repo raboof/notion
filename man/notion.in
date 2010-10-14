@@ -2,7 +2,7 @@
 .SH NAME
 Notion - an X11 window manager
 .SH SYNOPSIS
-.B ion3
+.B notion
 .I "[options]"
 .SH "DESCRIPTION"
 
@@ -26,7 +26,7 @@ in the DISPLAY environment variable.
 .TP
 .B \-session session_name
 Set session name. This option affects where workspace and other save files are
-put (~/.ion3/session_name if option set).
+put (~/.notion/session_name if option set).
 .TP
 .B \-help
 Show help on command line options
@@ -132,7 +132,7 @@ BINDINGS:WMenu
 
 .SH FILES AND DIRECTORIES
 .TP
-.B ETCDIR/cfg_ion.lua
+.B ETCDIR/cfg_notion.lua
 System default main configuration files
 .TP
 .B ETCDIR/cfg_*.lua
@@ -141,10 +141,10 @@ Other configuration files.
 .B ETCDIR/look_*.lua
 Colour scheme configuration files
 .TP
-.B ~/.ion3/
+.B ~/.notion/
 User configuration files
 .TP
-.B ~/.ion3/cfg_ion.lua
+.B ~/.notion/cfg_notion.lua
 User default main configuration file (overrides system default)
 
 .SH SEE ALSO

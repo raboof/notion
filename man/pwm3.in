@@ -105,7 +105,7 @@ User default main configuration file (overrides system default)
 .SH SEE ALSO
 
 For more information, see
-\fIion3(1)\fP.
+\fInotion(1)\fP.
 
 .SH AUTHOR
 Both PWM and Ion have been written by Tuomo Valkonen <tuomov at iki.fi>.

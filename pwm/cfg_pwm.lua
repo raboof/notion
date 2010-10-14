@@ -3,7 +3,7 @@
 --
 -- This file only includes some settings that are rather frequently altered,
 -- and the differences between PWM and Ion. The rest of the settings are in 
--- cfg_ioncore.lua and individual modules' configuration files 
+-- cfg_notioncore.lua and individual modules' configuration files 
 -- (cfg_modulename.lua).
 --
 
@@ -32,8 +32,8 @@ ioncore.set{
     --warp=true,
 }
 
--- cfg_ioncore contains configuration of the Ion 'core'
-dopath("cfg_ioncore")
+-- cfg_notioncore contains configuration of the Ion 'core'
+dopath("cfg_notioncore")
 
 -- Load some modules. 
 --dopath("cfg_modules")

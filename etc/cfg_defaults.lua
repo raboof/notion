@@ -2,7 +2,7 @@
 -- Ion default settings
 --
 
-dopath("cfg_ioncore")
+dopath("cfg_notioncore")
 dopath("cfg_kludges")
 dopath("cfg_layouts")
 

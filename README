@@ -60,7 +60,7 @@ Some optional installation steps
    a program to view a file based on its guessed MIME type. Unless you are
    using Debian, most likely you don't have it, but any other similar 
    program (or just plain old text editor) will do as well -- just modify the
-   bindings in `cfg_ioncore.lua`. Of course, if you don't want to use the 
+   bindings in `cfg_notioncore.lua`. Of course, if you don't want to use the 
    feature at this time or never, you may simply skip this step. If you want
    to use `run-mailcap`, it can be found from the following address, as a 
    source tarball as well:

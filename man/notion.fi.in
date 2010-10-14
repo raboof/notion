@@ -2,7 +2,7 @@
 .SH NIMI
 Notion - X11 ikkunanhallintaohjelma
 .SH SELOSTE
-.B ion3
+.B notion
 .I "[valinnat]"
 .SH "KUVAUS"
 
@@ -135,7 +135,7 @@ BINDINGS:WMenu
 
 .SH TIEDOSTOT JA HAKEMISTOT
 .TP
-.B ETCDIR/cfg_ion.lua
+.B ETCDIR/cfg_notion.lua
 J‰rjestelm‰n oletusarvoinen p‰‰asetustiedosto.
 .TP
 .B ETCDIR/cfg_*.lua
@@ -144,10 +144,10 @@ Muita asetustiedostoja.
 .B ETCDIR/look_*.lua
 Ulkon‰ˆn asetustiedostoja.
 .TP
-.B ~/.ion3/
+.B ~/.notion/
 K‰ytt‰j‰n asetustiedostot.
 .TP
-.B ~/.ion3/cfg_ion.lua
+.B ~/.notion/cfg_notion.lua
 K‰ytt‰j‰n oletusarvoinen p‰‰asetustiedosto.
 
 .SH KATSO MY÷S
