@@ -53,8 +53,11 @@ end
 newmeta.__index=getmod
 setmetatable(_G, newmeta)
 
+notioncore = ioncore
+
 -- Export some important functions into global namespace.
 export(ioncore, 
+       notioncore,
        "submap",
        "submap_enter",
        "submap_wait",
