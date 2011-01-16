@@ -1,22 +1,22 @@
 
-Welcome to Ion!
+Welcome to Notion!
 
-If you have never used Ion before, it is highly recommended that you study 
-the Ion manual page before proceeding further. It is reproduced below, but 
+If you have never used Notion before, it is highly recommended that you study 
+the Notion manual page before proceeding further. It is reproduced below, but 
 you can also access it later on, for example, by pressing <F1> and then 
 <Enter> or, by running 'man notion' in a terminal. All this supposing that 
-you have installed Ion in a standard location so that the system commands
+you have installed Notion in a standard location so that the system commands
 can find the manual page.
 
-If you are too eager to try out Ion and against all recommendation want to
+If you are too eager to try out Notion and against all recommendation want to
 skip reading the manual page, you should at least know that pressing <F2> 
 should start a terminal emulator (xterm) and that the main menu can be 
 accessed with <F12>.
 
 When you feel ready to write customized configuration files (you're going
 to do that in any case), please see the configuration manual available from
-the Ion webpage listed at the end of the user manual below. It may, however,
-be beneficial to become well acquainted with Ion before delving into this 
+the Notion webpage listed at the end of the user manual below. It may, however,
+be beneficial to become well acquainted with Notion before delving into this 
 so that you have grasped the basic concepts necessary to understand the
 binding configuration files.
 
