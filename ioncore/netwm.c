@@ -261,22 +261,24 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 /*{{{ user time */
 
-
-static bool in_before_interval(Time t1, Time t2, Time td)
-{
-    if(t1 < t2)
-        return (t2 - t1 < td);
-    else
-        return (t1 + td > t2);
-}
-
-
+/** When a new window is mapped, look at the netwm user time to find out 
+ * whether the new window should be switched to and get the focus.
+ *
+ * It is unclear what the desired behavior would be, and how we should takee
+ * into consideration ioncore_g.usertime_diff_new and IONCORE_CLOCK_SKEW_MS,
+ * so for now we deny raising the new window only in the special case where 
+ * its user time is set to 0, specifically preventing it from being raised.
+ */
 void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
 {
+    // the currently focussed window
     WClientWin *cur=OBJ_CAST(ioncore_g.focus_current, WClientWin);
+    // the new window
     Window win=region_xwindow((WRegion*)cwin);
     Time now=ioncore_get_timestamp(); /* TODO: should really use the event.. */
+    // user time, current window user time
     Time ut=0, cut=0;
+    // whether the new (got) and current (gotcut) windows had their usertime set
     bool got=FALSE, gotcut=FALSE;
     bool nofocus=FALSE;
     
@@ -289,15 +291,19 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
     }
     
     got=xwindow_get_cardinal_property(win, atom_net_wm_user_time, &ut);
+   
+    /* The special value of zero on a newly mapped window can be used to 
+     * request that the window not be initially focused when it is mapped */
+    if (got && ut == 0)
+        nofocus = TRUE;
     
-    if(gotcut && ioncore_g.usertime_diff_current!=0){
-        nofocus=((got && ut < cut && !(cut + IONCORE_CLOCK_SKEW_MS <= ut))  ||
-                 (!got && in_before_interval(cut, now, ioncore_g.usertime_diff_current)));
-    }else if(got && ioncore_g.usertime_diff_new!=0){
-        nofocus=((gotcut && ut < cut && !(cut + IONCORE_CLOCK_SKEW_MS <= ut))  ||
-                 (!gotcut && !in_before_interval(ut, now, ioncore_g.usertime_diff_new)));
-    }
-    
+    /* there was some other logic here, but it was not clear how it was meant 
+     * to work and prevented newly created windows from receiving the focus
+     * in some cases
+     * (https://sourceforge.net/tracker/?func=detail&aid=3109576&group_id=314802&atid=1324528) 
+     * Stripped until we decide how this is supposed to behave.
+     */
+  
     if(nofocus){
         param->switchto=FALSE;
         param->jumpto=FALSE;
