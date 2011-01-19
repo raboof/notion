@@ -61,6 +61,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <pwd.h>
+/* needed for NGROUPS_MAX on Solaris 10 */
+#include <limits.h>
 
 #include <libtu/util.h>
 #include <libtu/types.h>
