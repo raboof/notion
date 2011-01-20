@@ -25,7 +25,7 @@ local function update_drives()
  		if drive:match("/([^/]+)$") then
  			local drive_name = drive:match("/([^/]+)$")
  			local drive_base = drive_name:sub(1,3)
- 			local drive_partition = drive_name:sub(4,5)
+ 			local drive_partition = drive_name:sub(4,-1)
 			if drive_table[drive_base] then
 				table.insert(drive_table[drive_base], drive_partition)
 			else
