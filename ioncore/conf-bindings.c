@@ -11,6 +11,10 @@
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
 
+#ifdef CF_SUN_F1X_REMAP
+#include <X11/Sunkeysym.h>
+#endif
+
 #include <libtu/map.h>
 
 #include "common.h"
@@ -82,9 +86,9 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
             keysym=XStringToKeysym(p);
 #ifdef CF_SUN_F1X_REMAP
             if(keysym==XK_F11)
-                keysym=XK_SunF36;
+                keysym=SunXK_F36;
             else if(keysym==XK_F12)
-                keysym=XK_SunF37;
+                keysym=SunXK_F37;
 #endif
         }
         
