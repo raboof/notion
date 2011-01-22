@@ -38,6 +38,10 @@ static Atom atom_net_wm_user_time=0;
 
 static Atom atom_net_supported=0;
 
+#define SOURCE_UNKNOWN     0
+#define SOURCE_APPLICATION 1
+#define SOURCE_PAGER       2
+
 /*}}}*/
 
 
@@ -194,7 +198,12 @@ void netwm_set_active(WRegion *reg)
 static void netwm_active_window_rq(WClientWin *cwin, 
                                    const XClientMessageEvent *ev)
 {
-    bool ignore=FALSE;
+    long source=ev->data.l[0];
+    /**
+     * By default we ignore non-pager activity requests, as they're known to 
+     * steal focus from newly-created windows :(
+     */
+    bool ignore=source!=SOURCE_PAGER;
     
     extl_table_gets_b(cwin->proptab, "ignore_net_active_window", &ignore);
     
