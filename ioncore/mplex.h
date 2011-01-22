@@ -157,6 +157,7 @@ extern bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *disp,
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
 extern void mplex_switch_next(WMPlex *mplex);
 extern void mplex_switch_prev(WMPlex *mplex);
+extern void mplex_switch_to(WMPlex *mplex, WRegion *reg);
 extern bool mplex_is_hidden(WMPlex *mplex, WRegion *reg);
 extern bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp);
 
