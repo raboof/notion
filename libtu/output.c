@@ -7,7 +7,7 @@
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
  */
 
-#if defined(HAS_SYSTEM_ASPRINTF)
+#if HAS_SYSTEM_ASPRINTF
 #define _GNU_SOURCE
 #endif
 
@@ -22,8 +22,8 @@
 #include "util.h"
 #include "private.h"
 
-#if !defined(HAS_SYSTEM_ASPRINTF)
-#include "snprintf_2.2/snprintf.h"
+#if !HAS_SYSTEM_ASPRINTF
+#include "snprintf_2.2/snprintf.c"
 #endif
 
 
