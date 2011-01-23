@@ -19,7 +19,7 @@
 
 #include "../version.h"
 
-char mod_menu_ion_api_version[]=ION_API_VERSION;
+char mod_menu_ion_api_version[]=NOTION_API_VERSION;
 
 
 /*}}}*/

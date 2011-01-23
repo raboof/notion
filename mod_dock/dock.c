@@ -83,7 +83,7 @@
 #include "../version.h"
 
 static const char *modname="dock";
-const char mod_dock_ion_api_version[]=ION_API_VERSION;
+const char mod_dock_ion_api_version[]=NOTION_API_VERSION;
 
 static bool shape_extension=FALSE;
 static int shape_event_basep=0;

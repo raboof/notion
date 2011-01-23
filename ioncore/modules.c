@@ -86,13 +86,23 @@ static void *get_module_symbol(dlhandle handle,
     return ret;
 }
 
+static char *get_version(dlhandle handle, const char *modulename)
+{
+    return (char*)get_module_symbol(handle, modulename, 
+                                              "_ion_api_version");
+}
+
+static bool check_has_version(dlhandle handle, const char *modulename)
+{
+    return get_version(handle, modulename) != NULL;
+}
+
 static bool check_version(dlhandle handle, const char *modulename)
 {
-    char *versionstr=(char*)get_module_symbol(handle, modulename, 
-                                              "_ion_api_version");
+    char *versionstr=get_version(handle, modulename);
     if(versionstr==NULL)
         return FALSE;
-    return (strcmp(versionstr, ION_API_VERSION)==0);
+    return (strcmp(versionstr, NOTION_API_VERSION)==0);
 }
 
 
@@ -178,9 +188,16 @@ static int try_load(const char *file, void *param)
     if(get_name(handle))
         return EXTL_TRYCONFIG_OK;
     
+    if(!check_has_version(handle, name)){
+        warn_obj(file, TR("Module version information for %s not found. "
+                          "Refusing to use."), name);
+        goto err3;
+    }
+
     if(!check_version(handle, name)){
-        warn_obj(file, TR("Module version information not found or "
-                          "version mismatch. Refusing to use."));
+        warn_obj(file, TR("Module version mismatch: expected '%s', found '%s'."
+                          " Refusing to use."), 
+                       NOTION_API_VERSION, get_version(handle, name));
         goto err3;
     }
     
