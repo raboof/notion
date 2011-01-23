@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <sys/select.h>
 #include <errno.h>
+#include <string.h>
 
 #include <libtu/types.h>
 #include <libtu/misc.h>
@@ -120,6 +121,7 @@ void mainloop_select()
     #warning "pselect() unavailable -- using dirty hacks"
     {
         struct timeval tv={0, 0};
+        bool to;
         
         /* If there are timers, make sure we return from select with 
          * some delay, if the timer signal happens right before

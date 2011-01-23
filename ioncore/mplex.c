@@ -969,6 +969,15 @@ void mplex_switch_prev(WMPlex *mplex)
                                     next, prev));
 }
 
+/*EXTL_DOC
+ * Have \var{mplex} display the given child window already added to the mplex
+ */
+EXTL_EXPORT_MEMBER
+void mplex_switch_to(WMPlex *mplex, WRegion *reg)
+{
+    WPrepareFocusResult result;
+    mplex_managed_prepare_focus(mplex, reg->manager, 0, &result);
+}
 
 bool mplex_set_hidden(WMPlex *mplex, WRegion *reg, int sp)
 {
