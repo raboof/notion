@@ -127,10 +127,11 @@ void mainloop_select()
          * we'll just have to ignore without pselect().
          */
         do{
+            bool to;
             FD_ZERO(&rfds);
             set_input_fds(&rfds, &nfds);
             
-            bool to=libmainloop_get_timeout(&tv);
+            to=libmainloop_get_timeout(&tv);
             
             if(mainloop_unhandled_signals()){
                 ret=0;

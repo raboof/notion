@@ -271,14 +271,15 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
  */
 void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
 {
-    // the currently focussed window
+    /* the currently focussed window */
     WClientWin *cur=OBJ_CAST(ioncore_g.focus_current, WClientWin);
-    // the new window
+    /* the new window */
     Window win=region_xwindow((WRegion*)cwin);
     Time now=ioncore_get_timestamp(); /* TODO: should really use the event.. */
-    // user time, current window user time
+    /* user time, current window user time */
     Time ut=0, cut=0;
-    // whether the new (got) and current (gotcut) windows had their usertime set
+    /* whether the new (got) and current (gotcut) windows had their usertime 
+     * set */
     bool got=FALSE, gotcut=FALSE;
     bool nofocus=FALSE;
     
