@@ -95,6 +95,8 @@ bool ioncore_handle_event(XEvent *ev)
     CASE_EVENT(SelectionRequest)
         ioncore_handle_selection_request(&(ev->xselectionrequest));
         break;
+    default:
+        return FALSE;
     }
     
     return TRUE;
