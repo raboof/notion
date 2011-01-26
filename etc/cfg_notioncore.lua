@@ -140,7 +140,7 @@ defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
 
     bdoc("Show the Notion manual page."),
-    kpress(META.."F1", "ioncore.exec_on(_, ':man ion3')"),
+    kpress(META.."F1", "ioncore.exec_on(_, ':man notion')"),
 
     bdoc("Run a terminal emulator."),
     kpress(ALTMETA.."F2", "ioncore.exec_on(_, XTERM or 'xterm')"),
