@@ -40,12 +40,4 @@ extern void frame_setup_dragwin_style(WFrame *frame, GrStyleSpec *spec, int tab)
 extern void frame_inactivated(WFrame *frame);
 extern void frame_activated(WFrame *frame);
 
-/* 'elastic tab sizes' logic 
- *
- * bar_w: total width of the bar. The width of the tabs of the children should
- * add up to this.
- */
-extern void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,
-    int *elastic, int *minw);
-
 #endif /* ION_IONCORE_FRAME_DRAW_H */

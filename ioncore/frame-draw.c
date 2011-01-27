@@ -226,13 +226,16 @@ void frame_clear_shape(WFrame *frame)
 
 #define CF_TAB_MAX_TEXT_X_OFF 10
 
+void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *elastic, int *minw);//FIXME
+
 static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
 {
     int bar_w=0, textw, w, tmaxw, tminw, tmp=0;
     WLListIterTmp itmp;
     WRegion *sub;
-    const char *displayname;
+    const char *p;
     GrBorderWidths bdw;
+    char *title;
     uint bdtotal;
     int i, m;
     
@@ -250,13 +253,13 @@ static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
             w=bar_w-tmp;
 
             FRAME_MX_FOR_ALL(sub, frame, itmp){
-                displayname=region_displayname(sub);
-                if(displayname==NULL)
+                p=region_displayname(sub);
+                if(p==NULL)
                     continue;
             
                 textw=2*CF_TAB_MAX_TEXT_X_OFF+
                     grbrush_get_text_width(frame->bar_brush,
-                    displayname, strlen(displayname))-
+                    p, strlen(p))-
                     frame->float_tab_min_w;
                 if (textw>=2*CF_TAB_MAX_TEXT_X_OFF)
                     w+=2*CF_TAB_MAX_TEXT_X_OFF;
@@ -315,30 +318,26 @@ void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *ela
     int textw=0,tmp,tmaxw,tminw=frame->propor_tab_min_w;
     WLListIterTmp itmp;
     WRegion *sub;
-    const char *displayname;
+    const char *p;
     GrBorderWidths bdw;
+    //char *title;
     uint bdtotal,curw,nextw;
     int i, m, n;
 
     m=FRAME_MCOUNT(frame);
-
     *minw=0;
     
-/*
-    if(frame->bar_brush==NULL)
-        *elastic=0;
-        *maxw=-1;
-fprintf(stderr,"ZERR\n");
-        return;
-*/
+//    if(frame->bar_brush==NULL)
+//        *elastic=0;
+//        *maxw=-1;
+//fprintf(stderr,"ZERR\n");
+//        return;
     if(m>0){
 	grbrush_get_border_widths(frame->bar_brush, &bdw);
 	bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)
 		 +bdw.right+bdw.left);
 	tmp = bar_w - bdtotal;
-#ifdef DEBUG
-	fprintf(stderr,"TMPST:%i barw:%i bdt:%i\n",tmp,bar_w,bdtotal);
-#endif
+//fprintf(stderr,"TMPST:%i barw:%i bdt:%i\n",tmp,bar_w,bdtotal);
        
 	curw=0;
 	n=m;
@@ -349,25 +348,20 @@ fprintf(stderr,"ZERR\n");
 		/*Remainig tabs are too large => equal width.*/
 		*maxw=tmp/n;
 		*elastic=tmp-(*maxw)*n;
-#ifdef DEBUG
-		fprintf(stderr,"TRUNC maxw:%i elastic:%i tmp:%i n:%i\n",*maxw,*elastic,tmp,n);
-#endif
+//fprintf(stderr,"TRUNC maxw:%i elastic:%i tmp:%i n:%i\n",*maxw,*elastic,tmp,n);
 		return;
 	    }
 	    FRAME_MX_FOR_ALL(sub, frame, itmp){
-		displayname=region_displayname(sub);
-
-		if(displayname==NULL)
-		    textw=0;
-		else
-		    textw=grbrush_get_text_width(frame->bar_brush,
-					     displayname, strlen(displayname));
+		p=region_displayname(sub);
+		if(p==NULL)
+		    continue;
+		
+		textw=grbrush_get_text_width(frame->bar_brush,
+					     p, strlen(p));
 		if (textw<tminw)
 		    textw=tminw;
 		if((unsigned)textw == curw){
-#ifdef DEBUG
-		    fprintf(stderr,"TW:%i (%s)\n",textw,displayname);
-#endif
+//fprintf(stderr,"TW:%i (%s)\n",textw,p);
 		    tmp-=textw;
 		    n--;
 		} else if((unsigned)textw>curw){
@@ -377,9 +371,7 @@ fprintf(stderr,"ZERR\n");
 	    }
 	    curw = nextw;
 	}
-#ifdef DEBUG
-	fprintf(stderr,"TMP elastic:%i\n",tmp);
-#endif
+//fprintf(stderr,"TMP elastic:%i\n",tmp);
 
 	n=0;
 	curw=0;
@@ -387,12 +379,12 @@ fprintf(stderr,"ZERR\n");
 	while (n<m) {
 	    nextw=(uint)-1;/*FIXME: MAXINT*/
 	    FRAME_MX_FOR_ALL(sub, frame, itmp){
-		displayname=region_displayname(sub);
-		if(displayname==NULL)
+		p=region_displayname(sub);
+		if(p==NULL)
 		    continue;
 		
 		textw=grbrush_get_text_width(frame->bar_brush,
-					     displayname, strlen(displayname));
+					     p, strlen(p));
 		if (textw<tminw)
 		    textw=tminw;
 		if((unsigned)textw == curw){
@@ -403,24 +395,18 @@ fprintf(stderr,"ZERR\n");
 		}
 	    }
 	    if (nextw>(unsigned)frame->float_tab_min_w)
-		nextw=frame->float_tab_min_w;
-#ifdef DEBUG
-	    fprintf(stderr,"TMP --- tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
-#endif
+	      nextw=frame->float_tab_min_w;
+//fprintf(stderr,"TMP --- tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
 	    if (n*(nextw-curw)<(unsigned)tmp) {
 		/*we can extend small tabs to 'nextw'*/
 		*minw=nextw;
 		tmp-=n*(nextw-curw);
-#ifdef DEBUG
-		fprintf(stderr,"TMPSUBGO tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
-#endif
+//fprintf(stderr,"TMPSUBGO tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
 	    } else {
 		/*we can extend small tabs only to 'curw+tmp/n'*/
 		*minw+=tmp/n;
 		tmp-=(*minw-curw)*n;
-#ifdef DEBUG
-		fprintf(stderr,"TMPSUBBRK tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
-#endif
+//fprintf(stderr,"TMPSUBBRK tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
 		break;
 	    }
 	    if (nextw==(unsigned)frame->float_tab_min_w)
@@ -428,9 +414,7 @@ fprintf(stderr,"ZERR\n");
 	    curw=nextw;
 	}
 	
-#ifdef DEBUG
-	fprintf(stderr,"TMP elastic:%i min:%i\n",tmp,*minw);
-#endif
+//fprintf(stderr,"TMP elastic:%i min:%i\n",tmp,*minw);
 	*elastic=tmp;
     } else {
 	*elastic=0;
@@ -563,7 +547,7 @@ void frame_brushes_updated(WFrame *frame)
         frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
     }
     
-    /*FIXME*/
+    //FIXME
     frame->propor_tab_min_w=30;
     
     /* shaped mode stuff */
