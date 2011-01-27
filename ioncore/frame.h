@@ -76,8 +76,7 @@ DECLCLASS(WFrame){
     WFrameBarMode barmode;
     int bar_w, bar_h;
     double bar_max_width_q;
-    int float_tab_min_w;
-    int propor_tab_min_w;
+    int tab_min_w;
 };
 
 
