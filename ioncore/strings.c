@@ -175,6 +175,7 @@ int str_len(const char *p)
             }
             len++;
             bytes-=l;
+            p += l;
         }
         return len;
     }
