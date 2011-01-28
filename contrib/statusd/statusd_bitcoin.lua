@@ -19,12 +19,11 @@ local function get_bitcoin_speed()
 	if not hps then
 		return "N/A"
 	end
-	r = hps:read()
-	if not r then
+	local answ = hps:read("*a")
+	if not answ  or answ == "" then
 		return "N/A"
-	else
-		return string.format("%0.2f", r / 1000)
 	end
+	return string.format("%0.2f", answ / 1000)
 end
 
 local function get_bitcoin_balance()
@@ -32,12 +31,11 @@ local function get_bitcoin_balance()
 	if not bl then
 		return "N/A"
 	end
-	r = bl:read()
-	if not r then
+	local answ = bl:read("*a")
+	if not answ or answ == "" then
 		return "N/A"
-	else
-		return string.format("%0.2f", r)
 	end
+	return string.format("%0.2f", answ)
 end
 
 local function update_bitcoin()
