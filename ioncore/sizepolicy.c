@@ -362,7 +362,13 @@ const char *sizepolicy2string(WSizePolicy szplcy)
 {
     const char* str=stringintmap_key(szplcy_specs, szplcy, NULL);
     if(str==NULL){
-        /* fall back on policy without modifiers if full name not found */
+        /* fall back on policy without modifiers if full name not found 
+         *
+         * Without this, the scratchpad sometimes became impossible to resize
+         * after reboots. 
+         * http://lists.berlios.de/pipermail/ion-general/2009-December/001775.html
+         * http://article.gmane.org/gmane.comp.window-managers.ion.general/8897/match=scratchpad
+         */
         str=stringintmap_key(szplcy_specs, szplcy&0xff, NULL);
     }
     return str;
