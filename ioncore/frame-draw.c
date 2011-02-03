@@ -229,10 +229,10 @@ void frame_clear_shape(WFrame *frame)
 
 static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
 {
-    int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
+    int bar_w, textw=0, tmaxw=frame->tab_min_w, tmp=0;
     WLListIterTmp itmp;
     WRegion *sub;
-    const char *p;
+    const char *displayname;
     GrBorderWidths bdw;
     char *title;
     uint bdtotal;
@@ -242,6 +242,7 @@ static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
         return;
     
     m=FRAME_MCOUNT(frame);
+    bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
     
     if(m>0){
         grbrush_get_border_widths(frame->bar_brush, &bdw);
@@ -249,17 +250,16 @@ static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
                  +bdw.right+bdw.left);
 
         FRAME_MX_FOR_ALL(sub, frame, itmp){
-            p=region_displayname(sub);
-            if(p==NULL)
+            displayname=region_displayname(sub);
+            if(displayname==NULL)
                 continue;
             
             textw=grbrush_get_text_width(frame->bar_brush,
-                                         p, strlen(p));
+                                         displayname, strlen(displayname));
             if(textw>tmaxw)
                 tmaxw=textw;
         }
 
-        bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
         if(bar_w<frame->tab_min_w && 
            REGION_GEOM(frame).w>frame->tab_min_w)
             bar_w=frame->tab_min_w;
@@ -276,9 +276,7 @@ static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
             /* Some labels must be truncated */
         }
     }else{
-        bar_w=frame->tab_min_w;
-        if(bar_w>frame->bar_max_width_q*REGION_GEOM(frame).w)
-            bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
+        if(bar_w<frame->tab_min_w) bar_w=frame->tab_min_w;
     }
 
     if(complete || frame->bar_w!=bar_w){
