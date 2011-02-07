@@ -224,80 +224,12 @@ void frame_clear_shape(WFrame *frame)
 }
 
 
-#define CF_TAB_MAX_TEXT_X_OFF 10
-
-
-static void frame_shaped_recalc_bar_size(WFrame *frame, bool complete)
+static void free_title(WFrame *frame, int i)
 {
-    int bar_w, textw=0, tmaxw=frame->tab_min_w, tmp=0;
-    WLListIterTmp itmp;
-    WRegion *sub;
-    const char *displayname;
-    GrBorderWidths bdw;
-    char *title;
-    uint bdtotal;
-    int i, m;
-    
-    if(frame->bar_brush==NULL)
-        return;
-    
-    m=FRAME_MCOUNT(frame);
-    bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
-    
-    if(m>0){
-        grbrush_get_border_widths(frame->bar_brush, &bdw);
-        bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)
-                 +bdw.right+bdw.left);
-
-        FRAME_MX_FOR_ALL(sub, frame, itmp){
-            displayname=region_displayname(sub);
-            if(displayname==NULL)
-                continue;
-            
-            textw=grbrush_get_text_width(frame->bar_brush,
-                                         displayname, strlen(displayname));
-            if(textw>tmaxw)
-                tmaxw=textw;
-        }
-
-        if(bar_w<frame->tab_min_w && 
-           REGION_GEOM(frame).w>frame->tab_min_w)
-            bar_w=frame->tab_min_w;
-        
-        tmp=bar_w-bdtotal-m*tmaxw;
-        
-        if(tmp>0){
-            /* No label truncation needed, good. See how much can be padded. */
-            tmp/=m*2;
-            if(tmp>CF_TAB_MAX_TEXT_X_OFF)
-                tmp=CF_TAB_MAX_TEXT_X_OFF;
-            bar_w=(tmaxw+tmp*2)*m+bdtotal;
-        }else{
-            /* Some labels must be truncated */
-        }
-    }else{
-        if(bar_w<frame->tab_min_w) bar_w=frame->tab_min_w;
-    }
-
-    if(complete || frame->bar_w!=bar_w){
-        frame->bar_w=bar_w;
-        frame_set_shape(frame);
-    }
-}
-
-
-static int init_title(WFrame *frame, int i)
-{
-    int textw;
-    
     if(frame->titles[i].text!=NULL){
         free(frame->titles[i].text);
         frame->titles[i].text=NULL;
     }
-    
-    textw=frame_nth_tab_iw((WFrame*)frame, i);
-    frame->titles[i].iw=textw;
-    return textw;
 }
 
 
@@ -307,19 +239,25 @@ void frame_recalc_bar(WFrame *frame, bool complete)
     WLListIterTmp tmp;
     WRegion *sub;
     char *title;
+    bool set_shape;
 
     if(frame->bar_brush==NULL || frame->titles==NULL)
         return;
-    
-    if(frame->barmode==FRAME_BAR_SHAPED)
-        frame_shaped_recalc_bar_size(frame, complete);
-    else if(complete)
-        frame_clear_shape(frame);
+
+    set_shape=frame->tabs_params.alg(frame,complete);
+
+    if(set_shape) {
+        if(frame->barmode==FRAME_BAR_SHAPED)
+            frame_set_shape(frame);
+        else
+            frame_clear_shape(frame);
+    }
     
     i=0;
     
     if(FRAME_MCOUNT(frame)==0){
-        textw=init_title(frame, i);
+        free_title(frame, i);
+        textw=frame->titles[i].iw;
         if(textw>0){
             title=grbrush_make_label(frame->bar_brush, TR("<empty frame>"), 
                                      textw);
@@ -329,7 +267,8 @@ void frame_recalc_bar(WFrame *frame, bool complete)
     }
     
     FRAME_MX_FOR_ALL(sub, frame, tmp){
-        textw=init_title(frame, i);
+        free_title(frame, i);
+        textw=frame->titles[i].iw;
         if(textw>0){
             title=region_make_label(sub, textw, frame->bar_brush);
             frame->titles[i].text=title;
@@ -426,21 +365,8 @@ void frame_brushes_updated(WFrame *frame)
         frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
     }
     
-    /* shaped mode stuff */
-    frame->tab_min_w=100;
-    frame->bar_max_width_q=0.95;
-    
-    if(grbrush_get_extra(frame->brush, "floatframe_tab_min_w",
-                         'i', &(frame->tab_min_w))){
-        if(frame->tab_min_w<=0)
-            frame->tab_min_w=1;
-    }
-    
-    if(grbrush_get_extra(frame->brush, "floatframe_bar_max_w_q", 
-                         'd', &(frame->bar_max_width_q))){
-        if(frame->bar_max_width_q<=0.0 || frame->bar_max_width_q>1.0)
-            frame->bar_max_width_q=1.0;
-    }
+    /* tabs and bar width calculation stuff */
+    frame_tabs_calc_brushes_updated(frame);
 }
 
 
