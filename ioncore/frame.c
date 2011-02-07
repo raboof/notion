@@ -760,6 +760,8 @@ bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how)
 
 void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
 {
+    bool complete;
+
     if(how==ioncore_g.notifies.activated ||
        how==ioncore_g.notifies.inactivated ||
        how==ioncore_g.notifies.name ||
@@ -767,9 +769,11 @@ void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
        how==ioncore_g.notifies.sub_activity ||
        how==ioncore_g.notifies.tag){
        
+        complete=how==ioncore_g.notifies.name;
+       
         frame_update_attrs(frame);
-        frame_recalc_bar(frame, FALSE);
-        frame_draw_bar(frame, FALSE);
+        frame_recalc_bar(frame, complete);
+        frame_draw_bar(frame, complete);
     }
 }
 
