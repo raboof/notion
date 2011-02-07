@@ -43,10 +43,18 @@ DECLSTRUCT(TabCalcParams){
     TabCalcPtr alg;
     /* Maximum size of shaped bar. */
     double bar_max_width_q;
-    /* Requested size of the tab. */
+    /* Minimum width of a tab in shaped frame.
+     * For 'proportional' and 'elastic' algorithms also minimum width of a tab
+     * provided that no title has to be truncated
+     */
     int tab_min_w;
     /* Requested empty space to be added before and after text. */
     int requested_pad;
+    /* Minimum width of a tab for 'proportional' and 'elastic' algorithms.
+     * Long titles will be truncated instead of shortening a short tab below
+     * this length.
+     */
+    int propor_tab_min_w;
 };
 
 void frame_tabs_calc_brushes_updated(WFrame *frame);
