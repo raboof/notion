@@ -11,6 +11,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <features.h>
+
 #include <libtu/types.h>
 #include <libtu/misc.h>
 #include <libtu/dlist.h>
@@ -103,7 +105,7 @@ void mainloop_select()
     int ret=0;
     
     
-#ifdef _POSIX_SELECT
+#if _POSIX_SELECT || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
     {
         sigset_t oldmask;
 
