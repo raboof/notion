@@ -286,7 +286,7 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
     Window win=region_xwindow((WRegion*)cwin);
     Time now=ioncore_get_timestamp(); /* TODO: should really use the event.. */
     /* user time, current window user time */
-    Time ut=0, cut=0;
+    CARD32 ut=0, cut=0;
     /* whether the new (got) and current (gotcut) windows had their usertime 
      * set */
     bool got=FALSE, gotcut=FALSE;
@@ -294,6 +294,7 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
     
     if(cur!=NULL){
         Window curwin;
+        CARD32 cut;
         if(param->tfor==cur)
             return;
         curwin=region_xwindow((WRegion*)cur);

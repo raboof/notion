@@ -141,13 +141,13 @@ static void clientwin_get_winprops(WClientWin *cwin)
         cwin->flags|=CLIENTWIN_PROP_LAZY_RESIZE;
     
     DO_SZH("max_size", CLIENTWIN_PROP_MAXSIZE, CLIENTWIN_PROP_I_MAXSIZE,
-           PMaxSize, max_width, max_height, );
+           PMaxSize, max_width, max_height, { });
            
     DO_SZH("min_size", CLIENTWIN_PROP_MINSIZE, CLIENTWIN_PROP_I_MINSIZE,
-           PMinSize, min_width, min_height, );
+           PMinSize, min_width, min_height, { });
            
     DO_SZH("resizeinc", CLIENTWIN_PROP_RSZINC, CLIENTWIN_PROP_I_RSZINC,
-           PResizeInc, width_inc, height_inc, );
+           PResizeInc, width_inc, height_inc, { });
 
     DO_SZH("aspect", CLIENTWIN_PROP_ASPECT, CLIENTWIN_PROP_I_ASPECT,
            PAspect, min_aspect.x, min_aspect.y, 

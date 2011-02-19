@@ -86,6 +86,23 @@ static void *get_module_symbol(dlhandle handle,
     return ret;
 }
 
+static void (*get_module_fptr(dlhandle handle,
+                              const char *modulename,
+                              const char *name))(void **)
+{
+    void (*result)(void**);
+
+    /* 'result = (void (*)(void))get_module_symbol(handle, modulename, 
+     * name);' would seem more natural, but the C99 standard leaves 
+     * casting from "void *" to a function pointer undefined. 
+     * The assignment used below is the POSIX.1-2003 (Technical
+     * Corrigendum 1) workaround; see the Rationale for the
+     * POSIX specification of dlsym(). */
+    *(void **) (&result) = get_module_symbol(handle, modulename, name);
+    
+    return result;
+}
+
 static char *get_version(dlhandle handle, const char *modulename)
 {
     return (char*)get_module_symbol(handle, modulename, 
@@ -110,7 +127,7 @@ static bool call_init(dlhandle handle, const char *modulename)
 {
     bool (*initfn)(void);
     
-    initfn=(bool (*)())get_module_symbol(handle, modulename, "_init");
+    initfn=(bool (*)())get_module_fptr(handle, modulename, "_init");
     
     if(initfn==NULL)
         return TRUE;
@@ -123,7 +140,7 @@ static void call_deinit(dlhandle handle, const char *modulename)
 {
     void (*deinitfn)(void);
     
-    deinitfn=(void (*)())get_module_symbol(handle, modulename, "_deinit");
+    deinitfn=(void (*)())get_module_fptr(handle, modulename, "_deinit");
     
     if(deinitfn!=NULL)
         deinitfn();
