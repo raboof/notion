@@ -22,7 +22,11 @@ See also:
     * Lua 5.1 <http://www.lua.org/>
     * gettext <http://www.gnu.org/software/gettext/>
 
-2. Edit `system.mk` to suit your system. 
+   On Ubuntu (and probably Debian), the following packages are required:
+     lua5.1 liblua5.1-0-dev libx11-dev libxext-dev libsm-dev gettext
+
+2. Edit `system.mk` to suit your system. In particular, if you're on Ubuntu
+     or Debian, you'll need to uncomment the other set of LUA* variables.
 
 3. If you want to build some extra modules now or do not want to build
    some of the standard modules, edit `modulelist.mk`.
