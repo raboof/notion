@@ -38,7 +38,7 @@ if test "$1" != "-snapshot"; then
 
     release=`echo "$dir"|sed 's/^[^-]\+-\([^-]\+-[0-9]\+\(-[0-9]\+\)\?\)$/\1/p; d'`
 
-    if test "$release" == ""; then
+    if test "$release" = ""; then
         echo "Invalid package name $dir."
         exit 1
     else
