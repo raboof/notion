@@ -2,6 +2,9 @@
 ## System settings
 ##
 
+# Beware: in releases, the Notion system.mk is used to build both libtu, 
+# libextl and notion - so structural changes to this file should also be
+# carried out on the Notion system.mk
 
 ##
 ## Installation paths

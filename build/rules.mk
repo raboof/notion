@@ -2,6 +2,10 @@
 ## Some make rules
 ##
 
+# Beware: in releases, the Notion rules.mk is used to build both libtu, 
+# libextl and notion - so structural changes to this file should also be
+# carried out on the Notion rules.mk
+
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
 MODULE_TARGETS := $(MODULE).a $(MODULE).lc
