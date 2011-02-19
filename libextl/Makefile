@@ -18,6 +18,8 @@ HEADERS=readconfig.h extl.h luaextl.h private.h types.h
 
 TARGETS=libextl.a libextl-mkexports
 
+.PHONY : libextl-mkexports
+
 ######################################
 
 include $(TOPDIR)/build/rules.mk
