@@ -92,7 +92,7 @@ WStacking *mplex_iter_nodes(WMPlexIterTmp *tmp)
 
 
 bool mplex_do_init(WMPlex *mplex, WWindow *parent, 
-                   const WFitParams *fp, Window win)
+                   const WFitParams *fp, Window win, const char *name)
 {
     mplex->flags=0;
     
@@ -107,7 +107,7 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent,
     mplex->stdispinfo.pos=MPLEX_STDISP_BL;
     mplex->stdispinfo.fullsize=FALSE;
     
-    if(!window_do_init((WWindow*)mplex, parent, fp, win))
+    if(!window_do_init((WWindow*)mplex, parent, fp, win, name))
         return FALSE;
     
     mplex->win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
@@ -123,15 +123,15 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent,
 }
 
 
-bool mplex_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp)
+bool mplex_init(WMPlex *mplex, WWindow *parent, const WFitParams *fp, const char *name)
 {
-    return mplex_do_init(mplex, parent, fp, None);
+    return mplex_do_init(mplex, parent, fp, None, name);
 }
 
 
-WMPlex *create_mplex(WWindow *parent, const WFitParams *fp)
+WMPlex *create_mplex(WWindow *parent, const WFitParams *fp, const char *name)
 {
-    CREATEOBJ_IMPL(WMPlex, mplex, (p, parent, fp));
+    CREATEOBJ_IMPL(WMPlex, mplex, (p, parent, fp, name));
 }
 
 
@@ -2182,9 +2182,9 @@ void mplex_load_contents(WMPlex *mplex, ExtlTab tab)
 }
 
 
-WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab, const char *name)
 {
-    WMPlex *mplex=create_mplex(par, fp);
+    WMPlex *mplex=create_mplex(par, fp, name);
     if(mplex!=NULL)
         mplex_load_contents(mplex, tab);
     return (WRegion*)mplex;

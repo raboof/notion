@@ -104,7 +104,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     
     gr_stylespec_init(&frame->baseattr);
     
-    if(!mplex_init((WMPlex*)frame, parent, fp))
+    if(!mplex_init((WMPlex*)frame, parent, fp, "Notion WFrame"))
         return FALSE;
     
     frame_initialise_gr(frame);

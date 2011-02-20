@@ -9,6 +9,9 @@
 #include <string.h>
 
 #include <libtu/minmax.h>
+
+#include <ioncore/property.h>
+
 #include "common.h"
 #include "global.h"
 #include "xwindow.h"
@@ -51,13 +54,19 @@ WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr)
 /*{{{ Create */
 
 
-Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom)
+Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom, const char *name)
 {
     int w=maxof(1, geom->w);
     int h=maxof(1, geom->h);
+    const char *p[1];
+    Window window;
     
-    return XCreateSimpleWindow(ioncore_g.dpy, par, geom->x, geom->y, w, h,
+    window = XCreateSimpleWindow(ioncore_g.dpy, par, geom->x, geom->y, w, h,
                                0, 0, BlackPixel(ioncore_g.dpy, rw->xscr));
+    p[0] = name;
+    xwindow_set_text_property(window, XA_WM_NAME, p, 1);
+
+    return window;
 }
 
 

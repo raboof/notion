@@ -55,12 +55,12 @@ void window_release(WWindow *wwin)
 
 
 bool window_do_init(WWindow *wwin, WWindow *par, 
-                    const WFitParams *fp, Window win)
+                    const WFitParams *fp, Window win, const char *name)
 {
     if(win==None){
         assert(par!=NULL);
         win=create_xwindow(region_rootwin_of((WRegion*)par),
-                           par->win, &(fp->g));
+                           par->win, &(fp->g), name);
         if(win==None)
             return FALSE;
     }
@@ -79,9 +79,9 @@ bool window_do_init(WWindow *wwin, WWindow *par,
 }
 
 
-bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp)
+bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp, const char *name)
 {
-    return window_do_init(wwin, par, fp, None);
+    return window_do_init(wwin, par, fp, None, name);
 }
 
 

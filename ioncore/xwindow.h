@@ -16,7 +16,7 @@
 #define XWINDOW_REGION_OF(WIN) xwindow_region_of(WIN)
 
 extern Window create_xwindow(WRootWin *rw, Window par,
-                             const WRectangle *geom);
+                             const WRectangle *geom, const char *name);
 
 extern WRegion *xwindow_region_of(Window win);
 extern WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr);

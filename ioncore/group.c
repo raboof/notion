@@ -8,9 +8,13 @@
 
 #include <string.h>
 
+#include <X11/Xatom.h>
+
 #include <libtu/minmax.h>
 #include <libtu/objp.h>
 #include <libmainloop/defer.h>
+
+#include <ioncore/property.h>
 
 #include "common.h"
 #include "rootwin.h"
@@ -352,6 +356,8 @@ void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 
 bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
 {
+    const char *p[1];
+
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
     ws->bottom=NULL;
@@ -364,6 +370,9 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
                                 CopyFromParent, 0, NULL);
     if(ws->dummywin==None)
         return FALSE;
+
+    p[0] = "Notion WGroup dummy window";
+    xwindow_set_text_property(ws->dummywin, XA_WM_NAME, p, 1);
 
     region_init(&ws->reg, par, fp);
     region_register(&ws->reg);
