@@ -8,6 +8,8 @@
 
 #include <string.h>
 
+#include <X11/Xatom.h>
+
 #include <libtu/objp.h>
 #include <libtu/minmax.h>
 #include <libtu/ptrlist.h>
@@ -30,6 +32,7 @@
 #include <ioncore/extlconv.h>
 #include <ioncore/xwindow.h>
 #include <ioncore/navi.h>
+#include <ioncore/property.h>
 #include "placement.h"
 #include "tiling.h"
 #include "split.h"
@@ -532,6 +535,8 @@ static WRegion *create_frame_tiling(WWindow *parent, const WFitParams *fp)
 bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp, 
                 WRegionSimpleCreateFn *create_frame_fn, bool ci)
 {
+    const char *p[1];
+
     ws->split_tree=NULL;
     ws->create_frame_fn=(create_frame_fn 
                          ? create_frame_fn
@@ -546,6 +551,9 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
                                 CopyFromParent, 0, NULL);
     if(ws->dummywin==None)
         return FALSE;
+
+    p[0] = "Notion WTiling dummy window";
+    xwindow_set_text_property(ws->dummywin, XA_WM_NAME, p, 1);
 
     region_init(&(ws->reg), parent, fp);
 
