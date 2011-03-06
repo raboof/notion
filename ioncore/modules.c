@@ -90,17 +90,17 @@ static void (*get_module_fptr(dlhandle handle,
                               const char *modulename,
                               const char *name))(void **)
 {
-    void (*result)(void**);
-
-    /* 'result = (void (*)(void))get_module_symbol(handle, modulename, 
-     * name);' would seem more natural, but the C99 standard leaves 
-     * casting from "void *" to a function pointer undefined. 
-     * The assignment used below is the POSIX.1-2003 (Technical
-     * Corrigendum 1) workaround; see the Rationale for the
-     * POSIX specification of dlsym(). */
-    *(void **) (&result) = get_module_symbol(handle, modulename, name);
-    
-    return result;
+    /* This is not valid ISO C. However, it is 'tried and tested'. The 
+     * workaround originally recommended[1] is not alias-safe[2]. The approach
+     * we chose, while not valid ISO C, *is* valid under POSIX 2008[3]. Newer
+     * versions of GCC should not warn about it anymore[4].
+     *
+     * [1] http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html#tag_03_112_06)
+     * [2] http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45289#c1
+     * [3] http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_12_03
+     * [4] http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45289#c10
+     */
+    return (void (*)(void**)) get_module_symbol(handle, modulename, name);
 }
 
 static char *get_version(dlhandle handle, const char *modulename)
