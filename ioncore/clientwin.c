@@ -1255,23 +1255,25 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
         result = TRUE;
     }
 
-    WMPlex* mplex = find_mplexer((WRegion*) cwin);
-    switch(ev->detail){
-    case Above:
-        /* If ev->above is not None, the window should be placed just 
-         * above the sibling. This is not implemented.
-         */
-        if (mplex != NULL) {
-            mplex_switch_to(mplex, (WRegion*) cwin);
-            result = TRUE;
+    if(ev->value_mask&CWStackMode){
+        WMPlex* mplex = find_mplexer((WRegion*) cwin);
+        switch(ev->detail){
+        case Above:
+            /* If ev->above is not None, the window should be placed just 
+             * above the sibling. This is not implemented.
+             */
+            if (mplex != NULL && ev->above == None) {
+                mplex_switch_to(mplex, (WRegion*) cwin);
+                result = TRUE;
+            }
+            break;
+        case Below:
+        case TopIf:
+        case BottomIf:
+        case Opposite:
+            /* unimplemented */
+            break;
         }
-        break;
-    case Below:
-    case TopIf:
-    case BottomIf:
-    case Opposite:
-        /* unimplemented */
-        break;
     }
     
     return result;
