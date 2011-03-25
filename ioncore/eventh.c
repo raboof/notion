@@ -153,15 +153,6 @@ void ioncore_handle_destroy_notify(const XDestroyWindowEvent *ev)
 
 /*{{{ Client configure/property/message */
 
-WMPlex* find_mplexer(WRegion *cwin)
-{
-    if (cwin == NULL)
-        return NULL;
-    if(obj_is((Obj*)cwin, &CLASSDESCR(WMPlex)))
-        return (WMPlex*) cwin;
-    return find_mplexer(cwin->manager);
-}
-
 void ioncore_handle_configure_request(XConfigureRequestEvent *ev)
 {
     WClientWin *cwin;
@@ -181,15 +172,6 @@ void ioncore_handle_configure_request(XConfigureRequestEvent *ev)
         return;
     }
     
-    if (ev->detail == Above) {
-        WMPlex* mplex;
-
-        mplex = find_mplexer((WRegion*) cwin);
-
-        if (mplex != NULL)
-            mplex_switch_to(mplex, (WRegion*) cwin);
-    }
-
     clientwin_handle_configure_request(cwin, ev);
 }
 
