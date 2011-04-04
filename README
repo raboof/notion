@@ -100,7 +100,7 @@ Configuration
 -------------
 
 For help on modifying Notion's configuration files, PLEASE READ THE DOCUMENT
-"Configuring and extending Ion3 with Lua" available from the Ion web page,
+"Configuring and extending Notion with Lua" available from the Notion web page,
 listed at the top of this file.
 
 
