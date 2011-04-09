@@ -40,6 +40,8 @@
 
 char mod_xrandr_ion_api_version[]=ION_API_VERSION;
 
+WHook *randr_screen_change_notify=NULL;
+
 static bool hasXrandR=FALSE;
 static int xrr_event_base;
 static int xrr_error_base;
@@ -120,6 +122,7 @@ bool handle_xrandr_event(XEvent *ev)
             
             mplex_do_fit_managed((WMPlex*)screen, &fp);
         }
+        hook_call_v(randr_screen_change_notify);
         
         return TRUE;
     }
@@ -150,6 +153,9 @@ static bool check_pivots()
     return TRUE;
 }
 
+#define INIT_HOOK_(NM)                             \
+    NM=mainloop_register_hook(#NM, create_hook()); \
+    if(NM==NULL) return FALSE
 
 bool mod_xrandr_init()
 {
@@ -167,6 +173,8 @@ bool mod_xrandr_init()
     }
     
     hook_add(ioncore_handle_event_alt,(WHookDummy *)handle_xrandr_event);
+
+    INIT_HOOK_(randr_screen_change_notify);
     
     return TRUE;
 }
