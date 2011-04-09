@@ -144,8 +144,9 @@ static bool check_pivots()
     
     FOR_ALL_SCREENS(scr){
         Rotation rot=RR_Rotate_90;
-        
-        XRRRotations(ioncore_g.dpy, scr->id, &rot);
+        int randr_screen_id = XRRRootToScreen(ioncore_g.dpy, ((WMPlex*) scr)->win.win);
+        if (randr_screen_id != -1)
+            XRRRotations(ioncore_g.dpy, randr_screen_id, &rot);
         
         insrot(scr->id, rr2scrrot(rot));
     }
