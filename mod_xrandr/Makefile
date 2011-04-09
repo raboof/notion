@@ -4,7 +4,7 @@
 ##
 
 # System specific configuration is in system.mk
-TOPDIR=../ion-3
+TOPDIR=../notion
 include $(TOPDIR)/build/system-inc.mk
 
 ######################################
