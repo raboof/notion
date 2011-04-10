@@ -17,11 +17,27 @@ INSTALLATION
                 # make install
            or (as yourself),
                 $ mkdir -p ~/.ion3/lib
-                $ cp .libs/mod_xinerama.* ~/.ion3/lib
+                $ cp .libs/mod_xinerama.{so,lc} ~/.ion3/lib
         4. Add dopath("mod_xinerama") to ~/.ion3/cfg_ion.lua. See below
 	   for possible status bar issues.
         5. (Re)start Ion.
 		
+CONFIGURATION
+
+If you don't like current behaviour, you can set up screens differently,
+by placing following code in cfg_xinerama.lua:
+
+local screens = mod_xinerama.query_screens()
+
+if (screens) then
+    -- -- now you can edit the 'screens' table in lua,
+    -- -- e.g.:
+    -- screens = mod_xinerama.merge_contained_screens(screens)
+    -- -- or (current behaviour):
+    -- screens = mod_xinerama.merge_overlapping_screens(screens)
+    -- -- and finally setup the screens:
+    mod_xinerama.setup_screens_once(screens)
+end
 
 LIMITATIONS
 
