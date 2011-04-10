@@ -64,7 +64,7 @@ ExtlTab mod_xinerama_query_screens()
             extl_table_sets_i(rect,"y",sInfo[i].y_org);
             extl_table_sets_i(rect,"w",sInfo[i].width);
             extl_table_sets_i(rect,"h",sInfo[i].height);
-            extl_table_seti_t(ret,i,rect);
+            extl_table_seti_t(ret,i+1,rect);
         }
 
         XFree(sInfo);
@@ -84,7 +84,7 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
     ExtlTab screen;
     int i;
 
-    for (i=0;extl_table_geti_t(screens,i,&screen);i++) {
+    for (i=0;extl_table_geti_t(screens,i+1,&screen);i++) {
         WFitParams fp;
         WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
 
