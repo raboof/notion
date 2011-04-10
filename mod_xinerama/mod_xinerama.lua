@@ -42,7 +42,6 @@ package.loaded["mod_xinerama"]=true
 -- Load configuration file
 dopath('cfg_xinerama', true)
 
--- FIXME this function has to be called only once!
 local screens = mod_xinerama.query_screens();
 if screens then
     mod_xinerama.setup_screens_once(screens);
