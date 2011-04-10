@@ -60,10 +60,10 @@ ExtlTab mod_xinerama_query_screens()
        
         for(i = 0 ; i < nRects ; ++i) {
             ExtlTab rect = extl_create_table();
-            extl_table_sets_i(rect,"x_org",sInfo[i].x_org);
-            extl_table_sets_i(rect,"y_org",sInfo[i].y_org);
-            extl_table_sets_i(rect,"width",sInfo[i].width);
-            extl_table_sets_i(rect,"height",sInfo[i].height);
+            extl_table_sets_i(rect,"x",sInfo[i].x_org);
+            extl_table_sets_i(rect,"y",sInfo[i].y_org);
+            extl_table_sets_i(rect,"w",sInfo[i].width);
+            extl_table_sets_i(rect,"h",sInfo[i].height);
             extl_table_seti_t(ret,i,rect);
         }
 
@@ -90,10 +90,10 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
 
         WScreen* newScreen;
         WRegion* reg=NULL;
-        extl_table_gets_i(screen,"x_org",&(fp.g.x));
-        extl_table_gets_i(screen,"y_org",&(fp.g.y));
-        extl_table_gets_i(screen,"width",&(fp.g.w));
-        extl_table_gets_i(screen,"height",&(fp.g.h));
+        extl_table_gets_i(screen,"x",&(fp.g.x));
+        extl_table_gets_i(screen,"y",&(fp.g.y));
+        extl_table_gets_i(screen,"w",&(fp.g.w));
+        extl_table_gets_i(screen,"h",&(fp.g.h));
         fp.mode = REGION_FIT_EXACT;
 
 #ifdef MOD_XINERAMA_DEBUG
