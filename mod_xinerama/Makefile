@@ -15,10 +15,10 @@ DOCS=LICENSE README
 
 SOURCES=mod_xinerama.c
 
-MAKE_EXPORTS=xinerama_module
+MAKE_EXPORTS=mod_xinerama
 LIBS = $(X11_LIBS) -lXinerama
 MODULE=mod_xinerama
-MODULE_STUB=
+MODULE_STUB=mod_xinerama.lua
 
 ######################################
 
