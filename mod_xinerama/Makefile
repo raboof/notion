@@ -11,12 +11,14 @@ include $(TOPDIR)/build/system-inc.mk
 
 INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR)
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+DOCS=LICENSE README
 
 SOURCES=mod_xinerama.c
 
 MAKE_EXPORTS=xinerama_module
 LIBS = $(X11_LIBS) -lXinerama
 MODULE=mod_xinerama
+MODULE_STUB=
 
 ######################################
 
@@ -33,7 +35,7 @@ _install: module_install
 ######################################
 
 .PHONY: tarball
-tarball: $(SOURCES) $(ETC) $(DOCS) Makefile
+tarball: $(SOURCES) $(ETC) $(DOCS) $(MODULE_STUB) Makefile
 	sh -c 'BASENAME=ion-devel-$(MODULE)-`date -r \`ls -t $+ | head -n 1\` +%Y%m%d`; \
 		mkdir $$BASENAME; \
 		cp $+ $$BASENAME; \
