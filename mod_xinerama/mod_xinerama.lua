@@ -141,14 +141,16 @@ function mod_xinerama.merge_overlapping_screens(screens)
 	-- Here we merge all marked screensets to one new screenset.
 	-- We also delete the merged screensets from the 'screensets' table.
 	local mergedset = {newscreen}
+	local pos
 	table.foreach(mergekeys, function(_k, setkey)
 	    table.foreach(screensets[setkey], function(_k2, prevscreen)
 		table.insert(mergedset, prevscreen)
 	    end)
 	    table.remove(screensets, setkey)
+	    pos = setkey
 	end)
 
-	table.insert(screensets,mergedset)
+	table.insert(screensets, pos, mergedset)
     end)
 
     -- Now we have the screenset that contain the screens to be merged
