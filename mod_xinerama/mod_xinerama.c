@@ -45,6 +45,11 @@ static int xinerama_event_base;
 static int xinerama_error_base;
 static bool xinerama_ready = FALSE;
 
+/*EXTL_DOC
+ * Queries the Xinerama extension for screen configuration.
+ *
+ * Example output: \{\{x=0,y=0,w=1024,h=768\},\{x=1024,y=0,w=1280,h=1024\}\}
+ */
 EXTL_SAFE
 EXTL_EXPORT
 ExtlTab mod_xinerama_query_screens()
@@ -121,6 +126,13 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
 }
 
 static bool setup_screens_called = FALSE;
+/*EXTL_DOC
+ * The first call setups the screens of ion (and returns 
+ * \codestr{true} on success). Subsequent calls do nothing
+ * (and return \codestr{false}).
+ *
+ * Example input: \{\{x=0,y=0,w=1024,h=768\},\{x=1024,y=0,w=1280,h=1024\}\}
+ */
 EXTL_EXPORT
 bool mod_xinerama_setup_screens_once(ExtlTab screens)
 {

@@ -44,9 +44,18 @@ local function screen_contains(scr1, scr2)
     return x_in and y_in
 end
 
--- Filters screens for fully contained screens.
--- The output screens also contain field ids containing the
--- numbers of merged screens.
+--DOC
+-- Filters out fully contained screens. I.e. it merges two screens
+-- if one is fully contained in the other screen (this contains the
+-- case that both screens are of the same geometry).
+-- The output screens also contain field ids containing the numbers
+-- of merged screens. The order of the screens is defined by the
+-- first screen in the merged set. (I.e., having big B, and big C,
+-- showing different parts of desktop and small A (primary) showing
+-- part of C, then the order will be C,B and not B,C as someone
+-- may expect.
+--
+-- Example input format: \{\{x=0,y=0,w=1024,h=768\},\{x=0,y=0,w=1280,h=1024\}\}
 function mod_xinerama.merge_contained_screens(screens)
     local ret = {}
     table.foreach(screens,function (newnum,newscreen)
@@ -89,9 +98,20 @@ local function screen_overlaps(scr1, scr2)
     return x_in and y_in
 end
 
--- Filters screens for overlapping screens.
--- The output screens also contain field ids containing the
--- numbers of merged screens.
+--DOC
+-- Merges overlapping screens. I.e. it merges two screens
+-- if they overlap. It merges two screens if and only if there
+-- is a path between them using only overlapping screens.
+-- one is fully contained in the other screen (this contains the
+-- case that both screens are of the same geometry).
+-- The output screens also contain field ids containing the numbers
+-- of merged screens. The order of the screens is defined by the
+-- first screen in the merged set. (I.e., having big B, and big C,
+-- showing different parts of desktop and small A (primary) showing
+-- part of C, then the order will be C,B and not B,C as someone
+-- may expect.
+--
+-- Example input format: \{\{x=0,y=0,w=1024,h=768\},\{x=0,y=0,w=1280,h=1024\}\}
 function mod_xinerama.merge_overlapping_screens(screens)
     -- Group overlapping screens into sets for merging.
     --         *-------*
