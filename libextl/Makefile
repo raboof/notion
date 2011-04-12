@@ -3,7 +3,11 @@
 ##
 
 # System-specific configuration is in system.mk
+ifndef SUBMODULE
 TOPDIR=.
+else
+TOPDIR=..
+endif
 include $(TOPDIR)/build/system-inc.mk
 
 ######################################
