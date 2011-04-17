@@ -30,6 +30,37 @@ local mod_xinerama=_G["mod_xinerama"]
 
 assert(mod_xinerama)
 
+
+-- Helper functions {{{
+
+-- creates new table, converts {x,y,w,h} representation to {x,y,xmax,ymax}
+local function to_max_representation(screen)
+    return {
+	x = screen.x,
+	y = screen.y,
+	xmax = screen.x + screen.w,
+	ymax = screen.y + screen.h
+    }
+end
+
+-- edits passed table, converts representation {x,y,xmax,ymax} to {x,y,w,h},
+-- and sorts table of indices (entry screen.ids)
+local function fix_representation(screen)
+    screen.w = screen.xmax - screen.x
+    screen.h = screen.ymax - screen.y
+    screen.xmax = nil
+    screen.ymax = nil
+    table.sort(screen.ids)
+end
+
+local function fix_representations(screens)
+    for _k, screen in pairs(screens) do
+	fix_representation(screen)
+    end
+end
+
+-- }}}
+
 -- Contained screens {{{
 
 -- true if [from1, to1] contains [from2, to2] 
@@ -39,8 +70,8 @@ end
 
 -- true if scr1 contains scr2
 local function screen_contains(scr1, scr2)
-    local x_in = contains(scr1.x, scr1.x+scr1.w, scr2.x, scr2.x+scr2.w)
-    local y_in = contains(scr1.y, scr1.y+scr1.h, scr2.y, scr2.y+scr2.h)
+    local x_in = contains(scr1.x, scr1.xmax, scr2.x, scr2.xmax)
+    local y_in = contains(scr1.y, scr1.ymax, scr2.y, scr2.ymax)
     return x_in and y_in
 end
 
@@ -58,27 +89,29 @@ end
 -- Example input format: \{\{x=0,y=0,w=1024,h=768\},\{x=0,y=0,w=1280,h=1024\}\}
 function mod_xinerama.merge_contained_screens(screens)
     local ret = {}
-    table.foreach(screens,function (newnum,newscreen)
-	local merged = nil
-	table.foreach(ret, function (prevnum,prevscreen)
+    for newnum, _newscreen in ipairs(screens) do
+	newscreen = to_max_representation(_newscreen)
+	local merged = false
+	for prevnum, prevscreen in pairs(ret) do
 	    if screen_contains(prevscreen, newscreen) then
 		table.insert(prevscreen.ids,newnum)
 		merged = true;
 	    elseif screen_contains(newscreen, prevscreen) then
 		prevscreen.x = newscreen.x
 		prevscreen.y = newscreen.y
-		prevscreen.w = newscreen.w
-		prevscreen.h = newscreen.h
+		prevscreen.xmax = newscreen.xmax
+		prevscreen.ymax = newscreen.ymax
 		table.insert(prevscreen.ids,newnum)
+		merged = true
 	    end
-	    return merged
-	end)
+	    if merged then break end
+	end
 	if not merged then
 	    newscreen.ids = { newnum }
 	    table.insert(ret, newscreen)
 	end
-	return nil
-    end)
+    end
+    fix_representations(ret)
     return ret
 end
 
@@ -93,9 +126,54 @@ end
 
 -- true if scr1 overlaps scr2
 local function screen_overlaps(scr1, scr2)
-    local x_in = overlaps(scr1.x, scr1.x+scr1.w, scr2.x, scr2.x+scr2.w)
-    local y_in = overlaps(scr1.y, scr1.y+scr1.h, scr2.y, scr2.y+scr2.h)
+    local x_in = overlaps(scr1.x, scr1.xmax, scr2.x, scr2.xmax)
+    local y_in = overlaps(scr1.y, scr1.ymax, scr2.y, scr2.ymax)
     return x_in and y_in
+end
+
+--DOC
+-- Merges overlapping screens. I.e. it finds set of smallest rectangles,
+-- such that these rectangles do not overlap and such that they contain
+-- all screens.
+--
+-- Example input format: \{\{x=0,y=0,w=1024,h=768\},\{x=0,y=0,w=1280,h=1024\}\}
+function mod_xinerama.merge_overlapping_screens(screens)
+    local ret = {}
+    for _newnum, _newscreen in ipairs(screens) do
+	local newscreen = to_max_representation(_newscreen)
+	newscreen.ids = { _newnum }
+	local overlaps = true
+	local pos
+	while overlaps do
+	    overlaps = false
+	    for prevpos, prevscreen in pairs(ret) do
+		if screen_overlaps(prevscreen, newscreen) then
+		    -- stabilise ordering
+		    if (not pos) or (prevpos < pos) then pos = prevpos end
+		    -- merge with the previous screen
+		    newscreen.x = math.min(newscreen.x, prevscreen.x)
+		    newscreen.y = math.min(newscreen.y, prevscreen.y)
+		    newscreen.xmax = math.max(newscreen.xmax, prevscreen.xmax)
+		    newscreen.ymax = math.max(newscreen.ymax, prevscreen.ymax)
+		    -- merge the indices
+		    for _k, _v in ipairs(prevscreen.ids) do
+			table.insert(newscreen.ids, _v)
+		    end
+		    
+		    -- delete the merged previous screen
+		    table.remove(ret, prevpos)
+
+		    -- restart from beginning
+		    overlaps = true
+		    break
+		end
+	    end
+	end
+	if not pos then pos = table.maxn(ret)+1 end
+	table.insert(ret, pos, newscreen)
+    end
+    fix_representations(ret)
+    return ret
 end
 
 --DOC
@@ -111,8 +189,21 @@ end
 -- part of C, then the order will be C,B and not B,C as someone
 -- may expect.
 --
+-- This function may output overlapping regions, AB and C on the example:
+--         *-------*
+-- *-----* |   C   |
+-- |     | *-------*
+-- |  A  |
+-- |   +-+-------*
+-- *---+-*       |
+--     |    B    |
+--     |         |
+--     +---------*
+-- Notion's WScreen implementation will (partially) hide C when AB is focused.
+-- Thus this algorithm is not what you want by default.
+--
 -- Example input format: \{\{x=0,y=0,w=1024,h=768\},\{x=0,y=0,w=1280,h=1024\}\}
-function mod_xinerama.merge_overlapping_screens(screens)
+function mod_xinerama.merge_overlapping_screens_alternative(screens)
     -- Group overlapping screens into sets for merging.
     --         *-------*
     -- *-----* |   C   |
@@ -139,61 +230,68 @@ function mod_xinerama.merge_overlapping_screens(screens)
     -- and then takes screen C.
     --
     local screensets = {}
-    table.foreach(screens,function (newnum,newscreen)
-	newscreen.id = newnum
+    for _newnum, _newscreen in ipairs(screens) do
+	newscreen = to_max_representation(_newscreen)
+	newscreen.id = _newnum
 
 	--Find all screensets to merge with:
 	--if there is a screen in a screenset that overlaps
 	--with current screen, then we mark the set in 'mergekeys'
 	local mergekeys = {}
-	table.foreach(screensets, function (setkey, screenset)
-	    table.foreach(screenset, function(_k, prevscreen)
+	-- We use ipairs here, because we rely on the order.
+	for setkey, screenset in ipairs(screensets) do
+	    -- find any screen of 'screenset' that overlaps 'newscreen'
+	    for _k, prevscreen in pairs(screenset) do
 		if screen_overlaps(newscreen, prevscreen) then
-		    -- we need the indices backwards
+		    -- Found. 'setkey' contains indices of overlapping
+		    -- 'screenset's, sorted decreasingly
 		    table.insert(mergekeys, 1, setkey)
-		    return true
+		    break
 		end
-		return nil
-	    end)
-	    return nil
-	end)
+	    end
+	end
 
 	-- Here we merge all marked screensets to one new screenset.
 	-- We also delete the merged screensets from the 'screensets' table.
 	local mergedset = {newscreen}
 	local pos
-	table.foreach(mergekeys, function(_k, setkey)
-	    table.foreach(screensets[setkey], function(_k2, prevscreen)
+	-- we use ipairs here, because we rely on the order.
+	for _k, setkey in ipairs(mergekeys) do
+	    -- copy contents of 'screensets[setkey]' to 'mergedset'
+	    for _k2, prevscreen in pairs(screensets[setkey]) do
 		table.insert(mergedset, prevscreen)
-	    end)
+	    end
+	    -- remove 'screensets[setkey]'
 	    table.remove(screensets, setkey)
 	    pos = setkey
-	end)
+	end
 
+	-- pos keeps index of first set that we merged in this loop,
+	-- we want to insert the product of this merge to pos.
 	if not pos then pos = table.maxn(screensets)+1 end
 	table.insert(screensets, pos, mergedset)
-    end)
+    end
 
-    -- Now we have the screenset that contain the screens to be merged
+    -- Now we have the screenset that contains the screens to be merged
     local ret = {}
-    table.foreach(screensets, function(_k, screenset)
-	local x1 = screenset[1].x
-	local x2 = x1
-	local y1 = screenset[1].y
-	local y2 = y1
-	local idset = {}
-	table.foreach(screenset, function(_k2, screen)
-	    if (x1 > screen.x) then x1 = screen.x end
-	    if (x2 < screen.x + screen.w) then x2 = screen.x + screen.w end
-	    if (y1 > screen.y) then y1 = screen.y end
-	    if (y2 < screen.y + screen.h) then y2 = screen.y + screen.h end
-	    table.insert(idset, screen.id)
-	end)
-	table.sort(idset)
-	table.insert(ret, {
-	    x = x1, y = y1, w = x2 - x1, h = y2 - y1, ids = idset
-	})
-    end)
+    for _k, screenset in ipairs(screensets) do
+	local newscreen = {
+	    x = screenset[1].x,
+	    xmax = screenset[1].xmax,
+	    y = screenset[1].y,
+	    ymax = screenset[1].ymax,
+	    ids = {}
+	}
+	for _k2, screen in pairs(screenset) do
+	    newscreen.x = math.min(newscreen.x, screen.x)
+	    newscreen.y = math.min(newscreen.y, screen.y)
+	    newscreen.xmax = math.max(newscreen.xmax, screen.xmax)
+	    newscreen.ymax = math.max(newscreen.ymax, screen.ymax)
+	    table.insert(newscreen.ids, screen.id)
+	end
+	table.insert(ret, newscreen)
+    end
+    fix_representations(ret)
     
     return ret
 end

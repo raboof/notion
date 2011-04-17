@@ -33,6 +33,23 @@ end
 
 -- }}}
 
+-- {{{ Table compare
+-- Second table tree may contain some indices that the first does not contain.
+
+function table_compare(table, super)
+    if not ( type(table) == type(super) ) then
+	return false
+    end
+    if not ( type(table) == "table" ) then
+	return table == super
+    end
+    for key, value in pairs(table) do
+	if not table_compare(value, super[key]) then return false end
+    end
+    return true
+end
+-- }}}
+
 -- {{{ mock notion contest
 ioncore = { 
   load_module = function() 
@@ -52,33 +69,42 @@ _G["mod_xinerama"] = {
 -- load xinerama module lua code
 dofile('mod_xinerama.lua')
 
-function do_test(fn_name, outn, input)
+function do_test(fn_name, input, output)
     print("\nTesting:" .. fn_name)
     print_tables("Input", input)
-    local output = mod_xinerama[fn_name](input)
-    print_tables("Output", output)
-    assert(table.getn(output, outn))
+    local ret = mod_xinerama[fn_name](input)
+    print_tables("Output", ret)
+    assert(table_compare(output, ret))
 end
 
 -- now perform some tests:
 
 -- {{{ merge_contained_screens
 
-do_test("merge_contained_screens",1,{
+do_test("merge_contained_screens",{
+    {x=0,y=0,w=800,h=600}
+},{
     {x=0,y=0,w=800,h=600}
 })
 
-do_test("merge_contained_screens",1,{
+do_test("merge_contained_screens",{
     {x=0,y=0,w=800,h=600},
     {x=0,y=0,w=800,h=600},
+},{
+    {x=0,y=0,w=800,h=600}
 })
 
-do_test("merge_contained_screens",1,{
+do_test("merge_contained_screens",{
     {x=0,y=0,w=800,h=600},
     {x=100,y=100,w=600,h=400},
+},{
+    {x=0,y=0,w=800,h=600}
 })
 
-do_test("merge_contained_screens",2,{
+do_test("merge_contained_screens",{
+    {x=0,y=0,w=800,h=600},
+    {x=100,y=100,w=800,h=600},
+},{
     {x=0,y=0,w=800,h=600},
     {x=100,y=100,w=800,h=600},
 })
@@ -87,23 +113,31 @@ do_test("merge_contained_screens",2,{
 
 -- {{{ merge_overlapping_screens
 
-do_test("merge_overlapping_screens",1,{
+do_test("merge_overlapping_screens",{
+    {x=0,y=0,w=800,h=600}
+},{
     {x=0,y=0,w=800,h=600}
 })
 
-do_test("merge_overlapping_screens",1,{
+do_test("merge_overlapping_screens",{
     {x=0,y=0,w=800,h=600},
     {x=0,y=0,w=800,h=600},
+},{
+    {x=0,y=0,w=800,h=600}
 })
 
-do_test("merge_overlapping_screens",1,{
+do_test("merge_overlapping_screens",{
     {x=0,y=0,w=800,h=600},
     {x=100,y=100,w=600,h=400},
+},{
+    {x=0,y=0,w=800,h=600}
 })
 
-do_test("merge_overlapping_screens",1,{
+do_test("merge_overlapping_screens",{
     {x=0,y=0,w=800,h=600},
     {x=100,y=100,w=800,h=600},
+},{
+    {x=0,y=0,w=900,h=700}
 })
 
 
@@ -121,20 +155,22 @@ do_test("merge_overlapping_screens",1,{
 9         |              |
 0         ~~~~~~~~~~~~~~~~
 ]]--
-do_test("merge_overlapping_screens",1,{
+do_test("merge_overlapping_screens",{
     {x=0,y=0,w=800,h=600},
     {x=400,y=400,w=800,h=600},
     {x=500,y=0,w=500,h=300}
+},{
+    {x=0,y=0,w=1200,h=1000}
 })
 
 
 --[[
   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
-0 ________________________
-1 |              ||      |
-2 |              ||      |
-3 |              ||      |
-4 |       _______|========
+0 ________________  ______
+1 |              |  |    |
+2 |              |  |    |
+3 |              |  ~~~~~~
+4 |       _______|________
 5 |       |      |       |
 6 ~~~~~~~~~~~~~~~~       |
 7         |              |
@@ -142,8 +178,19 @@ do_test("merge_overlapping_screens",1,{
 9         |              |
 0         ~~~~~~~~~~~~~~~~
 ]]--
-do_test("merge_overlapping_screens",1,{
+do_test("merge_overlapping_screens",{
+    {x=0,y=0,w=800,h=600},
+    {x=900,y=100,w=300,h=300},
+    {x=400,y=400,w=800,h=600}
+},{
+    {x=0,y=0,w=1200,h=1000}
+})
+
+do_test("merge_overlapping_screens_alternative",{
     {x=0,y=0,w=800,h=600},
     {x=400,y=400,w=800,h=600},
-    {x=800,y=0,w=400,h=400}
+    {x=900,y=100,w=300,h=300}
+},{
+    {x=0,y=0,w=1200,h=1000},
+    {x=900,y=100,w=300,h=300}
 })
