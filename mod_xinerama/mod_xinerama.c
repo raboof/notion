@@ -87,9 +87,10 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
 {
     WRootWin* rootWin = ioncore_g.rootwins;
     ExtlTab screen;
-    int i;
+    int i, n, screen_id=0;
 
-    for (i=0;extl_table_geti_t(screens,i+1,&screen);i++) {
+    n = extl_table_get_n(screens);
+    for (i=1; i<=n; i++) if (extl_table_geti_t(screens,i,&screen)) {
         WFitParams fp;
         WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
 
@@ -103,7 +104,7 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
 
 #ifdef MOD_XINERAMA_DEBUG
         printf("Rectangle #%d: x=%d y=%d width=%u height=%u\n", 
-               i+1, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
+               i, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
 #endif
 
         par.flags = MPLEX_ATTACH_GEOM|MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED ;
@@ -114,12 +115,12 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
             (WRegionCreateFn*)create_screen, NULL);
 
         if(newScreen == NULL) {
-            warn(TR("Unable to create Xinerama workspace %d."), i);
+            warn(TR("Unable to create Xinerama workspace %d."), screen_id);
             return FALSE;
         }
 
-        newScreen->id = i ;
-
+        newScreen->id = screen_id++ ;
+        extl_unref_table(screen);
     }
     rootWin->scr.id = -2;
     return TRUE;
