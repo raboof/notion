@@ -170,6 +170,7 @@ function mod_xinerama.merge_overlapping_screens(screens)
 	    pos = setkey
 	end)
 
+	if not pos then pos = table.maxn(screensets)+1 end
 	table.insert(screensets, pos, mergedset)
     end)
 
