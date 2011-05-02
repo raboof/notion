@@ -80,6 +80,48 @@ ExtlTab mod_xinerama_query_screens()
 /* }}} */
 
 /* {{{ Setup ion's screens */
+/* Set up one new screen 
+ * @param screen dimensions (x/y/w/h) 
+ * @returns true on success, false on failure
+ */
+EXTL_EXPORT
+bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
+{
+    WRootWin* rootWin = ioncore_g.rootwins;
+    WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
+    WFitParams fp;
+
+    WScreen* newScreen;
+    WRegion* reg=NULL;
+
+    extl_table_gets_i(screen,"x",&(fp.g.x));
+    extl_table_gets_i(screen,"y",&(fp.g.y));
+    extl_table_gets_i(screen,"w",&(fp.g.w));
+    extl_table_gets_i(screen,"h",&(fp.g.h));
+    fp.mode = REGION_FIT_EXACT;
+
+#ifdef MOD_XINERAMA_DEBUG
+    printf("Rectangle #%d: x=%d y=%d width=%u height=%u\n", 
+           i, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
+#endif
+
+    par.flags = MPLEX_ATTACH_GEOM|MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED ;
+    par.geom = fp.g;
+    par.szplcy = SIZEPOLICY_FULL_EXACT;
+
+    newScreen = (WScreen*) mplex_do_attach_new(&rootWin->scr.mplex, &par,
+        (WRegionCreateFn*)create_screen, NULL);
+
+    if(newScreen == NULL) {
+        warn(TR("Unable to create Xinerama workspace %d."), screen_id);
+        return FALSE;
+    }
+
+    newScreen->id = screen_id;
+    return TRUE;
+ }
+
+
 /* This function has to be rewritten to be safe to
    call more than once. We have also to move to lua
    as much as possible. */
@@ -92,36 +134,12 @@ bool mod_xinerama_setup_screens(ExtlTab screens)
 
     n = extl_table_get_n(screens);
     for (i=1; i<=n; i++) if (extl_table_geti_t(screens,i,&screen)) {
-        WFitParams fp;
-        WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
+        bool ok = mod_xinerama_setup_new_screen(screen_id++, screen);
 
-        WScreen* newScreen;
-        WRegion* reg=NULL;
-        extl_table_gets_i(screen,"x",&(fp.g.x));
-        extl_table_gets_i(screen,"y",&(fp.g.y));
-        extl_table_gets_i(screen,"w",&(fp.g.w));
-        extl_table_gets_i(screen,"h",&(fp.g.h));
-        fp.mode = REGION_FIT_EXACT;
-
-#ifdef MOD_XINERAMA_DEBUG
-        printf("Rectangle #%d: x=%d y=%d width=%u height=%u\n", 
-               i, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
-#endif
-
-        par.flags = MPLEX_ATTACH_GEOM|MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED ;
-        par.geom = fp.g;
-        par.szplcy = SIZEPOLICY_FULL_EXACT;
-
-        newScreen = (WScreen*) mplex_do_attach_new(&rootWin->scr.mplex, &par,
-            (WRegionCreateFn*)create_screen, NULL);
-
-        if(newScreen == NULL) {
-            warn(TR("Unable to create Xinerama workspace %d."), screen_id);
-            return FALSE;
-        }
-
-        newScreen->id = screen_id++ ;
         extl_unref_table(screen);
+
+        if (!ok)
+            return FALSE;
     }
     rootWin->scr.id = -2;
     return TRUE;
