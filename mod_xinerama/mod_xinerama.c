@@ -81,6 +81,29 @@ ExtlTab mod_xinerama_query_screens()
 
 /* {{{ Controlling notion screens from lua */
 
+/*
+ * Updates WFitParams based on the lua parameters
+ *
+ * @param screen dimensions (x/y/w/h) 
+ */
+static void convert_parameters(ExtlTab screen, WFitParams *fp)
+{
+    fp->mode = REGION_FIT_EXACT;
+
+    extl_table_gets_i(screen,"x",&(fp->g.x));
+    extl_table_gets_i(screen,"y",&(fp->g.y));
+    extl_table_gets_i(screen,"w",&(fp->g.w));
+    extl_table_gets_i(screen,"h",&(fp->g.h));
+}
+
+/* Set the id of the root window */
+EXTL_EXPORT
+void mod_xinerama_set_root_screen_id(int screen_id)
+{
+    WRootWin* rootWin = ioncore_g.rootwins;
+    rootWin->scr.id = screen_id;
+}
+
 /* Set up one new screen 
  * @param screen dimensions (x/y/w/h) 
  * @returns true on success, false on failure
@@ -95,15 +118,11 @@ bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
     WScreen* newScreen;
     WRegion* reg=NULL;
 
-    extl_table_gets_i(screen,"x",&(fp.g.x));
-    extl_table_gets_i(screen,"y",&(fp.g.y));
-    extl_table_gets_i(screen,"w",&(fp.g.w));
-    extl_table_gets_i(screen,"h",&(fp.g.h));
-    fp.mode = REGION_FIT_EXACT;
+    convert_parameters(screen, &fp);
 
 #ifdef MOD_XINERAMA_DEBUG
     printf("Rectangle #%d: x=%d y=%d width=%u height=%u\n", 
-           i, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
+           screen_id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
 #endif
 
     par.flags = MPLEX_ATTACH_GEOM|MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED ;
@@ -119,9 +138,31 @@ bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
     }
 
     newScreen->id = screen_id;
-    rootWin->scr.id = -2;
     return TRUE;
- }
+}
+
+/* Set up one new screen 
+ * @param screen the screen to update
+ * @param dimensions the new dimensions (x/y/w/h) 
+ */
+EXTL_EXPORT
+bool mod_xinerama_update_screen(WScreen *screen, ExtlTab dimensions)
+{
+    WFitParams fp;
+    
+    convert_parameters(dimensions, &fp);
+
+#ifdef MOD_XINERAMA_DEBUG
+    printf("Updating rectangle #%d: x=%d y=%d width=%u height=%u\n", 
+           screen->id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
+#endif
+
+    REGION_GEOM(screen)=fp.g;
+    mplex_managed_geom((WMPlex*)screen, &(fp.g));
+    mplex_do_fit_managed((WMPlex*)screen, &fp);
+
+    return TRUE;
+}
 
 /* }}} */
 

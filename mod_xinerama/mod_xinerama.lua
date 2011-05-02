@@ -301,32 +301,29 @@ end
 --- {{{ Setup ion's screens */
 
 --DOC
--- Perform the initial setup of ion screens
-function mod_xinerama.setup_screens_initial(screens)
-    for screen_index, screen in ipairs(screens) do
-        mod_xinerama.setup_new_screen(screen_index - 1, screen)
-    end
-end
-
--- }}}
-
---- {{{ Misc
-
---DOC
--- The first call setups the screens of ion (and returns 
--- true on success). Subsequent calls do nothing (and return false).
---  
+-- Perform the setup of ion screens.
+--
+-- The first call sets up the screens of ion, subsequent calls update the
+-- current screens
+--
+-- Returns true on success, false on failure
+--
 -- Example input: {{x=0,y=0,w=1024,h=768},{x=1024,y=0,w=1280,h=1024}}
-function mod_xinerama.setup_screens_once(screens)
-print('setup_screens_once')
-    if setup_screens_called then
-        return false
-    else
-        setup_screens_called = true
-        return mod_xinerama.setup_screens_initial(screens)
+function mod_xinerama.setup_screens(screens)
+    mod_xinerama.set_root_screen_id(-2)
+    for screen_index, screen in ipairs(screens) do
+        local screen_id = screen_index - 1;
+        local existing_screen = ioncore.find_screen_id(screen_index - 1)
+        if existing_screen ~= nil then
+            mod_xinerama.update_screen(existing_screen, screen)
+        else
+            mod_xinerama.setup_new_screen(screen_index - 1, screen)
+        end
     end
+    -- TODO what to do when the number of screens is lower than last time
+    -- this function was called? Remove the screen and store its contents
+    -- somewhere else?
 end
-
 
 -- }}}
 
@@ -337,7 +334,14 @@ package.loaded["mod_xinerama"]=true
 -- Load configuration file
 dopath('cfg_xinerama', true)
 
-local screens = mod_xinerama.query_screens();
-if screens then
-    mod_xinerama.setup_screens_once(mod_xinerama.merge_overlapping_screens(screens));
-end 
+--DOC
+-- Queries Xinerama for the screen dimensions and updates ion screens 
+-- accordingly
+function mod_xinerama.refresh()
+    local screens = mod_xinerama.query_screens()
+    if screens then
+        mod_xinerama.setup_screens(mod_xinerama.merge_overlapping_screens(screens))
+    end 
+end
+
+mod_xinerama.refresh()
