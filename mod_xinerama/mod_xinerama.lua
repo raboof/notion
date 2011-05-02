@@ -298,6 +298,25 @@ end
 
 -- }}}
 
+--- {{{ Misc
+
+--DOC
+-- The first call setups the screens of ion (and returns 
+-- true on success). Subsequent calls do nothing (and return false).
+--  
+-- Example input: {{x=0,y=0,w=1024,h=768},{x=1024,y=0,w=1280,h=1024}}
+function mod_xinerama.setup_screens_once(screens)
+print('setup_screens_once')
+    if setup_screens_called then
+        return false
+    else
+        setup_screens_called = true
+        return mod_xinerama.setup_screens(screens)
+    end
+end
+
+
+-- }}}
 
 -- Mark ourselves loaded.
 package.loaded["mod_xinerama"]=true

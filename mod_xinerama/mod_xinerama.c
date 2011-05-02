@@ -83,7 +83,8 @@ ExtlTab mod_xinerama_query_screens()
 /* This function has to be rewritten to be safe to
    call more than once. We have also to move to lua
    as much as possible. */
-static bool mod_xinerama_setup_screens(ExtlTab screens)
+EXTL_EXPORT
+bool mod_xinerama_setup_screens(ExtlTab screens)
 {
     WRootWin* rootWin = ioncore_g.rootwins;
     ExtlTab screen;
@@ -126,21 +127,6 @@ static bool mod_xinerama_setup_screens(ExtlTab screens)
     return TRUE;
 }
 
-static bool setup_screens_called = FALSE;
-/*EXTL_DOC
- * The first call setups the screens of ion (and returns 
- * \codestr{true} on success). Subsequent calls do nothing
- * (and return \codestr{false}).
- *
- * Example input: \{\{x=0,y=0,w=1024,h=768\},\{x=1024,y=0,w=1280,h=1024\}\}
- */
-EXTL_EXPORT
-bool mod_xinerama_setup_screens_once(ExtlTab screens)
-{
-    if (setup_screens_called) return FALSE;
-    setup_screens_called = TRUE;
-    return mod_xinerama_setup_screens(screens);
-}
 /* }}} */
 
 /* {{{ Module init and deinit */
