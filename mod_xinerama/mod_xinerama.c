@@ -79,7 +79,8 @@ ExtlTab mod_xinerama_query_screens()
 }
 /* }}} */
 
-/* {{{ Setup ion's screens */
+/* {{{ Controlling notion screens from lua */
+
 /* Set up one new screen 
  * @param screen dimensions (x/y/w/h) 
  * @returns true on success, false on failure
@@ -118,32 +119,9 @@ bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
     }
 
     newScreen->id = screen_id;
-    return TRUE;
- }
-
-
-/* This function has to be rewritten to be safe to
-   call more than once. We have also to move to lua
-   as much as possible. */
-EXTL_EXPORT
-bool mod_xinerama_setup_screens(ExtlTab screens)
-{
-    WRootWin* rootWin = ioncore_g.rootwins;
-    ExtlTab screen;
-    int i, n, screen_id=0;
-
-    n = extl_table_get_n(screens);
-    for (i=1; i<=n; i++) if (extl_table_geti_t(screens,i,&screen)) {
-        bool ok = mod_xinerama_setup_new_screen(screen_id++, screen);
-
-        extl_unref_table(screen);
-
-        if (!ok)
-            return FALSE;
-    }
     rootWin->scr.id = -2;
     return TRUE;
-}
+ }
 
 /* }}} */
 

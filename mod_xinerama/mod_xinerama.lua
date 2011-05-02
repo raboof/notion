@@ -298,6 +298,18 @@ end
 
 -- }}}
 
+--- {{{ Setup ion's screens */
+
+--DOC
+-- Perform the initial setup of ion screens
+function mod_xinerama.setup_screens_initial(screens)
+    for screen_index, screen in ipairs(screens) do
+        mod_xinerama.setup_new_screen(screen_index - 1, screen)
+    end
+end
+
+-- }}}
+
 --- {{{ Misc
 
 --DOC
@@ -311,7 +323,7 @@ print('setup_screens_once')
         return false
     else
         setup_screens_called = true
-        return mod_xinerama.setup_screens(screens)
+        return mod_xinerama.setup_screens_initial(screens)
     end
 end
 
