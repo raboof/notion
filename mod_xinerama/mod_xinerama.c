@@ -105,43 +105,6 @@ void mod_xinerama_set_root_screen_id(int screen_id)
 }
 
 /* Set up one new screen 
- * @param screen dimensions (x/y/w/h) 
- * @returns true on success, false on failure
- */
-EXTL_EXPORT
-bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
-{
-    WRootWin* rootWin = ioncore_g.rootwins;
-    WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
-    WFitParams fp;
-
-    WScreen* newScreen;
-    WRegion* reg=NULL;
-
-    convert_parameters(screen, &fp);
-
-#ifdef MOD_XINERAMA_DEBUG
-    printf("Rectangle #%d: x=%d y=%d width=%u height=%u\n", 
-           screen_id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
-#endif
-
-    par.flags = MPLEX_ATTACH_GEOM|MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED ;
-    par.geom = fp.g;
-    par.szplcy = SIZEPOLICY_FULL_EXACT;
-
-    newScreen = (WScreen*) mplex_do_attach_new(&rootWin->scr.mplex, &par,
-        (WRegionCreateFn*)create_screen, NULL);
-
-    if(newScreen == NULL) {
-        warn(TR("Unable to create Xinerama workspace %d."), screen_id);
-        return FALSE;
-    }
-
-    newScreen->id = screen_id;
-    return TRUE;
-}
-
-/* Set up one new screen 
  * @param screen the screen to update
  * @param dimensions the new dimensions (x/y/w/h) 
  */
@@ -157,11 +120,44 @@ bool mod_xinerama_update_screen(WScreen *screen, ExtlTab dimensions)
            screen->id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
 #endif
 
-    REGION_GEOM(screen)=fp.g;
-    mplex_managed_geom((WMPlex*)screen, &(fp.g));
-    mplex_do_fit_managed((WMPlex*)screen, &fp);
+    region_fitrep((WRegion*)screen, NULL, &fp);
 
     return TRUE;
+}
+
+/* Set up one new screen 
+ * @param screen dimensions (x/y/w/h) 
+ * @returns true on success, false on failure
+ */
+EXTL_EXPORT
+bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
+{
+    WRootWin* rootWin = ioncore_g.rootwins;
+    WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
+    WScreen* newScreen;
+
+    /* it would be nice to drop MPLEX_ATTACH_WHATEVER, add MPLEX_ATTACH_GEOM 
+     * and directly create the WScreen with the correct size, but 
+     * mplex_do_attach_final will resize the screen to be of equal size as the
+     * surrounding WMPlex (the WRootWindow), which we don't want. Perhaps the
+     * WScreen should not be attached to the WRootWindow's MPlex directly.
+     *
+     * As a sort of workaround we create it with MPLEX_ATTACH_WHATEVER and 
+     * fitrep it later. */
+    par.flags = MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED|MPLEX_ATTACH_WHATEVER ;
+    par.szplcy = SIZEPOLICY_FULL_EXACT;
+
+    newScreen = (WScreen*) mplex_do_attach_new(&rootWin->scr.mplex, &par,
+        (WRegionCreateFn*)create_screen, NULL);
+
+    if(newScreen == NULL) {
+        warn(TR("Unable to create Xinerama workspace %d."), screen_id);
+        return FALSE;
+    }
+
+    newScreen->id = screen_id;
+
+    return mod_xinerama_update_screen(newScreen, screen);
 }
 
 /* }}} */
