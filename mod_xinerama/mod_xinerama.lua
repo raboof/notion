@@ -33,6 +33,13 @@ assert(mod_xinerama)
 
 -- Helper functions {{{
 
+local function max(one, other) 
+    if one == nil then return other end
+    if other == nil then return one end
+
+    return (one > other) and one or other
+end
+
 -- creates new table, converts {x,y,w,h} representation to {x,y,xmax,ymax}
 local function to_max_representation(screen)
     return {
@@ -95,7 +102,7 @@ function mod_xinerama.merge_contained_screens(screens)
 	for prevnum, prevscreen in pairs(ret) do
 	    if screen_contains(prevscreen, newscreen) then
 		table.insert(prevscreen.ids,newnum)
-		merged = true;
+		merged = true
 	    elseif screen_contains(newscreen, prevscreen) then
 		prevscreen.x = newscreen.x
 		prevscreen.y = newscreen.y
@@ -301,6 +308,14 @@ end
 --- {{{ Setup ion's screens */
 
 --DOC
+-- Move a WScreen off the visible virtual screen. 
+function mod_xinerama.move_offscreen(screen, max_right)
+    local dimensions = mod_xinerama.get_screen_dimensions(screen)
+    dimensions.x = max_right + 1
+    mod_xinerama.update_screen(screen, dimensions) 
+end
+
+--DOC
 -- Perform the setup of ion screens.
 --
 -- The first call sets up the screens of ion, subsequent calls update the
@@ -311,18 +326,37 @@ end
 -- Example input: {{x=0,y=0,w=1024,h=768},{x=1024,y=0,w=1280,h=1024}}
 function mod_xinerama.setup_screens(screens)
     mod_xinerama.set_root_screen_id(-2)
+
+    local max_screen_id = 0
+    local max_right
+
     for screen_index, screen in ipairs(screens) do
-        local screen_id = screen_index - 1;
-        local existing_screen = ioncore.find_screen_id(screen_index - 1)
+        local screen_id = screen_index - 1
+        max_screen_id = max(max_screen_id, screen_id)        
+        max_right = max(max_right, screen.x + screen.w)
+
+        local existing_screen = ioncore.find_screen_id(screen_id)
         if existing_screen ~= nil then
             mod_xinerama.update_screen(existing_screen, screen)
         else
-            mod_xinerama.setup_new_screen(screen_index - 1, screen)
+            mod_xinerama.setup_new_screen(screen_id, screen)
         end
     end
+
     -- TODO what to do when the number of screens is lower than last time
     -- this function was called? Remove the screen and store its contents
     -- somewhere else?
+
+    -- for now move the screen to a location outside the virtual screen, so
+    -- it can't be accidentally focussed and obscure the proper screens
+    local invisible_screen_id = max_screen_id + 1
+    local invisible_screen = ioncore.find_screen_id(invisible_screen_id)
+    while invisible_screen do
+        mod_xinerama.move_offscreen(invisible_screen, max_right)
+
+        invisible_screen_id = invisible_screen_id + 1
+        invisible_screen = ioncore.find_screen_id(invisible_screen_id)
+    end
 end
 
 -- }}}

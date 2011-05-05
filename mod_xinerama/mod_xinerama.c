@@ -77,6 +77,26 @@ ExtlTab mod_xinerama_query_screens()
     }
     return extl_table_none();
 }
+
+/*EXTL_DOC
+ * Queries Notion for screen location and dimensions.
+ *
+ * Example output: \{x=0,y=0,w=1024,h=768\}
+ */
+EXTL_SAFE
+EXTL_EXPORT
+ExtlTab mod_xinerama_get_screen_dimensions(WScreen *screen)
+{
+    ExtlTab rect = extl_create_table();
+
+    extl_table_sets_i(rect,"x",REGION_GEOM(screen).x);
+    extl_table_sets_i(rect,"y",REGION_GEOM(screen).y);
+    extl_table_sets_i(rect,"w",REGION_GEOM(screen).w);
+    extl_table_sets_i(rect,"h",REGION_GEOM(screen).h);
+
+    return rect;
+}
+
 /* }}} */
 
 /* {{{ Controlling notion screens from lua */
