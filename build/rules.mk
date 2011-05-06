@@ -241,16 +241,16 @@ endif
 ifdef SUBDIRS
 
 subdirs:
-	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i SUBMODULE=1; done
+	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i; done
 
 subdirs-depend:
-	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i SUBMODULE=1 depend; done
+	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i depend; done
 
 subdirs-clean:
-	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i SUBMODULE=1 clean; done
+	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i clean; done
 
 subdirs-realclean:
-	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i SUBMODULE=1 realclean; done
+	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i realclean; done
 
 subdirs-install:
 	set -e; for i in $(INSTALL_SUBDIRS); do $(MAKE) -C $$i install; done
