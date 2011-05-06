@@ -1,4 +1,8 @@
-LIBS_SUBDIRS =
+LIBS_SUBDIRS = libmainloop
+
+LIBMAINLOOP_DIR = $(TOPDIR)/libmainloop
+LIBMAINLOOP_INCLUDES = -I$(TOPDIR)
+LIBMAINLOOP_LIBS = -L$(LIBMAINLOOP_DIR) -lmainloop
 
 ifeq ($(shell ls $(TOPDIR)/libtu/obj.h 2>/dev/null),)
 
@@ -9,11 +13,12 @@ LIBTU_LIBS = -ltu
 
 else
 
-#libtu as subproject
+#In-tree libtu
+LIBS_SUBDIRS += libtu
+
 LIBTU_DIR = $(TOPDIR)/libtu
 LIBTU_INCLUDES = -I$(TOPDIR)
 LIBTU_LIBS = -L$(LIBTU_DIR) -ltu
-LIBS_SUBDIRS += libtu
 
 endif
 
@@ -28,18 +33,13 @@ MKEXPORTS = libextl-mkexports
 
 else
 
+#In-tree libextl
+LIBS_SUBDIRS += libextl
+
 LIBEXTL_DIR = $(TOPDIR)/libextl
 LIBEXTL_INCLUDES = -I$(TOPDIR)
 LIBEXTL_LIBS = -L$(LIBEXTL_DIR) -lextl
 
 MKEXPORTS = $(LUA) $(LIBEXTL_DIR)/libextl-mkexports
 
-LIBS_SUBDIRS += libextl
-
 endif
-
-LIBMAINLOOP_DIR = $(TOPDIR)/libmainloop
-LIBMAINLOOP_INCLUDES = -I$(TOPDIR)
-LIBMAINLOOP_LIBS = -L$(LIBMAINLOOP_DIR) -lmainloop
-
-LIBS_SUBDIRS += libmainloop
