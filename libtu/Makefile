@@ -3,7 +3,7 @@
 ##
 
 # System-specific configuration is in system.mk
-ifndef SUBMODULE
+ifeq ($(MAKELEVEL),0)
 TOPDIR=.
 else
 TOPDIR=..
