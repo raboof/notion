@@ -4,7 +4,7 @@ LIBMAINLOOP_DIR = $(TOPDIR)/libmainloop
 LIBMAINLOOP_INCLUDES = -I$(TOPDIR)
 LIBMAINLOOP_LIBS = -L$(LIBMAINLOOP_DIR) -lmainloop
 
-ifeq ($(shell ls $(TOPDIR)/libtu/obj.h 2>/dev/null),)
+ifeq ($(wildcard $(TOPDIR)/libtu/obj.h),)
 
 #External libtu, feel free to edit
 LIBTU_DIR = $(TOPDIR)/../libtu
@@ -22,7 +22,7 @@ LIBTU_LIBS = -L$(LIBTU_DIR) -ltu
 
 endif
 
-ifeq ($(shell ls $(TOPDIR)/libextl/luaextl.h 2>/dev/null),)
+ifeq ($(wildcard $(TOPDIR)/libextl/luaextl.h),)
 
 #External libextl, feel free to edit
 LIBEXTL_DIR = $(TOPDIR)/../libextl
