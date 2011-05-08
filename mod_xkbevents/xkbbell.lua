@@ -10,7 +10,7 @@ Copyright (c) Etan Reisner 2011
 
 xkbbell = xkbbell or {}
 if not xkbbell.timeout then
-    xkbbel.timeout = 10000
+    xkbbell.timeout = 10000
 end
 if not xkbbell.low_threshold then
     xkbbell.low_threshold = 50
@@ -22,15 +22,15 @@ if not xkbbell.high_threshold then
     xkbbell.high_threshold = 100
 end
 
-local bell_hook = ioncore.get_hook"xkb_bell_event"
+local bell_hook = ioncore.get_hook("xkb_bell_event")
 if not bell_hook then
-    dopath"xkbevents"
-    bell_hook = ioncore.get_hook"xkb_bell_event"
+    dopath("xkbevents")
+    bell_hook = ioncore.get_hook("xkb_bell_event")
 end
 
 local timer = ioncore.create_timer()
 local screen_iws = setmetatable({}, {__mode="kv"})
-local iw_hide_funs = setmetatable({} {__mode="kv"})
+local iw_hide_funs = setmetatable({}, {__mode="kv"})
 local active_frames = setmetatable({}, {__mode="kv"})
 
 local function set_hidden(iw, scr, state)
