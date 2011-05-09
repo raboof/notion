@@ -8,6 +8,16 @@ Last Updated: 2011-05-05
 Copyright (c) Etan Reisner 2011
 --]]
 
+local bell_hook = ioncore.get_hook("xkb_bell_event")
+if not bell_hook then
+    pcall(dopath, "xkbevents")
+    bell_hook = ioncore.get_hook("xkb_bell_event")
+    if not bell_hook then
+        warn("Could not load mod_xkbevents.")
+        return
+    end
+end
+
 xkbbell = xkbbell or {}
 if not xkbbell.timeout then
     xkbbell.timeout = 10000
@@ -20,12 +30,6 @@ if not xkbbell.medium_threshold then
 end
 if not xkbbell.high_threshold then
     xkbbell.high_threshold = 100
-end
-
-local bell_hook = ioncore.get_hook("xkb_bell_event")
-if not bell_hook then
-    dopath("xkbevents")
-    bell_hook = ioncore.get_hook("xkb_bell_event")
 end
 
 local timer = ioncore.create_timer()
@@ -112,9 +116,7 @@ local function bell_info(tab)
     end)
 end
 
-if bell_hook then
-    bell_hook:add(bell_info)
-end
+bell_hook:add(bell_info)
 
 local hook = ioncore.get_hook("region_notify")
 if hook then
