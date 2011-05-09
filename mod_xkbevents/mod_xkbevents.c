@@ -142,7 +142,7 @@ bool handle_xkb_event(XEvent *ev)
     XkbEvent *kev=NULL;
     WHookMarshallExtl *fn=NULL;
 
-    if(!ev->type==xkb_event_code)
+    if(ev->type!=xkb_event_code)
         return FALSE;
 
     kev=(XkbEvent*)ev;
