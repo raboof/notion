@@ -53,7 +53,7 @@ DECLSTRUCT(WBellParams){
 
 #include "version.h"
 
-char xkbevents_ion_api_version[]=ION_API_VERSION;
+char mod_xkbevents_ion_api_version[]=ION_API_VERSION;
 
 /*}}} Module information */
 
@@ -227,19 +227,19 @@ static bool init_hooks()
 
 #undef INIT_HOOK_
 
-void xkbevents_deinit()
+void mod_xkbevents_deinit()
 {
-    xkbevents_unregister_exports();
+    mod_xkbevents_unregister_exports();
 }
 
-bool xkbevents_init()
+bool mod_xkbevents_init()
 {
     int opcode;
     int major=XkbMajorVersion;
     int minor=XkbMinorVersion;
 
     if(!XkbLibraryVersion(&major,&minor)){
-        warn(TR("X library built with XKB version %d.%02d but xkbevents was built with XKB version %d.%02d. Going to try to work anyway."), major, minor, XkbMajorVersion, XkbMinorVersion);
+        warn(TR("X library built with XKB version %d.%02d but mod_xkbevents was built with XKB version %d.%02d. Going to try to work anyway."), major, minor, XkbMajorVersion, XkbMinorVersion);
     }
 
     if(!XkbQueryExtension(ioncore_g.dpy,&opcode,&xkb_event_code,&xkb_error_code,&major,&minor)>0){
@@ -252,7 +252,7 @@ bool xkbevents_init()
     if(!init_hooks())
         return FALSE;
 
-    if(!xkbevents_register_exports())
+    if(!mod_xkbevents_register_exports())
         return FALSE;
 
     if(!hook_add(ioncore_handle_event_alt, (void (*)())handle_xkb_event))
