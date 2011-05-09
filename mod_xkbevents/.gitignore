@@ -1,0 +1,5 @@
+exports.c
+exports.h
+exports.o
+mod_xkbevents.lc
+mod_xkbevents.so
