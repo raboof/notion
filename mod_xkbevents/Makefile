@@ -14,9 +14,9 @@ LDFLAGS += $(X11_LIBS)
 
 SOURCES=xkbevents.c
 
-MAKE_EXPORTS=xkbevents
+MAKE_EXPORTS=mod_xkbevents
 
-MODULE=xkbevents
+MODULE=mod_xkbevents
 
 ######################################
 
