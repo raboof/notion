@@ -200,6 +200,10 @@ bool handle_xkb_event(XEvent *ev)
     return FALSE;
 }
 
+#undef CHANGED
+
+#undef PARAM_ANY
+
 /*{{{ Init & deinit */
 
 /* ion never does this though it looks to me like that leaks (though I suppose
@@ -220,6 +224,8 @@ static bool init_hooks()
 
     return TRUE;
 }
+
+#undef INIT_HOOK_
 
 void xkbevents_deinit()
 {
