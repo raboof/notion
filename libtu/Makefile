@@ -9,7 +9,6 @@ else
 TOPDIR=..
 endif
 include $(TOPDIR)/build/system-inc.mk
-include $(TOPDIR)/system.mk
 
 ######################################
 
