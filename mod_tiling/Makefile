@@ -1,5 +1,5 @@
 ##
-## Ion workspace module Makefile
+## Notion workspace module Makefile
 ##
 
 # System-specific configuration is in system.mk

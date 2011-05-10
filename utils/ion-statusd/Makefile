@@ -1,5 +1,5 @@
 ##
-## Ion-statusd Makefile
+## Notion ion-statusd Makefile
 ##
 
 # System-specific configuration is in system.mk
