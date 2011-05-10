@@ -1,7 +1,6 @@
 ##
 ## Notion dock module Makefile
 ##
-## $Header: /home/twp/cvsroot/twp/ion/ion-devel-dock/Makefile,v 1.15 2003/12/21 18:08:43 twp Exp $
 ##
 
 # System specific configuration is in system.mk
