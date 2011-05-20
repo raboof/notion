@@ -2,13 +2,17 @@
 ## Extl Makefile
 ##
 
-# System-specific configuration is in system.mk
 ifeq ($(MAKELEVEL),0)
 TOPDIR=.
 else
 TOPDIR=..
 endif
-include $(TOPDIR)/build/system-inc.mk
+
+# System-specific configuration
+include $(TOPDIR)/system.mk
+
+# Internal library CFLAGS/INCLUDES
+include $(TOPDIR)/build/libs.mk
 
 ######################################
 
