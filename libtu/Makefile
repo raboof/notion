@@ -12,9 +12,6 @@ endif
 # System-specific configuration
 include $(TOPDIR)/system.mk
 
-# Internal library CFLAGS/INCLUDES
-include $(TOPDIR)/build/libs.mk
-
 ######################################
 
 #INCLUDES += $(LIBTU_INCLUDES) $(LUA_INCLUDES)
