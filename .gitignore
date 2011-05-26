@@ -1,1 +1,13 @@
 .project
+*.a
+*.o
+*.so
+*.lc
+exports.[ch]
+po/*.mo
+man/*.1
+man/welcome*.txt
+notion/notion
+utils/ion-completeman
+utils/ion-statusd/ion-statusd
+utils/ion-completefile/ion-completefile

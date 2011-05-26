@@ -61,32 +61,39 @@ DL_LIBS=-ldl
 ## Lua
 ##
 
-# We try autodect lua by pkg-config. We suppose, that lua and luac found in 
-# path are the correct lua. You have to edit this, if the autodetection does
-# not work.
+# To skip auto-detection of lua uncomment this and edit the variables below to
+# suit your installation of lua.
+#LUA_MANUAL=1
 
-ifeq ($(shell pkg-config --exists lua5.1 2>/dev/null && echo 1),1)
-#ifeq (0,1)
+# Default to paths and names that should work for a build installed from the
+# official Lua 5.1 source tarball.
+LUA_DIR=/usr/local
+LUA_LIBS=-L$(LUA_DIR)/lib -llua
+LUA_INCLUDES = -I$(LUA_DIR)/include
+LUA=$(LUA_DIR)/bin/lua
+LUAC=$(LUA_DIR)/bin/luac
 
-# If you are using the Debian packages, the following settings should be
-# what you want.
+# Attempt to autodect lua using pkg-config.
+
+ifndef LUA_MANUAL
+
+ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
+
 LUA_LIBS=`pkg-config --libs lua5.1`
 LUA_INCLUDES=`pkg-config --cflags lua5.1`
 LUA=lua5.1
 LUAC=luac5.1
 
-else
+else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua && pkg-config --modversion lua)))
 
-# If you have installed Lua 5.1 from the official tarball without changing
-# paths, this should do it.
-LUA_DIR=/usr/local
-LUA_LIBS = -L$(LUA_DIR)/lib -llua
-LUA_INCLUDES = -I$(LUA_DIR)/include
-LUA=$(LUA_DIR)/bin/lua
-LUAC=$(LUA_DIR)/bin/luac
+LUA_LIBS=`pkg-config --libs lua`
+LUA_INCLUDES=`pkg-config --cflags lua`
+LUA=lua
+LUAC=luac
 
-endif
+endif # lua
 
+endif # LUA_MANUAL
 
 
 ##
