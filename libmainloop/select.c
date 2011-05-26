@@ -11,8 +11,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include <features.h>
-
 #include <libtu/types.h>
 #include <libtu/misc.h>
 #include <libtu/dlist.h>
