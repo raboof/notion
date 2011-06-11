@@ -370,6 +370,12 @@ char *extl_lookup_script(const char *file, const char *sp)
     return tmp;
 }
 
+static int warn_notfound(const char *file, void *param)
+{
+    warn(TR("Tried: '%s'"), file);
+
+    return EXTL_TRYCONFIG_NOTFOUND;
+}
 
 bool extl_read_config(const char *file, const char *sp, bool warn_nx)
 {
@@ -384,9 +390,12 @@ bool extl_read_config(const char *file, const char *sp, bool warn_nx)
     retval=extl_try_config(file, sp, (ExtlTryConfigFn*)try_call, &param,
                               EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
     
-    if(retval==EXTL_TRYCONFIG_NOTFOUND && warn_nx)
-        extl_warn(TR("Unable to find '%s.%s' or '%s.%s' on search path."), 
+    if(retval==EXTL_TRYCONFIG_NOTFOUND && warn_nx){
+        extl_warn(TR("Unable to find '%s.%s' or '%s.%s' on search path..."), 
             file, EXTL_COMPILED_EXTENSION, file, EXTL_EXTENSION);
+        extl_try_config(file, sp, (ExtlTryConfigFn*)warn_notfound, NULL,
+                              EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
+    }
 
     return (retval==EXTL_TRYCONFIG_OK);
 }
