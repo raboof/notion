@@ -3,7 +3,7 @@
 ##
 
 # System-specific configuration is in system.mk
-TOPDIR=../notion/notion
+TOPDIR=../notion
 include $(TOPDIR)/build/system-inc.mk
 
 ######################################
