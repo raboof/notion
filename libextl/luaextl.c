@@ -1973,7 +1973,7 @@ static int extl_l1_call_handler(lua_State *st)
     }
     
     if(!extl_check_protected(param.spec)){
-        extl_warn(TR("Attempt to call an unsafe function \"%s\" in "
+        extl_warn(TR("Ignoring call to unsafe function \"%s\" in "
                      "restricted mode."), param.spec->name);
         return 0;
     }
