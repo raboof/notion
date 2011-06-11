@@ -385,7 +385,8 @@ bool extl_read_config(const char *file, const char *sp, bool warn_nx)
                               EXTL_COMPILED_EXTENSION, EXTL_EXTENSION);
     
     if(retval==EXTL_TRYCONFIG_NOTFOUND && warn_nx)
-        extl_warn(TR("Unable to find '%s' on search path."), file);
+        extl_warn(TR("Unable to find '%s.%s' or '%s.%s' on search path."), 
+            file, EXTL_COMPILED_EXTENSION, file, EXTL_EXTENSION);
 
     return (retval==EXTL_TRYCONFIG_OK);
 }
