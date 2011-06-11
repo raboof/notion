@@ -1,6 +1,7 @@
 /*
  * ion/ioncore/modules.c
  *
+ * Copyright (c) Arnout Engelen 2011
  * Copyright (c) Tuomo Valkonen 1999-2009. 
  *
  * See the included file LICENSE for details.
@@ -239,16 +240,16 @@ err1:
     return EXTL_TRYCONFIG_LOAD_FAILED;
 }
 
-
 static bool do_load_module(const char *modname)
 {
     int retval;
+    const char *extension = "so";
     
     retval=extl_try_config(modname, NULL, (ExtlTryConfigFn*)try_load, 
-                           NULL, "so", NULL);
+                           NULL, extension, NULL);
     
     if(retval==EXTL_TRYCONFIG_NOTFOUND)
-        warn(TR("Unable to find '%s' on search path."), modname);
+        warn(TR("Unable to find '%s.%s' on search path."), modname, extension);
     
     return (retval==EXTL_TRYCONFIG_OK);
 }
