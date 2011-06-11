@@ -10,7 +10,7 @@ Copyright (c) Etan Reisner 2011
 
 local bell_hook = ioncore.get_hook("xkb_bell_event")
 if not bell_hook then
-    pcall(dopath, "xkbevents")
+    pcall(dopath, "mod_xkbevents")
     bell_hook = ioncore.get_hook("xkb_bell_event")
     if not bell_hook then
         warn("Could not load mod_xkbevents.")
