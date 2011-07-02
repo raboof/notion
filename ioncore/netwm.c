@@ -81,7 +81,11 @@ void netwm_init_rootwin(WRootWin *rw)
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
 
     p[0]=libtu_progbasename();
+#ifdef X_HAVE_UTF8_STRING
+    xwindow_set_utf8_property(rw->dummy_win, atom_net_wm_name, p, 1);
+#else
     xwindow_set_text_property(rw->dummy_win, atom_net_wm_name, p, 1);
+#endif
 }
 
 
