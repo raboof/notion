@@ -230,11 +230,15 @@ void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
     XFree(prop.value);
 }
 
-#ifdef X_HAVE_UTF8_STRING
 void xwindow_set_utf8_property(Window win, Atom a, const char **ptr, int n)
 {
+#ifndef X_HAVE_UTF8_STRING
+    xwindow_set_text_property(win, a, ptr, n);
+#else
     XTextProperty prop;
     bool ok;
+
+    
 
     int st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
                                      XUTF8StringStyle, &prop);
@@ -245,8 +249,8 @@ void xwindow_set_utf8_property(Window win, Atom a, const char **ptr, int n)
 
     XSetTextProperty(ioncore_g.dpy, win, &prop, a);
     XFree(prop.value);
-}
 #endif
+}
 
 
 /*}}}*/
@@ -454,7 +458,6 @@ void ioncore_x_set_text_property(int win, int atom, ExtlTab tab)
     XFreeStringList(list);
 }
 
-#ifdef X_HAVE_UTF8_STRING
 /*EXTL_DOC
  * Set a UTF8_STRING property for a window. The fields of \var{tab} starting
  * from 1 should be the different null-separated parts of the property.
@@ -480,7 +483,6 @@ void ioncore_x_set_utf8_property(int win, int atom, ExtlTab tab)
 
     XFreeStringList(list);
 }
-#endif
 
 
 
