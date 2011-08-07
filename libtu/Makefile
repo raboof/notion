@@ -3,8 +3,13 @@
 ##
 
 # System-specific configuration is in system.mk
+ifeq ($(MAKELEVEL),0)
 TOPDIR=.
-include $(TOPDIR)/build/system-inc.mk
+else
+TOPDIR=..
+endif
+
+# System-specific configuration
 include $(TOPDIR)/system.mk
 
 ######################################
