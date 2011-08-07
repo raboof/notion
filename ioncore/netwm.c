@@ -81,6 +81,10 @@ void netwm_init_rootwin(WRootWin *rw)
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
 
     p[0]=libtu_progbasename();
+    /** 
+     * Unfortunately we cannot determine the charset of libtu_progbasename()
+     * so we'll just have to guess it makes sense in the current locale charset
+     */
     xwindow_set_utf8_property(rw->dummy_win, atom_net_wm_name, p, 1);
 }
 
