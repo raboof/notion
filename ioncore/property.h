@@ -27,7 +27,8 @@ extern void xwindow_set_text_property(Window win, Atom a,
                                       const char **p, int n);
 extern bool xwindow_get_cardinal_property(Window win, Atom a, CARD32 *vret);
 /** 
- * Set a property as UTF8_STRING
+ * Set a property as UTF8_STRING. To read UTF8_STRING properties, the normal
+ * xwindow_get_text_property can be used.
  *
  * @param p null-terminated list of input strings, in the current locale 
  *          encoding
