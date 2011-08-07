@@ -238,8 +238,6 @@ void xwindow_set_utf8_property(Window win, Atom a, const char **ptr, int n)
     XTextProperty prop;
     bool ok;
 
-    
-
     int st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
                                      XUTF8StringStyle, &prop);
     ok=(st>=0);

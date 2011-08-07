@@ -64,7 +64,7 @@ void netwm_init()
 void netwm_init_rootwin(WRootWin *rw)
 {
     Atom atoms[N_NETWM];
-        const char *p[1];
+    const char *p[1];
 
     atoms[0]=atom_net_wm_name;
     atoms[1]=atom_net_wm_state;
