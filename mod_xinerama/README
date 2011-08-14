@@ -1,14 +1,22 @@
-Ion Xinerama module (based on the mod_xrandr skeleton)
-by Thomas Themel <themel0r@wannabehacker.com>
+Notion Xinerama module 
+
+* By Tomáš Ebenlendr and Arnout Engelen
+* Based on work by Thomas Themel <themel0r@wannabehacker.com>
+* Based on the mod_xrandr skeleton
 
 INTRODUCTION
 
-This module gives ion3 back its Xinerama support that was killed on 20070117.
+This module provides multi-head support to Notion. It uses the Xinerama API,
+and thus can be used with any X Server that exposes functionality through this 
+API, notably RandR (used by both ATI and nVidia) and TwinView (used by nVidia).
+
+(it is based on the module that gave ion3 its Xinerama support back that was 
+killed on 20070117)
 
 INSTALLATION
 
-        1. Edit Makefile to ensure TOPDIR points to your top-level ion source
-           directory with a system.mk that matches the version of ion installed
+        1. Edit Makefile to ensure TOPDIR points to your top-level notion source
+           directory with a system.mk that matches the version of notion installed
            on your system.
 
         2. Run make.
@@ -16,9 +24,9 @@ INSTALLATION
         3. Either run (as root)
                 # make install
            or (as yourself),
-                $ mkdir -p ~/.ion3/lib
-                $ cp .libs/mod_xinerama.{so,lc} ~/.ion3/lib
-        4. Add dopath("mod_xinerama") to ~/.ion3/cfg_ion.lua. See below
+                $ mkdir -p ~/.notion/lib
+                $ cp .libs/mod_xinerama.{so,lc} ~/.notion/lib
+        4. Add dopath("mod_xinerama") to ~/.notion/cfg_notion.lua. See below
 	   for possible status bar issues.
         5. (Re)start Ion.
 		
@@ -36,7 +44,7 @@ if (screens) then
     -- -- or (current behaviour):
     -- screens = mod_xinerama.merge_overlapping_screens(screens)
     -- -- and finally setup the screens:
-    mod_xinerama.setup_screens_once(screens)
+    mod_xinerama.setup_screens(screens)
 end
 
 LIMITATIONS
@@ -51,7 +59,7 @@ trivial with access to the original ion code and a Solaris machine.
 
 WRAPPING goto_next_scr/goto_prev_scr
 
-Without altering the ion3 source, it doesn't seem possible to get
+Without altering the notion source, it doesn't seem possible to get
 goto_next_scr/goto_prev_scr to properly wrap around on the last/first screen.
 This can be worked around in lua, though:
 
