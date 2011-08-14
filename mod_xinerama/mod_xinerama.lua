@@ -210,6 +210,7 @@ end
 -- Thus this algorithm is not what you want by default.
 --
 -- Example input format: \{\{x=0,y=0,w=1024,h=768\},\{x=0,y=0,w=1280,h=1024\}\}
+-- See test_xinerama.lua for example input/output
 function mod_xinerama.merge_overlapping_screens_alternative(screens)
     -- Group overlapping screens into sets for merging.
     --         *-------*
@@ -374,7 +375,8 @@ dopath('cfg_xinerama', true)
 function mod_xinerama.refresh()
     local screens = mod_xinerama.query_screens()
     if screens then
-        mod_xinerama.setup_screens(mod_xinerama.merge_overlapping_screens(screens))
+        local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
+        mod_xinerama.setup_screens(merged_screens)
     end 
 end
 

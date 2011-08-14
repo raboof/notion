@@ -40,12 +40,23 @@ local screens = mod_xinerama.query_screens()
 if (screens) then
     -- -- now you can edit the 'screens' table in lua,
     -- -- e.g.:
-    -- screens = mod_xinerama.merge_contained_screens(screens)
+    -- local merged_screens = mod_xinerama.merge_contained_screens(screens)
     -- -- or (current behaviour):
-    -- screens = mod_xinerama.merge_overlapping_screens(screens)
+    -- local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
     -- -- and finally setup the screens:
-    mod_xinerama.setup_screens(screens)
+    mod_xinerama.setup_screens(merged_screens)
 end
+
+REFRESHING
+
+When the screen topology changes, the locations, sizes and mergings of windows
+may be recalculated. The Xinerama API does not support notifications of 
+topology changes, but these might be received through other means, such as 
+mod_xrandr. 
+
+If you're satisfied with the default merge algorithm, you may simply call
+mod_xinerama.refresh(). If you want to use your own merging algorithm, you
+may call mod_xinerama.setup_screens(merged_screens) again.
 
 LIMITATIONS
 
