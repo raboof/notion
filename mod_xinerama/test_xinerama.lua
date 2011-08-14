@@ -50,7 +50,7 @@ function table_compare(table, super)
 end
 -- }}}
 
--- {{{ mock notion contest
+-- {{{ mock notion context
 ioncore = { 
   load_module = function() 
     return 1
