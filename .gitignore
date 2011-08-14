@@ -8,6 +8,7 @@ po/*.mo
 man/*.1
 man/welcome*.txt
 notion/notion
+pwm/pwm3plus
 utils/ion-completeman
 utils/ion-statusd/ion-statusd
 utils/ion-completefile/ion-completefile
