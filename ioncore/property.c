@@ -457,7 +457,7 @@ void ioncore_x_set_text_property(int win, int atom, ExtlTab tab)
 }
 
 /*EXTL_DOC
- * Set a UTF8_STRING property for a window. The fields of \var{tab} starting
+ * Set a \code{UTF8\_STRING} property for a window. The fields of \var{tab} starting
  * from 1 should be the different null-separated parts of the property.
  * See the \code{XSetTextProperty}(3) manual page for more information.
  */
