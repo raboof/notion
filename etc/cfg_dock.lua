@@ -1,5 +1,5 @@
 --
--- Ion dock module configuration
+-- Notion dock module configuration
 --
 
 -- Create a dock

@@ -1,5 +1,5 @@
 --
--- Look_cleanviolet for Ion's default drawing engine. 
+-- Look_cleanviolet for Notion's default drawing engine. 
 -- Based on look-clean and look-violetgrey.
 -- 
 
