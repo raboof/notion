@@ -24,11 +24,13 @@ DECLCLASS(WWindow){
 };
 
 
-extern bool window_init(WWindow *p, WWindow *parent, 
+extern bool window_init(WWindow *p, /*@notnull@*/ WWindow *parent, 
                         const WFitParams *fp, const char *name);
 /**
- * @param win the window to initialize. When 'None', a new window is created 
- * @param name the name of the newly created Window
+ * @param parent required when 'win' is 'None'.
+ * @param win    the window to initialize. A new window is created when 'win' 
+ *               is 'None'.
+ * @param name   the name of the newly created Window
  */
 extern bool window_do_init(WWindow *p, WWindow *parent, 
                            const WFitParams *fp, Window win, const char *name);
