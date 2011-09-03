@@ -1,4 +1,4 @@
--- look_cleanios.lua drawing engine configuration file for Ion.
+-- look_cleanios.lua drawing engine configuration file for Notion.
 
 if not gr.select_engine("de") then return end
 

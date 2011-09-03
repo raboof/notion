@@ -1,5 +1,5 @@
 --
--- Ion tiling module configuration file
+-- Notion tiling module configuration file
 --
 
 -- Bindings for the tilings. 

@@ -1,16 +1,16 @@
 --
--- Ion main configuration file
+-- Notion main configuration file
 --
 -- This file only includes some settings that are rather frequently altered.
 -- The rest of the settings are in cfg_notioncore.lua and individual modules'
 -- configuration files (cfg_modulename.lua). 
 --
 -- When any binding and other customisations that you want are minor, it is 
--- recommended that you include them in a copy of this file in ~/.ion3/.
+-- recommended that you include them in a copy of this file in ~/.notion/.
 -- Simply create or copy the relevant settings at the end of this file (from
 -- the other files), recalling that a key can be unbound by passing 'nil' 
 -- (without the quotes) as the callback. For more information, please see 
--- the Ion configuration manual available from the Ion Web page.
+-- the Notion configuration manual available from the Notion Web page.
 --
 
 -- Set default modifiers. Alt should usually be mapped to Mod1 on
@@ -64,7 +64,7 @@ ioncore.set{
 -- modules with 'mod' replaced by 'cfg'.
 dopath("cfg_defaults")
 
--- Load configuration of the Ion 'core'. Most bindings are here.
+-- Load configuration of the Notion 'core'. Most bindings are here.
 --dopath("cfg_notioncore")
 
 -- Load some kludges to make apps behave better.
