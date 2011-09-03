@@ -23,6 +23,17 @@ extern void xwindow_set_integer_property(Window win, Atom a, int value);
 extern bool xwindow_get_state_property(Window win, int *state);
 extern void xwindow_set_state_property(Window win, int state);
 extern char **xwindow_get_text_property(Window win, Atom a, int *nret);
+
+/** 
+ * Set a text property. The type of the property (STRING, COMPOUND, UTF-8) is
+ * determined automatically based on the string and the current locale.
+ *
+ * This may be used for any property of type 'TEXT' (not 'STRING') in
+ * http://tronche.com/gui/x/icccm/sec-2.html#s-2.6.2
+ *
+ * @param p null-terminated list of input strings, in the current locale 
+ *          encoding
+ */
 extern void xwindow_set_text_property(Window win, Atom a, 
                                       const char **p, int n);
 extern bool xwindow_get_cardinal_property(Window win, Atom a, CARD32 *vret);
