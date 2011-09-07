@@ -25,8 +25,9 @@ extern void xwindow_set_state_property(Window win, int state);
 extern char **xwindow_get_text_property(Window win, Atom a, int *nret);
 
 /** 
- * Set a text property. The type of the property (STRING, COMPOUND, UTF-8) is
- * determined automatically based on the string and the current locale.
+ * Set a text property. The type of the property (STRING, COMPOUND_STRING, 
+ * UTF8_STRING or even any custom multibyte encoding) is determined 
+ * automatically based on the string and the current locale.
  *
  * This may be used for any property of type 'TEXT' (not 'STRING') in
  * http://tronche.com/gui/x/icccm/sec-2.html#s-2.6.2
