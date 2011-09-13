@@ -107,4 +107,13 @@ local function update_workspace()
     end)
 end
 
-ioncore.get_hook("region_notify_hook"):add(update_workspace)
+local function update_workspace_wrap(reg, how)
+    if how ~= "name" then
+        return
+    end
+
+    update_workspace()
+end
+
+ioncore.get_hook("region_notify_hook"):add(update_workspace_wrap)
+ioncore.get_hook("screen_managed_changed_hook"):add(update_workspace)

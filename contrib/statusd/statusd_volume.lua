@@ -12,8 +12,8 @@ local function get_volume()
    local s=f:read('*all')
    f:close()
    local _, _, master, pcm = 
-      string.find(s, "vol (%d*), .*\n"..
-                     "pcm (%d*), .*\n"
+      string.find(s, "vol[0-9]? (%d*), .*\n"..
+                     "pcm[0-9]? (%d*), .*\n"
                )
 
    if not master then
