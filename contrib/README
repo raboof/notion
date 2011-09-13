@@ -12,7 +12,7 @@ make sure you load the script with
 
 dopath("scriptname")
 
-in your cfg_ion.lua.
+in your cfg_notion.lua.
 
 
 Statusbar scripts

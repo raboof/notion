@@ -2,14 +2,14 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Ion scripts collection</title>
+<title>Notion scripts collection</title>
 <link href="default.css" title="Default" rel="stylesheet" type="text/css">
 </head>
 <body>
 
-<div class=title><h1>Ion3 scripts collection</h1></div>
+<div class=title><h1>Notion scripts collection</h1></div>
 
-Here are some scripts for Ion3. All of them are in the public domain unless
+Here are some scripts for Notion. All of them are in the public domain unless
 otherwise mentioned in the source file.
 <p>
 Please note that some of the scripts are not up to date, and do
@@ -76,7 +76,7 @@ if you need them.
     <dd> Create per-clientwin scratchpads
 
     <dt> <a href="scripts/document_menus.lua">document_menus.lua</a>
-    <dd> Navigate the filesystem using ion menus.
+    <dd> Navigate the filesystem using notion menus.
 
     <dt> <a href="scripts/enumerate.lua">enumerate.lua</a>
     <dd> Adds "X." in front of the client windows, which may make switching
@@ -115,7 +115,7 @@ if you need them.
     <dd> 'Lock' selected frames so they don't close via the keyboard. 
 
     <dt> <a href="scripts/min_tabs.lua">min_tabs.lua</a>
-    <dd> Show tabs precisely when two or more windows in an ion frame
+    <dd> Show tabs precisely when two or more windows in an notion frame
 
     <dt> <a href="scripts/move_current.lua">move_current.lua</a>
     <dd> Move current window in a frame to another frame in specified
@@ -125,7 +125,7 @@ if you need them.
     <dd> Mark next mapped window to be attached to a specified object
 
     <dt> <a href="scripts/mpd.lua">mpd.lua</a>
-    <dd> Control a MusicPD server from within Ion
+    <dd> Control a MusicPD server 
 
     <dt> <a href="scripts/named_floating_groupws.lua">named_floating_groupws.lua</a>
     <dd> Toggle (and create) floating WGroupWS:s by name.
@@ -148,7 +148,7 @@ if you need them.
     <dd> Show notification boxes, similar to the activity notification.
 
     <dt> <a href="scripts/nowarp_scratchpad.lua">nowarp_scratchpad.lua</a>
-    <dd> Keeps ion from warping the pointer when activating a scratchpad
+    <dd> Keeps notion from warping the pointer when activating a scratchpad
          region.
 
     <dt> <a href="scripts/panel.lua">panel.lua</a>
@@ -161,10 +161,10 @@ if you need them.
 
     <dt> <a href="scripts/rotate_statusbar.lua">rotate_statusbar.lua</a>
     <dd> Rotate the statusbar between different templates.  This will
-         automatically load all of the modules for ion-statusd.
+         automatically load all of the modules for notion-statusd.
 
     <dt> <a href="scripts/rss_feed.lua">rss_feed.lua</a>
-    <dd> A simple rss-reader script in lua for ion.
+    <dd> A simple rss-reader script
 
     <dt> <a href="scripts/rss_feed_hh.lua">rss_feed_hh.lua</a>
     <dd> Some small improvements to match rss_feed my personal taste.
@@ -204,8 +204,8 @@ if you need them.
     screens, up/down between workspaces.</dd>
 
     <dt> <a href="scripts/xkbion.lua">xkbion.lua</a></dt>
-    <dd> This script allows you to use independent keyboard layouts for different windows in Ion3.
-    It uses a window property to store the XKB groups, so you can restart Ion without losing
+    <dd> This script allows you to use independent keyboard layouts for different windows in Notion.
+    It uses a window property to store the XKB groups, so you can restart Notion without losing
     settings for each window.</dd>
 
     <dt> <a href="scripts/zoom.lua">zoom.lua</a>
@@ -219,16 +219,16 @@ if you need them.
     <!-- New scripts in alphabetical order, please -->
 
     <dt> <a href="keybindings/cfg_mouse.lua">cfg_mouse.lua</a>
-    <dd> Make the mouse pull its weight in ion. </dd>
+    <dd> Make the mouse pull its weight. </dd>
 
     <dt> <a href="keybindings/dans_bindings.lua">dans_bindings.lua</a>
     <dd> Keybindings for more intuitive WIonWS navigation.</dd>
 
     <dt> <a href="keybindings/emacs_bindings.lua">emacs_bindings.lua</a>
-    <dd> Emacs-like keybindings for Ion </dd>
+    <dd> Emacs-like keybindings </dd>
 
     <dt> <a href="keybindings/vim_bindings.lua">vim_bindings.lua</a>
-    <dd> Vim-like keybindings for Ion queries.</dd>
+    <dd> Vim-like keybindings for Notion queries.</dd>
 </dl>
 
 <h2>Styles</h2>
@@ -375,162 +375,162 @@ below for more information.
 </dl>
 
 
-<h3>Ion-statusd monitors</h3>
+<h3>Notion-statusd monitors</h3>
 <a name="statusd"></a>
 
-These monitors are run within the separate <tt>ion-statusd</tt> program.
+These monitors are run within the separate <tt>notion-statusd</tt> program.
 Note that many of them depend on the Linux <tt>/proc</tt> filesystem and
 thus will not work on other systems.
 
 <dl>
     <!-- New scripts in alphabetical order, please -->
     <dt> <a href="statusd/statusd_amarok.lua">statusd_amarok.lua</a>
-    <dd> Ion-statusd monitor reporting the current song from <a href="http://amarok.kde.org/">Amarok</a>.
+    <dd> Notion-statusd monitor reporting the current song from <a href="http://amarok.kde.org/">Amarok</a>.
 
     <dt> <a href="statusd/statusd_apm.lua">statusd_apm.lua</a>
-    <dd> Ion-statusd monitor reporting APM status; works on OpenBSD 4.0 by executing
+    <dd> Notion-statusd monitor reporting APM status; works on OpenBSD 4.0 by executing
     external program every minute. Now with hints for battery state and
     external A/C connection.
     <dt> <a href="statusd/statusd_apm2.lua">statusd_apm2.lua</a>
-    <dd> Ion-statusd monitor reporting APM status; works on FreeBSD by executing apm as an external program every minute. Added hints for a bit more color. Even though this is apm2, save it as statusd_apm.lua.
+    <dd> Notion-statusd monitor reporting APM status; works on FreeBSD by executing apm as an external program every minute. Added hints for a bit more color. Even though this is apm2, save it as statusd_apm.lua.
 
     <dt> <a href="statusd/statusd_batt.lua">statusd_batt.lua</a>
-    <dd> Ion-statusd monitor reporting battery status; works with apm.
+    <dd> Notion-statusd monitor reporting battery status; works with apm.
     
     <dt> <a href="statusd/statusd_binclock.lua">statusd_binclock.lua</a>
-    <dd> Ion-statusd binary clock in two possible modes: Plain binary (numbers) and character mode (dots, lines, etc).
+    <dd> Notion-statusd binary clock in two possible modes: Plain binary (numbers) and character mode (dots, lines, etc).
 
     <dt> <a href="statusd/statusd_bitcoin.lua">statusd_bitcoin.lua</a>
-    <dd> Ion-statusd monitor reporting bitcoin speed in khash/s and balance
+    <dd> Notion-statusd monitor reporting bitcoin speed in khash/s and balance
 
     <dt> <a href="statusd/statusd_bsdbatt.lua">statusd_bsdbatt.lua</a>
-    <dd> Ion-statusd monitor for FreeBSD ACPI CMBATT status. Uses the sysctl interface.</dd>
+    <dd> Notion-statusd monitor for FreeBSD ACPI CMBATT status. Uses the sysctl interface.</dd>
 
     <dt> <a href="statusd/statusd_cpufreq.lua">statusd_cpufreq.lua</a>
-    <dd> Ion-statusd monitor reporting current CPU speed in KHz, MHz, or GHz.  Uses the <code>/proc</code> filesystem and <code>cpufreq</code>.
+    <dd> Notion-statusd monitor reporting current CPU speed in KHz, MHz, or GHz.  Uses the <code>/proc</code> filesystem and <code>cpufreq</code>.
 
     <dt> <a href="statusd/statusd_cpuspeed.lua">statusd_cpuspeed.lua</a>
-    <dd> Ion-statusd monitor reporting current CPU speed; works with apm.
+    <dd> Notion-statusd monitor reporting current CPU speed; works with apm.
 
     <dt> <a href="statusd/statusd_cpustat.lua">statusd_cpustat.lua</a>
-    <dd> Ion-statusd monitor reporting current CPU stats using the Linux <code>/proc/stat</code> interface.
+    <dd> Notion-statusd monitor reporting current CPU stats using the Linux <code>/proc/stat</code> interface.
 
     <dt> <a href="statusd/statusd_df.lua">statusd_df.lua</a>
-    <dd> Ion-statusd monitor reporting free disk space.  Depends on <code>df</code>.
+    <dd> Notion-statusd monitor reporting free disk space.  Depends on <code>df</code>.
 
     <dt> <a href="statusd/statusd_dgs.lua">statusd_dgs.lua</a>
-    <dd> Ion-statusd monitor reporting on any games waiting for a move
+    <dd> Notion-statusd monitor reporting on any games waiting for a move
         on <a href="www.dragongoserver.net">www.dragongoserver.net</a>.
 
     <dt> <a href="statusd/statusd_drives.lua">statusd_drives.lua</a>
-    <dd> Ion-statusd monitor reporting on connected drives
+    <dd> Notion-statusd monitor reporting on connected drives
 
     <dt> <a href="statusd/statusd_exec.lua">statusd_exec.lua</a>
     <dd> Show output of external programs or scripts in statusbar. Uses non-blocking reads and can be used with both continously outputting and periodically run programs. Allows highlighting with regexp matching.
 
     <dt> <a href="statusd/statusd_flashing.lua">statusd_flashing.lua</a>
-    <dd> Ion-statusd multi-purpose monitor. Show blinking alarms when some defined files or directories have changed. It can be used to monitor email inboxes, security logs, etc.
+    <dd> Notion-statusd multi-purpose monitor. Show blinking alarms when some defined files or directories have changed. It can be used to monitor email inboxes, security logs, etc.
 
     <dt> <a href="statusd/statusd_fortune.lua">statusd_fortune.lua</a>
-    <dd> Ion-statusd monitor displaying fortunes.
+    <dd> Notion-statusd monitor displaying fortunes.
     
     <dt> <a href="statusd/statusd_iface.lua">statusd_iface.lua</a>
-    <dd> Ion-statusd monitor reporting currently used network
+    <dd> Notion-statusd monitor reporting currently used network
     interface.
 
     <dt> <a href="statusd/statusd_inetaddr.lua">statusd_inetaddr.lua</a>
-    <dd> Ion-statusd monitor reporting current IP address from ifconfig.
+    <dd> Notion-statusd monitor reporting current IP address from ifconfig.
 
     <dt> <a href="statusd/statusd_info.lua">statusd_info.lua</a>
-    <dd> Ion-statusd monitor reporting current CPU, RAM, and swap usage. Depends on <code>top</code> and <code>free</code>.
+    <dd> Notion-statusd monitor reporting current CPU, RAM, and swap usage. Depends on <code>top</code> and <code>free</code>.
 
     <dt> <a href="statusd/statusd_iwinfo.lua">statusd_iwinfo.lua</a>
-    <dd> Ion-statusd monitor reporting minimal wireless info.
+    <dd> Notion-statusd monitor reporting minimal wireless info.
 
     <dt><a href="statusd/statusd_laptopstatus.lua">statusd_laptopstatus.lua</a>
-    <dd> Ion-statusd monitor reporting CPU speed &amp; temperature and battery status; works with acpi.
+    <dd> Notion-statusd monitor reporting CPU speed &amp; temperature and battery status; works with acpi.
 
     <dt><a href="statusd/statusd_linuxbatt.lua">statusd_linuxbatt.lua</a>
-    <dd> Ion-statusd monitor reporting battery percentage and status using the Linux <code>/proc/acpi</code> interface.
+    <dd> Notion-statusd monitor reporting battery percentage and status using the Linux <code>/proc/acpi</code> interface.
 
     <dt><a href="statusd/statusd_maildir.lua">statusd_maildir.lua</a>
-    <dd> Ion-statusd monitor showing mailcount of a Maildir.
+    <dd> Notion-statusd monitor showing mailcount of a Maildir.
 
     <dt><a href="statusd/statusd_mcpu.lua">statusd_mcpu.lua</a>
-    <dd> Ion-statusd monitor reporting multiple CPUs usage (average and per-CPU); works with <code>/proc/stat</code>.
+    <dd> Notion-statusd monitor reporting multiple CPUs usage (average and per-CPU); works with <code>/proc/stat</code>.
 
     <dt><a href="statusd/statusd_mem.lua">statusd_mem.lua</a>
-    <dd> Ion-statusd monitor reporting current memory usage with selective alarms and non blocking I/O. Depends on Linux <code>free</code> command.
+    <dd> Notion-statusd monitor reporting current memory usage with selective alarms and non blocking I/O. Depends on Linux <code>free</code> command.
 
     <dt><a href="statusd/statusd_meminfo.lua">statusd_meminfo.lua</a>
-    <dd> Ion-statusd monitor reporting current memory and swap usage.  Depends on the Linux <code>/proc/meminfo</code> interface.
+    <dd> Notion-statusd monitor reporting current memory and swap usage.  Depends on the Linux <code>/proc/meminfo</code> interface.
 
     <dt><a href="statusd/statusd_moc.lua">statusd_moc.lua</a>
-    <dd> Ion-statusd monitor reporting <a href="http://moc.daper.net">moc</a> information and status.
+    <dd> Notion-statusd monitor reporting <a href="http://moc.daper.net">moc</a> information and status.
 
     <dt> <a href="statusd/statusd_mocmon.lua">statusd_mocmon.lua</a>
-    <dd> Ion-statusd monitor reporting <a href="http://moc.daper.net">moc</a> information. This is actually
+    <dd> Notion-statusd monitor reporting <a href="http://moc.daper.net">moc</a> information. This is actually
          just a modification of <a href="statusd/statusd_xmmsip.lua">statusd_xmmsip.lua</a> using the idea of
 	 non-blocking I/O as shown in <a href="statusd/statusd_mocp.lua">statusd_mocp.lua</a>.
 
     <dt><a href="statusd/statusd_mocp.lua">statusd_mocp.lua</a>
-    <dd> Ion-statusd monitor reporting <a href="http://moc.daper.net">moc</a>
+    <dd> Notion-statusd monitor reporting <a href="http://moc.daper.net">moc</a>
          status.  This is a stripped down, non-blocking I/O version of the
          above.  It is useful with
          <a href="scripts/rotate_statusbar.lua">rotate_statusbar.lua</a>.
 
     <dt><a href="statusd/statusd_mpd-socket.lua">statusd_mpd-socket.lua</a>
-    <dd> Ion-statusd monitor reporting <a href="http://www.musicpd.org">mpd</a> information and status. Uses a socket interface to avoid some performance issues with the original.
+    <dd> Notion-statusd monitor reporting <a href="http://www.musicpd.org">mpd</a> information and status. Uses a socket interface to avoid some performance issues with the original.
 
     <dt><a href="statusd/statusd_mpd.lua">statusd_mpd.lua</a>
-    <dd> Ion-statusd monitor reporting <a href="http://www.musicpd.org">mpd</a> information and status.
+    <dd> Notion-statusd monitor reporting <a href="http://www.musicpd.org">mpd</a> information and status.
 
     <dt><a href="statusd/statusd_netmon.lua">statusd_netmon.lua</a>
-    <dd> Ion-statusd network monitor reporting network activity.
+    <dd> Notion-statusd network monitor reporting network activity.
 
     <dt><a href="statusd/statusd_nginfo.lua">statusd_nginfo.lua</a>
-    <dd> Ion-statusd monitor reporting Nagios server(s) status.
+    <dd> Notion-statusd monitor reporting Nagios server(s) status.
 
     <dt><a href="statusd/statusd_nmaild.lua">statusd_nmaild.lua</a>
-    <dd> Ion-statusd Maildir monitor with selective alarms, counters for different filters and optional command launcher when a new email is detected.
+    <dd> Notion-statusd Maildir monitor with selective alarms, counters for different filters and optional command launcher when a new email is detected.
 
     <dt><a href="statusd/statusd_orpheus.lua">statusd_orpheus.lua</a>
-    <dd> Ion-statusd monitor reporting song currently being played by orpheus.
+    <dd> Notion-statusd monitor reporting song currently being played by orpheus.
 
     <dt><a href="statusd/statusd_pytone.lua">statusd_pytone.lua</a>
-    <dd> Ion-statusd monitor reporting song currently being played by pytone.
+    <dd> Notion-statusd monitor reporting song currently being played by pytone.
 
     <dt><a href="statusd/statusd_sysmon.lua">statusd_sysmon.lua</a>
-    <dd> Ion-statusd monitor for reporting various system resources.
+    <dd> Notion-statusd monitor for reporting various system resources.
 
     <dt><a href="statusd/statusd_ticker.lua">statusd_ticker.lua</a>
-    <dd> Ion-statusd monitor which scrolls the output of specified programs.
+    <dd> Notion-statusd monitor which scrolls the output of specified programs.
 
     <dt><a href="statusd/statusd_uname.lua">statusd_uname.lua</a>
-    <dd> Ion-statusd monitor for reporting uname.  It is primarily a simple
+    <dd> Notion-statusd monitor for reporting uname.  It is primarily a simple
          example of how to use statusd.popen_bgread() with coroutines for
          non-blocking I/O.
 
     <dt><a href="statusd/statusd_uptime.lua">statusd_uptime.lua</a>
-    <dd> Ion-statusd monitor reporting the system uptime.
+    <dd> Notion-statusd monitor reporting the system uptime.
 
     <dt><a href="statusd/statusd_volume.lua">statusd_volume.lua</a>
-    <dd> Ion-statusd monitor reporting sound volume values (currently, master and pcm). Depends on aumix.
+    <dd> Notion-statusd monitor reporting sound volume values (currently, master and pcm). Depends on aumix.
 
     <dt><a href="statusd/statusd_volume2.lua">statusd_volume2.lua</a>
-    <dd> Ion-stadusd monitor reporting master sound volume and state (on or muted). Depends on <code>amixer</code>. Despite being named "statusd_volume2.lua", the script needs to be relabeled "statusd_volume.lua" to work.
+    <dd> Notion-statusd monitor reporting master sound volume and state (on or muted). Depends on <code>amixer</code>. Despite being named "statusd_volume2.lua", the script needs to be relabeled "statusd_volume.lua" to work.
 
     <dt><a href="statusd/statusd_weather.lua">statusd_weather.lua</a>
-    <dd> Ion-stadusd monitor reporting weather.
+    <dd> Notion-statusd monitor reporting weather.
 
     <dt><a href="statusd/statusd_xmms.lua">statusd_xmms.lua</a>
-    <dd> Ion-statusd monitor reporting song currently selected in xmms' playlist.
+    <dd> Notion-statusd monitor reporting song currently selected in xmms' playlist.
 
     <dt> <a href="statusd/statusd_xmms2.lua">statusd_xmms2.lua</a>
     <dd> Song as "Artist - Title"
 
     <dt> <a href="statusd/statusd_xmmsip.lua">statusd_xmmsip.lua</a>
-    <dd> Ion-statusd monitor(s) reporting information from a xmms-infopipe-plugin's pipe.
+    <dd> Notion-statusd monitor(s) reporting information from a xmms-infopipe-plugin's pipe.
          Can be customized in various ways.
 </dl>
 
@@ -547,24 +547,24 @@ and add your own.-->
 To use any of the scripts, follow these directions.
 
 <ol>
-<li>Create the directory <tt>~/.ion3/</tt>, if it does not exist yet.
+<li>Create the directory <tt>~/.notion/</tt>, if it does not exist yet.
 <li>Copy the script in this directory.
 <li>Depending on the type of script, do the following.
     <dl>
     
     <!-- Extra space in tag to not confuse verify_index.pl hack -->
     <dt >Proper scripts
-    <dd>Copy <tt>cfg_ion.lua</tt> in <tt>~/.ion3/</tt>, if it does not
+    <dd>Copy <tt>cfg_notion.lua</tt> in <tt>~/.notion/</tt>, if it does not
         contain one already. This file can usually be found in either
-        <tt>/usr/local/etc/ion3/</tt> or <tt>/etc/X11/ion3/</tt>.
+        <tt>/usr/local/etc/notion/</tt> or <tt>/etc/X11/notion/</tt>.
         Then add the suitably modified line
 <pre>
 dopath("name of script without extension")
 </pre>
-        at the end of the file (in <tt>~/.ion3/</tt>).
+        at the end of the file (in <tt>~/.notion/</tt>).
 
     <dt >Statusbar
-    <dd>Make sure you have <tt>cfg_statusbar.lua</tt> in <tt>~/.ion3/</tt>, 
+    <dd>Make sure you have <tt>cfg_statusbar.lua</tt> in <tt>~/.notion/</tt>, 
         and add one of the monitors provided by the script in the template
         <em>without</em> the <tt>statusd_</tt> or such prefix.
         
@@ -578,7 +578,7 @@ dopath("name of script without extension")
 
 Some scripts may need further setup. For more information, see 
 the scripts themselves, and the
-<a href="http://modeemi.cs.tut.fi/~tuomov/ion-doc-3/ionconf/"
+<a href="http://notion.sourceforge.net/notionconf"
 >documentation</a>.
 
 

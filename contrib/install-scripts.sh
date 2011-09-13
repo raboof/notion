@@ -9,7 +9,7 @@
 # Make sure INSTALL_LOCATION doesn't contain anything important.
 # It may get overwritten!
 
-INSTALL_LOCATION="$HOME/.ion3/lib"
+INSTALL_LOCATION="$HOME/.notion/lib"
 SCRIPT_DIRS="keybindings scripts statusd styles"
 
 ########################################################################
