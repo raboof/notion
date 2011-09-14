@@ -1,6 +1,7 @@
 /*
  * Ion xkb events
  *
+ * Copyright (c) Sergey Redin 2006.
  * Copyright (c) Etan Reisner 2011.
  *
  * Released under the MIT License.
@@ -203,6 +204,27 @@ bool handle_xkb_event(XEvent *ev)
 #undef CHANGED
 
 #undef PARAM_ANY
+
+
+/*EXTL_DOC
+ * Set the current XKB group. See \code{XkbLockGroup}(3) manual page
+ * for details. See xkbion.lua for example use.
+ */
+EXTL_EXPORT
+int mod_xkbevents_lock_group(int state)
+{
+	return XkbLockGroup(ioncore_g.dpy, XkbUseCoreKbd, state);
+}
+
+/*EXTL_DOC
+ * Latch modifiers. See \code{XkbLatchModifiers}(3) manual page
+ * for details.
+ */
+EXTL_EXPORT
+int mod_xkbevents_lock_modifiers(int affect, int values)
+{
+	return XkbLockModifiers(ioncore_g.dpy, XkbUseCoreKbd, affect, values);
+}
 
 /*{{{ Init & deinit */
 
