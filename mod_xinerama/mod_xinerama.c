@@ -106,12 +106,15 @@ ExtlTab mod_xinerama_get_screen_dimensions(WScreen *screen)
  *
  * @param screen dimensions (x/y/w/h) 
  */
-static void convert_parameters(ExtlTab screen, WRectangle *g)
+static void convert_parameters(ExtlTab screen, WFitParams *fp)
 {
+    WRectangle *g = &(fp->g);
     extl_table_gets_i(screen,"x",&(g->x));
     extl_table_gets_i(screen,"y",&(g->y));
     extl_table_gets_i(screen,"w",&(g->w));
     extl_table_gets_i(screen,"h",&(g->h));
+    fp->mode=REGION_FIT_EXACT;
+    fp->gravity=ForgetGravity;
 }
 
 /* Set the id of the root window */
@@ -131,14 +134,15 @@ bool mod_xinerama_update_screen(WScreen *screen, ExtlTab dimensions)
 {
     WFitParams fp;
     
-    convert_parameters(dimensions, &(fp.g));
+    convert_parameters(dimensions, &fp);
 
 #ifdef MOD_XINERAMA_DEBUG
     printf("Updating rectangle #%d: x=%d y=%d width=%u height=%u\n", 
            screen->id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
 #endif
 
-    region_fit((WRegion*)screen, &(fp.g), REGION_FIT_EXACT);
+    /* Fit the mplex directly instead of using region_fit, due to #3349390 */
+    mplex_fitrep(&(screen->mplex), NULL, &fp);
 
     return TRUE;
 }
