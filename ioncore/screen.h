@@ -61,14 +61,6 @@ extern void screen_set_managed_offset(WScreen *scr, const WRectangle *off);
 
 extern bool screen_init_layout(WScreen *scr, ExtlTab tab);
 
-/** 
- * Usually calling 'region_fitrep' would do the trick but this has been 
- * disabled for screens due to bug #3349390. Until this is fixed properly 
- * (feature request #3391541), if you *really* want to resize a screen, use
- * this method.
- */
-extern bool screen_fit(WScreen *scr, const WFitParams *fp);
-
 extern WScreen *ioncore_find_screen_id(int id);
 extern WScreen *ioncore_goto_screen_id(int id);
 extern WScreen *ioncore_goto_next_screen();
