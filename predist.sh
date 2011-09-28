@@ -66,8 +66,21 @@ EOF
 
 }
 
+##
+## Modules
+##
+
+getmod() {
+    do_git_export $1 $2
+    sed -i -e "s/TOPDIR=..\/notion/TOPDIR=..\//" $2/Makefile
+}
+
 getlib $NOTION_REPOS/libtu libtu
 getlib $NOTION_REPOS/libextl libextl
+getmod $NOTION_REPOS/mod_xinerama mod_xinerama
+getmod $NOTION_REPOS/mod_xrandr mod_xrandr
+getmod $NOTION_REPOS/mod_xkbevents mod_xkbevents
+do_git_export $NOTION_REPOS/contrib contrib
 
 ##
 ## Makefiles
@@ -78,6 +91,7 @@ mkdist() {
 }
 
 mkdist Makefile system.mk
+sed -i -e "s/de/de mod_xinerama mod_xrandr mod_xkbevents/" modulelist.mk
 
 ##
 ## Scripts
