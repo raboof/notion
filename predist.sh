@@ -48,6 +48,8 @@ if test "$1" != "-snapshot"; then
     fi
 else
     release=snapshot-`date +"%Y%m%d"`
+    cd .. ; mv $dir "$dir-$release" ; cd "$dir-$release"
+    dir="$dir-$release"
 fi
 
 
