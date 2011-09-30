@@ -25,6 +25,9 @@ See also:
    On Ubuntu (and probably Debian), the following packages are required:
      lua5.1 liblua5.1-0-dev libx11-dev libxext-dev libsm-dev gettext
 
+   If you also build the RandR and Xinerama modules, you will need:
+     libxinerama-dev libxrandr-dev
+
 2. Edit `system.mk` to suit your system. In particular, if you're on Ubuntu
      or Debian, you'll need to uncomment the other set of LUA* variables.
 
