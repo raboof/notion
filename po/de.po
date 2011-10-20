@@ -1230,11 +1230,11 @@ msgstr "Neuer Arbeitsflächenname:"
 msgid "Frame name:"
 msgstr "Rahmenname:"
 
-msgid "Restart Ion (y/n)?"
-msgstr "Ion neustarten (y[a]/n[ein])/?"
+msgid "Restart Notion (y/n)?"
+msgstr "Notion neustarten (y[a]/n[ein])/?"
 
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Ion beenden/Sitzung herunterfahren (y/n)?"
+msgid "Exit Notion/Shutdown session (y/n)?"
+msgstr "Notion beenden/Sitzung herunterfahren (y/n)?"
 
 msgid "Go to or create workspace:"
 msgstr "Gehe zu oder erstelle Arbeitsfläche:"

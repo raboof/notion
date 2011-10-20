@@ -1314,11 +1314,11 @@ msgstr "Nom de l'espace de travail:"
 msgid "Frame name:"
 msgstr "Nom du cadre:"
 
-msgid "Restart Ion (y/n)?"
-msgstr "Redémarrer Ion (y/n)?"
+msgid "Restart Notion (y/n)?"
+msgstr "Redémarrer Notion (y/n)?"
 
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Quiter Ion/Fermer la session (y/n)?"
+msgid "Exit Notion/Shutdown session (y/n)?"
+msgstr "Quiter Notion/Fermer la session (y/n)?"
 
 msgid "Go to or create workspace:"
 msgstr "Aller à ou créer l'espace de travail:"

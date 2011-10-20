@@ -1306,11 +1306,11 @@ msgstr "Název pracovní plochy:"
 msgid "Frame name:"
 msgstr "Název rámu:"
 
-msgid "Restart Ion (y/n)?"
-msgstr "Restartovat Ion (y/n)?"
+msgid "Restart Notion (y/n)?"
+msgstr "Restartovat Notion (y/n)?"
 
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Ukonèit Ion/ukonèit sezení (y/n)?"
+msgid "Exit Notion/Shutdown session (y/n)?"
+msgstr "Ukonèit Notion/ukonèit sezení (y/n)?"
 
 msgid "Go to or create workspace:"
 msgstr "Vytvoøit nebo pøejít na pracovní plochu:"

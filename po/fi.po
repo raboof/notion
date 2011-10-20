@@ -1323,11 +1323,11 @@ msgstr "Työpöydän nimi:"
 msgid "Frame name:"
 msgstr "Kehyksen nimi:"
 
-msgid "Restart Ion (y/n)?"
-msgstr "Uudelleenkäynnistä Ion (kyllä: y, ei: n)?"
+msgid "Restart Notion (y/n)?"
+msgstr "Uudelleenkäynnistä Notion (kyllä: y, ei: n)?"
 
-msgid "Exit Ion/Shutdown session (y/n)?"
-msgstr "Poistu Ionista/Lopeta istunto (kyllä: y, ei: n)?"
+msgid "Exit Notion/Shutdown session (y/n)?"
+msgstr "Poistu Notionista/Lopeta istunto (kyllä: y, ei: n)?"
 
 msgid "Go to or create workspace:"
 msgstr "Mene tai luo työpöytä:"
