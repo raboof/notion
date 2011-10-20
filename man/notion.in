@@ -150,7 +150,7 @@ User default main configuration file (overrides system default)
 .SH SEE ALSO
 The Notion home page, \fIhttp://notion.sf.net/\fP
 .PP
-The document "Configuring and extending Ion3 with Lua" found on the
+The document "Configuring and extending Notion with Lua" found on the
 Ion home page.
 .PP
 .I DOCDIR/
