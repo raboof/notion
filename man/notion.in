@@ -151,7 +151,7 @@ User default main configuration file (overrides system default)
 The Notion home page, \fIhttp://notion.sf.net/\fP
 .PP
 The document "Configuring and extending Notion with Lua" found on the
-Ion home page.
+Notion home page.
 .PP
 .I DOCDIR/
 .PP
