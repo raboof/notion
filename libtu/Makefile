@@ -35,9 +35,9 @@ libtu.a: $(OBJS)
 	$(RANLIB) $@
 
 install:
-	$(INSTALLDIR) $(LIBDIR)
-	$(INSTALL) -m $(DATA_MODE) libtu.a $(LIBDIR)
-	$(INSTALLDIR) $(INCDIR)/libtu
+	$(INSTALLDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m $(DATA_MODE) libtu.a $(DESTDIR)$(LIBDIR)
+	$(INSTALLDIR) $(DESTDIR)$(INCDIR)/libtu
 	for h in $(HEADERS); do \
-		$(INSTALL) -m $(DATA_MODE) $$h $(INCDIR)/libtu; \
+		$(INSTALL) -m $(DATA_MODE) $$h $(DESTDIR)$(INCDIR)/libtu; \
 	done
