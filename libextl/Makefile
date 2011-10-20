@@ -42,11 +42,11 @@ libextl-mkexports: libextl-mkexports.in
 	sed "1s:LUA50:$(LUA):" $< > $@
 
 install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) libextl-mkexports $(BINDIR)
-	$(INSTALLDIR) $(LIBDIR)
-	$(INSTALL) -m $(DATA_MODE) libextl.a $(LIBDIR)
-	$(INSTALLDIR) $(INCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) libextl-mkexports $(DESTDIR)$(BINDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m $(DATA_MODE) libextl.a $(DESTDIR)$(LIBDIR)
+	$(INSTALLDIR) $(DESTDIR)$(INCDIR)
 	for h in $(HEADERS); do \
-		$(INSTALL) -m $(DATA_MODE) $$h $(INCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$h $(DESTDIR)$(INCDIR); \
 	done
