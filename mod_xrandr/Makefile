@@ -25,9 +25,9 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 _install: module_install
-	$(INSTALLDIR) $(ETCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(ETCDIR)
 	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(ETCDIR); \
 	done
 
 ######################################
