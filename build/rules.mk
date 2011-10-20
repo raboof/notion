@@ -130,8 +130,8 @@ $(EXECUTABLE_): $(OBJS) $(EXT_OBJS)
 	$(CC) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
 
 executable_install:
-	$(INSTALLDIR) $(BINDIR_)
-	$(INSTALLBIN) $(EXECUTABLE_) $(BINDIR_)
+	$(INSTALLDIR) $(DESTDIR)$(BINDIR_)
+	$(INSTALLBIN) $(EXECUTABLE_) $(DESTDIR)$(BINDIR_)
 
 endif # EXECUTABLE
 
@@ -151,8 +151,8 @@ $(MODULE).so: $(OBJS) $(EXT_OBJS)
 
 
 module_install: module_stub_install
-	$(INSTALLDIR) $(MODULEDIR)
-	$(INSTALLBIN) $(MODULE).so $(MODULEDIR)
+	$(INSTALLDIR) $(DESTDIR)$(MODULEDIR)
+	$(INSTALLBIN) $(MODULE).so $(DESTDIR)$(MODULEDIR)
 
 else # PRELOAD_MODULES
 
@@ -171,8 +171,8 @@ module_install: module_stub_install
 endif # PRELOAD_MODULES
 
 module_stub_install:
-	$(INSTALLDIR) $(LCDIR)
-	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(LCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LCDIR)
+	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(DESTDIR)$(LCDIR)
 
 ifndef MODULE_STUB
 
@@ -210,15 +210,15 @@ _realclean:
 	$(LUAC) -o $@ $<
 
 lc_install:
-	$(INSTALLDIR) $(LCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LCDIR)
 	for i in $(LUA_COMPILED); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(LCDIR); \
 	done
 
 etc_install:
-	$(INSTALLDIR) $(ETCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(ETCDIR)
 	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(ETCDIR); \
 	done
 
 # Dependencies

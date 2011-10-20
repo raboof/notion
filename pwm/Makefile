@@ -49,7 +49,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 _install: executable_install
-	$(INSTALLDIR) $(PWM_ETCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(PWM_ETCDIR)
 	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(PWM_ETCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(PWM_ETCDIR); \
 	done
