@@ -94,6 +94,11 @@ mkdist() {
 
 mkdist Makefile system.mk
 sed -i -e "s/de/de mod_xinerama mod_xrandr mod_xkbevents/" modulelist.mk
+echo "
+ifeq (\$(PRELOAD_MODULES),1)
+X11_LIBS += -lXinerama -lXrandr
+endif
+" >> system.mk
 
 ##
 ## Scripts
