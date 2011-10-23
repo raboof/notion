@@ -146,8 +146,12 @@ LD_SHAREDFLAGS=-shared
 %.o: %.c $(EXPORTS_H)
 	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
+# notion might not link to Xext, so modules will have to link to it themselves
+# if they need it: 
+LIBS += $(X11_LIBS)
+
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) $(LIBS) -o $@
 
 
 module_install: module_stub_install

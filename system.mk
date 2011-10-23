@@ -178,7 +178,7 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wparentheses -pedantic -Wuninitialized
 
 CFLAGS=-Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
-LDFLAGS=$(LIBS) $(EXTRA_LIBS)
+LDFLAGS=-Wl,--as-needed $(LIBS) $(EXTRA_LIBS) 
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
 # The following options are mainly for development use and can be used
