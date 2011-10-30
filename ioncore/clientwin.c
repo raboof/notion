@@ -344,6 +344,8 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     clientwin_get_protocols(cwin);
     clientwin_get_winprops(cwin);
     clientwin_get_size_hints(cwin);
+
+    netwm_update_allowed_actions(cwin);
     
     XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)cwin);
     XAddToSaveSet(ioncore_g.dpy, win);

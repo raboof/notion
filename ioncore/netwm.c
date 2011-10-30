@@ -34,8 +34,9 @@ static Atom atom_net_supporting_wm_check=0;
 static Atom atom_net_virtual_roots=0;
 static Atom atom_net_active_window=0;
 static Atom atom_net_wm_user_time=0;
+static Atom atom_net_wm_allowed_actions=0;
 
-#define N_NETWM 7
+#define N_NETWM 8
 
 static Atom atom_net_supported=0;
 
@@ -60,6 +61,7 @@ void netwm_init()
     atom_net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     atom_net_active_window=XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
     atom_net_wm_user_time=XInternAtom(ioncore_g.dpy, "_NET_WM_USER_TIME", False);
+    atom_net_wm_allowed_actions=XInternAtom(ioncore_g.dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 }
 
 
@@ -75,6 +77,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[4]=atom_net_supporting_wm_check;
     atoms[5]=atom_net_virtual_roots;
     atoms[6]=atom_net_active_window;
+    atoms[7]=atom_net_wm_allowed_actions;
     
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
@@ -142,6 +145,25 @@ void netwm_update_state(WClientWin *cwin)
         data[n++]=atom_net_wm_state_demands_attention;
 
     XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state, 
+                    XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
+}
+
+void netwm_update_allowed_actions(WClientWin *cwin)
+{
+    CARD32 data[1];
+    int n=0;
+    
+    /* TODO add support for 'resize' and list it here */
+    /* TODO add support for 'minimize' and list it here */
+    /* TODO add support for 'maximize_horz' and list it here */
+    /* TODO add support for 'maximize_vert' and list it here */
+    /* TODO add support for 'fullscreen' and list it here */
+    /* TODO add support for 'change desktop' and list it here */
+    /* TODO add support for 'close' and list it here */
+    /* TODO add support for 'above' and list it here */
+    /* TODO add support for 'below' and list it here */
+
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_allowed_actions, 
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 
