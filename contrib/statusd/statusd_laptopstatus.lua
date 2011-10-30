@@ -1,7 +1,8 @@
--- statusd_laptopstatus.lua v0.0.2 (last modified 2005-06-13)
+-- statusd_laptopstatus.lua v0.0.3 (last modified 2011-10-30)
 --
 -- Copyright (C) 2005 Jari Eskelinen <jari.eskelinen@iki.fi>
 --	modified by René van Bevern <rvb@pro-linux.de> for error handling
+--	modified by Juri Hamburg <juri@fail2fail.com> for sysfs support (2011)
 --
 -- Permission to copy, redistirbute, modify etc. is granted under the terms
 -- of GNU GENERAL PUBLIC LICENSE Version 2.
@@ -13,7 +14,7 @@
 -- kind of exotic hardware (multiple processors, multiple batteries etc.)
 -- this script probably will fail or show incorrect information.
 --
--- Just throw this script under ~/.ion3 and add following keywords to your
+-- Just throw this script under ~/.ion3 (or ~/.notion) and add following keywords to your
 -- cfg_statusbar.lua's template-line with your own taste:
 --
 -- %laptopstatus_cpuspeed
@@ -34,6 +35,7 @@
 --         loops in some weird situations?
 --       * Do not poll for information not defined in template to be used
 --       * Auto-detect right acpi devices instead of hardcoded BATT0 etc.
+--       * Add calculation of timeleft value for get_battery_sysfs()
 
 --
 -- SETTINGS
@@ -48,6 +50,8 @@ if not statusd_laptopstatus then
     batterypercent_critical = 5,      -- Battery percent which will cause critical hint
     batterytimeleft_important = 600,  -- Battery time left (in secs) which will cause important hint
     batterytimeleft_critical = 300,   -- Battery time left (in secs) which will cause critical hint
+
+    --procfs
     ac_state = {"/proc/acpi/ac_adapter/AC/state",
     	        "/proc/acpi/ac_adapter/ACAD/state",
 		"/proc/acpi/ac_adapter/ADP0/state",
@@ -59,7 +63,13 @@ if not statusd_laptopstatus then
     bat_info = {"/proc/acpi/battery/BAT0/info",
                 "/proc/acpi/battery/BAT1/info"},
     bat_state = {"/proc/acpi/battery/BAT0/state",
-                 "/proc/acpi/battery/BAT1/state"}
+                 "/proc/acpi/battery/BAT1/state"},
+
+    --sysfs
+    temp_info_sysfs = {"/sys/class/thermal/thermal_zone0/temp"},
+    ac_state_sysfs = {"/sys/class/power_supply/AC/online"},
+    bat_now_sysfs = {"/sys/class/power_supply/BAT0/energy_now"},
+    bat_full_sysfs = {"/sys/class/power_supply/BAT0/energy_full"}
   }
 end
 
@@ -100,8 +110,32 @@ local function get_ac()
   file:close()
 end
 
+local function get_ac_sysfs()
+  local file = try_open(statusd_laptopstatus.ac_state_sysfs, "r")
+  if tonumber(file:read("*all")) == 1 then 
+      return true
+  else return false end
+  file:close()
+end
 
-local function get_thermal()
+local function get_thermal_sysfs()
+    local temp, hint = nil, "normal"
+
+    if pcall(function ()
+        local file = try_open(statusd_laptopstatus.temp_info_sysfs, "r")
+        temp = file:read("*all")
+        temp = tonumber(temp)/1000
+        file:close();
+    end)
+     then if temp >= statusd_laptopstatus.temperature_important then
+             hint = "important" end
+          if temp >= statusd_laptopstatus.temperature_critical then
+	     hint = "critical" end
+          return {temperature=string.format("%02dC", temp), hint=hint}
+     else return {temperature="n/a", hint = "hint"} end
+ end
+
+local function get_thermal_procfs()
   local temp, hint = nil, "normal"
 
   if pcall(function ()
@@ -121,8 +155,42 @@ local function get_thermal()
      else return {temperature="n/a", hint = "hint"} end
 end
 
+local function get_thermal()
+    if try_open(statusd_laptopstatus.temp_info) ~= nil then
+        return get_thermal_procfs()
+    else
+        return get_thermal_sysfs()
+    end
+end
 
-local function get_battery()
+
+
+local function get_battery_sysfs()
+    local percenthint = "normal"
+    local timelefthint = "normal"
+    local full, now
+
+    if pcall(function ()
+        local file=try_open(statusd_laptopstatus.bat_now_sysfs)
+        now = tonumber(file:read("*all"))
+        file:close();
+
+        local file=try_open(statusd_laptopstatus.bat_full_sysfs)
+        full = tonumber(file:read("*all"))
+    end) then
+        local percent = math.floor(now / full * 100 + 5/10)
+        if get_ac_sysfs() == true then
+            timeleft = "*AC*"
+        else timeleft = "n/a" end -- there's no discharging rate in sysfs provided now (2011 Oct)
+        --TODO: calculate estimated time with delta of current and previous now values depending on 
+        --statusd_laptopstatus.interval
+       if percent <= statusd_laptopstatus.batterypercent_important then percenthint = "important" end
+       if percent <= statusd_laptopstatus.batterypercent_critical then percenthint = "critical" end
+       return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain="n/a", percenthint=percenthint, timelefthint=timelefthint}
+    else return { percent="n/a", timeleft="n/a", drain="n/a", percenthint=percenthint, timelefthint=timelefthint} end
+end
+
+local function get_battery_procfs()
   local percenthint = "normal"
   local timelefthint = "normal"
   local lastfull, rate, rateunit, remaining
@@ -173,6 +241,16 @@ local function get_battery()
   
        return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain=tostring(rate)..rateunit, percenthint=percenthint, timelefthint=timelefthint}
   else return { percent="n/a", timeleft="n/a", drain="n/a", percenthint=percenthint, timelefthint=timelefthint} end
+end
+
+
+--if no procfs battery state is found, try sysfs
+local function get_battery()
+    if try_open(statusd_laptopstatus.bat_state) ~= nil then
+        return get_battery_procfs()
+    else 
+        return get_battery_sysfs()
+    end
 end
 
 local last_timeleft = nil
