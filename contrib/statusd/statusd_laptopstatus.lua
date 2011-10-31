@@ -9,12 +9,13 @@
 --
 -- This is script for displaying some interesting information about your
 -- laptops power saving in Ion's status monitor. Script is very Linux
--- specific (uses /proc or sysfs interface) and needs ACPI-support (don't
+-- specific (uses procfs or sysfs interface) and needs ACPI-support (don't
 -- know exactly but 2.6.x kernels should be fine). Also if you have some
 -- kind of exotic hardware (multiple processors, multiple batteries etc.)
 -- this script probably will fail or show incorrect information.
 --
--- The script will try profs interface first. If that fails, it will the sysfs interface.
+-- The script will try procfs interface first. If that fails, it will try to
+-- use the sysfs interface.
 --
 -- Just throw this script under ~/.ion3 (or ~/.notion) and add following keywords to your
 -- cfg_statusbar.lua's template-line with your own taste:
