@@ -41,6 +41,9 @@
 -- SETTINGS
 --
 
+NA = "n/a"
+AC = "*AC*"
+
 if not statusd_laptopstatus then
   statusd_laptopstatus = {
     interval = 10,                    -- Polling interval in seconds
@@ -99,7 +102,7 @@ local function get_cpu()
      end)
      then return {speed=string.format("%4dMHz", math.ceil(mhz/5)*5),
                   hint=hint}
-     else return {speed="n/a", hint=hint} end
+     else return {speed=NA, hint=hint} end
 end
 
 
@@ -133,7 +136,7 @@ local function get_thermal_sysfs()
           if temp >= statusd_laptopstatus.temperature_critical then
 	     hint = "critical" end
           return {temperature=string.format("%02dC", temp), hint=hint}
-     else return {temperature="n/a", hint = "hint"} end
+     else return {temperature=NA, hint = "hint"} end
  end
 
 local function get_thermal_procfs()
@@ -153,7 +156,7 @@ local function get_thermal_procfs()
           if temp >= statusd_laptopstatus.temperature_critical then
 	     hint = "critical" end
           return {temperature=string.format("%02dC", temp), hint=hint}
-     else return {temperature="n/a", hint = "hint"} end
+     else return {temperature=NA, hint = "hint"} end
 end
 
 local function get_thermal()
@@ -182,14 +185,14 @@ local function get_battery_sysfs()
         local percent = math.floor(now / full * 100 + 5/10)
         local timeleft
         if get_ac_sysfs() == 1 then
-            timeleft = "*AC*"
-        else timeleft = "n/a" end -- there's no discharging rate in sysfs provided now (2011 Oct)
+            timeleft = AC
+        else timeleft = NA end -- there's no discharging rate in sysfs provided now (2011 Oct)
         --TODO: calculate estimated time with delta of current and previous now values depending on 
         --statusd_laptopstatus.interval
        if percent <= statusd_laptopstatus.batterypercent_important then percenthint = "important" end
        if percent <= statusd_laptopstatus.batterypercent_critical then percenthint = "critical" end
-       return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain="n/a", percenthint=percenthint, timelefthint=timelefthint}
-    else return { percent="n/a", timeleft="n/a", drain="n/a", percenthint=percenthint, timelefthint=timelefthint} end
+       return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain=NA, percenthint=percenthint, timelefthint=timelefthint}
+    else return { percent=NA, timeleft=NA, drain=NA, percenthint=percenthint, timelefthint=timelefthint} end
 end
 
 local function get_battery_procfs()
@@ -225,9 +228,9 @@ local function get_battery_procfs()
        local timeleft
        local hours, secs, mins
        if get_ac() == 1 then
-           timeleft = " *AC*"
+           timeleft = AC
        elseif rate <= 0 then
-           timeleft = "n/a"
+           timeleft = NA
        else
           secs = 3600 * (remaining / rate)
           mins = secs / 60
@@ -242,7 +245,7 @@ local function get_battery_procfs()
        if percent <= statusd_laptopstatus.batterypercent_critical then percenthint = "critical" end
   
        return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain=tostring(rate)..rateunit, percenthint=percenthint, timelefthint=timelefthint}
-  else return { percent="n/a", timeleft="n/a", drain="n/a", percenthint=percenthint, timelefthint=timelefthint} end
+  else return { percent=NA, timeleft=NA, drain=NA, percenthint=percenthint, timelefthint=timelefthint} end
 end
 
 
@@ -273,7 +276,7 @@ local function update_laptopstatus ()
     statusd.inform("laptopstatus_batterypercent", battery.percent)
     statusd.inform("laptopstatus_batterypercent_template", "xxx%")
     statusd.inform("laptopstatus_batterypercent_hint", battery.percenthint)
-    if battery.timeleft ~= "n/a" or last_timeleft == "*AC*" then
+    if battery.timeleft ~= NA or last_timeleft == AC then
         statusd.inform("laptopstatus_batterytimeleft", battery.timeleft)
         last_timeleft = battery.timeleft
     end
