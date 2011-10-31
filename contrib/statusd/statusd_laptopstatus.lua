@@ -105,17 +105,18 @@ end
 
 local function get_ac()
   local file = try_open(statusd_laptopstatus.ac_state, "r")
-  if not string.find(file:read("*all"), "state:%s+on.line") then return 0
-  else return 1 end
+  local ac_str = file:read("*all")
   file:close()
+  if not string.find(ac_str, "state:%s+on.line") then return 0
+  else return 1 end
 end
 
 local function get_ac_sysfs()
   local file = try_open(statusd_laptopstatus.ac_state_sysfs, "r")
-  if tonumber(file:read("*all")) == 1 then 
-      return true
-  else return false end
+  if file == nil then return 0 end
+  local ac_on = tonumber(file:read("*all"))
   file:close()
+  return ac_on
 end
 
 local function get_thermal_sysfs()
@@ -179,7 +180,8 @@ local function get_battery_sysfs()
         full = tonumber(file:read("*all"))
     end) then
         local percent = math.floor(now / full * 100 + 5/10)
-        if get_ac_sysfs() == true then
+        local timeleft
+        if get_ac_sysfs() == 1 then
             timeleft = "*AC*"
         else timeleft = "n/a" end -- there's no discharging rate in sysfs provided now (2011 Oct)
         --TODO: calculate estimated time with delta of current and previous now values depending on 
@@ -271,7 +273,7 @@ local function update_laptopstatus ()
     statusd.inform("laptopstatus_batterypercent", battery.percent)
     statusd.inform("laptopstatus_batterypercent_template", "xxx%")
     statusd.inform("laptopstatus_batterypercent_hint", battery.percenthint)
-    if battery.timeleft ~= "n/a" or last_timeleft == " *AC*" then
+    if battery.timeleft ~= "n/a" or last_timeleft == "*AC*" then
         statusd.inform("laptopstatus_batterytimeleft", battery.timeleft)
         last_timeleft = battery.timeleft
     end
