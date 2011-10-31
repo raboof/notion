@@ -9,10 +9,12 @@
 --
 -- This is script for displaying some interesting information about your
 -- laptops power saving in Ion's status monitor. Script is very Linux
--- specific (uses /proc interface) and needs ACPI -support new enough (don't
+-- specific (uses /proc or sysfs interface) and needs ACPI-support (don't
 -- know exactly but 2.6.x kernels should be fine). Also if you have some
 -- kind of exotic hardware (multiple processors, multiple batteries etc.)
 -- this script probably will fail or show incorrect information.
+--
+-- The script will try profs interface first. If that fails, it will the sysfs interface.
 --
 -- Just throw this script under ~/.ion3 (or ~/.notion) and add following keywords to your
 -- cfg_statusbar.lua's template-line with your own taste:
@@ -35,7 +37,6 @@
 --         loops in some weird situations?
 --       * Do not poll for information not defined in template to be used
 --       * Auto-detect right acpi devices instead of hardcoded BATT0 etc.
---       * Add calculation of timeleft value for get_battery_sysfs()
 
 --
 -- SETTINGS
@@ -82,6 +83,41 @@ statusd_laptopstatus=table.join(statusd.get_config("laptopstatus"), statusd_lapt
 -- CODE 
 --
 local laptopstatus_timer
+local RingBuffer = {}
+
+RingBuffer.__index = RingBuffer
+
+function RingBuffer.create(size)
+    local buf = {}
+    setmetatable(buf,RingBuffer)
+    buf.size = size
+    buf.elements = {}
+    buf.current = 1
+    return buf
+end
+
+function RingBuffer:add(val)
+   if self.current > self.size then
+       self.current = 1
+   end 
+   self.elements[self.current] = val 
+   self.current = self.current + 1
+end
+
+function average(array)
+    local sum = 0
+    for i,v in ipairs(array) do
+        sum = sum + v
+    end
+    if table.getn(array) ~= 0 then 
+       return sum / table.getn(array)
+   else 
+       return 0
+   end
+end
+
+rates_buffer = RingBuffer.create(20)
+
 
 function try_open(files, mode)
   for _, file in pairs(files) do
@@ -168,6 +204,8 @@ local function get_thermal()
 end
 
 
+local rate_sysfs
+local last_power
 
 local function get_battery_sysfs()
     local percenthint = "normal"
@@ -186,9 +224,19 @@ local function get_battery_sysfs()
         local timeleft
         if get_ac_sysfs() == 1 then
             timeleft = AC
-        else timeleft = NA end -- there's no discharging rate in sysfs provided now (2011 Oct)
-        --TODO: calculate estimated time with delta of current and previous now values depending on 
-        --statusd_laptopstatus.interval
+        elseif last_power ~= nil and now < last_power then
+            rate_sysfs = last_power - now 
+            rates_buffer:add(rate_sysfs)
+            secs = statusd_laptopstatus.interval * (now / average(rates_buffer.elements))
+            mins = secs / 60
+            hours = math.floor(mins / 60)
+            mins = math.floor(mins - (hours * 60))
+            timeleft = string.format("%02d:%02d", hours, mins)
+        else
+            timeleft = NA
+        end 
+        last_power = now
+
        if percent <= statusd_laptopstatus.batterypercent_important then percenthint = "important" end
        if percent <= statusd_laptopstatus.batterypercent_critical then percenthint = "critical" end
        return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain=NA, percenthint=percenthint, timelefthint=timelefthint}
