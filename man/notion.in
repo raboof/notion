@@ -54,7 +54,7 @@ one can be displayed at a time.
 
 Workspaces themselves may contain \fBtilings\fP and detached/floating
 \fBframes\fP. A workspace containing no tilings and only detached/floating
-windows is also called a \fBfloating workspace\fB. Tilings themselves contain 
+windows is also called a \fBfloating workspace\fP. Tilings themselves contain 
 \fBframes\fP tiled to fill the screen, and possibly a statusbar or dock. Akin 
 to screens, frames multiplex other objects, but in this case mostly client 
 window \fBgroups\fP. Most of the time, frames are the only trace of Notion 
