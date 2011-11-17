@@ -181,7 +181,7 @@ module_stub_install:
 ifndef MODULE_STUB
 
 $(MODULE).lc:
-	echo "ioncore.load_module('$(MODULE)')" | $(LUAC) -o $@ -
+	echo "ioncore.load_module('$(MODULE)') package.loaded['$(MODULE)']=true" | $(LUAC) -o $@ -
 else
 
 LUA_SOURCES += $(MODULE_STUB)
