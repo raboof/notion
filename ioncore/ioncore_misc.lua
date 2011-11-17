@@ -1,6 +1,7 @@
 --
--- ion/share/ioncore_misc.lua
+-- notion/share/ioncore_misc.lua
 -- 
+-- Copyright (c) The Notion Team 2011.
 -- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- See the included file LICENSE for details.
@@ -101,3 +102,19 @@ function ioncore.tagged_attach(reg, param)
     return not errors
 end
 
+--DOC
+-- Look up a region by type and name
+function ioncore.find_region(name, type)
+    local result
+
+    ioncore.region_i(
+        function(win)
+            if (win:name() == name) then
+                result = win
+            end
+            return true;
+        end, 
+        type);
+
+    return result
+end
