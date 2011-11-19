@@ -16,6 +16,7 @@
 
 
 typedef struct{
+    /** Names, keyed by WRegionNameInfo's */
     struct rb_node *rb;
     bool initialised;
 } WNamespace;
@@ -42,6 +43,13 @@ extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 
 extern bool ioncore_region_i(ExtlFn fn, const char *typenam);
 extern bool ioncore_clientwin_i(ExtlFn fn);
+/** 
+ * Look up a region (internal windows, not client windows) by name and type 
+ * name. 
+ * 
+ * As region names are unique, the 'typename' parameter is only used to filter
+ * out regions that do not have the expected type.
+ */
 extern WRegion *ioncore_lookup_region(const char *cname, const char *typenam);
 extern WClientWin *ioncore_lookup_clientwin(const char *cname);
 
