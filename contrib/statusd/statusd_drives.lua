@@ -33,9 +33,9 @@ local function update_drives()
 			end
  		end
 	end
-	local result = ""
+	local result_table = {}
 	for drive, partitions in pairs(drive_table) do
-		result = result..drive
+		local result = drive
 		local parts = ""
  		for k,i in pairs(partitions) do
  			if i ~= "" then
@@ -43,12 +43,12 @@ local function update_drives()
  			end
  		end 
  		if parts ~= "" then
- 			result = result.."["..parts:sub(1,-2).."] "
- 		else
- 			result = result.." "
+ 			result = result.."["..parts:sub(1,-2).."]"
  		end
+ 		table.insert(result_table, result)
 	end
-	statusd.inform("drives", result)
+	table.sort(result_table)
+	statusd.inform("drives", table.concat(result_table, " "))
 	drives_timer:set(settings.update_interval, update_drives)
 end
 
