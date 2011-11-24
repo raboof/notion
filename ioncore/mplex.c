@@ -15,6 +15,7 @@
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
 
+#include "names.h"
 #include "common.h"
 #include "window.h"
 #include "global.h"
@@ -115,6 +116,8 @@ bool mplex_do_init(WMPlex *mplex, WWindow *parent,
     window_select_input(&(mplex->win), IONCORE_EVENTMASK_CWINMGR);
     
     region_register((WRegion*)mplex);
+
+    region_set_name((WRegion*)mplex, name);
     
     /* Call this to set MPLEX_MANAGED_UNVIEWABLE if necessary. */
     mplex_fit_managed(mplex);

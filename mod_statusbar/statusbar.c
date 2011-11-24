@@ -49,7 +49,7 @@ static WStatusBar *statusbars=NULL;
 
 bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
 {
-    if(!window_init(&(p->wwin), parent, fp, "Notion WStatusBar"))
+    if(!window_init(&(p->wwin), parent, fp, "WStatusBar"))
         return FALSE;
 
     p->brush=NULL;

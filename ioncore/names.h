@@ -26,6 +26,7 @@ extern WNamespace ioncore_internal_ns;
 extern WNamespace ioncore_clientwin_ns;
 
 
+/** Register a region (but not a clientwin) to the naming registry */
 extern bool region_register(WRegion *reg);
 extern bool region_set_name(WRegion *reg, const char *name);
 extern bool region_set_name_exact(WRegion *reg, const char *name);

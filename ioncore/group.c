@@ -371,7 +371,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     if(ws->dummywin==None)
         return FALSE;
 
-    p[0] = "Notion WGroup dummy window";
+    p[0] = "WGroup";
     xwindow_set_text_property(ws->dummywin, XA_WM_NAME, p, 1);
 
     region_init(&ws->reg, par, fp);

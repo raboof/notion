@@ -1123,7 +1123,7 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
     dock->save=TRUE;
 
     
-    if(!window_init((WWindow*)dock, parent, &fp2, "Notion WDock"))
+    if(!window_init((WWindow*)dock, parent, &fp2, "WDock"))
         return FALSE;
     
     region_add_bindmap((WRegion*)dock, dock_bindmap);

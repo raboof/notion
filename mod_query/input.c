@@ -121,7 +121,7 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
 
     input->last_fp=*fp;
 
-    if(!window_init((WWindow*)input, par, fp, "Notion WInput"))
+    if(!window_init((WWindow*)input, par, fp, "WInput"))
         return FALSE;
 
     win=input->win.win;

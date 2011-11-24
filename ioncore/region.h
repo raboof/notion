@@ -197,4 +197,6 @@ extern void region_unset_manager_pseudoactivity(WRegion *reg);
 
 extern WHook *region_notify_hook;
 
+void ioncore_region_notify(WRegion *reg, WRegionNotify how);
+
 #endif /* ION_IONCORE_REGION_H */
