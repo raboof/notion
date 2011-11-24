@@ -14,6 +14,13 @@
 #include <libextl/extl.h>
 #include "region.h"
 
+/** 
+ * Manipulate the 'activity' flag of this region. If the region is already 
+ * active the 'activity'-flag will remain off.
+ *
+ * @param sp SET, UNSET or TOGGLE
+ * @returns the new value of the 'activity' flag 
+ */
 extern bool region_set_activity(WRegion *reg, int sp);
 extern bool region_is_activity(WRegion* re);
 extern bool region_is_activity_r(WRegion *reg);
