@@ -347,6 +347,17 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 }
 
 
+/*EXTL_DOC
+ * Returns the first WRootWin
+ */
+EXTL_SAFE
+EXTL_EXPORT
+WRootWin *ioncore_rootwin()
+{
+    return ioncore_g.rootwins;
+}
+
+
 /*}}}*/
 
 
