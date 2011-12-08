@@ -49,6 +49,16 @@ local function remove_client(xid)
                                   atom_window, 32, "replace", list)
 end
 
+local function net_mark_supported(atom)
+        if (ioncore.rootwin) then
+                local rootwin = ioncore.rootwin()
+                local atom_atom = ioncore.x_intern_atom("ATOM", false)
+                local atom_net_supported = ioncore.x_intern_atom("_NET_SUPPORTED", false)
+                ioncore.x_change_property(rootwin:xid(), atom_net_supported, atom_atom,
+                                  32, "append", {atom})
+        end
+end
+
 add_client(ioncore.current())
 
 do
@@ -63,4 +73,6 @@ do
         if hook then
                 hook:add(remove_client)
         end
+
+        net_mark_supported(atom_client_list);
 end
