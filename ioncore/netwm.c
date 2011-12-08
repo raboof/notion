@@ -85,6 +85,9 @@ void netwm_init_rootwin(WRootWin *rw)
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
                     32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
+    XChangeProperty(ioncore_g.dpy, rw->dummy_win,
+                    atom_net_supporting_wm_check, XA_WINDOW,
+                    32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supported, XA_ATOM,
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
