@@ -145,12 +145,8 @@ void netwm_update_state(WClientWin *cwin)
     CARD32 data[2];
     int n=0;
     
-    /* Temporarily disabled due to a Firefox bug :(. This might break 
-     * netwm_check_initial_fullscreen, but that's not as regularly used as
-     * Firefox. See also: https://sourceforge.net/tracker/?func=detail&aid=3429909&group_id=314802&atid=1324528
     if(REGION_IS_FULLSCREEN(cwin))
         data[n++]=atom_net_wm_state_fullscreen;
-     */
     if(region_is_activity_r(&(cwin->region)))
         data[n++]=atom_net_wm_state_demands_attention;
 
