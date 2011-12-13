@@ -563,6 +563,9 @@ void debrush_set_window_shape(DEBrush *brush, bool rough,
 {
     XRectangle r[MAXSHAPE];
     int i;
+
+    if(!ioncore_g.shape_extension)
+        return;
     
     if(n>MAXSHAPE)
         n=MAXSHAPE;

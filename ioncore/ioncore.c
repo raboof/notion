@@ -24,6 +24,8 @@
 #include <libintl.h>
 #endif
 #include <stdarg.h>
+#include <X11/extensions/shape.h>
+#include <X11/extensions/Xext.h>
 
 #include <libtu/util.h>
 #include <libtu/optparser.h>
@@ -373,6 +375,10 @@ static bool init_global()
     
     ioncore_g.framed_transients=TRUE;
     
+    ioncore_g.shape_extension=FALSE;
+    ioncore_g.shape_event_basep=0;
+    ioncore_g.shape_error_basep=0;
+
     INITSTR(activated);
     INITSTR(inactivated);
     INITSTR(activity);
@@ -516,6 +522,12 @@ static bool ioncore_init_x(const char *display, int stflags)
     ioncore_g.win_context=XUniqueContext();
     ioncore_g.conn=ConnectionNumber(dpy);
     
+    if(XShapeQueryExtension(ioncore_g.dpy, &ioncore_g.shape_event_basep,
+                            &ioncore_g.shape_error_basep))
+        ioncore_g.shape_extension=TRUE;
+    else
+        XMissingExtension(ioncore_g.dpy, "SHAPE");
+
     cloexec_braindamage_fix(ioncore_g.conn);
     
     ioncore_g.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
