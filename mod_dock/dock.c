@@ -394,9 +394,8 @@ static void dock_reshape(WDock *dock)
 {
     int outline_style;
     
-    if(!ioncore_g.shape_extension){
+    if(!ioncore_g.shape_extension)
         return;
-    }
     
     dock_get_outline_style(dock, &outline_style);
     
