@@ -982,14 +982,23 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
     
     if(np!=NULL){
         region_unset_parent((WRegion*)cwin);
-        do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
+
+        /**
+         * update netwm properties before mapping, because some apps check the
+         * netwm state directly when mapped.
+         *
+         * also, update netwm properties after setting the parent, because
+         * the new state of _NET_WM_STATE_FULLSCREEN is determined based on
+         * the parent of the cwin.
+         */                                                                                     
         region_set_parent((WRegion*)cwin, np);
+        netwm_update_state(cwin);
+
+        do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
         sendconfig_clientwin(cwin);
         
         if(!REGION_IS_FULLSCREEN(cwin))
             cwin->flags&=~CLIENTWIN_FS_RQ;
-
-        netwm_update_state(cwin);
     }
     
     if (postpone_resize(cwin))
