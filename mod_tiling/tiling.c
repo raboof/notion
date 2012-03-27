@@ -139,6 +139,33 @@ void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd,
 }
 
 
+void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL)
+        split_save((WSplit*)node, dir);
+}
+
+void tiling_managed_restore(WTiling *ws, WRegion *mgd, int dir)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL){
+        split_restore((WSplit*)node, dir);
+        if(dir==SPLIT_HORIZONTAL)
+            mplex_remanage_stdisp(&region_screen_of(&ws->reg)->mplex);
+    }
+}
+
+bool tiling_managed_verify(WTiling *ws, WRegion *mgd, int dir)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL)
+        return split_verify((WSplit*)node, dir);
+    else
+        return FALSE;
+}
+
+
 void tiling_map(WTiling *ws)
 {
     REGION_MARK_MAPPED(ws);
@@ -1691,6 +1718,15 @@ static DynFunTab tiling_dynfuntab[]={
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
     
+    {region_managed_save,
+     tiling_managed_save},
+
+    {region_managed_restore,
+     tiling_managed_restore},
+
+    {(DynFun*)region_managed_verify,
+     (DynFun*)tiling_managed_verify},
+
     {region_managed_remove, 
      tiling_managed_remove},
     

@@ -198,6 +198,10 @@ bool split_init(WSplit *split, const WRectangle *geom)
     split->parent=NULL;
     split->ws_if_root=NULL;
     split->geom=*geom;
+    split->saved_geom.x=-1;
+    split->saved_geom.y=-1;
+    split->saved_geom.w=-1;
+    split->saved_geom.h=-1;
     split->min_w=0;
     split->min_h=0;
     split->max_w=INT_MAX;
@@ -732,6 +736,189 @@ void split_resize(WSplit *node, const WRectangle *ng,
     splittree_begin_resize();
     split_do_resize(node, ng, hprimn, vprimn, FALSE);
     splittree_end_resize();
+}
+
+
+/*}}}*/
+
+
+/*{{{ Save, restore and verify code for maximization */
+
+
+bool split_is_parent(WSplit *p, WSplit *node)
+{
+    if(p==node)
+        return TRUE;
+    else if (node->parent==NULL)
+        return FALSE;
+    else
+        return split_is_parent(p,(WSplit*)node->parent);
+}
+
+
+/* Descending from p, try to determine the first split of type dir between p
+ * and node. */
+WSplit *max_parent_direction_rel(WSplit *p, WSplit *node, int dir)
+{
+    if(OBJ_IS(p,WSplitSplit)){
+        WSplitSplit *tmp=(WSplitSplit*)p;
+        if(tmp->dir!=dir){
+            if (split_is_parent(tmp->br,node))
+                return max_parent_direction_rel(tmp->br,node,dir);
+            if (split_is_parent(tmp->tl,node))
+                return max_parent_direction_rel(tmp->tl,node,dir);
+        }
+    }
+    return p;
+}
+
+
+WSplit *max_parent(WSplit *node)
+{
+    WSplit *p=(WSplit*)node->parent;
+    if(p==NULL)
+        return node;
+    else
+        return max_parent(p);
+}
+
+
+WSplit *max_parent_direction(WSplit *node, int dir)
+{
+    return max_parent_direction_rel(max_parent(node),node,dir);
+}
+
+
+void split_do_save_default(WSplit *node, int dir)
+{
+    if(dir==SPLIT_VERTICAL){
+        node->saved_geom.y=node->geom.y;
+        node->saved_geom.h=node->geom.h;
+    }else if (dir==SPLIT_HORIZONTAL){
+        node->saved_geom.x=node->geom.x;
+        node->saved_geom.w=node->geom.w;
+    }
+}
+
+void splitsplit_do_save(WSplitSplit *node, int dir)
+{
+    split_do_save(node->tl, dir);
+    split_do_save(node->br, dir);
+    split_do_save_default(((WSplit*)node), dir);
+}
+
+void split_do_save(WSplit *node, int dir)
+{
+    CALL_DYN(split_do_save, node, (node,dir));
+}
+
+void split_save(WSplit *node, int dir)
+{
+    split_do_save(max_parent_direction(node,dir), dir);
+}
+
+
+void split_do_restore_default(WSplit *node,int dir)
+{
+    WRectangle geom = node->geom;
+    if(dir==SPLIT_VERTICAL){
+        geom.y=node->saved_geom.y;
+        geom.h=node->saved_geom.h;
+    }else if (dir==SPLIT_HORIZONTAL){
+        geom.x=node->saved_geom.x;
+        geom.w=node->saved_geom.w;
+    }
+    split_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+}
+
+void splitsplit_do_restore(WSplitSplit *node, int dir)
+{
+    WSplit *tmp=(WSplit*)node;
+    split_do_restore(node->tl, dir);
+    split_do_restore(node->br, dir);
+    if(dir==SPLIT_VERTICAL){
+        tmp->geom.y=tmp->saved_geom.y;
+        tmp->geom.h=tmp->saved_geom.h;
+    }else if (dir==SPLIT_HORIZONTAL){
+        tmp->geom.x=tmp->saved_geom.x;
+        tmp->geom.w=tmp->saved_geom.w;
+        split_update_bounds(tmp, FALSE);
+    }
+}
+
+void split_do_restore(WSplit *node, int dir)
+{
+    CALL_DYN(split_do_restore, node, (node,dir));
+}
+
+void split_restore(WSplit *node, int dir)
+{
+    splittree_begin_resize();
+    split_do_restore(max_parent_direction(node,dir), dir);
+    splittree_end_resize();
+}
+
+
+bool split_do_verify_default(WSplit *node, int dir)
+{
+    if(dir==SPLIT_VERTICAL)
+        return node->saved_geom.y>=0 && node->saved_geom.h>=0;
+    else
+        return node->saved_geom.x>=0 && node->saved_geom.w>=0;
+}
+
+bool splitsplit_do_verify(WSplitSplit *node, int dir)
+{
+    if(dir==SPLIT_HORIZONTAL){
+        if(node->dir==SPLIT_HORIZONTAL){
+            return
+                ((WSplit*)node)->saved_geom.x==node->tl->saved_geom.x &&
+                node->br->saved_geom.x==node->tl->saved_geom.x+node->tl->saved_geom.w &&
+                ((WSplit*)node)->saved_geom.w==node->tl->saved_geom.w+node->br->saved_geom.w &&
+                split_do_verify(node->tl,dir) &&
+                split_do_verify(node->br,dir);
+        }
+        if(node->dir==SPLIT_VERTICAL){
+            return
+                ((WSplit*)node)->saved_geom.x==node->tl->saved_geom.x &&
+                ((WSplit*)node)->saved_geom.x==node->br->saved_geom.x &&
+                ((WSplit*)node)->saved_geom.w==node->tl->saved_geom.w &&
+                ((WSplit*)node)->saved_geom.w==node->br->saved_geom.w &&
+                split_do_verify(node->tl,dir) &&
+                split_do_verify(node->br,dir);
+        }
+    }else if(dir==SPLIT_VERTICAL){
+        if(node->dir==SPLIT_VERTICAL){
+            return
+                ((WSplit*)node)->saved_geom.y==node->tl->saved_geom.y &&
+                node->br->saved_geom.y==node->tl->saved_geom.y+node->tl->saved_geom.h &&
+                ((WSplit*)node)->saved_geom.h==node->tl->saved_geom.h+node->br->saved_geom.h &&
+                split_do_verify(node->tl, dir) &&
+                split_do_verify(node->br, dir);
+        }
+        if(node->dir==SPLIT_HORIZONTAL){
+            return
+                ((WSplit*)node)->saved_geom.y==node->tl->saved_geom.y &&
+                ((WSplit*)node)->saved_geom.y==node->br->saved_geom.y &&
+                ((WSplit*)node)->saved_geom.h==node->tl->saved_geom.h &&
+                ((WSplit*)node)->saved_geom.h==node->br->saved_geom.h &&
+                split_do_verify(node->tl, dir) &&
+                split_do_verify(node->br, dir);
+        }
+    }
+    return FALSE;
+}
+
+bool split_do_verify(WSplit *node, int dir)
+{
+    bool ret = FALSE;
+    CALL_DYN_RET(ret, bool, split_do_verify, node, (node, dir));
+    return ret;
+}
+
+bool split_verify(WSplit *node, int dir)
+{
+    return split_do_verify(max_parent_direction(node,dir), dir);
 }
 
 
@@ -1961,6 +2148,9 @@ bool split_get_config(WSplit *node, ExtlTab *tabret)
 
 static DynFunTab split_dynfuntab[]={
     {split_do_resize, split_do_resize_default},
+    {split_do_save, split_do_save_default},
+    {split_do_restore, split_do_restore_default},
+    {(DynFun*)split_do_verify, (DynFun*)split_do_verify_default},
     {(DynFun*)split_current_todir, (DynFun*)split_current_todir_default},
     END_DYNFUNTAB,
 };
@@ -1975,6 +2165,9 @@ static DynFunTab splitinner_dynfuntab[]={
 static DynFunTab splitsplit_dynfuntab[]={
     {split_update_bounds, splitsplit_update_bounds},
     {split_do_resize, splitsplit_do_resize},
+    {split_do_save, splitsplit_do_save},
+    {split_do_restore, splitsplit_do_restore},
+    {(DynFun*)split_do_verify, (DynFun*)splitsplit_do_verify},
     {splitinner_do_rqsize, splitsplit_do_rqsize},
     {splitinner_replace, splitsplit_replace},
     {splitinner_remove, splitsplit_remove},

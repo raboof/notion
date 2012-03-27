@@ -13,6 +13,7 @@
 #include <libtu/minmax.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
+#include <mod_tiling/split.h>
 
 #include "common.h"
 #include "global.h"
@@ -637,6 +638,26 @@ void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
 }
 
 
+void region_managed_save(WRegion *mgr, WRegion *reg, int dir)
+{
+    CALL_DYN(region_managed_save, mgr, (mgr, reg, dir));
+}
+
+
+void region_managed_restore(WRegion *mgr, WRegion *reg, int dir)
+{
+    CALL_DYN(region_managed_restore, mgr, (mgr, reg, dir));
+}
+
+
+bool region_managed_verify(WRegion *mgr, WRegion *reg, int dir)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_managed_verify, mgr, (mgr, reg,dir));
+    return ret;
+}
+
+
 void region_size_hints(WRegion *reg, WSizeHints *hints_ret)
 {
     sizehints_clear(hints_ret);
@@ -745,6 +766,43 @@ static bool rqh(WFrame *frame, int y, int h)
             abs(rgeom.h-REGION_GEOM(frame).h)>1);
 }
 
+/*EXTL_DOC
+ * Attempt to toggle vertical maximisation of \var{frame}, experimental version.
+ */
+EXTL_EXPORT_MEMBER
+void frame_maximize_vert_2(WFrame *frame)
+{
+    WRegion *mp=region_manager((WRegion*)frame);
+    int oy, oh;
+
+    if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
+        if(frame->flags&FRAME_SHADED)
+            frame->flags|=FRAME_SHADED_TOGGLE;
+        if(frame->flags&FRAME_SAVED_VERT){
+            if(region_managed_verify(mp, (WRegion*)frame,SPLIT_VERTICAL))
+                region_managed_restore(mp, (WRegion*)frame,SPLIT_VERTICAL);
+            else
+                rqh(frame, frame->saved_y, frame->saved_h);
+        }
+        frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
+        region_goto((WRegion*)frame);
+        return;
+    }
+
+    if(mp==NULL)
+        return;
+
+    oy=REGION_GEOM(frame).y;
+    oh=REGION_GEOM(frame).h;
+
+    region_managed_save(mp, (WRegion*)frame,SPLIT_VERTICAL);
+    rqh(frame, 0, REGION_GEOM(mp).w);
+
+    frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
+    frame->saved_y=oy;
+    frame->saved_h=oh;
+    region_goto((WRegion*)frame);
+}
 
 /*EXTL_DOC
  * Attempt to toggle vertical maximisation of \var{frame}.
@@ -799,6 +857,41 @@ static bool rqw(WFrame *frame, int x, int w)
             abs(rgeom.w-REGION_GEOM(frame).w)>1);
 }
 
+/*EXTL_DOC
+ * Attempt to toggle vertical maximisation of \var{frame}, experimental version.
+ */
+EXTL_EXPORT_MEMBER
+void frame_maximize_horiz_2(WFrame *frame)
+{
+    WRegion *mp=region_manager((WRegion*)frame);
+    int ox, ow;
+
+    if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
+        if(frame->flags&FRAME_SAVED_HORIZ){
+            if(region_managed_verify(mp, (WRegion*)frame,SPLIT_HORIZONTAL))
+                region_managed_restore(mp, (WRegion*)frame,SPLIT_HORIZONTAL);
+            else
+                rqw(frame, frame->saved_x, frame->saved_w);
+        }
+        frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
+        region_goto((WRegion*)frame);
+        return;
+    }
+
+    if(mp==NULL)
+        return;
+
+    ox=REGION_GEOM(frame).x;
+    ow=REGION_GEOM(frame).w;
+
+    region_managed_save(mp, (WRegion*)frame,SPLIT_HORIZONTAL);
+    rqw(frame, 0, REGION_GEOM(mp).w);
+
+    frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
+    frame->saved_x=ox;
+    frame->saved_w=ow;
+    region_goto((WRegion*)frame);
+}
 
 /*EXTL_DOC
  * Attempt to toggle horizontal maximisation of \var{frame}.

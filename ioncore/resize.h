@@ -127,6 +127,10 @@ extern void region_managed_rqgeom_absolute_default(WRegion *reg, WRegion *sub,
                                                    const WRQGeomParams *rq,
                                                    WRectangle *geomret);
 
+DYNFUN void region_managed_save(WRegion *reg, WRegion *sub, int dir);
+DYNFUN void region_managed_restore(WRegion *reg, WRegion *sub, int dir);
+DYNFUN bool region_managed_verify(WRegion *reg, WRegion *sub, int dir);
+
 
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);
 DYNFUN int region_orientation(WRegion *reg);
@@ -137,7 +141,9 @@ extern void region_size_hints_correct(WRegion *reg,
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 
+extern void frame_maximize_vert_2(WFrame *frame);
 extern void frame_maximize_vert(WFrame *frame);
+extern void frame_maximize_horiz_2(WFrame *frame);
 extern void frame_maximize_horiz(WFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
