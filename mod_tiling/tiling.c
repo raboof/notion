@@ -128,6 +128,20 @@ bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
     return TRUE;
 }
 
+void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd, 
+                           const WRQGeomParams *rq,
+                           WRectangle *geomret)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL)
+        splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
+}
+
+bool tiling_statusbar_transition(WTiling *ws)
+{
+    return ws->statusbar_transition;
+}
+
 void tiling_ignore_statusbar(WTiling *ws)
 {    
     ws->statusbar_transition=TRUE;
@@ -141,16 +155,6 @@ void tiling_unignore_statusbar(WTiling *ws)
     mplex_remanage_stdisp(&region_screen_of(&ws->reg)->mplex);
     ws->statusbar_transition=FALSE;
 }
-
-void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd, 
-                           const WRQGeomParams *rq,
-                           WRectangle *geomret)
-{
-    WSplitRegion *node=get_node_check(ws, mgd);
-    if(node!=NULL && ws->split_tree!=NULL)
-        splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
-}
-
 
 void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
 {
@@ -170,15 +174,10 @@ void tiling_managed_restore(WTiling *ws, WRegion *mgd, int dir)
 bool tiling_managed_verify(WTiling *ws, WRegion *mgd, int dir)
 {
     WSplitRegion *node=get_node_check(ws, mgd);
-    if(node!=NULL && ws->split_tree!=NULL)
-        return split_verify((WSplit*)node, dir);
-    else
-        return FALSE;
-}
-
-bool tiling_statusbar_transition(WTiling *ws)
-{
-    return ws->statusbar_transition;
+    return 
+        (node!=NULL && ws->split_tree!=NULL)
+        ? split_verify((WSplit*)node, dir)
+        : FALSE;
 }
 
 void tiling_map(WTiling *ws)

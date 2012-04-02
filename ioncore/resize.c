@@ -784,12 +784,13 @@ void frame_maximize_vert_2(WFrame *frame)
     WRegion *mp=REGION_MANAGER(frame);
     int oy, oh;
 
-    region_ignore_statusbar(mp);
+    if(mp!=NULL)
+        region_ignore_statusbar(mp);
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
         if(frame->flags&FRAME_SAVED_VERT){
-            if(region_managed_verify(mp, (WRegion*)frame,SPLIT_VERTICAL))
+            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame,SPLIT_VERTICAL))
                 region_managed_restore(mp, (WRegion*)frame,SPLIT_VERTICAL);
             else
                 rqh(frame, frame->saved_y, frame->saved_h);
@@ -822,7 +823,7 @@ void frame_maximize_vert_2(WFrame *frame)
 EXTL_EXPORT_MEMBER
 void frame_maximize_vert(WFrame *frame)
 {
-    WRegion *mp=REGION_MANAGER(frame);
+    WRegion *mp=region_manager((WRegion*)frame);
     int oy, oh;
     
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
@@ -878,10 +879,11 @@ void frame_maximize_horiz_2(WFrame *frame)
     WRegion *mp=REGION_MANAGER(frame);
     int ox, ow;
 
-    region_ignore_statusbar(mp);
+    if(mp!=NULL)
+        region_ignore_statusbar(mp);
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
         if(frame->flags&FRAME_SAVED_HORIZ){
-            if(region_managed_verify(mp, (WRegion*)frame,SPLIT_HORIZONTAL))
+            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame,SPLIT_HORIZONTAL))
                 region_managed_restore(mp, (WRegion*)frame,SPLIT_HORIZONTAL);
             else
                 rqw(frame, frame->saved_x, frame->saved_w);
@@ -914,7 +916,7 @@ void frame_maximize_horiz_2(WFrame *frame)
 EXTL_EXPORT_MEMBER
 void frame_maximize_horiz(WFrame *frame)
 {
-    WRegion *mp=REGION_MANAGER(frame);
+    WRegion *mp=region_manager((WRegion*)frame);
     int ox, ow;
     
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){

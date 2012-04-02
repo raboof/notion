@@ -745,14 +745,15 @@ void split_resize(WSplit *node, const WRectangle *ng,
 /*{{{ Save, restore and verify code for maximization */
 
 
-bool split_is_parent(WSplit *p, WSplit *node)
+bool splits_are_related(WSplit *p, WSplit *node)
 {
     if(p==node)
         return TRUE;
-    else if (node->parent==NULL)
-        return FALSE;
-    else
-        return split_is_parent(p,(WSplit*)node->parent);
+    else 
+        return 
+            node->parent!=NULL 
+            ? splits_are_related(p,(WSplit*)node->parent)
+            : FALSE;
 }
 
 
@@ -760,13 +761,13 @@ bool split_is_parent(WSplit *p, WSplit *node)
  * and node. */
 WSplit *max_parent_direction_rel(WSplit *p, WSplit *node, int dir)
 {
-    if(OBJ_IS(p,WSplitSplit)){
-        WSplitSplit *tmp=(WSplitSplit*)p;
-        if(tmp->dir!=dir){
-            if (split_is_parent(tmp->br,node))
-                return max_parent_direction_rel(tmp->br,node,dir);
-            if (split_is_parent(tmp->tl,node))
-                return max_parent_direction_rel(tmp->tl,node,dir);
+    if(OBJ_IS(p, WSplitSplit)){
+        WSplitSplit *sp=(WSplitSplit*)p;
+        if(sp->dir!=dir){
+            if (splits_are_related(sp->tl, node))
+                return max_parent_direction_rel(sp->tl, node, dir);
+            if (splits_are_related(sp->br, node))
+                return max_parent_direction_rel(sp->br, node, dir);
         }
     }
     return p;
@@ -776,32 +777,30 @@ WSplit *max_parent_direction_rel(WSplit *p, WSplit *node, int dir)
 WSplit *max_parent(WSplit *node)
 {
     WSplit *p=(WSplit*)node->parent;
-    if(p==NULL)
-        return node;
-    else
-        return max_parent(p);
+    return p==NULL ? node : max_parent(p);
 }
 
 
 WSplit *max_parent_direction(WSplit *node, int dir)
 {
-    return max_parent_direction_rel(max_parent(node),node,dir);
+    return max_parent_direction_rel(max_parent(node), node, dir);
 }
 
 
 void split_do_save_default(WSplit *node, int dir)
 {
-    if(dir==SPLIT_VERTICAL){
-        node->saved_geom.y=node->geom.y;
-        node->saved_geom.h=node->geom.h;
-    }else if (dir==SPLIT_HORIZONTAL){
+    if (dir==SPLIT_HORIZONTAL){
         node->saved_geom.x=node->geom.x;
         node->saved_geom.w=node->geom.w;
+    }else if(dir==SPLIT_VERTICAL){
+        node->saved_geom.y=node->geom.y;
+        node->saved_geom.h=node->geom.h;
     }
 }
 
 void splitsplit_do_save(WSplitSplit *node, int dir)
 {
+    assert(node->tl!=NULL && node->br!=NULL);
     split_do_save(node->tl, dir);
     split_do_save(node->br, dir);
     split_do_save_default(((WSplit*)node), dir);
@@ -821,29 +820,30 @@ void split_save(WSplit *node, int dir)
 void split_do_restore_default(WSplit *node,int dir)
 {
     WRectangle geom = node->geom;
-    if(dir==SPLIT_VERTICAL){
-        geom.y=node->saved_geom.y;
-        geom.h=node->saved_geom.h;
-    }else if (dir==SPLIT_HORIZONTAL){
+    if(dir==SPLIT_HORIZONTAL){
         geom.x=node->saved_geom.x;
         geom.w=node->saved_geom.w;
+    }else if (dir==SPLIT_VERTICAL){
+        geom.y=node->saved_geom.y;
+        geom.h=node->saved_geom.h;
     }
     split_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
 }
 
 void splitsplit_do_restore(WSplitSplit *node, int dir)
 {
-    WSplit *tmp=(WSplit*)node;
+    WSplit *snode=(WSplit*)node;
+    assert(node->tl!=NULL && node->br!=NULL);
     split_do_restore(node->tl, dir);
     split_do_restore(node->br, dir);
     if(dir==SPLIT_VERTICAL){
-        tmp->geom.y=tmp->saved_geom.y;
-        tmp->geom.h=tmp->saved_geom.h;
+        snode->geom.y=snode->saved_geom.y;
+        snode->geom.h=snode->saved_geom.h;
     }else if (dir==SPLIT_HORIZONTAL){
-        tmp->geom.x=tmp->saved_geom.x;
-        tmp->geom.w=tmp->saved_geom.w;
-        split_update_bounds(tmp, FALSE);
+        snode->geom.x=snode->saved_geom.x;
+        snode->geom.w=snode->saved_geom.w;
     }
+    split_update_bounds(snode, FALSE);
 }
 
 void split_do_restore(WSplit *node, int dir)
@@ -853,28 +853,28 @@ void split_do_restore(WSplit *node, int dir)
 
 void split_restore(WSplit *node, int dir)
 {
-    splittree_begin_resize();
     split_do_restore(max_parent_direction(node,dir), dir);
-    splittree_end_resize();
 }
 
 
 bool split_do_verify_default(WSplit *node, int dir)
 {
-    if(dir==SPLIT_VERTICAL)
-        return node->saved_geom.y>=0 && node->saved_geom.h>=0;
-    else
+    if(dir==SPLIT_HORIZONTAL)
         return node->saved_geom.x>=0 && node->saved_geom.w>=0;
+    else if(dir==SPLIT_VERTICAL)
+        return node->saved_geom.y>=0 && node->saved_geom.h>=0;
+    return FALSE;
 }
 
 bool splitsplit_do_verify(WSplitSplit *node, int dir)
 {
+    assert(node->tl!=NULL && node->br!=NULL);
     if(dir==SPLIT_HORIZONTAL){
         if(node->dir==SPLIT_HORIZONTAL){
             return
                 ((WSplit*)node)->saved_geom.x==node->tl->saved_geom.x &&
-                node->br->saved_geom.x==node->tl->saved_geom.x+node->tl->saved_geom.w &&
                 ((WSplit*)node)->saved_geom.w==node->tl->saved_geom.w+node->br->saved_geom.w &&
+                node->br->saved_geom.x==node->tl->saved_geom.x+node->tl->saved_geom.w &&
                 split_do_verify(node->tl,dir) &&
                 split_do_verify(node->br,dir);
         }
@@ -891,8 +891,8 @@ bool splitsplit_do_verify(WSplitSplit *node, int dir)
         if(node->dir==SPLIT_VERTICAL){
             return
                 ((WSplit*)node)->saved_geom.y==node->tl->saved_geom.y &&
-                node->br->saved_geom.y==node->tl->saved_geom.y+node->tl->saved_geom.h &&
                 ((WSplit*)node)->saved_geom.h==node->tl->saved_geom.h+node->br->saved_geom.h &&
+                node->br->saved_geom.y==node->tl->saved_geom.y+node->tl->saved_geom.h &&
                 split_do_verify(node->tl, dir) &&
                 split_do_verify(node->br, dir);
         }
