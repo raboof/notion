@@ -764,9 +764,9 @@ WSplit *max_parent_direction_rel(WSplit *p, WSplit *node, int dir)
     if(OBJ_IS(p, WSplitSplit)){
         WSplitSplit *sp=(WSplitSplit*)p;
         if(sp->dir!=dir){
-            if (splits_are_related(sp->tl, node))
+            if(splits_are_related(sp->tl, node))
                 return max_parent_direction_rel(sp->tl, node, dir);
-            if (splits_are_related(sp->br, node))
+            if(splits_are_related(sp->br, node))
                 return max_parent_direction_rel(sp->br, node, dir);
         }
     }
@@ -789,7 +789,7 @@ WSplit *max_parent_direction(WSplit *node, int dir)
 
 void split_do_save_default(WSplit *node, int dir)
 {
-    if (dir==SPLIT_HORIZONTAL){
+    if(dir==SPLIT_HORIZONTAL){
         node->saved_geom.x=node->geom.x;
         node->saved_geom.w=node->geom.w;
     }else if(dir==SPLIT_VERTICAL){
@@ -823,7 +823,7 @@ void split_do_restore_default(WSplit *node,int dir)
     if(dir==SPLIT_HORIZONTAL){
         geom.x=node->saved_geom.x;
         geom.w=node->saved_geom.w;
-    }else if (dir==SPLIT_VERTICAL){
+    }else if(dir==SPLIT_VERTICAL){
         geom.y=node->saved_geom.y;
         geom.h=node->saved_geom.h;
     }
@@ -836,12 +836,12 @@ void splitsplit_do_restore(WSplitSplit *node, int dir)
     assert(node->tl!=NULL && node->br!=NULL);
     split_do_restore(node->tl, dir);
     split_do_restore(node->br, dir);
-    if(dir==SPLIT_VERTICAL){
-        snode->geom.y=snode->saved_geom.y;
-        snode->geom.h=snode->saved_geom.h;
-    }else if (dir==SPLIT_HORIZONTAL){
+    if(dir==SPLIT_HORIZONTAL){
         snode->geom.x=snode->saved_geom.x;
         snode->geom.w=snode->saved_geom.w;
+    }else if(dir==SPLIT_VERTICAL){
+        snode->geom.y=snode->saved_geom.y;
+        snode->geom.h=snode->saved_geom.h;
     }
     split_update_bounds(snode, FALSE);
 }
@@ -861,52 +861,51 @@ bool split_do_verify_default(WSplit *node, int dir)
 {
     if(dir==SPLIT_HORIZONTAL)
         return node->saved_geom.x>=0 && node->saved_geom.w>=0;
-    else if(dir==SPLIT_VERTICAL)
+    if(dir==SPLIT_VERTICAL)
         return node->saved_geom.y>=0 && node->saved_geom.h>=0;
     return FALSE;
 }
 
+bool verify_helper(WSplit *node1, WSplit *node2, int dir)
+{
+    if(dir==SPLIT_HORIZONTAL)
+        return 
+            node1->saved_geom.x==node2->saved_geom.x &&
+            node1->saved_geom.w==node2->saved_geom.w;
+    if(dir==SPLIT_VERTICAL)
+        return 
+            node1->saved_geom.y==node2->saved_geom.y &&
+            node1->saved_geom.h==node2->saved_geom.h;
+    return FALSE;
+}
+
+/* Verify that the saved geometry of a split matches the saved geometry of its 
+ * two children. */
 bool splitsplit_do_verify(WSplitSplit *node, int dir)
 {
+    bool ret=FALSE;
     assert(node->tl!=NULL && node->br!=NULL);
-    if(dir==SPLIT_HORIZONTAL){
-        if(node->dir==SPLIT_HORIZONTAL){
-            return
+    if(dir!=node->dir)
+        ret = 
+            verify_helper((WSplit*)node, node->tl, dir) &&
+            verify_helper((WSplit*)node, node->br, dir);
+    else{ 
+        if(dir==SPLIT_HORIZONTAL){
+            ret =
                 ((WSplit*)node)->saved_geom.x==node->tl->saved_geom.x &&
                 ((WSplit*)node)->saved_geom.w==node->tl->saved_geom.w+node->br->saved_geom.w &&
-                node->br->saved_geom.x==node->tl->saved_geom.x+node->tl->saved_geom.w &&
-                split_do_verify(node->tl,dir) &&
-                split_do_verify(node->br,dir);
-        }
-        if(node->dir==SPLIT_VERTICAL){
-            return
-                ((WSplit*)node)->saved_geom.x==node->tl->saved_geom.x &&
-                ((WSplit*)node)->saved_geom.x==node->br->saved_geom.x &&
-                ((WSplit*)node)->saved_geom.w==node->tl->saved_geom.w &&
-                ((WSplit*)node)->saved_geom.w==node->br->saved_geom.w &&
-                split_do_verify(node->tl,dir) &&
-                split_do_verify(node->br,dir);
-        }
-    }else if(dir==SPLIT_VERTICAL){
-        if(node->dir==SPLIT_VERTICAL){
-            return
+                node->br->saved_geom.x==node->tl->saved_geom.x+node->tl->saved_geom.w;
+        }else if(dir==SPLIT_VERTICAL){
+            ret =
                 ((WSplit*)node)->saved_geom.y==node->tl->saved_geom.y &&
                 ((WSplit*)node)->saved_geom.h==node->tl->saved_geom.h+node->br->saved_geom.h &&
-                node->br->saved_geom.y==node->tl->saved_geom.y+node->tl->saved_geom.h &&
-                split_do_verify(node->tl, dir) &&
-                split_do_verify(node->br, dir);
-        }
-        if(node->dir==SPLIT_HORIZONTAL){
-            return
-                ((WSplit*)node)->saved_geom.y==node->tl->saved_geom.y &&
-                ((WSplit*)node)->saved_geom.y==node->br->saved_geom.y &&
-                ((WSplit*)node)->saved_geom.h==node->tl->saved_geom.h &&
-                ((WSplit*)node)->saved_geom.h==node->br->saved_geom.h &&
-                split_do_verify(node->tl, dir) &&
-                split_do_verify(node->br, dir);
+                node->br->saved_geom.y==node->tl->saved_geom.y+node->tl->saved_geom.h;
         }
     }
-    return FALSE;
+    return 
+        ret &&
+        split_do_verify(node->tl,dir) &&
+        split_do_verify(node->br,dir);
 }
 
 bool split_do_verify(WSplit *node, int dir)

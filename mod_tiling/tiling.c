@@ -128,6 +128,7 @@ bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
     return TRUE;
 }
 
+
 void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd, 
                            const WRQGeomParams *rq,
                            WRectangle *geomret)
@@ -166,9 +167,8 @@ void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
 void tiling_managed_restore(WTiling *ws, WRegion *mgd, int dir)
 {
     WSplitRegion *node=get_node_check(ws, mgd);
-    if(node!=NULL && ws->split_tree!=NULL){
+    if(node!=NULL && ws->split_tree!=NULL)
         split_restore((WSplit*)node, dir);
-    }
 }
 
 bool tiling_managed_verify(WTiling *ws, WRegion *mgd, int dir)
@@ -1729,10 +1729,19 @@ static DynFunTab tiling_dynfuntab[]={
     
     {(DynFun*)region_fitrep,
      (DynFun*)tiling_fitrep},
-    
+
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
-    
+
+    {(DynFun*)region_statusbar_transition,
+     (DynFun*)tiling_statusbar_transition},
+
+    {region_ignore_statusbar,
+     tiling_ignore_statusbar},
+
+    {region_unignore_statusbar,
+     tiling_unignore_statusbar},
+   
     {region_managed_save,
      tiling_managed_save},
 
@@ -1741,15 +1750,6 @@ static DynFunTab tiling_dynfuntab[]={
 
     {(DynFun*)region_managed_verify,
      (DynFun*)tiling_managed_verify},
-
-    {region_ignore_statusbar,
-    tiling_ignore_statusbar},
-
-    {region_unignore_statusbar,
-    tiling_unignore_statusbar},
-
-    {(DynFun*)region_statusbar_transition,
-     (DynFun*)tiling_statusbar_transition},
 
     {region_managed_remove, 
      tiling_managed_remove},

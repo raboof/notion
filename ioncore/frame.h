@@ -95,6 +95,7 @@ extern void frame_set_mode(WFrame *frame, WFrameMode mode);
 extern WFrameMode frame_mode(WFrame *frame);
 
 /* Resize and reparent */
+DYNFUN bool region_statusbar_transition(WRegion *reg);
 extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
 extern void frame_size_hints(WFrame *frame, WSizeHints *hints_ret);
 
@@ -132,7 +133,5 @@ extern void frame_do_load(WFrame *frame, ExtlTab tab);
 extern WHook *frame_managed_changed_hook;
 
 extern WFrameMode framemode_unalt(WFrameMode mode);
-
-DYNFUN bool region_statusbar_transition(WRegion *reg);
 
 #endif /* ION_IONCORE_FRAME_H */

@@ -127,11 +127,11 @@ extern void region_managed_rqgeom_absolute_default(WRegion *reg, WRegion *sub,
                                                    const WRQGeomParams *rq,
                                                    WRectangle *geomret);
 
+DYNFUN void region_ignore_statusbar(WRegion *reg);
+DYNFUN void region_unignore_statusbar(WRegion *reg);
 DYNFUN void region_managed_save(WRegion *reg, WRegion *sub, int dir);
 DYNFUN void region_managed_restore(WRegion *reg, WRegion *sub, int dir);
 DYNFUN bool region_managed_verify(WRegion *reg, WRegion *sub, int dir);
-DYNFUN void region_ignore_statusbar(WRegion *reg);
-DYNFUN void region_unignore_statusbar(WRegion *reg);
 
 
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);
