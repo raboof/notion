@@ -133,4 +133,6 @@ extern WHook *frame_managed_changed_hook;
 
 extern WFrameMode framemode_unalt(WFrameMode mode);
 
+DYNFUN bool region_statusbar_transition(WRegion *reg);
+
 #endif /* ION_IONCORE_FRAME_H */

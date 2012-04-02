@@ -389,6 +389,13 @@ static bool frame_initialise_titles(WFrame *frame)
 
 /*{{{ Resize and reparent */
 
+bool region_statusbar_transition(WRegion *reg)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_statusbar_transition, reg, (reg));
+    return ret;
+}
+
 
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 {
@@ -411,7 +418,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_SHADED;
         }
-        frame->flags&=~FRAME_MAXED_VERT;
+        if(REGION_MANAGER(frame)==NULL || !region_statusbar_transition(REGION_MANAGER(frame)))
+            frame->flags&=~FRAME_MAXED_VERT;
     }
     
     if(wchg){
@@ -422,7 +430,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_MIN_HORIZ;
         }
-        frame->flags&=~FRAME_MAXED_HORIZ;
+        if(REGION_MANAGER(frame)==NULL || !region_statusbar_transition(REGION_MANAGER(frame)))
+            frame->flags&=~FRAME_MAXED_HORIZ;
     }
 
     if(wchg || hchg){

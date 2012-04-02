@@ -30,6 +30,7 @@ DECLCLASS(WTiling){
     WRegionSimpleCreateFn *create_frame_fn;
     Window dummywin;
     bool batchop;
+    bool statusbar_transition;
 };
 
 
