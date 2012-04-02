@@ -1729,16 +1729,16 @@ static DynFunTab tiling_dynfuntab[]={
     
     {(DynFun*)region_fitrep,
      (DynFun*)tiling_fitrep},
-
+    
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
-
+    
     {(DynFun*)region_statusbar_transition,
      (DynFun*)tiling_statusbar_transition},
-
+    
     {region_ignore_statusbar,
      tiling_ignore_statusbar},
-
+    
     {region_unignore_statusbar,
      tiling_unignore_statusbar},
    
