@@ -885,6 +885,10 @@ bool splitsplit_do_verify(WSplitSplit *node, int dir)
 {
     bool ret=FALSE;
     assert(node->tl!=NULL && node->br!=NULL);
+
+    if(!split_do_verify_default((WSplit*)node, dir))
+        return FALSE;
+
     if(dir!=node->dir)
         ret = 
             verify_helper((WSplit*)node, node->tl, dir) &&
