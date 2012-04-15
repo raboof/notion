@@ -151,8 +151,8 @@ static bool try_fullscreen(WClientWin *cwin, WScreen *dflt,
         fs_scr=dflt;
     }
 
-    if(fs_scr==NULL)
-        fs_scr=netwm_check_initial_fullscreen(cwin);
+    if(fs_scr==NULL && netwm_check_initial_fullscreen(cwin))
+        fs_scr=dflt;
 
     if(fs_scr==NULL)
         fs_scr=clientwin_fullscreen_chkrq(cwin, param->geom.w, param->geom.h);
