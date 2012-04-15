@@ -107,7 +107,7 @@ void netwm_init_rootwin(WRootWin *rw)
 /*{{{ _NET_WM_STATE */
 
 
-bool *netwm_check_initial_fullscreen(WClientWin *cwin)
+bool netwm_check_initial_fullscreen(WClientWin *cwin)
 {
 
     int i, n;

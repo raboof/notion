@@ -20,7 +20,7 @@
 extern void netwm_init();
 extern void netwm_init_rootwin(WRootWin *rw);
 
-extern bool *netwm_check_initial_fullscreen(WClientWin *cwin);
+extern bool netwm_check_initial_fullscreen(WClientWin *cwin);
 extern void netwm_update_state(WClientWin *cwin);
 extern void netwm_update_allowed_actions(WClientWin *cwin);
 extern void netwm_delete_state(WClientWin *cwin);
