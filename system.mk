@@ -244,3 +244,8 @@ RM=rm
 INSTALL_STRIP =
 CFLAGS += -g
 
+
+ifeq ($(PRELOAD_MODULES),1)
+X11_LIBS += -lXinerama -lXrandr
+endif
+
