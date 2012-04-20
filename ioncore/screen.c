@@ -43,13 +43,11 @@ WHook *screen_managed_changed_hook=NULL;
 /*{{{ Init/deinit */
 
 
-bool screen_init(WScreen *scr, WRootWin *parent,
-                 const WFitParams *fp, int id, Window rootwin)
+bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
 {
     Window win;
     XSetWindowAttributes attr;
     ulong attrflags=0;
-    bool is_root=FALSE;
     
     scr->id=id;
     scr->atom_workspace=None;
@@ -63,26 +61,20 @@ bool screen_init(WScreen *scr, WRootWin *parent,
     watch_init(&(scr->notifywin_watch));
     watch_init(&(scr->infowin_watch));
 
-    if(parent==NULL){
-        win=rootwin;
-        is_root=TRUE;
-    }else{
-        attr.background_pixmap=ParentRelative;
-        attrflags=CWBackPixmap;
+    attr.background_pixmap=ParentRelative;
+    attrflags=CWBackPixmap;
         
-        win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(parent),
-                          fp->g.x, fp->g.y, fp->g.w, fp->g.h, 0, 
-                          DefaultDepth(ioncore_g.dpy, parent->xscr),
-                          InputOutput,
-                          DefaultVisual(ioncore_g.dpy, parent->xscr),
-                          attrflags, &attr);
-        if(win==None)
-            return FALSE;
-    }
+    win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(parent),
+        fp->g.x, fp->g.y, fp->g.w, fp->g.h, 0, 
+        DefaultDepth(ioncore_g.dpy, parent->xscr),
+        InputOutput,
+        DefaultVisual(ioncore_g.dpy, parent->xscr),
+        attrflags, &attr);
+    if(win==None)
+        return FALSE;
 
     if(!mplex_do_init((WMPlex*)scr, (WWindow*)parent, fp, win, "WScreen")){
-        if(!is_root)
-            XDestroyWindow(ioncore_g.dpy, win);
+        XDestroyWindow(ioncore_g.dpy, win);
         return FALSE;
     }
 
@@ -91,10 +83,8 @@ bool screen_init(WScreen *scr, WRootWin *parent,
     scr->mplex.flags|=MPLEX_ADD_TO_END;
     scr->mplex.win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
     
-    if(!is_root){
-        scr->mplex.win.region.flags|=REGION_MAPPED;
-        window_select_input((WWindow*)scr, IONCORE_EVENTMASK_SCREEN);
-    }
+    scr->mplex.win.region.flags|=REGION_MAPPED;
+    window_select_input((WWindow*)scr, IONCORE_EVENTMASK_SCREEN);
     
     if(id==0){
         scr->atom_workspace=XInternAtom(ioncore_g.dpy, 
@@ -123,7 +113,7 @@ bool screen_init(WScreen *scr, WRootWin *parent,
 
 WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id)
 {
-    CREATEOBJ_IMPL(WScreen, screen, (p, parent, fp, id, None));
+    CREATEOBJ_IMPL(WScreen, screen, (p, parent, fp, id));
 }
 
 
@@ -208,16 +198,12 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
 
 static void screen_map(WScreen *scr)
 {
-    if(scr->uses_root)
-        return;
     mplex_map((WMPlex*)scr);
 }
 
 
 static void screen_unmap(WScreen *scr)
 {
-    if(scr->uses_root)
-        return;
     mplex_unmap((WMPlex*)scr);
 }
 

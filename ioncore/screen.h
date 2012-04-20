@@ -38,18 +38,16 @@ DECLCLASS(WScreen){
     WMPlex mplex;
     int id;
     Atom atom_workspace;
-    bool uses_root;
+    /** Deprecated field, but kept to keep our ABI stable */
+    bool dep;
     WRectangle managed_off;
     WScreen *next_scr, *prev_scr;
     Watch notifywin_watch;
     Watch infowin_watch;
 };
 
-/* rootwin should only be set if parent is NULL, and this WScreen is
- * actually a root window.
- */
-extern bool screen_init(WScreen *scr, WRootWin *parent, 
-                        const WFitParams *fp, int id, Window rootwin);
+extern bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, 
+                        int id);
 
 extern WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id);
 
