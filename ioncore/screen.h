@@ -38,7 +38,6 @@ DECLCLASS(WScreen){
     WMPlex mplex;
     int id;
     Atom atom_workspace;
-    bool uses_root;
     WRectangle managed_off;
     WScreen *next_scr, *prev_scr;
     Watch notifywin_watch;
