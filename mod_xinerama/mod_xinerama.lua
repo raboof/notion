@@ -363,14 +363,6 @@ end
 -- Mark ourselves loaded.
 package.loaded["mod_xinerama"]=true
 
-if package.loaded["mod_statusbar"] then
-    warn(TR("mod_statusbar loaded before mod_xinerama - this could lead to problems. See https://sourceforge.net/tracker/?group_id=314802&atid=1324531"))
-end
-
-if package.loaded["mod_dock"] then
-    warn(TR("mod_dock loaded before mod_xinerama - this could lead to problems. See https://sourceforge.net/tracker/?func=detail&aid=3439561&group_id=314802&atid=1324531"))
-end
-
 -- Load configuration file
 dopath('cfg_xinerama', true)
 
