@@ -375,6 +375,7 @@ function mod_xinerama.refresh()
         local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
         mod_xinerama.setup_screens(merged_screens)
     end 
+    notioncore.screens_updated(notioncore.rootwin());
 end
 
 mod_xinerama.refresh()
