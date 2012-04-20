@@ -117,14 +117,6 @@ static void convert_parameters(ExtlTab screen, WFitParams *fp)
     fp->gravity=ForgetGravity;
 }
 
-/* Set the id of the root window */
-EXTL_EXPORT
-void mod_xinerama_set_root_screen_id(int screen_id)
-{
-    WRootWin* rootWin = ioncore_g.rootwins;
-    rootWin->scr.id = screen_id;
-}
-
 /* Set up one new screen 
  * @param screen the screen to update
  * @param dimensions the new dimensions (x/y/w/h) 
@@ -141,8 +133,7 @@ bool mod_xinerama_update_screen(WScreen *screen, ExtlTab dimensions)
            screen->id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
 #endif
 
-    /* Fit the mplex directly instead of using region_fit, due to #3349390 */
-    mplex_fitrep(&(screen->mplex), NULL, &fp);
+    region_fitrep((WRegion*)screen, NULL, &fp);
 
     return TRUE;
 }
@@ -155,29 +146,20 @@ EXTL_EXPORT
 bool mod_xinerama_setup_new_screen(int screen_id, ExtlTab screen)
 {
     WRootWin* rootWin = ioncore_g.rootwins;
-    WMPlexAttachParams par = MPLEXATTACHPARAMS_INIT;
     WScreen* newScreen;
+    WFitParams fp;
 
-    /* it would be nice to drop MPLEX_ATTACH_WHATEVER, add MPLEX_ATTACH_GEOM 
-     * and directly create the WScreen with the correct size, but 
-     * mplex_do_attach_final will resize the screen to be of equal size as the
-     * surrounding WMPlex (the WRootWindow), which we don't want. Perhaps the
-     * WScreen should not be attached to the WRootWindow's MPlex directly.
-     *
-     * As a sort of workaround we create it with MPLEX_ATTACH_WHATEVER and 
-     * fitrep it later. */
-    par.flags = MPLEX_ATTACH_SIZEPOLICY|MPLEX_ATTACH_UNNUMBERED|MPLEX_ATTACH_WHATEVER ;
-    par.szplcy = SIZEPOLICY_FULL_EXACT;
+    convert_parameters(screen, &fp);
 
-    newScreen = (WScreen*) mplex_do_attach_new(&rootWin->scr.mplex, &par,
-        (WRegionCreateFn*)create_screen, NULL);
+    newScreen = create_screen(rootWin, &fp, screen_id);
 
     if(newScreen == NULL) {
         warn(TR("Unable to create Xinerama workspace %d."), screen_id);
         return FALSE;
     }
 
-    newScreen->id = screen_id;
+    region_set_manager((WRegion*)newScreen, (WRegion*)rootWin);
+    region_map((WRegion*)newScreen);
 
     return mod_xinerama_update_screen(newScreen, screen);
 }
