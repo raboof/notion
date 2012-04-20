@@ -257,6 +257,8 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     preinit_gr(rootwin);
     netwm_init_rootwin(rootwin);
 
+    region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);
+    
     net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     XDeleteProperty(ioncore_g.dpy, root, net_virtual_roots);
 
