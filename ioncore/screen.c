@@ -177,34 +177,6 @@ static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
 /*{{{ Region dynfun implementations */
 
 
-static bool screen_fitrep(WScreen *scr, WWindow *par, const WFitParams *fp)
-{
-    WRegion *sub;
-    
-    if(par!=NULL)
-        warn(TR("Unable to reparent screens"));
-
-    /* Disallow resizing Screen's entirely. This is a terrible hack to prevent
-     * problems where the Screen's are resized to fit the root window. The old
-     * assumption that a root Window corresponds 1-to-1 with the Screens is no
-     * longer valid in the modern RandR/Xinerama world. This means WRootWindow
-     * should no longer be a child of WMPlex (which causes the calls that try
-     * to resize the Screen to fit the root Window). Until we fix that, we 
-     * need this hack.
-     * More background: https://sourceforge.net/mailarchive/forum.php?thread_name=20110806114934.GI8542%40bzzt.net&forum_name=notion-devel
-     */
-    if(fp!=NULL)
-        return FALSE;
-    
-    if(scr->uses_root)
-        return FALSE;
-
-    return mplex_fitrep((WMPlex*)scr, NULL, fp);
-}
-
-
-
-
 static void screen_managed_changed(WScreen *scr, int mode, bool sw, 
                                    WRegion *reg_)
 {
@@ -236,16 +208,12 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
 
 static void screen_map(WScreen *scr)
 {
-    if(scr->uses_root)
-        return;
     mplex_map((WMPlex*)scr);
 }
 
 
 static void screen_unmap(WScreen *scr)
 {
-    if(scr->uses_root)
-        return;
     mplex_unmap((WMPlex*)scr);
 }
 
@@ -537,9 +505,6 @@ static DynFunTab screen_dynfuntab[]={
 
     {(DynFun*)region_handle_drop, 
      (DynFun*)screen_handle_drop},
-
-    {(DynFun*)region_fitrep,
-     (DynFun*)screen_fitrep},
 
     END_DYNFUNTAB
 };
