@@ -208,12 +208,16 @@ static void screen_managed_changed(WScreen *scr, int mode, bool sw,
 
 static void screen_map(WScreen *scr)
 {
+    if(scr->uses_root)
+        return;
     mplex_map((WMPlex*)scr);
 }
 
 
 static void screen_unmap(WScreen *scr)
 {
+    if(scr->uses_root)
+        return;
     mplex_unmap((WMPlex*)scr);
 }
 
