@@ -38,7 +38,7 @@ libextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
-libextl-mkexports: libextl-mkexports.in
+libextl-mkexports: libextl-mkexports.in $(LUA)
 	sed "1s:LUA50:$(LUA):" $< > $@
 
 install:
