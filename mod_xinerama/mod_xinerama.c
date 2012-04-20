@@ -1,5 +1,5 @@
 /*
- * Ion xinerama module
+ * Notion xinerama module
  * based on mod_xrandr by Ragnar Rova and Tuomo Valkonen
  *
  * by Thomas Themel <themel0r@wannabehacker.com>
