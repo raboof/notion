@@ -30,7 +30,6 @@
 #include "focus.h"
 #include "regbind.h"
 #include "screen.h"
-#include "screen.h"
 #include "bindmaps.h"
 #include <libextl/readconfig.h>
 #include "resize.h"
@@ -259,9 +258,6 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
 
     region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);
     
-    net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
-    XDeleteProperty(ioncore_g.dpy, root, net_virtual_roots);
-
     scr=create_screen(rootwin, &fp, xscr);
     if(scr==NULL){
         free(rootwin);
@@ -271,6 +267,8 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     region_map((WRegion*)scr);
 
     LINK_ITEM(*(WRegion**)&ioncore_g.rootwins, (WRegion*)rootwin, p_next, p_prev);
+
+    ioncore_screens_updated(rootwin);
 
     xwindow_set_cursor(root, IONCORE_CURSOR_DEFAULT);
     
