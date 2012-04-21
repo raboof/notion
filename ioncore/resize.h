@@ -42,6 +42,9 @@
 #define REGION_ORIENTATION_HORIZONTAL 1
 #define REGION_ORIENTATION_VERTICAL 2
 
+#define KEEP_MAX      0x0001
+#define NO_REDRAW     0x0002
+
 
 #define RQGEOMPARAMS_INIT {{0, 0, 0, 0}, 0, 0}
 

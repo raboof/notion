@@ -389,10 +389,10 @@ static bool frame_initialise_titles(WFrame *frame)
 
 /*{{{ Resize and reparent */
 
-bool region_statusbar_transition(WRegion *reg)
+int region_maximize_transition(WRegion *reg)
 {
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_statusbar_transition, reg, (reg));
+    int ret=0;
+    CALL_DYN_RET(ret, bool, region_maximize_transition, reg, (reg));
     return ret;
 }
 
@@ -402,10 +402,14 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     WRectangle old_geom, mg;
     bool wchg=(REGION_GEOM(frame).w!=fp->g.w);
     bool hchg=(REGION_GEOM(frame).h!=fp->g.h);
+    int st=
+        REGION_MANAGER(frame)==NULL ?
+        0 :
+        region_maximize_transition(REGION_MANAGER(frame));
     
     old_geom=REGION_GEOM(frame);
     
-    if(!window_fitrep(&(frame->mplex.win), par, fp))
+    if(!(st&NO_REDRAW) && !window_fitrep(&(frame->mplex.win), par, fp))
         return FALSE;
 
     mplex_managed_geom((WMPlex*)frame, &mg);
@@ -418,7 +422,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_SHADED;
         }
-        if(REGION_MANAGER(frame)==NULL || !region_statusbar_transition(REGION_MANAGER(frame)))
+        if(!(st&KEEP_MAX))
             frame->flags&=~FRAME_MAXED_VERT;
     }
     
@@ -430,7 +434,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_MIN_HORIZ;
         }
-        if(REGION_MANAGER(frame)==NULL || !region_statusbar_transition(REGION_MANAGER(frame)))
+        if(!(st&KEEP_MAX))
             frame->flags&=~FRAME_MAXED_HORIZ;
     }
 

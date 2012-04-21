@@ -799,7 +799,8 @@ void frame_maximize_vert_2(WFrame *frame)
                 rqh(frame, frame->saved_y, frame->saved_h);
         }
         frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
-        region_unignore_statusbar(mp);
+        if(mp!=NULL)
+            region_unignore_statusbar(mp);
         region_goto((WRegion*)frame);
         return;
     }
@@ -895,7 +896,8 @@ void frame_maximize_horiz_2(WFrame *frame)
         }
         frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
         region_goto((WRegion*)frame);
-        region_unignore_statusbar(mp);
+        if(mp!=NULL)
+            region_unignore_statusbar(mp);
         return;
     }
 

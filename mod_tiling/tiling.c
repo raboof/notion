@@ -138,23 +138,23 @@ void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd,
         splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
 }
 
-bool tiling_statusbar_transition(WTiling *ws)
+int tiling_maximize_transition(WTiling *ws)
 {
-    return ws->statusbar_transition;
+    return ws->maximize_transition;
 }
 
 void tiling_ignore_statusbar(WTiling *ws)
 {    
-    ws->statusbar_transition=TRUE;
+    ws->maximize_transition=KEEP_MAX|NO_REDRAW;
     tiling_unmanage_stdisp(ws, TRUE, TRUE);
-    ws->statusbar_transition=FALSE;
 }
 
 void tiling_unignore_statusbar(WTiling *ws)
 {    
-    ws->statusbar_transition=TRUE;
-    mplex_remanage_stdisp(&region_screen_of(&ws->reg)->mplex);
-    ws->statusbar_transition=FALSE;
+    WMPlex mplex=region_screen_of(&ws->reg)->mplex;
+    ws->maximize_transition=KEEP_MAX;
+    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj),&mplex.stdispinfo);
+    ws->maximize_transition=0;
 }
 
 void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
@@ -585,7 +585,7 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
     ws->stdispnode=NULL;
     ws->managed_list=NULL;
     ws->batchop=FALSE;
-    ws->statusbar_transition=FALSE;
+    ws->maximize_transition=0;
     
     ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
@@ -1733,8 +1733,8 @@ static DynFunTab tiling_dynfuntab[]={
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
     
-    {(DynFun*)region_statusbar_transition,
-     (DynFun*)tiling_statusbar_transition},
+    {(DynFun*)region_maximize_transition,
+     (DynFun*)tiling_maximize_transition},
     
     {region_ignore_statusbar,
      tiling_ignore_statusbar},
