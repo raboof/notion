@@ -370,3 +370,43 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
 
 /*}}}*/
 
+/*{{{ _NET_WM_VIRTUAL_ROOTS */
+
+int count_screens()
+{
+    int result = 0;
+    WScreen *scr;
+
+    FOR_ALL_SCREENS(scr){
+        result++;
+    }
+
+    return result;
+}
+
+/*EXTL_DOC
+ * refresh \_NET\_WM\_VIRTUAL\_ROOTS 
+ */
+EXTL_SAFE
+EXTL_EXPORT
+void ioncore_screens_updated(WRootWin *rw)
+{
+    int current_screen = 0;
+    int n_screens;
+    CARD32 *virtualroots;
+    WScreen *scr;
+
+    n_screens = count_screens();
+    virtualroots = (CARD32*)malloc(n_screens * sizeof(CARD32));
+    
+    FOR_ALL_SCREENS(scr){
+        virtualroots[current_screen] = region_xwindow((WRegion *)scr);
+        current_screen++;
+    }
+
+    XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
+                    atom_net_virtual_roots, XA_WINDOW, 
+                    32, PropModeReplace, (uchar*)virtualroots, n_screens);
+}
+
+/*}}}*/
