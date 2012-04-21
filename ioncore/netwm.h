@@ -32,4 +32,6 @@ extern bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev);
 
 extern void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param);
 
+extern void ioncore_screens_updated(WRootWin *rw);
+
 #endif /* ION_IONCORE_NETWM_H */
