@@ -778,15 +778,16 @@ static bool rqh(WFrame *frame, int y, int h)
             abs(rgeom.h-REGION_GEOM(frame).h)>1);
 }
 
+
 /*EXTL_DOC
- * Attempt to toggle vertical maximisation of \var{frame}, experimental version.
+ * Attempt to toggle vertical maximisation of \var{frame}.
  */
 EXTL_EXPORT_MEMBER
-void frame_maximize_vert_2(WFrame *frame)
+void frame_maximize_vert(WFrame *frame)
 {
     WRegion *mp=REGION_MANAGER(frame);
     int oy, oh;
-
+    
     if(mp!=NULL)
         region_ignore_statusbar(mp);
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
@@ -807,51 +808,20 @@ void frame_maximize_vert_2(WFrame *frame)
 
     if(mp==NULL)
         return;
-
+    
     oy=REGION_GEOM(frame).y;
     oh=REGION_GEOM(frame).h;
-
+    
     region_managed_save(mp, (WRegion*)frame,SPLIT_VERTICAL);
     rqh(frame, 0, REGION_GEOM(mp).w);
-
+    
     region_unignore_statusbar(mp);
-
+    
     frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
     frame->saved_y=oy;
     frame->saved_h=oh;
-
+    
     region_goto((WRegion*)frame);
-}
-
-/*EXTL_DOC
- * Attempt to toggle vertical maximisation of \var{frame}.
- */
-EXTL_EXPORT_MEMBER
-void frame_maximize_vert(WFrame *frame)
-{
-    WRegion *mp=region_manager((WRegion*)frame);
-    int oy, oh;
-    
-    if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
-        if(frame->flags&FRAME_SHADED)
-            frame->flags|=FRAME_SHADED_TOGGLE;
-        if(frame->flags&FRAME_SAVED_VERT)
-            rqh(frame, frame->saved_y, frame->saved_h);
-        frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
-        return;
-    }
-
-    if(mp==NULL)
-        return;
-    
-    oy=REGION_GEOM(frame).y;
-    oh=REGION_GEOM(frame).h;
-    
-    rqh(frame, 0, REGION_GEOM(mp).h);
-
-    frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
-    frame->saved_y=oy;
-    frame->saved_h=oh;
 }
 
 static bool rqw(WFrame *frame, int x, int w)
@@ -876,15 +846,16 @@ static bool rqw(WFrame *frame, int x, int w)
             abs(rgeom.w-REGION_GEOM(frame).w)>1);
 }
 
+
 /*EXTL_DOC
- * Attempt to toggle vertical maximisation of \var{frame}, experimental version.
+ * Attempt to toggle horizontal maximisation of \var{frame}.
  */
 EXTL_EXPORT_MEMBER
-void frame_maximize_horiz_2(WFrame *frame)
+void frame_maximize_horiz(WFrame *frame)
 {
     WRegion *mp=REGION_MANAGER(frame);
     int ox, ow;
-
+    
     if(mp!=NULL)
         region_ignore_statusbar(mp);
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
@@ -903,49 +874,20 @@ void frame_maximize_horiz_2(WFrame *frame)
 
     if(mp==NULL)
         return;
-
+    
     ox=REGION_GEOM(frame).x;
     ow=REGION_GEOM(frame).w;
-
+    
     region_managed_save(mp, (WRegion*)frame,SPLIT_HORIZONTAL);
     rqw(frame, 0, REGION_GEOM(mp).w);
-
+    
     region_unignore_statusbar(mp);
-
+    
     frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
     frame->saved_x=ox;
     frame->saved_w=ow;
-
+    
     region_goto((WRegion*)frame);
-}
-
-/*EXTL_DOC
- * Attempt to toggle horizontal maximisation of \var{frame}.
- */
-EXTL_EXPORT_MEMBER
-void frame_maximize_horiz(WFrame *frame)
-{
-    WRegion *mp=region_manager((WRegion*)frame);
-    int ox, ow;
-    
-    if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
-        if(frame->flags&FRAME_SAVED_HORIZ)
-            rqw(frame, frame->saved_x, frame->saved_w);
-        frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
-        return;
-    }
-
-    if(mp==NULL)
-        return;
-    
-    ox=REGION_GEOM(frame).x;
-    ow=REGION_GEOM(frame).w;
-    
-    rqw(frame, 0, REGION_GEOM(mp).w);
-        
-    frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
-    frame->saved_x=ox;
-    frame->saved_w=ow;
 }
 
 

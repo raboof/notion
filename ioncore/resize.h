@@ -146,9 +146,7 @@ extern void region_size_hints_correct(WRegion *reg,
 extern uint region_min_h(WRegion *reg);
 extern uint region_min_w(WRegion *reg);
 
-extern void frame_maximize_vert_2(WFrame *frame);
 extern void frame_maximize_vert(WFrame *frame);
-extern void frame_maximize_horiz_2(WFrame *frame);
 extern void frame_maximize_horiz(WFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
