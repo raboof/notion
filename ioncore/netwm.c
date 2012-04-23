@@ -407,6 +407,8 @@ void ioncore_screens_updated(WRootWin *rw)
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_virtual_roots, XA_WINDOW, 
                     32, PropModeReplace, (uchar*)virtualroots, n_screens);
+
+    free(virtualroots);
 }
 
 /*}}}*/
