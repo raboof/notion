@@ -26,14 +26,14 @@ POTDIRS=../ioncore \
 	../mod_statusbar \
 	../mod_mgmtmode \
 	../de \
-	../ion \
+	../notion \
 	../pwm \
 	../etc \
 	$(LIBEXTL_DIR)
 
 EXTRA_POTFILES_LUA=../build/mkman.lua
 
-POTFILE=ion3.pot
+POTFILE=notion.pot
 
 TARGETS = $(MO_FILES)
 
@@ -80,7 +80,7 @@ $(POTFILE): $(POTFILE)_c $(POTFILE)_lua
 _install:
 	for i in $(TRANSLATIONS); do \
 		$(INSTALLDIR) $(DESTDIR)$(LOCALEDIR)/$$i/LC_MESSAGES ; \
-		$(INSTALL) -m $(DATA_MODE) $$i.mo $(DESTDIR)$(LOCALEDIR)/$$i/LC_MESSAGES/ion3.mo ; \
+		$(INSTALL) -m $(DATA_MODE) $$i.mo $(DESTDIR)$(LOCALEDIR)/$$i/LC_MESSAGES/notion.mo ; \
 	done
 
 update_fi: pot
