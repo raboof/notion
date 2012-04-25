@@ -905,7 +905,7 @@ static bool extl_getref(lua_State *st, int ref)
 
 static bool extl_do_unref(lua_State *st, int *refp)
 {
-    lua_unref(st, *refp);
+    luaL_unref(st, LUA_REGISTRYINDEX, *refp);
     return TRUE;
 }
 
