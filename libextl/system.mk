@@ -55,24 +55,17 @@ LIBTU_INCLUDES =
 
 # Default to paths and names that should work for a build installed from the
 # official Lua 5.1 source tarball.
-LUA_DIR=nonsense
-LUA_LIBS=`pkg-config --libs lua5.1`
-LUA_INCLUDES =`pkg-config --cflags lua5.1`
-LUA=
+LUA_DIR=$(shell dirname `which lua` | xargs dirname)
+LUA_LIBS=-L$(LUA_DIR)/lib -llua
+LUA_INCLUDES = -I$(LUA_DIR)/include
+LUA=$(LUA_DIR)/bin/lua
 LUAC=$(LUA_DIR)/bin/luac
 
 # Attempt to autodect lua using pkg-config.
 
 ifndef LUA_MANUAL
 
-ifeq (5.2,$(findstring 5.2,$(shell pkg-config --exists lua5.2 && pkg-config --modversion lua5.2)))
-
-LUA_LIBS=`pkg-config --libs lua5.2`
-LUA_INCLUDES=`pkg-config --cflags lua5.2`
-LUA=`which lua5.2`
-LUAC=`which luac5.2`
-
-else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
+ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
 
 LUA_LIBS=`pkg-config --libs lua5.1`
 LUA_INCLUDES=`pkg-config --cflags lua5.1`
