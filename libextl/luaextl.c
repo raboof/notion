@@ -62,7 +62,11 @@ static void flushtrace();
 static int lua_objlen_check(lua_State *st, int index)
 {
     CHECK_TABLE(st, index);
+#if LUA_VERSION_NUM==502
+    return lua_rawlen(st, index);
+#else
     return lua_objlen(st, index);
+#endif
 }
 
 
@@ -994,7 +998,11 @@ static bool extl_do_eq(lua_State *st, EqParams *ep)
         return FALSE;
     if(!extl_getref(st, ep->o2))
         return FALSE;
+#if LUA_VERSION_NUM==502
+    ep->ret=lua_compare(st, -1, -2,LUA_OPEQ);
+#else
     ep->ret=lua_equal(st, -1, -2);
+#endif
     return TRUE;
 }
 
