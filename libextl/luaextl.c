@@ -464,7 +464,7 @@ static bool extl_init_obj_info(lua_State *st)
     lua_pushstring(st, "v");
     lua_rawset_check(st, -3);
     lua_setmetatable(st, -2);
-    owned_cache_ref=lua_ref(st, -1);
+    owned_cache_ref=luaL_ref(st, LUA_REGISTRYINDEX);
 
     lua_pushcfunction(st, extl_obj_typename);
     lua_setglobal(st, "obj_typename");
@@ -730,9 +730,9 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
             lua_pushvalue(st, pos);
             if(type=='a'){
                 ((ExtlAny*)valret)->type='f';
-                ((ExtlAny*)valret)->value.f=lua_ref(st, 1);
+                ((ExtlAny*)valret)->value.f=luaL_ref(st, LUA_REGISTRYINDEX);
             }else{
-                *((int*)valret)=lua_ref(st, 1);
+                *((int*)valret)=luaL_ref(st, LUA_REGISTRYINDEX);
             }
         }
         return TRUE;
@@ -744,9 +744,9 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
             lua_pushvalue(st, pos);
             if(type=='a'){
                 ((ExtlAny*)valret)->type='t';
-                ((ExtlAny*)valret)->value.f=lua_ref(st, 1);
+                ((ExtlAny*)valret)->value.f=luaL_ref(st, LUA_REGISTRYINDEX);
             }else{
-                *((int*)valret)=lua_ref(st, 1);
+                *((int*)valret)=luaL_ref(st, LUA_REGISTRYINDEX);
             }
         }
         return TRUE;
@@ -944,7 +944,7 @@ static bool extl_do_ref(lua_State *st, int *refp)
 {
     if(!extl_getref(st, *refp))
         return FALSE;
-    *refp=lua_ref(st, 1);
+    *refp=luaL_ref(st, LUA_REGISTRYINDEX);
     return TRUE;
 }
 
@@ -970,7 +970,7 @@ ExtlFn extl_ref_fn(ExtlFn ref)
 static bool extl_do_create_table(lua_State *st, int *refp)
 {
     lua_newtable(st);
-    *refp=lua_ref(st, 1);
+    *refp=luaL_ref(st, LUA_REGISTRYINDEX);
     return TRUE;
 }
 
@@ -1701,7 +1701,7 @@ static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
      * the newly created environment.
      */
     lua_pushcclosure(st, call_loaded, 1);
-    *(param->resptr)=lua_ref(st, -1);
+    *(param->resptr)=luaL_ref(st, LUA_REGISTRYINDEX);
     
     return TRUE;
 }
@@ -2264,7 +2264,7 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
     
     /* Set the global WFoobar */
     lua_pushvalue(st, -1);
-    data->refret=lua_ref(st, 1); /* TODO: free on failure */
+    data->refret=luaL_ref(st, LUA_REGISTRYINDEX); /* TODO: free on failure */
     if(!data->hide){
         lua_pushstring(st, data->cls);
         lua_pushvalue(st, -2);
@@ -2326,7 +2326,7 @@ static void extl_do_unregister_class(lua_State *st, ClassData *data)
     /* Get __index and return it for resetting the functions. */
     lua_pushstring(st, "__index");
     lua_gettable(st, -2);
-    data->refret=lua_ref(st, -1);
+    data->refret=luaL_ref(st, LUA_REGISTRYINDEX);
     lua_pop(st, 1);
     /* Set the entry from registry to nil. */
     lua_pushnil(st);
@@ -2376,7 +2376,7 @@ static bool extl_do_register_module(lua_State *st, ClassData *clsdata)
     lua_pushvalue(st, -2);
     lua_rawset(st, LUA_REGISTRYINDEX);
     
-    clsdata->refret=lua_ref(st, -1);
+    clsdata->refret=luaL_ref(st, LUA_REGISTRYINDEX);
     
     return TRUE;
 }
@@ -2407,7 +2407,7 @@ static bool extl_do_unregister_module(lua_State *st, ClassData *clsdata)
     lua_pushvalue(st, -1);
     lua_pushnil(st);
     lua_rawset(st, LUA_REGISTRYINDEX);
-    clsdata->refret=lua_ref(st, -1);
+    clsdata->refret=luaL_ref(st, LUA_REGISTRYINDEX);
     
     return TRUE;
 }
