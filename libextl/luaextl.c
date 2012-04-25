@@ -59,10 +59,10 @@ static void flushtrace();
 
 #define CHECK_TABLE(ST, INDEX) luaL_checktype(ST, INDEX, LUA_TTABLE)
 
-static int luaL_getn_check(lua_State *st, int index)
+static int lua_objlen_check(lua_State *st, int index)
 {
     CHECK_TABLE(st, index);
-    return luaL_getn(st, index);
+    return lua_objlen(st, index);
 }
 
 
@@ -1179,7 +1179,7 @@ typedef struct{
 static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
 {
     lua_rawgeti(st, LUA_REGISTRYINDEX, params->ref);
-    params->n=luaL_getn_check(st, -1);
+    params->n=lua_objlen_check(st, -1);
     return TRUE;
 }
 
