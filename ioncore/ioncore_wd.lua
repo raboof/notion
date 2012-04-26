@@ -102,6 +102,10 @@ end
 -- script. If the command is prefixed by two colons, \command{ion-runinxterm}
 -- will ask you to press enter after the command is finished, even if it
 -- returns succesfully.
+-- 
+-- For GUI commands, you might prefer to use mod_query.exec_on_merr(), which 
+-- monitors the process's \code{stderr} and shows any output as warnings on
+-- the screen instead of in notions own output.
 function ioncore.exec_on(reg, cmd, merr_internal)
     local _, _, col, c=string.find(cmd, "^[%s]*(:+)(.*)")
     if col then
