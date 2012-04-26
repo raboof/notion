@@ -4,18 +4,20 @@
 -- email: randy@rwald.com
 -- Released under the GPL
 --
--- Due to bug in "top b -n 1", uses "top b -n 2 -d 1 -p 0|grep Cpu|tail -n 1"
--- to get information about CPU usage and "free" to get information
--- about memory and swap usage.
+-- This script is based on parsing 'top' output.
 --
--- If this script fails, manually check the output of "top b -n 2 -d 1 -p 0|grep -i cpu".
--- If it doesn't look similar to the below (in particular, if the
--- "Cpu(s):" part is differently capitalized or punctuated),
--- change the grep and the regexp in get_CPU_info() to match.
+-- Unfortunately top output is inconsistent among versions. Some versions 
+-- (such as 3.2.8) are known not to work, as they do not support the 'b' 
+-- mode. Other versions do not work correctly with '-n 1', so we pass '-n 2'
+-- just to be sure.
+--
+-- We currently recognise 2 output formats for the command
+--     top b -n 2 -d 1 -p 0|grep Cpu|tail -n 1
+--
 -- Cpu(s): 16.9% us,  5.1% sy,  0.0% ni, 70.8% id,  6.5% wa,  0.1% hi,  0.5% si
---   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
--- Cpu(s): 74.5% us,  3.9% sy,  0.0% ni, 19.6% id,  0.0% wa,  0.0% hi,  2.0% si
---   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+-- %Cpu(s):  4.5 us,  1.0 sy,  0.0 ni, 93.5 id,  1.0 wa,  0.0 hi,  0.0 si,  0.0 st
+--
+-- Let us know when you encounter another variation, perhaps we can support it, too.
 -- 
 -- Available monitors:
 -- 	%info_CPU_user		Percentage of CPU used by user programs
@@ -69,7 +71,7 @@ local function get_CPU_info()
 		info_CPU_idle,
 		info_CPU_wa,
 		info_CPU_hi,
-		info_CPU_si = string.find(s, "Cpu%(s%):%s*(%d+%.%d+%%)%s*us,%s*(%d+%.%d+%%)%s*sy,%s*(%d+%.%d+%%)%s*ni,%s*(%d+%.%d+%%)%s*id,%s*(%d+%.%d+%%)%s*wa,%s*(%d+%.%d+%%)%s*hi,%s*(%d+%.%d+%%)%s*si") 
+		info_CPU_si = string.find(s, "Cpu%(s%):%s*(%d+%.%d+%%?)%s*us,%s*(%d+%.%d+%%?)%s*sy,%s*(%d+%.%d+%%?)%s*ni,%s*(%d+%.%d+%%?)%s*id,%s*(%d+%.%d+%%?)%s*wa,%s*(%d+%.%d+%%?)%s*hi,%s*(%d+%.%d+%%?)%s*si") 
 	return info_CPU_user.."", info_CPU_system.."", info_CPU_ni.."", info_CPU_idle.."", info_CPU_wa.."", info_CPU_hi.."", info_CPU_si..""
 end
 
