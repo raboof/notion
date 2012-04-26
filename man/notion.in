@@ -156,7 +156,7 @@ Notion home page.
 .PP
 .I DOCDIR/
 .PP
-\fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
+\fIX(7x)\fP, \fIjoe(1)\fP
 
 .SH AUTHOR
 Notion was written by the Notion team, based on Ion which was written by Tuomo Valkonen <tuomov at iki.fi>.
