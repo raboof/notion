@@ -53,6 +53,10 @@ static void flushtrace();
 #define flushtrace()
 #endif
 
+#if LUA_VERSION_NUM<502
+#define lua_getuservalue lua_getfenv
+#define lua_setuservalue lua_setfenv
+#endif
 
 /*{{{ Safer rawget/set/getn */
 
@@ -1649,7 +1653,7 @@ static int call_loaded(lua_State *st)
     lua_pushvalue(st, lua_upvalueindex(1));
     
     /* Fill 'arg' */
-    lua_getfenv(st, -1);
+    lua_getuservalue(st, -1);
     lua_pushstring(st, "arg");
     
     if(nargs>0){
@@ -1695,14 +1699,14 @@ static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
     /* Now there's fn, newenv in stack */
     lua_newtable(st); /* Create metatable */
     lua_pushstring(st, "__index");
-    lua_getfenv(st, -4); /* Get old environment */
+    lua_getuservalue(st, -4); /* Get old environment */
     lua_rawset_check(st, -3); /* Set metatable.__index */
     lua_pushstring(st, "__newindex");
-    lua_getfenv(st, -4); /* Get old environment */
+    lua_getuservalue(st, -4); /* Get old environment */
     lua_rawset_check(st, -3); /* Set metatable.__newindex */
     /* Now there's fn, newenv, meta in stack */
     lua_setmetatable(st, -2); /* Set metatable for new environment */
-    lua_setfenv(st, -2);
+    lua_setuservalue(st, -2);
     /* Now there should be just fn in stack */
 
     /* Callloaded will put any parameters it gets in the table 'arg' in
