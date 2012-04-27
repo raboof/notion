@@ -140,7 +140,15 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
     param.retval=FALSE;
     
     
+#if LUA_VERSION_NUM==502
+    /* TODO: Call appropriate lua_checkstack!?
+    lua_checkstack(st, 2); */
+    lua_pushcfunction(st, extl_docpcall);
+    lua_pushlightuserdata(st, &param);
+    err=lua_pcall(st, 1, 0, 0);
+#else
     err=lua_cpcall(st, extl_docpcall, &param);
+#endif
     if(err==LUA_ERRRUN){
         extl_warn("%s", lua_tostring(st, -1));
     }else if(err==LUA_ERRMEM){
