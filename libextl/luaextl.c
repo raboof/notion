@@ -2100,7 +2100,11 @@ typedef struct{
 static bool extl_do_register_function(lua_State *st, RegData *data)
 {
     ExtlExportedFnSpec *spec=data->spec, *spec2;
+#if LUA_VERSION_NUM==502
+    int ind;
+#else
     int ind=LUA_GLOBALSINDEX;
+#endif
     
     if((spec->ispec!=NULL && strlen(spec->ispec)>MAX_PARAMS) ||
        (spec->ospec!=NULL && strlen(spec->ospec)>MAX_PARAMS)){
@@ -2113,6 +2117,12 @@ static bool extl_do_register_function(lua_State *st, RegData *data)
         lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
         ind=-3;
     }
+#if LUA_VERSION_NUM==502
+    else{
+        lua_pushglobaltable(st);
+        ind=-3;
+    }
+#endif
     
     lua_pushstring(st, spec->name);
 
@@ -2163,12 +2173,22 @@ bool extl_register_functions(ExtlExportedFnSpec *spec)
 static bool extl_do_unregister_function(lua_State *st, RegData *data)
 {
     ExtlExportedFnSpec *spec=data->spec;
+#if LUA_VERSION_NUM==502
+    int ind;
+#else
     int ind=LUA_GLOBALSINDEX;
+#endif
     
     if(data->table!=LUA_NOREF){
         lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
         ind=-3;
     }
+#if LUA_VERSION_NUM==502
+    else{
+        lua_pushglobaltable(st);
+        ind=-3;
+    }
+#endif
     
     /* Clear table.fn */
     lua_pushstring(st, spec->name);
@@ -2274,9 +2294,17 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
     lua_pushvalue(st, -1);
     data->refret=luaL_ref(st, LUA_REGISTRYINDEX); /* TODO: free on failure */
     if(!data->hide){
+#if LUA_VERSION_NUM==502
+        lua_pushglobaltable(st);
+        lua_pushstring(st, data->cls);
+        lua_pushvalue(st, -3);
+        lua_rawset(st, -3);
+        lua_remove(st, -1);
+#else
         lua_pushstring(st, data->cls);
         lua_pushvalue(st, -2);
         lua_rawset(st, LUA_GLOBALSINDEX);
+#endif
     }
 
     /* New we create a metatable for the actual objects with __gc metamethod
@@ -2341,9 +2369,17 @@ static void extl_do_unregister_class(lua_State *st, ClassData *data)
     lua_rawset(st, LUA_REGISTRYINDEX);
     
     /* Reset the global reference to the class to nil. */
+#if LUA_VERSION_NUM==502
+    lua_pushglobaltable(st);
+    lua_pushstring(st, data->cls);
+    lua_pushnil(st);
+    lua_rawset(st, -3);
+    lua_remove(st, -1);
+#else
     lua_pushstring(st, data->cls);
     lua_pushnil(st);
     lua_rawset(st, LUA_GLOBALSINDEX);
+#endif
 }
 
 
