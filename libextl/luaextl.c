@@ -62,7 +62,7 @@ static void flushtrace();
 static int lua_objlen_check(lua_State *st, int index)
 {
     CHECK_TABLE(st, index);
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     return lua_rawlen(st, index);
 #else
     return lua_objlen(st, index);
@@ -140,7 +140,7 @@ static bool extl_cpcall(lua_State *st, ExtlCPCallFn *fn, void *ptr)
     param.retval=FALSE;
     
     
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     /* TODO: Call appropriate lua_checkstack!?
     lua_checkstack(st, 2); */
     lua_pushcfunction(st, extl_docpcall);
@@ -1006,7 +1006,7 @@ static bool extl_do_eq(lua_State *st, EqParams *ep)
         return FALSE;
     if(!extl_getref(st, ep->o2))
         return FALSE;
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     ep->ret=lua_compare(st, -1, -2,LUA_OPEQ);
 #else
     ep->ret=lua_equal(st, -1, -2);
@@ -2100,7 +2100,7 @@ typedef struct{
 static bool extl_do_register_function(lua_State *st, RegData *data)
 {
     ExtlExportedFnSpec *spec=data->spec, *spec2;
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     int ind;
 #else
     int ind=LUA_GLOBALSINDEX;
@@ -2117,7 +2117,7 @@ static bool extl_do_register_function(lua_State *st, RegData *data)
         lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
         ind=-3;
     }
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     else{
         lua_pushglobaltable(st);
         ind=-3;
@@ -2173,7 +2173,7 @@ bool extl_register_functions(ExtlExportedFnSpec *spec)
 static bool extl_do_unregister_function(lua_State *st, RegData *data)
 {
     ExtlExportedFnSpec *spec=data->spec;
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     int ind;
 #else
     int ind=LUA_GLOBALSINDEX;
@@ -2183,7 +2183,7 @@ static bool extl_do_unregister_function(lua_State *st, RegData *data)
         lua_rawgeti(st, LUA_REGISTRYINDEX, data->table);
         ind=-3;
     }
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     else{
         lua_pushglobaltable(st);
         ind=-3;
@@ -2294,7 +2294,7 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
     lua_pushvalue(st, -1);
     data->refret=luaL_ref(st, LUA_REGISTRYINDEX); /* TODO: free on failure */
     if(!data->hide){
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
         lua_pushglobaltable(st);
         lua_pushstring(st, data->cls);
         lua_pushvalue(st, -3);
@@ -2369,7 +2369,7 @@ static void extl_do_unregister_class(lua_State *st, ClassData *data)
     lua_rawset(st, LUA_REGISTRYINDEX);
     
     /* Reset the global reference to the class to nil. */
-#if LUA_VERSION_NUM==502
+#if LUA_VERSION_NUM>=502
     lua_pushglobaltable(st);
     lua_pushstring(st, data->cls);
     lua_pushnil(st);
