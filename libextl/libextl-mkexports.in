@@ -605,7 +605,7 @@ end
 
 function texfriendly_typeormod(nm)
     if string.find(nm, "A-Z") then
-        return "\\type{"..string.gsub(nm, '_', '\_').."}"
+        return "\\type{"..string.gsub(nm, '_', '\\_').."}"
     else
         return "\\code{"..nm.."}"
     end
