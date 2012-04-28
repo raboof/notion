@@ -19,7 +19,7 @@
 -- Helper functions {{{
 
 function errorf(fmt, ...)
-    error(string.format(fmt, unpack(arg)), 2)
+    error(string.format(fmt, ...), 2)
 end
 
 function matcherr(s)
@@ -27,7 +27,7 @@ function matcherr(s)
 end
 
 function fprintf(h, fmt, ...)
-    h:write(string.format(fmt, args))
+    h:write(string.format(fmt, ...))
 end
 
 function trim(str)
