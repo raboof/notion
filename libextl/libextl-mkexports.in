@@ -27,7 +27,7 @@ function matcherr(s)
 end
 
 function fprintf(h, fmt, ...)
-    h:write(string.format(fmt, unpack(arg)))
+    h:write(string.format(fmt, args))
 end
 
 function trim(str)
@@ -165,6 +165,19 @@ function parse_type(t)
     return desc, otype, varname
 end
 
+-- http://lua-users.org/wiki/SplitJoin
+function gsplit2(s,sep)
+	local lasti, done, g = 1, false, s:gmatch('(.-)'..sep..'()')
+	return function()
+		if done then return end
+		local v,i = g()
+		if s == '' or sep == '' then done = true return s end
+		if v == nil then done = true return s:sub(lasti) end
+		lasti = i
+		return v
+	end
+end
+
 function parse(d)
     local doc=nil
     local safe=false
@@ -208,7 +221,7 @@ function parse(d)
         end
         param=trim(param)
         if string.len(param)>0 then
-            for p in string.gfind(param .. ",", "([^,]*),") do
+            for p in gsplit2(param, ',') do
                 local spec, objtype, varname=parse_type(p)
                 idesc=idesc .. spec
                 table.insert(itypes, objtype)
