@@ -771,7 +771,7 @@ while arg[i] do
     i=i+1
 end
 
-if table.getn(inputs)==0 then
+if #inputs==0 then
     usage()
 end
 
