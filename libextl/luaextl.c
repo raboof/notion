@@ -1647,29 +1647,13 @@ bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
 
 static int call_loaded(lua_State *st)
 {
-    int i, nargs=lua_gettop(st);
+    int i;
 
     /* Get the loaded file/string as function */
     lua_pushvalue(st, lua_upvalueindex(1));
     
-    /* Fill 'arg' */
-    lua_getuservalue(st, -1);
-    lua_pushstring(st, "arg");
-    
-    if(nargs>0){
-        lua_newtable(st);
-        for(i=1; i<=nargs; i++){
-            lua_pushvalue(st, i);
-            lua_rawseti_check(st, -2, i);
-        }
-    }else{
-        lua_pushnil(st);
-    }
-    
-    lua_rawset_check(st, -3);
-    lua_pop(st, 1);
     lua_call(st, 0, LUA_MULTRET);
-    return (lua_gettop(st)-nargs);
+    return 0;
 }
 
 
@@ -1695,23 +1679,6 @@ static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
         return FALSE;
     }
     
-    lua_newtable(st); /* Create new environment */
-    /* Now there's fn, newenv in stack */
-    lua_newtable(st); /* Create metatable */
-    lua_pushstring(st, "__index");
-    lua_getuservalue(st, -4); /* Get old environment */
-    lua_rawset_check(st, -3); /* Set metatable.__index */
-    lua_pushstring(st, "__newindex");
-    lua_getuservalue(st, -4); /* Get old environment */
-    lua_rawset_check(st, -3); /* Set metatable.__newindex */
-    /* Now there's fn, newenv, meta in stack */
-    lua_setmetatable(st, -2); /* Set metatable for new environment */
-    lua_setuservalue(st, -2);
-    /* Now there should be just fn in stack */
-
-    /* Callloaded will put any parameters it gets in the table 'arg' in
-     * the newly created environment.
-     */
     lua_pushcclosure(st, call_loaded, 1);
     *(param->resptr)=luaL_ref(st, LUA_REGISTRYINDEX);
     
