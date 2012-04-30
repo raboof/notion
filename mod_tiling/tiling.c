@@ -147,6 +147,7 @@ void tiling_ignore_statusbar(WTiling *ws)
 {    
     ws->maximize_transition=KEEP_MAX|NO_REDRAW;
     tiling_unmanage_stdisp(ws, TRUE, TRUE);
+    ws->maximize_transition=NO_REDRAW;
 }
 
 void tiling_unignore_statusbar(WTiling *ws)
