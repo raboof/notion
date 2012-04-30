@@ -817,7 +817,7 @@ void split_save(WSplit *node, int dir)
 }
 
 
-void split_do_restore_default(WSplit *node, int dir)
+void split_do_restore_default(WSplit *node,int dir)
 {
     WRectangle geom = node->geom;
     if(dir==SPLIT_HORIZONTAL){
