@@ -393,12 +393,13 @@ void ioncore_screens_updated(WRootWin *rw)
 {
     int current_screen = 0;
     int n_screens;
-    CARD32 *virtualroots;
+
+    long *virtualroots;
     WScreen *scr;
 
     n_screens = count_screens();
-    virtualroots = (CARD32*)malloc(n_screens * sizeof(CARD32));
-    
+    virtualroots = (long*)malloc(n_screens * sizeof(long));
+
     FOR_ALL_SCREENS(scr){
         virtualroots[current_screen] = region_xwindow((WRegion *)scr);
         current_screen++;
