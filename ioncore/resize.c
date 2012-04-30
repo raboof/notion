@@ -638,7 +638,7 @@ void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_ignore_statusbar(WRegion *mgr)
+void region_ignore_statusbar(WRegion *mgr, int dir)
 {
     CALL_DYN(region_ignore_statusbar, mgr, (mgr));
 }
@@ -665,7 +665,7 @@ void region_managed_restore(WRegion *mgr, WRegion *reg, int dir)
 bool region_managed_verify(WRegion *mgr, WRegion *reg, int dir)
 {
     bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_managed_verify, mgr, (mgr, reg,dir));
+    CALL_DYN_RET(ret, bool, region_managed_verify, mgr, (mgr, reg, dir));
     return ret;
 }
 
@@ -789,13 +789,13 @@ void frame_maximize_vert(WFrame *frame)
     int oy, oh;
     
     if(mp!=NULL)
-        region_ignore_statusbar(mp);
+        region_ignore_statusbar(mp, SPLIT_VERTICAL);
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
         if(frame->flags&FRAME_SAVED_VERT){
-            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame,SPLIT_VERTICAL))
-                region_managed_restore(mp, (WRegion*)frame,SPLIT_VERTICAL);
+            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame, SPLIT_VERTICAL))
+                region_managed_restore(mp, (WRegion*)frame, SPLIT_VERTICAL);
             else
                 rqh(frame, frame->saved_y, frame->saved_h);
         }
@@ -812,7 +812,7 @@ void frame_maximize_vert(WFrame *frame)
     oy=REGION_GEOM(frame).y;
     oh=REGION_GEOM(frame).h;
     
-    region_managed_save(mp, (WRegion*)frame,SPLIT_VERTICAL);
+    region_managed_save(mp, (WRegion*)frame, SPLIT_VERTICAL);
     rqh(frame, 0, REGION_GEOM(mp).w);
     
     region_unignore_statusbar(mp);
@@ -857,11 +857,11 @@ void frame_maximize_horiz(WFrame *frame)
     int ox, ow;
     
     if(mp!=NULL)
-        region_ignore_statusbar(mp);
+        region_ignore_statusbar(mp, SPLIT_HORIZONTAL);
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
         if(frame->flags&FRAME_SAVED_HORIZ){
-            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame,SPLIT_HORIZONTAL))
-                region_managed_restore(mp, (WRegion*)frame,SPLIT_HORIZONTAL);
+            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame, SPLIT_HORIZONTAL))
+                region_managed_restore(mp, (WRegion*)frame, SPLIT_HORIZONTAL);
             else
                 rqw(frame, frame->saved_x, frame->saved_w);
         }
@@ -878,7 +878,7 @@ void frame_maximize_horiz(WFrame *frame)
     ox=REGION_GEOM(frame).x;
     ow=REGION_GEOM(frame).w;
     
-    region_managed_save(mp, (WRegion*)frame,SPLIT_HORIZONTAL);
+    region_managed_save(mp, (WRegion*)frame, SPLIT_HORIZONTAL);
     rqw(frame, 0, REGION_GEOM(mp).w);
     
     region_unignore_statusbar(mp);
