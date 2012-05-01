@@ -599,32 +599,7 @@ bool extl_init()
         return FALSE;
     }
 
-    /* This is equivalent to calling all the ones below but it also includes
-     * the debug library, so I went with those in case there was a reason not
-     * to include the debug library.
     luaL_openlibs(l_st);
-    */
-
-    lua_pushcfunction(l_st, luaopen_base);
-    lua_call(l_st, 0, 0);
-
-    lua_pushcfunction(l_st, luaopen_table);
-    lua_call(l_st, 0, 0);
-
-    lua_pushcfunction(l_st, luaopen_io);
-    lua_call(l_st, 0, 0);
-
-    lua_pushcfunction(l_st, luaopen_os);
-    lua_call(l_st, 0, 0);
-
-    lua_pushcfunction(l_st, luaopen_string);
-    lua_call(l_st, 0, 0);
-
-    lua_pushcfunction(l_st, luaopen_math);
-    lua_call(l_st, 0, 0);
-
-    lua_pushcfunction(l_st, luaopen_package);
-    lua_call(l_st, 0, 0);
 
     if(!extl_init_obj_info(l_st)){
         lua_close(l_st);
