@@ -1019,7 +1019,6 @@ function mod_query.create_run_env(mplex)
         env=_ENV
         env._=mplex
         env._sub=mplex:current()
-        env.print=my_print
     else
         local origenv=getfenv()
         local meta={__index=origenv, __newindex=origenv}
