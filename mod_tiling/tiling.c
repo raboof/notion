@@ -143,21 +143,18 @@ int tiling_maximize_transition(WTiling *ws)
     return ws->maximize_transition;
 }
 
-void tiling_ignore_statusbar(WTiling *ws, int dir)
+void tiling_ignore_statusbar(WTiling *ws)
 {    
-    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT|NO_REDRAW;
+    ws->maximize_transition=KEEP_MAX|NO_REDRAW;
     tiling_unmanage_stdisp(ws, TRUE, TRUE);
-    if(dir==SPLIT_HORIZONTAL)
-        ws->maximize_transition&=~KEEP_MAX_HORIZ;
-    else if(dir==SPLIT_VERTICAL)
-        ws->maximize_transition&=~KEEP_MAX_VERT;
+    ws->maximize_transition=NO_REDRAW;
 }
 
 void tiling_unignore_statusbar(WTiling *ws)
 {    
     WMPlex mplex=region_screen_of(&ws->reg)->mplex;
-    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT;
-    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj), &mplex.stdispinfo);
+    ws->maximize_transition=KEEP_MAX;
+    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj),&mplex.stdispinfo);
     ws->maximize_transition=0;
 }
 

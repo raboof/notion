@@ -422,7 +422,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_SHADED;
         }
-        if(!(st&KEEP_MAX_VERT))
+        if(!(st&KEEP_MAX))
             frame->flags&=~FRAME_MAXED_VERT;
     }
     
@@ -434,7 +434,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_MIN_HORIZ;
         }
-        if(!(st&KEEP_MAX_HORIZ))
+        if(!(st&KEEP_MAX))
             frame->flags&=~FRAME_MAXED_HORIZ;
     }
 

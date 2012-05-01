@@ -752,7 +752,7 @@ bool splits_are_related(WSplit *p, WSplit *node)
     else 
         return 
             node->parent!=NULL 
-            ? splits_are_related(p, (WSplit*)node->parent)
+            ? splits_are_related(p,(WSplit*)node->parent)
             : FALSE;
 }
 
@@ -808,16 +808,16 @@ void splitsplit_do_save(WSplitSplit *node, int dir)
 
 void split_do_save(WSplit *node, int dir)
 {
-    CALL_DYN(split_do_save, node, (node, dir));
+    CALL_DYN(split_do_save, node, (node,dir));
 }
 
 void split_save(WSplit *node, int dir)
 {
-    split_do_save(max_parent_direction(node, dir), dir);
+    split_do_save(max_parent_direction(node,dir), dir);
 }
 
 
-void split_do_restore_default(WSplit *node, int dir)
+void split_do_restore_default(WSplit *node,int dir)
 {
     WRectangle geom = node->geom;
     if(dir==SPLIT_HORIZONTAL){
@@ -848,12 +848,12 @@ void splitsplit_do_restore(WSplitSplit *node, int dir)
 
 void split_do_restore(WSplit *node, int dir)
 {
-    CALL_DYN(split_do_restore, node, (node, dir));
+    CALL_DYN(split_do_restore, node, (node,dir));
 }
 
 void split_restore(WSplit *node, int dir)
 {
-    split_do_restore(max_parent_direction(node, dir), dir);
+    split_do_restore(max_parent_direction(node,dir), dir);
 }
 
 
@@ -908,8 +908,8 @@ bool splitsplit_do_verify(WSplitSplit *node, int dir)
     }
     return 
         ret &&
-        split_do_verify(node->tl, dir) &&
-        split_do_verify(node->br, dir);
+        split_do_verify(node->tl,dir) &&
+        split_do_verify(node->br,dir);
 }
 
 bool split_do_verify(WSplit *node, int dir)
@@ -921,7 +921,7 @@ bool split_do_verify(WSplit *node, int dir)
 
 bool split_verify(WSplit *node, int dir)
 {
-    return split_do_verify(max_parent_direction(node, dir), dir);
+    return split_do_verify(max_parent_direction(node,dir), dir);
 }
 
 
