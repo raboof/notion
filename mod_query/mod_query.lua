@@ -1014,14 +1014,22 @@ end
 
 
 function mod_query.create_run_env(mplex)
-    local origenv=getfenv()
-    local meta={__index=origenv, __newindex=origenv}
-    local env={
-        _=mplex, 
-        _sub=mplex:current(),
-        print=my_print
-    }
-    setmetatable(env, meta)
+    local env
+    if _ENV then
+        env=_ENV
+        env._=mplex
+        env._sub=mplex:current()
+        env.print=my_print
+    else
+        local origenv=getfenv()
+        local meta={__index=origenv, __newindex=origenv}
+        env={
+            _=mplex, 
+            _sub=mplex:current(),
+            print=my_print
+        }
+        setmetatable(env, meta)
+    end
     return env
 end
 
@@ -1037,16 +1045,25 @@ function mod_query.do_handle_lua(mplex, env, code)
         print_res=(print_res and print_res..tmp or tmp)
     end
 
-    local f, err=loadstring(code)
-    if not f then
-        mod_query.warn(mplex, err)
-        return
+
+    if _ENV then
+        env.print=collect_print
+        local f, err=load(code,nil, nil, env)
+        if not f then
+            mod_query.warn(mplex, err)
+            return
+        end
+        err=collect_errors(f)
+    else
+        local f, err=loadstring(code)
+        if not f then
+            mod_query.warn(mplex, err)
+            return
+        end
+        env.print=collect_print
+        setfenv(f, env)
+        err=collect_errors(f)
     end
-    
-    env.print=collect_print
-    setfenv(f, env)
-    
-    err=collect_errors(f)
     if err then
         mod_query.warn(mplex, err)
     elseif print_res then
