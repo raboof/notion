@@ -1014,21 +1014,15 @@ end
 
 
 function mod_query.create_run_env(mplex)
-    local env
-    if _ENV then
-        env=_ENV
-        env._=mplex
-        env._sub=mplex:current()
-    else
-        local origenv=getfenv()
-        local meta={__index=origenv, __newindex=origenv}
-        env={
-            _=mplex, 
-            _sub=mplex:current(),
-            print=my_print
-        }
-        setmetatable(env, meta)
-    end
+    local origenv
+    if _ENV then origenv=_ENV else origenv=getfenv() end
+    local meta={__index=origenv, __newindex=origenv}
+    local env={
+        _=mplex, 
+        _sub=mplex:current(),
+        print=my_print
+    }
+    setmetatable(env, meta)
     return env
 end
 
