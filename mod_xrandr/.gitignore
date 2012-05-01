@@ -1,0 +1,6 @@
+exports.c
+exports.h
+exports.o
+mod_xrandr.lc
+mod_xrandr.o
+mod_xrandr.so
