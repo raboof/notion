@@ -638,9 +638,9 @@ void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_ignore_statusbar(WRegion *mgr)
+void region_ignore_statusbar(WRegion *mgr, int dir)
 {
-    CALL_DYN(region_ignore_statusbar, mgr, (mgr));
+    CALL_DYN(region_ignore_statusbar, mgr, (mgr, dir));
 }
 
 
@@ -789,7 +789,7 @@ void frame_maximize_vert(WFrame *frame)
     int oy, oh;
     
     if(mp!=NULL)
-        region_ignore_statusbar(mp);
+        region_ignore_statusbar(mp, SPLIT_VERTICAL);
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
@@ -857,7 +857,7 @@ void frame_maximize_horiz(WFrame *frame)
     int ox, ow;
     
     if(mp!=NULL)
-        region_ignore_statusbar(mp);
+        region_ignore_statusbar(mp, SPLIT_HORIZONTAL);
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
         if(frame->flags&FRAME_SAVED_HORIZ){
             if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame, SPLIT_HORIZONTAL))
