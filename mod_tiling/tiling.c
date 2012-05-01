@@ -154,7 +154,7 @@ void tiling_unignore_statusbar(WTiling *ws)
 {    
     WMPlex mplex=region_screen_of(&ws->reg)->mplex;
     ws->maximize_transition=KEEP_MAX;
-    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj),&mplex.stdispinfo);
+    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj), &mplex.stdispinfo);
     ws->maximize_transition=0;
 }
 
