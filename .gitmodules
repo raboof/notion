@@ -1,0 +1,9 @@
+[submodule "mod_xinerama"]
+	path = mod_xinerama
+	url = git://notion.git.sourceforge.net/gitroot/notion/mod_xinerama
+[submodule "mod_xrandr"]
+	path = mod_xrandr
+	url = git://notion.git.sourceforge.net/gitroot/notion/mod_xrandr
+[submodule "mod_xkbevents"]
+	path = mod_xkbevents
+	url = git://notion.git.sourceforge.net/gitroot/notion/mod_xkbevents
