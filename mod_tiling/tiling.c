@@ -143,7 +143,7 @@ int tiling_query_transition(WTiling *ws)
     return ws->maximize_transition;
 }
 
-void tiling_ignore_statusbar(WTiling *ws)
+void tiling_ignore_stdisp(WTiling *ws)
 {    
     ws->maximize_transition=KEEP_MAX;
     if(ws->stdispnode!=NULL){
@@ -152,7 +152,7 @@ void tiling_ignore_statusbar(WTiling *ws)
     }
 }
 
-void tiling_unignore_statusbar(WTiling *ws)
+void tiling_unignore_stdisp(WTiling *ws)
 {    
     WMPlex mplex=region_screen_of(&ws->reg)->mplex;
     WRegion *stdisp=(WRegion*)mplex.stdispwatch.obj;
@@ -1740,11 +1740,11 @@ static DynFunTab tiling_dynfuntab[]={
     {(DynFun*)region_query_transition,
      (DynFun*)tiling_query_transition},
     
-    {region_ignore_statusbar,
-     tiling_ignore_statusbar},
+    {region_ignore_stdisp,
+     tiling_ignore_stdisp},
     
-    {region_unignore_statusbar,
-     tiling_unignore_statusbar},
+    {region_unignore_stdisp,
+     tiling_unignore_stdisp},
    
     {region_managed_save,
      tiling_managed_save},

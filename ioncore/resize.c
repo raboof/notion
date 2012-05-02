@@ -637,15 +637,15 @@ void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_ignore_statusbar(WRegion *mgr)
+void region_ignore_stdisp(WRegion *mgr)
 {
-    CALL_DYN(region_ignore_statusbar, mgr, (mgr));
+    CALL_DYN(region_ignore_stdisp, mgr, (mgr));
 }
 
 
-void region_unignore_statusbar(WRegion *mgr)
+void region_unignore_stdisp(WRegion *mgr)
 {
-    CALL_DYN(region_unignore_statusbar, mgr, (mgr));
+    CALL_DYN(region_unignore_stdisp, mgr, (mgr));
 }
 
 
@@ -788,7 +788,7 @@ void frame_maximize_vert(WFrame *frame)
     int oy, oh;
     
     if(mp!=NULL)
-        region_ignore_statusbar(mp);
+        region_ignore_stdisp(mp);
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
@@ -798,7 +798,7 @@ void frame_maximize_vert(WFrame *frame)
             rqh(frame, frame->saved_y, frame->saved_h);
         frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
         if(mp!=NULL)
-            region_unignore_statusbar(mp);
+            region_unignore_stdisp(mp);
         region_goto((WRegion*)frame);
         return;
     }
@@ -812,7 +812,7 @@ void frame_maximize_vert(WFrame *frame)
     region_managed_save(mp, (WRegion*)frame, VERTICAL);
     rqh(frame, 0, REGION_GEOM(mp).w);
     
-    region_unignore_statusbar(mp);
+    region_unignore_stdisp(mp);
     
     frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
     frame->saved_y=oy;
@@ -854,7 +854,7 @@ void frame_maximize_horiz(WFrame *frame)
     int ox, ow;
     
     if(mp!=NULL)
-        region_ignore_statusbar(mp);
+        region_ignore_stdisp(mp);
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
         if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame, HORIZONTAL))
             region_managed_restore(mp, (WRegion*)frame, HORIZONTAL);
@@ -863,7 +863,7 @@ void frame_maximize_horiz(WFrame *frame)
         frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
         region_goto((WRegion*)frame);
         if(mp!=NULL)
-            region_unignore_statusbar(mp);
+            region_unignore_stdisp(mp);
         return;
     }
 
@@ -876,7 +876,7 @@ void frame_maximize_horiz(WFrame *frame)
     region_managed_save(mp, (WRegion*)frame, HORIZONTAL);
     rqw(frame, 0, REGION_GEOM(mp).w);
     
-    region_unignore_statusbar(mp);
+    region_unignore_stdisp(mp);
     
     frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
     frame->saved_x=ox;
