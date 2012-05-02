@@ -95,6 +95,7 @@ extern void frame_set_mode(WFrame *frame, WFrameMode mode);
 extern WFrameMode frame_mode(WFrame *frame);
 
 /* Resize and reparent */
+DYNFUN int region_maximize_transition(WRegion *reg);
 extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
 extern void frame_size_hints(WFrame *frame, WSizeHints *hints_ret);
 

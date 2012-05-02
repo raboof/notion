@@ -13,6 +13,7 @@
 #include <libtu/minmax.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
+#include <mod_tiling/split.h>
 
 #include "common.h"
 #include "global.h"
@@ -637,6 +638,38 @@ void region_managed_rqgeom_absolute_default(WRegion *mgr, WRegion *reg,
 }
 
 
+void region_ignore_statusbar(WRegion *mgr, int dir)
+{
+    CALL_DYN(region_ignore_statusbar, mgr, (mgr, dir));
+}
+
+
+void region_unignore_statusbar(WRegion *mgr)
+{
+    CALL_DYN(region_unignore_statusbar, mgr, (mgr));
+}
+
+
+void region_managed_save(WRegion *mgr, WRegion *reg, int dir)
+{
+    CALL_DYN(region_managed_save, mgr, (mgr, reg, dir));
+}
+
+
+void region_managed_restore(WRegion *mgr, WRegion *reg, int dir)
+{
+    CALL_DYN(region_managed_restore, mgr, (mgr, reg, dir));
+}
+
+
+bool region_managed_verify(WRegion *mgr, WRegion *reg, int dir)
+{
+    bool ret=FALSE;
+    CALL_DYN_RET(ret, bool, region_managed_verify, mgr, (mgr, reg, dir));
+    return ret;
+}
+
+
 void region_size_hints(WRegion *reg, WSizeHints *hints_ret)
 {
     sizehints_clear(hints_ret);
@@ -752,15 +785,24 @@ static bool rqh(WFrame *frame, int y, int h)
 EXTL_EXPORT_MEMBER
 void frame_maximize_vert(WFrame *frame)
 {
-    WRegion *mp=region_manager((WRegion*)frame);
+    WRegion *mp=REGION_MANAGER(frame);
     int oy, oh;
     
+    if(mp!=NULL)
+        region_ignore_statusbar(mp, SPLIT_VERTICAL);
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
-        if(frame->flags&FRAME_SAVED_VERT)
-            rqh(frame, frame->saved_y, frame->saved_h);
+        if(frame->flags&FRAME_SAVED_VERT){
+            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame, SPLIT_VERTICAL))
+                region_managed_restore(mp, (WRegion*)frame, SPLIT_VERTICAL);
+            else
+                rqh(frame, frame->saved_y, frame->saved_h);
+        }
         frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
+        if(mp!=NULL)
+            region_unignore_statusbar(mp);
+        region_goto((WRegion*)frame);
         return;
     }
 
@@ -770,11 +812,16 @@ void frame_maximize_vert(WFrame *frame)
     oy=REGION_GEOM(frame).y;
     oh=REGION_GEOM(frame).h;
     
-    rqh(frame, 0, REGION_GEOM(mp).h);
-
+    region_managed_save(mp, (WRegion*)frame, SPLIT_VERTICAL);
+    rqh(frame, 0, REGION_GEOM(mp).w);
+    
+    region_unignore_statusbar(mp);
+    
     frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
     frame->saved_y=oy;
     frame->saved_h=oh;
+    
+    region_goto((WRegion*)frame);
 }
 
 static bool rqw(WFrame *frame, int x, int w)
@@ -806,13 +853,22 @@ static bool rqw(WFrame *frame, int x, int w)
 EXTL_EXPORT_MEMBER
 void frame_maximize_horiz(WFrame *frame)
 {
-    WRegion *mp=region_manager((WRegion*)frame);
+    WRegion *mp=REGION_MANAGER(frame);
     int ox, ow;
     
+    if(mp!=NULL)
+        region_ignore_statusbar(mp, SPLIT_HORIZONTAL);
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
-        if(frame->flags&FRAME_SAVED_HORIZ)
-            rqw(frame, frame->saved_x, frame->saved_w);
+        if(frame->flags&FRAME_SAVED_HORIZ){
+            if(mp!=NULL && region_managed_verify(mp, (WRegion*)frame, SPLIT_HORIZONTAL))
+                region_managed_restore(mp, (WRegion*)frame, SPLIT_HORIZONTAL);
+            else
+                rqw(frame, frame->saved_x, frame->saved_w);
+        }
         frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
+        region_goto((WRegion*)frame);
+        if(mp!=NULL)
+            region_unignore_statusbar(mp);
         return;
     }
 
@@ -822,11 +878,16 @@ void frame_maximize_horiz(WFrame *frame)
     ox=REGION_GEOM(frame).x;
     ow=REGION_GEOM(frame).w;
     
+    region_managed_save(mp, (WRegion*)frame, SPLIT_HORIZONTAL);
     rqw(frame, 0, REGION_GEOM(mp).w);
-        
+    
+    region_unignore_statusbar(mp);
+    
     frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
     frame->saved_x=ox;
     frame->saved_w=ow;
+    
+    region_goto((WRegion*)frame);
 }
 
 
