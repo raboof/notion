@@ -835,13 +835,13 @@ void split_do_restore_default(WSplit *node, int dir)
     }
     split_update_bounds(node, FALSE);
     node->geom=geom;
-
 }
 
 void splitregion_do_restore(WSplitRegion *node, int dir)
 {
     region_max_transition(node->reg, dir, RM_MAX);
     split_do_restore_default((WSplit*)node, dir);
+    region_fit(node->reg, &(node->split.geom), REGION_FIT_EXACT);
 }
 
 void splitsplit_do_restore(WSplitSplit *node, int dir)

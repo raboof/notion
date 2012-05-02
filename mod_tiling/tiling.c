@@ -145,15 +145,20 @@ int tiling_query_transition(WTiling *ws)
 
 void tiling_ignore_statusbar(WTiling *ws)
 {    
-    ws->maximize_transition=NO_REDRAW|KEEP_MAX;
-    tiling_unmanage_stdisp(ws, TRUE, TRUE);
+    ws->maximize_transition=KEEP_MAX;
+    if(ws->stdispnode!=NULL){
+        ws->maximize_transition|=NO_REDRAW;
+        tiling_unmanage_stdisp(ws, TRUE, TRUE);
+    }
 }
 
 void tiling_unignore_statusbar(WTiling *ws)
 {    
     WMPlex mplex=region_screen_of(&ws->reg)->mplex;
+    WRegion *stdisp=(WRegion*)mplex.stdispwatch.obj;
     ws->maximize_transition=KEEP_MAX;
-    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj), &mplex.stdispinfo);
+    if(stdisp!=NULL)
+        tiling_manage_stdisp(ws,stdisp,&mplex.stdispinfo);
     ws->maximize_transition=0;
 }
 
