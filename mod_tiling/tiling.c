@@ -138,25 +138,21 @@ void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd,
         splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
 }
 
-int tiling_maximize_transition(WTiling *ws)
+int tiling_query_transition(WTiling *ws)
 {
     return ws->maximize_transition;
 }
 
-void tiling_ignore_statusbar(WTiling *ws, int dir)
+void tiling_ignore_statusbar(WTiling *ws)
 {    
-    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT|NO_REDRAW;
+    ws->maximize_transition=NO_REDRAW|KEEP_MAX;
     tiling_unmanage_stdisp(ws, TRUE, TRUE);
-    if(dir==SPLIT_HORIZONTAL)
-        ws->maximize_transition&=~KEEP_MAX_HORIZ;
-    else if(dir==SPLIT_VERTICAL)
-        ws->maximize_transition&=~KEEP_MAX_VERT;
 }
 
 void tiling_unignore_statusbar(WTiling *ws)
 {    
     WMPlex mplex=region_screen_of(&ws->reg)->mplex;
-    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT;
+    ws->maximize_transition=KEEP_MAX;
     tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj), &mplex.stdispinfo);
     ws->maximize_transition=0;
 }
@@ -164,8 +160,7 @@ void tiling_unignore_statusbar(WTiling *ws)
 void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
 {
     WSplitRegion *node=get_node_check(ws, mgd);
-    if(node!=NULL && ws->split_tree!=NULL)
-        split_save((WSplit*)node, dir);
+    split_save((WSplit*)node, dir);
 }
 
 void tiling_managed_restore(WTiling *ws, WRegion *mgd, int dir)
@@ -1737,8 +1732,8 @@ static DynFunTab tiling_dynfuntab[]={
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
     
-    {(DynFun*)region_maximize_transition,
-     (DynFun*)tiling_maximize_transition},
+    {(DynFun*)region_query_transition,
+     (DynFun*)tiling_query_transition},
     
     {region_ignore_statusbar,
      tiling_ignore_statusbar},

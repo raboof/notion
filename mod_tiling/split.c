@@ -798,6 +798,12 @@ void split_do_save_default(WSplit *node, int dir)
     }
 }
 
+void splitregion_do_save(WSplitRegion *node, int dir)
+{
+    region_max_transition(node->reg, dir , SET_MAX);
+    split_do_save_default((WSplit*)node, dir);
+}
+
 void splitsplit_do_save(WSplitSplit *node, int dir)
 {
     assert(node->tl!=NULL && node->br!=NULL);
@@ -827,23 +833,23 @@ void split_do_restore_default(WSplit *node, int dir)
         geom.y=node->saved_geom.y;
         geom.h=node->saved_geom.h;
     }
-    split_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+    split_update_bounds(node, FALSE);
+    node->geom=geom;
+
+}
+
+void splitregion_do_restore(WSplitRegion *node, int dir)
+{
+    region_max_transition(node->reg, dir, RM_MAX);
+    split_do_restore_default((WSplit*)node, dir);
 }
 
 void splitsplit_do_restore(WSplitSplit *node, int dir)
 {
-    WSplit *snode=(WSplit*)node;
     assert(node->tl!=NULL && node->br!=NULL);
     split_do_restore(node->tl, dir);
     split_do_restore(node->br, dir);
-    if(dir==SPLIT_HORIZONTAL){
-        snode->geom.x=snode->saved_geom.x;
-        snode->geom.w=snode->saved_geom.w;
-    }else if(dir==SPLIT_VERTICAL){
-        snode->geom.y=snode->saved_geom.y;
-        snode->geom.h=snode->saved_geom.h;
-    }
-    split_update_bounds(snode, FALSE);
+    split_do_restore_default((WSplit*)node, dir);
 }
 
 void split_do_restore(WSplit *node, int dir)
@@ -864,6 +870,13 @@ bool split_do_verify_default(WSplit *node, int dir)
     if(dir==SPLIT_VERTICAL)
         return node->saved_geom.y>=0 && node->saved_geom.h>=0;
     return FALSE;
+}
+
+bool splitregion_do_verify(WSplitRegion *node, int dir)
+{
+    return 
+        split_do_verify_default((WSplit*)node, dir) &&
+        region_max_transition(node->reg, dir, QUERY_MAX);
 }
 
 bool verify_helper(WSplit *node1, WSplit *node2, int dir)
@@ -2190,6 +2203,9 @@ static DynFunTab splitsplit_dynfuntab[]={
 static DynFunTab splitregion_dynfuntab[]={
     {split_update_bounds, splitregion_update_bounds},
     {split_do_resize, splitregion_do_resize},
+    {split_do_save, splitregion_do_save},
+    {split_do_restore, splitregion_do_restore},
+    {(DynFun*)split_do_verify, (DynFun*)splitregion_do_verify},
     {(DynFun*)split_get_config, (DynFun*)splitregion_get_config},
     {split_map, splitregion_map},
     {split_unmap, splitregion_unmap},
