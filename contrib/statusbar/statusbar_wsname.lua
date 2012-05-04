@@ -108,6 +108,8 @@ local function get_ws_name(t)
         else
             ws_names_all = ws_names_all..wsname.all_marker..ws_names
         end
+
+        return true
     end
 
     ioncore.region_i(inform, "WScreen")
