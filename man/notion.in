@@ -21,7 +21,7 @@ Directory to search for configuration files and other scripts
 .TP
 .B \-oneroot
 On X servers with multiple (traditional non-Xinerama) screens, manage only
-default screen (root window), not all, as given by the -display option or
+default screen (root window), not all, as given by the \-display option or
 in the DISPLAY environment variable.
 .TP
 .B \-session session_name
