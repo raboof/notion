@@ -316,6 +316,51 @@ function mod_xinerama.move_offscreen(screen, max_right)
     mod_xinerama.update_screen(screen, dimensions) 
 end
 
+function move_invisible_screens_away(max_visible_screen_id, max_right)
+    -- for now move the screen to a location outside the virtual screen, so
+    -- it can't be accidentally focussed and obscure the proper screens
+    local invisible_screen_id = max_visible_screen_id + 1
+    local invisible_screen = ioncore.find_screen_id(invisible_screen_id)
+    while invisible_screen do
+        mod_xinerama.move_offscreen(invisible_screen, max_right)
+
+        invisible_screen_id = invisible_screen_id + 1
+        invisible_screen = ioncore.find_screen_id(invisible_screen_id)
+    end
+
+end
+
+-- This should be made 'smarter', but at least let's make sure workspaces don't
+-- end up on invisible screens
+function rearrange_workspaces(max_visible_screen_id)
+   function move_to_first_screen(workspace)
+       notioncore.find_screen_id(0):attach(workspace)
+
+       return true
+   end
+
+   function rearrange_workspaces_s(screen)
+       if (screen:id() > max_visible_screen_id) then
+           for i = 0, screen:mx_count() do
+               move_to_first_screen(screen:mx_nth(i))
+           end
+       end
+
+       return true
+   end
+
+   local screen_id = 0;
+   local screen = ioncore.find_screen_id(screen_id)
+   while (screen ~= nil) do
+       rearrange_workspaces_s(screen);      
+
+       screen_id = screen_id + 1
+       screen = ioncore.find_screen_id(screen_id)
+   end
+
+   notioncore.region_i(rearrange_workspaces_s, "WScreen");
+end
+
 --DOC
 -- Perform the setup of ion screens.
 --
@@ -329,6 +374,7 @@ function mod_xinerama.setup_screens(screens)
     local max_screen_id = 0
     local max_right
 
+    -- Update screen dimensions or create new screens
     for screen_index, screen in ipairs(screens) do
         local screen_id = screen_index - 1
         max_screen_id = max(max_screen_id, screen_id)        
@@ -342,20 +388,11 @@ function mod_xinerama.setup_screens(screens)
         end
     end
 
-    -- TODO what to do when the number of screens is lower than last time
-    -- this function was called? Remove the screen and store its contents
-    -- somewhere else?
-
-    -- for now move the screen to a location outside the virtual screen, so
-    -- it can't be accidentally focussed and obscure the proper screens
-    local invisible_screen_id = max_screen_id + 1
-    local invisible_screen = ioncore.find_screen_id(invisible_screen_id)
-    while invisible_screen do
-        mod_xinerama.move_offscreen(invisible_screen, max_right)
-
-        invisible_screen_id = invisible_screen_id + 1
-        invisible_screen = ioncore.find_screen_id(invisible_screen_id)
-    end
+    -- when the number of screens is lower than last time this function was 
+    -- called, move 'superfluous' screens away
+    move_invisible_screens_away(max_screen_id, max_right)
+    
+    rearrange_workspaces(max_screen_id)
 end
 
 -- }}}
