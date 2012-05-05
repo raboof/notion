@@ -333,6 +333,10 @@ int screen_id(WScreen *scr)
 
 static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 {
+/*
+    I'm not so sure this is neccessary and it interferes somewhat with 
+    multi-monitor workspace rearrangements
+
     bool onmxlist=FALSE, others=FALSE;
     WLListNode *lnode;
     WLListIterTmp tmp;
@@ -352,6 +356,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
             return NULL;
         }
     }
+*/
     
     return reg;
 }
