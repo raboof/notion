@@ -389,44 +389,32 @@ static bool frame_initialise_titles(WFrame *frame)
 
 /*{{{ Resize and reparent */
 
-int region_query_transition(WRegion *reg)
-{
-    int ret=0;
-    CALL_DYN_RET(ret, bool, region_query_transition, reg, (reg));
-    return ret;
-}
-
-
-bool region_max_transition(WRegion *reg, int dir, int action)
-{
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_max_transition, reg, (reg, dir, action));
-    return ret;
-}
 
 bool frame_max_transition(WFrame *frame, int dir, int action)
 {
-    if(action==SET_MAX){
-        if(dir==HORIZONTAL)
-            frame->flags|=FRAME_MAXED_HORIZ;
-        else if(dir==VERTICAL)
-            frame->flags|=FRAME_MAXED_VERT;
-        return TRUE;
+    if(action==RM_KEEP)
+        frame->flags&=~FRAME_KEEP_FLAGS;
+    if(action==SAVE){
+        frame->flags|=FRAME_KEEP_FLAGS;
+        if(dir==HORIZONTAL){
+            frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
+            frame->saved_x=REGION_GEOM(frame).x;
+            frame->saved_w=REGION_GEOM(frame).w;
+        }
+        else if(dir==VERTICAL){
+            frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
+            frame->saved_y=REGION_GEOM(frame).y;
+            frame->saved_h=REGION_GEOM(frame).h;
+        }
     }
-    if(action==RM_MAX){
+
+    if(action==VERIFY){
         if(dir==HORIZONTAL)
-            frame->flags&=~FRAME_MAXED_HORIZ;
+            return (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
         else if(dir==VERTICAL)
-            frame->flags&=~FRAME_MAXED_VERT;
-        return TRUE;
+            return (frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT) ? TRUE : FALSE;
     }
-    if(action==QUERY_MAX){
-        if(dir==HORIZONTAL)
-            return frame->flags&FRAME_MAXED_HORIZ;
-        else if(dir==VERTICAL)
-            return frame->flags&FRAME_MAXED_VERT;
-    }
-    return FALSE;
+    return TRUE;
 }
 
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
@@ -434,16 +422,7 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
     WRectangle old_geom, mg;
     bool wchg=(REGION_GEOM(frame).w!=fp->g.w);
     bool hchg=(REGION_GEOM(frame).h!=fp->g.h);
-
-    int st=
-        REGION_MANAGER(frame)==NULL ?
-        0 :
-        region_query_transition(REGION_MANAGER(frame));
-
-    if(st&NO_REDRAW){
-            return TRUE;
-    }
-
+    
     old_geom=REGION_GEOM(frame);
     
     if(!window_fitrep(&(frame->mplex.win), par, fp))
@@ -451,28 +430,28 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 
     mplex_managed_geom((WMPlex*)frame, &mg);
     
-    if(hchg){
-        if(mg.h<=1){
-            frame->flags|=(FRAME_SHADED|FRAME_SAVED_VERT);
-            frame->saved_y=old_geom.y;
-            frame->saved_h=old_geom.h;
-        }else{
-            frame->flags&=~FRAME_SHADED;
-        }
-        if(!(st&KEEP_MAX))
+    if(!(frame->flags&FRAME_KEEP_FLAGS)){
+        if(hchg){
+            if(mg.h<=1){
+                frame->flags|=(FRAME_SHADED|FRAME_SAVED_VERT);
+                frame->saved_y=old_geom.y;
+                frame->saved_h=old_geom.h;
+            }else{
+                frame->flags&=~FRAME_SHADED;
+            }
             frame->flags&=~FRAME_MAXED_VERT;
-    }
-    
-    if(wchg){
-        if(mg.w<=1){
-            frame->flags|=(FRAME_MIN_HORIZ|FRAME_SAVED_HORIZ);
-            frame->saved_x=old_geom.x;
-            frame->saved_w=old_geom.w;
-        }else{
-            frame->flags&=~FRAME_MIN_HORIZ;
         }
-        if(!(st&KEEP_MAX))
+
+        if(wchg){
+            if(mg.w<=1){
+                frame->flags|=(FRAME_MIN_HORIZ|FRAME_SAVED_HORIZ);
+                frame->saved_x=old_geom.x;
+                frame->saved_w=old_geom.w;
+            }else{
+                frame->flags&=~FRAME_MIN_HORIZ;
+            }
             frame->flags&=~FRAME_MAXED_HORIZ;
+        }
     }
 
     if(wchg || hchg){
@@ -1026,9 +1005,6 @@ static DynFunTab frame_dynfuntab[]={
     {region_updategr, 
      frame_updategr},
 
-    {(DynFun*)region_max_transition,
-     (DynFun*)frame_max_transition},
-     
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
      

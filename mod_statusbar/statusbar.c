@@ -634,15 +634,7 @@ bool statusbar_fitrep(WStatusBar *sb, WWindow *par, const WFitParams *fp)
 {
     bool wchg=(REGION_GEOM(sb).w!=fp->g.w);
     bool hchg=(REGION_GEOM(sb).h!=fp->g.h);
-
-    int st=
-        REGION_MANAGER(sb)==NULL ?
-        0 :
-        region_query_transition(REGION_MANAGER(sb));
-    if(st&NO_REDRAW){
-            return TRUE;
-    }
-
+    
     if(!window_fitrep(&(sb->wwin), par, fp))
         return FALSE;
     

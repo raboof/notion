@@ -30,7 +30,6 @@ DECLCLASS(WTiling){
     WRegionSimpleCreateFn *create_frame_fn;
     Window dummywin;
     bool batchop;
-    int maximize_transition;
 };
 
 
