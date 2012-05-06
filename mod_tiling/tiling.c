@@ -144,7 +144,7 @@ bool tiling_managed_maximize(WTiling *ws, WRegion *mgd, int dir, int action)
     bool ret;
     WRectangle geom;
     WMPlexSTDispInfo di;
-    bool a;
+    bool a=FALSE;
     if(node!=NULL && ws->split_tree!=NULL){
     /* Some corrections for the case of a non-fullsized stdisp. Currently we 
      * only handle the case of a horizontal stdisp positioned in the lower left 
@@ -159,10 +159,10 @@ bool tiling_managed_maximize(WTiling *ws, WRegion *mgd, int dir, int action)
                 di.fullsize==0;
             if(a){
                 /* First resize the stdisp to its original width. Otherwise 
-                 * functions might be resized into the stdisp by 
+                 * frames might be resized into the stdisp by 
                  * split.c:check_stdisp and apparently X clients don't like it 
                  * when they are resized into each other. At least urxvt runs 
-                 * crazy the following code. */
+                 * crazy without the following code. */
                 geom=REGION_GEOM(ws->stdispnode->regnode.reg);
                 geom.w=ws->stdisp_saved_w;
                 split_do_resize((WSplit*)ws->stdispnode, &geom, PRIMN_ANY, 
@@ -172,11 +172,11 @@ bool tiling_managed_maximize(WTiling *ws, WRegion *mgd, int dir, int action)
                 ws->stdisp_saved_w=ws->stdispnode->regnode.reg->geom.w;
         }
         ret=split_maximize((WSplit*)node, dir, action);
-        if(a)
-            /* Looks like this is necessary to update the geometry information of 
-             * WSplitSplit's and such. There shouldn't be any actual changes to the 
-             * geometry of any window, as we have already taken care of this via 
-             * the resizing of the statusbar above and the code in 
+        if(ws->stdispnode!=NULL && a)
+            /* Looks like this is necessary to update the geometry information 
+             * of WSplitSplit's and such. There shouldn't be any actual changes 
+             * to the geometry of any window, as we have already taken care of 
+             * this via the resizing of the statusbar above and the code in 
              * split.c:check_stdisp. */
             tiling_manage_stdisp(ws, ws->stdispnode->regnode.reg, &di);
         return ret;

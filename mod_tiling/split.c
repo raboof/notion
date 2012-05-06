@@ -812,7 +812,7 @@ void check_stdisp(WFrame *frame, WRectangle *ng, int dir)
             if(ng->y+ng->h==sgeom.y && ng->x>=((WTiling*)ws)->stdisp_saved_w)
                 ng->h+=sgeom.h;
         }else if(dir==SPLIT_VERTICAL){
-            /* If a frame was first vertically maximized and the horizontally 
+            /* If a frame was first vertically maximized and then horizontally 
              * maximized, it might end up lying directly above the stdisp when 
              * before it was away from the stdisp. Restoring its original height 
              * would then cause it to overlap with the stdisp. Therefore, if we 
