@@ -392,6 +392,8 @@ static bool frame_initialise_titles(WFrame *frame)
 
 bool frame_max_transition(WFrame *frame, int dir, int action)
 {
+    if(action==SET_KEEP)
+        frame->flags|=FRAME_KEEP_FLAGS;
     if(action==RM_KEEP)
         frame->flags&=~FRAME_KEEP_FLAGS;
     if(action==SAVE){
@@ -407,7 +409,12 @@ bool frame_max_transition(WFrame *frame, int dir, int action)
             frame->saved_h=REGION_GEOM(frame).h;
         }
     }
-
+    if(action==RESTORE){
+        if(dir==HORIZONTAL)
+            frame->flags&=~FRAME_MAXED_HORIZ;
+        else if(dir==VERTICAL)
+            frame->flags&=~FRAME_MAXED_VERT;
+    }
     if(action==VERIFY){
         if(dir==HORIZONTAL)
             return (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;

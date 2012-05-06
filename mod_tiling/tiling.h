@@ -26,6 +26,7 @@ DECLCLASS(WTiling){
     WRegion reg;
     WSplit *split_tree;
     WSplitST *stdispnode;
+    int stdisp_saved_w;
     PtrList *managed_list;
     WRegionSimpleCreateFn *create_frame_fn;
     Window dummywin;

@@ -766,8 +766,11 @@ void frame_maximize_vert(WFrame *frame)
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
-        if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, VERTICAL, VERIFY))
+        if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, VERTICAL, VERIFY)){
+            region_managed_maximize(mp, (WRegion*)frame, VERTICAL, SET_KEEP);
             region_managed_maximize(mp, (WRegion*)frame, VERTICAL, RESTORE);
+            region_managed_maximize(mp, (WRegion*)frame, VERTICAL, RM_KEEP);
+        }
         else if(frame->flags&FRAME_SAVED_VERT)
             rqh(frame, frame->saved_y, frame->saved_h);
         frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
@@ -825,8 +828,11 @@ void frame_maximize_horiz(WFrame *frame)
     int ox, ow;
     
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
-        if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, VERIFY))
+        if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, VERIFY)){
+            region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, SET_KEEP);
             region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RESTORE);
+            region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RM_KEEP);
+        }
         else if(frame->flags&FRAME_SAVED_HORIZ)
             rqw(frame, frame->saved_x, frame->saved_w);
         frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);

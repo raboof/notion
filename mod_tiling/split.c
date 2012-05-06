@@ -787,9 +787,41 @@ WSplit *max_parent_direction(WSplit *node, int dir)
 }
 
 
-bool save(WFrame *frame, int dir)
+void check_stdisp(WFrame *frame, WRectangle *ng, int dir)
 {
-    return frame_max_transition(frame, dir, SAVE);
+    /* Some corrections for the case of a non-fullsized stdisp. Currently we 
+     * only handle the case of a horizontal stdisp positioned in the lower left 
+     * corner. This should be the most common setup. */
+    WRegion *ws=REGION_MANAGER(frame);
+    WRectangle sgeom;
+    if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)
+        return;
+    if(
+       ((WTiling*)ws)->stdispnode->corner==MPLEX_STDISP_BL && 
+       ((WTiling*)ws)->stdispnode->orientation==REGION_ORIENTATION_HORIZONTAL &&
+       ((WTiling*)ws)->stdispnode->fullsize==0
+      )
+    {
+        sgeom=REGION_GEOM(((WTiling*)ws)->stdispnode->regnode.reg);
+        if(dir==SPLIT_HORIZONTAL){
+            /* If the frame we are about to resize lies directly above the stdisp, 
+             * and will be moved away from the stdisp by the resizing, add the 
+             * height of the stdisp to its target height. Otherwise it would 
+             * flicker when the stdisp is moved away.
+             */
+            if(ng->y+ng->h==sgeom.y && ng->x>=((WTiling*)ws)->stdisp_saved_w)
+                ng->h+=sgeom.h;
+        }else if(dir==SPLIT_VERTICAL){
+            /* If a frame was first vertically maximized and the horizontally 
+             * maximized, it might end up lying directly above the stdisp when 
+             * before it was away from the stdisp. Restoring its original height 
+             * would then cause it to overlap with the stdisp. Therefore, if we 
+             * detect this case, we subtract the height of the stdisp from its 
+             * target height.*/
+            if(sgeom.x<=ng->x && ng->x<sgeom.x+sgeom.h && ng->y+ng->h>sgeom.y)
+                ng->h-=sgeom.h;
+        }
+    }
 }
 
 bool restore(WSplitRegion *node, int dir)
@@ -808,6 +840,7 @@ bool restore(WSplitRegion *node, int dir)
         geom.h=frame->saved_h;
         flags=REGION_RQGEOM_VERT_ONLY;
     }
+    check_stdisp(frame, &geom, dir);
     splitregion_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
     return TRUE;
 }
@@ -840,9 +873,8 @@ bool splitregion_do_maximize(WSplitRegion *node, int dir, int action)
         return FALSE;
 
     if(action==RESTORE)
-        return restore(node, dir);
-    else
-        return frame_max_transition((WFrame*)node->reg, dir, action);
+        restore(node, dir);
+    return frame_max_transition((WFrame*)node->reg, dir, action);
 }
 
 bool splitst_do_maximize(WSplitST *node, int dir, int action)

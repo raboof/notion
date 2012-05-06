@@ -46,6 +46,7 @@
 #define SAVE                1
 #define RESTORE             2
 #define VERIFY              3
+#define SET_KEEP            4
 #define RM_KEEP             5
 #define HORIZONTAL          SPLIT_HORIZONTAL
 #define VERTICAL            SPLIT_VERTICAL
