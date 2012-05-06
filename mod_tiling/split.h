@@ -47,6 +47,7 @@ typedef enum {
 DECLCLASS(WSplit){
     Obj obj;
     WRectangle geom;
+    WRectangle saved_geom;
     WSplitInner *parent;
     void *ws_if_root;
     
@@ -112,7 +113,7 @@ extern bool split_init(WSplit *split, const WRectangle *geom);
 extern bool splitinner_init(WSplitInner *split, const WRectangle *geom);
 extern bool splitsplit_init(WSplitSplit *split, const WRectangle *geom, 
                             int dir);
-extern bool splitregion_init(WSplitRegion *split,const WRectangle *geom,
+extern bool splitregion_init(WSplitRegion *split, const WRectangle *geom,
                              WRegion *reg);
 extern bool splitst_init(WSplitST *split, const WRectangle *geom,
                          WRegion *reg);
@@ -139,6 +140,12 @@ extern void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
                                  WPrimn hprimn, WPrimn vprimn, bool transpose);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          WPrimn hprimn, WPrimn vprimn);
+DYNFUN void split_do_save(WSplit *node, int dir);
+extern void split_save(WSplit *node, int dir);
+DYNFUN void split_do_restore(WSplit *node, int dir);
+extern void split_restore(WSplit *node, int dir);
+DYNFUN bool split_do_verify(WSplit *node, int dir);
+extern bool split_verify(WSplit *node, int dir);
 DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
                                  RootwardAmount *ha, RootwardAmount *va, 
                                  WRectangle *rg, bool tryonly);
