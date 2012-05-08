@@ -850,12 +850,14 @@ bool check_stdisp(WFrame *frame, WRectangle *ng)
     if(geom_moved_away_from_stdisp(*ng, st, wsg)){
         if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR){
             ng->y-=stg.h;
-            if(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
+            if(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT 
+                    && frame->saved_y==stg.h)
                 frame->saved_y-=stg.h;
         }
         if(st->corner==MPLEX_STDISP_BL || st->corner==MPLEX_STDISP_BR){
             ng->h+=stg.h;
-            if(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
+            if(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT 
+                    && frame->saved_y+frame->saved_h==stg.y)
                 frame->saved_h+=stg.h;
         }
         return FALSE;
@@ -958,6 +960,7 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
     WFrame *frame;
     WRectangle geom = ((WSplit*)node)->geom;
     bool ret;
+    bool other_max;
 
     if(!OBJ_IS(node->reg, WFrame))
         return FALSE;
@@ -971,7 +974,16 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
         geom.h=frame->saved_h;
     }
     ret=check_stdisp(frame, &geom);
+    other_max=
+        dir==SPLIT_HORIZONTAL 
+        ? frame->flags&FRAME_MAXED_VERT
+        : frame->flags&FRAME_MAXED_HORIZ;
     splitregion_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+    if(other_max)
+        frame->flags|=
+            dir==SPLIT_HORIZONTAL 
+            ? FRAME_MAXED_VERT
+            : FRAME_MAXED_HORIZ;
     return ret;
 }
 
