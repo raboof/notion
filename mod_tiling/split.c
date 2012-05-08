@@ -875,6 +875,24 @@ bool check_stdisp(WFrame *frame, WRectangle *ng)
     return FALSE;
 }
 
+
+void split_do_maxhelper(WSplit *node, int dir, int action)
+{
+    CALL_DYN(split_do_maxhelper, node, (node, dir, action));
+}
+
+void splitsplit_do_maxhelper(WSplitSplit *node, int dir, int action)
+{
+    assert(node->tl!=NULL && node->br!=NULL);
+    split_do_maxhelper(node->tl, dir, action);
+    split_do_maxhelper(node->br, dir, action);
+}
+
+void splitst_do_maxhelper(WSplit *node, int dir, int action)
+{
+    return;
+}
+
 void splitregion_do_maxhelper(WSplitRegion *node, int dir, int action)
 {
     WFrame *frame;
@@ -899,68 +917,12 @@ void splitregion_do_maxhelper(WSplitRegion *node, int dir, int action)
         frame->flags&=~FRAME_KEEP_FLAGS;
 }
 
-bool splitregion_do_restore(WSplitRegion *node, int dir)
+
+bool split_do_restore(WSplit *node, int dir)
 {
-    WFrame *frame;
-    WRectangle geom = ((WSplit*)node)->geom;
-    bool ret;
-
-    if(!OBJ_IS(node->reg, WFrame))
-        return FALSE;
-
-    frame=(WFrame*)node->reg;
-    if(dir==SPLIT_HORIZONTAL){
-        geom.x=frame->saved_x;
-        geom.w=frame->saved_w;
-    }else if(dir==SPLIT_VERTICAL){
-        geom.y=frame->saved_y;
-        geom.h=frame->saved_h;
-    }
-    ret=check_stdisp(frame, &geom);
-    splitregion_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+    bool ret = FALSE;
+    CALL_DYN_RET(ret, bool, split_do_restore, node, (node, dir));
     return ret;
-}
-
-bool splitregion_do_verify(WSplitRegion *node, int dir)
-{
-    WFrame *frame;
-    bool ret=FALSE;
-
-    if(!OBJ_IS(node->reg, WFrame))
-        return FALSE;
-
-    frame=(WFrame*)node->reg;
-
-    if(dir==HORIZONTAL){
-        ret=(frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
-        frame->flags&=~FRAME_MAXED_HORIZ;
-    }
-    else if(dir==VERTICAL){
-        ret=(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT) ? TRUE : FALSE;
-        frame->flags&=~FRAME_MAXED_VERT;
-    }
-    return ret;
-}
-
-void splitst_do_maxhelper(WSplit *node, int dir, int action)
-{
-    return;
-}
-
-bool splitst_do_restore(WSplit *node, int dir)
-{
-    return FALSE;
-}
-
-bool splitst_do_verify(WSplit *node, int dir)
-{
-    return TRUE;
-}
-void splitsplit_do_maxhelper(WSplitSplit *node, int dir, int action)
-{
-    assert(node->tl!=NULL && node->br!=NULL);
-    split_do_maxhelper(node->tl, dir, action);
-    split_do_maxhelper(node->br, dir, action);
 }
 
 bool splitsplit_do_restore(WSplitSplit *node, int dir)
@@ -986,6 +948,41 @@ bool splitsplit_do_restore(WSplitSplit *node, int dir)
     return ret;
 }
 
+bool splitst_do_restore(WSplit *node, int dir)
+{
+    return FALSE;
+}
+
+bool splitregion_do_restore(WSplitRegion *node, int dir)
+{
+    WFrame *frame;
+    WRectangle geom = ((WSplit*)node)->geom;
+    bool ret;
+
+    if(!OBJ_IS(node->reg, WFrame))
+        return FALSE;
+
+    frame=(WFrame*)node->reg;
+    if(dir==SPLIT_HORIZONTAL){
+        geom.x=frame->saved_x;
+        geom.w=frame->saved_w;
+    }else if(dir==SPLIT_VERTICAL){
+        geom.y=frame->saved_y;
+        geom.h=frame->saved_h;
+    }
+    ret=check_stdisp(frame, &geom);
+    splitregion_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+    return ret;
+}
+
+
+bool split_do_verify(WSplit *node, int dir)
+{
+    bool ret = FALSE;
+    CALL_DYN_RET(ret, bool, split_do_verify, node, (node, dir));
+    return ret;
+}
+
 bool splitsplit_do_verify(WSplitSplit *node, int dir)
 {
     bool ret;
@@ -996,24 +993,32 @@ bool splitsplit_do_verify(WSplitSplit *node, int dir)
         split_do_verify(node->br, dir);
 }
 
-void split_do_maxhelper(WSplit *node, int dir, int action)
+bool splitst_do_verify(WSplit *node, int dir)
 {
-    CALL_DYN(split_do_maxhelper, node, (node, dir, action));
+    return TRUE;
 }
 
-bool split_do_restore(WSplit *node, int dir)
+bool splitregion_do_verify(WSplitRegion *node, int dir)
 {
-    bool ret = FALSE;
-    CALL_DYN_RET(ret, bool, split_do_restore, node, (node, dir));
+    WFrame *frame;
+    bool ret=FALSE;
+
+    if(!OBJ_IS(node->reg, WFrame))
+        return FALSE;
+
+    frame=(WFrame*)node->reg;
+
+    if(dir==HORIZONTAL){
+        ret=(frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
+        frame->flags&=~FRAME_MAXED_HORIZ;
+    }
+    else if(dir==VERTICAL){
+        ret=(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT) ? TRUE : FALSE;
+        frame->flags&=~FRAME_MAXED_VERT;
+    }
     return ret;
 }
 
-bool split_do_verify(WSplit *node, int dir)
-{
-    bool ret = FALSE;
-    CALL_DYN_RET(ret, bool, split_do_verify, node, (node, dir));
-    return ret;
-}
 
 bool split_maximize(WSplit *node, int dir, int action)
 {
