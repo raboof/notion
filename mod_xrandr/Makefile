@@ -14,9 +14,10 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=mod_xrandr.c
 
-MAKE_EXPORTS=xrandr_module
+MAKE_EXPORTS=mod_xrandr
 LIBS = $(X11_LIBS) -lXrandr
 MODULE=mod_xrandr
+MODULE_STUB=mod_xrandr.lua
 
 ######################################
 

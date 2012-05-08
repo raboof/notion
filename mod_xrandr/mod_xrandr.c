@@ -38,6 +38,8 @@
 #include <ioncore/xwindow.h>
 #include <ioncore/../version.h>
 
+#include "exports.h"
+
 char mod_xrandr_ion_api_version[]=ION_API_VERSION;
 
 WHook *randr_screen_change_notify=NULL;
@@ -177,7 +179,7 @@ bool mod_xrandr_init()
 
     INIT_HOOK_(randr_screen_change_notify);
     
-    return TRUE;
+    return mod_xrandr_register_exports();
 }
 
 
@@ -187,4 +189,39 @@ bool mod_xrandr_deinit()
                 (WHookDummy *)handle_xrandr_event);
     
     return TRUE;
+}
+
+/*EXTL_DOC
+ * Queries the RandR extension for outputs with this geometry
+ */
+EXTL_SAFE
+EXTL_EXPORT
+void mod_xrandr_get_outputs_for_geom(ExtlTab geom)
+{
+    XRRScreenResources  *res;
+    int i;
+   
+    res = XRRGetScreenResources(ioncore_g.dpy, ioncore_g.rootwins->dummy_win);
+
+    for(i=0; i < res->noutput; i++){
+        int x,y;
+        int w,h;
+        XRROutputInfo *output_info = XRRGetOutputInfo (ioncore_g.dpy, res, res->outputs[i]);
+        if(output_info->crtc != None){
+            XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(ioncore_g.dpy, res, output_info->crtc);
+        
+            fprintf(stderr, "Output: %s\n", output_info->name);
+            extl_table_gets_i(geom, "x", &x);
+            extl_table_gets_i(geom, "y", &y);
+            extl_table_gets_i(geom, "w", &w);
+            extl_table_gets_i(geom, "h", &h);
+            if(x==crtc_info->x && y==crtc_info->y
+               && w==(int)crtc_info->width && h==(int)crtc_info->height){
+                fprintf(stderr, "Matched\n");
+            }
+
+            XRRFreeCrtcInfo(crtc_info);
+        }
+        XRRFreeOutputInfo(output_info);
+    }
 }
