@@ -798,11 +798,11 @@ bool geom_moved_away_from_stdisp(WRectangle geom, WSplitST *st, WRectangle wsg)
     if(st->corner==MPLEX_STDISP_TL)
         return geom.y==stg.h ? geom.x>=rw : FALSE;
     if(st->corner==MPLEX_STDISP_TR)
-        return geom.y==stg.h ? geom.x+geom.w<=geom.w-rw : FALSE;
+        return geom.y==stg.h ? geom.x+geom.w<=wsg.w-rw : FALSE;
     if(st->corner==MPLEX_STDISP_BL)
         return geom.y+geom.h==stg.y ? geom.x>=rw : FALSE;
     if(st->corner==MPLEX_STDISP_BR)
-        return geom.y+geom.h==stg.h ? geom.x+geom.w<=geom.w-rw : FALSE;
+        return geom.y+geom.h==stg.y ? geom.x+geom.w<=wsg.w-rw : FALSE;
     return FALSE;
 }
 
@@ -820,14 +820,16 @@ bool geom_best_stdisp_match(WRectangle geom, WSplitST *st, WRectangle wsg)
             ? geom.x<rw && geom.x+geom.w>=rw 
             : FALSE;
     if(st->corner==MPLEX_STDISP_TR)
-        return geom.y==stg.h ? geom.x<=wsg.w-rw && geom.x+geom.h> wsg.w-rw : FALSE;
+        return geom.y==stg.h 
+            ? geom.x<=wsg.w-rw && geom.x+geom.w> wsg.w-rw
+            : FALSE;
     if(st->corner==MPLEX_STDISP_BL)
         return geom.y+geom.h==stg.y
             ? geom.x<rw && geom.x+geom.w>=rw 
             : FALSE;
     if(st->corner==MPLEX_STDISP_BR)
-        return geom.y+geom.h==stg.h
-            ? geom.x<=wsg.w-rw && geom.x+geom.h> wsg.w-rw
+        return geom.y+geom.h==stg.y
+            ? geom.x<=wsg.w-rw && geom.x+geom.w>wsg.w-rw
             : FALSE;
     return FALSE;
 }
@@ -841,6 +843,7 @@ bool check_stdisp(WFrame *frame, WRectangle *ng)
 
     if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)
         return FALSE;
+
     st=((WTiling*)ws)->stdispnode;
     stg=REGION_GEOM(st->regnode.reg);
 
