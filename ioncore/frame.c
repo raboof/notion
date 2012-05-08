@@ -390,40 +390,6 @@ static bool frame_initialise_titles(WFrame *frame)
 /*{{{ Resize and reparent */
 
 
-bool frame_max_transition(WFrame *frame, int dir, int action)
-{
-    if(action==SET_KEEP)
-        frame->flags|=FRAME_KEEP_FLAGS;
-    if(action==RM_KEEP)
-        frame->flags&=~FRAME_KEEP_FLAGS;
-    if(action==SAVE){
-        frame->flags|=FRAME_KEEP_FLAGS;
-        if(dir==HORIZONTAL){
-            frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
-            frame->saved_x=REGION_GEOM(frame).x;
-            frame->saved_w=REGION_GEOM(frame).w;
-        }
-        else if(dir==VERTICAL){
-            frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
-            frame->saved_y=REGION_GEOM(frame).y;
-            frame->saved_h=REGION_GEOM(frame).h;
-        }
-    }
-    if(action==RESTORE){
-        if(dir==HORIZONTAL)
-            frame->flags&=~FRAME_MAXED_HORIZ;
-        else if(dir==VERTICAL)
-            frame->flags&=~FRAME_MAXED_VERT;
-    }
-    if(action==VERIFY){
-        if(dir==HORIZONTAL)
-            return (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
-        else if(dir==VERTICAL)
-            return (frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT) ? TRUE : FALSE;
-    }
-    return TRUE;
-}
-
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 {
     WRectangle old_geom, mg;
