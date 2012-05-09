@@ -786,16 +786,16 @@ WSplit *max_parent_direction(WSplit *node, int dir)
     return max_parent_direction_rel(max_parent(node), node, dir);
 }
 
-int *wh(WRectangle geom, int orientation)
+int *wh(WRectangle *geom, int orientation)
 {
     return 
-        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom.w : &geom.h;
+        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->w : &geom->h;
 }
 
-int *xy(WRectangle geom, int orientation)
+int *xy(WRectangle *geom, int orientation)
 {
     return 
-        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom.x : &geom.y;
+        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->x : &geom->y;
 }
 
 bool cond1(int orientation, int corner)
@@ -825,7 +825,7 @@ WRectangle stdisp_recommended_geometry(WSplitST *st, WRectangle wsg)
     if(ori==REGION_ORIENTATION_HORIZONTAL
         ? (st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
         : (st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL))
-            *xy(stg, ori)=*wh(wsg, ori)-*wh(stg, ori);
+            *xy(&stg, ori)=*wh(&wsg, ori)-*wh(&stg, ori);
 
     return stg;
 }
@@ -839,9 +839,9 @@ bool geom_overlaps_stdisp_geom(WRectangle geom, WSplitST *st, WRectangle stg)
     int ori=st->orientation;
 
     if(cond1(ori, st->corner))
-        return *xy(geom, ori)<*wh(stg, ori);
+        return *xy(&geom, ori)<*wh(&stg, ori);
     if(cond2(ori, st->corner))
-        return *xy(geom, ori)+*wh(geom, ori)>*xy(stg, ori);
+        return *xy(&geom, ori)+*wh(&geom, ori)>*xy(&stg, ori);
 
     return FALSE;
 }
@@ -855,10 +855,10 @@ bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
         : REGION_ORIENTATION_HORIZONTAL;
 
     if(cond1(ori, st->corner))
-        return *xy(geom, ori)==*wh(stg, ori);
+        return *xy(&geom, ori)==*wh(&stg, ori);
         
     if(cond2(ori, st->corner))
-        return *xy(geom, ori)+*wh(geom, ori)==*xy(stg, ori);
+        return *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
 
     return FALSE;
 }
@@ -874,14 +874,12 @@ void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, 
         : REGION_ORIENTATION_HORIZONTAL;
 
     if(geom_borders_stdisp(*geom, st) && !geom_overlaps_stdisp_geom(*geom, st, rstg)){
-        if(cond1(ori, st->corner)){
-            *xy(*geom, ori)=*wh(stg, ori);
-            *wh(*geom, ori)+=*wh(stg, ori);
+        if(!cond2(ori, st->corner)){
+            *xy(geom, ori)=-*wh(&stg, ori);
+            *wh(geom, ori)+=*wh(&stg, ori);
         }
-        if(cond2(ori, st->corner)){
-            *wh(*geom, ori)+=*wh(stg, ori);
-            *wh(*geom, ori)+=*wh(stg, ori);
-        }
+        if(!cond1(ori, st->corner))
+            *wh(geom, ori)+=*wh(&stg, ori);
     }
 }
 
@@ -894,12 +892,12 @@ bool adapt_stdisp_to_geom(WRectangle geom, WSplitST *st, int dir, WRectangle rst
     int ori=st->orientation;
     if(geom_borders_stdisp(geom, st)){
         if(cond1(ori, st->corner))
-            if(*xy(geom, ori)<*wh(rstg, ori) && *xy(geom, ori)+*wh(geom, ori)>=*wh(rstg, ori))
-                *wh(nstg, ori)=*xy(geom, ori)+*wh(geom, ori);
+            if(*xy(&geom, ori)<*wh(&rstg, ori) && *xy(&geom, ori)+*wh(&geom, ori)>=*wh(&rstg, ori))
+                *wh(&nstg, ori)=*xy(&geom, ori)+*wh(&geom, ori);
         if(cond2(ori, st->corner))
-            if(*xy(geom, ori)<=*xy(rstg, ori) && *xy(geom, ori)+*wh(geom, ori)>*xy(rstg, ori)){
-                *xy(nstg, ori)=*xy(geom, ori);
-                *wh(nstg, ori)=*wh(rstg, ori)+(*xy(rstg, ori)-*xy(geom, ori));
+            if(*xy(&geom, ori)<=*xy(&rstg, ori) && *xy(&geom, ori)+*wh(&geom, ori)>*xy(&rstg, ori)){
+                *xy(&nstg, ori)=*xy(&geom, ori);
+                *wh(&nstg, ori)=*wh(&rstg, ori)+(*xy(&rstg, ori)-*xy(&geom, ori));
             }
         if(rectangle_compare(&nstg, &REGION_GEOM(st->regnode.reg))){
             splitst_do_resize(st, &nstg, PRIMN_ANY, PRIMN_ANY, FALSE);
