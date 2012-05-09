@@ -807,7 +807,7 @@ bool cond1(int orientation, int corner)
 
 bool cond2(int orientation, int corner)
 {
-    return orientation=REGION_ORIENTATION_HORIZONTAL
+    return orientation==REGION_ORIENTATION_HORIZONTAL
         ? corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR
         : corner==MPLEX_STDISP_BR || corner==MPLEX_STDISP_BL;
 }
@@ -817,7 +817,7 @@ WRectangle stdisp_recommended_geometry(WSplitST *st, WRectangle wsg)
     /* wsg holds the geometry of the workspace that st is on. */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
     int rw=stdisp_recommended_w(st);
-    int rh=stdisp_recommended_w(st);
+    int rh=stdisp_recommended_h(st);
     int ori=st->orientation;
     stg.w=rw;
     stg.h=rh;
@@ -850,7 +850,7 @@ bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
 {
     /* Assuming that geom overlaps with st, does it touch st? */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
-    int ori= st->orientation==REGION_ORIENTATION_HORIZONTAL
+    int ori=st->orientation==REGION_ORIENTATION_HORIZONTAL
         ? REGION_ORIENTATION_VERTICAL
         : REGION_ORIENTATION_HORIZONTAL;
 
