@@ -61,8 +61,7 @@ DECLCLASS(WFrame){
     
     int flags;
     WFrameMode mode;
-    int saved_w, saved_h;
-    int saved_x, saved_y;
+    WRectangle saved_geom;
     
     int tab_dragged_idx;
     void *quasiact_source;

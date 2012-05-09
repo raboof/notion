@@ -786,58 +786,133 @@ WSplit *max_parent_direction(WSplit *node, int dir)
     return max_parent_direction_rel(max_parent(node), node, dir);
 }
 
-bool geom_moved_away_from_stdisp(WRectangle geom, WSplitST *st, WRectangle wsg)
+WRectangle stdisp_recommended_geometry(WSplitST *st)
 {
     WRectangle stg=REGION_GEOM(st->regnode.reg);
-    int rw;
-    if(!st->orientation==REGION_ORIENTATION_HORIZONTAL)
-        return FALSE;
+    WRectangle wsg=REGION_MANAGER(st)->geom;
+    int rw=stdisp_recommended_w(st);
+    int rh=stdisp_recommended_w(st);
+    stg.w=rw;
+    stg.h=rh;
 
-    rw=stdisp_recommended_w(st);
+    if(st->orientation==REGION_ORIENTATION_HORIZONTAL){
+        if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
+            stg.x=wsg.w-rw;
+    }
 
-    if(st->corner==MPLEX_STDISP_TL)
-        return geom.y==stg.h ? geom.x>=rw : FALSE;
-    if(st->corner==MPLEX_STDISP_TR)
-        return geom.y==stg.h ? geom.x+geom.w<=wsg.w-rw : FALSE;
-    if(st->corner==MPLEX_STDISP_BL)
-        return geom.y+geom.h==stg.y ? geom.x>=rw : FALSE;
-    if(st->corner==MPLEX_STDISP_BR)
-        return geom.y+geom.h==stg.y ? geom.x+geom.w<=wsg.w-rw : FALSE;
+    if(st->orientation==REGION_ORIENTATION_VERTICAL){
+        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
+            stg.y=wsg.h-rh;
+    }
+    return stg;
+}
+
+bool geom_overlaps_stdisp_geom(WRectangle geom, WSplitST *st, WRectangle stg)
+{
+    if(st->orientation==REGION_ORIENTATION_HORIZONTAL){
+        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
+        return geom.x<stg.w;
+    if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
+        return geom.x+geom.w>stg.x;
+    }
+
+    if(st->orientation==REGION_ORIENTATION_VERTICAL){
+        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR)
+            return geom.y<stg.h;
+        if(st->corner==MPLEX_STDISP_BR || st->corner==MPLEX_STDISP_BL)
+            return geom.y+geom.h>stg.y;
+    }
+
     return FALSE;
 }
 
-bool geom_best_stdisp_match(WRectangle geom, WSplitST *st, WRectangle wsg)
+bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
 {
     WRectangle stg=REGION_GEOM(st->regnode.reg);
-    int rw;
-    if(!st->orientation==REGION_ORIENTATION_HORIZONTAL)
-        return FALSE;
 
-    rw=stdisp_recommended_w(st);
+    if(st->orientation==REGION_ORIENTATION_HORIZONTAL){
+        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR)
+            return geom.y==stg.h;
+    if(st->corner==MPLEX_STDISP_BR || st->corner==MPLEX_STDISP_BL)
+        return geom.y+geom.h==stg.y;
+    }
 
-    if(st->corner==MPLEX_STDISP_TL)
-        return geom.y==stg.h
-            ? geom.x<rw && geom.x+geom.w>=rw 
-            : FALSE;
-    if(st->corner==MPLEX_STDISP_TR)
-        return geom.y==stg.h 
-            ? geom.x<=wsg.w-rw && geom.x+geom.w> wsg.w-rw
-            : FALSE;
-    if(st->corner==MPLEX_STDISP_BL)
-        return geom.y+geom.h==stg.y
-            ? geom.x<rw && geom.x+geom.w>=rw 
-            : FALSE;
-    if(st->corner==MPLEX_STDISP_BR)
-        return geom.y+geom.h==stg.y
-            ? geom.x<=wsg.w-rw && geom.x+geom.w>wsg.w-rw
-            : FALSE;
+    if(st->orientation==REGION_ORIENTATION_VERTICAL){
+        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
+            return geom.x==stg.w;
+    if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
+        return geom.x+geom.w==stg.x;
+    }
+
     return FALSE;
 }
 
-bool check_stdisp(WFrame *frame, WRectangle *ng)
+void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir)
+{
+    WRectangle stg=REGION_GEOM(st->regnode.reg);
+
+    if(geom_borders_stdisp(*geom, st)
+            && !geom_overlaps_stdisp_geom(*geom, st, stdisp_recommended_geometry(st))){
+        if(dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL){
+            if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR){
+                geom->y-=stg.h;
+                geom->h+=stg.h;
+            }
+            if(st->corner==MPLEX_STDISP_BL || st->corner==MPLEX_STDISP_BR)
+                geom->h+=stg.h;
+        }
+
+        if(dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL){
+            if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL){
+                geom->x-=stg.w;
+                geom->w+=stg.w;
+            }
+            if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
+                geom->w+=stg.w;
+        }
+    }
+}
+
+bool geom_best_stdisp_match(WRectangle geom, WSplitST *st, WRectangle *stg, int dir)
+{
+    WRectangle strg=stdisp_recommended_geometry(st);
+    WRectangle wsg=REGION_MANAGER(st)->geom;
+    if(geom_borders_stdisp(geom, st)){
+            if(dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL){
+                if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL){
+                    if(geom.x<strg.w && geom.x+geom.w>=strg.w)
+                        stg->w=geom.x+geom.w;
+                        return TRUE;
+                }
+                if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR){
+                    if(geom.x<=strg.x && geom.x+geom.w>strg.x){
+                        stg->x=geom.x;
+                        stg->w=wsg.w-geom.x;
+                    }
+                    return TRUE;
+                }
+            }
+            if(dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL){
+                if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR){
+                    if(geom.y<strg.h && geom.h+geom.h>=strg.h)
+                        stg->h=geom.y+geom.h;
+                        return TRUE;
+                }
+                if(st->corner==MPLEX_STDISP_BL || st->corner==MPLEX_STDISP_BR){
+                    if(geom.y<=strg.y && geom.y+geom.h>strg.y){
+                        stg->y=geom.y;
+                        stg->h=wsg.h-geom.y;
+                    }
+                    return TRUE;
+                }
+            }
+    }
+    return FALSE;
+}
+
+bool check_stdisp(WFrame *frame, WRectangle *ng, int dir)
 {
     WRegion *ws=REGION_MANAGER(frame);
-    WRectangle wsg=ws->geom;
     WSplitST *st;
     WRectangle stg;
 
@@ -847,30 +922,13 @@ bool check_stdisp(WFrame *frame, WRectangle *ng)
     st=((WTiling*)ws)->stdispnode;
     stg=REGION_GEOM(st->regnode.reg);
 
-    if(geom_moved_away_from_stdisp(*ng, st, wsg)){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR){
-            ng->y-=stg.h;
-            if(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT 
-                    && frame->saved_y==stg.h)
-                frame->saved_y-=stg.h;
-        }
-        if(st->corner==MPLEX_STDISP_BL || st->corner==MPLEX_STDISP_BR){
-            ng->h+=stg.h;
-            if(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT 
-                    && frame->saved_y+frame->saved_h==stg.y)
-                frame->saved_h+=stg.h;
-        }
-        return FALSE;
-    }
+    adapt_geom_moved_away_from_stdisp(ng, st, dir);
+    
+    if((frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
+            || (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ))
+        adapt_geom_moved_away_from_stdisp(&frame->saved_geom, st, dir);
 
-    if(geom_best_stdisp_match(*ng, st, wsg)){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
-            stg.w=ng->x+ng->w;
-        
-        if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR){
-            stg.x=ng->x;
-            stg.w=wsg.w-ng->x;
-        }
+    if(geom_best_stdisp_match(*ng, st, &stg, dir)){
         splitst_do_resize(st, &stg, PRIMN_ANY, PRIMN_ANY, FALSE);
         return TRUE;
     }
@@ -906,13 +964,13 @@ void splitregion_do_maxhelper(WSplitRegion *node, int dir, int action)
         frame->flags|=FRAME_KEEP_FLAGS;
         if(dir==HORIZONTAL){
             frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
-            frame->saved_x=REGION_GEOM(frame).x;
-            frame->saved_w=REGION_GEOM(frame).w;
+            frame->saved_geom.x=REGION_GEOM(frame).x;
+            frame->saved_geom.w=REGION_GEOM(frame).w;
         }
         else if(dir==VERTICAL){
             frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
-            frame->saved_y=REGION_GEOM(frame).y;
-            frame->saved_h=REGION_GEOM(frame).h;
+            frame->saved_geom.y=REGION_GEOM(frame).y;
+            frame->saved_geom.h=REGION_GEOM(frame).h;
         }
     }
     if(action==RM_KEEP)
@@ -958,7 +1016,7 @@ bool splitst_do_restore(WSplit *node, int dir)
 bool splitregion_do_restore(WSplitRegion *node, int dir)
 {
     WFrame *frame;
-    WRectangle geom = ((WSplit*)node)->geom;
+    WRectangle geom=((WSplit*)node)->geom;
     bool ret;
     bool other_max;
 
@@ -967,18 +1025,20 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
 
     frame=(WFrame*)node->reg;
     if(dir==SPLIT_HORIZONTAL){
-        geom.x=frame->saved_x;
-        geom.w=frame->saved_w;
+        geom.x=frame->saved_geom.x;
+        geom.w=frame->saved_geom.w;
     }else if(dir==SPLIT_VERTICAL){
-        geom.y=frame->saved_y;
-        geom.h=frame->saved_h;
+        geom.y=frame->saved_geom.y;
+        geom.h=frame->saved_geom.h;
     }
-    ret=check_stdisp(frame, &geom);
+
+    ret=check_stdisp(frame, &geom, dir);
     other_max=
-        dir==SPLIT_HORIZONTAL 
+        dir==SPLIT_HORIZONTAL
         ? frame->flags&FRAME_MAXED_VERT
         : frame->flags&FRAME_MAXED_HORIZ;
     splitregion_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
+
     if(other_max)
         frame->flags|=
             dir==SPLIT_HORIZONTAL 

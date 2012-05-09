@@ -468,13 +468,13 @@ static void set_saved(WMoveresMode *mode, WRegion *reg)
     
     /* Restore saved sizes from the beginning of the resize action */
     if(mode->origgeom.w!=mode->geom.w){
-        frame->saved_x=mode->origgeom.x;
-        frame->saved_w=mode->origgeom.w;
+        frame->saved_geom.x=mode->origgeom.x;
+        frame->saved_geom.w=mode->origgeom.w;
     }
     
     if(mode->origgeom.h!=mode->geom.h){
-        frame->saved_y=mode->origgeom.y;
-        frame->saved_h=mode->origgeom.h;
+        frame->saved_geom.y=mode->origgeom.y;
+        frame->saved_geom.h=mode->origgeom.h;
     }
 }
 
@@ -769,7 +769,7 @@ void frame_maximize_vert(WFrame *frame)
         if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, VERTICAL, VERIFY))
             region_managed_maximize(mp, (WRegion*)frame, VERTICAL, RESTORE);
         else if(frame->flags&FRAME_SAVED_VERT)
-            rqh(frame, frame->saved_y, frame->saved_h);
+            rqh(frame, frame->saved_geom.y, frame->saved_geom.h);
         frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
         region_goto((WRegion*)frame);
         return;
@@ -786,8 +786,8 @@ void frame_maximize_vert(WFrame *frame)
     region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RM_KEEP);
     
     frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
-    frame->saved_y=oy;
-    frame->saved_h=oh;
+    frame->saved_geom.y=oy;
+    frame->saved_geom.h=oh;
     
     region_goto((WRegion*)frame);
 }
@@ -828,7 +828,7 @@ void frame_maximize_horiz(WFrame *frame)
         if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, VERIFY))
             region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RESTORE);
         else if(frame->flags&FRAME_SAVED_HORIZ)
-            rqw(frame, frame->saved_x, frame->saved_w);
+            rqw(frame, frame->saved_geom.x, frame->saved_geom.w);
         frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
         region_goto((WRegion*)frame);
         return;
@@ -845,8 +845,8 @@ void frame_maximize_horiz(WFrame *frame)
     region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RM_KEEP);
     
     frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
-    frame->saved_x=ox;
-    frame->saved_w=ow;
+    frame->saved_geom.x=ox;
+    frame->saved_geom.w=ow;
     
     region_goto((WRegion*)frame);
 }
