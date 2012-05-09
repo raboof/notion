@@ -786,126 +786,125 @@ WSplit *max_parent_direction(WSplit *node, int dir)
     return max_parent_direction_rel(max_parent(node), node, dir);
 }
 
-WRectangle stdisp_recommended_geometry(WSplitST *st)
+int *wh(WRectangle geom, int orientation)
 {
+    return 
+        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom.w : &geom.h;
+}
+
+int *xy(WRectangle geom, int orientation)
+{
+    return 
+        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom.x : &geom.y;
+}
+
+bool cond1(int orientation, int corner)
+{
+    return orientation==REGION_ORIENTATION_HORIZONTAL
+        ? corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL
+        : corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR;
+}
+
+bool cond2(int orientation, int corner)
+{
+    return orientation=REGION_ORIENTATION_HORIZONTAL
+        ? corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR
+        : corner==MPLEX_STDISP_BR || corner==MPLEX_STDISP_BL;
+}
+
+WRectangle stdisp_recommended_geometry(WSplitST *st, WRectangle wsg)
+{
+    /* wsg holds the geometry of the workspace that st is on. */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
-    WRectangle wsg=REGION_MANAGER(st)->geom;
     int rw=stdisp_recommended_w(st);
     int rh=stdisp_recommended_w(st);
+    int ori=st->orientation;
     stg.w=rw;
     stg.h=rh;
 
-    if(st->orientation==REGION_ORIENTATION_HORIZONTAL){
-        if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
-            stg.x=wsg.w-rw;
-    }
+    if(ori==REGION_ORIENTATION_HORIZONTAL
+        ? (st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
+        : (st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL))
+            *xy(stg, ori)=*wh(wsg, ori)-*wh(stg, ori);
 
-    if(st->orientation==REGION_ORIENTATION_VERTICAL){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
-            stg.y=wsg.h-rh;
-    }
     return stg;
 }
 
 bool geom_overlaps_stdisp_geom(WRectangle geom, WSplitST *st, WRectangle stg)
 {
-    if(st->orientation==REGION_ORIENTATION_HORIZONTAL){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
-        return geom.x<stg.w;
-    if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
-        return geom.x+geom.w>stg.x;
-    }
+    /* If st had geometry stg, would a frame with geometry geom overlap with 
+     * it? Here "overlap" means to lie over/under the stdisp in case of a 
+     * horizontal stdisp and left/right of the stdisp in case of a vertical 
+     * stdisp. */
+    int ori=st->orientation;
 
-    if(st->orientation==REGION_ORIENTATION_VERTICAL){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR)
-            return geom.y<stg.h;
-        if(st->corner==MPLEX_STDISP_BR || st->corner==MPLEX_STDISP_BL)
-            return geom.y+geom.h>stg.y;
-    }
+    if(cond1(ori, st->corner))
+        return *xy(geom, ori)<*wh(stg, ori);
+    if(cond2(ori, st->corner))
+        return *xy(geom, ori)+*wh(geom, ori)>*xy(stg, ori);
 
     return FALSE;
 }
 
 bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
 {
+    /* Assuming that geom overlaps with st, does it touch st? */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
+    int ori= st->orientation==REGION_ORIENTATION_HORIZONTAL
+        ? REGION_ORIENTATION_VERTICAL
+        : REGION_ORIENTATION_HORIZONTAL;
 
-    if(st->orientation==REGION_ORIENTATION_HORIZONTAL){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR)
-            return geom.y==stg.h;
-    if(st->corner==MPLEX_STDISP_BR || st->corner==MPLEX_STDISP_BL)
-        return geom.y+geom.h==stg.y;
-    }
-
-    if(st->orientation==REGION_ORIENTATION_VERTICAL){
-        if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL)
-            return geom.x==stg.w;
-    if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
-        return geom.x+geom.w==stg.x;
-    }
+    if(cond1(ori, st->corner))
+        return *xy(geom, ori)==*wh(stg, ori);
+        
+    if(cond2(ori, st->corner))
+        return *xy(geom, ori)+*wh(geom, ori)==*xy(stg, ori);
 
     return FALSE;
 }
 
-void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir)
+void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, WRectangle rstg)
 {
+    /* Assuming that st takes its recommended geometry rstg, does a frame of 
+     * geometry geom lie away from st? If so, add the height or the width of st 
+     * to geom as appropriate. */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
+    int ori=st->orientation==REGION_ORIENTATION_HORIZONTAL
+        ? REGION_ORIENTATION_VERTICAL
+        : REGION_ORIENTATION_HORIZONTAL;
 
-    if(geom_borders_stdisp(*geom, st)
-            && !geom_overlaps_stdisp_geom(*geom, st, stdisp_recommended_geometry(st))){
-        if(dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL){
-            if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR){
-                geom->y-=stg.h;
-                geom->h+=stg.h;
-            }
-            if(st->corner==MPLEX_STDISP_BL || st->corner==MPLEX_STDISP_BR)
-                geom->h+=stg.h;
+    if(geom_borders_stdisp(*geom, st) && !geom_overlaps_stdisp_geom(*geom, st, rstg)){
+        if(cond1(ori, st->corner)){
+            *xy(*geom, ori)=*wh(stg, ori);
+            *wh(*geom, ori)+=*wh(stg, ori);
         }
-
-        if(dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL){
-            if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL){
-                geom->x-=stg.w;
-                geom->w+=stg.w;
-            }
-            if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
-                geom->w+=stg.w;
+        if(cond2(ori, st->corner)){
+            *wh(*geom, ori)+=*wh(stg, ori);
+            *wh(*geom, ori)+=*wh(stg, ori);
         }
     }
 }
 
-bool geom_best_stdisp_match(WRectangle geom, WSplitST *st, WRectangle *stg, int dir)
+bool adapt_stdisp_to_geom(WRectangle geom, WSplitST *st, int dir, WRectangle rstg)
 {
-    WRectangle strg=stdisp_recommended_geometry(st);
-    WRectangle wsg=REGION_MANAGER(st)->geom;
+    /* If st tries to take geometry rstg, determine if a frame of geometry geom 
+     * forces st to take a geometry different from rstg. If so, resize st to 
+     * this geometry. */
+    WRectangle nstg=REGION_GEOM(st->regnode.reg);
+    int ori=st->orientation;
     if(geom_borders_stdisp(geom, st)){
-            if(dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL){
-                if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL){
-                    if(geom.x<strg.w && geom.x+geom.w>=strg.w)
-                        stg->w=geom.x+geom.w;
-                        return TRUE;
-                }
-                if(st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR){
-                    if(geom.x<=strg.x && geom.x+geom.w>strg.x){
-                        stg->x=geom.x;
-                        stg->w=wsg.w-geom.x;
-                    }
-                    return TRUE;
-                }
+        if(cond1(ori, st->corner))
+            if(*xy(geom, ori)<*wh(rstg, ori) && *xy(geom, ori)+*wh(geom, ori)>=*wh(rstg, ori))
+                *wh(nstg, ori)=*xy(geom, ori)+*wh(geom, ori);
+        if(cond2(ori, st->corner))
+            if(*xy(geom, ori)<=*xy(rstg, ori) && *xy(geom, ori)+*wh(geom, ori)>*xy(rstg, ori)){
+                *xy(nstg, ori)=*xy(geom, ori);
+                *wh(nstg, ori)=*wh(rstg, ori)+(*xy(rstg, ori)-*xy(geom, ori));
             }
-            if(dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL){
-                if(st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_TR){
-                    if(geom.y<strg.h && geom.h+geom.h>=strg.h)
-                        stg->h=geom.y+geom.h;
-                        return TRUE;
-                }
-                if(st->corner==MPLEX_STDISP_BL || st->corner==MPLEX_STDISP_BR){
-                    if(geom.y<=strg.y && geom.y+geom.h>strg.y){
-                        stg->y=geom.y;
-                        stg->h=wsg.h-geom.y;
-                    }
-                    return TRUE;
-                }
-            }
+        if(rectangle_compare(&nstg, &REGION_GEOM(st->regnode.reg))){
+            splitst_do_resize(st, &nstg, PRIMN_ANY, PRIMN_ANY, FALSE);
+            return TRUE;
+        }
     }
     return FALSE;
 }
@@ -915,22 +914,26 @@ bool check_stdisp(WFrame *frame, WRectangle *ng, int dir)
     WRegion *ws=REGION_MANAGER(frame);
     WSplitST *st;
     WRectangle stg;
+    WRectangle wsg;
+    WRectangle rstg;
 
     if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)
         return FALSE;
 
     st=((WTiling*)ws)->stdispnode;
-    stg=REGION_GEOM(st->regnode.reg);
+    wsg=ws->geom;
+    if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL)
+            || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL)){
 
-    adapt_geom_moved_away_from_stdisp(ng, st, dir);
-    
-    if((frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
-            || (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ))
-        adapt_geom_moved_away_from_stdisp(&frame->saved_geom, st, dir);
+        rstg=stdisp_recommended_geometry(st, wsg);
 
-    if(geom_best_stdisp_match(*ng, st, &stg, dir)){
-        splitst_do_resize(st, &stg, PRIMN_ANY, PRIMN_ANY, FALSE);
-        return TRUE;
+        adapt_geom_moved_away_from_stdisp(ng, st, dir, rstg);
+
+        if((frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
+                || (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ))
+            adapt_geom_moved_away_from_stdisp(&frame->saved_geom, st, dir, rstg);
+
+        return adapt_stdisp_to_geom(*ng, st, dir, rstg);
     }
     return FALSE;
 }
