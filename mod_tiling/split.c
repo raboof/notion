@@ -798,18 +798,11 @@ int *xy(WRectangle *geom, int orientation)
         orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->x : &geom->y;
 }
 
-bool cond1(int orientation, int corner)
+bool is_left(int orientation, int corner)
 {
     return orientation==REGION_ORIENTATION_HORIZONTAL
         ? corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL
         : corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR;
-}
-
-bool cond2(int orientation, int corner)
-{
-    return orientation==REGION_ORIENTATION_HORIZONTAL
-        ? corner==MPLEX_STDISP_TR || corner==MPLEX_STDISP_BR
-        : corner==MPLEX_STDISP_BR || corner==MPLEX_STDISP_BL;
 }
 
 WRectangle stdisp_recommended_geometry(WSplitST *st, WRectangle wsg)
@@ -822,10 +815,8 @@ WRectangle stdisp_recommended_geometry(WSplitST *st, WRectangle wsg)
     stg.w=rw;
     stg.h=rh;
 
-    if(ori==REGION_ORIENTATION_HORIZONTAL
-        ? (st->corner==MPLEX_STDISP_TR || st->corner==MPLEX_STDISP_BR)
-        : (st->corner==MPLEX_STDISP_TL || st->corner==MPLEX_STDISP_BL))
-            *xy(&stg, ori)=*wh(&wsg, ori)-*wh(&stg, ori);
+    if(!is_left(ori, st->corner))
+        *xy(&stg, ori)=*wh(&wsg, ori)-*wh(&stg, ori);
 
     return stg;
 }
@@ -838,12 +829,10 @@ bool geom_overlaps_stdisp_geom(WRectangle geom, WSplitST *st, WRectangle stg)
      * stdisp. */
     int ori=st->orientation;
 
-    if(cond1(ori, st->corner))
-        return *xy(&geom, ori)<*wh(&stg, ori);
-    if(cond2(ori, st->corner))
-        return *xy(&geom, ori)+*wh(&geom, ori)>*xy(&stg, ori);
-
-    return FALSE;
+    return
+        is_left(ori, st->corner)
+        ? *xy(&geom, ori)<*wh(&stg, ori)
+        : *xy(&geom, ori)+*wh(&geom, ori)>*xy(&stg, ori);
 }
 
 bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
@@ -854,13 +843,9 @@ bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
         ? REGION_ORIENTATION_VERTICAL
         : REGION_ORIENTATION_HORIZONTAL;
 
-    if(cond1(ori, st->corner))
-        return *xy(&geom, ori)==*wh(&stg, ori);
-        
-    if(cond2(ori, st->corner))
-        return *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
-
-    return FALSE;
+    return is_left(ori, st->corner)
+        ? *xy(&geom, ori)==*wh(&stg, ori)
+        : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
 }
 
 void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, WRectangle rstg)
@@ -873,13 +858,12 @@ void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, 
         ? REGION_ORIENTATION_VERTICAL
         : REGION_ORIENTATION_HORIZONTAL;
 
-    if(geom_borders_stdisp(*geom, st) && !geom_overlaps_stdisp_geom(*geom, st, rstg)){
-        if(!cond2(ori, st->corner)){
-            *xy(geom, ori)=-*wh(&stg, ori);
-            *wh(geom, ori)+=*wh(&stg, ori);
-        }
-        if(!cond1(ori, st->corner))
-            *wh(geom, ori)+=*wh(&stg, ori);
+    if(geom_overlaps_stdisp_geom(*geom, st, stg)
+            && geom_borders_stdisp(*geom, st) 
+            && !geom_overlaps_stdisp_geom(*geom, st, rstg)){
+        if(is_left(ori, st->corner))
+            *xy(geom, ori)=0;
+        *wh(geom, ori)+=*wh(&stg, ori);
     }
 }
 
@@ -891,14 +875,15 @@ bool adapt_stdisp_to_geom(WRectangle geom, WSplitST *st, int dir, WRectangle rst
     WRectangle nstg=REGION_GEOM(st->regnode.reg);
     int ori=st->orientation;
     if(geom_borders_stdisp(geom, st)){
-        if(cond1(ori, st->corner))
+        if(is_left(ori, st->corner)){
             if(*xy(&geom, ori)<*wh(&rstg, ori) && *xy(&geom, ori)+*wh(&geom, ori)>=*wh(&rstg, ori))
                 *wh(&nstg, ori)=*xy(&geom, ori)+*wh(&geom, ori);
-        if(cond2(ori, st->corner))
+        }else
             if(*xy(&geom, ori)<=*xy(&rstg, ori) && *xy(&geom, ori)+*wh(&geom, ori)>*xy(&rstg, ori)){
                 *xy(&nstg, ori)=*xy(&geom, ori);
                 *wh(&nstg, ori)=*wh(&rstg, ori)+(*xy(&rstg, ori)-*xy(&geom, ori));
             }
+
         if(rectangle_compare(&nstg, &REGION_GEOM(st->regnode.reg))){
             splitst_do_resize(st, &nstg, PRIMN_ANY, PRIMN_ANY, FALSE);
             return TRUE;
@@ -1004,7 +989,6 @@ bool splitsplit_do_restore(WSplitSplit *node, int dir)
         snode->geom.w=node->tl->geom.w;
         snode->geom.h=node->tl->geom.h+node->br->geom.h;
     }
-    split_update_bounds(snode, FALSE);
 
     return ret;
 }
@@ -1034,17 +1018,15 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
     }
 
     ret=check_stdisp(frame, &geom, dir);
+
     other_max=
         dir==SPLIT_HORIZONTAL
         ? frame->flags&FRAME_MAXED_VERT
         : frame->flags&FRAME_MAXED_HORIZ;
+
     splitregion_do_resize(node, &geom, PRIMN_ANY, PRIMN_ANY, FALSE);
 
-    if(other_max)
-        frame->flags|=
-            dir==SPLIT_HORIZONTAL 
-            ? FRAME_MAXED_VERT
-            : FRAME_MAXED_HORIZ;
+    frame->flags|=other_max;
     return ret;
 }
 
