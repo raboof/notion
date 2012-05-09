@@ -3,7 +3,7 @@
 ##
 
 # System-specific configuration is in system.mk
-TOPDIR=..
+TOPDIR=../..
 include $(TOPDIR)/system.mk
 
 ######################################
