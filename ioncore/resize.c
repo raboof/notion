@@ -783,7 +783,7 @@ void frame_maximize_vert(WFrame *frame)
     
     region_managed_maximize(mp, (WRegion*)frame, VERTICAL, SAVE);
     rqh(frame, 0, REGION_GEOM(mp).h);
-    region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RM_KEEP);
+    region_managed_maximize(mp, (WRegion*)frame, VERTICAL, RM_KEEP);
     
     frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
     frame->saved_geom.y=oy;
