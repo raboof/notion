@@ -14,9 +14,9 @@ INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
 
 LIBS += $(X11_LIBS) 
 
-SOURCES=ionflux.c
+SOURCES=notionflux.c
 
-TARGETS=ionflux
+TARGETS=notionflux
 
 ######################################
 
@@ -24,7 +24,7 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-ionflux: $(SOURCES)
+notionflux: $(SOURCES)
 	$(CC) $< $(CFLAGS) $(LDFLAGS) -o $@
 
 _install:

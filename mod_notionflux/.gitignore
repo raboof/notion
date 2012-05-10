@@ -1,4 +1,4 @@
-ionflux/ionflux
-mod_ionflux/mod_ionflux.lc
-mod_ionflux/mod_ionflux.o
-mod_ionflux/mod_ionflux.so
+notionflux/notionflux
+mod_notionflux/mod_notionflux.lc
+mod_notionflux/mod_notionflux.o
+mod_notionflux/mod_notionflux.so

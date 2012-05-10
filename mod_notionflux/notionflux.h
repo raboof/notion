@@ -1,5 +1,5 @@
 /*
- * mod_ionflux/ionflux.h
+ * mod_notionflux/notionflux.h
  *
  * Copyright (c) Tuomo Valkonen 2004-2005. 
  *
@@ -9,8 +9,8 @@
  * (at your option) any later version.
  */
 
-#ifndef IONFLUX_H
-#define IONFLUX_H
+#ifndef NOTIONFLUX_H
+#define NOTIONFLUX_H
 
 /* This limit is deliberate, not just laziness. */
 #define MAX_SERVED 8

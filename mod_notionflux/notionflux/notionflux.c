@@ -1,5 +1,5 @@
 /*
- * mod_ionflux/ionflux/ionflux.c
+ * mod_notionflux/notionflux/notionflux.c
  *
  * Copyright (c) Tuomo Valkonen 2004-2005. 
  *
@@ -22,7 +22,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "../ionflux.h"
+#include "../notionflux.h"
 
 static void die(const char *s)
 {

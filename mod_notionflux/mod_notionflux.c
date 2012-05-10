@@ -1,5 +1,5 @@
 /*
- * mod_ionflux/mod_ionflux/mod_ionflux.c
+ * mod_notionflux/mod_notionflux/mod_notionflux.c
  *
  * Copyright (c) Tuomo Valkonen 2004-2005. 
  *
@@ -27,7 +27,7 @@
 #include <libtu/errorlog.h>
 #include <libextl/extl.h>
 
-#include "../ionflux.h"
+#include "../notionflux.h"
 
 typedef struct{
     int fd;
@@ -254,7 +254,7 @@ static bool start_listening()
     return TRUE;
 
 errwarn:
-    warn_err_obj("mod_ionflux listening socket");
+    warn_err_obj("mod_notionflux listening socket");
 err:
     if(listenfd>=0){
         close(listenfd);
@@ -294,11 +294,11 @@ void close_connections()
     extl_unref_fn(tostringfn);
 }
     
-char mod_ionflux_ion_api_version[]=ION_API_VERSION;
+char mod_notionflux_ion_api_version[]=ION_API_VERSION;
 
 static Atom flux_socket=None;
 
-bool mod_ionflux_init()
+bool mod_notionflux_init()
 {
     int i;
     WRootWin *rw;
@@ -328,7 +328,7 @@ bool mod_ionflux_init()
 }
 
 
-void mod_ionflux_deinit()
+void mod_notionflux_deinit()
 {
     WRootWin *rw;
     
