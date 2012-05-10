@@ -45,12 +45,14 @@ static int tmp[CHUNK];
 
 /* Without the 'or nil' kludge tostring may have no parameters. */
 static const char tostringstr[]=
-    "local r=arg[1]()\n"
-    "if type(r)=='string' then\n"
-    "    return string.format('%q', r)\n"
+    "local arg={...}\n"
+    "local callable=arg[1]\n"
+    "local result=callable()\n"
+    "if type(result)=='string' then\n"
+    "    return string.format('%q', result)\n"
     "else\n"
-    "    return tostring(r)\n"
-    "end";
+    "    return tostring(result)\n"
+    "end\n";
 
 static void writes(int fd, const char *s)
 {
