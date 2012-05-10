@@ -854,7 +854,7 @@ bool geom_borders_stdisp(WRectangle geom, WSplitST *st)
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
 }
 
-void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, WRectangle rstg)
+bool adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, WRectangle rstg)
 {
     /* Assuming that st takes its recommended geometry rstg, does a frame of 
      * geometry geom lie away from st? If so, add the height or the width of st 
@@ -866,7 +866,9 @@ void adapt_geom_moved_away_from_stdisp(WRectangle *geom, WSplitST *st, int dir, 
         if(is_lt(ori, st->corner))
             *xy(geom, ori)=0;
         *wh(geom, ori)+=*wh(&stg, ori);
+        return TRUE;
     }
+    return FALSE;
 }
 
 /* bool adapt_stdisp_to_geom(WRectangle geom, WSplitST *st, int dir, WRectangle rstg)
@@ -901,17 +903,29 @@ bool frame_neighbors_stdisp(WFrame *frame, WSplitST *st)
         && geom_borders_stdisp(REGION_GEOM(frame), st);
 }
 
-void update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
+bool geom_clashes_with_stdisp(WRectangle geom, WSplitST *st)
 {
+    WRectangle stg=REGION_GEOM(st->regnode.reg);
+    int ori=flip_orientation(st->orientation);
+    return 
+        is_lt(ori, st->corner)
+        ? *xy(&geom, ori)==0
+        : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori)+*wh(&stg, ori);
+}
+
+bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
+{
+    bool ret=FALSE;
     WRegion *ws=REGION_MANAGER(frame);
     WSplitST *st;
     WRectangle stg;
     WRectangle wsg;
     WRectangle rstg;
     WRectangle ngr;
+    int ori;
 
     if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)
-        return;
+        return FALSE;
 
     st=((WTiling*)ws)->stdispnode;
     stg=REGION_GEOM(st->regnode.reg);
@@ -920,9 +934,8 @@ void update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
             || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL)){
 
         if(frame_neighbors_stdisp(frame, st)){
-
             rstg=stdisp_recommended_geometry(st, wsg);
-            adapt_geom_moved_away_from_stdisp(ng, st, dir, rstg);
+            ret=adapt_geom_moved_away_from_stdisp(ng, st, dir, rstg);
 
             if((frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
                     || (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ))
@@ -931,6 +944,37 @@ void update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
 
         /* return adapt_stdisp_to_geom(*ng, st, dir, rstg); */
     }
+
+    if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_VERTICAL)
+            || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_HORIZONTAL))
+        if(frame_neighbors_stdisp(frame, st) && geom_clashes_with_stdisp(frame->saved_geom, st)){
+            ori=flip_orientation(st->orientation);
+            if(is_lt(ori, st->corner))
+                *xy(ng, ori)+=*wh(&stg, ori);
+            *wh(ng, ori)-=*wh(&stg, ori);
+        }
+
+    return ret;
+}
+
+bool check_no_clash(WFrame *frame, int dir)
+{
+    WRegion *ws=REGION_MANAGER(frame);
+    WSplitST *st;
+    int ori;
+
+    if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)
+        return TRUE;
+
+    st=((WTiling*)ws)->stdispnode;
+    ori=flip_orientation(st->orientation);
+
+    if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_VERTICAL)
+            || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_HORIZONTAL))
+        if(frame_neighbors_stdisp(frame, st) && geom_clashes_with_stdisp(frame->saved_geom, st))
+            return *wh(&frame->saved_geom, ori)>=*wh(&REGION_GEOM(st), ori);
+            
+    return TRUE;
 }
 
 
@@ -1065,7 +1109,7 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
         : frame->flags&FRAME_MAXED_HORIZ;
 
     fakegeom=geom;
-    update_geom_from_stdisp(frame, &geom, dir);
+    ret=update_geom_from_stdisp(frame, &geom, dir);
 
     /* Tell the region the correct geometry to avoid redrawing it again when 
      * the stdisp is resized by split_regularise_stdisp. Some clients (notably 
@@ -1081,10 +1125,11 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
      * children have different heights. The call to split_regularise_stdisp 
      * below will take care of correcting the geometry of the WSplit and it 
      * behaves badly when the tiling is inconsistent. */
-    node->split.geom=fakegeom;
+    node->split.geom=
+        ret ? fakegeom : geom;
 
     frame->flags|=other_max;
-    return rectangle_compare(&geom, &fakegeom);
+    return ret;
 }
 
 
@@ -1119,6 +1164,9 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
         return FALSE;
 
     frame=(WFrame*)node->reg;
+
+    if(!check_no_clash(frame, dir))
+        return FALSE;
 
     if(dir==HORIZONTAL){
         ret=(frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
