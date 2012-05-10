@@ -142,18 +142,10 @@ bool tiling_managed_maximize(WTiling *ws, WRegion *mgd, int dir, int action)
 {
     WSplitRegion *node=get_node_check(ws, mgd);
     bool ret;
-    bool saw_stdisp;
-    WMPlexSTDispInfo di;
     if(node!=NULL && ws->split_tree!=NULL){
         ret=split_maximize((WSplit*)node, dir, action);
-        if(action==RESTORE){
-            /* di.pos=ws->stdispnode->corner;
-            di.fullsize=ws->stdispnode->fullsize;
-            tiling_manage_stdisp(ws, ws->stdispnode->regnode.reg, &di); */
-            /* split_maximize((WSplit*)node, dir, SET_KEEP); */
+        if(action==RESTORE && ret)
             split_regularise_stdisp(ws->stdispnode);
-            /* split_maximize((WSplit*)node, dir, RM_KEEP); */
-        }
         return ret;
     }
     else
