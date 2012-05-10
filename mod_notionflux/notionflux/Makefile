@@ -1,5 +1,5 @@
 ##
-## Ionflux Makefile
+## Notionflux Makefile
 ##
 
 # System-specific configuration is in system.mk

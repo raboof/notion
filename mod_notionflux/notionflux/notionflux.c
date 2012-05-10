@@ -159,10 +159,10 @@ static char *get_socket()
     if(dpy==NULL)
         die_e("Unable to open display.");
     
-    a=XInternAtom(dpy, "_ION_MOD_IONFLUX_SOCKET", True);
+    a=XInternAtom(dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", True);
     
     if(a==None)
-        die_e("Missing atom. Ion not running?");
+        die_e("Missing atom. Notion not running?");
     
     s=xwindow_get_string_property(DefaultRootWindow(dpy), a, NULL);
     

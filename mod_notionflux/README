@@ -1,11 +1,4 @@
-
-This is a simple "remote control" module for Ion. To build it, edit
-IONDIR in system.mk to point to Ion2 top-level source tarball 
-top-level directly. Then run 'make' and 'make install'.
-
-The 'mod_notionflux' module must be loaded before starting any shells
-where the 'notionflux' program is to be used as the unix domain socket
-to use is passed in the NOTIONFLUX_SOCKET environment variable.
+This is a simple "remote control" module for Notion. 
 
 ***
 *** THIS MODULE IS PROBABLY A GAPING SECURITY HOLE!

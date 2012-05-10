@@ -318,7 +318,7 @@ bool mod_notionflux_init()
         return FALSE;
     }
         
-    flux_socket=XInternAtom(ioncore_g.dpy, "_ION_MOD_IONFLUX_SOCKET", False);
+    flux_socket=XInternAtom(ioncore_g.dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", False);
     
     FOR_ALL_ROOTWINS(rw){
         xwindow_set_string_property(region_xwindow((WRegion*)rw), flux_socket, listenfile);
