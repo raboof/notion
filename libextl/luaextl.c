@@ -1615,16 +1615,25 @@ bool extl_call(ExtlFn fnref, const char *spec, const char *rspec, ...)
 /*{{{ extl_loadfile/string */
 
 
+/**
+ * Expects 
+ * - a stack with only the parameters to be passed to the function 
+ * - the function to call as an upvalue
+ * Performs
+ * - execute the function
+ * Returns
+ * - the number of return values
+ */
 static int call_loaded(lua_State *st)
 {
-    int i, nargs=lua_gettop(st);
+    int nargs=lua_gettop(st);
 
     /* Get the loaded file/string as function */
     lua_pushvalue(st, lua_upvalueindex(1));
     lua_insert(st, 1);
 
     lua_call(st, nargs, LUA_MULTRET);
-    return (lua_gettop(st)-nargs);
+    return lua_gettop(st);
 }
 
 
@@ -1635,6 +1644,10 @@ typedef struct{
 } ExtlLoadParam;
 
 
+/**
+ * Stores a c closure in param->resptr containing a call to call_loaded with 
+ * as (fixed) parameter the function loaded from the file/buffer in param->src
+ */
 static bool extl_do_load(lua_State *st, ExtlLoadParam *param)
 {
     int res=0;

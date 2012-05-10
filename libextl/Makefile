@@ -26,7 +26,7 @@ HEADERS=readconfig.h extl.h luaextl.h private.h types.h
 
 TARGETS=libextl.a libextl-mkexports
 
-.PHONY : libextl-mkexports
+.PHONY : libextl-mkexports test
 
 ######################################
 
@@ -50,3 +50,11 @@ install:
 	for h in $(HEADERS); do \
 		$(INSTALL) -m $(DATA_MODE) $$h $(DESTDIR)$(INCDIR); \
 	done
+
+test:
+	rm test/extltest
+	gcc -g -o test/extltest test/extltest.c `pkg-config --libs lua5.1` `pkg-config --cflags lua5.1` -ltu
+	test/extltest
+	rm test/extltest
+	gcc -g -o test/extltest test/extltest.c `pkg-config --libs lua5.2` `pkg-config --cflags lua5.2` -ltu
+	test/extltest
