@@ -29,4 +29,4 @@ notionflux: $(SOURCES)
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) ionflux $(BINDIR)
+	$(INSTALL) -s -m $(BIN_MODE) notionflux $(BINDIR)
