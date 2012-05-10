@@ -139,6 +139,9 @@ extern void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
                                  WPrimn hprimn, WPrimn vprimn, bool transpose);
 extern void split_resize(WSplit *node, const WRectangle *ng, 
                          WPrimn hprimn, WPrimn vprimn);
+DYNFUN void split_do_maxhelper(WSplit *node, int dir, int action);
+DYNFUN bool split_do_restore(WSplit *node, int dir);
+DYNFUN bool split_do_verify(WSplit *node, int dir);
 extern bool split_maximize(WSplit *node, int dir, int action);
 DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
                                  RootwardAmount *ha, RootwardAmount *va, 
