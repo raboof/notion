@@ -36,3 +36,8 @@ _install:
 
 relocatable_build:
 	$(MAKE) RELOCATABLE=1 PREFIX=
+
+.PHONY: test
+
+test:
+	$(MAKE) -C test

@@ -1,0 +1,32 @@
+Each subdirectory here is an integration test. 
+
+== Requirements ==
+
+- xserver-xorg-video-dummy 
+- lposix (aka lua-posix in Debian)
+
+== Running the tests ==
+
+Install notion and run 'make test'
+
+== How it works ==
+
+Each integration test basically looks like this:
+- Start a dummy X server (Xdummy)
+- Start notion with the configuration in $test/config
+  - basically $test/config behaves like the ~user/.notion dir for this test
+  - Right now this starts the currenly *installed* notion.
+    It would be better if it could start the version that was
+    built but not neccessarily installed
+- Execute each .lua script in $test
+  - the .lua script is executed through notionflux, so:
+    - it has access to the notion internals
+    - I'm not sure whether it can 'require' stuff etc
+  - scripts return "ok" upon success, an error message otherwise
+  
+== Limitations ==
+
+- the x.org dummy driver does not appear to support RandR
+- there might be some SELINUX noise, probably due to the way Xdummy works
+- Xdummy doesn't properly autodetect which X ports are free, so we use a fixed
+  value of :7
