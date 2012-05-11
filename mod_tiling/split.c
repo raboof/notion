@@ -904,6 +904,13 @@ bool geom_clashes_with_stdisp(WRectangle geom, WSplitST *st)
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori)+*wh(&stg, ori);
 }
 
+bool same_direction(int dir, int ori)
+{
+    return 
+        (dir==SPLIT_HORIZONTAL && ori==REGION_ORIENTATION_HORIZONTAL)
+        || (dir==SPLIT_VERTICAL && ori==REGION_ORIENTATION_VERTICAL);
+}
+
 bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
 {
     bool ret=FALSE;
@@ -919,12 +926,14 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
         return FALSE;
 
     st=((WTiling*)ws)->stdispnode;
+
+    if(st->fullsize)
+        return FALSE;
+
     stg=REGION_GEOM(st->regnode.reg);
     rstg=stdisp_recommended_geom(st, wsg);
     wsg=ws->geom;
-    if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL)
-            || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL)){
-
+    if(same_direction(dir, st->orientation)){
         if(frame_neighbors_stdisp(frame, st) && !geom_overlaps_stgeom_xy(*ng, st, rstg)){
             grow_by_stdisp_wh(ng, st);
             ret=TRUE;
@@ -934,17 +943,12 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
                 if(geom_aligned_stdisp(frame->saved_geom, st))
                     grow_by_stdisp_wh(&frame->saved_geom, st);
         }
+    }else if(frame_neighbors_stdisp(frame, st) && geom_clashes_with_stdisp(frame->saved_geom, st)){
+        ori=flip_orientation(st->orientation);
+        if(is_lt(ori, st->corner))
+            *xy(ng, ori)+=*wh(&stg, ori);
+        *wh(ng, ori)-=*wh(&stg, ori);
     }
-
-    if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_VERTICAL)
-            || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_HORIZONTAL))
-        if(frame_neighbors_stdisp(frame, st) && geom_clashes_with_stdisp(frame->saved_geom, st)){
-            ori=flip_orientation(st->orientation);
-            if(is_lt(ori, st->corner))
-                *xy(ng, ori)+=*wh(&stg, ori);
-            *wh(ng, ori)-=*wh(&stg, ori);
-        }
-
     return ret;
 }
 
@@ -1004,7 +1008,7 @@ bool splitst_do_restore(WSplit *node, int dir)
 
 bool splitsplit_do_restore(WSplitSplit *node, int dir)
 {
-    bool ret;
+    bool ret1, ret2, ret=FALSE;
     WSplit *snode=(WSplit*)node;
 
     WSplitST *st;
@@ -1032,10 +1036,16 @@ bool splitsplit_do_restore(WSplitSplit *node, int dir)
             stg.x=og.x;
             stg.w=og.w;
         }
-        splitst_do_resize(st, &stg, PRIMN_ANY, PRIMN_ANY, FALSE);
-        ret=TRUE;
-    }else
-        ret=split_do_restore(node->tl, dir) | split_do_restore(node->br, dir);
+        if(rectangle_compare(&stg, &((WSplit*)st)->geom)){
+            splitst_do_resize(st, &stg, PRIMN_ANY, PRIMN_ANY, FALSE);
+            ret=TRUE;
+        }
+    }else{
+        /* Avoid short-circuit evaluation. */
+        ret1=split_do_restore(node->tl, dir);
+        ret2=split_do_restore(node->br, dir);
+        ret=ret1 || ret2;
+    }
 
     snode->geom.x=node->tl->geom.x;
     snode->geom.y=node->tl->geom.y;
@@ -1133,9 +1143,6 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
 
     frame=(WFrame*)node->reg;
 
-    if(!check_no_clash(frame, dir))
-        return FALSE;
-
     if(dir==HORIZONTAL){
         ret=(frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
         frame->flags&=~FRAME_MAXED_HORIZ;
@@ -1144,6 +1151,10 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
         ret=(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT) ? TRUE : FALSE;
         frame->flags&=~FRAME_MAXED_VERT;
     }
+
+    if(!check_no_clash(frame, dir))
+        return FALSE;
+
     return ret;
 }
 
@@ -1154,12 +1165,13 @@ bool splitst_do_verify(WSplit *node, int dir)
 
 bool splitsplit_do_verify(WSplitSplit *node, int dir)
 {
-    bool ret;
+    bool ret1, ret2;
     assert(node->tl!=NULL && node->br!=NULL);
 
-    return 
-        split_do_verify(node->tl, dir) &
-        split_do_verify(node->br, dir);
+    /* Avoid short-circuit evaluation. */
+    ret1=split_do_verify(node->tl, dir);
+    ret2=split_do_verify(node->br, dir);
+    return ret1 && ret2;
 }
 
 bool split_do_verify(WSplit *node, int dir)
