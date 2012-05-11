@@ -867,27 +867,24 @@ bool geom_aligned_stdisp(WRectangle geom, WSplitST *st)
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
 }
 
-bool grow_by_stdisp_wh(WRectangle *geom, WSplitST *st, WRectangle rstg)
+void grow_by_stdisp_wh(WRectangle *geom, WSplitST *st)
 {
     /*          BEFORE                      AFTER       
      *                                               
      *                                               
-     *              ------                       ------
-     *              |geom|                       |    |
-     *      ------  ------               ------  |geom|
-     *      |rstg|                       |rstg|  |    |
-     *      ------                       ------  ------     
+     *              ------                     ------
+     *              |geom|                     |    |
+     *      -----  ------               -----  |geom|
+     *      |stg|                       |stg|  |    |
+     *      -----                       -----  ------     
      *
      */
+    WRectangle stg=REGION_GEOM(st->regnode.reg);
     int ori=flip_orientation(st->orientation);
 
-    if(!geom_overlaps_stgeom_xy(*geom, st, rstg)){
-        if(is_lt(ori, st->corner))
-            *xy(geom, ori)=0;
-        *wh(geom, ori)+=*wh(&rstg, ori);
-        return TRUE;
-    }
-    return FALSE;
+    if(is_lt(ori, st->corner))
+        *xy(geom, ori)=0;
+    *wh(geom, ori)+=*wh(&stg, ori);
 }
 
 bool frame_neighbors_stdisp(WFrame *frame, WSplitST *st)
@@ -923,18 +920,19 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
 
     st=((WTiling*)ws)->stdispnode;
     stg=REGION_GEOM(st->regnode.reg);
+    rstg=stdisp_recommended_geom(st, wsg);
     wsg=ws->geom;
     if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_HORIZONTAL)
             || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_VERTICAL)){
 
-        if(frame_neighbors_stdisp(frame, st)){
-            rstg=stdisp_recommended_geom(st, wsg);
-            ret=grow_by_stdisp_wh(ng, st, rstg);
+        if(frame_neighbors_stdisp(frame, st) && !geom_overlaps_stgeom_xy(*ng, st, rstg)){
+            grow_by_stdisp_wh(ng, st);
+            ret=TRUE;
 
             if((frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
                     || (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ))
                 if(geom_aligned_stdisp(frame->saved_geom, st))
-                    grow_by_stdisp_wh(&frame->saved_geom, st, rstg);
+                    grow_by_stdisp_wh(&frame->saved_geom, st);
         }
     }
 
