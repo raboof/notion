@@ -894,7 +894,7 @@ bool frame_neighbors_stdisp(WFrame *frame, WSplitST *st)
         && geom_aligned_stdisp(REGION_GEOM(frame), st);
 }
 
-bool geom_clashes_with_stdisp(WRectangle geom, WSplitST *st)
+bool geom_clashes_stdisp(WRectangle geom, WSplitST *st)
 {
     WRectangle stg=REGION_GEOM(st->regnode.reg);
     int ori=flip_orientation(st->orientation);
@@ -934,7 +934,8 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
     rstg=stdisp_recommended_geom(st, wsg);
     wsg=ws->geom;
     if(same_direction(dir, st->orientation)){
-        if(frame_neighbors_stdisp(frame, st) && !geom_overlaps_stgeom_xy(*ng, st, rstg)){
+        if(frame_neighbors_stdisp(frame, st) 
+                && !geom_overlaps_stgeom_xy(*ng, st, rstg)){
             grow_by_stdisp_wh(ng, st);
             ret=TRUE;
 
@@ -943,7 +944,8 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
                 if(geom_aligned_stdisp(frame->saved_geom, st))
                     grow_by_stdisp_wh(&frame->saved_geom, st);
         }
-    }else if(frame_neighbors_stdisp(frame, st) && geom_clashes_with_stdisp(frame->saved_geom, st)){
+    }else if(frame_neighbors_stdisp(frame, st) 
+            && geom_clashes_stdisp(frame->saved_geom, st)){
         ori=flip_orientation(st->orientation);
         if(is_lt(ori, st->corner))
             *xy(ng, ori)+=*wh(&stg, ori);
@@ -967,7 +969,7 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
     if(dir==SPLIT_HORIZONTAL){
         geom.x=frame->saved_geom.x;
         geom.w=frame->saved_geom.w;
-    }else if(dir==SPLIT_VERTICAL){
+    }else{
         geom.y=frame->saved_geom.y;
         geom.h=frame->saved_geom.h;
     }
@@ -989,13 +991,12 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
 
     split_update_bounds(&(node->split), FALSE);
 
-    /* Keep the old geometry for the split. Otherwise the tiling would be 
-     * inconsistent, by for example having horizontal WSplitSplits whose 
+    /* Keep the old geometry for the WSplit. Otherwise the tiling would be 
+     * inconsistent, by for example having horizontal WSplitSplit's whose 
      * children have different heights. The call to split_regularise_stdisp 
      * below will take care of correcting the geometry of the WSplit and it 
      * behaves badly when the tiling is inconsistent. */
-    node->split.geom=
-        ret ? fakegeom : geom;
+    node->split.geom=ret ? fakegeom : geom;
 
     frame->flags|=other_max;
     return ret;
@@ -1082,8 +1083,7 @@ void splitregion_do_maxhelper(WSplitRegion *node, int dir, int action)
             frame->flags|=(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
             frame->saved_geom.x=REGION_GEOM(frame).x;
             frame->saved_geom.w=REGION_GEOM(frame).w;
-        }
-        else if(dir==VERTICAL){
+        }else{
             frame->flags|=(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
             frame->saved_geom.y=REGION_GEOM(frame).y;
             frame->saved_geom.h=REGION_GEOM(frame).h;
@@ -1113,7 +1113,7 @@ void split_do_maxhelper(WSplit *node, int dir, int action)
 }
 
 
-bool check_no_clash(WFrame *frame, int dir)
+bool savedgeom_clashes_stdisp(WFrame *frame, int dir)
 {
     WRegion *ws=REGION_MANAGER(frame);
     WSplitST *st;
@@ -1125,12 +1125,12 @@ bool check_no_clash(WFrame *frame, int dir)
     st=((WTiling*)ws)->stdispnode;
     ori=flip_orientation(st->orientation);
 
-    if((dir==SPLIT_HORIZONTAL && st->orientation==REGION_ORIENTATION_VERTICAL)
-            || (dir==SPLIT_VERTICAL && st->orientation==REGION_ORIENTATION_HORIZONTAL))
-        if(frame_neighbors_stdisp(frame, st) && geom_clashes_with_stdisp(frame->saved_geom, st))
-            return *wh(&frame->saved_geom, ori)>=*wh(&REGION_GEOM(st), ori);
-            
-    return TRUE;
+    return
+        !same_direction(dir, st->orientation) 
+            && frame_neighbors_stdisp(frame, st) 
+            && geom_clashes_stdisp(frame->saved_geom, st)
+        ? *wh(&frame->saved_geom, ori)<*wh(&REGION_GEOM(st), ori)
+        : FALSE;
 }
 
 bool splitregion_do_verify(WSplitRegion *node, int dir)
@@ -1144,15 +1144,14 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
     frame=(WFrame*)node->reg;
 
     if(dir==HORIZONTAL){
-        ret=(frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ) ? TRUE : FALSE;
+        ret=frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ;
         frame->flags&=~FRAME_MAXED_HORIZ;
-    }
-    else if(dir==VERTICAL){
-        ret=(frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT) ? TRUE : FALSE;
+    }else{
+        ret=frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT;
         frame->flags&=~FRAME_MAXED_VERT;
     }
 
-    if(!check_no_clash(frame, dir))
+    if(savedgeom_clashes_stdisp(frame, dir))
         return FALSE;
 
     return ret;
