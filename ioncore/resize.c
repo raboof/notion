@@ -766,10 +766,12 @@ void frame_maximize_vert(WFrame *frame)
     if(frame->flags&FRAME_SHADED || frame->flags&FRAME_MAXED_VERT){
         if(frame->flags&FRAME_SHADED)
             frame->flags|=FRAME_SHADED_TOGGLE;
-        if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, VERTICAL, VERIFY))
-            region_managed_maximize(mp, (WRegion*)frame, VERTICAL, RESTORE);
-        else if(frame->flags&FRAME_SAVED_VERT)
-            rqh(frame, frame->saved_geom.y, frame->saved_geom.h);
+        if(frame->flags&FRAME_SAVED_VERT){
+            if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, VERTICAL, VERIFY))
+                region_managed_maximize(mp, (WRegion*)frame, VERTICAL, RESTORE);
+            else
+                rqh(frame, frame->saved_geom.y, frame->saved_geom.h);
+        }
         frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT|FRAME_SHADED_TOGGLE);
         region_goto((WRegion*)frame);
         return;
@@ -825,10 +827,12 @@ void frame_maximize_horiz(WFrame *frame)
     int ox, ow;
     
     if(frame->flags&FRAME_MIN_HORIZ || frame->flags&FRAME_MAXED_HORIZ){
-        if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, VERIFY))
-            region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RESTORE);
-        else if(frame->flags&FRAME_SAVED_HORIZ)
-            rqw(frame, frame->saved_geom.x, frame->saved_geom.w);
+        if(frame->flags&FRAME_SAVED_HORIZ){
+            if(mp!=NULL && region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, VERIFY))
+                region_managed_maximize(mp, (WRegion*)frame, HORIZONTAL, RESTORE);
+            else
+                rqw(frame, frame->saved_geom.x, frame->saved_geom.w);
+        }
         frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
         region_goto((WRegion*)frame);
         return;

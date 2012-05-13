@@ -745,31 +745,37 @@ bool splits_are_related(WSplit *p, WSplit *node)
 {
     if(p==node)
         return TRUE;
-    else 
-        return 
-            node->parent!=NULL 
-            ? splits_are_related(p, (WSplit*)node->parent)
-            : FALSE;
+
+    return 
+        node->parent!=NULL 
+        ? splits_are_related(p, (WSplit*)node->parent)
+        : FALSE;
 }
 
 
-/* Descending from p, try to determine the first split of type dir between p
- * and node. */
 WSplit *maxparentdir_rel(WSplit *p, WSplit *node, int dir)
 {
+    /* Descending from p, try to determine the first split of type dir between 
+     * p and node, while ignoring a potential stdisp. */
     if(OBJ_IS(p, WSplitSplit)){
         WSplitSplit *sp=(WSplitSplit*)p;
+        assert(sp->tl!=NULL && sp->br!=NULL);
+        assert(splits_are_related(sp->tl, node) || 
+               splits_are_related(sp->br, node));
+
         if(OBJ_IS(sp->tl, WSplitST))
             return maxparentdir_rel(sp->br, node, dir);
         if(OBJ_IS(sp->br, WSplitST))
             return maxparentdir_rel(sp->tl, node, dir);
+
         if(sp->dir!=dir){
-            if(splits_are_related(sp->tl, node))
-                return maxparentdir_rel(sp->tl, node, dir);
-            if(splits_are_related(sp->br, node))
-                return maxparentdir_rel(sp->br, node, dir);
+            return 
+                splits_are_related(sp->tl, node) 
+                ? maxparentdir_rel(sp->tl, node, dir)
+                : maxparentdir_rel(sp->br, node, dir);
         }
     }
+
     return p;
 }
 
@@ -788,27 +794,27 @@ WSplit *maxparentdir(WSplit *node, int dir)
 
 int *wh(WRectangle *geom, int orientation)
 {
-    return 
-        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->w : &geom->h;
+    return orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->w : &geom->h;
 }
 
 int *xy(WRectangle *geom, int orientation)
 {
-    return 
-        orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->x : &geom->y;
+    return orientation==REGION_ORIENTATION_HORIZONTAL ? &geom->x : &geom->y;
 }
 
 bool is_lt(int orientation, int corner)
 {
     /* Read as "is_left" or "is_top", depending on the orientation. */
-    return orientation==REGION_ORIENTATION_HORIZONTAL
+    return 
+        orientation==REGION_ORIENTATION_HORIZONTAL
         ? corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL
         : corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR;
 }
 
 int flip_orientation(int orientation)
 {
-    return orientation==REGION_ORIENTATION_HORIZONTAL
+    return 
+        orientation==REGION_ORIENTATION_HORIZONTAL
         ? REGION_ORIENTATION_VERTICAL
         : REGION_ORIENTATION_HORIZONTAL;
 }
@@ -862,7 +868,8 @@ bool geom_aligned_stdisp(WRectangle geom, WSplitST *st)
     WRectangle stg=REGION_GEOM(st->regnode.reg);
     int ori=flip_orientation(st->orientation);
 
-    return is_lt(ori, st->corner)
+    return 
+        is_lt(ori, st->corner)
         ? *xy(&geom, ori)==*wh(&stg, ori)
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
 }
@@ -890,8 +897,8 @@ void grow_by_stdisp_wh(WRectangle *geom, WSplitST *st)
 bool frame_neighbors_stdisp(WFrame *frame, WSplitST *st)
 {
     return
-        geom_overlaps_stgeom_xy(REGION_GEOM(frame), st, REGION_GEOM(st))
-        && geom_aligned_stdisp(REGION_GEOM(frame), st);
+        geom_overlaps_stgeom_xy(REGION_GEOM(frame), st, REGION_GEOM(st)) &&
+        geom_aligned_stdisp(REGION_GEOM(frame), st);
 }
 
 bool geom_clashes_stdisp(WRectangle geom, WSplitST *st)
@@ -904,20 +911,26 @@ bool geom_clashes_stdisp(WRectangle geom, WSplitST *st)
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori)+*wh(&stg, ori);
 }
 
-bool same_direction(int dir, int ori)
+bool is_same_dir(int dir, int ori)
 {
     return 
-        (dir==SPLIT_HORIZONTAL && ori==REGION_ORIENTATION_HORIZONTAL)
-        || (dir==SPLIT_VERTICAL && ori==REGION_ORIENTATION_VERTICAL);
+        (dir==SPLIT_HORIZONTAL && ori==REGION_ORIENTATION_HORIZONTAL) || 
+        (dir==SPLIT_VERTICAL && ori==REGION_ORIENTATION_VERTICAL);
+}
+
+bool is_maxed(WFrame *frame, int dir)
+{
+    return
+        dir==SPLIT_HORIZONTAL
+        ? frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ
+        : frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT;
 }
 
 bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
 {
-    bool ret=FALSE;
     WRegion *ws=REGION_MANAGER(frame);
     WSplitST *st;
     WRectangle stg;
-    WRectangle wsg;
     WRectangle rstg;
     WRectangle ngr;
     int ori;
@@ -927,31 +940,35 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
 
     st=((WTiling*)ws)->stdispnode;
 
-    if(st->fullsize)
+    if(st->fullsize || !frame_neighbors_stdisp(frame, st))
         return FALSE;
 
-    stg=REGION_GEOM(st->regnode.reg);
-    rstg=stdisp_recommended_geom(st, wsg);
-    wsg=ws->geom;
-    if(same_direction(dir, st->orientation)){
-        if(frame_neighbors_stdisp(frame, st) 
-                && !geom_overlaps_stgeom_xy(*ng, st, rstg)){
-            grow_by_stdisp_wh(ng, st);
-            ret=TRUE;
+    rstg=stdisp_recommended_geom(st, ws->geom);
 
-            if((frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT)
-                    || (frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ))
-                if(geom_aligned_stdisp(frame->saved_geom, st))
-                    grow_by_stdisp_wh(&frame->saved_geom, st);
+    if(is_same_dir(dir, st->orientation) &&
+       !geom_overlaps_stgeom_xy(*ng, st, rstg))
+    {
+        grow_by_stdisp_wh(ng, st);
+        if(is_maxed(frame, other_dir(dir)) &&
+           geom_aligned_stdisp(frame->saved_geom, st))
+        {
+            grow_by_stdisp_wh(&frame->saved_geom, st);
         }
-    }else if(frame_neighbors_stdisp(frame, st) 
-            && geom_clashes_stdisp(frame->saved_geom, st)){
+        return TRUE;
+    }
+    
+    if(!is_same_dir(dir, st->orientation) &&
+       geom_clashes_stdisp(frame->saved_geom, st))
+    {
+        stg=REGION_GEOM(st->regnode.reg);
         ori=flip_orientation(st->orientation);
         if(is_lt(ori, st->corner))
             *xy(ng, ori)+=*wh(&stg, ori);
+        /* We've checked that this makes sense when verifying the saved layout. */
         *wh(ng, ori)-=*wh(&stg, ori);
     }
-    return ret;
+
+    return FALSE;
 }
 
 bool splitregion_do_restore(WSplitRegion *node, int dir)
@@ -1126,9 +1143,9 @@ bool savedgeom_clashes_stdisp(WFrame *frame, int dir)
     ori=flip_orientation(st->orientation);
 
     return
-        !same_direction(dir, st->orientation) 
-            && frame_neighbors_stdisp(frame, st) 
-            && geom_clashes_stdisp(frame->saved_geom, st)
+        !is_same_dir(dir, st->orientation) && 
+        frame_neighbors_stdisp(frame, st) && 
+        geom_clashes_stdisp(frame->saved_geom, st)
         ? *wh(&frame->saved_geom, ori)<*wh(&REGION_GEOM(st), ori)
         : FALSE;
 }
@@ -1143,13 +1160,12 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
 
     frame=(WFrame*)node->reg;
 
-    if(dir==HORIZONTAL){
-        ret=frame->flags&FRAME_MAXED_HORIZ && frame->flags&FRAME_SAVED_HORIZ;
-        frame->flags&=~FRAME_MAXED_HORIZ;
-    }else{
-        ret=frame->flags&FRAME_MAXED_VERT && frame->flags&FRAME_SAVED_VERT;
-        frame->flags&=~FRAME_MAXED_VERT;
-    }
+    ret=is_maxed(frame, dir);
+
+    if(dir==HORIZONTAL)
+        frame->flags&=~(FRAME_MAXED_HORIZ|FRAME_SAVED_HORIZ);
+    else
+        frame->flags&=~(FRAME_MAXED_VERT|FRAME_SAVED_VERT);
 
     if(savedgeom_clashes_stdisp(frame, dir))
         return FALSE;
@@ -1186,13 +1202,11 @@ bool split_maximize(WSplit *node, int dir, int action)
     WSplit *p=maxparentdir(node, dir);
     if(action==RESTORE)
         return split_do_restore(p, dir);
-    else if(action==VERIFY)
+    if(action==VERIFY)
         return split_do_verify(p, dir);
-    else{
-        split_do_maxhelper(p, dir, action);
-        return TRUE;
-    }
-    return FALSE;
+
+    split_do_maxhelper(p, dir, action);
+    return TRUE;
 }
 
 
