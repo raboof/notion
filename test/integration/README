@@ -27,6 +27,7 @@ Each integration test basically looks like this:
 == Limitations ==
 
 - the x.org dummy driver does not appear to support RandR
+  - .. but we might be able to test some of the mod_xinerama stuff with fakexinerama
 - there might be some SELINUX noise, probably due to the way Xdummy works
 - Xdummy doesn't properly autodetect which X ports are free, so we use a fixed
   value of :7
