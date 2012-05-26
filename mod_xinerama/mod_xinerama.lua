@@ -335,8 +335,6 @@ end
 function rearrange_workspaces(max_visible_screen_id)
    function move_to_first_screen(workspace)
        notioncore.find_screen_id(0):attach(workspace)
-
-       return true
    end
 
    function rearrange_workspaces_s(screen)
@@ -345,8 +343,6 @@ function rearrange_workspaces(max_visible_screen_id)
                move_to_first_screen(screen:mx_nth(i))
            end
        end
-
-       return true
    end
 
    local screen_id = 0;
@@ -357,8 +353,6 @@ function rearrange_workspaces(max_visible_screen_id)
        screen_id = screen_id + 1
        screen = ioncore.find_screen_id(screen_id)
    end
-
-   notioncore.region_i(rearrange_workspaces_s, "WScreen");
 end
 
 --DOC
