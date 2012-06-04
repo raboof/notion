@@ -53,6 +53,9 @@ ioncore.set{
     
     -- Display notification tooltips for activity on hidden workspace.
     --screen_notify=true,
+    
+    -- Automatically save layout on restart and exit.
+    --autosave_layout=true,
 }
 
 

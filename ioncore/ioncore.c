@@ -364,6 +364,7 @@ static bool init_global()
     ioncore_g.no_mousefocus=FALSE;
     ioncore_g.unsqueeze_enabled=TRUE;
     ioncore_g.autoraise=TRUE;
+    ioncore_g.autosave_layout=TRUE;
     
     ioncore_g.enc_utf8=FALSE;
     ioncore_g.enc_sb=TRUE;

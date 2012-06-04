@@ -92,6 +92,7 @@ DECLSTRUCT(WGlobal){
     bool no_mousefocus;
     bool unsqueeze_enabled;
     bool autoraise;
+    bool autosave_layout;
     Time usertime_diff_current;
     Time usertime_diff_new;
     
