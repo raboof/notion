@@ -77,28 +77,43 @@ LUAC=$(LUA_DIR)/bin/luac
 
 ifndef LUA_MANUAL
 
+# lua libraries and includes:
+
 ifeq (5.2,$(findstring 5.2,$(shell pkg-config --exists lua5.2 && pkg-config --modversion lua5.2)))
 
 LUA_LIBS=`pkg-config --libs lua5.2`
 LUA_INCLUDES=`pkg-config --cflags lua5.2`
-LUA=`which lua5.2`
-LUAC=`which luac5.2`
 
 else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
 
 LUA_LIBS=`pkg-config --libs lua5.1`
 LUA_INCLUDES=`pkg-config --cflags lua5.1`
-LUA=`which lua5.1`
-LUAC=`which luac5.1`
 
 else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua && pkg-config --modversion lua)))
 
 LUA_LIBS=`pkg-config --libs lua`
 LUA_INCLUDES=`pkg-config --cflags lua`
+
+endif # lua
+
+# lua interpreter:
+
+ifneq ($(shell which lua5.2),)
+
+LUA=`which lua5.2`
+LUAC=`which luac5.2`
+
+else ifneq ($(shell which lua5.1),)
+
+LUA=`which lua5.1`
+LUAC=`which luac5.1`
+
+else ifneq ($(shell which lua),)
+
 LUA=`which lua`
 LUAC=`which luac`
 
-endif # lua
+endif # lua interpreter
 
 endif # LUA_MANUAL
 
