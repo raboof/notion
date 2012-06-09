@@ -18,3 +18,5 @@ function mod_xrandr.get_outputs(screen)
     -- get outputs based on geometry of this screen
     return mod_xrandr.get_outputs_for_geom(screen:geom())
 end
+
+dopath("cfg_xrandr", true)

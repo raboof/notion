@@ -18,6 +18,7 @@ MAKE_EXPORTS=mod_xrandr
 LIBS = $(X11_LIBS) -lXrandr
 MODULE=mod_xrandr
 MODULE_STUB=mod_xrandr.lua
+ETC=cfg_xrandr.lua
 
 ######################################
 
