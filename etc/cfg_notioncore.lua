@@ -65,6 +65,7 @@ defbindings("WScreen", {
     kpress(META.."Shift+comma", "ioncore.goto_prev_screen()"),
     kpress(META.."I", "ioncore.goto_prev_screen()"),
     kpress(META.."O", "ioncore.goto_next_screen()"),
+    kpress(META.."grave", "ioncore.goto_next_screen()"),
     
     bdoc("Create a new workspace of chosen default type."),
     kpress(META.."F9", "ioncore.create_ws(_)"),
