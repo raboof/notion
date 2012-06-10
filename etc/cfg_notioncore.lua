@@ -89,7 +89,12 @@ defbindings("WScreen", {
         kpress("AnyModifier+R", "WRegion.rqorder(_chld, 'front')",
                "_chld:non-nil"),
     }),
-
+    bdoc("Mute/Unmute Sound."),
+    kpress("AnyModifier+XF86AudioMute", "notioncore.exec_on(_, 'amixer sset Master toggle')"),
+    bdoc("Increase Volume."),
+    kpress("AnyModifier+XF86AudioRaiseVolume", "notioncore.exec_on(_, 'amixer sset Master 3%+')"),
+    bdoc("Decrease Volume."),
+    kpress("AnyModifier+XF86AudioLowerVolume", "notioncore.exec_on(_, 'amixer sset Master 3%-')"),
 })
 
 
