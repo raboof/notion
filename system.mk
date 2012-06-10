@@ -80,43 +80,49 @@ ifndef LUA_MANUAL
 # lua libraries and includes:
 
 ifeq (5.2,$(findstring 5.2,$(shell pkg-config --exists lua5.2 && pkg-config --modversion lua5.2)))
+ifneq ($(shell which lua5.2),)
+HAS_LUA52=true
+HAS_LUA=true
+endif
+endif
+
+ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
+ifneq ($(shell which lua5.1),)
+HAS_LUA51=true
+HAS_LUA=true
+endif
+endif
+
+ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua && pkg-config --modversion lua)))
+ifneq ($(shell which lua),)
+HAS_LUA=true
+endif
+endif
+
+ifdef HAS_LUA52
 
 LUA_LIBS=`pkg-config --libs lua5.2`
 LUA_INCLUDES=`pkg-config --cflags lua5.2`
-
-else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
-
-LUA_LIBS=`pkg-config --libs lua5.1`
-LUA_INCLUDES=`pkg-config --cflags lua5.1`
-
-else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua && pkg-config --modversion lua)))
-
-LUA_LIBS=`pkg-config --libs lua`
-LUA_INCLUDES=`pkg-config --cflags lua`
-
-endif # lua
-
-# lua interpreter:
-
-ifneq ($(shell which lua5.2),)
-
 LUA=`which lua5.2`
 LUAC=`which luac5.2`
 
-else ifneq ($(shell which lua5.1),)
+else ifdef HAS_LUA51
 
+LUA_LIBS=`pkg-config --libs lua5.1`
+LUA_INCLUDES=`pkg-config --cflags lua5.1`
 LUA=`which lua5.1`
 LUAC=`which luac5.1`
 
-else ifneq ($(shell which lua),)
+else ifdef HAS_LUA
 
+LUA_LIBS=`pkg-config --libs lua`
+LUA_INCLUDES=`pkg-config --cflags lua`
 LUA=`which lua`
 LUAC=`which luac`
 
-endif # lua interpreter
+endif # lua
 
-endif # LUA_MANUAL
-
+endif # lua manual
 
 ##
 ## X libraries, includes and options
