@@ -55,11 +55,16 @@ defbindings("WScreen", {
 
     bdoc("Go to n:th screen on multihead setup."),
     kpress(META.."Shift+1", "ioncore.goto_nth_screen(0)"),
+    kpress(META.."Q", "ioncore.goto_nth_screen(0)"),
     kpress(META.."Shift+2", "ioncore.goto_nth_screen(1)"),
+    kpress(META.."W", "ioncore.goto_nth_screen(1)"),
+    kpress(META.."Shift+3", "ioncore.goto_nth_screen(2)"),
+    kpress(META.."E", "ioncore.goto_nth_screen(2)"),
     
     bdoc("Go to next/previous screen on multihead setup."),
     kpress(META.."Shift+comma", "ioncore.goto_prev_screen()"),
-    kpress(META.."Shift+period", "ioncore.goto_next_screen()"),
+    kpress(META.."I", "ioncore.goto_prev_screen()"),
+    kpress(META.."O", "ioncore.goto_next_screen()"),
     
     bdoc("Create a new workspace of chosen default type."),
     kpress(META.."F9", "ioncore.create_ws(_)"),
