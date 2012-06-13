@@ -79,7 +79,8 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->brush=NULL;
     frame->bar_brush=NULL;
     frame->mode=mode;
-    frame->tab_min_w=0;
+    frame->float_tab_min_w=0;
+    frame->propor_tab_min_w=0;
     frame->bar_max_width_q=1.0;
     
     gr_stylespec_init(&frame->baseattr);
@@ -260,30 +261,61 @@ int frame_nth_tab_x(WFrame *frame, int n)
 }
 
 
+void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *elastic,int *minw);//FIXME
+
 static int frame_nth_tab_w_iw(WFrame *frame, int n, bool inner)
 {
     WRectangle bg;
     GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
     int m=FRAME_MCOUNT(frame);
+    int maxw,elastic,textw,minw;
     uint w;
+    WRegion *sub;
+    const char * p;
     
     frame_bar_geom(frame, &bg);
 
-    if(m==0)
-        m=1;
 
     if(frame->bar_brush!=NULL)
         grbrush_get_border_widths(frame->bar_brush, &bdw);
+
+    if (m==0) {
+        m=1;
+        w=bg.w-bdw.left-bdw.right;
+    } else {
+        frame_get_max_width_and_elastic(frame, bg.w, &maxw, &elastic, &minw);
+        if ((maxw > 0) && (maxw <= frame->propor_tab_min_w)) {
+            /* Remove borders */
+            w=bg.w-bdw.left-bdw.right-(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)*(m-1);
     
-    /* Remove borders */
-    w=bg.w-bdw.left-bdw.right-(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)*(m-1);
+            if(w<=0)
+                return 0;
     
-    if(w<=0)
-        return 0;
-    
-    /* Get n:th tab's portion of free area */
-    w=(((n+1)*w)/m-(n*w)/m);
-    
+            /* Get n:th tab's portion of free area */
+            w=(((n+1)*w)/m-(n*w)/m);
+        } else {
+            /* Get n:th tab's portion of elastic area */
+            elastic=(((n+1)*elastic)/m-(n*elastic)/m);
+
+            sub = mplex_mx_nth((WMPlex*)frame, n);
+            p=region_displayname(sub);
+            if(p==NULL)
+                textw=0;
+            else
+                textw=grbrush_get_text_width(frame->bar_brush,
+                                             p, strlen(p));
+            if (textw<minw)
+                textw=minw;
+            if (textw<frame->propor_tab_min_w)
+                textw=frame->propor_tab_min_w;
+
+            if (maxw>0 && (textw>maxw))
+                textw=maxw;
+            
+            w=elastic+textw;
+        }
+    }
+
     /* Add n:th tab's borders back */
     if(!inner){
         w+=(n==0 ? bdw.left : bdw.tb_ileft);
