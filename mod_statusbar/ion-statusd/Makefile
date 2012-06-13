@@ -14,7 +14,8 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
+	   -DCF_ION_EXECUTABLE=\"notion\"
 
 SOURCES = ion-statusd.c exec.c extlrx.c
 

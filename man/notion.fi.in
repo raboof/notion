@@ -1,12 +1,12 @@
-.TH ION 1
+.TH NOTION 1
 .SH NIMI
-Ion - X11 ikkunanhallintaohjelma
+Notion - X11 ikkunanhallintaohjelma
 .SH SELOSTE
 .B ion3
 .I "[valinnat]"
 .SH "KUVAUS"
 
-Ion on näppäimistökäyttäjiä silmälläpitäen suunniteltu laatoitusta ja 
+Notion on näppäimistökäyttäjiä silmälläpitäen suunniteltu laatoitusta ja 
 välilehtiä hyödyntävä ikkunanhallintaohjelma X11:lle.
  
 .SH "VALINNAT"
@@ -32,19 +32,19 @@ Istunnon nimi. Tämä vaikuttaa talletustiedostojen sijaintiin.
 Näytä komentorivin ohje.
 .TP
 .B \-version
-Näytä Ionin versio.
+Näytä Notionin versio.
 .TP
 .B \-about
-Näytä tietoja Ionista (versio, tekijä, lisenssi).
+Näytä tietoja Notionista (versio, tekijä, lisenssi).
 
 .SH PERUSKÄSITTEET
 
 Tämä kappale on katsaus erilaisiin niin kutsuttuihin \fBkappaleisiin\fP,
-joita ilmenee Ionin hallitsemalla X-näytöllä, ja niiden suhteisiin 
+joita ilmenee Notionin hallitsemalla X-näytöllä, ja niiden suhteisiin 
 tavallisessa kokoonpanossa. Sinun tarvitse ymmärtää nämä suhteet 
 tietääksesi milloin mitkäkin alempana kuvattavat näppäinsidonnat 
 ovat käytettävissäsi. Jos kaipaat vielä tarkempaa kuvausta, esimerkiksi
-tehdäksesi omat asetustiedostot, katso Ionin seittisivulta saatavaa 
+tehdäksesi omat asetustiedostot, katso Notionin seittisivulta saatavaa 
 yksityiskohtaisempaa dokumentaatiota.
 
 Ylimmän tason kappaleista, joilla on merkitystä tässä yhteydessä, 
@@ -58,7 +58,7 @@ kelluvia/irroitettuja \fBkehyksiä\fP. Laatoitukset taasen sisältävät
 \fBkehyksiä\fP laatoitettuna täyttämään koko näytön, sekä mahdollisesti
 tilapalkin tai telakan (dock). Näyttöjen tapaan kehykset lomittavat 
 muita kappaleita, mutta tässä tapauksessa lähinnä asiakasikkuna\fBryhmiä\fP. 
-Kehykset ovat suurimman osan ajasta ainut asia, minkä näet Ionista. Niillä
+Kehykset ovat suurimman osan ajasta ainut asia, minkä näet Notionista. Niillä
 voi olla reunakoristukset, ja lisäksi kehyksissä on \fBvälilehti\fP 
 jokaiselle lomitetulle kappaleelle.
 
@@ -151,14 +151,15 @@ Käyttäjän asetustiedostot.
 Käyttäjän oletusarvoinen pääasetustiedosto.
 
 .SH KATSO MYÖS
-Ionin kotisivu, \fIhttp://iki.fi/tuomov/ion/\fP (englanniksi).
+Notionin kotisivu, \fIhttp://iki.fi/tuomov/ion/\fP (englanniksi).
 .PP
-Dokumentti "Ion: Configuring and extending with Lua" (englanniksi)
-nähtävissä Ionin kotisivulla.
+Dokumentti "Configuring and extending Ion3 with Lua" (englanniksi)
+nähtävissä Notionin kotisivulla.
 .PP
 .I DOCDIR/
 .PP
 \fIX(7x)\fP, \fIpwm3(1)\fP, \fIjoe(1)\fP
 
 .SH TEKIJÄ
+Notionin on kirjoittanut Notion Team
 Ionin on kirjoittanut Tuomo Valkonen <tuomov at iki.fi>.

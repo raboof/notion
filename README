@@ -1,16 +1,19 @@
 
-Ion
+Notion
 ===
 
-Copyright (c) Tuomo Valkonen 1999-2007.
+Copyright (c) the Notion team 2010
+Copyright (c) Tuomo Valkonen 1999-2009.
 
-tuomov at iki.fi
-
-<http://iki.fi/tuomov/ion/>
+http://notion.sf.net
           
 
 Building and installing
 -----------------------
+
+See also: 
+
+  https://sourceforge.net/apps/mediawiki/notion/index.php?title=Development
 
 1. Make sure you have the following tools and libraries installed:
 
@@ -30,14 +33,14 @@ Building and installing
 5. Run `make install`, as root if you set `$PREFIX` in `system.mk` to a 
    directory that requires those privileges.
    
-   YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Ion
+   YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Notion
    will refuse to start if it can not find all the necessary uncorrupt
-   configuration files either in `$PREFIX/etc/ion3/` or in `~/.ion3/`.
+   configuration files either in `$PREFIX/etc/notion/` or in `~/.notion/`.
 
-6. How to best set up `startx` or whatever to start Ion instead of your
+6. How to best set up `startx` or whatever to start Notion instead of your
    current window manager depends on your system's setup. A good guess
    is creating or modifying an executable shell script `.xsession` in your
-   home directory to start Ion. This should usually (but not always) work
+   home directory to start Notion. This should usually (but not always) work
    if you're using some X display/login manager. If `~/.xsession` does not 
    help and you're not using a display manager, modifying `~/.xinitrc` or 
    creating one based on your system's `xinitrc` (wherever that may be; 
@@ -63,7 +66,7 @@ Some optional installation steps
    
        <http://www.debian.org/Packages/unstable/net/mime-support.html>
 
-2. Ion supports caching known man-pages in a file for faster man-page
+2. Notion supports caching known man-pages in a file for faster man-page
    completion in the F1 man page query. To enable this feature, you must
    periodically run a cronjob to build this list. To create a system-wide
    man page cache, run `crontab -e` (might vary depending on platform) as
@@ -77,7 +80,7 @@ Some optional installation steps
    
    If you can't or do not want to build a system-wide man page cache, run
    `crontab -e` as your normal user and replace `-mksyscache` with
-   `-mkusercache` above. The cache file will be `~/.ion3/mancache`.
+   `-mkusercache` above. The cache file will be `~/.notion/mancache`.
    
    It may also be useful to run `ion-completeman` with the suitable
    `-mk*cache` argument once manually to build the initial cache.
@@ -91,7 +94,7 @@ Some optional installation steps
 Configuration
 -------------
 
-For help on modifying Ion's configuration files, PLEASE READ THE DOCUMENT
+For help on modifying Notion's configuration files, PLEASE READ THE DOCUMENT
 "Configuring and extending Ion3 with Lua" available from the Ion web page,
 listed at the top of this file.
 
@@ -100,14 +103,15 @@ Questions, comments, problems?
 ------------------------------
 
 If the available documentation does not answer your question, please
-post it to the mailing list. Details can be found on the Ion web page
+post it to the mailing list. Details can be found on the Notion web page
 listed at the top of this file.
 
 
 Credits
 -------
 
-Ion was written by Tuomo Valkonen.
+Notion was written by the Notion team, based on Ion which was written by Tuomo
+Valkonen.
 
 The dock module was written by Tom Payne and Per Olofsson.
 

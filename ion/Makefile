@@ -13,7 +13,7 @@ include $(TOPDIR)/modulelist.mk
 
 SOURCES=ion.c
 
-TARGETS=ion3
+TARGETS=notion
 
 INCLUDES += $(X11_INCLUDES) 
 INCLUDES += $(LIBMAINLOOP_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
@@ -50,7 +50,7 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-ion3: $(OBJS) $(EXT_OBJS)
+notion: $(OBJS) $(EXT_OBJS)
 	$(CC) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
 
 preload.c:
@@ -58,4 +58,4 @@ preload.c:
 
 _install:
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) ion3 $(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) notion $(BINDIR)
