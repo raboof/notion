@@ -224,7 +224,7 @@ static void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
 {
     Bool success;
 
-    if(!(success=ioncore_do_snapshot()))
+    if(!(success=ioncore_do_snapshot(TRUE)))
         warn(TR("Failed to save session state"));
     else
         sm_set_properties();
