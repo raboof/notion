@@ -23,14 +23,14 @@ NROFF=nroff -man -Tlatin1
 #FILTERCRAP=perl -p -i -e 's/.\10//g'
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
 
-CONFIGS=../etc/cfg_ioncore.lua \
+CONFIGS=../etc/cfg_notioncore.lua \
 	../etc/cfg_tiling.lua \
 	../etc/cfg_query.lua \
 	../etc/cfg_menu.lua
 
 # TODO: PWM configuration file is undocumented
 PWM_CONFIGS=\
-	../etc/cfg_ioncore.lua \
+	../etc/cfg_notioncore.lua \
 	../etc/cfg_menu.lua \
 	../pwm/cfg_pwm.lua
 

@@ -136,7 +136,7 @@ static void help()
 
 int main(int argc, char*argv[])
 {
-    const char *cfgfile="cfg_ion";
+    const char *cfgfile="cfg_notion";
     const char *display=NULL;
     char *cmd=NULL;
     int stflags=0;

@@ -2,7 +2,7 @@
 .SH NÁZEV
 Notion - správce oken systému X11
 .SH PØEHLED
-.B ion3
+.B notion
 .I "[volby]"
 .SH "POPIS"
 
@@ -26,7 +26,7 @@ obrazovku (koøenové okno). (Tedy ne v¹echny, které byly zadány v parametru
 .TP
 .B \-session název_sezení
 Nastaví název sezení. Tato volba ovlivní, kam se ulo¾í pracovní plochy
-a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.ion3/session_name.
+a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.notion/session_name.
 .TP
 .B \-help
 Zobrazí nápovìdu k pøíkazovým parametrùm
@@ -132,7 +132,7 @@ BINDINGS:WMenu
 
 .SH SOUBORY A ADRESÁØE
 .TP
-.B ETCDIR/cfg_ion.lua
+.B ETCDIR/cfg_notion.lua
 Hlavní systémový konfiguraèní soubor
 .TP
 .B ETCDIR/cfg_*.lua
@@ -141,10 +141,10 @@ Ostatní konfiguraèní soubory
 .B ETCDIR/look_*.lua
 Soubory nastavující barevné schéma
 .TP
-.B ~/.ion3/
+.B ~/.notion/
 U¾ivatelské konfiguraèní soubory
 .TP
-.B ~/.ion3/cfg_ion.lua
+.B ~/.notion/cfg_notion.lua
 Hlavní u¾ivatelský konfiguraèní soubor (pøepisuje systémové nastavení)
 
 .SH VIZ TAKÉ

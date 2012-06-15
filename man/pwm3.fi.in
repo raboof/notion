@@ -95,15 +95,15 @@ Muita asetustiedostoja.
 .B ETCDIR/look_*.lua
 Ulkonäön asetustiedostoja.
 .TP
-.B ~/.ion3/
+.B ~/.notion/
 Käyttäjän asetustiedostot.
 .TP
-.B ~/.ion3/cfg_pwm.lua
+.B ~/.notion/cfg_pwm.lua
 Käyttäjän oletusarvoinen pääasetustiedosto.
 
 .SH KATSO MYÖS
 
-Katso \fIion3(1)\fP.
+Katso \fInotion(1)\fP.
 
 .SH TEKIJÄ
 PWM:n sekä Ionin on kirjoittanut Tuomo Valkonen <tuomov at iki.fi>.

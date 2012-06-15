@@ -40,7 +40,7 @@ The most notable changes in this release from the previous one are:
   * Transients and queries in too small frames are "unsqueezed" out
     of them, unless disabled with `ioncore.set{ unsqueeze = false }`.
 
-  * Some changes in default `cfg_ion.lua`: instead of loading 
+  * Some changes in default `cfg_notion.lua`: instead of loading 
     various other files, just `cfg_default.lua` is loaded instead.
 
   * `mod_tiling.untile` (available in the context menu) may be used 
