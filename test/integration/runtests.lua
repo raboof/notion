@@ -23,10 +23,12 @@ sleep(1)
 
 print '(Hopefully) started Xdummy.'
 
+posix.setenv('HOME', './basic_test');
+
 print 'Starting notion...'
 local notionpid = posix.fork()
 if (notionpid == 0) then
-    local errno = os.execute("../../notion/notion -display :7")
+    local errno = os.execute("../../notion/notion -noerrorlog -display :7")
     if (errno ~= 0) then
       print ('Error starting notion: ' .. errno)
       os.exit(1)
