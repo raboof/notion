@@ -232,18 +232,14 @@ EXTL_SAFE
 EXTL_EXPORT
 WScreen *ioncore_find_screen_id(int id)
 {
-    WScreen *scr, *maxscr=NULL;
+    WScreen *scr=NULL;
     
     FOR_ALL_SCREENS(scr){
-        if(id==-1){
-            if(maxscr==NULL || scr->id>maxscr->id)
-                maxscr=scr;
-        }
         if(scr->id==id)
             return scr;
     }
     
-    return maxscr;
+    return NULL;
 }
 
 
@@ -364,8 +360,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 
 static bool screen_may_dispose(WScreen *scr)
 {
-    warn(TR("Screens may not be destroyed."));
-    return FALSE;
+    return TRUE;
 }
 
 
