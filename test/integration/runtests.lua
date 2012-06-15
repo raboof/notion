@@ -4,6 +4,10 @@ function sleep(sec)
     os.execute("sleep " .. tonumber(sec))
 end
 
+function getTests(testset)
+  return (io.popen("ls " .. testset .. "/*.lua"):lines())
+end
+
 print 'Running tests against ../../notion/notion'
 print 'Starting Xdummy...'
 
@@ -36,19 +40,23 @@ for i,testset in ipairs(testsets) do
   sleep(2)
 
   print 'Running tests...'
-  local testoutputpipe = io.popen("cat " .. testset .. "/*.lua | DISPLAY=:7 notionflux")
-  local testoutput = testoutputpipe:read("*a")
+
+  for test in getTests(testset) do
+    print ('Running test ' .. test)
+    local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:7 notionflux")
+    local testoutput = testoutputpipe:read("*a")
+    print 'Evaluating result...'
+    if(testoutput ~= "\"ok\"\n") then
+      print('** ERROR ** ' .. testoutput)
+      errors = errors + 1
+    else
+      print '** OK **'
+    end
+  end
 
   print 'Killing notion process...'
   posix.kill(notionpid)
 
-  print 'Evaluating result...'
-  if(testoutput ~= "\"ok\"\n") then
-    print('** ERROR ** ' .. testoutput)
-    errors = errors + 1
-  else
-    print '** OK **'
-  end
 end
 
 print 'Killing X process...'

@@ -65,8 +65,10 @@ static void initFakeXinerama()
     char buf[ 4096 ];
     FILE* f;
     int i;
-    if( num_screens != -1 )
-        return;
+    // re-init every time we're invoked, because we want to be able to test 
+    // adding/removing screens
+    //if( num_screens != -1 )
+    //    return;
     num_screens = 0;
     home = getenv( "HOME" );
     if( home == NULL )
