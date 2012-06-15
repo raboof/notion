@@ -260,9 +260,6 @@ int frame_nth_tab_x(WFrame *frame, int n)
     return x;
 }
 
-
-void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *elastic,int *minw);//FIXME
-
 static int frame_nth_tab_w_iw(WFrame *frame, int n, bool inner)
 {
     WRectangle bg;
