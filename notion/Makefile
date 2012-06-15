@@ -11,7 +11,7 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
-SOURCES=ion.c
+SOURCES=notion.c
 
 TARGETS=notion
 

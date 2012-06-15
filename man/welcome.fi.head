@@ -1,23 +1,23 @@
 
-Tervetuloa käyttämään Ionia!
+Tervetuloa käyttämään Notionia!
 
-Jos et ole käyttänyt Ionia aiemmin, on hyvin suotiteltavaa, että opiskelet
-Ionin ohjesivun ennen kuin jatkat tätä pidemmälle. Se on toistettu alla,
+Jos et ole käyttänyt Notionia aiemmin, on hyvin suotiteltavaa, että opiskelet
+Notionin ohjesivun ennen kuin jatkat tätä pidemmälle. Se on toistettu alla,
 mutta voit aukaista sen myös myöhemmin painamalla <F1> ja <Enter>, tai
 suorittamalla 'man notion' komentoriviltä. (Tämä toimii sillä oletuksella,
-että olet asentanut Ionin järjestelmässäsi sellaiseen vakiosijaintin, 
+että olet asentanut Notionin järjestelmässäsi sellaiseen vakiosijaintin, 
 mistä sen työkalut osaavat hakea ohjesivuja.)
 
-Jos olet innokas kokeilemaan Ionia nyt heti ja vastoin suosituksia haluat
+Jos olet innokas kokeilemaan Notionia nyt heti ja vastoin suosituksia haluat
 jättää ohjesivun lukematta tällä istumalla, sinun tulisi kuitenkin tietää
 ainakin seuraavat näppäimet: <F2> käynnistää pääte-emulaattorin (xterm)
 ja <F12> näyttää päävalikon.
 
-Jossain vaiheessa, opeteltuasi Ionin peruskäsitteet ja toiminnot, haluat
+Jossain vaiheessa, opeteltuasi Notionin peruskäsitteet ja toiminnot, haluat
 varmaan muokata sen asetukset itsellesi sopivammiksi. Tähän löydät apua
-(englanniksi) Ionin asetus- ja ohjelmointimanuaalista. Se löytyy ainakin
-Ionin seittisivulta, johon on linkki alla olevan ohjesivun lopussa.
-Huomautettakoon vielä, että Ionin käytön ja peruskäsitteiden opettelu
+(englanniksi) Notionin asetus- ja ohjelmointimanuaalista. Se löytyy ainakin
+Notionin seittisivulta, johon on linkki alla olevan ohjesivun lopussa.
+Huomautettakoon vielä, että Notionin käytön ja peruskäsitteiden opettelu
 on hyvin suositeltvaa ennen asetustiedostojen pariin hyppäämistä.
 
 ---- Ohjesivu seuraa ----
