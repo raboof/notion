@@ -4,14 +4,19 @@ function sleep(sec)
     os.execute("sleep " .. tonumber(sec))
 end
 
-print 'Running tests against currently *installed* Notion'
+print 'Running tests against ../../notion/notion'
 print 'Starting Xdummy...'
 
 local xpid = posix.fork()
 if (xpid == 0) then
-    local result,errstr,errno = posix.exec("/bin/sh", "./Xdummy", ":7")
-    print ('Error replacing current process with Xdummy: ' .. errstr)
-    os.exit(1)
+    local errno = os.execute("/bin/sh ./Xdummy :7")
+    if (errno ~= 0) then
+      print ('Error starting Xdummy: ' .. errno)
+      print ('Check your logs in /tmp/Xdummy.<username>/7/_var_log_Xorg.7.log')
+      os.exit(1)
+    else
+      os.exit(0)
+    end
 end
 
 sleep(1)
@@ -21,9 +26,13 @@ print '(Hopefully) started Xdummy.'
 print 'Starting notion...'
 local notionpid = posix.fork()
 if (notionpid == 0) then
-    local result,errstr,errno = posix.exec("../../notion/notion", "-display", ":7")
-    print ('Error replacing current process with notion: ' .. errstr)
-    os.exit(1)
+    local errno = os.execute("../../notion/notion -display :7")
+    if (errno ~= 0) then
+      print ('Error starting notion: ' .. errno)
+      os.exit(1)
+    else
+      os.exit(0)
+    end
 end
 
 sleep(2)
