@@ -1,6 +1,21 @@
 #!/bin/sh
 
-do_darcs_export() {
+# Prepare a Notion release.
+#
+# Run this script in a freshly checked out notion directory: never commit the
+# changes made by this script (but perhaps tag them).
+#
+# Usage:
+#
+#   ~/dev/releases/notion$ ./predist.sh -snapshot
+# or
+#   ~/dev/releases/notion-3-20110219$ ./predist.sh
+
+if test "$NOTION_REPOS" = ""; then
+    NOTION_REPOS=git://notion.git.sourceforge.net/gitroot/notion
+fi
+
+do_git_export() {
 	url="$1"
 	project="$2"
 
@@ -8,9 +23,9 @@ do_darcs_export() {
 	
 	! test -f "${project}" || { echo "${project} exists"; exit 1; }
 
-	darcs get --partial "${url}" "${project}"
-	darcs changes --context --repo="${project}" > "${project}/exact-version"
-	rm -r "${project}/_darcs"
+	git clone "${url}" "${project}"
+	cd "${project}" ; git log > exact-version ; cd ..
+	rm -rf "${project}/.git"
 }
 
 ##
@@ -27,9 +42,9 @@ if test "$1" != "-snapshot"; then
         echo "Invalid package name $dir."
         exit 1
     else
-        versdef="#define ION_VERSION \"${release}\""
-        perl -p -i -e "s/^#define ION_VERSION.*/$versdef/" version.h
-        perl -p -i -e "s/ION_VERSION/$release/" build/ac/configure.ac
+        versdef="#define NOTION_RELEASE \"${release}\""
+        perl -p -i -e "s/^#define NOTION_RELEASE.*/$versdef/" version.h
+        #perl -p -i -e "s/NOTION_RELEASE/$release/" build/ac/configure.ac
     fi
 fi
 
@@ -39,7 +54,7 @@ fi
 ##
 
 getlib() {
-    do_darcs_export $1 $2
+    do_git_export $1 $2
     rm $2/build/rules.mk $2/system.mk
     #ln -s ../../build/rules.mk $2/build/rules.mk
     cat > $2/build/system-inc.mk << EOF
@@ -49,8 +64,8 @@ EOF
 
 }
 
-getlib http://modeemi.fi/~tuomov/repos/libtu-3 libtu
-getlib http://modeemi.fi/~tuomov/repos/libextl-3 libextl
+getlib $NOTION_REPOS/libtu libtu
+getlib $NOTION_REPOS/libextl libextl
 
 ##
 ## Makefiles

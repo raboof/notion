@@ -667,6 +667,7 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
 {
     WRegion *sub=node->reg;
     WLListNode *mxc=mplex->mx_current;
+    WFitParams fp;
 
     if(!STACKING_IS_HIDDEN(node))
         return;
@@ -680,6 +681,14 @@ static void mplex_do_node_display(WMPlex *mplex, WStacking *node,
         region_map(sub);
     else
         region_unmap(sub);
+
+    /* the mplex might have been resized while this window was invisible,
+     * and the client window might have had lazy resizing enabled. 
+     */
+    fp.mode=REGION_FIT_EXACT;
+    mplex_managed_geom(mplex, &(fp.g));
+    sizepolicy(&node->szplcy, node->reg, NULL, 0, &fp);
+    region_fitrep(node->reg, NULL, &fp);
     
     if(node->lnode!=NULL){
         if(mxc!=NULL){

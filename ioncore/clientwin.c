@@ -136,6 +136,9 @@ static void clientwin_get_winprops(WClientWin *cwin)
     if(extl_table_is_bool_set(tab, "acrobatic"))
         cwin->flags|=CLIENTWIN_PROP_ACROBATIC;
     
+    if(extl_table_is_bool_set(tab, "lazy_resize"))
+        cwin->flags|=CLIENTWIN_PROP_LAZY_RESIZE;
+    
     DO_SZH("max_size", CLIENTWIN_PROP_MAXSIZE, CLIENTWIN_PROP_I_MAXSIZE,
            PMaxSize, max_width, max_height, );
            
@@ -916,6 +919,12 @@ static void convert_geom(const WFitParams *fp,
 /*{{{ Region dynfuns */
 
 
+static bool postpone_resize(WClientWin *cwin)
+{
+    return cwin->state == IconicState && cwin->flags&CLIENTWIN_PROP_LAZY_RESIZE;
+}
+
+
 static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, 
                              const WFitParams *fp)
 {
@@ -940,8 +949,6 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
              REGION_GEOM(cwin).w!=geom.w ||
              REGION_GEOM(cwin).h!=geom.h);
     
-    REGION_GEOM(cwin)=geom;
-    
     if(np==NULL && !changes)
         return TRUE;
     
@@ -956,6 +963,11 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
 
         netwm_update_state(cwin);
     }
+    
+    if (postpone_resize(cwin))
+        return TRUE;
+    
+    REGION_GEOM(cwin)=geom;
     
     w=maxof(1, geom.w);
     h=maxof(1, geom.h);
