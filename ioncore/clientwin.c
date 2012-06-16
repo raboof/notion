@@ -1144,9 +1144,20 @@ static bool check_fs_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
     return FALSE;
 }
 
+WMPlex* find_mplexer(WRegion *cwin)
+{
+    if (cwin == NULL)
+        return NULL;
+    if(obj_is((Obj*)cwin, &CLASSDESCR(WMPlex)))
+        return (WMPlex*) cwin;
+    return find_mplexer(cwin->manager);
+}
 
+/* Returns whether anything was actually changed. */
 static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
 {
+    bool result = FALSE;
+
     if(ev->value_mask&(CWX|CWY|CWWidth|CWHeight)){
         WRQGeomParams rq=RQGEOMPARAMS_INIT;
         int gdx=0, gdy=0;
@@ -1204,10 +1215,31 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
         
         region_rqgeom((WRegion*)cwin, &rq, NULL);
         
-        return TRUE;
+        result = TRUE;
+    }
+
+    if(ev->value_mask&CWStackMode){
+        WMPlex* mplex = find_mplexer((WRegion*) cwin);
+        switch(ev->detail){
+        case Above:
+            /* If ev->above is not None, the window should be placed just 
+             * above the sibling. This is not implemented.
+             */
+            if (mplex != NULL && ev->above == None) {
+                mplex_switch_to(mplex, (WRegion*) cwin);
+                result = TRUE;
+            }
+            break;
+        case Below:
+        case TopIf:
+        case BottomIf:
+        case Opposite:
+            /* unimplemented */
+            break;
+        }
     }
     
-    return FALSE;
+    return result;
 }
 
 
