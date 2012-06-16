@@ -25,9 +25,13 @@ DECLCLASS(WWindow){
 
 
 extern bool window_init(WWindow *p, WWindow *parent, 
-                        const WFitParams *fp);
+                        const WFitParams *fp, const char *name);
+/**
+ * @param win the window to initialize. When 'None', a new window is created 
+ * @param name the name of the newly created Window
+ */
 extern bool window_do_init(WWindow *p, WWindow *parent, 
-                           const WFitParams *fp, Window win);
+                           const WFitParams *fp, Window win, const char *name);
 extern void window_deinit(WWindow *win);
 
 DYNFUN void window_draw(WWindow *wwin, bool complete);

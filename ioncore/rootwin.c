@@ -159,10 +159,15 @@ void rootwin_manage_initial_windows(WRootWin *rootwin)
 
 static void create_wm_windows(WRootWin *rootwin)
 {
+    const char *p[1];
+
     rootwin->dummy_win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
                                      0, 0, 1, 1, 0,
                                      CopyFromParent, InputOnly,
                                      CopyFromParent, 0, NULL);
+
+    p[0] = "Notion WRootWin dummy window";
+    xwindow_set_text_property(rootwin->dummy_win, XA_WM_NAME, p, 1);
 
     XSelectInput(ioncore_g.dpy, rootwin->dummy_win, PropertyChangeMask);
 }

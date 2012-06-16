@@ -46,7 +46,7 @@ bool panehandle_init(WPaneHandle *pwin, WWindow *parent, const WFitParams *fp)
     pwin->bline=GR_BORDERLINE_NONE;
     pwin->splitfloat=NULL;
     
-    if(!window_init(&(pwin->wwin), parent, fp))
+    if(!window_init(&(pwin->wwin), parent, fp, "Notion WPanelHandle"))
         return FALSE;
     
     ((WRegion*)pwin)->flags|=REGION_SKIP_FOCUS;

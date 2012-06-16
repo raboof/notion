@@ -101,11 +101,11 @@ DECLCLASS(WMPlex){
 
 /* Create/destroy */
 
-extern WMPlex *create_mplex(WWindow *parent, const WFitParams *fp);
+extern WMPlex *create_mplex(WWindow *parent, const WFitParams *fp, const char *name);
 extern bool mplex_init(WMPlex *mplex, WWindow *parent,
-                       const WFitParams *fp);
+                       const WFitParams *fp, const char *name);
 extern bool mplex_do_init(WMPlex *mplex, WWindow *parent, 
-                          const WFitParams *fp, Window win);
+                          const WFitParams *fp, Window win, const char *name);
 extern void mplex_deinit(WMPlex *mplex);
 
 /* Resize and reparent */
@@ -195,7 +195,8 @@ DYNFUN int mplex_default_index(WMPlex *mplex);
 /* Save/load */
 
 extern ExtlTab mplex_get_configuration(WMPlex *mplex);
-extern WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
+extern WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab, 
+                           const char *name);
 extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 
 
