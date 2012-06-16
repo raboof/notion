@@ -32,13 +32,13 @@ do_git_export() {
 ## Versioning
 ##
 
-if test "$1" != "-snapshot"; then
-    pwd=`pwd`
-    dir=`basename "$pwd"`
+pwd=`pwd`
+dir=`basename "$pwd"`
 
+if test "$1" != "-snapshot"; then
     release=`echo "$dir"|sed 's/^[^-]\+-\([^-]\+-[0-9]\+\(-[0-9]\+\)\?\)$/\1/p; d'`
 
-    if test "$release" == ""; then
+    if test "$release" = ""; then
         echo "Invalid package name $dir."
         exit 1
     else
@@ -46,6 +46,8 @@ if test "$1" != "-snapshot"; then
         perl -p -i -e "s/^#define NOTION_RELEASE.*/$versdef/" version.h
         #perl -p -i -e "s/NOTION_RELEASE/$release/" build/ac/configure.ac
     fi
+else
+    release=snapshot-`date +"%Y%m%d"`
 fi
 
 
@@ -84,3 +86,9 @@ mv build/libs.mk.dist build/libs.mk
 
 rm predist.sh
 chmod a+x install-sh
+
+cd ..
+echo Creating notion-${release}.tar.gz
+tar --exclude-vcs -czf notion-${release}-src.tar.gz $dir
+echo Creating notion-${release}.tar.bz2
+tar --exclude-vcs -cjf notion-${release}-src.tar.bz2 $dir

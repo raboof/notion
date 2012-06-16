@@ -51,7 +51,7 @@ static WDeferred *alloc_defer()
      * as N_DBUF is small.
      */
     for(i=0; i<N_DBUF; i++){
-        if(!dbuf_used&(1<<i)){
+        if(!(dbuf_used&(1<<i))){
             dbuf_used|=(1<<i);
             return dbuf+i;
         }
