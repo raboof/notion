@@ -229,7 +229,7 @@ void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
         ok=(st!=0);
     }
     
-    if(!st)
+    if(!ok)
         return;
     
     XSetTextProperty(ioncore_g.dpy, win, &prop, a);
