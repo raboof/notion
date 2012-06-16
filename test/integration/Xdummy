@@ -906,7 +906,7 @@ tweak_config() {
     $depth = $ENV{XDUMMY_DEPTH};
     $nomodelines = $ENV{XDUMMY_NOMODELINES};
     $mode_str = "";
-    $videoram = "24000";
+    $videoram = "240000";
     $HorizSync   = "30.0 - 130.0";
     $VertRefresh = "50.0 - 250.0";
     if ($geom ne "") {
