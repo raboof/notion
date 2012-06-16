@@ -57,15 +57,15 @@ welcome%txt: welcome%head notion%1
 	$(NROFF) notion$*1 | $(FILTERCRAP)) > $@
 
 _install:
-	$(INSTALLDIR) $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) notion.1 $(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(MANDIR)/man1
+	$(INSTALLDIR) $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) notion.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(DESTDIR)$(MANDIR)/man1
 	for tr in $(TRANSLATIONS); do \
-		$(INSTALLDIR) $(MANDIR)/$$tr/man1 ; \
-		$(INSTALL) -m $(DATA_MODE) notion.$$tr.1 $(MANDIR)/$$tr/man1/notion.1 ; \
-		$(INSTALL) -m $(DATA_MODE) pwm3.$$tr.1 $(MANDIR)/$$tr/man1/pwm3.1 ; \
+		$(INSTALLDIR) $(DESTDIR)$(MANDIR)/$$tr/man1 ; \
+		$(INSTALL) -m $(DATA_MODE) notion.$$tr.1 $(DESTDIR)$(MANDIR)/$$tr/man1/notion.1 ; \
+		$(INSTALL) -m $(DATA_MODE) pwm3.$$tr.1 $(DESTDIR)$(MANDIR)/$$tr/man1/pwm3.1 ; \
 	done
-	$(INSTALLDIR) $(SHAREDIR)
+	$(INSTALLDIR) $(DESTDIR)$(SHAREDIR)
 	for i in $(WELCOME_TARGETS); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(SHAREDIR) ; \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(SHAREDIR) ; \
 	done

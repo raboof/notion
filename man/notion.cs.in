@@ -150,7 +150,7 @@ Hlavní u¾ivatelský konfiguraèní soubor (pøepisuje systémové nastavení)
 .SH VIZ TAKÉ
 Domovská stránka Notionu \fIhttp://notion.sf.net/\fP
 .PP
-Dokument "Ion: Configuring and extending with Lua" k nalezení
+Dokument "Configuring and extending Notion with Lua" k nalezení
 tamté¾.
 .PP
 .I DOCDIR/

@@ -552,7 +552,7 @@ end
 -- or close the session (running under a session manager that supports such
 -- requests). If the answer is 'y', 'Y' or 'yes', so will happen.
 function mod_query.query_shutdown(mplex)
-    mod_query.query_yesno(mplex, TR("Exit Ion/Shutdown session (y/n)?"),
+    mod_query.query_yesno(mplex, TR("Exit Notion/Shutdown session (y/n)?"),
                          ioncore.shutdown)
 end
 
@@ -561,7 +561,7 @@ end
 -- This query asks whether the user wants restart Ioncore.
 -- If the answer is 'y', 'Y' or 'yes', so will happen.
 function mod_query.query_restart(mplex)
-    mod_query.query_yesno(mplex, TR("Restart Ion (y/n)?"), ioncore.restart)
+    mod_query.query_yesno(mplex, TR("Restart Notion (y/n)?"), ioncore.restart)
 end
 
 

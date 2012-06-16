@@ -13,6 +13,8 @@ po/*.mo
 man/*.1
 man/welcome*.txt
 notion/notion
+notion/preload.c
+pwm/preload.c
 pwm/pwm3plus
 utils/ion-completeman
 utils/ion-statusd/ion-statusd

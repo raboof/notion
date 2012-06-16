@@ -39,7 +39,7 @@ if test "$1" != "-snapshot"; then
     release=`echo "$dir"|sed 's/^[^-]\+-\([^-]\+-[0-9]\+\(-[0-9]\+\)\?\)$/\1/p; d'`
 
     if test "$release" = ""; then
-        echo "Invalid package name $dir."
+        echo "Invalid package name $dir. Use the '-snapshot' option to create a snapshot package"
         exit 1
     else
         versdef="#define NOTION_RELEASE \"${release}\""
@@ -94,6 +94,11 @@ mkdist() {
 
 mkdist Makefile system.mk
 sed -i -e "s/de/de mod_xinerama mod_xrandr mod_xkbevents/" modulelist.mk
+echo "
+ifeq (\$(PRELOAD_MODULES),1)
+X11_LIBS += -lXinerama -lXrandr
+endif
+" >> system.mk
 
 ##
 ## Scripts

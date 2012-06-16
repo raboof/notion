@@ -22,9 +22,9 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 _install:
-	$(INSTALLDIR) $(SHAREDIR)
+	$(INSTALLDIR) $(DESTDIR)$(SHAREDIR)
 	for i in $(SHELLSCRIPTS); do \
-		$(INSTALL) -m $(BIN_MODE) $$i $(SHAREDIR); \
+		$(INSTALL) -m $(BIN_MODE) $$i $(DESTDIR)$(SHAREDIR); \
 	done
 
 %: %.in

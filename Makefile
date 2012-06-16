@@ -29,7 +29,7 @@ include build/rules.mk
 ######################################
 
 _install:
-	$(INSTALLDIR) $(DOCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(DOCDIR)
 	for i in $(DOCS); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(DOCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(DOCDIR); \
 	done

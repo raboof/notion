@@ -21,7 +21,7 @@ See also:
     * Lua 5.1 (see <http://www.lua.org/>). 
 
    On Ubuntu (and probably Debian), the following packages are required:
-     lua5.1 liblua5.1-0-dev libx11-dev libxext-dev libsm-dev gettext
+     build-essential lua5.1 liblua5.1-0-dev libx11-dev libxext-dev libsm-dev gettext
 
    If you also build the RandR and Xinerama modules, you will need:
      libxinerama-dev libxrandr-dev

@@ -69,5 +69,5 @@ _install:
 	$(INSTALL) -m $(BIN_MODE) pwm3 $(BINDIR)
 	$(INSTALLDIR) $(PWM_ETCDIR)
 	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(PWM_ETCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(PWM_ETCDIR); \
 	done

@@ -97,13 +97,22 @@ LD_SHAREDFLAGS=-shared
 %.o: %.c $(EXPORTS_H)
 	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
+# notion might not link to Xext, so modules will have to link to it themselves
+# if they need it: 
+LIBS += $(X11_LIBS)
+
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) $(LIBS) -o $@
 
 
 module_install: module_stub_install
+<<<<<<< HEAD
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+=======
+	$(INSTALLDIR) $(DESTDIR)$(MODULEDIR)
+	$(INSTALLBIN) $(MODULE).so $(DESTDIR)$(MODULEDIR)
+>>>>>>> 47261a872f8638b12651f31da6c738b8639d97b1
 
 else # PRELOAD_MODULES
 
@@ -122,8 +131,8 @@ module_install: module_stub_install
 endif # PRELOAD_MODULES
 
 module_stub_install:
-	$(INSTALLDIR) $(LCDIR)
-	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(LCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LCDIR)
+	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(DESTDIR)$(LCDIR)
 
 ifndef MODULE_STUB
 
@@ -161,15 +170,15 @@ _realclean:
 	$(LUAC) -o $@ $<
 
 lc_install:
-	$(INSTALLDIR) $(LCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LCDIR)
 	for i in $(LUA_COMPILED); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(LCDIR); \
 	done
 
 etc_install:
-	$(INSTALLDIR) $(ETCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(ETCDIR)
 	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(ETCDIR); \
 	done
 
 # Dependencies
