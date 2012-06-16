@@ -367,12 +367,23 @@ static bool frame_initialise_titles(WFrame *frame)
 
 /*{{{ Resize and reparent */
 
+int region_maximize_transition(WRegion *reg)
+{
+    int ret=0;
+    CALL_DYN_RET(ret, bool, region_maximize_transition, reg, (reg));
+    return ret;
+}
+
 
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 {
     WRectangle old_geom, mg;
     bool wchg=(REGION_GEOM(frame).w!=fp->g.w);
     bool hchg=(REGION_GEOM(frame).h!=fp->g.h);
+    int st=
+        REGION_MANAGER(frame)==NULL ?
+        0 :
+        region_maximize_transition(REGION_MANAGER(frame));
     
     old_geom=REGION_GEOM(frame);
     
@@ -388,7 +399,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_SHADED;
         }
-        frame->flags&=~FRAME_MAXED_VERT;
+        if(!(st&KEEP_MAX_VERT))
+            frame->flags&=~FRAME_MAXED_VERT;
     }
     
     if(wchg){
@@ -399,7 +411,8 @@ bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
         }else{
             frame->flags&=~FRAME_MIN_HORIZ;
         }
-        frame->flags&=~FRAME_MAXED_HORIZ;
+        if(!(st&KEEP_MAX_HORIZ))
+            frame->flags&=~FRAME_MAXED_HORIZ;
     }
 
     if(wchg || hchg){

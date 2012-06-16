@@ -42,6 +42,10 @@
 #define REGION_ORIENTATION_HORIZONTAL 1
 #define REGION_ORIENTATION_VERTICAL 2
 
+#define KEEP_MAX_HORIZ      0x0001
+#define KEEP_MAX_VERT       0x0002
+#define NO_REDRAW           0x0004
+
 
 #define RQGEOMPARAMS_INIT {{0, 0, 0, 0}, 0, 0}
 
@@ -126,6 +130,12 @@ extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
 extern void region_managed_rqgeom_absolute_default(WRegion *reg, WRegion *sub,
                                                    const WRQGeomParams *rq,
                                                    WRectangle *geomret);
+
+DYNFUN void region_ignore_statusbar(WRegion *reg, int dir);
+DYNFUN void region_unignore_statusbar(WRegion *reg);
+DYNFUN void region_managed_save(WRegion *reg, WRegion *sub, int dir);
+DYNFUN void region_managed_restore(WRegion *reg, WRegion *sub, int dir);
+DYNFUN bool region_managed_verify(WRegion *reg, WRegion *sub, int dir);
 
 
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);

@@ -138,6 +138,51 @@ void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd,
         splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
 }
 
+int tiling_maximize_transition(WTiling *ws)
+{
+    return ws->maximize_transition;
+}
+
+void tiling_ignore_statusbar(WTiling *ws, int dir)
+{    
+    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT|NO_REDRAW;
+    tiling_unmanage_stdisp(ws, TRUE, TRUE);
+    if(dir==SPLIT_HORIZONTAL)
+        ws->maximize_transition&=~KEEP_MAX_HORIZ;
+    else if(dir==SPLIT_VERTICAL)
+        ws->maximize_transition&=~KEEP_MAX_VERT;
+}
+
+void tiling_unignore_statusbar(WTiling *ws)
+{    
+    WMPlex mplex=region_screen_of(&ws->reg)->mplex;
+    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT;
+    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj), &mplex.stdispinfo);
+    ws->maximize_transition=0;
+}
+
+void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL)
+        split_save((WSplit*)node, dir);
+}
+
+void tiling_managed_restore(WTiling *ws, WRegion *mgd, int dir)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    if(node!=NULL && ws->split_tree!=NULL)
+        split_restore((WSplit*)node, dir);
+}
+
+bool tiling_managed_verify(WTiling *ws, WRegion *mgd, int dir)
+{
+    WSplitRegion *node=get_node_check(ws, mgd);
+    return 
+        (node!=NULL && ws->split_tree!=NULL)
+        ? split_verify((WSplit*)node, dir)
+        : FALSE;
+}
 
 void tiling_map(WTiling *ws)
 {
@@ -543,6 +588,7 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
     ws->stdispnode=NULL;
     ws->managed_list=NULL;
     ws->batchop=FALSE;
+    ws->maximize_transition=0;
     
     ws->dummywin=XCreateWindow(ioncore_g.dpy, parent->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
@@ -1706,6 +1752,24 @@ static DynFunTab tiling_dynfuntab[]={
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
     
+    {(DynFun*)region_maximize_transition,
+     (DynFun*)tiling_maximize_transition},
+    
+    {region_ignore_statusbar,
+     tiling_ignore_statusbar},
+    
+    {region_unignore_statusbar,
+     tiling_unignore_statusbar},
+   
+    {region_managed_save,
+     tiling_managed_save},
+
+    {region_managed_restore,
+     tiling_managed_restore},
+
+    {(DynFun*)region_managed_verify,
+     (DynFun*)tiling_managed_verify},
+
     {region_managed_remove, 
      tiling_managed_remove},
     
