@@ -217,7 +217,7 @@ void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *ela
 
 static void frame_shaped_recalc_bar_size(WFrame *frame)
 {
-    int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
+    int bar_w=0, textw=0, tmaxw=frame->tabs_params.tab_min_w, tmp=0;
     WLListIterTmp itmp;
     WRegion *sub;
     const char *p;
@@ -247,10 +247,10 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
                 tmaxw=textw;
         }
 
-        bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
-        if(bar_w<frame->tab_min_w && 
-           REGION_GEOM(frame).w>frame->tab_min_w)
-            bar_w=frame->tab_min_w;
+        bar_w=frame->tabs_params.bar_max_width_q*REGION_GEOM(frame).w;
+        if(bar_w<frame->tabs_params.tab_min_w && 
+           REGION_GEOM(frame).w>frame->tabs_params.tab_min_w)
+            bar_w=frame->tabs_params.tab_min_w;
         
         tmp=bar_w-bdtotal-m*tmaxw;
         
@@ -264,9 +264,9 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
             /* Some labels must be truncated */
         }
     }else{
-        bar_w=frame->tab_min_w;
-        if(bar_w>frame->bar_max_width_q*REGION_GEOM(frame).w)
-            bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
+        bar_w=frame->tabs_params.tab_min_w;
+        if(bar_w>frame->tabs_params.bar_max_width_q*REGION_GEOM(frame).w)
+            bar_w=frame->tabs_params.bar_max_width_q*REGION_GEOM(frame).w;
     }
 
     if(frame->bar_w!=bar_w){
@@ -302,7 +302,7 @@ static void free_title(WFrame *frame, int i)
 */
 void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *elastic, int *minw){
     /* Dummy implementation O(n^2), instead of O(n*log(n)) */
-    int textw=0,tmp,tmaxw,tminw=frame->propor_tab_min_w;
+    int textw=0,tmp,tmaxw,tminw=frame->tabs_params.propor_tab_min_w;
     WLListIterTmp itmp;
     WRegion *sub;
     const char *displayname;
@@ -392,8 +392,8 @@ fprintf(stderr,"ZERR\n");
 			nextw=textw;
 		}
 	    }
-	    if (nextw>(unsigned)frame->float_tab_min_w)
-		nextw=frame->float_tab_min_w;
+	    if (nextw>(unsigned)frame->tabs_params.tab_min_w)
+		nextw=frame->tabs_params.tab_min_w;
 #ifdef DEBUG
 	    fprintf(stderr,"TMP --- tmp:%i n:%i curw:%i nextw:%i min:%i\n",tmp,n,curw,nextw,*minw);
 #endif
@@ -413,7 +413,7 @@ fprintf(stderr,"ZERR\n");
 #endif
 		break;
 	    }
-	    if (nextw==(unsigned)frame->float_tab_min_w)
+	    if (nextw==(unsigned)frame->tabs_params.tab_min_w)
 		break;
 	    curw=nextw;
 	}
@@ -435,11 +435,12 @@ void frame_recalc_bar(WFrame *frame)
     WRegion *sub;
     char *title;
     bool set_shape;
+    bool complete = TRUE;
 
     if(frame->bar_brush==NULL || frame->titles==NULL)
         return;
     
-    set_shape=frame->tabs_params.alg(frame,complete);
+    set_shape=frame->tabs_params.alg(frame, complete);
 
     if(set_shape) {
         if(frame->barmode==FRAME_BAR_SHAPED)
