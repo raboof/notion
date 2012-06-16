@@ -138,34 +138,34 @@ void tiling_managed_rqgeom(WTiling *ws, WRegion *mgd,
         splittree_rqgeom((WSplit*)node, rq->flags, &rq->geom, geomret);
 }
 
-int tiling_maximize_transition(WTiling *ws)
+int tiling_query_transition(WTiling *ws)
 {
     return ws->maximize_transition;
 }
 
-void tiling_ignore_statusbar(WTiling *ws, int dir)
+void tiling_ignore_stdisp(WTiling *ws)
 {    
-    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT|NO_REDRAW;
-    tiling_unmanage_stdisp(ws, TRUE, TRUE);
-    if(dir==SPLIT_HORIZONTAL)
-        ws->maximize_transition&=~KEEP_MAX_HORIZ;
-    else if(dir==SPLIT_VERTICAL)
-        ws->maximize_transition&=~KEEP_MAX_VERT;
+    ws->maximize_transition=KEEP_MAX;
+    if(ws->stdispnode!=NULL){
+        ws->maximize_transition|=NO_REDRAW;
+        tiling_unmanage_stdisp(ws, TRUE, TRUE);
+    }
 }
 
-void tiling_unignore_statusbar(WTiling *ws)
+void tiling_unignore_stdisp(WTiling *ws)
 {    
     WMPlex mplex=region_screen_of(&ws->reg)->mplex;
-    ws->maximize_transition=KEEP_MAX_HORIZ|KEEP_MAX_VERT;
-    tiling_manage_stdisp(ws, (WRegion*)(mplex.stdispwatch.obj), &mplex.stdispinfo);
+    WRegion *stdisp=(WRegion*)mplex.stdispwatch.obj;
+    ws->maximize_transition=KEEP_MAX;
+    if(stdisp!=NULL)
+        tiling_manage_stdisp(ws,stdisp,&mplex.stdispinfo);
     ws->maximize_transition=0;
 }
 
 void tiling_managed_save(WTiling *ws, WRegion *mgd, int dir)
 {
     WSplitRegion *node=get_node_check(ws, mgd);
-    if(node!=NULL && ws->split_tree!=NULL)
-        split_save((WSplit*)node, dir);
+    split_save((WSplit*)node, dir);
 }
 
 void tiling_managed_restore(WTiling *ws, WRegion *mgd, int dir)
@@ -1752,14 +1752,14 @@ static DynFunTab tiling_dynfuntab[]={
     {region_managed_rqgeom, 
      tiling_managed_rqgeom},
     
-    {(DynFun*)region_maximize_transition,
-     (DynFun*)tiling_maximize_transition},
+    {(DynFun*)region_query_transition,
+     (DynFun*)tiling_query_transition},
     
-    {region_ignore_statusbar,
-     tiling_ignore_statusbar},
+    {region_ignore_stdisp,
+     tiling_ignore_stdisp},
     
-    {region_unignore_statusbar,
-     tiling_unignore_statusbar},
+    {region_unignore_stdisp,
+     tiling_unignore_stdisp},
    
     {region_managed_save,
      tiling_managed_save},
