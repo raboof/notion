@@ -16,6 +16,15 @@ defwinprop{
     ignore_cfgrq = true,
 }
 
+-- Better would be to apply these settings automatically whenever a window
+-- has type _NET_WM_WINDOW_TYPE_NOTIFICATION
+defwinprop{
+        class = "Xfce4-notifyd",
+
+        float = true,
+        userpos = true,
+        switchto = false,
+}
 
 -- Put all dockapps in the statusbar's systray, also adding the missing
 -- size hints necessary for this to work.

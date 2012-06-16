@@ -76,6 +76,7 @@ static ExtlFn get_layout_fn;
  *  \var{mousefocus} & String: ''disable'' or ''sloppy''. \\
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
  *  \var{autoraise} & (boolean) Autoraise regions in groups on goto. \\
+ *  \var{autosave_layout} & (boolean) Automatically save layout on restart and exit. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -101,6 +102,7 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "framed_transients", &(ioncore_g.framed_transients));
     extl_table_gets_b(tab, "unsqueeze", &(ioncore_g.unsqueeze_enabled));
     extl_table_gets_b(tab, "autoraise", &(ioncore_g.autoraise));
+    extl_table_gets_b(tab, "autosave_layout", &(ioncore_g.autosave_layout));
     
     if(extl_table_gets_s(tab, "frame_default_index", &tmp)){
         ioncore_g.frame_default_index=stringintmap_value(frame_idxs, 
@@ -158,6 +160,7 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "framed_transients", ioncore_g.framed_transients);
     extl_table_sets_b(tab, "unsqueeze", ioncore_g.unsqueeze_enabled);
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
+    extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
     
 
     extl_table_sets_s(tab, "frame_default_index", 

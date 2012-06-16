@@ -32,6 +32,9 @@ ioncore.set{
     -- Movement commands warp the pointer to frames instead of just
     -- changing focus. Enabled by default.
     --warp=true,
+    
+    -- Automatically save layout on restart and exit.
+    --autosave_layout=true,
 }
 
 
