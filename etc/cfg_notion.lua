@@ -1,5 +1,5 @@
 --
--- Ion main configuration file
+-- Notion main configuration file
 --
 -- This file only includes some settings that are rather frequently altered.
 -- The rest of the settings are in cfg_notioncore.lua and individual modules'
@@ -41,7 +41,7 @@ ioncore.set{
 -- the the modules or configuration files that you want, below.
 dopath("cfg_defaults")
 
--- Load configuration of the Ion 'core'. Most bindings are here.
+-- Load configuration of the Notion 'core'. Most bindings are here.
 --dopath("cfg_notioncore")
 
 -- Load some kludges to make apps behave better.

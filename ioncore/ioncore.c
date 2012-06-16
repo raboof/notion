@@ -1,7 +1,8 @@
 /*
  * ion/ioncore/ioncore.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) The Notion Team 2011. 
+ * Copyright (c) Tuomo Valkonen 1999-2009. 
  *
  * See the included file LICENSE for details.
  */
@@ -66,16 +67,17 @@
 
 WGlobal ioncore_g;
 
-static const char *progname="ion";
+static const char *progname="notion";
 
 static const char ioncore_copy[]=
-    "Ion " ION_VERSION ", copyright (c) Tuomo Valkonen 1999-2007.";
+    "Notion " NOTION_VERSION ", see the README for copyright details.";
 
 static const char ioncore_license[]=DUMMY_TR(
-    "This program is free software; you can redistribute it and/or\n"
-    "modify it under the terms of the GNU Lesser General Public\n"
-    "License as published by the Free Software Foundation; either\n"
-    "version 2.1 of the License, or (at your option) any later version.\n"
+    "This software is licensed under the GNU Lesser General Public License\n"
+    "(LGPL), version 2.1, extended with terms applying to the use of the\n"
+    "former name of the project, Ion(tm), unless otherwise indicated in\n"
+    "components taken from elsewhere. For details, see the file LICENSE\n"
+    "that you should have received with this software.\n"
     "\n"
     "This program is distributed in the hope that it will be useful,\n"
     "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
@@ -650,7 +652,7 @@ void ioncore_deinit()
 
 
 /*EXTL_DOC
- * Is Ion supporting locale-specifically multibyte-encoded strings?
+ * Is Notion supporting locale-specifically multibyte-encoded strings?
  */
 EXTL_SAFE
 EXTL_EXPORT

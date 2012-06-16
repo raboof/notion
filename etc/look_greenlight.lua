@@ -1,5 +1,5 @@
 --
--- look_greenlight for Ion's default drawing engine. 
+-- look_greenlight for Notion's default drawing engine. 
 -- 
 
 if not gr.select_engine("de") then

@@ -1,5 +1,5 @@
 --
--- Layouts for Ion
+-- Layouts for Notion
 --
 
 --

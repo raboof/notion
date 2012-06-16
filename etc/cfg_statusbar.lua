@@ -1,5 +1,5 @@
 --
--- Ion statusbar module configuration file
+-- Notion statusbar module configuration file
 -- 
 
 

@@ -1,5 +1,5 @@
 --
--- Ion core configuration file
+-- Notion core configuration file
 --
 
 
