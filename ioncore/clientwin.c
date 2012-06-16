@@ -1194,10 +1194,12 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
         if(ev->value_mask&CWX){
             rq.geom.x=ev->x+gdx;
             rq.flags&=~REGION_RQGEOM_WEAK_X;
+            rq.flags&=~REGION_RQGEOM_WEAK_W;
         }
         if(ev->value_mask&CWY){
             rq.geom.y=ev->y+gdy;
             rq.flags&=~REGION_RQGEOM_WEAK_Y;
+            rq.flags&=~REGION_RQGEOM_WEAK_H;
         }
         
         region_rqgeom((WRegion*)cwin, &rq, NULL);

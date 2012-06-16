@@ -114,7 +114,18 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
     int h=(fullh ? max_geom.h : minof(rq_geom->h, max_geom.h));
     int x_=0, y_=0;
 
-    
+    /* ignore out-of-bound values for 'x' entirely */
+    if(!(rq_flags&REGION_RQGEOM_WEAK_X) && rq_geom->x > max_geom.w){
+        rq_flags|=REGION_RQGEOM_WEAK_X;
+        rq_geom->x = reg->geom.x;
+    }
+
+    /* ignore out-of-bound values for 'y' entirely */
+    if(!(rq_flags&REGION_RQGEOM_WEAK_Y) && rq_geom->y > max_geom.h){
+        rq_flags|=REGION_RQGEOM_WEAK_Y;
+        rq_geom->y = reg->geom.y;
+    }
+
     if(!(rq_flags&REGION_RQGEOM_WEAK_X) 
        && rq_flags&REGION_RQGEOM_WEAK_W){
         x_=fit_x(rq_geom->x, 1, &max_geom);
