@@ -66,10 +66,10 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     WRectangle mg;
 
     frame->flags=0;
-    frame->saved_w=0;
-    frame->saved_h=0;
-    frame->saved_x=0;
-    frame->saved_y=0;
+    frame->saved_geom.w=0;
+    frame->saved_geom.h=0;
+    frame->saved_geom.x=0;
+    frame->saved_geom.y=0;
     frame->tab_dragged_idx=-1;
     frame->titles=NULL;
     frame->titles_n=0;
@@ -367,89 +367,41 @@ static bool frame_initialise_titles(WFrame *frame)
 
 /*{{{ Resize and reparent */
 
-int region_query_transition(WRegion *reg)
-{
-    int ret=0;
-    CALL_DYN_RET(ret, bool, region_query_transition, reg, (reg));
-    return ret;
-}
-
-
-bool region_max_transition(WRegion *reg, int dir, int action)
-{
-    bool ret=FALSE;
-    CALL_DYN_RET(ret, bool, region_max_transition, reg, (reg, dir, action));
-    return ret;
-}
-
-bool frame_max_transition(WFrame *frame, int dir, int action)
-{
-    if(action==SET_MAX){
-        if(dir==HORIZONTAL)
-            frame->flags|=FRAME_MAXED_HORIZ;
-        else if(dir==VERTICAL)
-            frame->flags|=FRAME_MAXED_VERT;
-        return TRUE;
-    }
-    if(action==RM_MAX){
-        if(dir==HORIZONTAL)
-            frame->flags&=~FRAME_MAXED_HORIZ;
-        else if(dir==VERTICAL)
-            frame->flags&=~FRAME_MAXED_VERT;
-        return TRUE;
-    }
-    if(action==QUERY_MAX){
-        if(dir==HORIZONTAL)
-            return frame->flags&FRAME_MAXED_HORIZ;
-        else if(dir==VERTICAL)
-            return frame->flags&FRAME_MAXED_VERT;
-    }
-    return FALSE;
-}
 
 bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp)
 {
     WRectangle old_geom, mg;
     bool wchg=(REGION_GEOM(frame).w!=fp->g.w);
     bool hchg=(REGION_GEOM(frame).h!=fp->g.h);
-
-    int st=
-        REGION_MANAGER(frame)==NULL ?
-        0 :
-        region_query_transition(REGION_MANAGER(frame));
-
-    if(st&NO_REDRAW){
-            return TRUE;
-    }
-
+    
     old_geom=REGION_GEOM(frame);
     
     window_do_fitrep(&(frame->mplex.win), par, &(fp->g));
 
     mplex_managed_geom((WMPlex*)frame, &mg);
     
-    if(hchg){
-        if(mg.h<=1){
-            frame->flags|=(FRAME_SHADED|FRAME_SAVED_VERT);
-            frame->saved_y=old_geom.y;
-            frame->saved_h=old_geom.h;
-        }else{
-            frame->flags&=~FRAME_SHADED;
-        }
-        if(!(st&KEEP_MAX))
+    if(!(frame->flags&FRAME_KEEP_FLAGS)){
+        if(hchg){
+            if(mg.h<=1){
+                frame->flags|=(FRAME_SHADED|FRAME_SAVED_VERT);
+                frame->saved_geom.y=old_geom.y;
+                frame->saved_geom.h=old_geom.h;
+            }else{
+                frame->flags&=~FRAME_SHADED;
+            }
             frame->flags&=~FRAME_MAXED_VERT;
-    }
-    
-    if(wchg){
-        if(mg.w<=1){
-            frame->flags|=(FRAME_MIN_HORIZ|FRAME_SAVED_HORIZ);
-            frame->saved_x=old_geom.x;
-            frame->saved_w=old_geom.w;
-        }else{
-            frame->flags&=~FRAME_MIN_HORIZ;
         }
-        if(!(st&KEEP_MAX))
+
+        if(wchg){
+            if(mg.w<=1){
+                frame->flags|=(FRAME_MIN_HORIZ|FRAME_SAVED_HORIZ);
+                frame->saved_geom.x=old_geom.x;
+                frame->saved_geom.w=old_geom.w;
+            }else{
+                frame->flags&=~FRAME_MIN_HORIZ;
+            }
             frame->flags&=~FRAME_MAXED_HORIZ;
+        }
     }
 
     if(wchg || hchg){
@@ -764,7 +716,7 @@ bool frame_set_shaded(WFrame *frame, int sp)
     if(!nset){
         if(!(frame->flags&FRAME_SAVED_VERT))
             return FALSE;
-        rq.geom.h=frame->saved_h;
+        rq.geom.h=frame->saved_geom.h;
     }else{
         if(frame->barmode==FRAME_BAR_NONE){
             return FALSE;
@@ -1010,13 +962,13 @@ ExtlTab frame_get_configuration(WFrame *frame)
     extl_table_sets_i(tab, "mode", frame->mode);
 
     if(frame->flags&FRAME_SAVED_VERT){
-        extl_table_sets_i(tab, "saved_y", frame->saved_y);
-        extl_table_sets_i(tab, "saved_h", frame->saved_h);
+        extl_table_sets_i(tab, "saved_y", frame->saved_geom.y);
+        extl_table_sets_i(tab, "saved_h", frame->saved_geom.h);
     }
 
     if(frame->flags&FRAME_SAVED_HORIZ){
-        extl_table_sets_i(tab, "saved_x", frame->saved_x);
-        extl_table_sets_i(tab, "saved_w", frame->saved_w);
+        extl_table_sets_i(tab, "saved_x", frame->saved_geom.x);
+        extl_table_sets_i(tab, "saved_w", frame->saved_geom.w);
     }
     
     return tab;
@@ -1031,15 +983,15 @@ void frame_do_load(WFrame *frame, ExtlTab tab)
     
     if(extl_table_gets_i(tab, "saved_x", &p) &&
        extl_table_gets_i(tab, "saved_w", &s)){
-        frame->saved_x=p;
-        frame->saved_w=s;
+        frame->saved_geom.x=p;
+        frame->saved_geom.w=s;
         frame->flags|=FRAME_SAVED_HORIZ;
     }
 
     if(extl_table_gets_i(tab, "saved_y", &p) &&
        extl_table_gets_i(tab, "saved_h", &s)){
-        frame->saved_y=p;
-        frame->saved_h=s;
+        frame->saved_geom.y=p;
+        frame->saved_geom.h=s;
         frame->flags|=FRAME_SAVED_VERT;
     }
     
@@ -1098,9 +1050,6 @@ static DynFunTab frame_dynfuntab[]={
     {region_updategr, 
      frame_updategr},
 
-    {(DynFun*)region_max_transition,
-     (DynFun*)frame_max_transition},
-     
     {(DynFun*)region_fitrep,
      (DynFun*)frame_fitrep},
      

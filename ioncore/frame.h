@@ -22,6 +22,7 @@
 #include "sizehint.h"
 #include "frame-tabs-recalc.h"
 
+#define FRAME_KEEP_FLAGS  0x0001
 #define FRAME_SAVED_VERT  0x0008
 #define FRAME_SAVED_HORIZ 0x0010
 #define FRAME_SHADED      0x0020
@@ -58,8 +59,7 @@ DECLCLASS(WFrame){
     
     int flags;
     WFrameMode mode;
-    int saved_w, saved_h;
-    int saved_x, saved_y;
+    WRectangle saved_geom;
     
     int tab_dragged_idx;
     uint quasiactive_count;
@@ -93,8 +93,6 @@ extern void frame_set_mode(WFrame *frame, WFrameMode mode);
 extern WFrameMode frame_mode(WFrame *frame);
 
 /* Resize and reparent */
-DYNFUN int region_query_transition(WRegion *reg);
-DYNFUN bool region_max_transition(WRegion *reg, int dir, int action);
 extern bool frame_fitrep(WFrame *frame, WWindow *par, const WFitParams *fp);
 extern void frame_size_hints(WFrame *frame, WSizeHints *hints_ret);
 

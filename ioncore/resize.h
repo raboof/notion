@@ -43,11 +43,11 @@
 #define REGION_ORIENTATION_HORIZONTAL 1
 #define REGION_ORIENTATION_VERTICAL 2
 
-#define KEEP_MAX            0x0001
-#define NO_REDRAW           0x0004
-#define SET_MAX             0x0010
-#define RM_MAX              0x0040
-#define QUERY_MAX           0x0080
+#define SAVE                1
+#define RESTORE             2
+#define VERIFY              3
+#define SET_KEEP            4
+#define RM_KEEP             5
 #define HORIZONTAL          SPLIT_HORIZONTAL
 #define VERTICAL            SPLIT_VERTICAL
 
@@ -136,11 +136,7 @@ extern void region_managed_rqgeom_absolute_default(WRegion *reg, WRegion *sub,
                                                    const WRQGeomParams *rq,
                                                    WRectangle *geomret);
 
-DYNFUN void region_ignore_stdisp(WRegion *reg);
-DYNFUN void region_unignore_stdisp(WRegion *reg);
-DYNFUN void region_managed_save(WRegion *reg, WRegion *sub, int dir);
-DYNFUN void region_managed_restore(WRegion *reg, WRegion *sub, int dir);
-DYNFUN bool region_managed_verify(WRegion *reg, WRegion *sub, int dir);
+DYNFUN bool region_managed_maximize(WRegion *reg, WRegion *sub, int dir, int action);
 
 
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);

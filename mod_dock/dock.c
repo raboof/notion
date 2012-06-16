@@ -850,14 +850,6 @@ void dock_size_hints(WDock *dock, WSizeHints *hints)
 
 static bool dock_fitrep(WDock *dock, WWindow *parent, const WFitParams *fp)
 {
-    int st=
-        REGION_MANAGER(dock)==NULL ?
-        0 :
-        region_query_transition(REGION_MANAGER(dock));
-    if(st&NO_REDRAW){
-            return TRUE;
-    }
-
     if(!window_fitrep(&(dock->win), parent, fp))
         return FALSE;
 
