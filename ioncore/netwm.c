@@ -60,7 +60,7 @@ void netwm_init()
 void netwm_init_rootwin(WRootWin *rw)
 {
     Atom atoms[N_NETWM];
-        const char *p[1];
+    const char *p[1];
 
     atoms[0]=atom_net_wm_name;
     atoms[1]=atom_net_wm_state;
@@ -77,11 +77,11 @@ void netwm_init_rootwin(WRootWin *rw)
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
 
     p[0]=libtu_progbasename();
-#ifdef X_HAVE_UTF8_STRING
+    /** 
+     * Unfortunately we cannot determine the charset of libtu_progbasename()
+     * so we'll just have to guess it makes sense in the current locale charset
+     */
     xwindow_set_utf8_property(rw->dummy_win, atom_net_wm_name, p, 1);
-#else
-    xwindow_set_text_property(rw->dummy_win, atom_net_wm_name, p, 1);
-#endif
 }
 
 
