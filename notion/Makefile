@@ -1,5 +1,5 @@
 ##
-## Ion Makefile
+## Notion Makefile
 ##
 
 # System-specific configuration is in system.mk

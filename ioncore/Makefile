@@ -1,5 +1,5 @@
 ##
-## Ioncore Makefile
+## Notioncore Makefile
 ##
 
 # System-specific configuration is in system.mk
