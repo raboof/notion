@@ -27,11 +27,13 @@
 static Atom atom_net_wm_name=0;
 static Atom atom_net_wm_state=0;
 static Atom atom_net_wm_state_fullscreen=0;
+static Atom atom_net_wm_state_demands_attention=0;
 static Atom atom_net_supporting_wm_check=0;
 static Atom atom_net_virtual_roots=0;
 static Atom atom_net_active_window=0;
+static Atom atom_net_wm_allowed_actions=0;
 
-#define N_NETWM 6
+#define N_NETWM 8
 
 static Atom atom_net_supported=0;
 
@@ -50,10 +52,12 @@ void netwm_init()
     atom_net_wm_name=XInternAtom(ioncore_g.dpy, "_NET_WM_NAME", False);
     atom_net_wm_state=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE", False);
     atom_net_wm_state_fullscreen=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+    atom_net_wm_state_demands_attention=XInternAtom(ioncore_g.dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", False);
     atom_net_supported=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTED", False);
     atom_net_supporting_wm_check=XInternAtom(ioncore_g.dpy, "_NET_SUPPORTING_WM_CHECK", False);
     atom_net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     atom_net_active_window=XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
+    atom_net_wm_allowed_actions=XInternAtom(ioncore_g.dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 }
 
 
@@ -65,9 +69,11 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[0]=atom_net_wm_name;
     atoms[1]=atom_net_wm_state;
     atoms[2]=atom_net_wm_state_fullscreen;
-    atoms[3]=atom_net_supporting_wm_check;
-    atoms[4]=atom_net_virtual_roots;
-    atoms[5]=atom_net_active_window;
+    atoms[3]=atom_net_wm_state_demands_attention;
+    atoms[4]=atom_net_supporting_wm_check;
+    atoms[5]=atom_net_virtual_roots;
+    atoms[6]=atom_net_active_window;
+    atoms[7]=atom_net_wm_allowed_actions;
     
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
@@ -114,16 +120,46 @@ WScreen *netwm_check_initial_fullscreen(WClientWin *cwin)
     return NULL;
 }
 
+/*EXTL_DOC
+ * refresh \_NET\_WM\_STATE markers for this window
+ */
+EXTL_SAFE
+EXTL_EXPORT
+void ioncore_update_net_state(WClientWin *cwin)
+{
+    netwm_update_state(cwin);
+}
 
 void netwm_update_state(WClientWin *cwin)
 {
-    CARD32 data[1];
+    CARD32 data[2];
     int n=0;
     
     if(REGION_IS_FULLSCREEN(cwin))
         data[n++]=atom_net_wm_state_fullscreen;
+    if(region_is_activity_r(&(cwin->region)))
+        data[n++]=atom_net_wm_state_demands_attention;
 
     XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state, 
+                    XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
+}
+
+void netwm_update_allowed_actions(WClientWin *cwin)
+{
+    CARD32 data[1];
+    int n=0;
+    
+    /* TODO add support for 'resize' and list it here */
+    /* TODO add support for 'minimize' and list it here */
+    /* TODO add support for 'maximize_horz' and list it here */
+    /* TODO add support for 'maximize_vert' and list it here */
+    /* TODO add support for 'fullscreen' and list it here */
+    /* TODO add support for 'change desktop' and list it here */
+    /* TODO add support for 'close' and list it here */
+    /* TODO add support for 'above' and list it here */
+    /* TODO add support for 'below' and list it here */
+
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_allowed_actions, 
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 

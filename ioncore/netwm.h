@@ -22,6 +22,7 @@ extern void netwm_init_rootwin(WRootWin *rw);
 
 extern WScreen *netwm_check_initial_fullscreen(WClientWin *cwin);
 extern void netwm_update_state(WClientWin *cwin);
+extern void netwm_update_allowed_actions(WClientWin *cwin);
 extern void netwm_delete_state(WClientWin *cwin);
 extern void netwm_set_active(WRegion *reg);
 extern char **netwm_get_name(WClientWin *cwin);
