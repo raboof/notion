@@ -6,6 +6,7 @@
  * See the included file LICENSE for details.
  */
 
+#include <X11/XKBlib.h>
 #include <libtu/rb.h>
 #include <libextl/extl.h>
 #include "common.h"
@@ -207,7 +208,7 @@ WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state,
     if(bindmap==NULL)
         return NULL;
         
-    b.ksb=XKeycodeToKeysym(ioncore_g.dpy, kcb, 0);
+    b.ksb=XkbKeycodeToKeysym(ioncore_g.dpy, kcb, 0, 0);
     b.kcb=kcb;
     b.state=state;
     b.act=BINDING_KEYPRESS;

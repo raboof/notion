@@ -3,10 +3,26 @@
  * 
  * This file contains routines to attempt to add fonts to a font pattern
  * so that XCreateFontSet will not fail because the given font(s) do not
- * contain all the characters required by the locale. The original code
- * was apparently written by Tomohiro Kubota; see
+ * contain all the characters required by the locale. 
+ *
+ * It is based on code by Tomohiro Kubota; see
  * <http://www.debian.org/doc/manuals/intro-i18n/ch-examples.en.html#s13.4.5>.
+ *
+ * Copyright © 1999-2001 Tomohiro KUBOTA. 
+ *
+ * This manual is free software; you may redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free 
+ * Software Foundation; either version 2, or (at your option) any later 
+ * version.
  * 
+ * This is distributed in the hope that it will be useful, but without any 
+ * warranty; without even the implied warranty of merchantability or fitness 
+ * for a particular purpose. See the GNU General Public License for more 
+ * details. 
+ *
+ * You should have received a copy of the GNU General Public License along with 
+ * this program; if not, write to the Free Software Foundation, Inc., 51 
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
 #include <string.h>

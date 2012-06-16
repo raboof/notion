@@ -33,3 +33,8 @@ _install:
 	for i in $(DOCS); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(DOCDIR); \
 	done
+
+.PHONY: test
+
+test:
+	$(MAKE) -C test
