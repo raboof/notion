@@ -30,7 +30,6 @@
 #include "focus.h"
 #include "regbind.h"
 #include "screen.h"
-#include "screen.h"
 #include "bindmaps.h"
 #include <libextl/readconfig.h>
 #include "resize.h"
@@ -205,6 +204,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     Display *dpy=ioncore_g.dpy;
     WFitParams fp;
     Window root;
+    WScreen *scr;
     
     /* Try to select input on the root window */
     root=RootWindow(dpy, xscr);
@@ -212,7 +212,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     redirect_error=FALSE;
 
     XSetErrorHandler(my_redirect_error_handler);
-    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN);
+    XSelectInput(dpy, root, IONCORE_EVENTMASK_ROOT);
     XSync(dpy, 0);
     XSetErrorHandler(my_error_handler);
 
@@ -234,12 +234,12 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     fp.g.w=DisplayWidth(dpy, xscr);
     fp.g.h=DisplayHeight(dpy, xscr);
     
-    if(!screen_init((WScreen*)rootwin, NULL, &fp, xscr, root)){
+    if(!window_do_init((WWindow*)rootwin, NULL, &fp, root, "WRootWin")){
         free(rootwin);
         return FALSE;
     }
 
-    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT|IONCORE_EVENTMASK_SCREEN;
+    ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT;
     ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED|REGION_PLEASE_WARP;
     ((WRegion*)rootwin)->rootwin=rootwin;
     
@@ -250,11 +250,20 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     create_wm_windows(rootwin);
     preinit_gr(rootwin);
     netwm_init_rootwin(rootwin);
+
+    region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);
     
-    net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
-    XDeleteProperty(ioncore_g.dpy, root, net_virtual_roots);
+    scr=create_screen(rootwin, &fp, xscr);
+    if(scr==NULL){
+        free(rootwin);
+        return FALSE;
+    }
+    region_set_manager((WRegion*)scr, (WRegion*)rootwin);
+    region_map((WRegion*)scr);
 
     LINK_ITEM(*(WRegion**)&ioncore_g.rootwins, (WRegion*)rootwin, p_next, p_prev);
+
+    ioncore_screens_updated(rootwin);
 
     xwindow_set_cursor(root, IONCORE_CURSOR_DEFAULT);
     
@@ -283,9 +292,7 @@ void rootwin_deinit(WRootWin *rw)
     
     XFreeGC(ioncore_g.dpy, rw->xor_gc);
     
-    rw->scr.mplex.win.win=None;
-
-    screen_deinit(&rw->scr);
+    window_deinit((WWindow*)rw);
 }
 
 
@@ -293,6 +300,29 @@ void rootwin_deinit(WRootWin *rw)
 
 
 /*{{{ region dynfun implementations */
+
+
+static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
+{
+    WRegion *sub;
+    
+    sub=REGION_ACTIVE_SUB(rootwin);
+    
+    if(sub==NULL || !REGION_IS_MAPPED(sub)){
+        WScreen *scr;
+        FOR_ALL_SCREENS(scr){
+            if(REGION_IS_MAPPED(scr)){
+                sub=(WRegion*)scr;
+                break;
+            }
+        }
+    }
+
+    if(sub!=NULL)
+        region_do_set_focus(sub, warp);
+    else
+        window_do_set_focus((WWindow*)rootwin, warp);
+}
 
 
 static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
@@ -315,10 +345,28 @@ static void rootwin_unmap(WRootWin *rootwin)
 }
 
 
+static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
+{
+    region_unset_manager(reg, (WRegion*)rootwin);
+}
+
+
+static Window rootwin_x_window(WRootWin *rootwin)
+{
+    return WROOTWIN_ROOT(rootwin);
+}
+
+
 /*}}}*/
 
 
 /*{{{ Misc */
+
+
+static bool scr_ok(WRegion *r)
+{
+    return (OBJ_IS(r, WScreen) && REGION_IS_MAPPED(r));
+}
 
 
 /*EXTL_DOC
@@ -328,17 +376,22 @@ EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
-    WScreen *scr, *fb=NULL;
+    WRegion *r=REGION_ACTIVE_SUB(rootwin);
+    WScreen *scr;
+    
+    /* There should be no non-WScreen as children or managed by us, but... */
+    
+    if(r!=NULL && scr_ok(r))
+        return (WScreen*)r;
     
     FOR_ALL_SCREENS(scr){
-        if(REGION_MANAGER(scr)==(WRegion*)rootwin && REGION_IS_MAPPED(scr)){
-            fb=scr;
-            if(REGION_IS_ACTIVE(scr))
-                return scr;
+        if(REGION_MANAGER(scr)==(WRegion*)rootwin
+           && REGION_IS_MAPPED(scr)){
+            break;
         }
     }
     
-    return (fb ? fb : &rootwin->scr);
+    return scr;
 }
 
 
@@ -362,13 +415,16 @@ WRootWin *ioncore_rootwin()
 static DynFunTab rootwin_dynfuntab[]={
     {region_map, rootwin_map},
     {region_unmap, rootwin_unmap},
+    {region_do_set_focus, rootwin_do_set_focus},
+    {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
+    {region_managed_remove, rootwin_managed_remove},
     END_DYNFUNTAB
 };
 
 
 EXTL_EXPORT
-IMPLCLASS(WRootWin, WScreen, rootwin_deinit, rootwin_dynfuntab);
+IMPLCLASS(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
 
     
 /*}}}*/

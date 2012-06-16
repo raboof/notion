@@ -103,7 +103,7 @@ void netwm_init_rootwin(WRootWin *rw)
 /*{{{ _NET_WM_STATE */
 
 
-WScreen *netwm_check_initial_fullscreen(WClientWin *cwin)
+bool netwm_check_initial_fullscreen(WClientWin *cwin)
 {
 
     int i, n;
@@ -114,16 +114,16 @@ WScreen *netwm_check_initial_fullscreen(WClientWin *cwin)
                    1, TRUE, (uchar**)&data);
     
     if(n<0)
-        return NULL;
+        return FALSE;
     
     for(i=0; i<n; i++){
         if(data[i]==(long)atom_net_wm_state_fullscreen)
-            return region_screen_of((WRegion*)cwin);
+            return TRUE;
     }
     
     XFree((void*)data);
 
-    return NULL;
+    return FALSE;
 }
 
 /*EXTL_DOC
@@ -307,3 +307,45 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 /*}}}*/
 
+/*{{{ _NET_WM_VIRTUAL_ROOTS */
+
+int count_screens()
+{
+    int result = 0;
+    WScreen *scr;
+
+    FOR_ALL_SCREENS(scr){
+        result++;
+    }
+
+    return result;
+}
+
+/*EXTL_DOC
+ * refresh \_NET\_WM\_VIRTUAL\_ROOTS 
+ */
+EXTL_SAFE
+EXTL_EXPORT
+void ioncore_screens_updated(WRootWin *rw)
+{
+    int current_screen = 0;
+    int n_screens;
+    CARD32 *virtualroots;
+    WScreen *scr;
+
+    n_screens = count_screens();
+    virtualroots = (CARD32*)malloc(n_screens * sizeof(CARD32));
+    
+    FOR_ALL_SCREENS(scr){
+        virtualroots[current_screen] = region_xwindow((WRegion *)scr);
+        current_screen++;
+    }
+
+    XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
+                    atom_net_virtual_roots, XA_WINDOW, 
+                    32, PropModeReplace, (uchar*)virtualroots, n_screens);
+
+    free(virtualroots);
+}
+
+/*}}}*/

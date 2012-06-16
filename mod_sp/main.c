@@ -115,7 +115,7 @@ static WRegion *create(WMPlex *mplex, int flags)
                |MPLEX_ATTACH_SIZEPOLICY);
     par.szplcy=SIZEPOLICY_FULL_EXACT;
 
-    sp=mplex_do_attach_new((WMPlex*)mplex, &par,
+    sp=mplex_do_attach_new(mplex, &par,
                            create_scratchws,
                            NULL);
     

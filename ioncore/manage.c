@@ -35,24 +35,19 @@ WScreen *clientwin_find_suitable_screen(WClientWin *cwin,
     FOR_ALL_SCREENS(scr){
         if(!region_same_rootwin((WRegion*)scr, (WRegion*)cwin))
             continue;
-            
-        if(!OBJ_IS(scr, WRootWin)){
-            /* The root window itself is only a fallback */
-            
-            if(REGION_IS_ACTIVE(scr)){
-                found=scr;
-                if(!respectpos)
-                    break;
-            }
-            
-            if(rectangle_contains(&REGION_GEOM(scr), 
-                                  param->geom.x, param->geom.y)){
-                found=scr;
-                if(respectpos)
-                    break;
-            }
+        if(REGION_IS_ACTIVE(scr)){
+            found=scr;
+            if(!respectpos)
+                break;
         }
         
+        if(rectangle_contains(&REGION_GEOM(scr), 
+                    param->geom.x, param->geom.y)){
+            found=scr;
+            if(respectpos)
+                break;
+        }
+         
         if(found==NULL)
             found=scr;
     }
@@ -148,8 +143,8 @@ static bool try_fullscreen(WClientWin *cwin, WScreen *dflt,
         fs_scr=dflt;
     }
 
-    if(fs_scr==NULL)
-        fs_scr=netwm_check_initial_fullscreen(cwin);
+    if(fs_scr==NULL && netwm_check_initial_fullscreen(cwin))
+        fs_scr=dflt;
 
     if(fs_scr==NULL)
         fs_scr=clientwin_fullscreen_chkrq(cwin, param->geom.w, param->geom.h);

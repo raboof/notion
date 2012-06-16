@@ -34,7 +34,7 @@ static void mplexpholder_do_link(WMPlexPHolder *ph,
                                  WMPlexPHolder *after,
                                  WLListNode *or_after)
 {
-    assert(mplex==(WMPlex*)ph->mplex_watch.obj && mplex!=NULL);
+    assert(mplex==ph->mplex && mplex!=NULL);
     
     if(after!=NULL){
         assert(after->after==or_after);
