@@ -1,0 +1,18 @@
+[submodule "mod_xinerama"]
+	path = mod_xinerama
+	url = ../mod_xinerama
+[submodule "mod_xrandr"]
+	path = mod_xrandr
+	url = ../mod_xrandr
+[submodule "mod_xkbevents"]
+	path = mod_xkbevents
+	url = ../mod_xkbevents
+[submodule "libextl"]
+	path = libextl
+	url = ../libextl
+[submodule "libtu"]
+	path = libtu
+	url = ../libtu
+[submodule "contrib"]
+	path = contrib
+	url = ../contrib

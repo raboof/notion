@@ -214,3 +214,7 @@ DATA_MODE=644
 STRIP=strip
 
 RM=rm
+
+ifeq ($(PRELOAD_MODULES),1)
+X11_LIBS += -lXinerama -lXrandr
+endif
