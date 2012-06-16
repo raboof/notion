@@ -106,13 +106,8 @@ $(MODULE).so: $(OBJS) $(EXT_OBJS)
 
 
 module_install: module_stub_install
-<<<<<<< HEAD
 	$(INSTALLDIR) $(MODULEDIR)
 	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
-=======
-	$(INSTALLDIR) $(DESTDIR)$(MODULEDIR)
-	$(INSTALLBIN) $(MODULE).so $(DESTDIR)$(MODULEDIR)
->>>>>>> 47261a872f8638b12651f31da6c738b8639d97b1
 
 else # PRELOAD_MODULES
 
