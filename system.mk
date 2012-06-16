@@ -75,15 +75,15 @@ ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --mo
 
 LUA_LIBS=`pkg-config --libs lua5.1`
 LUA_INCLUDES=`pkg-config --cflags lua5.1`
-LUA=lua5.1
-LUAC=luac5.1
+LUA=`which lua5.1`
+LUAC=`which luac5.1`
 
 else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua && pkg-config --modversion lua)))
 
 LUA_LIBS=`pkg-config --libs lua`
 LUA_INCLUDES=`pkg-config --cflags lua`
-LUA=lua
-LUAC=luac
+LUA=`which lua`
+LUAC=`which luac`
 
 endif # lua
 
