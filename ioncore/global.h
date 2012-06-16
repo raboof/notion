@@ -116,6 +116,11 @@ DECLSTRUCT(WGlobal){
                  map,
                  unmap;
     } notifies;
+
+    /** XShape extension presence */
+    bool shape_extension;
+    int shape_event_basep;
+    int shape_error_basep;
 };
 
 
