@@ -37,6 +37,7 @@
 #define CLIENTWIN_PROP_I_ASPECT      0x04000
 #define CLIENTWIN_PROP_I_RSZINC      0x08000
 #define CLIENTWIN_USE_NET_WM_NAME    0x10000
+/* full screen mode has been requested by the client window itself */
 #define CLIENTWIN_FS_RQ              0x20000
 #define CLIENTWIN_UNMAP_RQ           0x40000
 #define CLIENTWIN_NEED_CFGNTFY       0x80000
