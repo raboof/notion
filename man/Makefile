@@ -15,7 +15,6 @@ WELCOME_TARGETS=\
 	$(foreach tr, $(TRANSLATIONS), welcome.$(tr).txt)
 
 TARGETS=notion.1 $(foreach tr, $(TRANSLATIONS), notion.$(tr).1) \
-	pwm3.1 $(foreach tr, $(TRANSLATIONS), pwm3.$(tr).1) \
 	$(WELCOME_TARGETS)
 
 MKMAN=$(LUA) ../build/mkman.lua
@@ -31,8 +30,7 @@ CONFIGS=../etc/cfg_notioncore.lua \
 # TODO: PWM configuration file is undocumented
 PWM_CONFIGS=\
 	../etc/cfg_notioncore.lua \
-	../etc/cfg_menu.lua \
-	../pwm/cfg_pwm.lua
+	../etc/cfg_menu.lua
 
 ######################################
 
@@ -43,14 +41,8 @@ include $(TOPDIR)/build/rules.mk
 notion.1: notion.in $(CONFIGS)
 	$(MKMAN) -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
 
-pwm3.1: pwm3.in $(PWM_CONFIGS)
-	$(MKMAN) -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(PWM_CONFIGS)
-
 notion.%.1: notion.%.in $(CONFIGS) ../po/%.po
 	$(MKMAN) -po ../po/$*.po -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
-
-pwm3.%.1: pwm3.%.in $(PWM_CONFIGS) ../po/%.po
-	$(MKMAN) -po ../po/$*.po -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(PWM_CONFIGS)
 
 welcome%txt: welcome%head notion%1
 	(cat welcome$*head; \
@@ -59,11 +51,9 @@ welcome%txt: welcome%head notion%1
 _install:
 	$(INSTALLDIR) $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m $(DATA_MODE) notion.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL) -m $(DATA_MODE) pwm3.1 $(DESTDIR)$(MANDIR)/man1
 	for tr in $(TRANSLATIONS); do \
 		$(INSTALLDIR) $(DESTDIR)$(MANDIR)/$$tr/man1 ; \
 		$(INSTALL) -m $(DATA_MODE) notion.$$tr.1 $(DESTDIR)$(MANDIR)/$$tr/man1/notion.1 ; \
-		$(INSTALL) -m $(DATA_MODE) pwm3.$$tr.1 $(DESTDIR)$(MANDIR)/$$tr/man1/pwm3.1 ; \
 	done
 	$(INSTALLDIR) $(DESTDIR)$(SHAREDIR)
 	for i in $(WELCOME_TARGETS); do \

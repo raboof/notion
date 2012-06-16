@@ -126,7 +126,7 @@ end
 
 local function addto(list)
     return function(tgt, attr)
-        local e=menuentry(tgt:name(), function() tgt:goto() end)
+        local e=menuentry(tgt:name(), function() tgt:display() end)
         e.attr=attr;
         table.insert(list, e)
         return true

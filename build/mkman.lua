@@ -66,7 +66,7 @@ end
 
 -- File parsing {{{
 
-local function dobindings(fn, bindings)
+local function dobindings(f, bindings)
     local p={}
     local dummy = function() end
     
@@ -176,18 +176,25 @@ local function dobindings(fn, bindings)
                        error("Setting global "..tostring(x))
                    end,
     })
-    setfenv(fn, env)
-    fn()
-    return bindings
-end
+    
+    local fn, err
+    
+    if _ENV then
+        fn, err=loadfile(f, nil, env)
+    else
+        fn, err=loadfile(f)
+    end
 
-local function parsefile(f, bindings)
-    local fn, err=loadfile(f)
     if not fn then
         error(err)
     end
-    
-    return dobindings(fn, bindings)
+
+    if not _ENV then
+        setfenv(fn, env)
+    end
+
+    fn()
+    return bindings
 end
     
 -- }}}
@@ -300,7 +307,7 @@ local function doargs(a)
             read_translations(a[i+1])
             i=i+2
         else
-            parsefile(a[i], bindings)
+            dobindings(a[i], bindings)
             i=i+1
         end
     end

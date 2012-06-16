@@ -27,7 +27,6 @@ POTDIRS=../ioncore \
 	../mod_mgmtmode \
 	../de \
 	../notion \
-	../pwm \
 	../etc \
 	$(LIBEXTL_DIR)
 

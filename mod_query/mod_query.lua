@@ -443,7 +443,7 @@ function mod_query.gotoclient_handler(frame, str)
     if cwin==nil then
         mod_query.warn(frame, TR("Could not find client window %s.", str))
     else
-        cwin:goto()
+        cwin:display()
     end
 end
 
@@ -465,7 +465,7 @@ function mod_query.attachclient_handler(frame, str)
     if frame:rootwin_of()~=reg:rootwin_of() then
         mod_query.warn(frame, TR("Cannot attach: different root windows."))
     elseif reg:manager()==frame then
-        reg:goto()
+        reg:display()
     else
         mod_query.call_warn(frame, attach)
     end
@@ -475,7 +475,7 @@ end
 function mod_query.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGroupWS")
     if ws then
-        ws:goto()
+        ws:display()
     else
         local function create_handler(mplex_, layout)
             if not layout or layout=="" then
@@ -997,7 +997,8 @@ end
 
 
 function mod_query.create_run_env(mplex)
-    local origenv=getfenv()
+    local origenv
+    if _ENV then origenv=_ENV else origenv=getfenv() end
     local meta={__index=origenv, __newindex=origenv}
     local env={
         _=mplex, 
@@ -1019,16 +1020,25 @@ function mod_query.do_handle_lua(mplex, env, code)
         print_res=(print_res and print_res..tmp or tmp)
     end
 
-    local f, err=loadstring(code)
-    if not f then
-        mod_query.warn(mplex, err)
-        return
+
+    if _ENV then
+        env.print=collect_print
+        local f, err=load(code,nil, nil, env)
+        if not f then
+            mod_query.warn(mplex, err)
+            return
+        end
+        err=collect_errors(f)
+    else
+        local f, err=loadstring(code)
+        if not f then
+            mod_query.warn(mplex, err)
+            return
+        end
+        env.print=collect_print
+        setfenv(f, env)
+        err=collect_errors(f)
     end
-    
-    env.print=collect_print
-    setfenv(f, env)
-    
-    err=collect_errors(f)
     if err then
         mod_query.warn(mplex, err)
     elseif print_res then
