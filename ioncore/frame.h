@@ -20,6 +20,7 @@
 #include "gr.h"
 #include "rectangle.h"
 #include "sizehint.h"
+#include "frame-tabs-recalc.h"
 
 #define FRAME_SAVED_VERT  0x0008
 #define FRAME_SAVED_HORIZ 0x0010
@@ -73,8 +74,8 @@ DECLCLASS(WFrame){
     /* Bar stuff */
     WFrameBarMode barmode;
     int bar_w, bar_h;
-    double bar_max_width_q;
-    int tab_min_w;
+    /* Parameters to calculate tab sizes. */
+    TabCalcParams tabs_params;
 };
 
 
@@ -101,7 +102,6 @@ extern void frame_inactivated(WFrame *frame);
 
 /* Tabs */
 extern int frame_nth_tab_w(WFrame *frame, int n);
-extern int frame_nth_tab_iw(WFrame *frame, int n);
 extern int frame_nth_tab_x(WFrame *frame, int n);
 extern int frame_tab_at_x(WFrame *frame, int x);
 extern void frame_update_attr_nth(WFrame *frame, int i);

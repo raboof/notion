@@ -79,8 +79,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->brush=NULL;
     frame->bar_brush=NULL;
     frame->mode=mode;
-    frame->tab_min_w=0;
-    frame->bar_max_width_q=1.0;
+    frame_tabs_width_recalc_init(frame);
     
     gr_stylespec_init(&frame->baseattr);
     
@@ -260,49 +259,22 @@ int frame_nth_tab_x(WFrame *frame, int n)
 }
 
 
-static int frame_nth_tab_w_iw(WFrame *frame, int n, bool inner)
-{
-    WRectangle bg;
-    GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
-    int m=FRAME_MCOUNT(frame);
-    uint w;
-    
-    frame_bar_geom(frame, &bg);
-
-    if(m==0)
-        m=1;
-
-    if(frame->bar_brush!=NULL)
-        grbrush_get_border_widths(frame->bar_brush, &bdw);
-    
-    /* Remove borders */
-    w=bg.w-bdw.left-bdw.right-(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)*(m-1);
-    
-    if(w<=0)
-        return 0;
-    
-    /* Get n:th tab's portion of free area */
-    w=(((n+1)*w)/m-(n*w)/m);
-    
-    /* Add n:th tab's borders back */
-    if(!inner){
-        w+=(n==0 ? bdw.left : bdw.tb_ileft);
-        w+=(n==m-1 ? bdw.right : bdw.tb_iright+bdw.spacing);
-    }
-            
-    return w;
-}
-
-
 int frame_nth_tab_w(WFrame *frame, int n)
 {
-    return frame_nth_tab_w_iw(frame, n, FALSE);
-}
+    GrBorderWidths bdw=GR_BORDER_WIDTHS_INIT;
 
+    if (n>frame->titles_n){
+        fprintf(stderr,"WARNING: we should not be here, please contact notion developers\n");
+        return 0;
+    }
+    if(frame->titles[n].iw==0) return 0; /* Too small tab. */
+            
+    if(frame->bar_brush!=NULL)
+        grbrush_get_border_widths(frame->bar_brush, &bdw);
 
-int frame_nth_tab_iw(WFrame *frame, int n)
-{
-    return frame_nth_tab_w_iw(frame, n, TRUE);
+    return frame->titles[n].iw +
+            (n==0 ? bdw.left : bdw.tb_ileft) +
+            (n==frame->titles_n-1 ? bdw.right : bdw.tb_iright+bdw.spacing);
 }
 
 
@@ -351,7 +323,6 @@ static void frame_free_titles(WFrame *frame)
 static void do_init_title(WFrame *frame, int i, WRegion *sub)
 {
     frame->titles[i].text=NULL;
-    frame->titles[i].iw=frame_nth_tab_iw(frame, i);
     
     gr_stylespec_init(&frame->titles[i].attr);
     
@@ -875,12 +846,16 @@ bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how)
 
 void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
 {
+    bool complete;
+
     if(how==ioncore_g.notifies.activated ||
        how==ioncore_g.notifies.inactivated ||
        how==ioncore_g.notifies.name ||
        how==ioncore_g.notifies.activity ||
        how==ioncore_g.notifies.sub_activity ||
        how==ioncore_g.notifies.tag){
+       
+        complete=how==ioncore_g.notifies.name;
        
         frame_update_attrs(frame);
         frame_recalc_bar(frame);

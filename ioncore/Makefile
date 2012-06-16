@@ -24,7 +24,7 @@ SOURCES=binding.c conf-bindings.c cursor.c event.c exec.c focus.c         \
         pholder.c mplexpholder.c llist.c basicpholder.c sizepolicy.c      \
         stacking.c group.c grouppholder.c group-cw.c navi.c		  \
         group-ws.c float-placement.c groupedpholder.c framedpholder.c	  \
-        return.c detach.c screen-notify.c
+        return.c detach.c screen-notify.c frame-tabs-recalc.c
 
 LUA_SOURCES=\
 	ioncore_ext.lua ioncore_luaext.lua ioncore_bindings.lua \

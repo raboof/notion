@@ -276,18 +276,12 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
 }
 
 
-static int init_title(WFrame *frame, int i)
+static void free_title(WFrame *frame, int i)
 {
-    int textw;
-    
     if(frame->titles[i].text!=NULL){
         free(frame->titles[i].text);
         frame->titles[i].text=NULL;
     }
-    
-    textw=frame_nth_tab_iw((WFrame*)frame, i);
-    frame->titles[i].iw=textw;
-    return textw;
 }
 
 
@@ -440,17 +434,25 @@ void frame_recalc_bar(WFrame *frame)
     WLListIterTmp tmp;
     WRegion *sub;
     char *title;
+    bool set_shape;
 
     if(frame->bar_brush==NULL || frame->titles==NULL)
         return;
     
-    if(frame->barmode==FRAME_BAR_SHAPED)
-        frame_shaped_recalc_bar_size(frame);
+    set_shape=frame->tabs_params.alg(frame,complete);
+
+    if(set_shape) {
+        if(frame->barmode==FRAME_BAR_SHAPED)
+            frame_set_shape(frame);
+        else
+            frame_clear_shape(frame);
+    }
     
     i=0;
     
     if(FRAME_MCOUNT(frame)==0){
-        textw=init_title(frame, i);
+        free_title(frame, i);
+        textw=frame->titles[i].iw;
         if(textw>0){
             title=grbrush_make_label(frame->bar_brush, TR("<empty frame>"), 
                                      textw);
@@ -460,7 +462,8 @@ void frame_recalc_bar(WFrame *frame)
     }
     
     FRAME_MX_FOR_ALL(sub, frame, tmp){
-        textw=init_title(frame, i);
+        free_title(frame, i);
+        textw=frame->titles[i].iw;
         if(textw>0){
             if(frame->flags&FRAME_SHOW_NUMBERS){
                 char *s=NULL;
@@ -566,21 +569,8 @@ void frame_brushes_updated(WFrame *frame)
         frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
     }
     
-    /* shaped mode stuff */
-    frame->tab_min_w=100;
-    frame->bar_max_width_q=0.95;
-    
-    if(grbrush_get_extra(frame->brush, "floatframe_tab_min_w",
-                         'i', &(frame->tab_min_w))){
-        if(frame->tab_min_w<=0)
-            frame->tab_min_w=1;
-    }
-    
-    if(grbrush_get_extra(frame->brush, "floatframe_bar_max_w_q", 
-                         'd', &(frame->bar_max_width_q))){
-        if(frame->bar_max_width_q<=0.0 || frame->bar_max_width_q>1.0)
-            frame->bar_max_width_q=1.0;
-    }
+    /* tabs and bar width calculation stuff */
+    frame_tabs_calc_brushes_updated(frame);
 }
 
 
