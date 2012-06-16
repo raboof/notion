@@ -20,7 +20,7 @@ DOCS = README LICENSE ChangeLog RELNOTES
 
 TO_REALCLEAN = build/ac/system-ac.mk
 
-POTFILE=po/ion.pot
+POTFILE=po/notion.pot
 
 ######################################
 

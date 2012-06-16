@@ -27,11 +27,6 @@ CONFIGS=../etc/cfg_notioncore.lua \
 	../etc/cfg_query.lua \
 	../etc/cfg_menu.lua
 
-# TODO: PWM configuration file is undocumented
-PWM_CONFIGS=\
-	../etc/cfg_notioncore.lua \
-	../etc/cfg_menu.lua
-
 ######################################
 
 include $(TOPDIR)/build/rules.mk

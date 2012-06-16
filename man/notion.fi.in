@@ -22,7 +22,7 @@ Hakupolkuun lisättävä hakemisto, josta löytyy asetus- ja muita tiedostoja.
 .TP
 .B \-oneroot
 Hallitse vain oletusnäyttöä X-palvelimilla, joissa on useampi perinteinen
-(ei Xinerama) näyttö/juuri-ikkuna. Tämä näyttö voidaan valita -display
+(ei Xinerama) näyttö/juuri-ikkuna. Tämä näyttö voidaan valita \-display
 parametrillä tai DISPLAY ympäristömuuttujalla.
 .TP
 .B \-session session_name
