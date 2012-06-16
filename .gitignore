@@ -5,6 +5,9 @@ tags
 *.o
 *.so
 *.lc
+*.gcda
+*.tar.gz
+.*.swp
 exports.[ch]
 po/*.mo
 man/*.1

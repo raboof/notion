@@ -1,7 +1,8 @@
 /*
- * ion/ioncore/property.c
+ * notion/ioncore/property.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) The Notion Team 2011. 
+ * Copyright (c) Tuomo Valkonen 1999-2009. 
  *
  * See the included file LICENSE for details.
  */
@@ -210,19 +211,22 @@ char **xwindow_get_text_property(Window win, Atom a, int *nret)
 void xwindow_set_text_property(Window win, Atom a, const char **ptr, int n)
 {
     XTextProperty prop;
-    Status st;
-
-    if(!ioncore_g.use_mb){
-        st=XStringListToTextProperty((char **)&ptr, n, &prop);
+    bool ok;
+    
+    if(ioncore_g.use_mb){
+        int st;
+#ifdef X_HAVE_UTF8_STRING
+        if (ioncore_g.enc_utf8)
+            st=Xutf8TextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
+                                         XUTF8StringStyle, &prop);
+        else
+#endif
+            st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
+                                         XTextStyle, &prop);
+        ok=(st>=0);
     }else{
-#ifdef X_HAVE_UTF8_STRING        
-        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
-                                     XUTF8StringStyle, &prop);
-#else        
-        st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)ptr, n,
-                                     XTextStyle, &prop);
-#endif        
-        st=!st;
+        Status st=XStringListToTextProperty((char **)ptr, n, &prop);
+        ok=(st!=0);
     }
     
     if(!st)
