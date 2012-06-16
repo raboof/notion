@@ -185,8 +185,8 @@ static bool screen_fitrep(WScreen *scr, WWindow *par, const WFitParams *fp)
 {
     WRegion *sub;
     
-    if(par==NULL)
-        return FALSE;
+    if(par!=NULL)
+        warn(TR("Unable to reparent screens"));
     
     if(scr->uses_root)
         return FALSE;
