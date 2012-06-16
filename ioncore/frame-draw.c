@@ -217,11 +217,12 @@ void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *ela
 
 static void frame_shaped_recalc_bar_size(WFrame *frame)
 {
-    int bar_w=0, textw, w, tmaxw, tminw, tmp=0;
+    int bar_w=0, textw=0, tmaxw=frame->tab_min_w, tmp=0;
     WLListIterTmp itmp;
     WRegion *sub;
-    const char *displayname;
+    const char *p;
     GrBorderWidths bdw;
+    char *title;
     uint bdtotal;
     int i, m;
     
@@ -229,37 +230,43 @@ static void frame_shaped_recalc_bar_size(WFrame *frame)
         return;
     
     m=FRAME_MCOUNT(frame);
-    bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
     
     if(m>0){
-        frame_get_max_width_and_elastic(frame, bar_w, &tmaxw, &tmp, &tminw);
-        
-        if ((tmaxw < 0) && (tminw == frame->float_tab_min_w)) {
-            /* No label truncation needed, good. See how much can be padded. */
-            w=bar_w-tmp;
+        grbrush_get_border_widths(frame->bar_brush, &bdw);
+        bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)
+                 +bdw.right+bdw.left);
 
-            FRAME_MX_FOR_ALL(sub, frame, itmp){
-                displayname=region_displayname(sub);
-                if(displayname==NULL)
-                    continue;
+        FRAME_MX_FOR_ALL(sub, frame, itmp){
+            p=region_displayname(sub);
+            if(p==NULL)
+                continue;
             
-                textw=2*CF_TAB_MAX_TEXT_X_OFF+
-                    grbrush_get_text_width(frame->bar_brush,
-                    displayname, strlen(displayname))-
-                    frame->float_tab_min_w;
-                if (textw>=2*CF_TAB_MAX_TEXT_X_OFF)
-                    w+=2*CF_TAB_MAX_TEXT_X_OFF;
-                else if (textw >=0)
-                    w+=textw;
-            }
-            if (bar_w>w)/*Padded to much*/
-                bar_w=w;
-        } else {
+            textw=grbrush_get_text_width(frame->bar_brush,
+                                         p, strlen(p));
+            if(textw>tmaxw)
+                tmaxw=textw;
+        }
+
+        bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
+        if(bar_w<frame->tab_min_w && 
+           REGION_GEOM(frame).w>frame->tab_min_w)
+            bar_w=frame->tab_min_w;
+        
+        tmp=bar_w-bdtotal-m*tmaxw;
+        
+        if(tmp>0){
+            /* No label truncation needed, good. See how much can be padded. */
+            tmp/=m*2;
+            if(tmp>CF_TAB_MAX_TEXT_X_OFF)
+                tmp=CF_TAB_MAX_TEXT_X_OFF;
+            bar_w=(tmaxw+tmp*2)*m+bdtotal;
+        }else{
             /* Some labels must be truncated */
         }
-    } else {
-        if(bar_w>frame->float_tab_min_w)
-            bar_w=frame->float_tab_min_w;
+    }else{
+        bar_w=frame->tab_min_w;
+        if(bar_w>frame->bar_max_width_q*REGION_GEOM(frame).w)
+            bar_w=frame->bar_max_width_q*REGION_GEOM(frame).w;
     }
 
     if(frame->bar_w!=bar_w){
@@ -284,6 +291,7 @@ static int init_title(WFrame *frame, int i)
 }
 
 
+<<<<<<< HEAD
 /* Proportional tabs algorithm:
   * Sort tabs by text sizes.
   * From smallest to largest do:
@@ -428,8 +436,11 @@ fprintf(stderr,"ZERR\n");
 }
 
 void frame_recalc_bar(WFrame *frame)
+=======
+void frame_recalc_bar(WFrame *frame, bool complete)
+>>>>>>> 71b4a943f74a093140140e27672b432ddecb7b72
 {
-    int textw, i, maxw, padding;
+    int textw, i;
     WLListIterTmp tmp;
     WRegion *sub;
     char *title;
@@ -491,7 +502,7 @@ void frame_draw_bar(const WFrame *frame, bool complete)
     grbrush_init_attr(frame->bar_brush, &frame->baseattr);
     
     grbrush_draw_textboxes(frame->bar_brush, &geom, frame->titles_n, 
-                           frame->titles, TRUE);
+                           frame->titles, complete);
     
     grbrush_end(frame->bar_brush);
 }
@@ -559,17 +570,14 @@ void frame_brushes_updated(WFrame *frame)
         frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
     }
     
-    /*FIXME*/
-    frame->propor_tab_min_w=30;
-    
     /* shaped mode stuff */
-    frame->float_tab_min_w=100;
+    frame->tab_min_w=100;
     frame->bar_max_width_q=0.95;
     
     if(grbrush_get_extra(frame->brush, "floatframe_tab_min_w",
-                         'i', &(frame->float_tab_min_w))){
-        if(frame->float_tab_min_w<=0)
-            frame->float_tab_min_w=1;
+                         'i', &(frame->tab_min_w))){
+        if(frame->tab_min_w<=0)
+            frame->tab_min_w=1;
     }
     
     if(grbrush_get_extra(frame->brush, "floatframe_bar_max_w_q", 
