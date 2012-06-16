@@ -166,7 +166,7 @@ static void create_wm_windows(WRootWin *rootwin)
                                      CopyFromParent, InputOnly,
                                      CopyFromParent, 0, NULL);
 
-    p[0] = "Notion WRootWin dummy window";
+    p[0] = "WRootWin";
     xwindow_set_text_property(rootwin->dummy_win, XA_WM_NAME, p, 1);
 
     XSelectInput(ioncore_g.dpy, rootwin->dummy_win, PropertyChangeMask);

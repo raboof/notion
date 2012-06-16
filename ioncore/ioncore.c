@@ -280,6 +280,7 @@ static bool init_hooks()
     INIT_HOOK_(region_notify_hook);
     ADD_HOOK_(region_notify_hook, ioncore_frame_quasiactivation_notify);
     ADD_HOOK_(region_notify_hook, ioncore_screen_activity_notify);
+    ADD_HOOK_(region_notify_hook, ioncore_region_notify);
     
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);

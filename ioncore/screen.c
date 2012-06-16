@@ -50,7 +50,6 @@ bool screen_init(WScreen *scr, WRootWin *parent,
     XSetWindowAttributes attr;
     ulong attrflags=0;
     bool is_root=FALSE;
-    const char *p[1];
     
     scr->id=id;
     scr->atom_workspace=None;
@@ -79,12 +78,9 @@ bool screen_init(WScreen *scr, WRootWin *parent,
                           attrflags, &attr);
         if(win==None)
             return FALSE;
-
-        p[0] = "Notion WScreen";
-        xwindow_set_text_property(win, XA_WM_NAME, p, 1);
     }
 
-    if(!mplex_do_init((WMPlex*)scr, (WWindow*)parent, fp, win, "Notion WScreen")){
+    if(!mplex_do_init((WMPlex*)scr, (WWindow*)parent, fp, win, "WScreen")){
         if(!is_root)
             XDestroyWindow(ioncore_g.dpy, win);
         return FALSE;

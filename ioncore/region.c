@@ -8,10 +8,13 @@
 
 #include <string.h>
 
+#include <X11/Xatom.h>
+
 #include <libtu/objp.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
 
+#include "property.h"
 #include "common.h"
 #include "global.h"
 #include "region.h"
@@ -926,6 +929,15 @@ WRegion *region_managed_within(WRegion *reg, WRegion *mgd)
     return NULL;
 }
 
+void ioncore_region_notify(WRegion *reg, WRegionNotify how)
+{
+    const char *p[1];
+
+    if(how==ioncore_g.notifies.name && obj_is((Obj*)reg, &CLASSDESCR(WWindow))){
+        p[0] = region_name(reg);
+        xwindow_set_text_property(((WWindow*)reg)->win, XA_WM_NAME, p, 1);
+    }
+}
 
 /*}}}*/
 

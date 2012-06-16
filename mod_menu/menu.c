@@ -630,7 +630,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->gm_kcb=0;
     menu->gm_state=0;
     
-    if(!window_init((WWindow*)menu, par, fp, "Notion WMenu"))
+    if(!window_init((WWindow*)menu, par, fp, "WMenu"))
         goto fail;
 
     win=menu->win.win;

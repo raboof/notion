@@ -1221,16 +1221,12 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
     }
 
     if(ev->value_mask&CWStackMode){
-        WMPlex* mplex = find_mplexer((WRegion*) cwin);
         switch(ev->detail){
         case Above:
-            /* If ev->above is not None, the window should be placed just 
-             * above the sibling. This is not implemented.
-             */
-            if (mplex != NULL && ev->above == None) {
-                mplex_switch_to(mplex, (WRegion*) cwin);
-                result = TRUE;
-            }
+            region_set_activity((WRegion*) cwin, SETPARAM_SET);
+            /* TODO we should be more conservative here - but what does/should
+             * region_set_activity return? */
+            result = TRUE;
             break;
         case Below:
         case TopIf:

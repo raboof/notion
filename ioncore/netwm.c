@@ -32,8 +32,9 @@ static Atom atom_net_supporting_wm_check=0;
 static Atom atom_net_virtual_roots=0;
 static Atom atom_net_active_window=0;
 static Atom atom_net_wm_allowed_actions=0;
+static Atom atom_net_wm_moveresize=0;
 
-#define N_NETWM 8
+#define N_NETWM 9
 
 static Atom atom_net_supported=0;
 
@@ -58,6 +59,7 @@ void netwm_init()
     atom_net_virtual_roots=XInternAtom(ioncore_g.dpy, "_NET_VIRTUAL_ROOTS", False);
     atom_net_active_window=XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
     atom_net_wm_allowed_actions=XInternAtom(ioncore_g.dpy, "_NET_WM_ALLOWED_ACTIONS", False);
+    atom_net_wm_moveresize=XInternAtom(ioncore_g.dpy, "_NET_WM_MOVERESIZE", False);
 }
 
 
@@ -74,6 +76,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[5]=atom_net_virtual_roots;
     atoms[6]=atom_net_active_window;
     atoms[7]=atom_net_wm_allowed_actions;
+    atoms[8]=atom_net_wm_moveresize;
     
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,

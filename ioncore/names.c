@@ -506,6 +506,9 @@ static WRegion *do_lookup_region(WNamespace *ns, const char *cname,
     
     if(!found)
         return NULL;
+
+    if(typenam!=NULL && !obj_is_str((Obj*)node->v.val, typenam))
+        return NULL;
     
     return (WRegion*)node->v.val;
 }

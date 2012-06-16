@@ -27,7 +27,7 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
 {
     XSetWindowAttributes attr;
     
-    if(!window_init(&(p->wwin), parent, fp, "Notion WInfoWin"))
+    if(!window_init(&(p->wwin), parent, fp, "WInfoWin"))
         return FALSE;
     
     p->buffer=ALLOC_N(char, INFOWIN_BUFFER_LEN);
