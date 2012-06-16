@@ -251,3 +251,4 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 
 /*}}}*/
+

@@ -33,7 +33,7 @@
 
 #include "../version.h"
 
-char mod_sm_ion_api_version[]=ION_API_VERSION;
+char mod_sm_ion_api_version[]=NOTION_API_VERSION;
 
 
 /*}}}*/

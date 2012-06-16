@@ -26,7 +26,7 @@
 
 #include "../version.h"
 
-char mod_tiling_ion_api_version[]=ION_API_VERSION;
+char mod_tiling_ion_api_version[]=NOTION_API_VERSION;
 
 
 /*}}}*/

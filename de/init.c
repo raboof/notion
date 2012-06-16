@@ -380,7 +380,7 @@ ExtlTab de_substyle(const char *pattern, ExtlTab tab)
 
 #include "../version.h"
 
-char de_ion_api_version[]=ION_API_VERSION;
+char de_ion_api_version[]=NOTION_API_VERSION;
 
 
 bool de_init()

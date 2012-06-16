@@ -31,7 +31,7 @@
 
 #include "../version.h"
 
-char mod_query_ion_api_version[]=ION_API_VERSION;
+char mod_query_ion_api_version[]=NOTION_API_VERSION;
 
 
 /*}}}*/
