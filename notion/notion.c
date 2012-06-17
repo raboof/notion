@@ -149,7 +149,7 @@ int main(int argc, char*argv[])
 
     libtu_init(argv[0]);
 
-    if(!ioncore_init("ion3", argc, argv, LOCALEDIR))
+    if(!ioncore_init("notion", argc, argv, LOCALEDIR))
         return EXIT_FAILURE;
 
     extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
@@ -157,7 +157,7 @@ int main(int argc, char*argv[])
     extl_add_searchdir(ETCDIR);
     extl_add_searchdir(SHAREDIR);
     extl_add_searchdir(LCDIR);
-    extl_set_userdirs("ion3");
+    extl_set_userdirs("notion");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
     
