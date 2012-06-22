@@ -34,12 +34,26 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
+ifdef $LUA
+
 libextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
 
 libextl-mkexports: libextl-mkexports.in
 	sed "1s:LUA50:$(LUA):" $< > $@
+
+else
+
+libextl.a: libextl-mkexports.in
+	echo "Error: LUA interpreter and libraries not found (or inconsistent versions)"
+	return -1
+
+libextl-mkexports: libextl-mkexports.in
+	echo "Error: LUA interpreter and libraries not found (or inconsistent versions)"
+	return -1
+
+endif 
 
 install:
 	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
