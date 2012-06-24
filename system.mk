@@ -70,8 +70,11 @@ DL_LIBS=-ldl
 LUA_DIR=/usr/local
 LUA_LIBS=-L$(LUA_DIR)/lib -llua
 LUA_INCLUDES = -I$(LUA_DIR)/include
+
+ifneq ($(shell which lua),)
 LUA=$(LUA_DIR)/bin/lua
 LUAC=$(LUA_DIR)/bin/luac
+endif
 
 # Attempt to autodect lua using pkg-config.
 
