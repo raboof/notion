@@ -34,7 +34,7 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-ifdef $LUA
+ifdef LUA
 
 libextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
