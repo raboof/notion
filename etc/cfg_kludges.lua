@@ -35,6 +35,12 @@ defwinprop{
     min_size = { w = 64, h = 64},
 }
 
+-- Make an exception for Docker, which sets correct size hints.
+defwinprop{
+    is_dockapp = true,
+    class = "Docker",
+    statusbar = "systray",
+}
 
 -- You might want to enable these if you really must use XMMS. 
 --[[
