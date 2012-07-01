@@ -14,6 +14,7 @@
 #include "infowin.h"
 #include "rectangle.h"
 #include "sizehint.h"
+#include <mod_tiling/split.h>
 
 
 /* To make it easier for region_managed_rqgeom handlers, the geom
@@ -41,6 +42,14 @@
 #define REGION_ORIENTATION_NONE 0
 #define REGION_ORIENTATION_HORIZONTAL 1
 #define REGION_ORIENTATION_VERTICAL 2
+
+#define SAVE                1
+#define RESTORE             2
+#define VERIFY              3
+#define SET_KEEP            4
+#define RM_KEEP             5
+#define HORIZONTAL          SPLIT_HORIZONTAL
+#define VERTICAL            SPLIT_VERTICAL
 
 
 #define RQGEOMPARAMS_INIT {{0, 0, 0, 0}, 0, 0}
@@ -126,6 +135,8 @@ extern void region_managed_rqgeom_allow(WRegion *reg, WRegion *sub,
 extern void region_managed_rqgeom_absolute_default(WRegion *reg, WRegion *sub,
                                                    const WRQGeomParams *rq,
                                                    WRectangle *geomret);
+
+DYNFUN bool region_managed_maximize(WRegion *reg, WRegion *sub, int dir, int action);
 
 
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);

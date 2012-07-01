@@ -168,9 +168,9 @@ void ioncore_do_exit()
 }
 
 
-bool ioncore_do_snapshot()
+bool ioncore_do_snapshot(bool save_layout)
 {
-    if(!ioncore_save_layout())
+    if(save_layout && !ioncore_save_layout())
         return FALSE;
 
     extl_protect(NULL);
@@ -186,7 +186,7 @@ void ioncore_emergency_snapshot()
     if(smhook!=NULL)
         warn(TR("Not saving state: running under session manager."));
     else
-        ioncore_do_snapshot();
+        ioncore_do_snapshot(TRUE);
 }
 
 
@@ -239,7 +239,7 @@ void ioncore_shutdown()
     if(smhook!=NULL){
         smhook(IONCORE_SM_SHUTDOWN);
     }else{
-        ioncore_do_snapshot();
+        ioncore_do_snapshot(ioncore_g.autosave_layout);
         ioncore_do_exit();
     }
 }
@@ -256,7 +256,7 @@ void ioncore_restart()
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESTART);
     }else{
-        ioncore_do_snapshot();
+        ioncore_do_snapshot(ioncore_g.autosave_layout);
         ioncore_do_restart();
     }
 }
@@ -273,7 +273,7 @@ void ioncore_restart_other(const char *cmd)
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESTART_OTHER);
     }else{
-        ioncore_do_snapshot();
+        ioncore_do_snapshot(ioncore_g.autosave_layout);
         ioncore_do_restart();
     }
 }
@@ -288,7 +288,7 @@ void ioncore_snapshot()
     if(smhook!=NULL)
         smhook(IONCORE_SM_SNAPSHOT);
     else
-        ioncore_do_snapshot();
+        ioncore_do_snapshot(TRUE);
 }
 
 

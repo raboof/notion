@@ -50,7 +50,7 @@ extern void ioncore_snapshot();
 
 extern void ioncore_do_exit();
 extern void ioncore_do_restart();
-extern bool ioncore_do_snapshot();
+extern bool ioncore_do_snapshot(bool save_layout);
 
 extern void ioncore_emergency_snapshot();
 

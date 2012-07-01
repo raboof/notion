@@ -1,4 +1,4 @@
 .PHONY: test
 
 test:
-	$(MAKE) -C integration
+	$(MAKE) -C integration test
