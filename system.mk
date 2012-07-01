@@ -208,7 +208,8 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-CFLAGS=-Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+CFLAGS=-Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
+
 LDFLAGS=-Wl,--as-needed $(LIBS) $(EXTRA_LIBS) 
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
