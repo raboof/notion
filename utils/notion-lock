@@ -1,0 +1,6 @@
+#!/bin/sh
+if xscreensaver-command -version >/dev/null 2>&1; then
+	exec xscreensaver-command -lock
+else
+	exec xlock
+fi

@@ -336,7 +336,8 @@ defbindings("WMoveresMode", {
 defmenu("mainmenu", {
     menuentry("Run...",         "mod_query.query_exec(_)"),
     menuentry("Terminal",       "mod_query.exec_on_merr(_, XTERM or 'xterm')"),
-    menuentry("Lock screen",    "mod_query.exec_on_merr(_, 'xlock')"),
+    menuentry("Lock screen",    
+        "notioncore.exec_on(_, notioncore.lookup_script('notion-lock'))"),
     menuentry("Help",           "mod_query.query_man(_)"),
     menuentry("About Notion",      "mod_query.show_about_ion(_)"),
     submenu("Styles",           "stylemenu"),
