@@ -191,37 +191,52 @@ bool mod_xrandr_deinit()
     return TRUE;
 }
 
+void add_output(ExtlTab result, XRROutputInfo *output_info)
+{
+    ExtlTab details = extl_create_table();
+    /* TODO we probably have to strdup the outputs' data here, because we free
+     * the XRROutputInfo later on. However, where can we make sure the strings
+     * get freed when the code calling mod_xrandr_get_outputs_for_geom is done
+     * with it?
+     */
+    extl_table_sets_s(details, "name", strdup(output_info->name));
+    extl_table_sets_t(result, strdup(output_info->name), details);
+}
+
 /*EXTL_DOC
  * Queries the RandR extension for outputs with this geometry
+ *
+ * Returns a table with the matching RandR window names as keys
  */
 EXTL_SAFE
 EXTL_EXPORT
-void mod_xrandr_get_outputs_for_geom(ExtlTab geom)
+ExtlTab mod_xrandr_get_outputs_for_geom(ExtlTab geom)
 {
-    XRRScreenResources  *res;
     int i;
+    XRRScreenResources *res = XRRGetScreenResources(ioncore_g.dpy, ioncore_g.rootwins->dummy_win);
+    ExtlTab result = extl_create_table();
    
-    res = XRRGetScreenResources(ioncore_g.dpy, ioncore_g.rootwins->dummy_win);
-
     for(i=0; i < res->noutput; i++){
         int x,y;
         int w,h;
-        XRROutputInfo *output_info = XRRGetOutputInfo (ioncore_g.dpy, res, res->outputs[i]);
+        XRROutputInfo *output_info = XRRGetOutputInfo(ioncore_g.dpy, res, res->outputs[i]);
         if(output_info->crtc != None){
             XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(ioncore_g.dpy, res, output_info->crtc);
         
-            fprintf(stderr, "Output: %s\n", output_info->name);
             extl_table_gets_i(geom, "x", &x);
             extl_table_gets_i(geom, "y", &y);
             extl_table_gets_i(geom, "w", &w);
             extl_table_gets_i(geom, "h", &h);
             if(x==crtc_info->x && y==crtc_info->y
                && w==(int)crtc_info->width && h==(int)crtc_info->height){
-                fprintf(stderr, "Matched\n");
+                add_output(result, output_info);
             }
 
             XRRFreeCrtcInfo(crtc_info);
         }
         XRRFreeOutputInfo(output_info);
     }
+    
+    return result;
 }
+
