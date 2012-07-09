@@ -308,21 +308,13 @@ end
 
 --- {{{ Setup notion's screens */
 
---DOC
--- Move a WScreen off the visible virtual screen. 
-function mod_xinerama.move_offscreen(screen, max_right)
-    local dimensions = mod_xinerama.get_screen_dimensions(screen)
-    dimensions.x = max_right + 1
-    mod_xinerama.update_screen(screen, dimensions) 
-end
-
-function move_invisible_screens_away(max_visible_screen_id, max_right)
+function move_invisible_screens_away(max_visible_screen_id)
     -- for now move the screen to a location outside the virtual screen, so
     -- it can't be accidentally focussed and obscure the proper screens
     local invisible_screen_id = max_visible_screen_id + 1
     local invisible_screen = notioncore.find_screen_id(invisible_screen_id)
     while invisible_screen do
-        mod_xinerama.move_offscreen(invisible_screen, max_right)
+        invisible_screen:rqclose();
 
         invisible_screen_id = invisible_screen_id + 1
         invisible_screen = notioncore.find_screen_id(invisible_screen_id)
@@ -366,25 +358,24 @@ end
 -- Example input: {{x=0,y=0,w=1024,h=768},{x=1024,y=0,w=1280,h=1024}}
 function mod_xinerama.setup_screens(screens)
     local max_screen_id = 0
-    local max_right
 
     -- Update screen dimensions or create new screens
     for screen_index, screen in ipairs(screens) do
         local screen_id = screen_index - 1
         max_screen_id = max(max_screen_id, screen_id)        
-        max_right = max(max_right, screen.x + screen.w)
 
         local existing_screen = notioncore.find_screen_id(screen_id)
         if existing_screen ~= nil then
             mod_xinerama.update_screen(existing_screen, screen)
         else
             mod_xinerama.setup_new_screen(screen_id, screen)
+            notioncore.create_ws(notioncore.find_screen_id(screen_id))
         end
     end
 
     -- when the number of screens is lower than last time this function was 
     -- called, move 'superfluous' screens away
-    move_invisible_screens_away(max_screen_id, max_right)
+    move_invisible_screens_away(max_screen_id)
     
     rearrange_workspaces(max_screen_id)
 end
