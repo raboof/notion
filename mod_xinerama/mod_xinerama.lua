@@ -1,4 +1,4 @@
--- Ion xinerama module - lua setup
+-- Notion xinerama module - lua setup
 -- 
 -- by Tomas Ebenlendr <ebik@ucw.cz>
 --
@@ -22,7 +22,7 @@
 -- confusing the user with require/include differences.
 if package.loaded["mod_xinerama"] then return end
 
-if not ioncore.load_module("mod_xinerama") then
+if not notioncore.load_module("mod_xinerama") then
     return
 end
 
@@ -306,7 +306,7 @@ end
 
 -- }}}
 
---- {{{ Setup ion's screens */
+--- {{{ Setup notion's screens */
 
 --DOC
 -- Move a WScreen off the visible virtual screen. 
@@ -320,12 +320,12 @@ function move_invisible_screens_away(max_visible_screen_id, max_right)
     -- for now move the screen to a location outside the virtual screen, so
     -- it can't be accidentally focussed and obscure the proper screens
     local invisible_screen_id = max_visible_screen_id + 1
-    local invisible_screen = ioncore.find_screen_id(invisible_screen_id)
+    local invisible_screen = notioncore.find_screen_id(invisible_screen_id)
     while invisible_screen do
         mod_xinerama.move_offscreen(invisible_screen, max_right)
 
         invisible_screen_id = invisible_screen_id + 1
-        invisible_screen = ioncore.find_screen_id(invisible_screen_id)
+        invisible_screen = notioncore.find_screen_id(invisible_screen_id)
     end
 
 end
@@ -346,19 +346,19 @@ function rearrange_workspaces(max_visible_screen_id)
    end
 
    local screen_id = 0;
-   local screen = ioncore.find_screen_id(screen_id)
+   local screen = notioncore.find_screen_id(screen_id)
    while (screen ~= nil) do
        rearrange_workspaces_s(screen);      
 
        screen_id = screen_id + 1
-       screen = ioncore.find_screen_id(screen_id)
+       screen = notioncore.find_screen_id(screen_id)
    end
 end
 
 --DOC
--- Perform the setup of ion screens.
+-- Perform the setup of notion screens.
 --
--- The first call sets up the screens of ion, subsequent calls update the
+-- The first call sets up the screens of notion, subsequent calls update the
 -- current screens
 --
 -- Returns true on success, false on failure
@@ -374,7 +374,7 @@ function mod_xinerama.setup_screens(screens)
         max_screen_id = max(max_screen_id, screen_id)        
         max_right = max(max_right, screen.x + screen.w)
 
-        local existing_screen = ioncore.find_screen_id(screen_id)
+        local existing_screen = notioncore.find_screen_id(screen_id)
         if existing_screen ~= nil then
             mod_xinerama.update_screen(existing_screen, screen)
         else
@@ -398,7 +398,7 @@ package.loaded["mod_xinerama"]=true
 dopath('cfg_xinerama', true)
 
 --DOC
--- Queries Xinerama for the screen dimensions and updates ion screens 
+-- Queries Xinerama for the screen dimensions and updates notion screens 
 -- accordingly
 function mod_xinerama.refresh()
     local screens = mod_xinerama.query_screens()
