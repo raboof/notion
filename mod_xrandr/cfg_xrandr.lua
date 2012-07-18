@@ -124,6 +124,7 @@ function mod_xrandr.rearrangeworkspaces()
             move_if_needed(workspace, screen_id)
         end
     end
+    mod_xinerama.populate_empty_screens()
 end
 
 -- refresh xinerama and rearrange workspaces on screen layout updates
