@@ -42,6 +42,10 @@ tarball: $(SOURCES) $(ETC) $(DOCS) Makefile
 		tar -cvjf $$BASENAME.tar.bz2 $$BASENAME/*; \
 		rm -Rf $$BASENAME'
 
+.PHONY: test
+test: $(SOURCES)
+	lua test_xrandr.lua
+
 ######################################
 
 .PHONY: tags
