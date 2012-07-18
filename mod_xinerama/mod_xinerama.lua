@@ -322,6 +322,20 @@ function close_invisible_screens(max_visible_screen_id)
 
 end
 
+-- find any screens with 0 workspaces and populate them with an empty one
+function mod_xinerama.populate_empty_screens()
+   local screen_id = 0;
+   local screen = notioncore.find_screen_id(screen_id)
+   while (screen ~= nil) do
+       if screen:mx_count() == 0 then
+           notioncore.create_ws(screen)
+       end
+
+       screen_id = screen_id + 1
+       screen = notioncore.find_screen_id(screen_id)
+   end
+end
+
 -- This should be made 'smarter', but at least let's make sure workspaces don't
 -- end up on invisible screens
 function mod_xinerama.rearrange_workspaces(max_visible_screen_id)
@@ -334,10 +348,6 @@ function mod_xinerama.rearrange_workspaces(max_visible_screen_id)
            for i = 0, screen:mx_count() do
                move_to_first_screen(screen:mx_nth(i))
            end
-       else
-           if screen:mx_count() == 0 then
-               notioncore.create_ws(screen)
-           end
        end
    end
 
@@ -349,6 +359,7 @@ function mod_xinerama.rearrange_workspaces(max_visible_screen_id)
        screen_id = screen_id + 1
        screen = notioncore.find_screen_id(screen_id)
    end
+   mod_xinerama.populate_empty_screens()
 end
 
 --DOC
