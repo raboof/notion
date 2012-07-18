@@ -102,7 +102,7 @@ function mod_xrandr.rearrangeworkspaces()
             local name, screen = next(screens)
             add_safe(new_mapping, screen:id(), workspace)
         else
-            add_safe(wanderers, workspace, screens)
+            wanderers[workspace] = screens
         end
         return true
     end
@@ -110,9 +110,8 @@ function mod_xrandr.rearrangeworkspaces()
 
     for workspace,screens in pairs(wanderers) do
         -- print('Wanderer', workspace:name())
-        -- TODO add to screen with least # of workspaces instead of just the 
-        -- first one that applies
-        add_safe(new_mapping, screens[0]:id(), workspace)
+        -- TODO add to screen with least # of workspaces instead of just the first one
+        add_safe(new_mapping, firstValue(screens):id(), workspace)
     end
     for i,workspace in pairs(orphans) do
         -- print('Orphan', workspace:name())
