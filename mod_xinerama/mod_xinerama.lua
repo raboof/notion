@@ -308,7 +308,7 @@ end
 
 --- {{{ Setup notion's screens */
 
-function move_invisible_screens_away(max_visible_screen_id)
+function close_invisible_screens(max_visible_screen_id)
     -- for now move the screen to a location outside the virtual screen, so
     -- it can't be accidentally focussed and obscure the proper screens
     local invisible_screen_id = max_visible_screen_id + 1
@@ -375,8 +375,8 @@ function mod_xinerama.setup_screens(screens)
 
     -- when the number of screens is lower than last time this function was 
     -- called, move 'superfluous' screens away
-    move_invisible_screens_away(max_screen_id)
-    
+    close_invisible_screens(max_screen_id)
+
     rearrange_workspaces(max_screen_id)
 end
 
