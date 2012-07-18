@@ -324,15 +324,19 @@ end
 
 -- This should be made 'smarter', but at least let's make sure workspaces don't
 -- end up on invisible screens
-function rearrange_workspaces(max_visible_screen_id)
+function mod_xinerama.rearrange_workspaces(max_visible_screen_id)
    function move_to_first_screen(workspace)
        notioncore.find_screen_id(0):attach(workspace)
    end
 
    function rearrange_workspaces_s(screen)
-       if (screen:id() > max_visible_screen_id) then
+       if screen:id() > max_visible_screen_id then
            for i = 0, screen:mx_count() do
                move_to_first_screen(screen:mx_nth(i))
+           end
+       else
+           if screen:mx_count() == 0 then
+               notioncore.create_ws(screen)
            end
        end
    end
@@ -369,15 +373,12 @@ function mod_xinerama.setup_screens(screens)
             mod_xinerama.update_screen(existing_screen, screen)
         else
             mod_xinerama.setup_new_screen(screen_id, screen)
-            notioncore.create_ws(notioncore.find_screen_id(screen_id))
         end
     end
 
     -- when the number of screens is lower than last time this function was 
     -- called, move 'superfluous' screens away
     close_invisible_screens(max_screen_id)
-
-    rearrange_workspaces(max_screen_id)
 end
 
 -- }}}
@@ -400,4 +401,5 @@ function mod_xinerama.refresh()
     notioncore.screens_updated(notioncore.rootwin());
 end
 
+-- At this point any workspaces from a saved session haven't been added yet
 mod_xinerama.refresh()
