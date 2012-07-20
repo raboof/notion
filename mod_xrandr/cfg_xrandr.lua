@@ -96,11 +96,10 @@ function mod_xrandr.rearrangeworkspaces()
     -- orphans and wanderers
     function roundone(workspace)
         local screens = candidate_screens_for_outputs(initialScreens[workspace:name()])
-        if (screens == nil) or empty(screens) then
+        if not screens or empty(screens) then
             table.insert(orphans, workspace)
         elseif singleton(screens) then
-            local name, screen = next(screens)
-            add_safe(new_mapping, screen:id(), workspace)
+            add_safe(new_mapping, firstValue(screens):id(), workspace)
         else
             add_safe(wanderers, workspace, screens)
         end
@@ -112,7 +111,7 @@ function mod_xrandr.rearrangeworkspaces()
         -- print('Wanderer', workspace:name())
         -- TODO add to screen with least # of workspaces instead of just the 
         -- first one that applies
-        add_safe(new_mapping, screens[0]:id(), workspace)
+        add_safe(new_mapping, firstValue(screens):id(), workspace)
     end
     for i,workspace in pairs(orphans) do
         -- print('Orphan', workspace:name())
