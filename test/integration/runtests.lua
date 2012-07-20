@@ -1,3 +1,4 @@
+# on Debian in lua-posix 
 require "posix"
 
 function sleep(sec)
