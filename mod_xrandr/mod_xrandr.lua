@@ -43,5 +43,4 @@ function mod_xrandr.get_outputs_within(screen)
     return filter(all_outputs, falls_within(screen:geom()))
 end
 
-
 dopath("cfg_xrandr", true)
