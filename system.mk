@@ -178,7 +178,7 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # You may uncomment this if you know that your system C libary provides
 # asprintf and  vasprintf. (GNU libc does.) If HAS_SYSTEM_ASPRINTF is not
 # defined, an implementation provided in libtu/sprintf_2.2/ is used. 
-#HAS_SYSTEM_ASPRINTF=1
+HAS_SYSTEM_ASPRINTF=1
 
 # The following setting is needed with GNU libc for clock_gettime and the
 # monotonic clock. Other systems may not need it, or may not provide a
@@ -208,7 +208,8 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-CFLAGS=-Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+CFLAGS=-Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
+
 LDFLAGS=-Wl,--as-needed $(LIBS) $(EXTRA_LIBS) 
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
