@@ -10,7 +10,7 @@ TOPDIR=..
 endif
 
 # System-specific configuration
-include $(TOPDIR)/system.mk
+include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
