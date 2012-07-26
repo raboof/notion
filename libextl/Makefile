@@ -9,10 +9,7 @@ TOPDIR=..
 endif
 
 # System-specific configuration
-include $(TOPDIR)/system.mk
-
-# Internal library CFLAGS/INCLUDES
-include $(TOPDIR)/build/libs.mk
+include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
