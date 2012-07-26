@@ -4,7 +4,7 @@
 
 # System-specific configuration is in system.mk
 TOPDIR=../..
-include $(TOPDIR)/system.mk
+include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
