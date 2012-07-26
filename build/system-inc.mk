@@ -1,4 +1,4 @@
-# Use system-ac.mk if it exist, system.mk otherwise.
+# Use system-ac.mk if it exist, system-autodetect.mk otherwise.
 
 ifndef TOPDIR
   TOPDIR=.
