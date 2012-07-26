@@ -36,8 +36,7 @@ See also:
    If you also build the RandR and Xinerama modules, you will need:
      libxinerama-dev libxrandr-dev
 
-3. Edit `system.mk` to suit your system. In particular, if you're on Ubuntu
-     or Debian, you'll need to uncomment the other set of LUA* variables.
+3. Edit `system.mk` to suit your system. Most settings should be autodetected.
 
 4. If you want to build some extra modules now or do not want to build
    some of the standard modules, edit `modulelist.mk`.
