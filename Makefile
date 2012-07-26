@@ -2,7 +2,7 @@
 ## Notion Makefile
 ##
 
-# System-specific configuration is in system.mk
+# Include system-specific configuration: auto-generated and optionally local 
 include build/system-inc.mk
 
 # List of modules
