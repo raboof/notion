@@ -1,10 +1,10 @@
-# Use system-ac.mk if it exist, system.mk otherwise.
+# Use system-ac.mk if it exist, system-autodetect.mk otherwise.
 
 ifndef TOPDIR
   TOPDIR=.
 endif
 
-SYSTEM_MK = $(TOPDIR)/system.mk
+SYSTEM_MK = $(TOPDIR)/system-autodetect.mk
 AC_SYSTEM_MK = $(TOPDIR)/build/ac/system-ac.mk
 
 ifeq ($(AC_SYSTEM_MK),$(wildcard $(AC_SYSTEM_MK)))
@@ -16,3 +16,5 @@ else
 endif
 
 include $(TOPDIR)/build/libs.mk
+
+-include $(TOPDIR)/system-local.mk

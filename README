@@ -15,7 +15,13 @@ See also:
 
   https://sourceforge.net/apps/mediawiki/notion/index.php?title=Development
 
-1. Make sure you have the following tools and libraries installed (along
+1. Get the source code.  Make sure all submodules are present and up to date.
+    git clone git://notion.git.sourceforge.net/gitroot/notion/notion
+    cd notion
+    git submodule init
+    git submodule update
+
+2. Make sure you have the following tools and libraries installed (along
    with, of course, standard X11 and libc stuff).
 
     * GNU make <http://www.gnu.org/software/make/>
@@ -30,24 +36,23 @@ See also:
    If you also build the RandR and Xinerama modules, you will need:
      libxinerama-dev libxrandr-dev
 
-2. Edit `system.mk` to suit your system. In particular, if you're on Ubuntu
-     or Debian, you'll need to uncomment the other set of LUA* variables.
+3. Edit `system.mk` to suit your system. Most settings should be autodetected.
 
-3. If you want to build some extra modules now or do not want to build
+4. If you want to build some extra modules now or do not want to build
    some of the standard modules, edit `modulelist.mk`.
    
-4. Run `make`. Note that `make` here refers to GNU make which is usually
+5. Run `make`. Note that `make` here refers to GNU make which is usually
    named `gmake` on systems with some other implementation of make as 
    default.
    
-5. Run `make install`, as root if you set `$PREFIX` in `system.mk` to a 
+6. Run `make install`, as root if you set `$PREFIX` in `system.mk` to a 
    directory that requires those privileges.
    
    YOU SHOULD NOT SKIP THIS STEP unless you know what you are doing. Notion
    will refuse to start if it can not find all the necessary uncorrupt
    configuration files either in `$PREFIX/etc/notion/` or in `~/.notion/`.
 
-6. How to best set up `startx` or whatever to start Notion instead of your
+7. How to best set up `startx` or whatever to start Notion instead of your
    current window manager depends on your system's setup. A good guess
    is creating or modifying an executable shell script `.xsession` in your
    home directory to start Notion. This should usually (but not always) work
