@@ -149,6 +149,13 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
             region_detach_manager(ws->managed_stdisp->reg);
         
         assert(ws->managed_stdisp==NULL);
+
+        /* Usually the stdisp will not be managed by the group itself, but rather by 
+         * the WTiling managed by the group, see group_manage_stdisp. */
+        if(ws->bottom!=NULL && ws->bottom->reg!=NULL && 
+           HAS_DYN(ws->bottom->reg, region_unmanage_stdisp)){
+            region_unmanage_stdisp((WRegion*)ws->bottom->reg, TRUE, TRUE);
+        }
         
         xdiff=fp->g.x-REGION_GEOM(ws).x;
         ydiff=fp->g.y-REGION_GEOM(ws).y;
