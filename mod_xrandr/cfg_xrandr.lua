@@ -99,12 +99,38 @@ function is_scratchpad(ws)
     return ws:name():find('scratchws')
 end
 
+function find_scratchpad()
+    local sp
+    local screen = notioncore.find_screen_id(0)
+    screen:managed_i(function(ws)
+        if is_scratchpad(ws) then
+            sp=ws
+            return false
+        else
+            return true
+        end
+    end)
+    return sp
+end
+
 function move_if_needed(workspace, screen_id)
     local screen = notioncore.find_screen_id(screen_id) 
 
     -- scratchpads are not part of a screens' mplex
-    if workspace:screen_of() ~= screen and not is_scratchpad(workspace) then
-        screen:attach(workspace)
+    if workspace:screen_of() ~= screen then
+        if not is_scratchpad(workspace) then
+            screen:attach(workspace)
+        else
+            local sp=find_scratchpad()
+            local cwins={}
+            workspace:bottom():managed_i(function(cwin)
+                table.insert(cwins, cwin)
+                return false
+            end)
+            for k,cwin in ipairs(cwins) do
+                sp:bottom():attach(cwin)
+            end
+        end
     end
 end
 
