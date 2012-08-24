@@ -8,8 +8,17 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-INSTALL_SUBDIRS = mod_notionflux notionflux
+INSTALL_SUBDIRS = notionflux
 SUBDIRS = $(INSTALL_SUBDIRS)
+
+######################################
+
+INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+
+SOURCES=mod_notionflux.c
+
+MODULE=mod_notionflux
 
 ######################################
 
@@ -17,3 +26,4 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
+_install: module_install

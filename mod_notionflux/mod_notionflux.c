@@ -27,7 +27,7 @@
 #include <libtu/errorlog.h>
 #include <libextl/extl.h>
 
-#include "../notionflux.h"
+#include "notionflux.h"
 
 typedef struct{
     int fd;
