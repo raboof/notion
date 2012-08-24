@@ -46,7 +46,7 @@ __cyg_profile_func_enter (void *func,  void *caller)
 {
     if(fp_trace != NULL) {
         clock_gettime(CLOCK_REALTIME, current_time);
-        fprintf(fp_trace, "e %p %p %ld.%lu\n", func, caller, current_time->tv_sec, current_time->tv_nsec);
+        fprintf(fp_trace, "e %p %p %ld.%09lu\n", func, caller, current_time->tv_sec, current_time->tv_nsec);
         fflush(fp_trace);
     }
 }
@@ -56,7 +56,7 @@ __cyg_profile_func_exit (void *func, void *caller)
 {
     if(fp_trace != NULL) {
         clock_gettime(CLOCK_REALTIME, current_time);
-        fprintf(fp_trace, "x %p %p %ld.%lu\n", func, caller, current_time->tv_sec, current_time->tv_nsec);
+        fprintf(fp_trace, "x %p %p %ld.%09lu\n", func, caller, current_time->tv_sec, current_time->tv_nsec);
         fflush(fp_trace);
     }
 }
