@@ -1,0 +1,65 @@
+Profiling Notion:
+
+Because Notion is not CPU-bound, and we want to optimize for low latencies, 
+if we do any profiling/tracing we'll want to perform those in 'real', 'wall
+clock' time, not CPU time.
+
+All linux profiling tools I've found either measure CPU time rather than real 
+time, or work based on SIGALRM (google perftools) which does not appear to 
+work for us. There's generally 2 ways to do real time profiling: stack sampling
+and tracing. I'm not sure how we could implement sampling. Tracing can be
+accomplished with the GCC '-finstrument-functions' feature.
+
+This only traces the C side of things. We don't get much insight in the lua
+part of the code (yet).
+
+== Enabling (compile-time) ==
+
+To enable tracing, add to your system-local.mk:
+ 
+  CFLAGS += -finstrument-functions -g -DPROFILING_ENABLED
+  LDFLAGS += -g
+
+== Starting/stopping (run-time) ==
+
+You can start/stop tracing with the methods in ioncore/profiling.h
+
+== Shared libraries ==
+
+Unfortunately, it seems like you cannot profile shared libraries this way,
+or something needs to be fixed in order for that to work. Our modules are
+loaded as shared libraries by default.
+
+For now, to profile our modules too, preload the modules:
+
+PRELOAD_MODULES=1
+X11_LIBS += -lXinerama -lXrandr
+
+== Interpreting the trace output ==
+
+This will generate a trace file showing records like this:
+
+e 0x809ccd1 0x809d4ed 1345834871.209096315
+e 0x809d580 0xb7e2e1b7 1345834871.209104766
+e 0x80a005e 0x809d5d5 1345834871.209112658
+x 0x80a005e 0x809d5d5 1345834871.209121598
+x 0x809d580 0xb7e2e1b7 1345834871.209129211
+| |         |          |          |-- timestamp (nanosecond part)
+| |         |          |-- timestamp (second part)
+| |         |-- source address of the call
+| |- Function being called
+|-- 'Entry' or 'eXit' record
+
+To convert the addresses of functions and call sites to human-readable form,
+use the 'addr2line.pl' script:
+
+$ utils/profiling/addr2line.pl `which notion` < trace > trace-humanreadable
+
+To view this trace in kcachegrind, use the prof2callgrind tool. This tool
+can basically convert any file format consisting of entry/exit records with
+filenames, line numbers and timestamps. 
+
+It currently ignores the source address of the call, making it a bit less 
+exact and a bit more flexible to use.  
+
+$ utils/profiling/prof2callgrind.pl < trace-humanreadable > trace-callgrind
