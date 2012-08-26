@@ -45,11 +45,11 @@ end
 
 -- parameter: list of output names
 -- returns: map from screen name to screen
-function candidate_screens_for_output(outputname)
+function candidate_screens_for_output(all_outputs, outputname)
     local retval = {}
 
     function addIfContainsOutput(screen)
-        local outputs_within_screen = mod_xrandr.get_outputs_within(screen)
+        local outputs_within_screen = mod_xrandr.get_outputs_within(all_outputs, screen)
         if outputs_within_screen[outputname] ~= nil then
             retval[screen:name()] = screen
         end
@@ -62,13 +62,13 @@ end
 
 -- parameter: list of output names
 -- returns: map from screen name to screen
-function candidate_screens_for_outputs(outputnames)
+function candidate_screens_for_outputs(all_outputs, outputnames)
     local result = {}
 
     if outputnames == nil then return result end
 
     for i,outputname in pairs(outputnames) do
-        local screens = candidate_screens_for_output(outputname)
+        local screens = candidate_screens_for_output(all_outputs, outputname)
         for k,screen in pairs(screens) do
              result[k] = screen;
         end
@@ -116,10 +116,12 @@ function mod_xrandr.rearrangeworkspaces()
     -- workspaces that want to be on multiple available outputs
     wanderers = {}
 
+    local all_outputs = mod_xrandr.get_all_outputs();
+
     -- round one: divide workspaces in directly assignable,
     -- orphans and wanderers
     function roundone(workspace)
-        local screens = candidate_screens_for_outputs(initialScreens[workspace:name()])
+        local screens = candidate_screens_for_outputs(all_outputs, initialScreens[workspace:name()])
         if not screens or empty(screens) then
             table.insert(orphans, workspace)
         elseif singleton(screens) then
@@ -151,8 +153,10 @@ end
 
 -- refresh xinerama and rearrange workspaces on screen layout updates
 function mod_xrandr.screenlayoutupdated()
+    notioncore.profiling_start('notion_xrandrrefresh.prof')
     mod_xinerama.refresh()
     mod_xrandr.rearrangeworkspaces()
+    notioncore.profiling_stop()
 end
 
 randr_screen_change_notify_hook = notioncore.get_hook('randr_screen_change_notify')

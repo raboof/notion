@@ -38,8 +38,7 @@ function falls_within(geom)
     end
 end
 
-function mod_xrandr.get_outputs_within(screen) 
-    all_outputs = mod_xrandr.get_all_outputs();
+function mod_xrandr.get_outputs_within(all_outputs, screen) 
     return filter(all_outputs, falls_within(screen:geom()))
 end
 
