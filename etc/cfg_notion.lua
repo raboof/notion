@@ -56,6 +56,10 @@ ioncore.set{
     
     -- Automatically save layout on restart and exit.
     --autosave_layout=true,
+    
+    -- Mouse focus mode; set to "sloppy" if you want the focus to follow the 
+    -- mouse, and to "disabled" otherwise.
+    --mousefocus="sloppy",
 }
 
 
