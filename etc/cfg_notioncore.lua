@@ -225,6 +225,9 @@ defbindings("WFrame", {
     mdrag("Button1@tab", "WFrame.p_tabdrag(_)"),
     mdrag("Button2@tab", "WFrame.p_tabdrag(_)"),
            
+    bdoc("Switch to next/previous object within the frame."),
+    mclick(META.."Button4", "WFrame.switch_next(_)"), 
+    mclick(META.."Button5", "WFrame.switch_prev(_)"),
 })
 
 -- Frames for transient windows ignore this bindmap
