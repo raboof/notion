@@ -55,6 +55,16 @@ use the 'addr2line.pl' script:
 
 $ utils/profiling/addr2line.pl `which notion` < trace > trace-humanreadable
 
+The result will contain some 'noise' caused by libextl which can be removed 
+with:
+
+$ ./utils/profiling/filterinternal.pl < trace-humanreadable > trace-humanreadable-filtered
+
+This will be better, but you'll miss some 'exit' tracepoints because lua 
+doesn't emit events for tail calls. To add them back:
+
+$ ./utils/profiling/addtailcalls.pl < trace-humanreadable-filtered > trace-humanreadable-filtered-balanced
+
 To view this trace in kcachegrind, use the prof2callgrind tool. This tool
 can basically convert any file format consisting of entry/exit records with
 filenames, line numbers and timestamps. 
@@ -62,4 +72,9 @@ filenames, line numbers and timestamps.
 It currently ignores the source address of the call, making it a bit less 
 exact and a bit more flexible to use.  
 
-$ utils/profiling/prof2callgrind.pl < trace-humanreadable > trace-callgrind
+$ utils/profiling/prof2callgrind.pl < trace-filtered-balanced > trace-callgrind
+
+Or all in two lines: 
+
+$ ./utils/profiling/addr2line.pl `which notion` < trace | ./utils/profiling/filterinternal.pl  | ./utils/profiling/addtailcalls.pl | ./utils/profiling/prof2callgrind.pl > kcg
+$ kcachegrind kcg

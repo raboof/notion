@@ -8,12 +8,18 @@ my %entries = ();
 
 print "events: Milliseconds\n";
 
-my @msAlreadyAccountedFor = (0,0,0,0);
+my @msAlreadyAccountedFor = (0,0,0,0,0,0,0);
 my @callstack = ();
 
-while (<STDIN> =~ /^(\w+)\s+(\S+) ([^:]+):(\d+) at (\d+)\.(\d{5})\d* called from (\S+) ([^:]+):(\d+)/) {
-  my ($action, $calledfunction, $calledfile, $calledline, $sec, $msec,
-	$callerfunction, $callerfile, $callerline) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+my %callframe = ();
+$callframe{"function"} = "toplevel";
+$callframe{"file"} = "toplevel";
+$callframe{"line"} = 0;
+push(@callstack, \%callframe);
+
+while (<STDIN> =~ /^(\w)\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{5})\d*/) {
+  my ($action, $calledfunction, $calledfile, $calledline, 
+	$callerfunction, $callerfile, $callerline, $sec, $msec) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
   my $callkey = "$calledfile$calledline $callerfile$callerline";
   my $entryArrayRef = $entries{$callkey};
   if ($action eq "e") {
@@ -40,7 +46,14 @@ while (<STDIN> =~ /^(\w+)\s+(\S+) ([^:]+):(\d+) at (\d+)\.(\d{5})\d* called from
       my $timespentinchildren = pop(@msAlreadyAccountedFor);
       my $timespentinclusive  = "$sec$msec" - $entry; 
       my $timespentself = $timespentinclusive - $timespentinchildren;
-      $msAlreadyAccountedFor[-1] = $msAlreadyAccountedFor[-1] + $timespentinclusive;
+      if ($timespentself < 0) {
+          print STDERR "Spent negative amount of time in $calledfunction ($entry-$sec$msec minus $timespentinchildren) !?\n";
+          exit 1;
+      }
+      #print "Time spent in $calledfunction (inclusive): $timespentinclusive\n";
+      my $accountedForSoFar = $msAlreadyAccountedFor[-1]; 
+      my $accountedFor = $accountedForSoFar + $timespentinclusive;
+      $msAlreadyAccountedFor[-1] = $accountedFor;
       print "$calledline $timespentself\n";
 
       # Record the fact that the parent function called the function we're exiting
@@ -52,7 +65,9 @@ while (<STDIN> =~ /^(\w+)\s+(\S+) ([^:]+):(\d+) at (\d+)\.(\d{5})\d* called from
         my $callerline = $parentframe{"line"};
         print "fl=$callerfile\nfn=$callerfunction\n";
         print "cfl=$calledfile\ncfn=$calledfunction\n";
-        print "calls=1 $calledline\n$callerline $timespentinclusive\n"
+        print "calls=1 $calledline\n$callerline $timespentinclusive\n";
+
+        #print "Time spent in children of $callerfunction so far: $accountedForSoFar + $timespentinclusive = $accountedFor\n";
       }
     }
   }
