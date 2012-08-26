@@ -180,6 +180,19 @@ void extl_unregister_class(const char *cls, ExtlExportedFnSpec *fns);
 bool extl_register_module(const char *cls, ExtlExportedFnSpec *fns);
 void extl_unregister_module(const char *cls, ExtlExportedFnSpec *fns);
 
+/* Profiling */
+
+enum ExtlHookEvent {
+    EXTL_HOOK_ENTER,
+    EXTL_HOOK_EXIT,
+    EXTL_HOOK_UNKNOWN
+};
+
+typedef void (*ExtlHook) (const enum ExtlHookEvent event, const char *name, const char *source, int currentline);
+
+int extl_sethook(ExtlHook hook);
+int extl_resethook();
+
 /* Misc. */
 
 extern bool extl_init();

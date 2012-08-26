@@ -40,6 +40,7 @@
 #define MAX_PARAMS 16
 
 static lua_State *l_st=NULL;
+ExtlHook current_hook=NULL;
 
 static bool extl_stack_get(lua_State *st, int pos, char type, 
                            bool copystring, bool *wasdeadobject,
@@ -2550,6 +2551,36 @@ extern bool extl_serialise(const char *file, ExtlTab tab)
     return ret;
 }
 
+void extl_dohook(lua_State *L, lua_Debug *ar)
+{
+    enum ExtlHookEvent event;
+    const char *source;
+
+    lua_getinfo(L, "Sn", ar);
+    if (ar->event == LUA_HOOKCALL)
+        event = EXTL_HOOK_ENTER;
+    else if (ar->event == LUA_HOOKRET)
+        event = EXTL_HOOK_EXIT;
+    else
+        event = EXTL_HOOK_UNKNOWN;
+
+    if (ar->source[0] == '@')
+        source = ar->source + 1;
+
+    if (strcmp(ar->what, "Lua") == 0)
+        (*current_hook) (event, ar->name, ar->source + 1, ar->linedefined);
+}
+
+int extl_sethook(ExtlHook hook)
+{
+    current_hook = hook;
+    return lua_sethook(l_st, extl_dohook, LUA_MASKCALL | LUA_MASKRET, -1);
+}
+
+int extl_resethook()
+{
+    return lua_sethook(l_st, NULL, 0, -1);
+}
 
 /*}}}*/
 
