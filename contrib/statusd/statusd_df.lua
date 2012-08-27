@@ -78,7 +78,7 @@ local function get_df()
       i, j, fsname, fssize, fsused, fsavail, fsusedp, mpoint
 	 = string.find(s, "(/%S+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%%?%s(%S+)\n",
 		       i)
-      if (i == nil) then return nil end
+      if (i == nil) then break end
       df_table[mpoint] = { mpoint=mpoint,
 	                   fs=fsname,
 	                   size=guess_mem_unit(tonumber(fssize)),
