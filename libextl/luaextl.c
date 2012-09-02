@@ -2564,10 +2564,7 @@ void extl_dohook(lua_State *L, lua_Debug *ar)
     else
         event = EXTL_HOOK_UNKNOWN;
 
-    if (ar->source[0] == '@')
-        source = ar->source + 1;
-
-    if (strcmp(ar->what, "Lua") == 0)
+    if (ar->source[0] == '@' && strcmp(ar->what, "Lua") == 0)
         (*current_hook) (event, ar->name, ar->source + 1, ar->linedefined);
 }
 
