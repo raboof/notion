@@ -125,7 +125,7 @@ function move_if_needed(workspace, screen_id)
             local cwins={}
             workspace:bottom():managed_i(function(cwin)
                 table.insert(cwins, cwin)
-                return false
+                return true
             end)
             for k,cwin in ipairs(cwins) do
                 sp:bottom():attach(cwin)
