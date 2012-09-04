@@ -1,18 +1,16 @@
 -- map workspace name to list of initial outputs for that workspace
-initialScreens = {}
-
 function nilOrEmpty(t)
     return not t or empty(t) 
 end
 
 function mod_xrandr.workspace_added(ws)
-    if nilOrEmpty(initialScreens[ws:name()]) then
+    if nilOrEmpty(ws:get_initialOutputs()) then
         outputs = mod_xrandr.get_outputs(ws:screen_of(ws))
         outputKeys = {}
         for k,v in pairs(outputs) do
-          table.insert(outputKeys, k)
+            table.insert(outputKeys, k)
         end
-        initialScreens[ws:name()] = outputKeys
+        ws:set_initialOutputs(outputKeys)
     end
     return true
 end
@@ -147,7 +145,7 @@ function mod_xrandr.rearrangeworkspaces()
     -- round one: divide workspaces in directly assignable,
     -- orphans and wanderers
     function roundone(workspace)
-        local screens = candidate_screens_for_outputs(all_outputs, initialScreens[workspace:name()])
+        local screens = candidate_screens_for_outputs(all_outputs, workspace:get_initialOutputs())
         if not screens or empty(screens) then
             table.insert(orphans, workspace)
         elseif singleton(screens) then
