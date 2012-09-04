@@ -4,13 +4,13 @@ function nilOrEmpty(t)
 end
 
 function mod_xrandr.workspace_added(ws)
-    if nilOrEmpty(ws:get_initialOutputs()) then
+    if nilOrEmpty(ws:get_initial_outputs()) then
         outputs = mod_xrandr.get_outputs(ws:screen_of(ws))
         outputKeys = {}
         for k,v in pairs(outputs) do
             table.insert(outputKeys, k)
         end
-        ws:set_initialOutputs(outputKeys)
+        ws:set_initial_outputs(outputKeys)
     end
     return true
 end
@@ -145,7 +145,7 @@ function mod_xrandr.rearrangeworkspaces()
     -- round one: divide workspaces in directly assignable,
     -- orphans and wanderers
     function roundone(workspace)
-        local screens = candidate_screens_for_outputs(all_outputs, workspace:get_initialOutputs())
+        local screens = candidate_screens_for_outputs(all_outputs, workspace:get_initial_outputs())
         if not screens or empty(screens) then
             table.insert(orphans, workspace)
         elseif singleton(screens) then
