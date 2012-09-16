@@ -20,7 +20,7 @@ function mod_xrandr.workspaces_added()
 end
 
 function mod_xrandr.screenmanagedchanged(tab) 
-    if tab.mode == 'add' then
+    if tab.mode == 'add' and obj_is(tab.sub, "WGroupWS") then
         mod_xrandr.workspace_added(tab.sub);
     end
 end
