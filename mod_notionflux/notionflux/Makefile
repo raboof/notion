@@ -28,5 +28,5 @@ notionflux: $(SOURCES)
 	$(CC) $< $(CFLAGS) $(LDFLAGS) -o $@
 
 _install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) notionflux $(BINDIR)
+	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -s -m $(BIN_MODE) notionflux $(DESTDIR)$(BINDIR)
