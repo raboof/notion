@@ -17,6 +17,7 @@
 
 DECLCLASS(WGroupWS){
     WGroup grp;
+    ExtlTab initial_outputs;
 };
 
 

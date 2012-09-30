@@ -1318,7 +1318,7 @@ WRegion *region_groupleader_of(WRegion *reg)
 /*{{{ Save/load */
 
 
-static ExtlTab group_get_configuration(WGroup *ws)
+ExtlTab group_get_configuration(WGroup *ws)
 {
     ExtlTab tab, mgds, subtab, g;
     WStacking *st;

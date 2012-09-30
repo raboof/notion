@@ -26,6 +26,7 @@
 #include "float-placement.h"
 #include "resize.h"
 #include "conf.h"
+#include "saveload.h"
 
 
 /*{{{ Settings */
@@ -309,6 +310,8 @@ bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp)
     if(!group_init(&(ws->grp), parent, fp))
         return FALSE;
 
+    ws->initial_outputs=extl_create_table();
+
     ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
     
     region_add_bindmap((WRegion*)ws, ioncore_groupws_bindmap);
@@ -325,6 +328,7 @@ WGroupWS *create_groupws(WWindow *parent, const WFitParams *fp)
 
 void groupws_deinit(WGroupWS *ws)
 {    
+    extl_unref_table(ws->initial_outputs);
     group_deinit(&(ws->grp));
 }
 
@@ -333,6 +337,7 @@ WRegion *groupws_load(WWindow *par, const WFitParams *fp,
                       ExtlTab tab)
 {
     WGroupWS *ws;
+    ExtlTab io;
     
     ws=create_groupws(par, fp);
     
@@ -341,7 +346,35 @@ WRegion *groupws_load(WWindow *par, const WFitParams *fp,
 
     group_do_load(&ws->grp, tab);
     
+    if(extl_table_gets_t(tab, "initial_outputs", &io))
+        ws->initial_outputs=io;
+
     return (WRegion*)ws;
+}
+
+ExtlTab groupws_get_configuration(WGroupWS *ws)
+{
+
+    ExtlTab tab;
+
+    tab=group_get_configuration(&ws->grp);
+    extl_table_sets_t(tab, "initial_outputs", ws->initial_outputs);
+    return tab;
+}
+
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+ExtlTab groupws_get_initial_outputs(WGroupWS *ws)
+{
+    return extl_ref_table(ws->initial_outputs);
+}
+
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+void groupws_set_initial_outputs(WGroupWS *ws, ExtlTab tab)
+{
+    extl_unref_table(ws->initial_outputs);
+    ws->initial_outputs=extl_ref_table(tab);
 }
 
 
@@ -360,6 +393,9 @@ static DynFunTab groupws_dynfuntab[]={
     
     {region_manage_stdisp,
      group_manage_stdisp},
+
+    {(DynFun*)region_get_configuration,
+     (DynFun*)groupws_get_configuration},
     
     END_DYNFUNTAB
 };
