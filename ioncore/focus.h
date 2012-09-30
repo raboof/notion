@@ -23,7 +23,7 @@ extern void region_maybewarp_now(WRegion *reg, bool warp);
 extern void region_warp(WRegion *reg); /* maybewarp TRUE */
 extern void region_set_focus(WRegion *reg); /* maybewarp FALSE */
 
-extern void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time);
+extern void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input);
 
 DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
 extern void region_do_warp(WRegion *reg);

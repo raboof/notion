@@ -252,7 +252,7 @@ static void group_do_set_focus(WGroup *ws, bool warp)
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
     else
-        region_finalise_focusing((WRegion*)ws, ws->dummywin, warp, CurrentTime);
+        region_finalise_focusing((WRegion*)ws, ws->dummywin, warp, CurrentTime, TRUE);
 }
 
 

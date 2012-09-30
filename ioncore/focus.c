@@ -347,7 +347,7 @@ bool region_may_control_focus(WRegion *reg)
 /*Time ioncore_focus_time=CurrentTime;*/
 
 
-void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time)
+void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input)
 {
     if(warp)
         region_do_warp(reg);
@@ -356,7 +356,8 @@ void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time)
         return;
     
     region_set_await_focus(reg);
-    XSetInputFocus(ioncore_g.dpy, win, RevertToParent, time);
+    if(set_input)
+        XSetInputFocus(ioncore_g.dpy, win, RevertToParent, time);
 }
 
 
