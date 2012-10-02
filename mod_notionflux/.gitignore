@@ -1,4 +1,4 @@
 notionflux/notionflux
-mod_notionflux/mod_notionflux.lc
-mod_notionflux/mod_notionflux.o
-mod_notionflux/mod_notionflux.so
+mod_notionflux.lc
+mod_notionflux.o
+mod_notionflux.so
