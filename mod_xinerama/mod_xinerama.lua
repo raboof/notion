@@ -384,6 +384,9 @@ function mod_xinerama.setup_screens(screens)
             mod_xinerama.update_screen(existing_screen, screen)
         else
             mod_xinerama.setup_new_screen(screen_id, screen)
+            if package.loaded["mod_sp"] then
+                mod_sp.create_scratchpad(notioncore.find_screen_id(screen_id))
+            end
         end
     end
 
