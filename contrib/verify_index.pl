@@ -7,7 +7,7 @@
 #   2) Exist on disk if in the index.html
 #   3) Are in the index.html if they exist on disk
 #
-# Run it from the ion-scripts-3/ directory.
+# Run it from the contrib directory.
 #
 # tyranix [ tyranix at gmail]
 #
