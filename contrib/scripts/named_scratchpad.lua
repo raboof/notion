@@ -6,6 +6,9 @@ Version: 0.2
 Last Updated: 2007-01-23
 
 Copyright (c) Etan Reisner 2007
+
+This software is released under the terms of the MIT license. For more
+information, see http://opensource.org/licenses/mit-license.php .
 --]]
 
 -- Usage: This will create a scratchpad named example_sp

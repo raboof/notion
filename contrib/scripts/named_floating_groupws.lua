@@ -6,6 +6,9 @@ Version: 0.1
 Last Updated: 2007-01-29
 
 Copyright (c) Etan Reisner 2007
+
+This software is released under the terms of the MIT license. For more
+information, see http://opensource.org/licenses/mit-license.php .
 --]]
 
 -- Example: This will create a level 2 floatws named example_floatws

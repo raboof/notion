@@ -7,6 +7,9 @@ Summary: Read a simplified binding file to let people set up some custom
 Last Updated: 2007-08-17
 
 Copyright (c) Etan Reisner 2007
+
+This software is released under the terms of the MIT license. For more
+information, see http://opensource.org/licenses/mit-license.php .
 --]]
 
 --[[
