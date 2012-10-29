@@ -1,3 +1,7 @@
+-- Authors: Voker57 <voker57@gmail.com>
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- Disk drives monitor
 
 -- %drives - list of currently connected drives

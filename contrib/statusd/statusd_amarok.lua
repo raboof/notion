@@ -1,3 +1,7 @@
+-- Authors: Mark Tran <mark@nirv.net>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- statusd_amarok.lua : Mark Tran <mark@nirv.net>
 
 -- Display current track from Amarok

@@ -1,3 +1,7 @@
+-- Authors: Brett Parker <iDunno@sommitrealweird.co.uk>
+-- License: GPL, version 2 or later
+-- Last Changed: 2005
+--
 -- statusd_maildir.lua - Gets new and total counts of mails in a Maildir structure
 -- Copyright (c) 2005 Brett Parker <iDunno@sommitrealweird.co.uk>
 -- 

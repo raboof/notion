@@ -1,3 +1,7 @@
+-- Authors: Tibor Csögör <tibi@tiborius.net>
+-- License: Public domain
+-- Last Changed: 2006-11-14
+--
 -- $Id: statusd_df.lua 60 2006-11-14 11:19:29Z tibi $
 
 -- statusd_df.lua -- disk space monitor for Ion3's statusbar

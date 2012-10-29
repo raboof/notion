@@ -1,3 +1,7 @@
+-- Authors: Greg Steuck, Gerald Young <ion3script@gwy.org>
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- Public domain, written by Greg Steuck
 -- Edited and updated by Gerald Young -- ion3script@gwy.org
 -- This works on FreeBSD's apm (5.x) program added some color to indicate 

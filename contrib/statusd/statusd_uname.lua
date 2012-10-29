@@ -1,3 +1,7 @@
+-- Authors: tyranix <tyranix@gmail.com>
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- statusd_uname.lua
 --[[
 Example of how to use statusd.popen_bgread() with coroutines to avoid blocking

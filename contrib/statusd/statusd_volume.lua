@@ -1,3 +1,7 @@
+-- Authors: Benjamin Sigonneau
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- Public domain, written by Benjamin Sigonneau
 -- Allows displaying volume information in the statusbar.
 -- 

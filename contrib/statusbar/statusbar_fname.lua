@@ -1,3 +1,7 @@
+-- Authors: Emanuele Giaquinta
+-- License: Unknown
+-- Last Changed: 2007
+--
 -- Copyright (c) Emanuele Giaquinta 2007
 
 local function get_fname()

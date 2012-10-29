@@ -1,3 +1,7 @@
+-- Authors: Randall Wald <randy@rwald.com>
+-- License: GPL
+-- Last Changed: Unknown
+--
 -- statusd_volume2.lua
 -- Volume level and state information script
 -- Written by Randall Wald

@@ -1,3 +1,6 @@
+-- Authors: Antti Vähäkotamäki
+-- License: LGPL, version 2.1 or later
+-- Last Changed: 2005
 --
 -- statusbar_external.lua
 --
@@ -211,7 +214,7 @@ for key in pairs(statusbar_external) do
 end
 
 --
--- Copyright (c) Antti V�h�kotam�ki 2005.
+-- Copyright (c) Antti Vähäkotamäki 2005.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
 -- the terms of the GNU Lesser General Public License as published by

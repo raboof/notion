@@ -1,3 +1,7 @@
+-- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- statusd_netmon.lua: monitor the speed of a network interface
 --
 -- Thanx to Tuomo for pointing out a problem in the previous script.

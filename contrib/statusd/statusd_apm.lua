@@ -1,3 +1,7 @@
+-- Authors: Greg Steuck, Darrin Chandler <dwchandler@stilyagin.com>
+-- License: Public domain
+-- Last Changed: 2006-10-28
+--
 -- Adds capability for OpenBSD APM info in ion3 statusbar.
 --
 -- Originally written by Greg Steuck and released into the Public Domain

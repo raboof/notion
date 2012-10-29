@@ -1,3 +1,7 @@
+-- Authors: Alexander Wirt <formorer@formorer.de>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- Stolen from statusd_mpd.lua
 -- Responsible for bugs and so on: Alexander Wirt <formorer@formorer.de>
 -- To get this working you have to enable playerinfofile in your pytonerc

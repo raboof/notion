@@ -1,3 +1,7 @@
+-- Authors: Marc Hartstein <marc.hartstein@alum.vassar.edu>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- statusd for MPD (Music Player Daemon)
 -- by Marc Hartstein <marc.hartstein@alum.vassar.edu>
 --

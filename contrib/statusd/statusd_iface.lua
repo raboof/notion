@@ -1,3 +1,7 @@
+-- Authors: Relu Patrascu <ikoflexer@gmail.com>
+-- License: LGPL, version 2.1 or later
+-- Last Changed: 2004-11-05
+--
 -- statusd_iface.lua
 -- 
 -- Copyright (c) Relu Patrascu 2004.

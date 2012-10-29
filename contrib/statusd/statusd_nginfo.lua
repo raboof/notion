@@ -1,3 +1,6 @@
+-- Authors: Raffaello Pelagalli <raffa@niah.org>
+-- License: LGPL, version 2.1 or later
+-- Last Changed: 2008-05-08
 --
 -- statusd_nginfo.lua
 -- 

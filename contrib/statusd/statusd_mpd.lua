@@ -1,3 +1,7 @@
+-- Authors: <delirium@hackish.org>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- statusd for MPD (Music Player Daemon)
 -- bugs/requests/comments: delirium@hackish.org
 

@@ -1,3 +1,7 @@
+-- Authors: Jari Eskelinen <jari.eskelinen@iki.fi>, René van Bevern <rvb@pro-linux.de>, Juri Hamburg <juri@fail2fail.com>
+-- License: GPL, version 2
+-- Last Changed: 2011
+--
 -- statusd_laptopstatus.lua v0.0.3 (last modified 2011-10-30)
 --
 -- Copyright (C) 2005 Jari Eskelinen <jari.eskelinen@iki.fi>

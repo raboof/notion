@@ -1,3 +1,7 @@
+-- Authors: Voker57 <voker57@gmail.com>
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- Real simple xmms2 monitor
 
 -- %xmms2 - current song in format "Artist - Title"

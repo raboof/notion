@@ -1,3 +1,6 @@
+-- Authors: Jeremy Hankins <nowan@nowan.org>
+-- License: Unknown
+-- Last Changed: 2005-06-28
 --
 -- By Jeremy Hankins <nowan@nowan.org>
 --

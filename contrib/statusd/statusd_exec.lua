@@ -1,3 +1,6 @@
+-- Authors: Antti Vähäkotamäki
+-- License: LGPL, version 2.1 or later
+-- Last Changed: 2006
 --
 -- statusd_exec.lua
 --

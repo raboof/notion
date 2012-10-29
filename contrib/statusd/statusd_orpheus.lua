@@ -1,3 +1,7 @@
+-- Authors: Norbert Tretkowski <norbert@tretkowski.de>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- Stolen from statusd_pytone.lua by Norbert Tretkowski <norbert@tretkowski.de>
 
 if not statusd_orpheus then

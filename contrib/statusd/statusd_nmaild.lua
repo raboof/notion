@@ -1,3 +1,7 @@
+-- Authors: Mario García H. <drosophila@nmental.com>
+-- License: GPL, version 2
+-- Last Changed: 2006-11-18
+--
 --------------------------------------------------------------------------------------------
 -- 	
 -- 	PURPOSE: 

@@ -1,3 +1,7 @@
+-- Authors: Andrea Rossato <arossato@istitutocolli.org>, Sergey Kozhemyakin <luc@server.by>
+-- License: GPL, version 2 or later
+-- Last Changed: 2008
+--
 -- statusd_weather.lua
 
 -- statusd_weather.lua: an Ion3 statusd applet for displaying weather information

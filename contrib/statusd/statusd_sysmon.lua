@@ -1,3 +1,7 @@
+-- Authors: Vladimir Chizhov <jagoterr@gmail.com>
+-- License: Unknown
+-- Last Changed: 2005-03-29
+--
 -- filename :   statusd_sysmon.lua
 -- version  :   2.0
 -- date     :   2005-03-29

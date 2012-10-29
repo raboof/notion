@@ -1,3 +1,7 @@
+-- Authors: Peter Randeu <ranpet@sbox.tugraz.at>
+-- License: GPL, version 2
+-- Last Changed: Unknown
+--
 -- statusd_xmms.lua
 --
 -- Gets title of song currently selected in xmms' playlist.

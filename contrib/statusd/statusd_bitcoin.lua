@@ -1,3 +1,7 @@
+-- Authors: Voker57 <voker57@gmail.com>
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- Bitcoin (฿) daemon monitor
 
 -- %bitcoin_speed - current speed in khash/s

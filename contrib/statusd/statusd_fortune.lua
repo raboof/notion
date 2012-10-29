@@ -1,3 +1,7 @@
+-- Authors: Hendrik Iben <hiben@tzi.de>
+-- License: GPL, version 2
+-- Last Changed: 2006-03-23
+--
 -- statusd_fortune.lua v20060323
 --
 -- Displays a fortune (in a sane way for one line).

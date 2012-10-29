@@ -1,3 +1,7 @@
+-- Authors: Tibor Csögör <tibi@tiborius.net>
+-- License: Public domain
+-- Last Changed: 2006-11-14
+--
 -- $Id: statusd_meminfo.lua 59 2006-11-14 11:17:02Z tibi $
 
 -- statusd_meminfo.lua -- memory and swap usage monitor for Ion3's statusbar

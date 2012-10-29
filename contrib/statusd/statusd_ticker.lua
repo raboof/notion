@@ -1,3 +1,7 @@
+-- Authors: Matus Telgarsky <mtelgars@andrew.cmu.edu>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- little ticker boondoggle
 --
 -- Selects amongst a set of specified commands and scrolls them not only line by line

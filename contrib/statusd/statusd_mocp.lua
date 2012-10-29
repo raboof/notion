@@ -1,3 +1,7 @@
+-- Authors: tyranix <tyranix@gmail.com>
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- statusd_mocp.lua
 --[[
 statusd for moc (Music On Console).  This is called mocp for two reasons.

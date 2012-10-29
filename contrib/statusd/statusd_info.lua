@@ -1,3 +1,7 @@
+-- Authors: Randall Wald <randy@rwald.com>
+-- License: GPL
+-- Last Changed: Unknown
+--
 -- statusd_info.lua
 -- CPU, Mem, and Swap information script
 -- Written by Randall Wald

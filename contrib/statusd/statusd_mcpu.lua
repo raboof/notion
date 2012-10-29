@@ -1,3 +1,6 @@
+-- Authors: Jakub Ružička <yac@email.cz>
+-- License: Unknown
+-- Last Changed: 2008-08-14
 --
 -- statusd_mcpu.lua - multi CPU monitor for ion3 statusbar
 --

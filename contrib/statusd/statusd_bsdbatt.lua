@@ -1,3 +1,6 @@
+-- Authors: Russell A. Jackson
+-- License: BSD 2-Clause License, see http://opensource.org/licenses/bsd-license.php
+-- Last Changed: 2005
 --
 -- Copyright (c) 2005 Russell A. Jackson
 -- All rights reserved.

@@ -1,3 +1,6 @@
+-- Authors: Tuomo Valkonen, Etan Reisner
+-- License: LGPL, version 2.1 or later
+-- Last Changed: 2007
 --
 -- statusbar_act.lua
 --

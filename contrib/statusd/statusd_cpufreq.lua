@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Public domain
+-- Last Changed: Unknown
+--
 -- statusd_cpufreq.lua
 --
 -- Public domain
