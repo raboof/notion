@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- Dan's bindings: these allow you to navigate ion in a sane way.
 --
 --      MOD1 + L/R cycles between clients in a frame.

@@ -1,3 +1,7 @@
+-- Authors: Canaan Hadley-Voth
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- cfg_mouse.lua
 --
 -- (Canaan Hadley-Voth)

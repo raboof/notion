@@ -1,3 +1,7 @@
+-- Authors: Matthieu MOY <Matthieu.Moy@imag.fr>, David Hansen <david.hansen@physik.fu-berlin.de>, Tyranix <tyranix@gmail.com>, Adam Di Carlo <aph@debian.org>
+-- License: Public domain
+-- Last Changed: 2007-04-27
+--
 -- Emacs-like keyboard configuration for Ion, version 3.
 -- Written by Matthieu MOY (Matthieu.Moy@imag.fr) on February 15, 2005.
 -- No copyright.
