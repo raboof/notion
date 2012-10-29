@@ -1,5 +1,5 @@
 -- Authors: Andrea Rossato <arossato@istitutocolli.org>
--- License: GNU GPL, version 2 or later
+-- License: GPL, version 2 or later
 -- Last Changed: 2006-07-07
 -- 
 -- weather.lua
