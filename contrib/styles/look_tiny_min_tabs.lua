@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look_tiny.min_tabs.lua: an ion3 style for use with the min_tabs
 -- extension, based on:
 -- look_tiny.lua: an ion3 style for small screens...like mine :(

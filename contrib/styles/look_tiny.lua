@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look_tiny.lua: an ion3 style for small screens...like mine :(
 -- based on look_minimalist.lua
 

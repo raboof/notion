@@ -1,3 +1,7 @@
+-- Authors: ootput
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look_ootput_dark.lua drawing engine configuration file for Ion.
 ---- <ootput @ freenode>
 

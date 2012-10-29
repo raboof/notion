@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look_minimalist.lua drawing engine configuration file for Ion.
 
 --one basic style motivated by the need to work with min_tabs.lua

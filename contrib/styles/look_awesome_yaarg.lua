@@ -1,3 +1,7 @@
+-- Authors: James Gray (yaarg) <j.gray@ed.ac.uk>
+-- License: Unknown
+-- Last Changed: 2006-02-03
+--
 --[[
     look_awesome_yaarg.lua (based on look awesome )
 

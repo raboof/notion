@@ -1,3 +1,7 @@
+-- Authors: Bas Kok
+-- License: Unknown
+-- Last Changed: 2004-09-16
+--
 -- look-bb.lua for use with the bb background.
 -- Bas Kok 20040916 
 

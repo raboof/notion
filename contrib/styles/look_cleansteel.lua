@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look-cleansteel.lua drawing engine configuration file for Ion.
 
 if not gr.select_engine("de") then return end

@@ -1,3 +1,6 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
 --
 -- look_blue, based on look-cleanviolet
 -- 

@@ -1,3 +1,7 @@
+-- Authors: Tibor Csögör <tibi@tiborius.net>
+-- License: Public domain
+-- Last Changed: 2007-02-07
+--
 -- $Id: look_tibi.lua 78 2007-02-07 18:36:32Z tibi $
 
 -- version : 0.2

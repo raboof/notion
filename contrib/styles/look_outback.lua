@@ -1,3 +1,7 @@
+-- Authors: Mark Tran <mark@nirv.net>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look_outback.lua : Mark Tran <mark@nirv.net>
 
 -- This style looks best when the alternative style is applied to "full"

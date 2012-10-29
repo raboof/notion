@@ -1,3 +1,7 @@
+-- Authors: ootput
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look-ootput.lua drawing engine configuration file for Ion.
 ---- <http://metawire.org/~ootput>
 

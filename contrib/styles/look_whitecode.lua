@@ -1,3 +1,6 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
 
 if not gr.select_engine("de") then return end
 

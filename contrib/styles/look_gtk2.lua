@@ -1,3 +1,7 @@
+-- Authors: Rene van Bevern <rvb@pro-linux.de>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- theme that goes well with the gtk2 default colors
 -- it makes use of terminus als artwiz fonts
 --

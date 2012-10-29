@@ -1,3 +1,7 @@
+-- Authors: Johan Kiviniemi
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- Look-qtrc 0.1 for the Ion window manager.
 -- Based on look-cleanviolet.
 --

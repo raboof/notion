@@ -1,3 +1,7 @@
+-- Authors: Steve Pomeroy <steve@staticfree.info>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look-cleansteel_trans.lua drawing engine configuration file for Ion.
 
 -- Based on the default cleansteel look, but with added transparency

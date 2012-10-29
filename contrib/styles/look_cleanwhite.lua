@@ -1,3 +1,7 @@
+-- Authors: René van Bevern <rvb@debian.org>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- look_cleanwhite.lua a bright theme fitting white terminals
 --
 -- uses Terminus fonts
