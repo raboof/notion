@@ -1,4 +1,7 @@
-
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+--
 notifybox={}
 
 local default="*notifybox*"

@@ -1,3 +1,7 @@
+-- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>, Henning Hasemann <hhasemann@web.de>
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- rss_feed.lua
 --
 -- Use:

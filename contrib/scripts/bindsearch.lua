@@ -1,3 +1,7 @@
+-- Authors: Canaan Hadley-Voth
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- bindsearch.lua
 -- 
 -- Canaan Hadley-Voth.

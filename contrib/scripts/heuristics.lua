@@ -1,3 +1,6 @@
+-- Authors: Tuomo Valkonen
+-- License: Unknown
+-- Last Changed: 2003
 --
 -- Window placement heuristics for WIonWS:s
 -- 

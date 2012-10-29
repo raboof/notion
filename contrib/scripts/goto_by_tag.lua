@@ -1,9 +1,11 @@
+-- Authors: Philipp Hartwig
+-- License: MIT, see http://opensource.org/licenses/mit-license.php
+-- Last Changed: 2012-09-29
+-- 
 --[[
 
 Description: This function sets focus to the first client with the given 
 tag.
-
-Author: Philipp Hartwig
 
 Usage: 
 

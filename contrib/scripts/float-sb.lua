@@ -1,3 +1,6 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
 --
 -- Example of floating toggleable statusbar
 --

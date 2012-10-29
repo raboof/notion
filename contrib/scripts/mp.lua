@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- Mark next mapped window to be attached to a specified object
 
 local marked

@@ -1,3 +1,6 @@
+-- Authors: Tuomo Valkonen
+-- License: Unknown
+-- Last Changed: 2007
 --
 -- tabmenu.lua
 --

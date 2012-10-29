@@ -1,3 +1,7 @@
+-- Authors: Steve Jothen <sjothen@gmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- Small interface to MusicPD
 --
 -- Author: Steve Jothen <sjothen at gmail dot com>

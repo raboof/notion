@@ -1,3 +1,7 @@
+-- Authors: Matthieu Moy <matthieu.moy@imag.fr>, Etan Reisner <deryni@gmail.com>
+-- License: Public domain
+-- Last Changed: 2006-07-03
+-- 
 -- Nest workspaces inside Frames.
 -- Matthieu Moy <Matthieu.Moy@imag.fr>, February 15th 2005.
 -- Made into a function (and to only show valid workspace types) by Etan Reisner <deryni@gmail.com> July 03 2006.

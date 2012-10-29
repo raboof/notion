@@ -1,3 +1,6 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
 --
 -- This script allows making panels and other windows the stdisp.
 --
@@ -57,5 +60,3 @@ function panel.unreg()
 end
     
 panel.reg()
-
-    

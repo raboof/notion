@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- A version of ioncore.goto_next that may be useful on multihead setups
 -- Replace ioncore.goto_next with goto_multihead.goto_next in cfg_tiling.lua
 -- to use it.

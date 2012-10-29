@@ -1,3 +1,7 @@
+-- Authors: David Tweed
+-- License: Unknown
+-- Last Changed: September 2005
+--
 -- this builds up a menu framework for performing some client operation
 -- say, jumping to the client or attaching the client ot the current 
 -- frame. it assumes that helpful applications either tend to have titles of

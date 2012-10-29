@@ -1,3 +1,7 @@
+-- Authors: Sergey Redin <sergey@redin.info>
+-- License: Public domain
+-- Last Changed: Unknown
+-- 
 -- xkbion.lua
 -- TODO: make xkbion_set understand some simple presets
 

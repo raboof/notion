@@ -1,3 +1,6 @@
+-- Authors: Jeremy Hankins <nowan@nowan.org>, Johannes Segitz, Antti Kaihola <antti.kaihola@linux-aktivaattori.org>
+-- License: Unknown
+-- Last Changed: 2005-11-16
 --
 -- By Jeremy Hankins <nowan@nowan.org>
 -- Multi-head support added by Johannes Segitz

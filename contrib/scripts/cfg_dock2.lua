@@ -1,3 +1,6 @@
+-- Authors: pinko
+-- License: Unknown
+-- Last Changed: 2005-11-09
 --
 -- cfg_dock2.lua (pinko version)
 --

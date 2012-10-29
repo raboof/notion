@@ -1,3 +1,7 @@
+-- Authors: Canaan Hadley-Voth
+-- License: Unknown
+-- Last Changed: 2005-12-20
+-- 
 -- document_menus.lua
 -- 
 -- Canaan Hadley-Voth

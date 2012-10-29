@@ -1,3 +1,7 @@
+-- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- USAGE: back-up the cfg_statusbar.lua. Rename this one to cfg_statusbar.lua,
 -- make changes in settings.active and settings.inactive (look below) to meet
 -- your needs (for farther changes, look into save_statusbar.lua, which will

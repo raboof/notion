@@ -1,3 +1,7 @@
+-- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- rss_feed.lua
 --
 -- Use:

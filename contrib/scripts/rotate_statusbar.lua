@@ -1,3 +1,7 @@
+-- Authors: tyranix
+-- License: Public domain
+-- Last Changed: Unknown
+-- 
 -- rotate_statusbar.lua
 --[[
 This replacement for cfg_statusbar.lua will rotate between

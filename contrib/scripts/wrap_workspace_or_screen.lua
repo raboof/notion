@@ -1,3 +1,7 @@
+-- Authors: Philipp Hartwig
+-- License: MIT, see http://opensource.org/licenses/mit-license.php
+-- Last Changed: 2012-09-29
+-- 
 --[[
 
 Description: Switch focus in the specified direction, but with the following 
@@ -8,8 +12,6 @@ switch to the next (resp. previous) workspace.
 
 * When switching focus right (resp. left) from the rightmost (resp. leftmost) 
 client, switch to the next (resp. previous) screen.
-
-Author: Philipp Hartwig
 
 Usage: Add bindings for
     wrap_wsscr.goto_next(_sub, 'up', {no_ascend=_})

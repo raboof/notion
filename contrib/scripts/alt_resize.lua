@@ -1,3 +1,6 @@
+-- Authors: Per Olofsson <pelle@dsv.su.se>
+-- License: Public Domain
+-- Last Changed: Unknown
 --
 -- Alternative resizing for ion-devel
 --

@@ -1,3 +1,7 @@
+-- Authors: pinko, Etan Reisner <deryni@gmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- Automatically create a winprop for the WClientWin given.
 -- Basic functionality by pinko
 -- Extended by Etan Reisner <deryni@gmail.com>

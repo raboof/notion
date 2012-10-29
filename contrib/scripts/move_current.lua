@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- Move current window in a frame to another frame in specified direction
 
 move_current={}

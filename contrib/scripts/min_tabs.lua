@@ -1,3 +1,7 @@
+-- Authors: David Tweed, Cas Cremers, David Roundy, John Schreiner
+-- License: Unknown
+-- Last Changed: 2007-02-22
+-- 
 --[[
 	min_tabs.lua
 
@@ -9,7 +13,7 @@
 	Originally created by David Tweed
 
 	22 Feb 2007 John Schreiner: ignore transients to prevent empty frames
-        14 Dec 2006 David Roundy: modified to work with latest ion3
+	14 Dec 2006 David Roundy: modified to work with latest ion3
 	11 Feb 2005 David Tweed: modified to work with ion3 svn versions
 	15 Feb 2005 Cas Cremers: only frames with one window hide the tabbar
 	(as opposed to <= 2)

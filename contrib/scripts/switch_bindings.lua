@@ -1,3 +1,7 @@
+-- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>, Canaan Hadley-Voth
+-- License: Unknown
+-- Last Changed: Unknown
+--
 -- switch_bindings.lua
 --
 -- Switch between different set of keybindings. You can use it to temporarily

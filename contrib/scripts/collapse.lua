@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- Move all windows on a WTiling to a single frame and destroy the rest.
 -- (like C-x 1 in Emacs)
 -- This is the ion3 version.

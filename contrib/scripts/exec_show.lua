@@ -1,3 +1,7 @@
+-- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- exec_show.lua: executes a command and displays the result
 --
 -- this script is meant to be used when the output for the command

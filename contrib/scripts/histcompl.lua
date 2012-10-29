@@ -1,3 +1,7 @@
+-- Authors: Unknown
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- History completion support for the line editor
 
 local function historyi()

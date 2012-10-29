@@ -1,3 +1,7 @@
+-- Authors: Reuben Thomas <rrt@sc3d.org>
+-- License: GPL
+-- Last Changed: 2005
+--
 -- Prompt for a URL and open it
 -- Use Opera bookmarks for completion
 -- (c) Reuben Thomas 2005 (rrt@sc3d.org); released under the GPL

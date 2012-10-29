@@ -1,3 +1,7 @@
+-- Authors: Canaan Hadley-Voth <ugggg@hotmail.com>
+-- License: Unknown
+-- Last Changed: Unknown
+-- 
 -- send_to_ws.lua
 --
 -- written by Canaan Hadley-Voth, ugggg at hotmail

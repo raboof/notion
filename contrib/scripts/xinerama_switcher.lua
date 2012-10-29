@@ -1,3 +1,7 @@
+-- Authors: Martin F. Krafft <madduck@madduck.net>
+-- License: Artistic, see http://opensource.org/licenses/artistic-license-1.0
+-- Last Changed: 2005.08.14
+-- 
 -- xinerama_switcher.lua
 -- 
 -- Goes to the frame in the specified direction. If there is no frame in the
