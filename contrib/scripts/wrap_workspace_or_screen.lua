@@ -1,4 +1,4 @@
--- Authors: Philipp Hartwig
+-- Authors: Philipp Hartwig <ph@phhart.de>
 -- License: MIT, see http://opensource.org/licenses/mit-license.php
 -- Last Changed: 2012-09-29
 -- 
