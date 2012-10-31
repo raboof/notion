@@ -1,5 +1,5 @@
 -- Authors: Reuben Thomas <rrt@sc3d.org>
--- License: GPL
+-- License: GPL, version 2
 -- Last Changed: 2005
 --
 -- Prompt for a URL and open it

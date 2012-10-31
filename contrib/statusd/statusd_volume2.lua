@@ -1,5 +1,5 @@
 -- Authors: Randall Wald <randy@rwald.com>
--- License: GPL
+-- License: GPL, version 2
 -- Last Changed: Unknown
 --
 -- statusd_volume2.lua
