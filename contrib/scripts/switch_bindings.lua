@@ -1,5 +1,5 @@
--- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>, Canaan Hadley-Voth
--- License: Unknown
+-- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>, Canaan Hadley-Voth
+-- License: Public domain
 -- Last Changed: Unknown
 --
 -- switch_bindings.lua

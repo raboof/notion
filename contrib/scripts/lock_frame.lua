@@ -1,4 +1,4 @@
--- Authors: James Gray (yaarg) <james@solitaryfield.org>, Etan Reisner (deryni) <deryni@gmail.com>
+-- Authors: James Gray <james@solitaryfield.org>, Etan Reisner <deryni@gmail.com>
 -- License: Unknown
 -- Last Changed: 2007-06-22
 -- 

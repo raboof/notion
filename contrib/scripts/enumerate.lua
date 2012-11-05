@@ -1,5 +1,5 @@
--- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>, René van Bevern <rvb@pro-linux.de>
--- License: Unknown
+-- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>, René van Bevern <rvb@pro-linux.de>
+-- License: Public domain
 -- Last Changed: Unknown
 -- 
 -- enumerate.lua: prepends "X. " in front of the title of a client-window so

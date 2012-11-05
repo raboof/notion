@@ -1,4 +1,4 @@
--- Authors: James Gray (yaarg) <j.gray@ed.ac.uk>
+-- Authors: James Gray <j.gray@ed.ac.uk>
 -- License: Unknown
 -- Last Changed: 2006-02-03
 --

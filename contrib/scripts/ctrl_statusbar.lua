@@ -1,5 +1,5 @@
 -- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>
--- License: Unknown
+-- License: Public domain
 -- Last Changed: Unknown
 -- 
 -- USAGE: back-up the cfg_statusbar.lua. Rename this one to cfg_statusbar.lua,

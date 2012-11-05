@@ -1,5 +1,5 @@
--- Authors: Sadrul Habib Chowdhury (Adil) <imadil@gmail.com>
--- License: Unknown
+-- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>
+-- License: Public domain
 -- Last Changed: Unknown
 -- 
 -- exec_show.lua: executes a command and displays the result
