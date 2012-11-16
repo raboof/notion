@@ -1280,7 +1280,8 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
         result = TRUE;
     }
 
-    if(ev->value_mask&CWStackMode){
+    if(ioncore_g.window_stacking_request != IONCORE_WINDOWSTACKINGREQUEST_IGNORE &&
+       ev->value_mask&CWStackMode){
         switch(ev->detail){
         case Above:
             region_set_activity((WRegion*) cwin, SETPARAM_SET);
