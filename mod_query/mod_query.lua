@@ -449,7 +449,7 @@ function mod_query.gotoclient_handler(frame, str)
     if cwin==nil then
         mod_query.warn(frame, TR("Could not find client window %s.", str))
     else
-        cwin:display()
+        cwin:goto_()
     end
 end
 
@@ -471,7 +471,7 @@ function mod_query.attachclient_handler(frame, str)
     if frame:rootwin_of()~=reg:rootwin_of() then
         mod_query.warn(frame, TR("Cannot attach: different root windows."))
     elseif reg:manager()==frame then
-        reg:display()
+        reg:goto_()
     else
         mod_query.call_warn(frame, attach)
     end
@@ -481,7 +481,7 @@ end
 function mod_query.workspace_handler(mplex, name)
     local ws=ioncore.lookup_region(name, "WGroupWS")
     if ws then
-        ws:display()
+        ws:goto_()
     else
         local function create_handler(mplex_, layout)
             if not layout or layout=="" then

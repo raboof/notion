@@ -348,7 +348,7 @@ bool region_goto(WRegion *reg)
  * actually have received the focus when this function returns.
  */
 EXTL_EXPORT_MEMBER
-bool region_display(WRegion *reg)
+bool region_goto_(WRegion *reg)
 {
     return region_goto_flags(reg, REGION_GOTO_FOCUS);
 }
