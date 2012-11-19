@@ -33,6 +33,12 @@ StringIntMap frame_idxs[]={
     END_STRINGINTMAP
 };
 
+StringIntMap win_stackrq[]={
+    {"ignore", IONCORE_WINDOWSTACKINGREQUEST_IGNORE},
+    {"activate",  IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE},
+    END_STRINGINTMAP
+};
+
 static bool get_winprop_fn_set=FALSE;
 static ExtlFn get_winprop_fn;
 
@@ -118,10 +124,9 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "autosave_layout", &(ioncore_g.autosave_layout));
 
     if(extl_table_gets_s(tab, "window_stacking_request", &tmp)){
-        if(strcmp(tmp, "ignore")==0)
-            ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;
-        else if(strcmp(tmp, "activate")==0)
-            ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE;
+        ioncore_g.window_stacking_request=stringintmap_value(win_stackrq, 
+                                                         tmp,
+                                                         ioncore_g.window_stacking_request);
         free(tmp);
     }
     
@@ -179,7 +184,6 @@ EXTL_EXPORT
 ExtlTab ioncore_get()
 {
     ExtlTab tab=extl_create_table();
-    const char *tmp;
     
     extl_table_sets_b(tab, "opaque_resize", ioncore_g.opaque_resize);
     extl_table_sets_b(tab, "warp", ioncore_g.warp_enabled);
@@ -191,17 +195,10 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
 
-    switch(ioncore_g.window_stacking_request)
-    {
-        case IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE:
-            tmp="activate";
-            break;
-        case IONCORE_WINDOWSTACKINGREQUEST_IGNORE:
-        default:
-            tmp="ignore";
-            break;
-    }
-    extl_table_sets_s(tab, "window_stacking_request", tmp);
+    extl_table_sets_s(tab, "window_stacking_request", 
+                      stringintmap_key(win_stackrq, 
+                                       ioncore_g.window_stacking_request,
+                                       NULL));
 
     extl_table_sets_s(tab, "frame_default_index", 
                       stringintmap_key(frame_idxs, 
