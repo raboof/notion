@@ -82,7 +82,9 @@ if not statusd_laptopstatus then
   }
 end
 
-statusd_laptopstatus=table.join(statusd.get_config("laptopstatus"), statusd_laptopstatus)
+if statusd ~= nil then
+    statusd_laptopstatus=table.join(statusd.get_config("laptopstatus"), statusd_laptopstatus)
+end
 
 --
 -- CODE 
