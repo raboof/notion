@@ -114,8 +114,8 @@ function average(array)
     for i,v in ipairs(array) do
         sum = sum + v
     end
-    if table.getn(array) ~= 0 then 
-       return sum / table.getn(array)
+    if #array ~= 0 then
+       return sum / #array
    else 
        return 0
    end
