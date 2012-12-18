@@ -39,13 +39,17 @@ function mod_xrandr.workspace_added(ws)
 end
 
 function for_all_workspaces_do(fn)
+    local workspaces={}
     notioncore.region_i(function(scr)
         scr:managed_i(function(ws)
-            fn(ws)
+            table.insert(workspaces, ws)
             return true 
         end)
         return true
     end, "WScreen")
+    for _,ws in ipairs(workspaces) do
+        fn(ws)
+    end
 end
 
 function mod_xrandr.workspaces_added()
