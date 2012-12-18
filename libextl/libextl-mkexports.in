@@ -673,7 +673,9 @@ function write_fndoc(h, fn, info)
         end
         fprintf(h, ")}\n")
     end
-    h:write("\\begin{funcdesc}\n" .. trim(info.doc).. "\n\\end{funcdesc}\n")
+    h:write("\\begin{funcdesc}\n" .. trim(info.doc) .. 
+            (info.safe and "\n This function is considered safe." or "") ..
+            "\n\\end{funcdesc}\n")
     fprintf(h, "\\end{function}\n\n")
 end
 
