@@ -53,7 +53,7 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wparentheses -pedantic -Wuninitialized
 
 
-CFLAGS=-g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
+CFLAGS=-g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 LDFLAGS=-g $(LIBS) $(EXTRA_LIBS)
 
 
