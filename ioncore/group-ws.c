@@ -369,7 +369,6 @@ ExtlTab groupws_get_initial_outputs(WGroupWS *ws)
     return extl_ref_table(ws->initial_outputs);
 }
 
-EXTL_SAFE
 EXTL_EXPORT_MEMBER
 void groupws_set_initial_outputs(WGroupWS *ws, ExtlTab tab)
 {
