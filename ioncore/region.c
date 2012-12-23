@@ -555,8 +555,6 @@ void region_detach_manager(WRegion *reg)
     if(mgr==NULL)
         return;
     
-    region_set_activity(reg, SETPARAM_UNSET);
-
     region_managed_remove(mgr, reg);
 
     assert(REGION_MANAGER(reg)==NULL);
