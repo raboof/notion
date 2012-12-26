@@ -120,6 +120,9 @@ WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id)
 void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
+
+    screen_unnotify(scr);
+    screen_nowindowinfo(scr);
     
     mplex_deinit((WMPlex*)scr);
 }
