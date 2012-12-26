@@ -19,7 +19,7 @@
 #include "extlconv.h"
 #include "names.h"
 #include "focus.h"
-#include "activity.h"
+#include "screen-notify.h"
 
 
 /*{{{ Helper */
