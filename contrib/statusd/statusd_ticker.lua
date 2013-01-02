@@ -119,7 +119,7 @@ if statusd ~= nil then
     statusd.inform("ticker_template", string.rep('x', settings.line_len))
 
     settings.update_fun = ticker_update
-    settings.commands.count = table.getn(settings.commands)
+    settings.commands.count = #(settings.commands)
     if settings.commands.count == 1 then
         settings.commands.get = ticker_single
     elseif settings.random then

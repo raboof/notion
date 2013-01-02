@@ -232,7 +232,7 @@ local function sanity_check()
                                 -- us the positions of the info we seek
 
     local t = tokenize(s)
-    local n = table.getn(t)
+    local n = #(t)
     local i = 0
 
     for i = 0,n do

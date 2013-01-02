@@ -119,7 +119,7 @@ end
 -- Construct the template for the statusbar
 function rotate_statusbar.get_template()
     -- Rotate through the pre-defined status bars
-    if rotate_statusbar.counter >= table.getn(rotate_statusbar.settings.all_statusbars) then
+    if rotate_statusbar.counter >= #(rotate_statusbar.settings.all_statusbars) then
         rotate_statusbar.counter = 0
     end
     rotate_statusbar.counter = rotate_statusbar.counter + 1

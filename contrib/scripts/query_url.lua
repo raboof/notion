@@ -42,7 +42,7 @@ function readOperaBookmarks ()
         -- TODO: Make the name and stripped URL processing below
         -- independent of browsing Opera's bookmarks, and add other
         -- bookmark formats
-        local urlIndex = table.getn (bookmarks)
+        local urlIndex = # (bookmarks)
         names[name] = urlIndex
         table.insert (bookmarks, name)
         local strippedUrl = string.gsub (url, "^https?://", "")

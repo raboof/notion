@@ -71,7 +71,7 @@ local function get_cpustat()
    end
 
    local c = {}
-   for i = 1, table.getn(t) do
+   for i = 1, #(t) do
       table.insert(c, math.round(((current_stat[i] - last_stat[i])
 				  / uptime_interv) * 100))
    end

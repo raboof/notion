@@ -64,7 +64,7 @@ function sizeSubmenus(tbl)
          local noMenus=0
          local totSz=0
          for i,w in pairs(tbl) do
-             totSz=totSz+table.getn(w)
+             totSz=totSz+#(w)
              noMenus=noMenus+1
          end
          return totSz,noMenus
@@ -151,7 +151,7 @@ function makelistEngine(frame,title,mkentry,lst,
             else
                 for j,w in pairs(v) do
                     --if we'd only have 1 or 2 element submenu, stick them in submenu directly 
-                    if table.getn(w)<=2 then
+                    if #(w)<=2 then
                             -- use the sub-instance on "sub-menu direct entries"
                             insertListIntoMenu(sndLevMenu,mkentry,w,frame,"rest")
                     else
@@ -168,7 +168,7 @@ function makelistEngine(frame,title,mkentry,lst,
         end
     end
     prependNum(mainMenu)
-    table.insert(mainMenu,table.getn(mainMenu)+1,ioncore.menuentry("------------------"..title.."------------------", "nil"))
+    table.insert(mainMenu,#(mainMenu)+1,ioncore.menuentry("------------------"..title.."------------------", "nil"))
     return mainMenu
 end
 

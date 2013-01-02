@@ -52,16 +52,16 @@ function app.match_class(class, instance)
       if class == win:get_ident().class then
         if instance then
             if instance == win:get_ident().instance then
-                table.insert(result, table.getn(result)-offset+1, win)
+                table.insert(result, #(result)-offset+1, win)
             end
         else
-            table.insert(result, table.getn(result)-offset+1, win)
+            table.insert(result, #(result)-offset+1, win)
         end
       end
       if win == currwin then
 	 -- Current client window found, continue filling the table from
 	 -- the beginning.
-	 offset = table.getn(result)
+	 offset = #(result)
       end
       return true
    end)

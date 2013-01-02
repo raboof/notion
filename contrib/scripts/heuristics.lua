@@ -47,7 +47,7 @@ end
 -- at a time with step 1 between calls.
 local function gettwo(L)
     return coroutine.wrap(function()
-                              for i=1,table.getn(L)-1 do
+                              for i=1,#(L)-1 do
                                   coroutine.yield(L[i], L[i+1])
                               end
                           end)
