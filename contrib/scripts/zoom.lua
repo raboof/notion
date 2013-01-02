@@ -79,7 +79,7 @@ function zoom_client(curframe, curclient, options)
    if (not zoomframe) or (curframe == zoomframe) then
       return
    end
-   local zoomclient = zoomframe:lcurrent(1)
+   local zoomclient = zoomframe:mx_current()
    if curclient then
       zoomframe:attach(curclient)
    end
