@@ -355,6 +355,18 @@ static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
     region_unset_manager(reg, (WRegion*)rootwin);
 }
 
+static WRegion *rootwin_managed_disposeroot(WRootWin *rootwin, WRegion *reg)
+{
+    WScreen *scr=OBJ_CAST(reg, WScreen);
+    if(scr!=NULL && scr==scr->prev_scr){
+        warn(TR("Only screen may not be destroyed/detached."));
+        return NULL;
+    }
+
+    return reg;
+}
+
+
 
 static Window rootwin_x_window(WRootWin *rootwin)
 {
@@ -424,6 +436,8 @@ static DynFunTab rootwin_dynfuntab[]={
     {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
     {region_managed_remove, rootwin_managed_remove},
+    {(DynFun*)region_managed_disposeroot,
+     (DynFun*)rootwin_managed_disposeroot},
     END_DYNFUNTAB
 };
 
