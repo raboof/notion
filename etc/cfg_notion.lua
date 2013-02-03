@@ -94,6 +94,7 @@ dopath("cfg_defaults")
 --dopath("mod_dock")
 --dopath("mod_sp")
 --dopath("mod_notionflux")
+--dopath("mod_xrandr")
 
 
 --
