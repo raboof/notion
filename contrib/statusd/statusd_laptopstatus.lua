@@ -77,8 +77,10 @@ if not statusd_laptopstatus then
     --sysfs
     temp_info_sysfs = {"/sys/class/thermal/thermal_zone0/temp"},
     ac_state_sysfs = {"/sys/class/power_supply/AC/online"},
-    bat_now_sysfs = {"/sys/class/power_supply/BAT0/energy_now"},
-    bat_full_sysfs = {"/sys/class/power_supply/BAT0/energy_full"},
+    bat_energy_now_sysfs = {"/sys/class/power_supply/BAT0/energy_now"},
+    bat_energy_full_sysfs = {"/sys/class/power_supply/BAT0/energy_full"},
+    bat_charge_now_sysfs = {"/sys/class/power_supply/BAT0/charge_now"},
+    bat_charge_full_sysfs = {"/sys/class/power_supply/BAT0/charge_full"},
   }
 end
 
@@ -218,9 +220,15 @@ local function get_battery_sysfs()
     local full, now
 
     if pcall(function ()
-        now = tonumber(read_val(statusd_laptopstatus.bat_now_sysfs))
-        full = tonumber(read_val(statusd_laptopstatus.bat_full_sysfs))
-    end) then
+        now = tonumber(read_val(statusd_laptopstatus.bat_energy_now_sysfs))
+        full = tonumber(read_val(statusd_laptopstatus.bat_energy_full_sysfs))
+    end) 
+    or
+    pcall(function ()
+        now = tonumber(read_val(statusd_laptopstatus.bat_charge_now_sysfs))
+        full = tonumber(read_val(statusd_laptopstatus.bat_charge_full_sysfs))
+    end)
+    then
         local percent = math.floor(now / full * 100 + 5/10)
         local timeleft
         if get_ac_sysfs() == 1 then
