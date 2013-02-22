@@ -78,7 +78,7 @@ if not statusd_laptopstatus then
     temp_info_sysfs = {"/sys/class/thermal/thermal_zone0/temp"},
     ac_state_sysfs = {"/sys/class/power_supply/AC/online"},
     bat_now_sysfs = {"/sys/class/power_supply/BAT0/energy_now"},
-    bat_full_sysfs = {"/sys/class/power_supply/BAT0/energy_full"}
+    bat_full_sysfs = {"/sys/class/power_supply/BAT0/energy_full"},
   }
 end
 
@@ -133,15 +133,22 @@ function try_open(files, mode)
   end
 end
 
+function read_val(files)
+    local fd = try_open(files, "r")
+    if fd then 
+        local value = fd:read("*all")
+        fd:close()
+        return value
+    end
+end
+
 local function get_cpu()
   local mhz, hint
   if pcall(function ()
        local status
-       local file = io.open("/proc/cpuinfo", "r")
-       status, _, mhz = string.find(file:read("*all"),
+       status, _, mhz = string.find(read_val({"/proc/cpuinfo"}),
                                     "cpu MHz%s+: (%d+)")
        if not status then error("could not get MHz") end
-       file:close()
      end)
      then return {speed=string.format("%4dMHz", math.ceil(mhz/5)*5),
                   hint=hint}
@@ -150,29 +157,22 @@ end
 
 
 local function get_ac()
-  local file = try_open(statusd_laptopstatus.ac_state, "r")
-  local ac_str = file:read("*all")
-  file:close()
+  local ac_str = read_val(statusd_laptopstatus.ac_state) or ""
   if not string.find(ac_str, "state:%s+on.line") then return 0
   else return 1 end
 end
 
 local function get_ac_sysfs()
-  local file = try_open(statusd_laptopstatus.ac_state_sysfs, "r")
-  if file == nil then return 0 end
-  local ac_on = tonumber(file:read("*all"))
-  file:close()
-  return ac_on
+  local ac_on = read_val(statusd_laptopstatus.ac_state_sysfs)
+  return tonumber(ac_on or 0)
 end
 
 local function get_thermal_sysfs()
     local temp, hint = nil, "normal"
 
     if pcall(function ()
-        local file = try_open(statusd_laptopstatus.temp_info_sysfs, "r")
-        temp = file:read("*all")
+        temp=read_val(statusd_laptopstatus.temp_info_sysfs)
         temp = tonumber(temp)/1000
-        file:close();
     end)
      then if temp >= statusd_laptopstatus.temperature_important then
              hint = "important" end
@@ -187,12 +187,10 @@ local function get_thermal_procfs()
 
   if pcall(function ()
        local status
-       local file=try_open(statusd_laptopstatus.temp_info, "r")
-       status, _, temp = string.find(file:read("*all"),
+       status, _, temp = string.find(read_val(statusd_laptopstatus.temp_info),
                                      "temperature:%s+(%d+).*")
        if not status then error("could not get temperature") end
        temp = tonumber(temp)
-       file:close();
      end)
      then if temp >= statusd_laptopstatus.temperature_important then
              hint = "important" end
@@ -220,12 +218,8 @@ local function get_battery_sysfs()
     local full, now
 
     if pcall(function ()
-        local file=try_open(statusd_laptopstatus.bat_now_sysfs)
-        now = tonumber(file:read("*all"))
-        file:close();
-
-        local file=try_open(statusd_laptopstatus.bat_full_sysfs)
-        full = tonumber(file:read("*all"))
+        now = tonumber(read_val(statusd_laptopstatus.bat_now_sysfs))
+        full = tonumber(read_val(statusd_laptopstatus.bat_full_sysfs))
     end) then
         local percent = math.floor(now / full * 100 + 5/10)
         local timeleft
@@ -257,15 +251,9 @@ local function get_battery_procfs()
 
   if pcall(function ()
        local status
-       local file=try_open(statusd_laptopstatus.bat_info, "r")
-       local infocontents = file:read("*all")
-       file:close();
+       local statecontents = read_val(statusd_laptopstatus.bat_state)
   
-       local file=try_open(statusd_laptopstatus.bat_state, "r")
-       local statecontents = file:read("*all")
-       file:close();
-  
-       status, _, lastfull = string.find(infocontents, "last full capacity:%s+(%d+).*")
+       status, _, lastfull = string.find(read_val(statusd_laptopstatus.bat_info), "last full capacity:%s+(%d+).*")
        if not status then error("could not get full battery capacity") end
        lastfull = tonumber(lastfull)
        if string.find(statecontents, "present rate:%s+unknown.*") then
