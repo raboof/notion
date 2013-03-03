@@ -42,4 +42,8 @@ function mod_xrandr.get_outputs_within(all_outputs, screen)
     return filter(all_outputs, falls_within(screen:geom()))
 end
 
+-- Mark ourselves loaded.
+package.loaded["mod_xrandr"]=true
+
+-- Load configuration file
 dopath("cfg_xrandr", true)
