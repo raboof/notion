@@ -235,8 +235,20 @@ end
 -- refresh xinerama and rearrange workspaces on screen layout updates
 function mod_xrandr.screenlayoutupdated()
     notioncore.profiling_start('notion_xrandrrefresh.prof')
-    mod_xinerama.refresh()
+
+    local screens = mod_xinerama.query_screens()
+    if screens then
+        local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
+        mod_xinerama.setup_screens(merged_screens)
+    end
+
     mod_xrandr.rearrangeworkspaces()
+
+    if screens then
+        mod_xinerama.close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
+    end 
+
+    notioncore.screens_updated(notioncore.rootwin());
     notioncore.profiling_stop()
 end
 
