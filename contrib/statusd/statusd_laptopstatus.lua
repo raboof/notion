@@ -1,27 +1,28 @@
--- Authors: Jari Eskelinen <jari.eskelinen@iki.fi>, René van Bevern <rvb@pro-linux.de>, Juri Hamburg <juri@fail2fail.com>
+-- Authors: Jari Eskelinen <jari.eskelinen@iki.fi>, René van Bevern <rvb@pro-linux.de>, Juri Hamburg <juri@fail2fail.com>, Philipp Hartwig <ph@phhart.de>
 -- License: GPL, version 2
--- Last Changed: 2011
+-- Last Changed: 2013-04-09
 --
 -- statusd_laptopstatus.lua v0.0.3 (last modified 2011-10-30)
 --
 -- Copyright (C) 2005 Jari Eskelinen <jari.eskelinen@iki.fi>
---	modified by René van Bevern <rvb@pro-linux.de> for error handling
---	modified by Juri Hamburg <juri@fail2fail.com> for sysfs support (2011)
+--  modified by René van Bevern <rvb@pro-linux.de> for error handling
+--  modified by Juri Hamburg <juri@fail2fail.com> for sysfs support (2011)
+--  modified by Philipp Hartwig <ph@phhart.de> for improved sysfs support (2013)
 --
 -- Permission to copy, redistirbute, modify etc. is granted under the terms
 -- of GNU GENERAL PUBLIC LICENSE Version 2.
 --
 -- This is script for displaying some interesting information about your
--- laptops power saving in Ion's status monitor. Script is very Linux
+-- laptops power saving in Notion's status monitor. Script is very Linux
 -- specific (uses procfs or sysfs interface) and needs ACPI-support (don't
 -- know exactly but 2.6.x kernels should be fine). Also if you have some
 -- kind of exotic hardware (multiple processors, multiple batteries etc.)
 -- this script probably will fail or show incorrect information.
 --
--- The script will try procfs interface first. If that fails, it will try to
--- use the sysfs interface.
+-- The script will try sysfs interface first. If that fails, it will try to
+-- use the procfs interface.
 --
--- Just throw this script under ~/.ion3 (or ~/.notion) and add following keywords to your
+-- Just throw this script under ~/.notion and add following keywords to your
 -- cfg_statusbar.lua's template-line with your own taste:
 --
 -- %laptopstatus_cpuspeed
@@ -35,13 +36,9 @@
 -- You can also run this script with lua interpreter and see if you get
 -- right values.
 --
--- NOTICE: This is my first ion/lua-script, so probably this can be done better.
--- Feel free to improve this script.
---
 -- TODO: * Is it stupid to use file:read("*all"), can this cause infinite
 --         loops in some weird situations?
 --       * Do not poll for information not defined in template to be used
---       * Auto-detect right acpi devices instead of hardcoded BATT0 etc.
 
 --
 -- SETTINGS
@@ -49,6 +46,9 @@
 
 NA = "n/a"
 AC = "*AC*"
+
+sys_dir="/sys/class/"
+proc_dir="/proc/acpi/"
 
 if not statusd_laptopstatus then
   statusd_laptopstatus = {
@@ -59,28 +59,6 @@ if not statusd_laptopstatus then
     batterypercent_critical = 5,      -- Battery percent which will cause critical hint
     batterytimeleft_important = 600,  -- Battery time left (in secs) which will cause important hint
     batterytimeleft_critical = 300,   -- Battery time left (in secs) which will cause critical hint
-
-    --procfs
-    ac_state = {"/proc/acpi/ac_adapter/AC/state",
-    	        "/proc/acpi/ac_adapter/ACAD/state",
-		"/proc/acpi/ac_adapter/ADP0/state",
-		"/proc/acpi/ac_adapter/ADP1/state"},
-    temp_info = {"/proc/acpi/thermal_zone/THRM/temperature",
-                 "/proc/acpi/thermal_zone/THM/temperature",
-                 "/proc/acpi/thermal_zone/THM0/temperature",
-                 "/proc/acpi/thermal_zone/THM1/temperature"},
-    bat_info = {"/proc/acpi/battery/BAT0/info",
-                "/proc/acpi/battery/BAT1/info"},
-    bat_state = {"/proc/acpi/battery/BAT0/state",
-                 "/proc/acpi/battery/BAT1/state"},
-
-    --sysfs
-    temp_info_sysfs = {"/sys/class/thermal/thermal_zone0/temp"},
-    ac_state_sysfs = {"/sys/class/power_supply/AC/online"},
-    bat_energy_now_sysfs = {"/sys/class/power_supply/BAT0/energy_now"},
-    bat_energy_full_sysfs = {"/sys/class/power_supply/BAT0/energy_full"},
-    bat_charge_now_sysfs = {"/sys/class/power_supply/BAT0/charge_now"},
-    bat_charge_full_sysfs = {"/sys/class/power_supply/BAT0/charge_full"},
   }
 end
 
@@ -128,19 +106,38 @@ end
 rates_buffer = RingBuffer.create(20)
 
 
-function try_open(files, mode)
-  for _, file in pairs(files) do
-    local fd = io.open(file, mode)
-    if fd then return fd, file end
-  end
-end
-
-function read_val(files)
-    local fd = try_open(files, "r")
+function read_val(file)
+    local fd = io.open(file)
     if fd then 
-        local value = fd:read("*all")
+        local value = fd:read("*a")
         fd:close()
         return value
+    end
+end
+
+-- Returns the full path of the first subdirectory of "path" containing a file 
+-- with name "filename" and first line equal to "content"
+function lookup_subdir(path, filename, content)
+    if path:sub(-1) ~= "/" then path = path .. "/" end
+    local fd=io.open(path)
+    if not fd then return nil end
+    fd:close()
+
+    function dir_iter()
+        if pcall(require, "lfs") then
+            return lfs.dir(path)
+        else
+            return io.popen("ls -1 " .. path):lines()
+        end
+    end
+
+    for dir in dir_iter() do
+        if not (dir == "." or dir == "..") then
+            local fd=io.open(path .. dir .. "/" .. filename)
+            if fd and ((not content) or content == fd:read():lower()) then
+                return path .. dir .. "/"
+            end
+        end
     end
 end
 
@@ -148,7 +145,7 @@ local function get_cpu()
   local mhz, hint
   if pcall(function ()
        local status
-       status, _, mhz = string.find(read_val({"/proc/cpuinfo"}),
+       status, _, mhz = string.find(read_val("/proc/cpuinfo"),
                                     "cpu MHz%s+: (%d+)")
        if not status then error("could not get MHz") end
      end)
@@ -157,29 +154,25 @@ local function get_cpu()
      else return {speed=NA, hint=hint} end
 end
 
-
-local function get_ac()
-  local ac_str = read_val(statusd_laptopstatus.ac_state) or ""
-  if not string.find(ac_str, "state:%s+on.line") then return 0
-  else return 1 end
-end
-
-local function get_ac_sysfs()
-  local ac_on = read_val(statusd_laptopstatus.ac_state_sysfs)
-  return tonumber(ac_on or 0)
+local function on_ac()
+  if ac_sys then
+      return (read_val(ac_dir .. "online") == "1")
+  else
+      return string.find(read_val(ac_dir .. "state") or "", "state:%s+on.line")
+  end
 end
 
 local function get_thermal_sysfs()
     local temp, hint = nil, "normal"
 
     if pcall(function ()
-        temp=read_val(statusd_laptopstatus.temp_info_sysfs)
+        temp=read_val(temp_dir .. "temp")
         temp = tonumber(temp)/1000
     end)
      then if temp >= statusd_laptopstatus.temperature_important then
              hint = "important" end
           if temp >= statusd_laptopstatus.temperature_critical then
-	     hint = "critical" end
+             hint = "critical" end
           return {temperature=string.format("%02dC", temp), hint=hint}
      else return {temperature=NA, hint = "hint"} end
  end
@@ -189,7 +182,7 @@ local function get_thermal_procfs()
 
   if pcall(function ()
        local status
-       status, _, temp = string.find(read_val(statusd_laptopstatus.temp_info),
+       status, _, temp = string.find(read_val(temp_dir .. "temperature"),
                                      "temperature:%s+(%d+).*")
        if not status then error("could not get temperature") end
        temp = tonumber(temp)
@@ -197,16 +190,16 @@ local function get_thermal_procfs()
      then if temp >= statusd_laptopstatus.temperature_important then
              hint = "important" end
           if temp >= statusd_laptopstatus.temperature_critical then
-	     hint = "critical" end
+             hint = "critical" end
           return {temperature=string.format("%02dC", temp), hint=hint}
      else return {temperature=NA, hint = "hint"} end
 end
 
 local function get_thermal()
-    if try_open(statusd_laptopstatus.temp_info) ~= nil then
-        return get_thermal_procfs()
-    else
+    if temp_sys then
         return get_thermal_sysfs()
+    else
+        return get_thermal_procfs()
     end
 end
 
@@ -220,18 +213,20 @@ local function get_battery_sysfs()
     local full, now
 
     if pcall(function ()
-        now = tonumber(read_val(statusd_laptopstatus.bat_energy_now_sysfs))
-        full = tonumber(read_val(statusd_laptopstatus.bat_energy_full_sysfs))
-    end) 
+        now = tonumber(read_val(bat_dir .. "energy_now"))
+        full = tonumber(read_val(bat_dir .. "energy_full"))
+    end)
     or
     pcall(function ()
-        now = tonumber(read_val(statusd_laptopstatus.bat_charge_now_sysfs))
-        full = tonumber(read_val(statusd_laptopstatus.bat_charge_full_sysfs))
+        now = tonumber(read_val(bat_dir .. "charge_now"))
+        full = tonumber(read_val(bat_dir .. "charge_full"))
     end)
     then
+        --Some batteries erronously report a charge_now value of charge_full_design when full.
+        if now > full then now=full end
         local percent = math.floor(now / full * 100 + 5/10)
         local timeleft
-        if get_ac_sysfs() == 1 then
+        if on_ac() then
             timeleft = AC
         elseif last_power ~= nil and now < last_power then
             rate_sysfs = last_power - now 
@@ -259,9 +254,9 @@ local function get_battery_procfs()
 
   if pcall(function ()
        local status
-       local statecontents = read_val(statusd_laptopstatus.bat_state)
+       local statecontents = read_val(bat_dir .. "state")
   
-       status, _, lastfull = string.find(read_val(statusd_laptopstatus.bat_info), "last full capacity:%s+(%d+).*")
+       status, _, lastfull = string.find(read_val(bat_dir .. "info"), "last full capacity:%s+(%d+).*")
        if not status then error("could not get full battery capacity") end
        lastfull = tonumber(lastfull)
        if string.find(statecontents, "present rate:%s+unknown.*") then
@@ -278,7 +273,7 @@ local function get_battery_procfs()
        local percent = math.floor(remaining / lastfull * 100 + 5/10)
        local timeleft
        local hours, secs, mins
-       if get_ac() == 1 then
+       if on_ac() then
            timeleft = AC
        elseif rate <= 0 then
            timeleft = NA
@@ -299,19 +294,43 @@ local function get_battery_procfs()
   else return { percent=NA, timeleft=NA, drain=NA, percenthint=percenthint, timelefthint=timelefthint} end
 end
 
-
---if no procfs battery state is found, try sysfs
 local function get_battery()
-    if try_open(statusd_laptopstatus.bat_state) ~= nil then
-        return get_battery_procfs()
-    else 
+    if bat_sys then
         return get_battery_sysfs()
+    else 
+        return get_battery_procfs()
     end
 end
 
 local last_timeleft = nil
 
+function do_init()
+    init=true
+
+    ac_dir=lookup_subdir(sys_dir .. "power_supply" , "type", "mains")
+    ac_sys=true
+    if(not ac_dir) then
+        ac_dir=lookup_subdir(proc_dir .. "ac_adapter", "state")
+        ac_sys=false
+    end
+
+    bat_dir=lookup_subdir(sys_dir .. "power_supply", "type", "battery")
+    bat_sys=true
+    if(not bat_dir) then
+        bat_dir=lookup_subdir(proc_dir .. "battery", "state")
+        bat_sys=false
+    end
+
+    temp_dir=lookup_subdir(sys_dir .. "thermal", "type", "acpitz") or lookup_subdir(sys_dir .. "thermal", "type", "thermal zone") 
+    temp_sys=true
+    if(not temp_dir) then
+        temp_dir=lookup_subdir(proc_dir .. "thermal_zone", "temperature")
+        temp_sys=false
+    end
+end
+
 local function update_laptopstatus ()
+  if not init then do_init() end
   cpu = get_cpu()
   thermal = get_thermal()
   battery = get_battery()
