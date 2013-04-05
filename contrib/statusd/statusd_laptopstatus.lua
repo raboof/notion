@@ -156,7 +156,7 @@ end
 
 local function on_ac()
   if ac_sys then
-      return (read_val(ac_dir .. "online") == "1")
+      return (tonumber(read_val(ac_dir .. "online") or "") == 1)
   else
       return string.find(read_val(ac_dir .. "state") or "", "state:%s+on.line")
   end
