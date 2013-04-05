@@ -397,10 +397,6 @@ function mod_xinerama.setup_screens(screens)
             end
         end
     end
-
-    -- when the number of screens is lower than last time this function was 
-    -- called, move 'superfluous' screens away
-    close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
 end
 
 -- }}}
@@ -419,6 +415,10 @@ function mod_xinerama.refresh()
     if screens then
         local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
         mod_xinerama.setup_screens(merged_screens)
+
+        -- when the number of screens is lower than last time this function was 
+        -- called, ask 'superfluous' to close
+        close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
     end 
     notioncore.screens_updated(notioncore.rootwin());
 end
