@@ -362,6 +362,17 @@ function mod_xinerama.rearrange_workspaces(max_visible_screen_id)
    mod_xinerama.populate_empty_screens()
 end
 
+function mod_xinerama.find_max_screen_id(screens)
+    local max_screen_id = 0
+
+    for screen_index, screen in ipairs(screens) do
+        local screen_id = screen_index - 1
+        max_screen_id = max(max_screen_id, screen_id)        
+    end
+
+    return max_screen_id;
+end
+
 --DOC
 -- Perform the setup of notion screens.
 --
@@ -372,14 +383,11 @@ end
 --
 -- Example input: {{x=0,y=0,w=1024,h=768},{x=1024,y=0,w=1280,h=1024}}
 function mod_xinerama.setup_screens(screens)
-    local max_screen_id = 0
-
     -- Update screen dimensions or create new screens
     for screen_index, screen in ipairs(screens) do
         local screen_id = screen_index - 1
-        max_screen_id = max(max_screen_id, screen_id)        
-
         local existing_screen = notioncore.find_screen_id(screen_id)
+
         if existing_screen ~= nil then
             mod_xinerama.update_screen(existing_screen, screen)
         else
@@ -392,7 +400,7 @@ function mod_xinerama.setup_screens(screens)
 
     -- when the number of screens is lower than last time this function was 
     -- called, move 'superfluous' screens away
-    close_invisible_screens(max_screen_id)
+    close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
 end
 
 -- }}}
