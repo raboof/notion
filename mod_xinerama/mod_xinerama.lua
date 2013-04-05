@@ -308,7 +308,7 @@ end
 
 --- {{{ Setup notion's screens */
 
-function close_invisible_screens(max_visible_screen_id)
+function mod_xinerama.close_invisible_screens(max_visible_screen_id)
     local invisible_screen_id = max_visible_screen_id + 1
     local invisible_screen = notioncore.find_screen_id(invisible_screen_id)
     while invisible_screen do
@@ -418,7 +418,7 @@ function mod_xinerama.refresh()
 
         -- when the number of screens is lower than last time this function was 
         -- called, ask 'superfluous' to close
-        close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
+        mod_xinerama.close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
     end 
     notioncore.screens_updated(notioncore.rootwin());
 end
