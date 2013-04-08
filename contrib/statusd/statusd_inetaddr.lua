@@ -68,7 +68,7 @@ local function get_inetaddr_ifcfg()
 	else
 		local ifconfig_info = f:read('*a')
 		f:close()
-		st,en,inetaddr = string.find(ifconfig_info, 'inet addr:(%d+\.%d+\.%d+\.%d+)')
+		st,en,inetaddr = string.find(ifconfig_info, 'inet addr:(%d+%.%d+%.%d+%.%d+)')
 		if not inetaddr then
 			inetaddr=""
 		end
