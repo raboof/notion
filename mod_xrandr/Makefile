@@ -44,7 +44,7 @@ tarball: $(SOURCES) $(ETC) $(DOCS) Makefile
 
 .PHONY: test
 test: $(SOURCES)
-	lua test_xrandr.lua
+	for i in test_xrandr*.lua ; do echo 'Testing' $$i ; lua $$i ; done
 
 ######################################
 

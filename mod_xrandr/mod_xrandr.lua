@@ -31,7 +31,7 @@ end
 
 function falls_within(geom)
     return function(output)
-      result = output.x >= geom.x and output.y <= geom.y
+      local result = output.x >= geom.x and output.y <= geom.y
         and output.x + output.w <= geom.x + geom.w
         and output.y + output.h <= geom.y + geom.h
       return result;

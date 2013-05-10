@@ -1,11 +1,13 @@
 -- {{{ mock notion context
 local firstscreen = {
     geom = function() return { x=0, y=0, w=1680, h=1050 } end,
-    name = function() return "WScreen<1>" end
+    name = function() return "WScreen<1>" end,
+    id = function() return 0 end
 }
 local secondscreen = {
     geom = function() return { x=1680, y=0, w=1920, h=1080 } end,
-    name = function() return "WScreen" end
+    name = function() return "WScreen" end,
+    id = function() return 1 end
 }
 
 notioncore = { 
@@ -44,14 +46,14 @@ assert(singleton(outputs_within_secondscreen))
 assert(firstValue(outputs_within_secondscreen).y == 0)
 assert(firstValue(outputs_within_secondscreen).x == 1680)
 
-local candidates = candidate_screens_for_output(all_outputs, 'VGA1')
+local candidates = candidate_screens_for_output(1, all_outputs, 'VGA1')
 assert(singleton(candidates))
 assert(firstKey(candidates) == "WScreen<1>")
 
-candidates = candidate_screens_for_outputs(all_outputs, {'VGA1'})
+candidates = candidate_screens_for_outputs(1, all_outputs, {'VGA1'})
 assert(singleton(candidates))
 assert(firstKey(candidates) == "WScreen<1>")
 
-candidates = candidate_screens_for_output(all_outputs, 'LVDS1')
+candidates = candidate_screens_for_output(1, all_outputs, 'LVDS1')
 assert(singleton(candidates))
 assert(firstKey(candidates) == "WScreen")
