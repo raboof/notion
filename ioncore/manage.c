@@ -323,6 +323,7 @@ bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
 DECLSTRUCT(WRescueInfo){
     WPHolder *ph;
     WRegion *get_rescue;
+    /** set to TRUE when we fail to get a PHolder for this region. */
     bool failed_get;
     bool test;
     int flags;
