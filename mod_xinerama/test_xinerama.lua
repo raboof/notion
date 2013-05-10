@@ -51,10 +51,10 @@ end
 -- }}}
 
 -- {{{ mock notion context
-ioncore = { 
-  load_module = function() 
-    return 1
-  end
+notioncore = { 
+  load_module = function() return 1 end,
+  rootwin = function() return nil end,
+  screens_updated = function(root) return 1 end
 }
 
 function dopath() 
