@@ -63,6 +63,7 @@
 #include "exec.h"
 #include "screen-notify.h"
 #include "key.h"
+#include "log.h"
 
 
 #include "../version.h"
@@ -601,6 +602,8 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 {
     WRootWin *rootwin;
     sigset_t inittrap;
+
+    LOG(INFO, GENERAL, TR("Starting Notion"));
 
     /* Don't trap termination signals just yet. */
     sigemptyset(&inittrap);
