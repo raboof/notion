@@ -11,6 +11,13 @@
 #include <stdio.h>
 #include "log.h"
 
+const char* loglevel_names[] = {
+    "DEBUG",
+    "INFO",
+    "WARN",
+    "ERROR",
+};
+
 /** For this category, show log messages at this loglevel and above */
 LogLevel minimumLevel(LogCategory category)
 {
@@ -26,6 +33,7 @@ LogLevel minimumLevel(LogCategory category)
 void vlog_message(LogLevel level, LogCategory category, const char *file, int line, const char* function, const char* message, va_list argp)
 {
     if(level >= minimumLevel(category)){
+        fprintf(stderr, "%-6s", loglevel_names[level]);
         if(file==NULL)
             fprintf(stderr, "Notion: ");
         else
