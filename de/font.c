@@ -10,6 +10,7 @@
 
 #include <libtu/objp.h>
 #include <ioncore/common.h>
+#include <ioncore/log.h>
 #include "font.h"
 #include "fontset.h"
 #include "brush.h"
@@ -115,6 +116,7 @@ DEFont *de_load_font(const char *fontname)
     }
     
     if(ioncore_g.use_mb && !(ioncore_g.enc_utf8 && iso10646_font(fontname))){
+        LOG(DEBUG, FONT, "Loading fontset %s", fontname); 
         fontset=de_create_font_set(fontname);
         if(fontset!=NULL){
             if(XContextDependentDrawing(fontset)){
@@ -124,17 +126,18 @@ DEFont *de_load_font(const char *fontname)
             }
         }
     }else{
+        LOG(DEBUG, FONT, "Loading fontstruct %s", fontname); 
         fontstruct=XLoadQueryFont(ioncore_g.dpy, fontname);
     }
     
     if(fontstruct==NULL && fontset==NULL){
         if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
             DEFont *fnt;
-            warn(TR("Could not load font \"%s\", trying \"%s\""),
+            LOG(WARN, FONT, TR("Could not load font \"%s\", trying \"%s\""),
                  fontname, CF_FALLBACK_FONT_NAME);
             fnt=de_load_font(CF_FALLBACK_FONT_NAME);
             if(fnt==NULL)
-                warn(TR("Failed to load fallback font."));
+                LOG(WARN, FONT, TR("Failed to load fallback font."));
             return fnt;
         }
         return NULL;
