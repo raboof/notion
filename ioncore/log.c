@@ -1,5 +1,5 @@
 /*
- * ion/ioncore/log.c
+ * notion/ioncore/log.c
  *
  * Copyright (c) the Notion team 2013
  *
@@ -23,22 +23,24 @@ LogLevel minimumLevel(LogCategory category)
     }
 }
 
-void vlog_message(LogLevel level, LogCategory category, const char *file, int line, const char* message, va_list argp)
+void vlog_message(LogLevel level, LogCategory category, const char *file, int line, const char* function, const char* message, va_list argp)
 {
     if(level >= minimumLevel(category)){
-        fprintf(stderr, "Notion: ");
-        if(file!=NULL)
-            fprintf(stderr, "%s:%d: ", file, line);
+        if(file==NULL)
+            fprintf(stderr, "Notion: ");
+        else
+            fprintf(stderr, "/notion/../%s:%d: %s: ", file, line, function);
+
         vfprintf(stderr, message, argp);
         fprintf(stderr, "\n");
     }
 }
 
-void log_message(LogLevel level, LogCategory category, const char *file, int line, const char* message, ...)
+void log_message(LogLevel level, LogCategory category, const char *file, int line, const char* function, const char* message, ...)
 {
     va_list argp;
     va_start(argp, message);
-    vlog_message(level, category, file, line, message, argp);
+    vlog_message(level, category, file, line, function, message, argp);
     va_end(argp);
 }
 
@@ -47,7 +49,7 @@ extern void LOG(LogLevel level, LogCategory category, const char* message, ...)
 {
     va_list argp;
     va_start(argp, message);
-    vlog_message(level, category, NULL, -1, message, argp);
+    vlog_message(level, category, NULL, -1, NULL, message, argp);
     va_end(argp);
 }
 #endif
