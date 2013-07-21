@@ -174,7 +174,7 @@ POSIX_SOURCE=-D_POSIX_C_SOURCE=200112L
 # SunOS, (Irix)
 #XOPEN_SOURCE=-D__EXTENSIONS__
 
-C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
+C99_SOURCE?=-std=c99 -DCF_HAS_VA_COPY
 
 # The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
 # in some cases simply defining
