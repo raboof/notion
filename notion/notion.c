@@ -1,6 +1,7 @@
 /*
- * ion/ion/ion.c
+ * notion/notion/notion.c
  *
+ * Copyright (c) the Notion team 2013.
  * Copyright (c) Tuomo Valkonen 1999-2009. 
  *
  * See the included file LICENSE for details.
@@ -30,6 +31,9 @@
 #include <ioncore/event.h>
 #include "../version.h"
 
+#ifndef P_tmpdir
+#define P_tmpdir "/tmp"
+#endif
 
 /* Options. Getopt is not used because getopt_long is quite gnu-specific
  * and they don't know of '-display foo' -style args anyway.
