@@ -2,5 +2,5 @@ language: c
 compiler:
   - gcc
   - clang
-# Change this to your needs
-script: sudo apt-get install lua5.2 liblua5.2-dev && make
+before_install: sudo apt-get install lua5.2 liblua5.2-dev 
+script: make
