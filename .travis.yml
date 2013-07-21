@@ -3,4 +3,4 @@ compiler:
   - gcc
   - clang
 # Change this to your needs
-script: sudo apt-get install lua5.1 && make
+script: sudo apt-get install lua5.2 liblua5.2-dev && make
