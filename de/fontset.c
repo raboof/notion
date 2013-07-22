@@ -136,13 +136,15 @@ XFontSet de_create_font_set(const char *fontname)
         
         setlocale(LC_CTYPE, "C");
         
-        LOG(DEBUG, FONT, "Found a font with %d missing charsets for %s, trying with the C locale.", nmissing, fontname);
+        LOG(DEBUG, FONT, "Found no font for %s, trying with the C locale.", fontname);
         fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
         
         if(lcc!=NULL){
             setlocale(LC_CTYPE, lcc);
             free(lcc);
         }
+    }else{
+        LOG(DEBUG, FONT, "Found a font with %d missing charsets for %s, trying with the C locale.", nmissing, fontname);
     }
 
 #ifndef CF_NO_FONTSET_KLUDGE    
