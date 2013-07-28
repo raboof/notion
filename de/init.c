@@ -401,7 +401,7 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     }
     
     if(style->font==NULL)
-        de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
+        de_load_font_for_style(style, de_default_fontname());
     
     if(based_on!=NULL && 
        gr_stylespec_equals(&based_on->spec, &style->spec)){
@@ -512,7 +512,7 @@ bool de_init()
         style=de_create_style(rootwin, "*");
         if(style!=NULL){
             style->is_fallback=TRUE;
-            de_load_font_for_style(style, CF_FALLBACK_FONT_NAME);
+            de_load_font_for_style(style, de_default_fontname());
         }
     }
     

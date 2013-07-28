@@ -1,13 +1,14 @@
 /*
- * ion/de/font.h
+ * notion/de/font.h
  *
+ * Copyright (c) the Notion team 2013
  * Copyright (c) Tuomo Valkonen 1999-2009. 
  *
  * See the included file LICENSE for details.
  */
 
-#ifndef ION_DE_FONT_H
-#define ION_DE_FONT_H
+#ifndef NOTION_DE_FONT_H
+#define NOTION_DE_FONT_H
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
@@ -29,6 +30,7 @@ DECLSTRUCT(DEFont){
     DEFont *next, *prev;
 };
 
+extern const char *de_default_fontname();
 extern bool de_load_font_for_style(DEStyle *style, const char *fontname);
 extern bool de_set_font_for_style(DEStyle *style, DEFont *font);
 extern DEFont *de_load_font(const char *fontname);
@@ -51,4 +53,4 @@ extern uint debrush_get_text_width(DEBrush *brush, const char *text, uint len);
 extern uint defont_get_text_width(DEFont *font, const char *text, uint len);
 extern void defont_get_font_extents(DEFont *font, GrFontExtents *fnte);
 
-#endif /* ION_DE_FONT_H */
+#endif /* NOTION_DE_FONT_H */
