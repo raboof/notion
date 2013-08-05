@@ -130,7 +130,7 @@ HAS_SYSTEM_ASPRINTF ?= 1
 # monotonic clock at all (which Ion can live with, and usually detect).
 EXTRA_LIBS += -lrt
 
-# Cygwin needs this.
+# Cygwin needs this. Also when you disable _BSD_SOURCE you may need it.
 #DEFINES += -DCF_NO_GETLOADAVG
 
 
@@ -167,10 +167,11 @@ EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
 #C89_SOURCE=-ansi
 
-POSIX_SOURCE=-D_POSIX_C_SOURCE=200112L
+POSIX_SOURCE?=-D_POSIX_C_SOURCE=200112L
+BSD_SOURCE?=-D_BSD_SOURCE
 
 # Most systems
-#XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
+XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 # SunOS, (Irix)
 #XOPEN_SOURCE=-D__EXTENSIONS__
 

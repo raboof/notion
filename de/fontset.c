@@ -10,6 +10,7 @@
  *
  * However, the code that this file is based on, was taken from:
  *
+ * Copyright (c) 2013 - the Notion team
  * Screen.cc for Blackbox - an X11 Window manager
  * Copyright (c) 2001 - 2002 Sean 'Shaleh' Perry <shaleh@debian.org>
  * Copyright (c) 1997 - 2000 Brad Hughes (bhughes@tcac.net)
@@ -99,70 +100,74 @@ static const char *get_font_size(const char *pattern, int *size)
     }
 }
 
-
-XFontSet de_create_font_set(const char *fontname) 
+XFontSet de_create_font_in_current_locale(const char *fontname)
 {
     XFontSet fs;
     char **missing=NULL, *def="-";
-    int nmissing, pixel_size=0;
-    char weight[CF_FONT_ELEMENT_SIZE], slant[CF_FONT_ELEMENT_SIZE];
-    const char *nfontname=fontname;
-    char *pattern2=NULL;
+    int nmissing=0;
     int i;
     
     LOG(DEBUG, FONT, "Creating fontset for: %s", fontname);
     
     fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
 
-    if(fs && nmissing==0){
-        if(missing!=NULL) 
-            XFreeStringList(missing);
-        LOG(DEBUG, FONT, "Found a font without missing charsets for %s, returning it.", fontname);
-        return fs;
-    }
-    
-    /* Not a warning, nothing serious */
-    LOG(DEBUG, FONT, "Failed to load fontset.");
-    
-    if(!fs){
-        char *lcc=NULL;
-        const char *lc;
-        if(missing!=NULL)
-            XFreeStringList(missing);
-        
-        lc=setlocale(LC_CTYPE, NULL);
-        if(lc!=NULL && strcmp(lc, "POSIX")!=0 && strcmp(lc, "C")!=0)
-            lcc=scopy(lc);
-        
-        setlocale(LC_CTYPE, "C");
-        
-        LOG(DEBUG, FONT, "Found no font for %s, trying with the C locale.", fontname);
-        fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
-        
-        if(lcc!=NULL){
-            setlocale(LC_CTYPE, lcc);
-            free(lcc);
-        }
-    }else{
-        LOG(DEBUG, FONT, "Found a font with %d missing charsets for %s, trying with the C locale.", nmissing, fontname);
-    }
-
-#ifndef CF_NO_FONTSET_KLUDGE    
-
     if(fs){
-        XFontStruct **fontstructs;
-        char **fontnames;
-        XFontsOfFontSet(fs, &fontstructs, &fontnames);
-        nfontname=fontnames[0];
+        if(nmissing==0)
+            LOG(DEBUG, FONT, "Found a font without missing charsets for %s, returning it.", fontname);
+        else {
+            int i;
+            LOG(INFO, FONT, "Found a font with %d missing charsets for %s:", nmissing, fontname);
+            for(i=0;i<nmissing;i++)
+                LOG(DEBUG, FONT, "* %s", missing[i]);
+        }
     }
 
-    LOG(DEBUG, FONT, "Doing the no_fontset_kludge with fontname %s.", nfontname);
+    if(missing!=NULL)
+        XFreeStringList(missing);
 
-    get_font_element(nfontname, weight, CF_FONT_ELEMENT_SIZE,
+    return fs;
+}
+
+XFontSet de_create_font_in_c_locale(const char *fontname)
+{
+    XFontSet fs;
+    char *lcc=NULL;
+    const char *lc;
+    
+    LOG(DEBUG, FONT, "Found no font for %s in the current locale, trying with the C locale.", fontname);
+
+    lc=setlocale(LC_CTYPE, NULL);
+    if(lc!=NULL && strcmp(lc, "POSIX")!=0 && strcmp(lc, "C")!=0)
+        lcc=scopy(lc);
+    
+    setlocale(LC_CTYPE, "C");
+    
+    fs=de_create_font_in_current_locale(fontname);
+    
+    if(lcc!=NULL){
+        setlocale(LC_CTYPE, lcc);
+        free(lcc);
+    }
+ 
+    return fs;
+}
+
+
+XFontSet de_create_font_kludged(const char *fontname)
+{
+    XFontSet fs = NULL;
+#ifndef CF_NO_FONTSET_KLUDGE    
+    char *pattern2=NULL;
+    char weight[CF_FONT_ELEMENT_SIZE], slant[CF_FONT_ELEMENT_SIZE];
+    int pixel_size=0;
+
+    LOG(DEBUG, FONT, "Doing the fontset_kludge with fontname %s.", fontname);
+
+    get_font_element(fontname, weight, CF_FONT_ELEMENT_SIZE,
                      "-medium-", "-bold-", "-demibold-", "-regular-", NULL);
-    get_font_element(nfontname, slant, CF_FONT_ELEMENT_SIZE,
+    get_font_element(fontname, slant, CF_FONT_ELEMENT_SIZE,
                      "-r-", "-i-", "-o-", "-ri-", "-ro-", NULL);
-    get_font_size(nfontname, &pixel_size);
+    get_font_size(fontname, &pixel_size);
     
     if(!strcmp(weight, "*"))
         strncpy(weight, "medium", CF_FONT_ELEMENT_SIZE);
@@ -187,29 +192,29 @@ XFontSet de_create_font_set(const char *fontname)
                        fontname, weight, slant, pixel_size, pixel_size);
     }
     
-    if(pattern2==NULL)
-        return NULL;
+    if(pattern2!=NULL){
+        LOG(DEBUG, FONT, "no_fontset_kludge resulted in fontname %s", pattern2);
 
-    LOG(DEBUG, FONT, "no_fontset_kludge resulted in fontname %s", pattern2);
-    
-    nfontname=pattern2;
-    
-    if(nmissing)
-        XFreeStringList(missing);
-    if(fs){
-        XFreeFontSet(ioncore_g.dpy, fs);
-        LOG(DEBUG, FONT, "Trying '%s'.", nfontname);
+        fs = de_create_font_in_current_locale(pattern2);
+
+        free(pattern2);
     }
 
-    
-    fs=XCreateFontSet(ioncore_g.dpy, nfontname, &missing, &nmissing, &def);
-    
-    free(pattern2);
-    
 #endif
-    
-    if(missing!=NULL) 
-        XFreeStringList(missing);
-
     return fs;
+}
+
+XFontSet de_create_font_set(const char *fontname) 
+{
+    XFontSet fs=de_create_font_in_current_locale(fontname);
+
+    if (fs)
+        return fs;
+   
+    fs=de_create_font_in_c_locale(fontname);
+
+    if (fs)
+        return fs;
+    else 
+        return de_create_font_kludged(fontname);
 }
