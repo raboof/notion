@@ -13,9 +13,10 @@
 #  * LUA (full path to lua interpreter)
 #  * LUAC (full path to lua compiler)
 
-LUA_VERSION ?= $(shell pkg-config --exists lua5.2 && echo 5.2)
-LUA_VERSION ?= $(shell pkg-config --exists lua5.1 && echo 5.1)
-LUA_VERSION ?= $(shell pkg-config --exists lua    && echo 5.0)
+LUA_VERSION ?= $(shell \
+       (pkg-config --exists lua5.2 && echo 5.2) \
+    || (pkg-config --exists lua5.1 && echo 5.1) \
+    || (pkg-config --exists lua    && echo 5.0))
 
 ifeq ($(LUA_VERSION),)
     $(error Could not find any lua version. (Did you install the -dev package?))
