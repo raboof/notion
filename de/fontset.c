@@ -121,7 +121,7 @@ XFontSet de_create_font_in_current_locale(const char *fontname)
                 LOG(DEBUG, FONT, "* %s", missing[i]);
         }
     }else{
-        LOG(WARN, FONT, "Found no font for %s.", nmissing, fontname);
+        LOG(WARN, FONT, "Found no font for %s.", fontname);
     }
 
     if(missing!=NULL)
