@@ -16,7 +16,7 @@ DOCS=LICENSE README
 SOURCES=mod_xinerama.c
 
 MAKE_EXPORTS=mod_xinerama
-LIBS = $(X11_LIBS) -lXinerama
+LIBS = -L/usr/lib/x86_64-linux-gnu $(X11_LIBS) -lXinerama
 MODULE=mod_xinerama
 MODULE_STUB=mod_xinerama.lua
 
@@ -51,3 +51,8 @@ test: $(SOURCES)
 .PHONY: tags
 tags:
 	exuberant-ctags -R . $(TOPDIR)
+
+################ ls_xinerama utility ###############
+
+ls_xinerama: ls_xinerama.c
+	$(CC) ls_xinerama.c -o ls_xinerama -Wl,--as-needed -lX11 -lXinerama
