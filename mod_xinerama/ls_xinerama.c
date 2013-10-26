@@ -9,6 +9,8 @@ int main() {
     int xinerama_error_base;
     bool xinerama_ready = XineramaQueryExtension(dpy,&xinerama_event_base, &xinerama_error_base);
 
+    fprintf(stdout, "Basic Xinerama screen information - for all the details run 'xdpyinfo -ext XINERAMA'\n");
+
     if (!xinerama_ready)
         fprintf(stderr, "No Xinerama support detected, mod_xinerama won't do anything.");
     else {
