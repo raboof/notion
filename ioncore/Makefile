@@ -51,7 +51,7 @@ include $(TOPDIR)/build/rules.mk
 
 # without -finstrument-functions
 profiling.o: profiling.c
-	gcc $(CFLAGS:-finstrument-functions=) -c profiling.c -o profiling.o
+	$(CC) $(CFLAGS:-finstrument-functions=) -c profiling.c -o profiling.o
 
 ioncore.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
