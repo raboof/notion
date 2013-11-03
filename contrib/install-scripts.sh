@@ -10,7 +10,7 @@
 # It may get overwritten!
 
 INSTALL_LOCATION="$HOME/.notion/lib"
-SCRIPT_DIRS="keybindings scripts statusd styles"
+SCRIPT_DIRS="keybindings scripts statusbar statusd styles"
 
 ########################################################################
 
