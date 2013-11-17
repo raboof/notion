@@ -186,6 +186,6 @@ int mod_statusbar__terminate_statusd(int pid)
 
     // Send SIGHUP to the specified statusd process to indicate
     // that we're done.
-    kill( (pid_t)pid, SIGHUP)
+    kill( (pid_t)pid, SIGHUP);
 }
 
