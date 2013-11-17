@@ -343,6 +343,20 @@ function mod_statusbar.create(param)
     return sb
 end
 
+--DOC
+-- Function to terminate \file{ion-statusd} on exit or reload. Should
+-- be called from hook \var{deinit}.
+function mod_statusbar.terminate_statusd()
+    if statusd_pid==0 then
+        return
+    end
+
+    mod_statusbar._terminate_statusd(statusd_pid)
+end
+
+-- Establish hook
+ioncore.get_hook("ioncoore_deinit_hook"): add(mod_statusbar.terminate_statusd)
+
 -- }}}
 
 
