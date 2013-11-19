@@ -355,7 +355,7 @@ function mod_statusbar.terminate_statusd()
 end
 
 -- Establish hook
-ioncore.get_hook("ioncoore_deinit_hook"): add(mod_statusbar.terminate_statusd)
+ioncore.get_hook("ioncore_deinit_hook"):add(mod_statusbar.terminate_statusd)
 
 -- }}}
 
