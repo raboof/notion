@@ -352,6 +352,8 @@ function mod_statusbar.terminate_statusd()
     end
 
     mod_statusbar._terminate_statusd(statusd_pid)
+
+    statusd_pid=0
 end
 
 -- Establish hook
