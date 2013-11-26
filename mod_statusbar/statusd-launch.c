@@ -177,15 +177,11 @@ err:
     return -1;
 }
 
-/* It looks like child processes generated via fork() on Linux do not
- * get a signal when the parent process dies. Specifically, the
- * PR_SET_PDEATHSIG is cleared, therefore the ion-statusd process must
+/* statusd automatically exits when notion dies. However, when notion is
+ * restarted (i.e. notioncore.restart()), the new notion process is simply
+ * execve'ed on top of the old one, therefore the ion-statusd process must
  * be explicitly terminated on deinit. This function should be called
  * from Lua on deinit with the ion-statusd process id generated above.
- * 
- * For more information, refer to the following man pages:
- * - fork(2)
- * - prctl(2), specifically section on PR_SET_PDEATHSIG
  */
 EXTL_EXPORT
 int mod_statusbar__terminate_statusd(int pid)
