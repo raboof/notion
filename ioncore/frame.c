@@ -480,8 +480,10 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     
     hints_ret->base_width+=woff;
     hints_ret->base_height+=hoff;
-    hints_ret->max_width+=woff;
-    hints_ret->max_height+=hoff;
+    if(hints_ret->max_width!=INT_MAX)
+        hints_ret->max_width+=woff;
+    if(hints_ret->max_height!=INT_MAX)
+        hints_ret->max_height+=hoff;
     hints_ret->min_width+=woff;
     hints_ret->min_height+=hoff;
     
