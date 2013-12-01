@@ -82,7 +82,7 @@ static WFrameMode framemode_is_floating(WFrameMode mode)
 
 
 bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                WFrameMode mode)
+                WFrameMode mode, char *name)
 {
     WRectangle mg;
 
@@ -104,7 +104,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     
     gr_stylespec_init(&frame->baseattr);
     
-    if(!mplex_init((WMPlex*)frame, parent, fp, "Notion WFrame"))
+    if(!mplex_init((WMPlex*)frame, parent, fp, name))
         return FALSE;
     
     frame_initialise_gr(frame);
@@ -126,9 +126,9 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
 }
 
 
-WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode)
+WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode, char *name)
 {
-    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode));
+    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode, name));
 }
 
 
@@ -928,7 +928,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         }
     }
     
-    frame=create_frame(par, fp, mode);
+    frame=create_frame(par, fp, mode, "WFrame");
     
     if(frame!=NULL)
         frame_do_load(frame, tab);

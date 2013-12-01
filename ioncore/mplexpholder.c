@@ -215,7 +215,7 @@ static WRegion *recreate_handler(WWindow *par,
     WFramedParam *param=rp->param;
     WFrame *frame;
     
-    frame=create_frame(par, fp, param->mode);
+    frame=create_frame(par, fp, param->mode, "MPlex PHolder Frame");
     
     if(frame==NULL)
         return NULL;
