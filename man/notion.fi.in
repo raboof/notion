@@ -6,99 +6,99 @@ Notion - X11 ikkunanhallintaohjelma
 .I "[valinnat]"
 .SH "KUVAUS"
 
-Notion on n‰pp‰imistˆk‰ytt‰ji‰ silm‰ll‰pit‰en suunniteltu laatoitusta ja 
-v‰lilehti‰ hyˆdynt‰v‰ ikkunanhallintaohjelma X11:lle.
+Notion on n√§pp√§imist√∂k√§ytt√§ji√§ silm√§ll√§pit√§en suunniteltu laatoitusta ja 
+v√§lilehti√§ hy√∂dynt√§v√§ ikkunanhallintaohjelma X11:lle.
  
 .SH "VALINNAT"
 .TP
-.B \-display kone:palvelin.n‰yttˆ
+.B \-display kone:palvelin.n√§ytt√∂
 X palvelin, johon ottaa yhteys.
 .TP
 .B \-conffile asetustiedosto
-K‰ytett‰v‰ asetustiedosto.
+K√§ytett√§v√§ asetustiedosto.
 .TP
 .B \-searchdir dir
-Hakupolkuun lis‰tt‰v‰ hakemisto, josta lˆytyy asetus- ja muita tiedostoja.
+Hakupolkuun lis√§tt√§v√§ hakemisto, josta l√∂ytyy asetus- ja muita tiedostoja.
 .TP
 .B \-oneroot
-Hallitse vain oletusn‰yttˆ‰ X-palvelimilla, joissa on useampi perinteinen
-(ei Xinerama) n‰yttˆ/juuri-ikkuna. T‰m‰ n‰yttˆ voidaan valita \-display
-parametrill‰ tai DISPLAY ymp‰ristˆmuuttujalla.
+Hallitse vain oletusn√§ytt√∂√§ X-palvelimilla, joissa on useampi perinteinen
+(ei Xinerama) n√§ytt√∂/juuri-ikkuna. T√§m√§ n√§ytt√∂ voidaan valita \-display
+parametrill√§ tai DISPLAY ymp√§rist√∂muuttujalla.
 .TP
 .B \-session session_name
-Istunnon nimi. T‰m‰ vaikuttaa talletustiedostojen sijaintiin.
+Istunnon nimi. T√§m√§ vaikuttaa talletustiedostojen sijaintiin.
 .TP
 .B \-help
-N‰yt‰ komentorivin ohje.
+N√§yt√§ komentorivin ohje.
 .TP
 .B \-version
-N‰yt‰ Notionin versio.
+N√§yt√§ Notionin versio.
 .TP
 .B \-about
-N‰yt‰ tietoja Notionista (versio, tekij‰, lisenssi).
+N√§yt√§ tietoja Notionista (versio, tekij√§, lisenssi).
 
-.SH PERUSKƒSITTEET
+.SH PERUSK√ÑSITTEET
 
-T‰m‰ kappale on katsaus erilaisiin niin kutsuttuihin \fBkappaleisiin\fP,
-joita ilmenee Notionin hallitsemalla X-n‰ytˆll‰, ja niiden suhteisiin 
-tavallisessa kokoonpanossa. Sinun tarvitse ymm‰rt‰‰ n‰m‰ suhteet 
-tiet‰‰ksesi milloin mitk‰kin alempana kuvattavat n‰pp‰insidonnat 
-ovat k‰ytett‰viss‰si. Jos kaipaat viel‰ tarkempaa kuvausta, esimerkiksi
-tehd‰ksesi omat asetustiedostot, katso Notionin seittisivulta saatavaa 
+T√§m√§ kappale on katsaus erilaisiin niin kutsuttuihin \fBkappaleisiin\fP,
+joita ilmenee Notionin hallitsemalla X-n√§yt√∂ll√§, ja niiden suhteisiin 
+tavallisessa kokoonpanossa. Sinun tarvitse ymm√§rt√§√§ n√§m√§ suhteet 
+tiet√§√§ksesi milloin mitk√§kin alempana kuvattavat n√§pp√§insidonnat 
+ovat k√§ytett√§viss√§si. Jos kaipaat viel√§ tarkempaa kuvausta, esimerkiksi
+tehd√§ksesi omat asetustiedostot, katso Notionin seittisivulta saatavaa 
 yksityiskohtaisempaa dokumentaatiota.
 
-Ylimm‰n tason kappaleista, joilla on merkityst‰ t‰ss‰ yhteydess‰, 
-kutsutaan \fBn‰ytˆiksi\fP. Ne vastaavat fyysisi‰ n‰yttˆj‰. N‰ytˆt
-sis‰lt‰v‰t \fBtyˆpˆyti‰\fP (jotka ovat itse er‰‰nlaisia \fBryhmi‰\fP)
-ja kokoruudun tilassa olevia \fBasiakasikkunoita\fP. N‰m‰ kappaleet ovat 
-\fBlomitettu\fP siten, ett‰ vain yksi voi n‰ky‰ kerrallaan.
+Ylimm√§n tason kappaleista, joilla on merkityst√§ t√§ss√§ yhteydess√§, 
+kutsutaan \fBn√§yt√∂iksi\fP. Ne vastaavat fyysisi√§ n√§ytt√∂j√§. N√§yt√∂t
+sis√§lt√§v√§t \fBty√∂p√∂yti√§\fP (jotka ovat itse er√§√§nlaisia \fBryhmi√§\fP)
+ja kokoruudun tilassa olevia \fBasiakasikkunoita\fP. N√§m√§ kappaleet ovat 
+\fBlomitettu\fP siten, ett√§ vain yksi voi n√§ky√§ kerrallaan.
 
-Tyˆpˆyd‰t voivat vuorostaan sis‰lt‰‰ \fBlaatoituksia\fP sek‰
-kelluvia/irroitettuja \fBkehyksi‰\fP. Laatoitukset taasen sis‰lt‰v‰t
-\fBkehyksi‰\fP laatoitettuna t‰ytt‰m‰‰n koko n‰ytˆn, sek‰ mahdollisesti
-tilapalkin tai telakan (dock). N‰yttˆjen tapaan kehykset lomittavat 
-muita kappaleita, mutta t‰ss‰ tapauksessa l‰hinn‰ asiakasikkuna\fBryhmi‰\fP. 
-Kehykset ovat suurimman osan ajasta ainut asia, mink‰ n‰et Notionista. Niill‰
-voi olla reunakoristukset, ja lis‰ksi kehyksiss‰ on \fBv‰lilehti\fP 
+Ty√∂p√∂yd√§t voivat vuorostaan sis√§lt√§√§ \fBlaatoituksia\fP sek√§
+kelluvia/irroitettuja \fBkehyksi√§\fP. Laatoitukset taasen sis√§lt√§v√§t
+\fBkehyksi√§\fP laatoitettuna t√§ytt√§m√§√§n koko n√§yt√∂n, sek√§ mahdollisesti
+tilapalkin tai telakan (dock). N√§ytt√∂jen tapaan kehykset lomittavat 
+muita kappaleita, mutta t√§ss√§ tapauksessa l√§hinn√§ asiakasikkuna\fBryhmi√§\fP. 
+Kehykset ovat suurimman osan ajasta ainut asia, mink√§ n√§et Notionista. Niill√§
+voi olla reunakoristukset, ja lis√§ksi kehyksiss√§ on \fBv√§lilehti\fP 
 jokaiselle lomitetulle kappaleelle.
 
-\fBKyselyt\fP ovat n‰yttˆjen tai kehysten alaosiin imestyvi‰ laatikoita,
-jotka odottavat sinulta tekstin syˆttˆ‰ jonkin siit‰ riippuvan toiminnon
-suorittamiseksi. Useimmat kyselyt tukevat tab-t‰ydennyst‰.
+\fBKyselyt\fP ovat n√§ytt√∂jen tai kehysten alaosiin imestyvi√§ laatikoita,
+jotka odottavat sinulta tekstin sy√∂tt√∂√§ jonkin siit√§ riippuvan toiminnon
+suorittamiseksi. Useimmat kyselyt tukevat tab-t√§ydennyst√§.
 
 
 .SH SIDONNAT
 
-N‰m‰ ovat oletusarvoiset n‰pp‰in- ja osoitinsidonnat. N‰pp‰inmuunninta
-(\fBMod1\fP) vastaava n‰pp‰in riippuu j‰rjestelm‰st‰si. PC-tietokoneilla,
-joissa on XFree86 se on todenn‰kˆisesti vasen Alt-n‰pp‰in (\fBAlt_L\fP).
-Suneilla se on luultavasti sidottu timanttin‰pp‰imiin. K‰yt‰ komentoa
-\fIxmodmap(1x)\fP selvitt‰‰ksesi asian tarkemmin.
+N√§m√§ ovat oletusarvoiset n√§pp√§in- ja osoitinsidonnat. N√§pp√§inmuunninta
+(\fBMod1\fP) vastaava n√§pp√§in riippuu j√§rjestelm√§st√§si. PC-tietokoneilla,
+joissa on XFree86 se on todenn√§k√∂isesti vasen Alt-n√§pp√§in (\fBAlt_L\fP).
+Suneilla se on luultavasti sidottu timanttin√§pp√§imiin. K√§yt√§ komentoa
+\fIxmodmap(1x)\fP selvitt√§√§ksesi asian tarkemmin.
 
-Otsikkojen per‰ss‰ hakasuluissa oleva merkkijono ilmoittaa moduulin,
-jonka asetustiedosto m‰‰rittelee alla olevat sidonnat.
+Otsikkojen per√§ss√§ hakasuluissa oleva merkkijono ilmoittaa moduulin,
+jonka asetustiedosto m√§√§rittelee alla olevat sidonnat.
 
 .SS Yleisesti saatavilla olevat sidonnat
 
 BINDINGS:WScreen
 
-.SS N‰ytˆill‰ ja kaikissa kehyksiss‰ toimivat sidonnat
+.SS N√§yt√∂ill√§ ja kaikissa kehyksiss√§ toimivat sidonnat
 
 BINDINGS:WMPlex
 
-.SS Kaikissa kehyksiss‰ toimivat sidonnat
+.SS Kaikissa kehyksiss√§ toimivat sidonnat
 
 BINDINGS:WFrame
 
-.SS N‰ytˆill‰ ja ylimm‰n tason kehyksiss‰ (ei ns. transientit) toimivat sidonnat
+.SS N√§yt√∂ill√§ ja ylimm√§n tason kehyksiss√§ (ei ns. transientit) toimivat sidonnat
 
 BINDINGS:WMPlex.toplevel
 
-.SS Ylimm‰n tason kehyksiss‰ (ei ns. transientit) toimivat sidonnat
+.SS Ylimm√§n tason kehyksiss√§ (ei ns. transientit) toimivat sidonnat
 
 BINDINGS:WFrame.toplevel
 
-.SS Kelluvissa/irroitetuissa kehyksiss‰ toimivat sidonnat
+.SS Kelluvissa/irroitetuissa kehyksiss√§ toimivat sidonnat
 
 BINDINGS:WFrame.floating
 
@@ -122,8 +122,8 @@ BINDINGS:WInput
 
 .SS Tekstinmuokkaussidonnat kyselyihin [mod_query]
 
-N‰m‰ n‰pp‰insidonnat vastaavat tekstieditorin \fIjoe(1)\fP sidontoja.
-Leikkaus ja liimaus toimii kuitenkin tavanomaisemmin, joskin n‰pp‰imet
+N√§m√§ n√§pp√§insidonnat vastaavat tekstieditorin \fIjoe(1)\fP sidontoja.
+Leikkaus ja liimaus toimii kuitenkin tavanomaisemmin, joskin n√§pp√§imet
 ovat vastaavat.
 
 BINDINGS:WEdln
@@ -136,30 +136,30 @@ BINDINGS:WMenu
 .SH TIEDOSTOT JA HAKEMISTOT
 .TP
 .B ETCDIR/cfg_notion.lua
-J‰rjestelm‰n oletusarvoinen p‰‰asetustiedosto.
+J√§rjestelm√§n oletusarvoinen p√§√§asetustiedosto.
 .TP
 .B ETCDIR/cfg_*.lua
 Muita asetustiedostoja.
 .TP
 .B ETCDIR/look_*.lua
-Ulkon‰ˆn asetustiedostoja.
+Ulkon√§√∂n asetustiedostoja.
 .TP
 .B ~/.notion/
-K‰ytt‰j‰n asetustiedostot.
+K√§ytt√§j√§n asetustiedostot.
 .TP
 .B ~/.notion/cfg_notion.lua
-K‰ytt‰j‰n oletusarvoinen p‰‰asetustiedosto.
+K√§ytt√§j√§n oletusarvoinen p√§√§asetustiedosto.
 
-.SH KATSO MY÷S
+.SH KATSO MY√ñS
 Notionin kotisivu, \fIhttp://iki.fi/tuomov/ion/\fP (englanniksi).
 .PP
 Dokumentti "Configuring and extending Notion with Lua" (englanniksi)
-n‰ht‰viss‰ Notionin kotisivulla.
+n√§ht√§viss√§ Notionin kotisivulla.
 .PP
 .I DOCDIR/
 .PP
 \fIX(7x)\fP, \fIjoe(1)\fP
 
-.SH TEKIJƒ
+.SH TEKIJ√Ñ
 Notionin on kirjoittanut Notion Team
 Ionin on kirjoittanut Tuomo Valkonen <tuomov at iki.fi>.

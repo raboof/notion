@@ -1,26 +1,26 @@
 
-Vítejte v Notionu!
+VÃ­tejte v Notionu!
 
-Pokud jste je¹tì nikdy Notion nepou¾ívali, silnì vám doporuèujeme
-prostudovat si pøed pokraèováním jeho manuálovou stránku. Kopii
-manuálové stránky naleznete ní¾e, ale mù¾ete se k ní kdykoliv vrátit
-napøíklad stiskem klávesy <F1> následované klávesou <Enter>, nebo
-v terminálu spu¹tìním pøíkazu 'man notion'. (Pøedpokládáme, ¾e jste
-Notion nainstalovali standardním zpùsobem a ¾e systémové pøíkazy ví, kde
-naleznou manuálovou stránku.)
+Pokud jste jeÂ¹tÃ¬ nikdy Notion nepouÂ¾Ã­vali, silnÃ¬ vÃ¡m doporuÃ¨ujeme
+prostudovat si pÃ¸ed pokraÃ¨ovÃ¡nÃ­m jeho manuÃ¡lovou strÃ¡nku. Kopii
+manuÃ¡lovÃ© strÃ¡nky naleznete nÃ­Â¾e, ale mÃ¹Â¾ete se k nÃ­ kdykoliv vrÃ¡tit
+napÃ¸Ã­klad stiskem klÃ¡vesy <F1> nÃ¡sledovanÃ© klÃ¡vesou <Enter>, nebo
+v terminÃ¡lu spuÂ¹tÃ¬nÃ­m pÃ¸Ã­kazu 'man notion'. (PÃ¸edpoklÃ¡dÃ¡me, Â¾e jste
+Notion nainstalovali standardnÃ­m zpÃ¹sobem a Â¾e systÃ©movÃ© pÃ¸Ã­kazy vÃ­, kde
+naleznou manuÃ¡lovou strÃ¡nku.)
 
-Jestli¾e jste pøíli¹ nedoèkaví a pøeze v¹echna doporuèení si
-manuálovou stránku nepøeètete, mìli byste alespoò vìdìt, ¾e klávesou
-<F2> by se mìl spustit emulátor terminálu (xterm) a ¾e do hlavního
-menu se dostanete klávesou <F12>.
+JestliÂ¾e jste pÃ¸Ã­liÂ¹ nedoÃ¨kavÃ­ a pÃ¸eze vÂ¹echna doporuÃ¨enÃ­ si
+manuÃ¡lovou strÃ¡nku nepÃ¸eÃ¨tete, mÃ¬li byste alespoÃ² vÃ¬dÃ¬t, Â¾e klÃ¡vesou
+<F2> by se mÃ¬l spustit emulÃ¡tor terminÃ¡lu (xterm) a Â¾e do hlavnÃ­ho
+menu se dostanete klÃ¡vesou <F12>.
 
-A¾ se budete cítit pøipraveni na psaní vlastních konfiguraèních
-souborù (jednou k tomu stejnì dojde), prostudujte si konfiguraèní
-manuál dostupnı na webovıch stránkách Notionu. Pøedtím ale doporuèujeme
-Notion nìjakou dobu pou¾ívat, abyste pochytili základní koncepty nutné
-pro porozumìní konfiguraèních souborù.
+AÂ¾ se budete cÃ­tit pÃ¸ipraveni na psanÃ­ vlastnÃ­ch konfiguraÃ¨nÃ­ch
+souborÃ¹ (jednou k tomu stejnÃ¬ dojde), prostudujte si konfiguraÃ¨nÃ­
+manuÃ¡l dostupnÃ½ na webovÃ½ch strÃ¡nkÃ¡ch Notionu. PÃ¸edtÃ­m ale doporuÃ¨ujeme
+Notion nÃ¬jakou dobu pouÂ¾Ã­vat, abyste pochytili zÃ¡kladnÃ­ koncepty nutnÃ©
+pro porozumÃ¬nÃ­ konfiguraÃ¨nÃ­ch souborÃ¹.
 
 
----- Následuje manuálová stránka ----
+---- NÃ¡sleduje manuÃ¡lovÃ¡ strÃ¡nka ----
 
 
