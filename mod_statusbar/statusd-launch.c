@@ -8,6 +8,7 @@
  
 #include <sys/time.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -30,7 +31,6 @@
 #define BL 1024
 
 #define USEC 1000000
-
 
 static bool process_pipe(int fd, ExtlFn fn, 
                          bool *doneseen, bool *eagain)
@@ -175,5 +175,25 @@ err:
     close(outfd);
     close(errfd);
     return -1;
+}
+
+/* statusd automatically exits when notion dies. However, when notion is
+ * restarted (i.e. notioncore.restart()), the new notion process is simply
+ * execve'ed on top of the old one, therefore the ion-statusd process must
+ * be explicitly terminated on deinit. This function should be called
+ * from Lua on deinit with the ion-statusd process id generated above.
+ */
+EXTL_EXPORT
+int mod_statusbar__terminate_statusd(int pid)
+{
+    if(pid==0) {
+        return -1;
+    }
+
+    // Send SIGHUP to the specified statusd process to indicate
+    // that we're done.
+    kill( (pid_t)pid, SIGHUP);
+
+    return 0;
 }
 

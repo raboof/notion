@@ -542,7 +542,7 @@ bool tiling_do_attach_initial(WTiling *ws, WRegion *reg)
 
 static WRegion *create_frame_tiling(WWindow *parent, const WFitParams *fp)
 {
-    return (WRegion*)create_frame(parent, fp, FRAME_MODE_TILED);
+    return (WRegion*)create_frame(parent, fp, FRAME_MODE_TILED, "Tiling Frame");
 }
 
 

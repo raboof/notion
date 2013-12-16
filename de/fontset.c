@@ -120,6 +120,8 @@ XFontSet de_create_font_in_current_locale(const char *fontname)
             for(i=0;i<nmissing;i++)
                 LOG(DEBUG, FONT, "* %s", missing[i]);
         }
+    }else{
+        LOG(WARN, FONT, "Found no font for %s.", fontname);
     }
 
     if(missing!=NULL)
@@ -134,7 +136,7 @@ XFontSet de_create_font_in_c_locale(const char *fontname)
     char *lcc=NULL;
     const char *lc;
     
-    LOG(DEBUG, FONT, "Found no font for %s in the current locale, trying with the C locale.", fontname);
+    LOG(DEBUG, FONT, "Trying to load %s with the C locale.", fontname);
 
     lc=setlocale(LC_CTYPE, NULL);
     if(lc!=NULL && strcmp(lc, "POSIX")!=0 && strcmp(lc, "C")!=0)
