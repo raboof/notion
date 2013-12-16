@@ -58,8 +58,8 @@ DECLCLASS(WGroup){
 };
 
 
-extern bool group_init(WGroup *grp, WWindow *parent, const WFitParams *fp);
-extern WGroup *create_group(WWindow *parent, const WFitParams *fp);
+extern bool group_init(WGroup *grp, WWindow *parent, const WFitParams *fp, const char *name);
+extern WGroup *create_group(WWindow *parent, const WFitParams *fp, const char *name);
 extern void group_deinit(WGroup *grp);
 
 extern WRegion *group_load(WWindow *par, const WFitParams *fp, 

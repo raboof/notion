@@ -268,7 +268,7 @@ bool groupcw_init(WGroupCW *cwg, WWindow *parent, const WFitParams *fp)
 {
     cwg->transient_szplcy=DFLT_SZPLCY;
     
-    if(!group_init(&(cwg->grp), parent, fp))
+    if(!group_init(&(cwg->grp), parent, fp, "Notion GroupCW"))
         return FALSE;
     
     region_add_bindmap((WRegion*)cwg, ioncore_groupcw_bindmap);

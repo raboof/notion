@@ -361,7 +361,7 @@ void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 /*{{{ Create/destroy */
 
 
-bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
+bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp, const char *name)
 {
     const char *p[1];
 
@@ -378,7 +378,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     if(ws->dummywin==None)
         return FALSE;
 
-    p[0] = "WGroup";
+    p[0] = name;
     xwindow_set_text_property(ws->dummywin, XA_WM_NAME, p, 1);
 
     region_init(&ws->reg, par, fp);
@@ -398,9 +398,9 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
 }
 
 
-WGroup *create_group(WWindow *par, const WFitParams *fp)
+WGroup *create_group(WWindow *par, const WFitParams *fp, const char *name)
 {
-    CREATEOBJ_IMPL(WGroup, group, (p, par, fp));
+    CREATEOBJ_IMPL(WGroup, group, (p, par, fp, name));
 }
 
 
@@ -1403,11 +1403,12 @@ void group_do_load(WGroup *ws, ExtlTab tab)
 }
 
 
-WRegion *group_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+WRegion *group_loaj(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WGroup *ws;
-    
-    ws=create_group(par, fp);
+
+    /* Generic initial name - to be overwritten later. */
+    ws=create_group(par, fp, "Notion GroupCW or GroupWS");
     
     if(ws==NULL)
         return NULL;

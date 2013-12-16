@@ -307,7 +307,7 @@ static WRegion *groupws_managed_disposeroot(WGroupWS *ws, WRegion *reg)
 
 bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp)
 {
-    if(!group_init(&(ws->grp), parent, fp))
+    if(!group_init(&(ws->grp), parent, fp, "Notion GroupWS"))
         return FALSE;
 
     ws->initial_outputs=extl_create_table();
