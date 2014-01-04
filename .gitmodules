@@ -13,9 +13,6 @@
 [submodule "libtu"]
 	path = libtu
 	url = ../libtu
-[submodule "contrib"]
-	path = contrib
-	url = ../contrib
 [submodule "mod_notionflux"]
 	path = mod_notionflux
 	url = ../mod_notionflux
