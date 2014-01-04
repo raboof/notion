@@ -1,6 +1,3 @@
-[submodule "mod_xrandr"]
-	path = mod_xrandr
-	url = ../mod_xrandr
 [submodule "mod_xkbevents"]
 	path = mod_xkbevents
 	url = ../mod_xkbevents
