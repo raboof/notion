@@ -1,6 +1,3 @@
-[submodule "mod_xinerama"]
-	path = mod_xinerama
-	url = ../mod_xinerama
 [submodule "mod_xrandr"]
 	path = mod_xrandr
 	url = ../mod_xrandr
