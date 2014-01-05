@@ -1,0 +1,62 @@
+.TH NOTIONFLUX 1
+.SH NAME
+Notionflux - lua remote control for Notion.
+.SH SYNOPSIS
+.B notionflux
+.I "[-e code]"
+.SH "DESCRIPTION"
+
+Notionflux allows you to access the notion lua scripting interface from the 
+command\-line. It either takes a script from stdin or through the '\-e' 
+parameter.
+
+The lua script will be executed by the Lua engine running in Notion, which 
+means it has access to the Notion lua api (notioncore.* et al). Calls to 
+'print' will print values to Notion's stdout (e.g. ~/.xsession\-errors). 
+The scripts' return value will be printed by notionflux. 
+
+.SH "OPTIONS"
+.TP
+.B \-e code
+Lua code to execute.
+
+.SH "ENVIRONMENT"
+
+Notionflux talks to Notion through a socket, which is determined by the _NOTION_MOD_NOTIONFLUX_SOCKET property on the root of the display on which Notion is running. 
+
+.SH "SECURITY"
+
+The notionflux socket is created with read/write permissions only for the user who started notion. Neither notion nor notionflux are setuid, so notionflux should not pose any security threat.
+
+.SH "EXAMPLES"
+Write 'foo' to Notion's stdout and 'bar' to the terminal, specifying the script on the commandline:
+.PP
+.nf
+.RS
+$ notionflux -e "print('foo'); return 'bar'"
+"bar"
+.RE
+.fi
+.PP
+Or the same, but now via STDIN:
+.PP
+.nf
+.RS
+$ echo "print('foo'); return 'bar'" | notionflux
+"bar"
+.RE
+.fi
+.PP
+
+.SH SEE ALSO
+The Notion home page, \fIhttp://notion.sf.net/\fP
+.PP
+The document "Configuring and extending Notion with Lua" found on the
+Notion home page.
+.PP
+.I DOCDIR/
+.PP
+\fIX(7x)\fP, \fInotionflux(1)\fP
+
+.SH AUTHOR
+Notionflux was written by the Notion team, based on ionflux which was written by Tuomo Valkonen <tuomov at iki.fi>.
