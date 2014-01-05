@@ -57,7 +57,7 @@ stdout and \'bar\' to the terminal, specifying the script on the commandline:
 .PP
 .nf
 .RS
-$ notionflux -e "print('foo'); return 'bar'"
+$ notionflux \-e "print('foo'); return 'bar'"
 "bar"
 .RE
 .fi
