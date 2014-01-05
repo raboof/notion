@@ -53,10 +53,10 @@ dist:
 	DIR=`basename "$$PWD"` ;\
 	RELEASE=`./nextversion.sh` ;\
 	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"$$RELEASE\"/" version.h ;\
-	git add version.h; git commit -m "Releasing version $$RELEASE"
+	git add version.h; git commit -m "Releasing version $$RELEASE" ;\
 	git tag $$RELEASE ; git push --tags ;\
-	git archive --format=tar.gz $$RELEASE > ../notion-$$RELEASE.tar.gz
-	git archive --format=tar.bz2 $$RELEASE > ../notion-$$RELEASE.tar.gz
+	git archive --format=tar.gz $$RELEASE > ../notion-$$RELEASE.tar.gz ;\
+	git archive --format=tar.bz2 $$RELEASE > ../notion-$$RELEASE.tar.bz2 ;\
 	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"snapshot\"/" version.h ;\
 	git add version.h; git commit -m "Released version $$RELEASE"
 
