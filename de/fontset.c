@@ -217,6 +217,13 @@ XFontSet de_create_font_set(const char *fontname)
 
     if (fs)
         return fs;
-    else 
-        return de_create_font_kludged(fontname);
+
+    fs = de_create_font_kludged(fontname);
+
+    if (fs)
+        return fs;
+
+    /* The final fallback... */
+    warn(TR("Could not load font %s"), fontname);
+    return de_create_font_in_current_locale("-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
 }
