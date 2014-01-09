@@ -55,8 +55,8 @@ dist:
 	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"$$RELEASE\"/" version.h ;\
 	git add version.h; git commit -m "Releasing version $$RELEASE" ;\
 	git tag $$RELEASE ; git push --tags ;\
-	git archive --format=tar.gz $$RELEASE > ../notion-$$RELEASE-src.tar.gz ;\
-	git archive --format=tar $$RELEASE | bzip2 > ../notion-$$RELEASE-src.tar.bz2 ;\
+	git archive --prefix notion-$$RELEASE/ --format=tar.gz $$RELEASE > ../notion-$$RELEASE-src.tar.gz ;\
+	git archive --prefix notion-$$RELEASE/ --format=tar $$RELEASE | bzip2 > ../notion-$$RELEASE-src.tar.bz2 ;\
 	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"snapshot\"/" version.h ;\
 	git add version.h; git commit -m "Released version $$RELEASE"
 
