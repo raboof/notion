@@ -422,16 +422,6 @@ IMPLCLASS(WTimer, Obj, timer_deinit, NULL);
 
 /*{{{ Signal handling */
 
-
-static void fatal_signal_handler(int signal_num)
-{
-    set_warn_handler(NULL);
-    warn(TR("Caught fatal signal %d. Dying without deinit."), signal_num); 
-    signal(signal_num, SIG_DFL);
-    kill(getpid(), signal_num);
-}
-
-           
 static void deadly_signal_handler(int signal_num)
 {
     set_warn_handler(NULL);
@@ -495,7 +485,6 @@ static void ignore_handler(int signal_num)
 
 #define IFTRAP(X) if(sigismember(which, X))
 #define DEADLY(X) IFTRAP(X) signal(X, deadly_signal_handler);
-#define FATAL(X) IFTRAP(X) signal(X, fatal_signal_handler);
 #define IGNORE(X) IFTRAP(X) signal(X, SIG_IGN)
 
 
@@ -514,16 +503,14 @@ void mainloop_trap_signals(const sigset_t *which)
     sigemptyset(&set);
     sigemptyset(&oldset);
     sigprocmask(SIG_SETMASK, &set, &oldset);
-    
+
+    // I do not handle SIG{ILL,SEGV,FPE,BUS} since there's not much I can do in
+    // response
+
     DEADLY(SIGHUP);
     DEADLY(SIGQUIT);
     DEADLY(SIGINT);
     DEADLY(SIGABRT);
-
-    FATAL(SIGILL);
-    FATAL(SIGSEGV);
-    FATAL(SIGFPE);
-    FATAL(SIGBUS);
     
     IGNORE(SIGTRAP);
     /*IGNORE(SIGWINCH);*/
@@ -576,7 +563,6 @@ void mainloop_trap_signals(const sigset_t *which)
 }
 
 #undef IGNORE
-#undef FATAL
 #undef DEADLY
 
 
