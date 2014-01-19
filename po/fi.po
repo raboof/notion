@@ -21,11 +21,11 @@ msgstr ""
 
 #: ../ioncore/conf-bindings.c:93
 msgid "Insane key combination."
-msgstr "J‰rjetˆn n‰pp‰inyhdistelm‰."
+msgstr "J√§rjet√∂n n√§pp√§inyhdistelm√§."
 
 #: ../ioncore/conf-bindings.c:97
 msgid "Could not convert keysym to keycode."
-msgstr "N‰pp‰insymbolin muunto n‰pp‰inkoodiksi ep‰onnistui."
+msgstr "N√§pp√§insymbolin muunto n√§pp√§inkoodiksi ep√§onnistui."
 
 #: ../ioncore/conf-bindings.c:108
 #, c-format
@@ -34,23 +34,23 @@ msgstr "Tuntematon nappi \"%s\"."
 
 #: ../ioncore/conf-bindings.c:113
 msgid "Insane button combination."
-msgstr "J‰rjetˆn nappiyhdistelm‰."
+msgstr "J√§rjet√∂n nappiyhdistelm√§."
 
 #: ../ioncore/conf-bindings.c:120 ../ioncore/conf-bindings.c:127
 msgid "Insane modifier combination."
-msgstr "J‰rjestˆn n‰pp‰inmuunninyhdistelm‰."
+msgstr "J√§rjest√∂n n√§pp√§inmuunninyhdistelm√§."
 
 #: ../ioncore/conf-bindings.c:165
 #, c-format
 msgid "Can not wait on modifiers when no modifiers set in \"%s\"."
 msgstr ""
-"N‰pp‰inmuuntimia ei voida odottaa sidonnassa \"%s\", koska siin‰ ei ole "
-"niit‰."
+"N√§pp√§inmuuntimia ei voida odottaa sidonnassa \"%s\", koska siin√§ ei ole "
+"niit√§."
 
 #: ../ioncore/conf-bindings.c:183
 #, c-format
 msgid "Unable to add binding %s."
-msgstr "Ei voitu lis‰t‰ sidontaa %s."
+msgstr "Ei voitu lis√§t√§ sidontaa %s."
 
 #: ../ioncore/conf-bindings.c:188
 #, c-format
@@ -60,12 +60,12 @@ msgstr "Ei voitu poistaa sidontaa %s."
 #: ../ioncore/conf-bindings.c:228
 #, c-format
 msgid "Unable to add submap for binding %s."
-msgstr "Ei voida lis‰t‰ alikarttaa sidonnalle %s."
+msgstr "Ei voida lis√§t√§ alikarttaa sidonnalle %s."
 
 #
 #: ../ioncore/conf-bindings.c:261
 msgid "Binding type not set."
-msgstr "Sidonnan tyyppi‰ ei ole asetettu."
+msgstr "Sidonnan tyyppi√§ ei ole asetettu."
 
 #: ../ioncore/conf-bindings.c:271
 #, c-format
@@ -80,20 +80,20 @@ msgstr "Sidonnalle %s asetettu tuntematon alue \"%s.\""
 #: ../ioncore/conf-bindings.c:336
 #, c-format
 msgid "Unable to get bindmap entry %d."
-msgstr "Sidontakartan alkion %d haussa ep‰onnistuttiin."
+msgstr "Sidontakartan alkion %d haussa ep√§onnistuttiin."
 
 #: ../ioncore/conf-bindings.c:378
 msgid "Unable to convert keysym to string."
-msgstr "N‰pp‰insymbolia muunto merkkijonoksi ep‰onnistui."
+msgstr "N√§pp√§insymbolia muunto merkkijonoksi ep√§onnistui."
 
 #: ../ioncore/conf-bindings.c:392
 msgid "Unable to convert button to string."
-msgstr "Napin tunnistetteen muunto merkkijonoksi ep‰onnistui."
+msgstr "Napin tunnistetteen muunto merkkijonoksi ep√§onnistui."
 
 #
 #: ../ioncore/event.c:110
 msgid "Time request from X server failed."
-msgstr "Ajan pyyntˆ X-palvelimelta ep‰onnistui."
+msgstr "Ajan pyynt√∂ X-palvelimelta ep√§onnistui."
 
 #
 #: ../ioncore/exec.c:185
@@ -107,7 +107,7 @@ msgstr "Virheellinen multibyte-merkkijono."
 #: ../ioncore/strings.c:264
 #, c-format
 msgid "Error compiling regular expression: %s"
-msgstr "Virhe s‰‰nnˆlisen lausekkeen k‰‰nnˆksess‰: %s"
+msgstr "Virhe s√§√§nn√∂lisen lausekkeen k√§√§nn√∂ksess√§: %s"
 
 #: ../ioncore/modules.c:155
 msgid "Invalid module name."
@@ -122,8 +122,8 @@ msgstr "Moduuli on jo ladattu."
 msgid ""
 "Module version information not found or version mismatch. Refusing to use."
 msgstr ""
-"Moduulin versiotieto joko puuttuu tai on v‰‰r‰. N‰in ollen sit‰ "
-"kielt‰ydyt‰‰n k‰ytt‰m‰st‰."
+"Moduulin versiotieto joko puuttuu tai on v√§√§r√§. N√§in ollen sit√§ "
+"kielt√§ydyt√§√§n k√§ytt√§m√§st√§."
 
 #: ../ioncore/modules.c:193
 #, c-format
@@ -133,7 +133,7 @@ msgstr "Virhe moduulin %s alustuksessa."
 #: ../ioncore/modules.c:217 ../../libextl-3/readconfig.c:388
 #, c-format
 msgid "Unable to find '%s' on search path."
-msgstr "Hakupolulta ei lˆytynyt '%s':‰‰."
+msgstr "Hakupolulta ei l√∂ytynyt '%s':√§√§."
 
 #: ../ioncore/modules.c:288
 msgid "Unknown module."
@@ -141,7 +141,7 @@ msgstr "Tuntematon moduuli."
 
 #: ../ioncore/modules.c:296
 msgid "Unable to initialise module."
-msgstr "Moduulin alustus ep‰onnistui."
+msgstr "Moduulin alustus ep√§onnistui."
 
 #: ../ioncore/modules.c:341
 msgid "No module to load given."
@@ -155,12 +155,12 @@ msgstr "Virheelliset parametrit."
 #
 #: ../ioncore/screen.c:382
 msgid "Only workspace may not be destroyed/detached."
-msgstr "Ainoata tyˆpˆyt‰‰ ei voi tuhota/irroitaa."
+msgstr "Ainoata ty√∂p√∂yt√§√§ ei voi tuhota/irroitaa."
 
 #
 #: ../ioncore/screen.c:393
 msgid "Screens may not be destroyed."
-msgstr "N‰yttˆj‰ ei voi tuhota."
+msgstr "N√§ytt√∂j√§ ei voi tuhota."
 
 #: ../ioncore/screen.c:429
 msgid "Invalid offset."
@@ -169,11 +169,11 @@ msgstr "Virheellinen poikkeama."
 #: ../ioncore/screen.c:468
 #, c-format
 msgid "Unable to create a workspace on screen %d."
-msgstr "Tyˆpˆyd‰n luonti ruudulle %d ep‰onnistui."
+msgstr "Ty√∂p√∂yd√§n luonti ruudulle %d ep√§onnistui."
 
 #: ../ioncore/sizehint.c:146
 msgid "Invalid client-supplied width/height increment."
-msgstr "Asiakkaan ilmoittama pysty/vaakalis‰ys koolle on virheellinen."
+msgstr "Asiakkaan ilmoittama pysty/vaakalis√§ys koolle on virheellinen."
 
 #: ../ioncore/sizehint.c:154
 msgid "Invalid client-supplied aspect-ratio."
@@ -191,15 +191,15 @@ msgid ""
 "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
-"T‰m‰ ohjelma on olennaisesti GNU v‰h‰isemm‰n yleisen lisenssin (LGPL)\n"
+"T√§m√§ ohjelma on olennaisesti GNU v√§h√§isemm√§n yleisen lisenssin (LGPL)\n"
 "version 2.1 alla, ellei komponenteissa muutoin mainita. Projektin\n"
-"nimen Ion(tm) k‰yttˆˆn liittyy lis‰ehtoja. Yksityiskohdat lˆyd‰t\n"
-"tiedostosta LICENSE, joka sinun olisi pit‰nyt saada t‰m‰n ohjelman\n"
+"nimen Ion(tm) k√§ytt√∂√∂n liittyy lis√§ehtoja. Yksityiskohdat l√∂yd√§t\n"
+"tiedostosta LICENSE, joka sinun olisi pit√§nyt saada t√§m√§n ohjelman\n"
 "mukana.\n"
 "\n"
-"T‰t‰ ohjelmaa levitet‰‰n siin‰ toivossa, ett‰ se olisi hyˆdyllinen,\n"
-"mutta ILMAN MITƒƒN TAKUUTA; ilman edes hiljaista takuuta kaupallisesti\n"
-"hyv‰ksytt‰v‰st‰ laadusta tai soveltuvuudesta tiettyyn tarkoitukseen.\n"
+"T√§t√§ ohjelmaa levitet√§√§n siin√§ toivossa, ett√§ se olisi hy√∂dyllinen,\n"
+"mutta ILMAN MIT√Ñ√ÑN TAKUUTA; ilman edes hiljaista takuuta kaupallisesti\n"
+"hyv√§ksytt√§v√§st√§ laadusta tai soveltuvuudesta tiettyyn tarkoitukseen.\n"
 
 #: ../ioncore/ioncore.c:160
 msgid "No encoding given in LC_CTYPE."
@@ -208,32 +208,32 @@ msgstr "LC_CTYPE ei kerro enkoodausta."
 #: ../ioncore/ioncore.c:478
 #, c-format
 msgid "Could not connect to X display '%s'"
-msgstr "Yhteydenotto X-palvelimeen '%s' ep‰onnistui."
+msgstr "Yhteydenotto X-palvelimeen '%s' ep√§onnistui."
 
 #: ../ioncore/ioncore.c:531
 msgid "Could not find a screen to manage."
-msgstr "Yht‰‰n hallittavissa olevaa juuri-ikkunaa ei lˆytynyt."
+msgstr "Yht√§√§n hallittavissa olevaa juuri-ikkunaa ei l√∂ytynyt."
 
 #: ../ioncore/xic.c:35
 msgid "Failed to open input method."
-msgstr "Syˆttˆmenetelm‰n avaaminen ep‰onnistui."
+msgstr "Sy√∂tt√∂menetelm√§n avaaminen ep√§onnistui."
 
 #: ../ioncore/xic.c:40
 msgid "Input method doesn't support any style."
-msgstr "Syˆttˆmenetelm‰ ei tue yht‰‰n syˆttˆtapaa."
+msgstr "Sy√∂tt√∂menetelm√§ ei tue yht√§√§n sy√∂tt√∂tapaa."
 
 #: ../ioncore/xic.c:55
 msgid "input method doesn't support my preedit type."
-msgstr "Syˆttˆmenetelm‰ ei tue kaivattua esimuokkaustyyli‰."
+msgstr "Sy√∂tt√∂menetelm√§ ei tue kaivattua esimuokkaustyyli√§."
 
 #: ../ioncore/xic.c:83
 msgid "Failed to create input context."
-msgstr "Syˆttˆkontekstin luonti ep‰onnistui."
+msgstr "Sy√∂tt√∂kontekstin luonti ep√§onnistui."
 
 #: ../ioncore/clientwin.c:376
 #, c-format
 msgid "The transient_for hint for \"%s\" points to itself."
-msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa itseens‰."
+msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa itseens√§."
 
 #: ../ioncore/clientwin.c:380
 #, c-format
@@ -245,7 +245,7 @@ msgstr "Ikkunan \"%s\" transient_for neuvo on rikki."
 #: ../ioncore/clientwin.c:385
 #, c-format
 msgid "The transient_for window for \"%s\" is not on the same screen."
-msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri n‰ytˆlle."
+msgstr "Ikkunan \"%s\" transient_for neuvo osoittaa eri n√§yt√∂lle."
 
 #: ../ioncore/clientwin.c:405 ../ioncore/clientwin.c:512
 #: ../ioncore/clientwin.c:1327
@@ -255,12 +255,12 @@ msgstr "Ikkuna %#x katosi."
 
 #: ../ioncore/clientwin.c:532
 msgid "Unable to find a matching root window!"
-msgstr "Vastaavaa juuri-ikkunaa ei lˆytynyt."
+msgstr "Vastaavaa juuri-ikkunaa ei l√∂ytynyt."
 
 #: ../ioncore/clientwin.c:571
 #, c-format
 msgid "Unable to manage client window %#x."
-msgstr "Asiakasikkunan %x hallittavaksi saattaminen ep‰onnistui."
+msgstr "Asiakasikkunan %x hallittavaksi saattaminen ep√§onnistui."
 
 #: ../ioncore/clientwin.c:620
 msgid "Changes is WM_TRANSIENT_FOR property are unsupported."
@@ -273,26 +273,26 @@ msgstr "Asiakasikkuna ei tue WM_DELETE-protokollaa."
 
 #: ../ioncore/clientwin.c:1333
 msgid "Saved client window does not want to be managed."
-msgstr "Talletettu asiakasikkuna ei halua sit‰ hallittavan."
+msgstr "Talletettu asiakasikkuna ei halua sit√§ hallittavan."
 
 #
 #: ../ioncore/colormap.c:93
 msgid "Unable to store colourmap watch info."
-msgstr "V‰rikartan valvonnan alustaminen ep‰onnistui."
+msgstr "V√§rikartan valvonnan alustaminen ep√§onnistui."
 
 #: ../ioncore/region.c:45
 msgid "Creating region with negative width or height!"
-msgstr "Yritys luoda korkeudeltaan tai leveydelt‰‰n negatiivinen alue."
+msgstr "Yritys luoda korkeudeltaan tai leveydelt√§√§n negatiivinen alue."
 
 #: ../ioncore/region.c:93
 #, c-format
 msgid "Destroying object \"%s\" with client windows as children."
-msgstr "Tuhotaan kappale \"%s\", jolla on viel‰ asiakasikkunoita."
+msgstr "Tuhotaan kappale \"%s\", jolla on viel√§ asiakasikkunoita."
 
 #: ../ioncore/region.c:434
 #, c-format
 msgid "Can not destroy %s: contains client windows."
-msgstr "Kappaletta %s ei voida tuhota, sill‰ se sis‰lt‰‰ asiakasikkunoita."
+msgstr "Kappaletta %s ei voida tuhota, sill√§ se sis√§lt√§√§ asiakasikkunoita."
 
 #: ../ioncore/region.c:435
 msgid "(unknown)"
@@ -301,7 +301,7 @@ msgstr "(tuntematon)"
 #
 #: ../ioncore/region.c:498
 msgid "Failed to rescue some client windows - not closing."
-msgstr "Joidenkin asiakasikkunoiden pelastaminen ep‰onnistui - ei suljeta."
+msgstr "Joidenkin asiakasikkunoiden pelastaminen ep√§onnistui - ei suljeta."
 
 #: ../ioncore/attach.c:55 ../ioncore/frame-pointer.c:278
 #, c-format
@@ -310,29 +310,29 @@ msgstr "Yritys saattaa alue %s hallitsemaan sen esivanhempaa %s."
 
 #: ../ioncore/attach.c:80
 msgid "Unable to reparent."
-msgstr "Vanhemman vaihto ep‰onnistui."
+msgstr "Vanhemman vaihto ep√§onnistui."
 
 #: ../ioncore/attach.c:89
 msgid "Unexpected attach error: trying to recover by attaching to screen."
-msgstr "Tuntematon liit‰nt‰virhe: yritet‰‰n toipua liitt‰m‰ll‰ n‰yttˆˆn."
+msgstr "Tuntematon liit√§nt√§virhe: yritet√§√§n toipua liitt√§m√§ll√§ n√§ytt√∂√∂n."
 
 #: ../ioncore/attach.c:108
 msgid "Failed recovery."
-msgstr "Toipuminen ep‰onnistui."
+msgstr "Toipuminen ep√§onnistui."
 
 #: ../ioncore/manage.c:190
 msgid "Unable to find a screen for a new client window."
-msgstr "Uudelle asiakasikkunalle ei lˆytynyt n‰yttˆ‰."
+msgstr "Uudelle asiakasikkunalle ei l√∂ytynyt n√§ytt√∂√§."
 
 #: ../ioncore/rootwin.c:215
 #, c-format
 msgid "Unable to redirect root window events for screen %d."
-msgstr "Juuri-ikkunan %d viestien uudelleenohjaus ep‰onnistui."
+msgstr "Juuri-ikkunan %d viestien uudelleenohjaus ep√§onnistui."
 
 #: ../ioncore/names.c:88
 #, c-format
 msgid "Corrupt instance number %s."
-msgstr "Rikkin‰inen instanssinumero %s."
+msgstr "Rikkin√§inen instanssinumero %s."
 
 #: ../ioncore/saveload.c:95
 #, c-format
@@ -350,17 +350,17 @@ msgid ""
 "configuration files that are causing this problem. (Maybe a missing\n"
 "module?)"
 msgstr ""
-"Talletetun sijoittelun latauksessa oli virheit‰. Siit‰ tehd‰‰n varmuuskopio\n"
+"Talletetun sijoittelun latauksessa oli virheit√§. Siit√§ tehd√§√§n varmuuskopio\n"
 "%s.\n"
-"Jos _et_ k‰yt‰ istunnonhallintaohjelmaa ja haluat palauttaa edellisen\n"
-"sijoittelun, kopioi t‰m‰ varmuuskopio uuden talletustiedoston p‰‰lle\n"
-"samassa hakemistossa kun Ion ei ole ajossa, ja kun olet korjannut t‰m‰n\n"
+"Jos _et_ k√§yt√§ istunnonhallintaohjelmaa ja haluat palauttaa edellisen\n"
+"sijoittelun, kopioi t√§m√§ varmuuskopio uuden talletustiedoston p√§√§lle\n"
+"samassa hakemistossa kun Ion ei ole ajossa, ja kun olet korjannut t√§m√§n\n"
 "tilanteen aiheuttavat virheet (mahdollisesti puuttuva moduuli?) muissa\n"
 "asetustiedostoissasi."
 
 #: ../ioncore/saveload.c:250
 msgid "Unable to get file for layout backup."
-msgstr "Sijoittelun varmuuskopiolle ei voitu muodostaa tiedostonime‰."
+msgstr "Sijoittelun varmuuskopiolle ei voitu muodostaa tiedostonime√§."
 
 #: ../ioncore/saveload.c:254
 #, c-format
@@ -369,12 +369,12 @@ msgstr "Varmuuskopio %s on jo olemassa."
 
 #: ../ioncore/saveload.c:260
 msgid "Failed backup."
-msgstr "Varmuuskopionti ep‰onnistui."
+msgstr "Varmuuskopionti ep√§onnistui."
 
 #
 #: ../ioncore/saveload.c:265
 msgid "Unable to initialise layout on any screen."
-msgstr "Sijoittelun alustus ep‰onnistui kaikilla n‰ytˆill‰."
+msgstr "Sijoittelun alustus ep√§onnistui kaikilla n√§yt√∂ill√§."
 
 #: ../ioncore/saveload.c:292
 #, c-format
@@ -383,27 +383,27 @@ msgstr "Ruudun %d asetukset puuttuvat."
 
 #: ../ioncore/saveload.c:305
 msgid "Unable to save layout."
-msgstr "Sijoittelun talletus ep‰onnistui."
+msgstr "Sijoittelun talletus ep√§onnistui."
 
 #: ../ioncore/conf.c:237
 msgid "User directory can not be set."
-msgstr "K‰ytt‰j‰n hakemistoa ei pystyt‰ asettamaan."
+msgstr "K√§ytt√§j√§n hakemistoa ei pystyt√§ asettamaan."
 
 #: ../ioncore/conf.c:311
 msgid "Some bindmaps were empty, loading ioncore_efbb."
-msgstr "Jotkut sidontakartat olivat tyhji‰. Ladataan ioncore_efbb."
+msgstr "Jotkut sidontakartat olivat tyhji√§. Ladataan ioncore_efbb."
 
 #: ../ioncore/fullscreen.c:46
 msgid "Failed to enter full screen mode."
-msgstr "Vaihto kokoruudun tilaan ep‰onnistui."
+msgstr "Vaihto kokoruudun tilaan ep√§onnistui."
 
 #: ../ioncore/fullscreen.c:80
 msgid ""
 "Failed to return from full screen mode; remaining manager or parent from "
 "previous location refused to manage us."
 msgstr ""
-"Asiakasikkunan paluu kokoruudun tilasta ep‰onnistui; edellinen hallitsija "
-"tai vanhempi kielt‰ytyi hallitsemasta ikkunaa."
+"Asiakasikkunan paluu kokoruudun tilasta ep√§onnistui; edellinen hallitsija "
+"tai vanhempi kielt√§ytyi hallitsemasta ikkunaa."
 
 #
 #: ../ioncore/mplex.c:1797
@@ -418,21 +418,21 @@ msgstr "Virheellinen toiminto-asetus."
 #: ../ioncore/gr.c:117
 #, c-format
 msgid "Drawing engine %s is not registered!"
-msgstr "Piirtomoottoria %s ei ole rekisterˆity!"
+msgstr "Piirtomoottoria %s ei ole rekister√∂ity!"
 
 #: ../ioncore/gr.c:136
 #, c-format
 msgid "Unable to find brush for style '%s'."
-msgstr "Tyylille '%s' ei lˆytynyt pensseli‰."
+msgstr "Tyylille '%s' ei l√∂ytynyt pensseli√§."
 
 #: ../ioncore/gr.c:652
 msgid "No drawing engines loaded, trying \"de\"."
-msgstr "Yht‰‰n piirtomoottoria ei ole ladattu. Yritet‰‰n oletusta \"de\"."
+msgstr "Yht√§√§n piirtomoottoria ei ole ladattu. Yritet√§√§n oletusta \"de\"."
 
 #
 #: ../ioncore/frame-draw.c:311
 msgid "<empty frame>"
-msgstr "<tyhj‰ kehys>"
+msgstr "<tyhj√§ kehys>"
 
 #: ../ioncore/group.c:183 ../mod_tiling/tiling.c:89
 #, c-format
@@ -455,11 +455,11 @@ msgstr "Virheellinen suunta."
 #: ../ioncore/group-ws.c:48
 #, c-format
 msgid "Unknown placement method \"%s\"."
-msgstr "Tuntematon sijoittelumenetelm‰ \"%s\"."
+msgstr "Tuntematon sijoittelumenetelm√§ \"%s\"."
 
 #: ../ioncore/detach.c:174
 msgid "Failed to reattach."
-msgstr "Uudelleenliitt‰minen ep‰onnistui"
+msgstr "Uudelleenliitt√§minen ep√§onnistui"
 
 #: ../ioncore/screen-notify.c:187
 msgid "act: "
@@ -469,15 +469,15 @@ msgstr "act: "
 #
 #: ../mod_tiling/tiling.c:70
 msgid "Split not on workspace."
-msgstr "Jako ei ole t‰ll‰ tyˆpˆyd‰ll‰."
+msgstr "Jako ei ole t√§ll√§ ty√∂p√∂yd√§ll√§."
 
 #: ../mod_tiling/tiling.c:345
 msgid "Unable to create a node for status display."
-msgstr "Solmun luonti tilan‰ytˆlle ep‰onnistui."
+msgstr "Solmun luonti tilan√§yt√∂lle ep√§onnistui."
 
 #: ../mod_tiling/tiling.c:358
 msgid "Unable to create new split for status display."
-msgstr "Uuden jaon tekeminen tilan‰ytˆlle ep‰onnistui."
+msgstr "Uuden jaon tekeminen tilan√§yt√∂lle ep√§onnistui."
 
 #: ../mod_tiling/tiling.c:709
 msgid "Tiling in useless state."
@@ -490,7 +490,7 @@ msgstr "Virheellinen suunta."
 #
 #: ../mod_tiling/tiling.c:956 ../mod_tiling/split.c:1030
 msgid "Invalid node."
-msgstr "Ep‰kelpo solmu."
+msgstr "Ep√§kelpo solmu."
 
 #
 #: ../mod_tiling/tiling.c:975
@@ -503,19 +503,19 @@ msgstr "Parametri on asettamatta."
 
 #: ../mod_tiling/tiling.c:1195
 msgid "Manager doesn't match."
-msgstr "Hallitsija on v‰‰r‰."
+msgstr "Hallitsija on v√§√§r√§."
 
 #: ../mod_tiling/tiling.c:1232
 msgid "The status display is not a valid parameter for this routine."
-msgstr "Tilan‰yttˆ ei ole kelpo parametri t‰lle toiminnolle."
+msgstr "Tilan√§ytt√∂ ei ole kelpo parametri t√§lle toiminnolle."
 
 #: ../mod_tiling/tiling.c:1323
 msgid "Refusing to float split directly containing the status display."
-msgstr "Tilan‰ytˆn suoraan sis‰lt‰v‰‰ jakoa ei voida kelluttaa."
+msgstr "Tilan√§yt√∂n suoraan sis√§lt√§v√§√§ jakoa ei voida kelluttaa."
 
 #: ../mod_tiling/tiling.c:1387
 msgid "No suitable split here."
-msgstr "Ei sopivaa jakoa t‰ss‰."
+msgstr "Ei sopivaa jakoa t√§ss√§."
 
 #
 #: ../mod_tiling/tiling.c:1423
@@ -524,7 +524,7 @@ msgstr "Halkaisupuu puuttuu."
 
 #: ../mod_tiling/tiling.c:1444
 msgid "Workspace already has a status display node."
-msgstr "Tyˆpˆyd‰ll‰ on jo solmu tilan‰ytˆlle."
+msgstr "Ty√∂p√∂yd√§ll√§ on jo solmu tilan√§yt√∂lle."
 
 #
 #: ../mod_tiling/tiling.c:1482
@@ -538,7 +538,7 @@ msgstr "Virheellinen suunta."
 #
 #: ../mod_tiling/tiling.c:1601
 msgid "No split type given."
-msgstr "Halkaisun tyyppi‰ ei ole asetettu."
+msgstr "Halkaisun tyyppi√§ ei ole asetettu."
 
 #: ../mod_tiling/tiling.c:1614
 msgid "Unknown split type."
@@ -548,31 +548,31 @@ msgstr "Tuntematon halkaisutyyppi."
 #
 #: ../mod_tiling/tiling.c:1654
 msgid "The workspace is empty."
-msgstr "Tyˆpˆyt‰ on tyhj‰."
+msgstr "Ty√∂p√∂yt√§ on tyhj√§."
 
 #: ../mod_tiling/placement.c:101
 #, c-format
 msgid ""
 "Ooops... could not find a region to attach client window to on workspace %s."
-msgstr "Tyˆpˆyd‰lt‰ %s ei lˆytynyt aluetta johon liitt‰‰ asiakasikkuna."
+msgstr "Ty√∂p√∂yd√§lt√§ %s ei l√∂ytynyt aluetta johon liitt√§√§ asiakasikkuna."
 
 #
 #: ../mod_tiling/split.c:536
 msgid "Unable to move the status display out of way."
-msgstr "Tilan‰yttˆ‰ ei voida siirt‰‰ pois tielt‰."
+msgstr "Tilan√§ytt√∂√§ ei voida siirt√§√§ pois tielt√§."
 
 #: ../mod_tiling/split.c:949
 msgid "REGION_RQGEOM_TRYONLY unsupported for status display."
-msgstr "REGION_RQGEOM_TRYONLY:‰ ei tueta tilan‰ytˆlle."
+msgstr "REGION_RQGEOM_TRYONLY:√§ ei tueta tilan√§yt√∂lle."
 
 #
 #: ../mod_tiling/split.c:1102
 msgid "Splitting the status display is not allowed."
-msgstr "Tilan‰ytˆn halkaisu ei ole sallittu."
+msgstr "Tilan√§yt√∂n halkaisu ei ole sallittu."
 
 #: ../mod_tiling/split.c:1128 ../mod_tiling/splitfloat.c:900
 msgid "Unable to split: not enough free space."
-msgstr "Ei voida halkaista: liian v‰h‰n tilaa."
+msgstr "Ei voida halkaista: liian v√§h√§n tilaa."
 
 #: ../mod_tiling/split.c:1881
 #, c-format
@@ -581,15 +581,15 @@ msgstr "Alueelle \"%s\" ei saatu asetuksia."
 
 #: ../mod_tiling/split-stdisp.c:599 ../mod_tiling/split-stdisp.c:624
 msgid "Status display in bad split configuration."
-msgstr "Tilan‰yttˆ huonossa halkaisuasetelmassa."
+msgstr "Tilan√§ytt√∂ huonossa halkaisuasetelmassa."
 
 #: ../mod_tiling/split-stdisp.c:664
 msgid "Status display badly located in split tree."
-msgstr "Tilan‰yttˆ on huonosti sijoittuneena halkaisupuuhun."
+msgstr "Tilan√§ytt√∂ on huonosti sijoittuneena halkaisupuuhun."
 
 #: ../mod_tiling/ops.c:69 ../mod_tiling/ops.c:117
 msgid "Not member of a group"
-msgstr "Ei j‰senen‰ miss‰‰n ryhm‰ss‰"
+msgstr "Ei j√§senen√§ miss√§√§n ryhm√§ss√§"
 
 #: ../mod_tiling/ops.c:74
 msgid "Manager group already has bottom"
@@ -597,11 +597,11 @@ msgstr "Managerilla on jo 'pohja'"
 
 #: ../mod_tiling/ops.c:151
 msgid "Unable to move a region from tiling to group."
-msgstr "Ei voitu siirt‰‰ kappaletta laatoituksesta ryhm‰‰n."
+msgstr "Ei voitu siirt√§√§ kappaletta laatoituksesta ryhm√§√§n."
 
 #: ../mod_query/wedln.c:811
 msgid "history"
-msgstr "hist.t‰yd."
+msgstr "hist.t√§yd."
 
 #: ../mod_query/fwarn.c:32
 msgid "Error:\n"
@@ -610,29 +610,29 @@ msgstr "Virhe:\n"
 #
 #: ../mod_menu/menu.c:598
 msgid "Empty menu."
-msgstr "Tyhj‰ valikko."
+msgstr "Tyhj√§ valikko."
 
 #
 #: ../mod_sm/sm.c:108
 msgid "Failed to set session directory."
-msgstr "Istuntohakemiston asetus ep‰onnistui."
+msgstr "Istuntohakemiston asetus ep√§onnistui."
 
 #: ../mod_sm/sm_session.c:86
 msgid "Too many ICE connections."
-msgstr "Liian monta ICE-yhteytt‰."
+msgstr "Liian monta ICE-yhteytt√§."
 
 #: ../mod_sm/sm_session.c:228
 msgid "Failed to save session state"
-msgstr "Istunnon tilan tallentaminen ep‰onnistui."
+msgstr "Istunnon tilan tallentaminen ep√§onnistui."
 
 #: ../mod_sm/sm_session.c:247
 msgid "Failed to request save-yourself-phase2 from session manager."
-msgstr "Save-yourself vaiheen kaksi pyyntˆ istunnonhallitsijalta ep‰onnistui."
+msgstr "Save-yourself vaiheen kaksi pyynt√∂ istunnonhallitsijalta ep√§onnistui."
 
 #
 #: ../mod_sm/sm_session.c:296
 msgid "SESSION_MANAGER environment variable not set."
-msgstr "Ymp‰ristˆmuuttujaa SESSION_MANAGER ei ole asetettu."
+msgstr "Ymp√§rist√∂muuttujaa SESSION_MANAGER ei ole asetettu."
 
 #: ../mod_sm/sm_session.c:301
 msgid "Session Manager: IceAddConnectionWatch failed."
@@ -641,11 +641,11 @@ msgstr "Virhe istunnonhallinan kutsussa IceAddConnectionWatch."
 #
 #: ../mod_sm/sm_session.c:326
 msgid "Unable to connect to the session manager."
-msgstr "Yhteydenotto istunnonhallintaohjelmaan ep‰onnistui."
+msgstr "Yhteydenotto istunnonhallintaohjelmaan ep√§onnistui."
 
 #: ../mod_sp/main.c:124
 msgid "Unable to create scratchpad."
-msgstr "Suttausalueen luonti ep‰onnistui."
+msgstr "Suttausalueen luonti ep√§onnistui."
 
 #: ../mod_statusbar/main.c:74
 msgid "reading a pipe"
@@ -653,7 +653,7 @@ msgstr "putken luku"
 
 #: ../mod_statusbar/main.c:163
 msgid "ion-statusd timed out."
-msgstr "ion-statusd:n k‰ynnistyksen aikaraja umpeutui."
+msgstr "ion-statusd:n k√§ynnistyksen aikaraja umpeutui."
 
 #: ../mod_statusbar/statusbar.c:1079
 #, c-format
@@ -663,7 +663,7 @@ msgstr ""
 #: ../de/init.c:65
 #, c-format
 msgid "Border attribute %s sanity check failed."
-msgstr "Reunan arvon '%s' j‰rkevyystarkistus ep‰onnistui."
+msgstr "Reunan arvon '%s' j√§rkevyystarkistus ep√§onnistui."
 
 #: ../de/init.c:88
 #, c-format
@@ -678,7 +678,7 @@ msgstr "Reunan sivuasetus \"%s\" on tuntematon."
 #: ../de/init.c:144
 #, c-format
 msgid "Unable to allocate colour \"%s\"."
-msgstr "V‰rin \"%s\" varaaminen ep‰onnistui."
+msgstr "V√§rin \"%s\" varaaminen ep√§onnistui."
 
 #: ../de/init.c:220
 #, c-format
@@ -702,19 +702,19 @@ msgstr ""
 #: ../de/font.c:56
 #, c-format
 msgid "Could not load font \"%s\", trying \"%s\""
-msgstr "Kirjaisimen \"%s\" lataaminen ep‰onnistui. Yritet‰‰n \"%s\":‰‰."
+msgstr "Kirjaisimen \"%s\" lataaminen ep√§onnistui. Yritet√§√§n \"%s\":√§√§."
 
 #: ../de/font.c:60
 msgid "Failed to load fallback font."
-msgstr "H‰t‰varakirjaisimen lataus ep‰onnistui."
+msgstr "H√§t√§varakirjaisimen lataus ep√§onnistui."
 
 #: ../de/style.c:291
 msgid "Style is still in use [%d] but the module is being unloaded!"
-msgstr "Tyyli %s on viel‰ k‰ytˆss‰ [%d], mutta moduulia poistetaan!"
+msgstr "Tyyli %s on viel√§ k√§yt√∂ss√§ [%d], mutta moduulia poistetaan!"
 
 #: ../ion/ion.c:39 ../pwm/pwm.c:39
 msgid "X display to use"
-msgstr "K‰ytett‰v‰ X-palvelin/n‰yttˆ"
+msgstr "K√§ytett√§v√§ X-palvelin/n√§ytt√∂"
 
 #: ../ion/ion.c:42 ../pwm/pwm.c:42
 msgid "Configuration file"
@@ -722,7 +722,7 @@ msgstr "Ensisijainen asetustiedosto"
 
 #: ../ion/ion.c:45 ../pwm/pwm.c:45
 msgid "Add directory to search path"
-msgstr "Lis‰‰ hakemisto hakupolulle"
+msgstr "Lis√§√§ hakemisto hakupolulle"
 
 #: ../ion/ion.c:48 ../pwm/pwm.c:48
 msgid "Manage default screen only"
@@ -738,23 +738,23 @@ msgstr "Istunnonhallinnan asiakastunniste"
 
 #: ../ion/ion.c:57 ../pwm/pwm.c:57
 msgid "Do not create startup error log and display it with xmessage."
-msgstr "ƒl‰ luo k‰ynnistysvirhelokia ja n‰yt‰ sit‰ xmessage:lla."
+msgstr "√Ñl√§ luo k√§ynnistysvirhelokia ja n√§yt√§ sit√§ xmessage:lla."
 
 #: ../ion/ion.c:61 ../pwm/pwm.c:61
 msgid "Show this help"
-msgstr "N‰yt‰ t‰m‰ aputeksti"
+msgstr "N√§yt√§ t√§m√§ aputeksti"
 
 #: ../ion/ion.c:64 ../pwm/pwm.c:64
 msgid "Show program version"
-msgstr "N‰yt‰ ohjelman versio"
+msgstr "N√§yt√§ ohjelman versio"
 
 #: ../ion/ion.c:67 ../pwm/pwm.c:67
 msgid "Show about text"
-msgstr "N‰yt‰ tietoja ohjelmasta"
+msgstr "N√§yt√§ tietoja ohjelmasta"
 
 #: ../ion/ion.c:82
 msgid "Could not get user configuration file directory."
-msgstr "K‰ytt‰j‰n asetustiedostohakemisto puuttuu, eik‰ sit‰ voitu luoda."
+msgstr "K√§ytt√§j√§n asetustiedostohakemisto puuttuu, eik√§ sit√§ voitu luoda."
 
 #: ../ion/ion.c:96
 #, c-format
@@ -767,7 +767,7 @@ msgid ""
 "Usage: %s [options]\n"
 "\n"
 msgstr ""
-"K‰yttˆ: %s [valintoja]\n"
+"K√§ytt√∂: %s [valintoja]\n"
 "\n"
 
 #
@@ -777,39 +777,39 @@ msgstr "Virheellinen komentorivi."
 
 #: ../ion/ion.c:219
 msgid "Ion startup error log:\n"
-msgstr "Ionin k‰ynnistysvirheloki:\n"
+msgstr "Ionin k√§ynnistysvirheloki:\n"
 
 #: ../ion/ion.c:230 ../pwm/pwm.c:180
 msgid "Refusing to start due to encountered errors."
-msgstr "Ohjelma kielt‰ytyy k‰ynnistym‰st‰ tavattujen virheiden johdosta."
+msgstr "Ohjelma kielt√§ytyy k√§ynnistym√§st√§ tavattujen virheiden johdosta."
 
 #: ../pwm/pwm.c:169
 msgid "PWM startup error log:\n"
-msgstr "PWM:n k‰ynnistysvirheloki:\n"
+msgstr "PWM:n k√§ynnistysvirheloki:\n"
 
 #: ../../libextl-3/readconfig.c:86
 msgid "$HOME not set"
-msgstr "Ymp‰ristˆmuuttujaa HOME ei ole asetettu."
+msgstr "Ymp√§rist√∂muuttujaa HOME ei ole asetettu."
 
 #: ../../libextl-3/readconfig.c:113
 msgid "User directory not set. Unable to set session directory."
 msgstr ""
-"K‰ytt‰j‰n hakemistoa ei ole asetettu, joten istuntohakemistoa ei voida "
+"K√§ytt√§j√§n hakemistoa ei ole asetettu, joten istuntohakemistoa ei voida "
 "asettaa."
 
 #: ../../libextl-3/readconfig.c:254
 #, c-format
 msgid "Falling back to %s."
-msgstr "Yritet‰‰n tiedostoa %s."
+msgstr "Yritet√§√§n tiedostoa %s."
 
 #: ../../libextl-3/readconfig.c:474
 #, c-format
 msgid "Unable to create session directory \"%s\"."
-msgstr "Istuntohakemiston \"%s\" luonti ep‰onnistui."
+msgstr "Istuntohakemiston \"%s\" luonti ep√§onnistui."
 
 #: ../../libextl-3/luaextl.c:117
 msgid "Lua stack full."
-msgstr "Luan pino on t‰ysi."
+msgstr "Luan pino on t√§ysi."
 
 #
 #: ../../libextl-3/luaextl.c:143
@@ -818,7 +818,7 @@ msgstr "Tuntematon Lua:n virhe."
 
 #: ../../libextl-3/luaextl.c:490
 msgid "Stack trace:"
-msgstr "Pinoj‰lki:"
+msgstr "Pinoj√§lki:"
 
 #: ../../libextl-3/luaextl.c:497
 #, c-format
@@ -827,7 +827,7 @@ msgid ""
 "(Unable to get debug info for level %d)"
 msgstr ""
 "\n"
-"(Debuggaustiedot eiv‰t ole saatavilla tasolle %d)"
+"(Debuggaustiedot eiv√§t ole saatavilla tasolle %d)"
 
 #: ../../libextl-3/luaextl.c:515
 msgid ""
@@ -835,22 +835,22 @@ msgid ""
 "  [Skipping unnamed C functions.]"
 msgstr ""
 "\n"
-"  [Ohitetaan nimettˆmi‰ C-funktioita.]"
+"  [Ohitetaan nimett√∂mi√§ C-funktioita.]"
 
 #: ../../libextl-3/luaextl.c:566
 msgid "Internal error."
-msgstr "Sis‰inen virhe."
+msgstr "Sis√§inen virhe."
 
 #: ../../libextl-3/luaextl.c:585
 msgid "Unable to initialize Lua."
-msgstr "Lua:n alustus ep‰onnistui."
+msgstr "Lua:n alustus ep√§onnistui."
 
 #: ../../libextl-3/luaextl.c:1469
 msgid ""
 "Too many return values. Use a C compiler that has va_copy to support more."
 msgstr ""
-"Liian monta paluuarvoa. Useamman tukemiseksi k‰yt‰ C-k‰‰nt‰j‰‰, joka tukee "
-"va_copy:‰."
+"Liian monta paluuarvoa. Useamman tukemiseksi k√§yt√§ C-k√§√§nt√§j√§√§, joka tukee "
+"va_copy:√§."
 
 #: ../../libextl-3/luaextl.c:1489
 msgid "Returned dead object."
@@ -860,12 +860,12 @@ msgstr "Kuollut kappale palautettu."
 #, c-format
 msgid "Invalid return value (expected '%c', got lua type \"%s\")."
 msgstr ""
-"Virheellinen paluuarvo (odotettiin tyyppi‰ '%c', mutta saatiin Lua:n tyyppi "
+"Virheellinen paluuarvo (odotettiin tyyppi√§ '%c', mutta saatiin Lua:n tyyppi "
 "\"%s\")."
 
 #: ../../libextl-3/luaextl.c:1528 ../../libextl-3/luaextl.c:1883
 msgid "Stack full."
-msgstr "Pino t‰ysi."
+msgstr "Pino t√§ysi."
 
 #: ../../libextl-3/luaextl.c:1894
 #, c-format
@@ -878,12 +878,12 @@ msgid ""
 "Argument %d to %s is of invalid type. (Argument template is '%s', got lua "
 "type %s)."
 msgstr ""
-"Parameteri %d funktiolle %s on v‰‰r‰‰ tyyppi‰. (Parametripohja on '%s', "
+"Parameteri %d funktiolle %s on v√§√§r√§√§ tyyppi√§. (Parametripohja on '%s', "
 "saatiin Lua:n tyyppi '%s'.)"
 
 #: ../../libextl-3/luaextl.c:1960
 msgid "L1 call handler upvalues corrupt."
-msgstr "Tason 1 kutsunk‰sittelij‰n \"upvalue\":t rikki."
+msgstr "Tason 1 kutsunk√§sittelij√§n \"upvalue\":t rikki."
 
 #: ../../libextl-3/luaextl.c:1965
 msgid "Called function has been unregistered."
@@ -899,7 +899,7 @@ msgstr "Yritys kutsua turvatonta funktiota \"%s\" rajoitetussa tilassa."
 msgid ""
 "Function '%s' has more parameters than the level 1 call handler can handle"
 msgstr ""
-"Funktiolla %s on enemm‰n parametrej‰ kuin mihin tason yksi kutsunk‰sittelij‰ "
+"Funktiolla %s on enemm√§n parametrej√§ kuin mihin tason yksi kutsunk√§sittelij√§ "
 "kykenee."
 
 #
@@ -910,11 +910,11 @@ msgstr "Suurin mahdollinen talletuksen rekursiosyvyys saavutettu."
 #: ../../libextl-3/luaextl.c:2501
 #, c-format
 msgid "Unable to serialise type %s."
-msgstr "Tyyppi‰ %s ei voida tallettaa."
+msgstr "Tyyppi√§ %s ei voida tallettaa."
 
 #: ../../libextl-3/luaextl.c:2532
 msgid "-- This file has been generated by %s. Do not edit.\n"
-msgstr "-- T‰m‰ tiedosto on %sin luoma. ƒl‰ editoi sit‰.\n"
+msgstr "-- T√§m√§ tiedosto on %sin luoma. √Ñl√§ editoi sit√§.\n"
 
 #: ../../libextl-3/misc.c:17
 #, c-format
@@ -922,11 +922,11 @@ msgid ""
 "Type checking failed in level 2 call handler for parameter %d (got %s, "
 "expected %s)."
 msgstr ""
-"Tyyppitarkistus ep‰onnistui tason 2 kutsunk‰sittelij‰ss‰ parametrille #%d "
+"Tyyppitarkistus ep√§onnistui tason 2 kutsunk√§sittelij√§ss√§ parametrille #%d "
 "(oli %s, odotettiin %s)."
 
 msgid "Scroll the message or completions up/down."
-msgstr "Vierit‰ viesti‰ tai t‰ydennyksi‰ ylˆs/alas."
+msgstr "Vierit√§ viesti√§ tai t√§ydennyksi√§ yl√∂s/alas."
 
 msgid "Close the query/message box, not executing bound actions."
 msgstr "Sulje kysely/viesti suorittamatta sidottuja toimintoja."
@@ -935,10 +935,10 @@ msgid "Close the query and execute bound action."
 msgstr "Sulje kysely ja suorita sidottu toiminta."
 
 msgid "Complete from history"
-msgstr "T‰ydenn‰ historiasta"
+msgstr "T√§ydenn√§ historiasta"
 
 msgid "Try to complete the entered text or cycle through completions."
-msgstr "Yrit‰ t‰ydent‰‰ syˆtetty teksti tai selaa t‰ydennyksi‰."
+msgstr "Yrit√§ t√§ydent√§√§ sy√∂tetty teksti tai selaa t√§ydennyksi√§."
 
 #
 msgid "Clear mark/cancel selection."
@@ -961,7 +961,7 @@ msgstr "Liimaa teksti leikelaudalta."
 
 #
 msgid "Select next/previous (matching) history entry."
-msgstr "N‰yt‰ seuraava/edellinen vastaus muistista."
+msgstr "N√§yt√§ seuraava/edellinen vastaus muistista."
 
 msgid "Transpose characters."
 msgstr "Transponoi merkit."
@@ -982,7 +982,7 @@ msgid "Delete next character."
 msgstr "Poista seuraava merkki."
 
 msgid "Skip one word forward/backward."
-msgstr "Ohita yksi sana eteen/taaksep‰in"
+msgstr "Ohita yksi sana eteen/taaksep√§in"
 
 msgid "Go to end/beginning."
 msgstr "Mene rivin alkuun/loppuun."
@@ -994,34 +994,34 @@ msgid "Kill"
 msgstr "Tapa"
 
 msgid "Attach tagged"
-msgstr "Liit‰ merkityt"
+msgstr "Liit√§ merkityt"
 
 msgid "Rename"
-msgstr "Uudelleennime‰"
+msgstr "Uudelleennime√§"
 
 msgid "Close"
 msgstr "Sulje"
 
 msgid "De/reattach"
-msgstr "Irroita/liit‰"
+msgstr "Irroita/liit√§"
 
 msgid "Toggle tag"
-msgstr "Muuta merkint‰‰"
+msgstr "Muuta merkint√§√§"
 
 msgid "Window info"
 msgstr "Ikkunan tiedot"
 
 msgid "Clear tags"
-msgstr "Poista merkinn‰t"
+msgstr "Poista merkinn√§t"
 
 msgid "Exit"
 msgstr "Poistu"
 
 msgid "Restart TWM"
-msgstr "K‰ynnist‰ TWM"
+msgstr "K√§ynnist√§ TWM"
 
 msgid "Restart"
-msgstr "Uudelleenk‰ynnist‰"
+msgstr "Uudelleenk√§ynnist√§"
 
 msgid "Save"
 msgstr "Talleta"
@@ -1039,10 +1039,10 @@ msgid "Help"
 msgstr "Ohjeet"
 
 msgid "Lock screen"
-msgstr "Lukitse n‰yttˆ"
+msgstr "Lukitse n√§ytt√∂"
 
 msgid "Terminal"
-msgstr "P‰‰teohjelma"
+msgstr "P√§√§teohjelma"
 
 #
 msgid "Run..."
@@ -1066,27 +1066,27 @@ msgid "Cancel the resize mode."
 msgstr "Peruuta tilasta."
 
 msgid "Move the frame."
-msgstr "Siirr‰ kehyst‰."
+msgstr "Siirr√§ kehyst√§."
 
 msgid "Lower the frame."
-msgstr "Alenna kehyst‰."
+msgstr "Alenna kehyst√§."
 
 #
 msgid "Raise the frame."
 msgstr "Nosta kehys."
 
 msgid "Toggle shade mode"
-msgstr "Kytke litistys p‰‰lle/pois."
+msgstr "Kytke litistys p√§√§lle/pois."
 
 msgid "Attach tagged objects to this frame."
-msgstr "Liit‰ merkityt kappaleet t‰h‰n kehykseen."
+msgstr "Liit√§ merkityt kappaleet t√§h√§n kehykseen."
 
 msgid "Maximize the frame horizontally/vertically."
 msgstr "Maksimoi kehys vaaka/pystysuunnassa."
 
 msgid "Move current object within the frame left/right."
 msgstr ""
-"Siirr‰ kehyksess‰ t‰ll‰ hetkell‰ n‰ytett‰v‰‰ kappaletta vasemmalle/oikealle."
+"Siirr√§ kehyksess√§ t√§ll√§ hetkell√§ n√§ytett√§v√§√§ kappaletta vasemmalle/oikealle."
 
 msgid "Switch to next/previous object within the frame."
 msgstr "Siirry seuraavaan/edelliseen kehyksen jakavaan kappaleeseen."
@@ -1096,76 +1096,76 @@ msgstr "Siirry n:teen kehyksen jakavaan kappaleeseen."
 
 #
 msgid "Query for a client window to attach."
-msgstr "Kysy liitett‰v‰‰ asiakasikkunaa."
+msgstr "Kysy liitett√§v√§√§ asiakasikkunaa."
 
 msgid "Move objects between frames by dragging and dropping the tab."
 msgstr ""
-"Siirr‰ kappaletta kehysten v‰lill‰ raahaamalla ja pudottamalla v‰lilehti."
+"Siirr√§ kappaletta kehysten v√§lill√§ raahaamalla ja pudottamalla v√§lilehti."
 
 msgid "Resize the frame."
 msgstr "Muuta kehyksen kokoa."
 
 msgid "Switch the frame to display the object indicated by the tab."
-msgstr "Vaihda kehys n‰ytt‰m‰‰n v‰lilehden ilmoittama kappale."
+msgstr "Vaihda kehys n√§ytt√§m√§√§n v√§lilehden ilmoittama kappale."
 
 msgid "Begin move/resize mode."
 msgstr "Aloita siirto ja koonmuutostila."
 
 msgid "Display context menu."
-msgstr "N‰yt‰ kontekstivalikko."
+msgstr "N√§yt√§ kontekstivalikko."
 
 #
 msgid "Query for a client window to go to."
-msgstr "Kysy asiakasikkunaa, johon siirty‰."
+msgstr "Kysy asiakasikkunaa, johon siirty√§."
 
 msgid "Query for workspace to go to or create a new one."
-msgstr "Kysy tyˆpˆyt‰‰ jolle siirty‰, tai luo uusi."
+msgstr "Kysy ty√∂p√∂yt√§√§ jolle siirty√§, tai luo uusi."
 
 msgid "Query for file to view."
-msgstr "Kysy tiedostoa n‰ytett‰v‰ksi."
+msgstr "Kysy tiedostoa n√§ytett√§v√§ksi."
 
 msgid "Query for file to edit."
 msgstr "Kysy tiedostoa muokattavaksi."
 
 msgid "Query for host to connect to with SSH."
-msgstr "Ota SSH-yhteys kyselt‰v‰‰n koneeseen."
+msgstr "Ota SSH-yhteys kyselt√§v√§√§n koneeseen."
 
 msgid "Query for Lua code to execute."
 msgstr "Kysy Lua-koodia ajettavaksi."
 
 msgid "Query for command line to execute."
-msgstr "Kysy komentorivi‰ suoritettavaksi."
+msgstr "Kysy komentorivi√§ suoritettavaksi."
 
 #
 msgid "Run a terminal emulator."
-msgstr "K‰ynnist‰ p‰‰te-emulaattori."
+msgstr "K√§ynnist√§ p√§√§te-emulaattori."
 
 msgid "Show the Ion manual page."
-msgstr "N‰yt‰ Ionin ohjesivu."
+msgstr "N√§yt√§ Ionin ohjesivu."
 
 msgid "Query for manual page to be displayed."
-msgstr "Kysy ohjesivua n‰ytett‰v‰ksi."
+msgstr "Kysy ohjesivua n√§ytett√§v√§ksi."
 
 msgid "Toggle tag of current object."
 msgstr "Merkitse aktiivinen kappale."
 
 msgid "Detach (float) or reattach an object to its previous location."
 msgstr ""
-"Irroita (kelluta) tai uudelleenliit‰ kappale sen edelliseen sijaintiin."
+"Irroita (kelluta) tai uudelleenliit√§ kappale sen edelliseen sijaintiin."
 
 msgid "Close current object."
 msgstr "Sulje aktiivinen kappale."
 
 msgid "Toggle client window group full-screen mode"
-msgstr "Muuta asiakasikkunaryhm‰n kokoruudun tilaa"
+msgstr "Muuta asiakasikkunaryhm√§n kokoruudun tilaa"
 
 #
 msgid ""
 "Send next key press to the client window. Some programs may not allow this "
 "by default."
 msgstr ""
-"L‰het‰ seuraava n‰pp‰inpainallus aktiiviselle asiakasikkunalle. Kaikki "
-"ohjelmat eiv‰t v‰ltt‰m‰tt‰ salli t‰t‰ oletuksena."
+"L√§het√§ seuraava n√§pp√§inpainallus aktiiviselle asiakasikkunalle. Kaikki "
+"ohjelmat eiv√§t v√§ltt√§m√§tt√§ salli t√§t√§ oletuksena."
 
 #
 msgid "Kill client owning the client window."
@@ -1176,56 +1176,56 @@ msgid ""
 "Nudge the client window. This might help with some programs' resizing "
 "problems."
 msgstr ""
-"Tˆn‰ise aktiivista asiakasikkunaa. T‰m‰ saattaa auttaa joidenkin ohjelmien "
+"T√∂n√§ise aktiivista asiakasikkunaa. T√§m√§ saattaa auttaa joidenkin ohjelmien "
 "koko-ongelmien kanssa."
 
 msgid "Raise focused object, if possible."
 msgstr "Nosta aktiivista kappaletta, jos mahdollista."
 
 msgid "Backward-circulate focus."
-msgstr "Kierr‰t‰ fokusta taaksep‰in"
+msgstr "Kierr√§t√§ fokusta taaksep√§in"
 
 msgid "Forward-circulate focus."
-msgstr "Kierr‰t‰ fokusta eteenp‰in."
+msgstr "Kierr√§t√§ fokusta eteenp√§in."
 
 msgid "Display the window list menu."
-msgstr "N‰yt‰ ikkunavalikko."
+msgstr "N√§yt√§ ikkunavalikko."
 
 msgid "Display the main menu."
-msgstr "N‰yt‰ p‰‰valikko."
+msgstr "N√§yt√§ p√§√§valikko."
 
 #
 #
 msgid "Create a new workspace of chosen default type."
-msgstr "Luo uusi tyˆpˆyt‰ ennalta asetettua tyyppi‰."
+msgstr "Luo uusi ty√∂p√∂yt√§ ennalta asetettua tyyppi√§."
 
 #
 msgid "Go to next/previous screen on multihead setup."
-msgstr "Mene seuraavalle/edelliselle n‰ytˆlle usean n‰ytˆn j‰rjestelm‰ss‰."
+msgstr "Mene seuraavalle/edelliselle n√§yt√∂lle usean n√§yt√∂n j√§rjestelm√§ss√§."
 
 #
 msgid "Go to n:th screen on multihead setup."
-msgstr "Siirry n‰ytˆlle n usean n‰ytˆn j‰rjestelm‰ss‰."
+msgstr "Siirry n√§yt√∂lle n usean n√§yt√∂n j√§rjestelm√§ss√§."
 
 #
 msgid "Clear all tags."
-msgstr "Poista kaikki merkinn‰t."
+msgstr "Poista kaikki merkinn√§t."
 
 msgid "Go to first region demanding attention or previously active one."
 msgstr ""
-"Mene ensimm‰iseen huomiota vaativaan alueeseen, tai edelliseen aktiiviseen."
+"Mene ensimm√§iseen huomiota vaativaan alueeseen, tai edelliseen aktiiviseen."
 
 #
 msgid "Switch to next/previous object within current screen."
 msgstr ""
-"Siirry seuraavaan/edelliseen t‰m‰nhetkisen n‰ytˆn lomittamaan kappaleeseen."
+"Siirry seuraavaan/edelliseen t√§m√§nhetkisen n√§yt√∂n lomittamaan kappaleeseen."
 
 #
 msgid ""
 "Switch to n:th object (workspace, full screen client window) within current "
 "screen."
 msgstr ""
-"Siirry n:teen t‰m‰nhetkisen n‰ytˆn lomittamaan kappaleeseen (tyˆpˆyt‰, "
+"Siirry n:teen t√§m√§nhetkisen n√§yt√∂n lomittamaan kappaleeseen (ty√∂p√∂yt√§, "
 "kokoruudun asiakasikkuna)."
 
 msgid "List"
@@ -1257,16 +1257,16 @@ msgstr ""
 
 #
 msgid "Workspaces"
-msgstr "Tyˆpˆyd‰t"
+msgstr "Ty√∂p√∂yd√§t"
 
 msgid "Programs"
 msgstr "Ohjelmat"
 
 msgid "Show the PWM manual page."
-msgstr "N‰yt‰ PWM:n ohjesivu."
+msgstr "N√§yt√§ PWM:n ohjesivu."
 
 msgid "Toggle scratchpad."
-msgstr "Kytke suttausalue p‰‰lle/pois"
+msgstr "Kytke suttausalue p√§√§lle/pois"
 
 msgid ""
 "\n"
@@ -1303,43 +1303,43 @@ msgid "SSH to:"
 msgstr "Avaa SSH-yhteys:"
 
 msgid "Failed to open ~/.ssh/config"
-msgstr "Tiedoston ~/.ssh/config avaaminen ep‰onnistui."
+msgstr "Tiedoston ~/.ssh/config avaaminen ep√§onnistui."
 
 msgid "Failed to open ~/.ssh/known_hosts"
-msgstr "Tiedostoa ~/.ssh/known_hosts avaaminen ep‰onnistui."
+msgstr "Tiedostoa ~/.ssh/known_hosts avaaminen ep√§onnistui."
 
 msgid "Run:"
 msgstr "Suorita:"
 
 msgid "View file:"
-msgstr "N‰yt‰ tiedosto:"
+msgstr "N√§yt√§ tiedosto:"
 
 msgid "Edit file:"
 msgstr "Muokkaa tiedostoa:"
 
 msgid "Workspace name:"
-msgstr "Tyˆpˆyd‰n nimi:"
+msgstr "Ty√∂p√∂yd√§n nimi:"
 
 msgid "Frame name:"
 msgstr "Kehyksen nimi:"
 
 msgid "Restart Notion (y/n)?"
-msgstr "Uudelleenk‰ynnist‰ Notion (kyll‰: y, ei: n)?"
+msgstr "Uudelleenk√§ynnist√§ Notion (kyll√§: y, ei: n)?"
 
 msgid "Exit Notion/Shutdown session (y/n)?"
-msgstr "Poistu Notionista/Lopeta istunto (kyll‰: y, ei: n)?"
+msgstr "Poistu Notionista/Lopeta istunto (kyll√§: y, ei: n)?"
 
 msgid "Go to or create workspace:"
-msgstr "Mene tai luo tyˆpˆyt‰:"
+msgstr "Mene tai luo ty√∂p√∂yt√§:"
 
 msgid "Attach window:"
-msgstr "Liit‰ ikkuna:"
+msgstr "Liit√§ ikkuna:"
 
 msgid "Go to window:"
 msgstr "Mene ikkunaan:"
 
 msgid "New workspace layout (default):"
-msgstr "Uuden tyˆpˆyd‰n sijoitelma (default):"
+msgstr "Uuden ty√∂p√∂yd√§n sijoitelma (default):"
 
 msgid "Unknown error"
 msgstr "Tuntematon virhe"
@@ -1348,22 +1348,22 @@ msgid "Unknown layout"
 msgstr "Tuntematon sijoittelu."
 
 msgid "Cannot attach: different root windows."
-msgstr "Ei voida liitt‰‰: eri juuri-ikkunat."
+msgstr "Ei voida liitt√§√§: eri juuri-ikkunat."
 
 msgid "Could not find client window %s."
-msgstr "Asiakasikkunaa %s ei lˆytynyt."
+msgstr "Asiakasikkunaa %s ei l√∂ytynyt."
 
 msgid "Too much result data"
 msgstr "Liian suuri vastaus"
 
 msgid "Save look selection in %s?"
-msgstr "Talletaanko ulkon‰kˆasetus tiedostoon %s?"
+msgstr "Talletaanko ulkon√§k√∂asetus tiedostoon %s?"
 
 msgid "Cannot save selection."
 msgstr "Ei voida tallettaa valintaa."
 
 msgid "Unable to append to non-table menu"
-msgstr "Ei voida lis‰t‰ valikkoon, koska sit‰ ei ole m‰‰ritelty tauluna "
+msgstr "Ei voida lis√§t√§ valikkoon, koska sit√§ ei ole m√§√§ritelty tauluna "
 
 msgid ""
 "Making the following minimal emergency mappings:\n"
@@ -1373,25 +1373,25 @@ msgid ""
 "  Mod1+C -> close\n"
 "  Mod1+K P/N -> WFrame.switch_next/switch_prev\n"
 msgstr ""
-"Tehd‰‰n seuraavat v‰himm‰iset h‰t‰sidonnat:\n"
+"Tehd√§√§n seuraavat v√§himm√§iset h√§t√§sidonnat:\n"
 "  F2 -> xterm\n"
-"  F11 -> uudelleenk‰ynnistys\n"
+"  F11 -> uudelleenk√§ynnistys\n"
 "  F12 -> lopetus\n"
 "  Mod1+C -> sulkeminen\n"
-"  Mod1+K P/N -> vaihto kehyksen sis‰ll‰\n"
+"  Mod1+K P/N -> vaihto kehyksen sis√§ll√§\n"
 
 msgid "Recursive table - unable to deepcopy"
-msgstr "Rekursiivinen taulu - ei voida syv‰kopioida."
+msgstr "Rekursiivinen taulu - ei voida syv√§kopioida."
 
 msgid "Frame"
 msgstr "Kehys"
 
 msgid "Screen"
-msgstr "N‰yttˆ"
+msgstr "N√§ytt√∂"
 
 #
 msgid "Workspace"
-msgstr "Tyˆpˆyt‰"
+msgstr "Ty√∂p√∂yt√§"
 
 msgid "Tiling"
 msgstr "Laatoitus"
@@ -1406,13 +1406,13 @@ msgid "Context menu:"
 msgstr "Kontekstivalikko:"
 
 msgid "Main menu:"
-msgstr "P‰‰valikko:"
+msgstr "P√§√§valikko:"
 
 msgid "Invalid guard %s."
 msgstr "Virheellinen vahti %s."
 
 msgid "Error compiling guard: %s"
-msgstr "Virhe vahdin k‰‰nnˆss‰. %s"
+msgstr "Virhe vahdin k√§√§nn√∂ss√§. %s"
 
 msgid "Error in command string: "
 msgstr "Virhe komentojonossa:"
@@ -1424,42 +1424,42 @@ msgid "Not a directory."
 msgstr "Ei hakemisto."
 
 msgid "Could not find %s"
-msgstr "Ei lˆydetty‰ %s:‰‰."
+msgstr "Ei l√∂ydetty√§ %s:√§√§."
 
 msgid "ion-statusd quit."
-msgstr "ion-statusd p‰‰tti suorituksen."
+msgstr "ion-statusd p√§√§tti suorituksen."
 
 msgid "Errors starting ion-statusd:\n"
-msgstr "Ion-statusd:n k‰ynnistysvirheet:\n"
+msgstr "Ion-statusd:n k√§ynnistysvirheet:\n"
 
 msgid "Failed to start ion-statusd."
-msgstr "Ion-statusd:n k‰ynnistys eop‰onnistui."
+msgstr "Ion-statusd:n k√§ynnistys eop√§onnistui."
 
 msgid "Screen not found."
-msgstr "Ruutua ei lˆytynyt."
+msgstr "Ruutua ei l√∂ytynyt."
 
 msgid "Screen already has an stdisp. Refusing to create a statusbar."
-msgstr "Ruudulla on jo tilan‰yttˆ. Kielt‰ydyt‰‰n luomasta tilarivi‰."
+msgstr "Ruudulla on jo tilan√§ytt√∂. Kielt√§ydyt√§√§n luomasta tilarivi√§."
 
 msgid "Failed to create statusbar."
-msgstr "Ep‰onnistuttiin tilarivin luonnissa"
+msgstr "Ep√§onnistuttiin tilarivin luonnissa"
 
 msgid "Split current frame vertically."
-msgstr "Halkaise t‰m‰nhetkinen kehys pystysuunnassa."
+msgstr "Halkaise t√§m√§nhetkinen kehys pystysuunnassa."
 
 msgid "Go to frame above/below/right/left of current frame."
 msgstr ""
-"Siirry t‰m‰nhetkisen kehyksen yll‰/alla/vasemmalle/oikealla olevaan "
+"Siirry t√§m√§nhetkisen kehyksen yll√§/alla/vasemmalle/oikealla olevaan "
 "kehykseen."
 
 msgid "Split current frame horizontally."
-msgstr "Halkaise t‰m‰nhetkinen kehys vaakasuunnassa."
+msgstr "Halkaise t√§m√§nhetkinen kehys vaakasuunnassa."
 
 msgid "Destroy current frame."
-msgstr "Tuhoa t‰m‰nhetkinen kehys."
+msgstr "Tuhoa t√§m√§nhetkinen kehys."
 
 msgid "Tile frame, if no tiling exists on the workspace"
-msgstr "Laatoita kehys, jos tyˆpˆyd‰ll‰ ei ole kehyst‰"
+msgstr "Laatoita kehys, jos ty√∂p√∂yd√§ll√§ ei ole kehyst√§"
 
 #
 msgid "Destroy frame"
@@ -1481,7 +1481,7 @@ msgstr "Peilaa"
 
 #
 msgid "Transpose"
-msgstr "K‰‰nn‰"
+msgstr "K√§√§nn√§"
 
 msgid "Untile"
 msgstr "Hajoita laatoitus"
@@ -1496,7 +1496,7 @@ msgid "At right"
 msgstr "Oikealla"
 
 msgid "Above"
-msgstr "Yl‰puolella"
+msgstr "Yl√§puolella"
 
 msgid "Below"
 msgstr "Alapuolella"
@@ -1520,16 +1520,16 @@ msgid "Select next/previous menu entry."
 msgstr "Siirry seuraavaan/edelliseen valintaan."
 
 msgid "Clear the menu's typeahead find buffer."
-msgstr "Tyhj‰‰ valikon hakupuskuri."
+msgstr "Tyhj√§√§ valikon hakupuskuri."
 
 msgid "Toggle floating dock."
-msgstr "N‰yt‰/piiloita kelluva laituri (dock)."
+msgstr "N√§yt√§/piiloita kelluva laituri (dock)."
 
 msgid "Pos-TL"
-msgstr "Paikka: yl‰vasen"
+msgstr "Paikka: yl√§vasen"
 
 msgid "Pos-TR"
-msgstr "Paikka: yl‰oikea"
+msgstr "Paikka: yl√§oikea"
 
 msgid "Pos-BL"
 msgstr "Paikka: alavasen"
@@ -1544,7 +1544,7 @@ msgid "Grow-R"
 msgstr "Kasvu: oikealle"
 
 msgid "Grow-U"
-msgstr "Kasvu: ylˆs"
+msgstr "Kasvu: yl√∂s"
 
 msgid "Grow-D"
 msgstr "Kasvu: alas"
@@ -1571,89 +1571,89 @@ msgstr "%s %s osassa %s"
 #~ "Unable to unsplit: Could not move client windows elsewhere within the "
 #~ "tiling."
 #~ msgstr ""
-#~ "Ei voida poistaa halkaisua: asiakasikkunoita ei voitu siirt‰‰ muualle "
+#~ "Ei voida poistaa halkaisua: asiakasikkunoita ei voitu siirt√§√§ muualle "
 #~ "laatoituksessa."
 
 #~ msgid "'based_on' for %s points back to the style itself."
-#~ msgstr "Tyylin %s 'based_on' -asetus osoittaa itseens‰."
+#~ msgstr "Tyylin %s 'based_on' -asetus osoittaa itseens√§."
 
 #~ msgid "Unknown base style. \"%s\""
 #~ msgstr "Tuntematon pohjatyyli \"%s\"."
 
 #~ msgid "Tag current object within the frame."
-#~ msgstr "Merkitse kehyksen t‰ll‰ hetkell‰ n‰ytt‰m‰ kappale."
+#~ msgstr "Merkitse kehyksen t√§ll√§ hetkell√§ n√§ytt√§m√§ kappale."
 
 #~ msgid "Xinerama sanity check failed; overlapping screens detected."
-#~ msgstr "Xinerama-tiedon j‰rkevyystarkastus havaitsi p‰‰llekk‰isi‰ ruutuja."
+#~ msgstr "Xinerama-tiedon j√§rkevyystarkastus havaitsi p√§√§llekk√§isi√§ ruutuja."
 
 #~ msgid "Xinerama sanity check failed; zero size detected."
-#~ msgstr "Xinerama-tiedon j‰rkevyystarkastus havaitsi p‰‰llekk‰isi‰ ruutuja."
+#~ msgstr "Xinerama-tiedon j√§rkevyystarkastus havaitsi p√§√§llekk√§isi√§ ruutuja."
 
 #~ msgid ""
 #~ "Don't know how to get Xinerama information for multiple X root windows."
-#~ msgstr "Xinerama-tietoa ei osata k‰ytt‰‰ usealle juuri-ikkunalle."
+#~ msgstr "Xinerama-tietoa ei osata k√§ytt√§√§ usealle juuri-ikkunalle."
 
 #~ msgid "Error retrieving Xinerama information."
 #~ msgstr "Xinerama-tietoja ei saatu."
 
 #~ msgid "Unable to setup Xinerama screen %d."
-#~ msgstr "Xinerama-ruudun %d hallittavaksi saattaminen ep‰onnistui."
+#~ msgstr "Xinerama-ruudun %d hallittavaksi saattaminen ep√§onnistui."
 
 #~ msgid "Unable to setup X screen %d."
-#~ msgstr "X-ruudun %d hallittavaksi saattaminen ep‰onnistui."
+#~ msgstr "X-ruudun %d hallittavaksi saattaminen ep√§onnistui."
 
 #
 #~ msgid "Refusing to destroy - not empty."
-#~ msgstr "Tuhoamisesta kielt‰ydyt‰‰n - ei tyhj‰."
+#~ msgstr "Tuhoamisesta kielt√§ydyt√§√§n - ei tyhj√§."
 
 #
 #~ msgid "Workspace not empty - refusing to destroy."
-#~ msgstr "Tyˆpˆyt‰‰ ei voida tuhota, koska se ei ole tyhj‰."
+#~ msgstr "Ty√∂p√∂yt√§√§ ei voida tuhota, koska se ei ole tyhj√§."
 
 #~ msgid "Nil frame."
 #~ msgstr "Kehys on asettamatta."
 
 #~ msgid "The frame is not managed by the workspace."
-#~ msgstr "Kehys ei ole t‰m‰n tyˆpˆyd‰n hallinnoima."
+#~ msgstr "Kehys ei ole t√§m√§n ty√∂p√∂yd√§n hallinnoima."
 
 #~ msgid "Already detached"
 #~ msgstr "Irroitettu jo"
 
 #~ msgid "Use Xinerama screen information (default: 1/yes)"
-#~ msgstr "Hyˆdynn‰ Xineramaa (oletus: 1/kyll‰)"
+#~ msgstr "Hy√∂dynn√§ Xineramaa (oletus: 1/kyll√§)"
 
 #~ msgid "Ignored: not compiled with Xinerama support"
-#~ msgstr "J‰tet‰‰n huomiotta: ohjelmaa ei ole k‰‰nnetty Xinerama-tuella"
+#~ msgstr "J√§tet√§√§n huomiotta: ohjelmaa ei ole k√§√§nnetty Xinerama-tuella"
 
 #~ msgid "Invalid parameter to -xinerama."
 #~ msgstr "Virheellinen parametri -xinerama:lle"
 
 #~ msgid "Use Xinerama screen information (default: 0/no)"
-#~ msgstr "Hyˆdynn‰ Xineramaa (oletus: 0/ei)"
+#~ msgstr "Hy√∂dynn√§ Xineramaa (oletus: 0/ei)"
 
 #~ msgid "Detach window from tiled frame"
-#~ msgstr "Irroita ikkuna laatoitetusta kehyksest‰"
+#~ msgstr "Irroita ikkuna laatoitetusta kehyksest√§"
 
 #
 #~ msgid "New workspace"
-#~ msgstr "Uusi tyˆpˆyt‰"
+#~ msgstr "Uusi ty√∂p√∂yt√§"
 
 #~ msgid "New empty workspace"
-#~ msgstr "Uusi tyhj‰ tyˆpˆyt‰"
+#~ msgstr "Uusi tyhj√§ ty√∂p√∂yt√§"
 
 #
 #~ msgid "Close workspace"
-#~ msgstr "Sulje tyˆpˆyt‰"
+#~ msgstr "Sulje ty√∂p√∂yt√§"
 
 #~ msgid "Could not find a complete workspace class. Please load some modules."
 #~ msgstr ""
-#~ "Yht‰k‰‰n t‰ydellist‰ tyˆpˆyt‰luokkaa ei lˆydy. Ole hyv‰ ja lataa joitakin "
+#~ "Yht√§k√§√§n t√§ydellist√§ ty√∂p√∂yt√§luokkaa ei l√∂ydy. Ole hyv√§ ja lataa joitakin "
 #~ "moduuleita."
 
 #
 #
 #~ msgid "Failed to rescue some client windows."
-#~ msgstr "Joidenkin asiakasikkunoiden pelastaminen ep‰onnistui."
+#~ msgstr "Joidenkin asiakasikkunoiden pelastaminen ep√§onnistui."
 
 #~ msgid "Same manager."
 #~ msgstr "Sama manageri."
@@ -1665,26 +1665,26 @@ msgstr "%s %s osassa %s"
 
 #
 #~ msgid "Failure to create a new frame."
-#~ msgstr "Uuden kehyksen luonti ep‰onnistui."
+#~ msgstr "Uuden kehyksen luonti ep√§onnistui."
 
 #
 #~ msgid "Region not managed by the workspace."
-#~ msgstr "Alue ei ole tyˆpˆyd‰n hallinnassa."
+#~ msgstr "Alue ei ole ty√∂p√∂yd√§n hallinnassa."
 
 #~ msgid "No geometry specified."
 #~ msgstr "Geometria on asettamatta."
 
 #~ msgid "Unable to re-initialise workspace. Destroying."
-#~ msgstr "Tyˆpˆyd‰n uudelleenalustus ep‰onnistui, joten se tuhotaan."
+#~ msgstr "Ty√∂p√∂yd√§n uudelleenalustus ep√§onnistui, joten se tuhotaan."
 
 #~ msgid "Refusing to close non-empty workspace."
-#~ msgstr "Tyˆpˆyd‰n tuhoamisesta kielt‰ydyt‰‰n, koska se ei ole tyhj‰."
+#~ msgstr "Ty√∂p√∂yd√§n tuhoamisesta kielt√§ydyt√§√§n, koska se ei ole tyhj√§."
 
 #~ msgid "Malfunctioning placement hook; condition #%d."
-#~ msgstr "Rikkin‰inen koukku; tapaus #%d."
+#~ msgstr "Rikkin√§inen koukku; tapaus #%d."
 
 #~ msgid "none"
-#~ msgstr "ei mik‰‰n"
+#~ msgstr "ei mik√§√§n"
 
 #
 #~ msgid "mail"
@@ -1695,10 +1695,10 @@ msgstr "%s %s osassa %s"
 #~ "Transients:\n"
 #~ msgstr ""
 #~ "\n"
-#~ "V‰liaikaisikkunat:\n"
+#~ "V√§liaikaisikkunat:\n"
 
 #~ msgid "Workspace type (%s):"
-#~ msgstr "Tyˆpˆyd‰n tyyppi (%s):"
+#~ msgstr "Ty√∂p√∂yd√§n tyyppi (%s):"
 
 #~ msgid "Go to previous active object."
 #~ msgstr "Mene edelliseen aktiiviseen olioon."
@@ -1706,20 +1706,20 @@ msgstr "%s %s osassa %s"
 #
 #
 #~ msgid "Toggle fullscreen mode of current client window."
-#~ msgstr "Kytke aktiivisen asiakasikkunan kokoruudun tila p‰‰lle/pois."
+#~ msgstr "Kytke aktiivisen asiakasikkunan kokoruudun tila p√§√§lle/pois."
 
 #~ msgid "WStatusBar expected."
 #~ msgstr "Odotettiin WStatusBaria."
 
 #~ msgid "Backwards-circulate focus and raise the newly focused frame."
-#~ msgstr "Kierr‰t‰ fokusta taaksep‰in ja nosta fokusoitu kehys."
+#~ msgstr "Kierr√§t√§ fokusta taaksep√§in ja nosta fokusoitu kehys."
 
 #~ msgid "(Un)stick"
 #~ msgstr "Aseta tahmaus"
 
 #
 #~ msgid "Query for a client window to attach to active frame."
-#~ msgstr "Kysy asiakasikkunaa liitett‰v‰ksi kehykseen."
+#~ msgstr "Kysy asiakasikkunaa liitett√§v√§ksi kehykseen."
 
 #
 #~ msgid "Resize the area."
@@ -1729,29 +1729,29 @@ msgstr "%s %s osassa %s"
 #~ msgstr "Nosta/alenna aktiivinen kehys."
 
 #~ msgid "Restart PWM"
-#~ msgstr "K‰ynnist‰ PWM"
+#~ msgstr "K√§ynnist√§ PWM"
 
 #~ msgid "Refresh list"
-#~ msgstr "Virkist‰ lista"
+#~ msgstr "Virkist√§ lista"
 
 #~ msgid "Unable to create workspace: no screen."
-#~ msgstr "Ei voida luoda tyˆpˆyt‰‰: ei ruutua."
+#~ msgstr "Ei voida luoda ty√∂p√∂yt√§√§: ei ruutua."
 
 #~ msgid "load"
 #~ msgstr "kuorma"
 
 #~ msgid "(Un)tag"
-#~ msgstr "Vaihda merkint‰"
+#~ msgstr "Vaihda merkint√§"
 
 #~ msgid "Circulate focus and raise the newly focused frame."
-#~ msgstr "Kierr‰t‰ fokusta ja nosta uudelleen fokusoitu kehys."
+#~ msgstr "Kierr√§t√§ fokusta ja nosta uudelleen fokusoitu kehys."
 
 #
 #~ msgid "No function given."
 #~ msgstr "Funktiota ei ole annettu."
 
 #~ msgid "Failed to create a timer for statusbar."
-#~ msgstr "Ep‰onnistuttiin ajastimen luonnissa tilariville."
+#~ msgstr "Ep√§onnistuttiin ajastimen luonnissa tilariville."
 
 #~ msgid "Vertically at root"
 #~ msgstr "Pystysuunnassa juuressa"
@@ -1761,27 +1761,27 @@ msgstr "%s %s osassa %s"
 
 #
 #~ msgid "Transpose at root"
-#~ msgstr "K‰‰nn‰ juuri"
+#~ msgstr "K√§√§nn√§ juuri"
 
 #~ msgid "Flip&transpose"
-#~ msgstr "Peilaa&k‰‰nn‰"
+#~ msgstr "Peilaa&k√§√§nn√§"
 
 #~ msgid "Horizontally at root"
 #~ msgstr "Vaakasuunnassa juuressa"
 
 #~ msgid "Frame may not be destroyed."
-#~ msgstr "Kehyst‰ ei saa tuhota."
+#~ msgstr "Kehyst√§ ei saa tuhota."
 
 #~ msgid "Failed to rescue managed objects."
-#~ msgstr "Hallittujen olioiden pelastaminen ep‰onnistui."
+#~ msgstr "Hallittujen olioiden pelastaminen ep√§onnistui."
 
 #
 #~ msgid "Could not find a root window."
-#~ msgstr "Juuri-ikkunaa ei lˆytynyt."
+#~ msgstr "Juuri-ikkunaa ei l√∂ytynyt."
 
 #~ msgid "Caught fatal signal %d. Dying without deinit."
 #~ msgstr ""
-#~ "Ohjelma lopettaa ilman j‰lkien putsausta tuhoisan signaalin %d "
+#~ "Ohjelma lopettaa ilman j√§lkien putsausta tuhoisan signaalin %d "
 #~ "vastaanottoon."
 
 #~ msgid "Caught signal %d. Dying."
@@ -1789,17 +1789,17 @@ msgstr "%s %s osassa %s"
 
 #
 #~ msgid "Object destroyed while deferred actions are still pending."
-#~ msgstr "Viiv‰stetty‰ toimintoja jonossa viel‰ oliota tuhottaessa."
+#~ msgstr "Viiv√§stetty√§ toimintoja jonossa viel√§ oliota tuhottaessa."
 
 #~ msgid "Unable to rescue \"%s\"."
-#~ msgstr "Alueen \"%s\" pelastaminen ep‰onnistui."
+#~ msgstr "Alueen \"%s\" pelastaminen ep√§onnistui."
 
 #~ msgid "Frame is not empty."
-#~ msgstr "Kehys ei ole tyhj‰."
+#~ msgstr "Kehys ei ole tyhj√§."
 
 #
 #~ msgid "Frame not managed by the workspace."
-#~ msgstr "Kehys ei ole t‰m‰n tyˆpˆyd‰n hallitsema."
+#~ msgstr "Kehys ei ole t√§m√§n ty√∂p√∂yd√§n hallitsema."
 
 #~ msgid "Vertically/root"
 #~ msgstr "Pystysuunnassa juuressa"
