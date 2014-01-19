@@ -15,11 +15,8 @@ See also:
 
   https://sourceforge.net/apps/mediawiki/notion/index.php?title=Development
 
-1. Get the source code.  Make sure all submodules are present and up to date.
+1. Get the source code.
     git clone git://notion.git.sourceforge.net/gitroot/notion/notion
-    cd notion
-    git submodule init
-    git submodule update
 
 2. In addition to the standard C library headers and the GNU toolchain, you 
    will need the following tools and libraries for building Notion.
