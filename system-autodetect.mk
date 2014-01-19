@@ -9,7 +9,7 @@
 # Installation path prefix. Unless you know what you're doing, the default
 # of /usr/local is likely the correct choice.
 #DIST: PREFIX=/usr/local
-PREFIX ?= /usr/local
+PREFIX ?= /tmp/notion/test
 
 # Unless you are creating a package conforming to some OS's standards, you
 # probably do not want to modify the following directories:
@@ -59,7 +59,7 @@ endif
 # Set PRELOAD_MODULES=1 if your system does not support dynamically loaded
 # modules through 'libdl' or has non-standard naming conventions.
 # You will likely need this option on e.g. Cygwin and Mac OS X.
-#PRELOAD_MODULES=1
+PRELOAD_MODULES=1
 
 # Flags to link with libdl. Even if PRELOAD_MODULES=1, you may need this
 # setting (for e.g. Lua, when not instructed by pkg-config).
@@ -156,7 +156,7 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 CFLAGS += -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
-LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)
+LDFLAGS += $(LIBS) $(EXTRA_LIBS)
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
 # The following options are mainly for development use and can be used
@@ -173,7 +173,7 @@ BSD_SOURCE?=-D_BSD_SOURCE
 # Most systems
 XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 # SunOS, (Irix)
-#XOPEN_SOURCE=-D__EXTENSIONS__
+XOPEN_SOURCE=-D__EXTENSIONS__
 
 C99_SOURCE?=-std=c99 -DCF_HAS_VA_COPY
 

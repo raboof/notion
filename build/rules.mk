@@ -110,8 +110,8 @@ SOURCES += preload.c
 TO_CLEAN += preload.c
 else # !PRELOAD_MODULES
 LDFLAGS += $(EXPORT_DYNAMIC)
-WHOLEA = -Wl,-whole-archive
-NO_WHOLEA = -Wl,-no-whole-archive
+WHOLEA =
+NO_WHOLEA =
 endif # !PRELOAD_MODULES
 
 preload.c:

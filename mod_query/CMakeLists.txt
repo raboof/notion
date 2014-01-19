@@ -1,0 +1,15 @@
+add_module(mod_query
+	SOURCES
+		complete.c
+		edln.c
+		input.c
+		listing.c
+		main.c
+		wedln.c
+		wedln-wrappers.c
+		wmessage.c
+		query.c
+		fwarn.c
+		history.c
+	EXPORTS
+)

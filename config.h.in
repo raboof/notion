@@ -1,0 +1,35 @@
+#ifndef NOTION_CONFIG_H
+#define NOTION_CONFIG_H
+
+#cmakedefine ETCDIR				"${ETCDIR}"
+//#cmakedefine BINDIR				"${BINDIR}"
+#cmakedefine SHAREDIR				"${SHAREDIR}"
+//#cmakedefine MANDIR				"${MANDIR}"
+//#cmakedefine DOCDIR				"${DOCDIR}"
+//#cmakedefine LIBDIR				"${LIBDIR}"
+#cmakedefine MODULEDIR				"${MODULEDIR}"
+#cmakedefine LCDIR				"${LCDIR}"
+#cmakedefine EXTRABINDIR			"${EXTRABINDIR}"
+//#cmakedefine VARDIR				"${VARDIR}"
+#cmakedefine LOCALEDIR				"${LOCALEDIR}"
+//#cmakedefine INCDIR				"${INCDIR}"
+
+#cmakedefine CF_DRAG_TRESHOLD			${CF_DRAG_TRESHOLD}
+#cmakedefine CF_DBLCLICK_DELAY			${CF_DBLCLICK_DELAY}
+#cmakedefine CF_MAX_MOVERES_STR_SIZE		${CF_MAX_MOVERES_STR_SIZE}
+#cmakedefine CF_RESIZE_DELAY			${CF_RESIZE_DELAY}
+#cmakedefine CF_XMESSAGE			"${CF_XMESSAGE}"
+#cmakedefine CF_EDGE_RESISTANCE			${CF_EDGE_RESISTANCE}
+#cmakedefine CF_RAISE_DELAY			${CF_RAISE_DELAY}
+#cmakedefine CF_STATUSBAR_SYSTRAY_HEIGHT	${CF_STATUSBAR_SYSTRAY_HEIGHT}
+#cmakedefine CF_VISIBILITY_CONSTRAINT		${CF_VISIBILITY_CONSTRAINT}
+#cmakedefine CF_USERTIME_DIFF_CURRENT		${CF_USERTIME_DIFF_CURRENT}
+#cmakedefine CF_USERTIME_DIFF_NEW		${CF_USERTIME_DIFF_NEW}
+#cmakedefine CF_CURSOR_DEFAULT			${CF_CURSOR_DEFAULT}
+#cmakedefine CF_CURSOR_RESIZE			${CF_CURSOR_RESIZE}
+#cmakedefine CF_CURSOR_MOVE			${CF_CURSOR_MOVE}
+#cmakedefine CF_CURSOR_DRAG			${CF_CURSOR_DRAG}
+#cmakedefine CF_CURSOR_WAITKEY			${CF_CURSOR_WAITKEY}
+#cmakedefine CF_STDISP_MIN_SZ			${CF_STDISP_MIN_SZ}
+
+#endif

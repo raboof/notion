@@ -1,0 +1,18 @@
+add_library(tu
+	iterable.c
+	map.c
+	misc.c
+	obj.c
+	objlist.c
+	optparser.c
+	output.c
+	parser.c
+	prefix.c
+	ptrlist.c
+	rb.c
+	setparam.c
+	stringstore.c
+	tokenizer.c
+	util.c
+	errorlog.c
+)

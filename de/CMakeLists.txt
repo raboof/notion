@@ -1,0 +1,12 @@
+add_module(de
+	SOURCES
+		init.c
+		draw.c
+		font.c
+		colour.c
+		brush.c
+		fontset.c
+		style.c
+		precompose.c
+	EXPORTS
+)

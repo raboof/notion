@@ -1,4 +1,4 @@
-#!LUA50
+#!/usr/bin/env lua
 -- -*- mode: lua -*-
 -- ion/mkexports.lua
 -- 

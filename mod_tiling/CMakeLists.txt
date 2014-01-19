@@ -1,0 +1,12 @@
+add_module(mod_tiling
+	SOURCES
+		main.c
+		tiling.c
+		placement.c
+		split.c
+		split-stdisp.c
+		splitfloat.c
+		panehandle.c
+		ops.c
+	EXPORTS
+)

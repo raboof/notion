@@ -17,3 +17,11 @@ notion/preload.c
 utils/ion-completeman
 utils/ion-statusd/ion-statusd
 utils/ion-completefile/ion-completefile
+
+config.h
+
+Makefile
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+install_manifest.txt

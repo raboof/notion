@@ -28,6 +28,7 @@
 #endif
 
 #include "../../version.h"
+#include "../../config.h"
 
 
 static OptParserOpt ion_opts[]={
@@ -173,7 +174,7 @@ int main(int argc, char*argv[])
     prefix_wrap_simple(extl_add_searchdir, ETCDIR);
     prefix_wrap_simple(extl_add_searchdir, SHAREDIR);
     prefix_wrap_simple(extl_add_searchdir, LCDIR);
-    extl_set_userdirs(CF_ION_EXECUTABLE);
+    extl_set_userdirs("notion");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
     

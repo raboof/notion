@@ -161,7 +161,7 @@ int main(int argc, char*argv[])
     
     localedir=prefix_add(LOCALEDIR);
     
-    if(!ioncore_init(CF_EXECUTABLE, argc, argv, localedir))
+    if(!ioncore_init("notion", argc, argv, localedir))
         return EXIT_FAILURE;
     
     if(localedir!=NULL)
@@ -172,7 +172,7 @@ int main(int argc, char*argv[])
     prefix_wrap_simple(extl_add_searchdir, ETCDIR);
     prefix_wrap_simple(extl_add_searchdir, SHAREDIR);
     prefix_wrap_simple(extl_add_searchdir, LCDIR);
-    extl_set_userdirs(CF_EXECUTABLE);
+    extl_set_userdirs("notion");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
     

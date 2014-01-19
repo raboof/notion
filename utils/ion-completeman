@@ -107,7 +107,7 @@ if test "x$HOME" != x; then
     usercache="$HOME/.ion3/mancache"
 fi
 
-vardir=${ION_VAR_PATH-@VARDIR@}
+vardir=${ION_VAR_PATH-/var/cache/notion}
 syscache="$vardir/mancache"
 
 
