@@ -65,6 +65,11 @@ ioncore.set{
     -- "ignore" to ignore these requests, and to "activate" to set the activity
     -- flag on a window that requests to be stacked "Above".
     --window_stacking_request="ignore",
+
+    -- Time (in ms) that a window has to be focussed in order to be added to the
+    -- focus list. Set this to <=0 (or comment it out) to disable the logic, and
+    -- update the focus list immediately
+    --focuslist_insert_delay=1000,
 }
 
 

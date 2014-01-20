@@ -96,6 +96,10 @@ static ExtlFn get_layout_fn;
  *                          requests. \codestr{ignore} to do nothing,
  *                          \codestr{activate} to set the activity flag on a
  *                          window requesting to be stacked Above. \\
+ *  \var{focuslist_insert_delay} & (integer) Time (in ms) that a window must
+ *                          stay focused in order to be added to the focus list.
+ *                          If this value is set <=0, this logic is disabled:
+ *                          the focus list is updated immediately \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -153,6 +157,9 @@ void ioncore_set(ExtlTab tab)
 
     if(extl_table_gets_i(tab, "usertime_diff_new", &dd))
         ioncore_g.usertime_diff_new=maxof(0, dd);
+
+    if(extl_table_gets_i(tab, "focuslist_insert_delay", &dd))
+        ioncore_g.focuslist_insert_delay=maxof(0, dd);
     
     ioncore_set_moveres_accel(tab);
     
@@ -194,6 +201,7 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "unsqueeze", ioncore_g.unsqueeze_enabled);
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
+    extl_table_sets_i(tab, "focuslist_insert_delay", ioncore_g.focuslist_insert_delay);
 
     extl_table_sets_s(tab, "window_stacking_request", 
                       stringintmap_key(win_stackrq, 

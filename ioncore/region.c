@@ -971,6 +971,14 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how)
         p[0] = region_name(reg);
         xwindow_set_text_property(((WWindow*)reg)->win, XA_WM_NAME, p, 1);
     }
+
+    // if the region that's waiting to be added to the focuslist is being
+    // deleted, cancel the insertion
+    if( how == ioncore_g.notifies.deinit &&
+        reg == region_focuslist_region_awaiting_insertion() )
+    {
+      region_focuslist_awaiting_insertion_cancel();
+    }
 }
 
 /*}}}*/

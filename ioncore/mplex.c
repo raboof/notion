@@ -713,7 +713,7 @@ static WStacking *mplex_to_focus(WMPlex *mplex)
     
     if(foc==NULL){
         /* Search focus history if no specific attempt set.*/
-        for(reg=ioncore_g.focus_current; reg!=NULL; reg=reg->active_next){
+        for(reg=ioncore_g.focuslist; reg!=NULL; reg=reg->active_next){
             foc=has_stacking_within(mplex, reg);
             if(foc!=NULL)
                 break;

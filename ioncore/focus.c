@@ -7,6 +7,7 @@
  */
 
 #include <libmainloop/hooks.h>
+#include <libmainloop/signal.h>
 #include "common.h"
 #include "focus.h"
 #include "global.h"
@@ -36,7 +37,7 @@ void region_focuslist_remove_with_mgrs(WRegion *reg)
 {
     WRegion *mgrp=region_manager_or_parent(reg);
     
-    UNLINK_ITEM(ioncore_g.focus_current, reg, active_next, active_prev);
+    UNLINK_ITEM(ioncore_g.focuslist, reg, active_next, active_prev);
     
     if(mgrp!=NULL)
         region_focuslist_remove_with_mgrs(mgrp);
@@ -46,14 +47,14 @@ void region_focuslist_remove_with_mgrs(WRegion *reg)
 void region_focuslist_push(WRegion *reg)
 {
     region_focuslist_remove_with_mgrs(reg);
-    LINK_ITEM_FIRST(ioncore_g.focus_current, reg, active_next, active_prev);
+    LINK_ITEM_FIRST(ioncore_g.focuslist, reg, active_next, active_prev);
 }
 
 
 void region_focuslist_move_after(WRegion *reg, WRegion *after)
 {
     region_focuslist_remove_with_mgrs(reg);
-    LINK_ITEM_AFTER(ioncore_g.focus_current, after, reg, 
+    LINK_ITEM_AFTER(ioncore_g.focuslist, after, reg,
                     active_next, active_prev);
 }
 
@@ -65,7 +66,7 @@ void region_focuslist_deinit(WRegion *reg)
     if(replace!=NULL)
         region_focuslist_move_after(replace, reg);
         
-    UNLINK_ITEM(ioncore_g.focus_current, reg, active_next, active_prev);
+    UNLINK_ITEM(ioncore_g.focuslist, reg, active_next, active_prev);
 }
 
 
@@ -80,13 +81,17 @@ WRegion *ioncore_goto_previous()
 {
     WRegion *next;
     
-    if(ioncore_g.focus_current==NULL)
+    if(ioncore_g.focuslist==NULL)
         return NULL;
+
+    // We're trying to access the focus list from lua (likely from the UI). I
+    // thus force any pending focuslist updates to complete now
+    region_focuslist_awaiting_insertion_trigger();
     
     /* Find the first region on focus history list that isn't currently
      * active.
      */
-    for(next=ioncore_g.focus_current->active_next;
+    for(next=ioncore_g.focuslist->active_next;
         next!=NULL; 
         next=next->active_next){
         
@@ -112,13 +117,17 @@ bool ioncore_focushistory_i(ExtlFn iterfn)
 {
     WRegion *next;
     
-    if(ioncore_g.focus_current==NULL)
+    if(ioncore_g.focuslist==NULL)
         return FALSE;
     
+    // We're trying to access the focus list from lua (likely from the UI). I
+    // thus force any pending focuslist updates to complete now
+    region_focuslist_awaiting_insertion_trigger();
+
     /* Find the first region on focus history list that isn't currently
      * active.
      */
-    for(next=ioncore_g.focus_current->active_next;
+    for(next=ioncore_g.focuslist->active_next;
         next!=NULL; 
         next=next->active_next){
         
@@ -211,6 +220,66 @@ WRegion *ioncore_await_focus()
 /*}}}*/
 
 
+/*{{{ focuslist delayed insertion logic */
+
+static WTimer*  focuslist_insert_timer=NULL;
+static WRegion* region_awaiting_insertion;
+
+static void timer_expired__focuslist_insert(WTimer* dummy1, Obj* dummy2)
+{
+  region_focuslist_push(region_awaiting_insertion);
+  region_awaiting_insertion = NULL;
+}
+
+static void schedule_focuslist_insert_timer(WRegion *reg)
+{
+  // if the delay is disabled, add to the list NOW
+  if( ioncore_g.focuslist_insert_delay <= 0 )
+  {
+    region_focuslist_push(reg);
+    return;
+  }
+
+  if( focuslist_insert_timer == NULL)
+  {
+    focuslist_insert_timer=create_timer();
+    if( focuslist_insert_timer == NULL )
+      return;
+  }
+
+  region_awaiting_insertion = reg;
+  timer_set(focuslist_insert_timer, ioncore_g.focuslist_insert_delay,
+            (WTimerHandler*)timer_expired__focuslist_insert, NULL);
+}
+
+
+void region_focuslist_awaiting_insertion_cancel(void)
+{
+  if( focuslist_insert_timer == NULL )
+    return;
+
+  timer_reset(focuslist_insert_timer);
+}
+
+void region_focuslist_awaiting_insertion_trigger(void)
+{
+  if( focuslist_insert_timer    != NULL &&
+      region_awaiting_insertion != NULL )
+  {
+    timer_expired__focuslist_insert(NULL,NULL);
+    timer_reset(focuslist_insert_timer);
+  }
+}
+
+const WRegion* region_focuslist_region_awaiting_insertion(void)
+{
+  return region_awaiting_insertion;
+}
+
+
+/*}}}*/
+
+
 /*{{{ Events */
 
 
@@ -222,9 +291,13 @@ void region_got_focus(WRegion *reg)
     
     region_set_activity(reg, SETPARAM_UNSET);
 
-    if(reg->active_sub==NULL){
-        region_focuslist_push(reg);
-        /*ioncore_g.focus_current=reg;*/
+    if(reg->active_sub==NULL)
+    {
+      // I update the current focus indicator right now. The focuslist is
+      // updated on a timer to keep the list ordered by importance (to keep
+      // windows that the user quickly cycles through at the bottom of the list)
+      ioncore_g.focus_current = reg;
+      schedule_focuslist_insert_timer(reg);
     }
     
     if(!REGION_IS_ACTIVE(reg)){
@@ -269,18 +342,6 @@ void region_lost_focus(WRegion *reg)
         par->active_sub=NULL;
         region_update_owned_grabs(par);
     }
-
-
-#if 0    
-    if(ioncore_g.focus_current==reg){
-        /* Find the closest active parent, or if none is found, stop at the
-         * screen and mark it "currently focused".
-         */
-        while(par!=NULL && !REGION_IS_ACTIVE(par) && !OBJ_IS(par, WScreen))
-            par=REGION_PARENT_REG(par);
-        ioncore_g.focus_current=par;
-    }
-#endif
 
     D(fprintf(stderr, "lost focus (act) %s [%p:]\n", OBJ_TYPESTR(reg), reg);)
     

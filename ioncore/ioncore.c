@@ -352,6 +352,7 @@ static bool init_global()
     ioncore_g.warp_next=FALSE;
     ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_OTHER;
     
+    ioncore_g.focuslist=NULL;
     ioncore_g.focus_current=NULL;
 
     ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
@@ -367,6 +368,7 @@ static bool init_global()
     ioncore_g.autoraise=TRUE;
     ioncore_g.autosave_layout=TRUE;
     ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;
+    ioncore_g.focuslist_insert_delay=CF_FOCUSLIST_INSERT_DELAY;
     
     ioncore_g.enc_utf8=FALSE;
     ioncore_g.enc_sb=TRUE;

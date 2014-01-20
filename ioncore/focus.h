@@ -61,4 +61,9 @@ WRegion *ioncore_current();
 
 extern void region_pointer_focus_hack(WRegion *reg);
 
+// focuslist delayed insertion logic stuff
+void           region_focuslist_awaiting_insertion_cancel(void);
+void           region_focuslist_awaiting_insertion_trigger(void);
+const WRegion* region_focuslist_region_awaiting_insertion(void);
+
 #endif /* ION_IONCORE_FOCUS_H */

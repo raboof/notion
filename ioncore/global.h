@@ -81,8 +81,19 @@ DECLSTRUCT(WGlobal){
      * some problems so these are handled as a special case.
      *
      * This is a doubly-linked list with links 'active_next' and 'active_prev'
+     *
+     * This is the list of previously-focused windows, in order of recent
+     * usefulness. The currently-focussed window is deemed most important (first
+     * item on this list) if focuslist_insert_delay is disabled, or if
+     * focuslist_insert_delay is enabled and its timer has expired
      */
-    WRegion *focus_current;
+    WRegion* focuslist;
+
+    // This is the region that is currently focused. It is usually the first
+    // item in the focuslist, but not always. It isn't the first item if
+    // focuslist_insert_delay is enabled, and the corresponding timer is active
+    WRegion* focus_current;
+
     
     int input_mode;
     int opmode;
@@ -101,6 +112,7 @@ DECLSTRUCT(WGlobal){
     int  window_stacking_request;
     Time usertime_diff_current;
     Time usertime_diff_new;
+    Time focuslist_insert_delay;
     
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */
