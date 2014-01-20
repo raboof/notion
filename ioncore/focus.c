@@ -600,3 +600,35 @@ void region_pointer_focus_hack(WRegion *reg)
 
 /*}}}*/
 
+/*{{{ Debug printers */
+
+void region_focuslist_debugprint(void)
+{
+  LOG(DEBUG, GENERAL, "focus list start =========================");
+  LOG(DEBUG, GENERAL, "currently-focused region ");
+  region_debugprint_parents( ioncore_g.focus_current );
+  LOG(DEBUG, GENERAL, "");
+
+  LOG(DEBUG, GENERAL, "top-of-focuslist ");
+  region_debugprint_parents( ioncore_g.focuslist );
+  LOG(DEBUG, GENERAL, "");
+
+  WRegion* reg = ioncore_g.focuslist;
+  while(1)
+  {
+    LOG(DEBUG, GENERAL, "%p (%s)", (void*)reg, reg != NULL ? reg->ni.name : "NULL");
+
+    if( reg              == NULL             ||
+        reg->active_next == NULL             ||
+        reg              == reg->active_next )
+    {
+      break;
+    }
+
+    reg = reg->active_next;
+  }
+
+  LOG(DEBUG, GENERAL, "focus list end =========================");
+}
+
+/*}}}*/
