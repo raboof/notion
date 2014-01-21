@@ -16,6 +16,17 @@ LUA_COMPILED := $(subst .lua,.lc, $(LUA_SOURCES))
 TARGETS := $(TARGETS) $(LUA_COMPILED)
 endif
 
+ifdef EXTRA_EXECUTABLE
+EXECUTABLE := $(EXTRA_EXECUTABLE)
+BINDIR_ := $(EXTRABINDIR)
+endif
+
+ifdef EXECUTABLE
+BINDIR_ ?= $(BINDIR)
+EXECUTABLE_ := $(EXECUTABLE)$(BIN_SUFFIX)
+TARGETS := $(TARGETS) $(EXECUTABLE_)
+endif
+
 
 # Main targets
 ######################################
@@ -40,10 +51,10 @@ depend: subdirs-depend _depend
 install: subdirs-install _install
 
 
+ifdef MAKE_EXPORTS
+
 # Exports
 ######################################
-
-ifdef MAKE_EXPORTS
 
 EXPORTS_C = exports.c
 EXPORTS_H = exports.h
@@ -56,13 +67,28 @@ _exports: $(EXPORTS_C)
 
 $(EXPORTS_H): $(EXPORTS_C)
 
-$(EXPORTS_C):
-	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) $(SOURCES)
+$(EXPORTS_C): $(SOURCES) $(MKEXPORTS_EXTRA_DEPS)
+	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) \
+	$(SOURCES) $(MKEXPORTS_EXTRAS)
+
+# Exports documentation
+######################################
+
+EXPORTS_DOC = exports.tex
+
+TO_CLEAN := $(TO_CLEAN) $(EXPORTS_DOC)
+
+_exports_doc: $(EXPORTS_DOC)
+
+$(EXPORTS_DOC): $(SOURCES) $(LUA_SOURCES) $(MKEXPORTS_EXTRA_DEPS)
+	$(MKEXPORTS) -mkdoc -module $(MAKE_EXPORTS) -o $(EXPORTS_DOC) \
+	$(SOURCES) $(LUA_SOURCES) $(MKEXPORTS_EXTRAS)
 
 else # !MAKE_EXPORTS
 
 EXPORTS_C = 
 EXPORTS_H = 
+EXPORTS_DOC =
 
 endif # !MAKE_EXPORTS
 
@@ -72,6 +98,44 @@ endif # !MAKE_EXPORTS
 
 OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
 
+
+ifdef EXECUTABLE
+
+ifdef MODULE_LIST
+ifdef MODULE_PATH
+ifeq ($(PRELOAD_MODULES),1)
+EXT_OBJS += $(foreach mod, $(MODULE_LIST), $(MODULE_PATH)/$(mod)/$(mod).a)
+DEPEND_DEPENDS += preload.c
+SOURCES += preload.c
+TO_CLEAN += preload.c
+else # !PRELOAD_MODULES
+LDFLAGS += $(EXPORT_DYNAMIC)
+WHOLEA = -Wl,-whole-archive
+NO_WHOLEA = -Wl,-no-whole-archive
+endif # !PRELOAD_MODULES
+
+preload.c:
+	$(LUA) $(TOPDIR)/build/mkpreload.lua $(MODULE_LIST) > preload.c
+
+endif # MODULE_PATH
+endif # MODULE_LIST
+
+ifeq ($(RELOCATABLE),1)
+DEFINES += -DCF_RELOCATABLE_BIN_LOCATION=\"$(BINDIR_)/$(EXECUTABLE)\"
+endif
+
+DEFINES += -DCF_EXECUTABLE=\"$(EXECUTABLE)\"
+
+$(EXECUTABLE_): $(OBJS) $(EXT_OBJS)
+	$(CC) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
+
+executable_install:
+	$(INSTALLDIR) $(DESTDIR)$(BINDIR_)
+	$(INSTALLBIN) $(EXECUTABLE_) $(DESTDIR)$(BINDIR_)
+
+endif # EXECUTABLE
+
+
 ifdef MODULE
 
 ifneq ($(PRELOAD_MODULES),1)
@@ -79,23 +143,27 @@ ifneq ($(PRELOAD_MODULES),1)
 CC_PICFLAGS=-fPIC -DPIC
 LD_SHAREDFLAGS=-shared
 
-%.o: %.c
+%.o: %.c $(EXPORTS_H)
 	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
+# notion might not link to Xext, so modules will have to link to it themselves
+# if they need it: 
+LIBS += $(X11_LIBS)
+
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) $(LIBS) -o $@
 
 
 module_install: module_stub_install
-	$(INSTALLDIR) $(MODULEDIR)
-	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+	$(INSTALLDIR) $(DESTDIR)$(MODULEDIR)
+	$(INSTALLBIN) $(MODULE).so $(DESTDIR)$(MODULEDIR)
 
 else # PRELOAD_MODULES
 
 PICOPT=-fPIC -DPIC
 LINKOPT=-shared
 
-%.o: %.c
+%.o: %.c $(EXPORTS_H)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
@@ -107,13 +175,13 @@ module_install: module_stub_install
 endif # PRELOAD_MODULES
 
 module_stub_install:
-	$(INSTALLDIR) $(LCDIR)
-	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(LCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LCDIR)
+	$(INSTALL) -m $(DATA_MODE) $(MODULE).lc $(DESTDIR)$(LCDIR)
 
 ifndef MODULE_STUB
 
 $(MODULE).lc:
-	echo "ioncore.load_module('$(MODULE)')" | $(LUAC) -o $@ -
+	echo "ioncore.load_module('$(MODULE)') package.loaded['$(MODULE)']=true" | $(LUAC) -o $@ -
 else
 
 LUA_SOURCES += $(MODULE_STUB)
@@ -123,7 +191,7 @@ endif #MODULE_STUB
 else # !MODULE
 
 
-%.o: %.c
+%.o: %.c $(EXPORTS_H)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
@@ -134,7 +202,7 @@ endif# !MODULE
 ######################################
 
 _clean:
-	$(RM) -f $(TO_CLEAN) core $(DEPEND_FILE) $(OBJS) libextl.a
+	$(RM) -f $(TO_CLEAN) core $(DEPEND_FILE) $(OBJS)
 
 _realclean:
 	$(RM) -f $(TO_REALCLEAN) $(TARGETS)
@@ -146,15 +214,15 @@ _realclean:
 	$(LUAC) -o $@ $<
 
 lc_install:
-	$(INSTALLDIR) $(LCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(LCDIR)
 	for i in $(LUA_COMPILED); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(LCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(LCDIR); \
 	done
 
 etc_install:
-	$(INSTALLDIR) $(ETCDIR)
+	$(INSTALLDIR) $(DESTDIR)$(ETCDIR)
 	for i in $(ETC); do \
-		$(INSTALL) -m $(DATA_MODE) $$i $(ETCDIR); \
+		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(ETCDIR); \
 	done
 
 # Dependencies
@@ -201,3 +269,9 @@ TO_CLEAN += potfiles_c potfiles_lua
 _potfiles:
 	echo "$(SOURCES)"|tr ' ' '\n' > potfiles_c
 	echo "$(LUA_SOURCES) $(ETC)"|tr ' ' '\n' > potfiles_lua
+
+# Defaults
+######################################
+
+INSTALL_STRIP ?= -s
+INSTALLBIN ?= $(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE)

@@ -1,0 +1,43 @@
+#!/bin/sh
+
+test "$XTERMCMD" || XTERMCMD="xterm"
+
+title=""
+wait=""
+
+while test $# -ge 0; do
+    if test "$1" = "--"; then
+        shift
+        break
+    elif test "$1" = "-phase2"; then
+        shift
+        "$@" && test "$wait" = "" || {
+            echo "Press enter..."
+            read nothing
+        }
+        exit
+    elif test "$1" = "-T"; then
+	if test $# -lt 2; then
+            echo error
+            exit 0
+	fi
+	title="$2"
+	shift 2
+    elif test "$1" = "-w"; then
+	wait="$1"
+	shift
+    else
+        break
+    fi
+done
+
+if test $# -lt 1; then
+    echo error
+    exit 0
+fi
+
+if test "$title" = ""; then
+	title="$*"
+fi
+
+exec $XTERMCMD -T "$title" -e $0 $wait -phase2 "$@"

@@ -1,0 +1,142 @@
+#!/bin/sh
+
+prog=$0
+tocompl=""
+section=""
+beg=""
+action=""
+usercache=""
+syscache=""
+linebeg="^"
+icase=""
+
+translate_grepsafe() { 
+    # The regexp below is supposed to be [\[\].*$^\\], but sed sucks
+    # and doesn't support simple and intuitive escaping and we have to
+    # do it the hard way with the collations [.[.] and [.].] standing 
+    # for [ and ], respectively.
+    sed 's:^[ \t]*\(.*\)[ \t]*$:\1:; s:[[.[.][.].].*$^\\]:\\&:g'
+}
+
+
+while test $# -ge 1; do
+    case "$1" in
+        -mid)
+            linebeg=""
+            ;;
+        -icase)
+            icase="-i"
+            ;;
+        -complete)
+            read section tocompl << EOF
+$2
+EOF
+            if test "$tocompl" = ""; then
+                tocompl="$section"
+                section=""
+            else
+                beg="$section "
+            fi
+            tocompl=`echo "$tocompl" | translate_grepsafe`
+            action="complete"
+            break
+            ;;
+        -mkusercache)
+            action="mkusercache"
+            break
+            ;;
+        -mksyscache)
+            action="mksyscache"
+            break
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
+done
+
+if test "x$action" = x; then
+    echo 2>&1 "Usage: $prog [-icase] [-mid] (-complete what|-mkusercache|-mksyscache)"
+    exit 1
+fi
+        
+
+filterpath() {
+    sed 's:^.*/\([^/]*\.[0-9].*\)$:\1:p; d'
+}
+
+filtersect() {
+    sed 's:^\(.*\)\.[0-9].*$:\1:p; d'
+}
+
+grepper() {
+    if test "$tocompl" = "" -a "$section" = ""; then
+        cat
+    else
+        if test "$section" = ""; then
+            section="[0-9]"
+        fi
+        grep $icase "$linebeg$tocompl.*\.$section"
+    fi
+}
+
+scan() {
+    if test "x$ION_MANPATH" != "x"; then
+        mpath="$ION_MANPATH"
+    elif test "x$MANPATH" != "x"; then
+        mpath="$MANPATH"
+    else
+        mpprog=`which manpath`
+        if test "x$mpprog" = x; then
+            echo "Please set MANPATH, ION_MANPATH or put 'manpath' on PATH" > /dev/stderr
+            exit 1
+        fi
+        mpath=`$mpprog`
+    fi
+    
+    for p in `echo "$mpath"|tr : '\n'`; do
+        find  "$p" -type f -o -type l | filterpath
+    done 
+}
+
+
+cachefile=""
+
+if test "x$HOME" != x; then
+    usercache="$HOME/.ion3/mancache"
+fi
+
+vardir=${ION_VAR_PATH-@VARDIR@}
+syscache="$vardir/mancache"
+
+
+case "$action" in
+    complete)
+        if test "x$usercache" != x -a -f "$usercache"; then
+            cachefile="$usercache"
+        elif test -f "$syscache"; then
+            cachefile="$syscache"
+        fi
+        
+        # Empty "common part" of completions.
+        echo "$beg"
+        
+        if test "x$cachefile" != x; then
+            grepper < "$cachefile" | filtersect
+        else
+            scan | grepper | filtersect
+        fi
+        ;;
+    mkusercache)
+        if test "x$usercache" != x; then
+            scan > "$usercache"
+        else
+            echo >&2 "\$HOME not set."
+        fi
+        ;;
+    mksyscache)
+        mkdir -p "$vardir"
+        scan > "$syscache"
+        ;;
+esac

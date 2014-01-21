@@ -1,0 +1,165 @@
+.TH NOTION 1
+.SH NÁZEV
+Notion - správce oken systému X11
+.SH PŘEHLED
+.B notion
+.I "[volby]"
+.SH "POPIS"
+
+Notion je dlaždicový správce oken se záložkami navržený pro klávesnicové uživatele.
+
+.SH "VOLBY"
+.TP
+.B \-display počítač:displej.obrazovka
+X displej, který se má spravovat
+.TP
+.B \-conffile soubor
+Konfigurační soubor, který se má použít
+.TP
+.B \-searchdir adresář
+Adresář, ve kterém se budou hledat konfigurační soubory a ostatní skripty
+.TP
+.B \-oneroot
+Na X serverech s více obrazovkami (ne-Xinerama) bude spravovat pouze výchozí
+obrazovku (kořenové okno). (Tedy ne všechny, které byly zadány v parametru
+\-display nebo v proměnné DISPLAY.)
+.TP
+.B \-session název_sezení
+Nastaví název sezení. Tato volba ovlivní, kam se uloží pracovní plochy
+a ostatní soubory. Pokud není nastavená, použije se ~/.notion/session_name.
+.TP
+.B \-help
+Zobrazí nápovědu k příkazovým parametrům
+.TP
+.B \-version
+Zobrazí verzi
+.TP
+.B \-about
+Zobrazí informace o programu (verze, autor, copyright)
+
+.SH Základní pojetí
+
+Tato sekce přináší přehled typů objektů, které se objevují na X displeji
+spravovaném Notionem. To je nezbytné pro pochopení operací s objekty a pro
+pochopení, proč jsou různá klávesová přiřazení dostupná jen u některých
+objektů. Podrobnější popis nutný pro psaní vlastních přizpůsobení naleznete
+na webových stránkách Notionu.
+
+Nejvyššími objekty jsou \fBobrazovky\fP, které odpovídají fyzickým
+obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP (což je něco jako
+\fBskupiny\fP) a \fBklientská okna\fP v celoobrazovkovém režimu. V jeden
+okamžik může být na obrazovce zobrazen právě jeden takový objekt.
+
+Pracovní plochy mohou obsahovat \fBdlaždice\fP a odpojené/plovoucí
+\fBrámy\fP. Dlaždice obsahují \fBrámy\fP tak, aby bezezbytku vyplnily
+(vydláždily) celou obrazovku, a případně stavový řádek a dok. Podobně
+jako obrazovky obsahují i rámy další objekty, ale v tomto případě již
+jde většinou o \fBskupiny\fP klientských oken. Po většinu času bývají
+rámy jedinou viditelnou částí Notionu - volitelně mohou mít kolem sebe
+orámování a pro každého potomka zobrazují \fBzáložku\fP.
+
+Další viditelnou částí jsou \fBdotazy\fP. Nejde o nic jiného než obdélníky,
+které se objeví ve spodní části rámů nebo obrazovek vždy, když se Notion ptá
+na nějakou informaci (třeba název okna pro připojení, nebo název programu,
+který se má spustit). Většina dotazů podporuje doplňování klávesou tab.
+
+
+.SH PŘIŘAZENÍ
+
+Toto jsou výchozí přiřazení klávesových zkratek. Přiřazení modifikátoru
+(\fBMod1\fP) závisí na systému. Na PCčkách s XFree86 bude nejspíš navázán
+na levou klávesu Alt (\fBAlt_L\fP). Na Sunech je obvykle namapován na klávesy
+s diamanty (\fBMeta_L\fP, \fBMeta_R\fP). Konkrétní přiřazení zjistíte
+programem \fIxmodmap(1)\fP.
+
+Řetězec v hranatých závorkách určuje modul, jehož konfigurační soubor
+definuje toto přiřazení.
+
+.SS Globální přiřazení
+
+BINDINGS:WScreen
+
+.SS Přiřazení pro práci s rámy a obrazovkami
+
+BINDINGS:WMPlex
+
+.SS Přiřazení pro práci se všemi rámy
+
+BINDINGS:WFrame
+
+.SS Přiřazení pro práci s nejvyššími rámy (ne s dočasnými) a obrazovkami
+
+BINDINGS:WMPlex.toplevel
+
+.SS Přiřazení pro práci s nejvyššími rámy (ne s dočasnými)
+
+BINDINGS:WFrame.toplevel
+
+.SS Přiřazení pro práci s plovoucími/odpojenými rámy
+
+BINDINGS:WFrame.floating
+
+.SS Přiřazení pro dlaždicové plochy a rámy [mod_tiling]
+
+BINDINGS:WTiling
+.\" BINDINGS:WFrame.tiled
+
+.SS Přiřazení pro klientská okna
+
+BINDINGS:WClientWin
+BINDINGS:WGroupCW
+
+.SS Přiřazení pro přesun/změnu velikosti
+
+BINDINGS:WMoveresMode
+
+.SS Přiřazení pro informační zprávy a dotazy [mod_query]
+
+BINDINGS:WInput
+
+.SS Přiřazení pro úpravu dotazů [mod_query]
+
+Tyto jsou podobné jako v textovém editoru \fIjoe(1)\fP.
+Vyjmutí, kopírování a vložení sice pracují mírně konvenčněji, ale
+klávesy jsou shodné.
+
+BINDINGS:WEdln
+
+.SS Přiřazení pro menu [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH SOUBORY A ADRESÁŘE
+.TP
+.B ETCDIR/cfg_notion.lua
+Hlavní systémový konfigurační soubor
+.TP
+.B ETCDIR/cfg_*.lua
+Ostatní konfigurační soubory
+.TP
+.B ETCDIR/look_*.lua
+Soubory nastavující barevné schéma
+.TP
+.B ~/.notion/
+Uživatelské konfigurační soubory
+.TP
+.B ~/.notion/cfg_notion.lua
+Hlavní uživatelský konfigurační soubor (přepisuje systémové nastavení)
+
+.SH VIZ TAKÉ
+Domovská stránka Notionu \fIhttp://notion.sf.net/\fP
+.PP
+Dokument "Configuring and extending Notion with Lua" k nalezení
+tamtéž.
+.PP
+.I DOCDIR/
+.PP
+\fIX(7x)\fP, \fInotionflux(1)\fP, \fIjoe(1)\fP
+
+.SH AUTOR
+Notion napsal Notion Team
+Ion napsal Tuomo Valkonen <tuomov at iki.fi>.
+
+.SH PŘEKLAD
+Do češtiny přeložil Miroslav Kuře <kurem at debian.cz>.
