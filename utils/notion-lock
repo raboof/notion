@@ -1,0 +1,10 @@
+#!/bin/sh
+if xscreensaver-command -version >/dev/null 2>&1; then
+	exec xscreensaver-command -lock
+else 
+	if type "i3lock" > /dev/null; then
+		exec i3lock -n -c 000000
+	else
+		exec xlock
+	fi
+fi

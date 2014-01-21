@@ -1,0 +1,31 @@
+Ion xrandr module
+Copyright (c) Ragnar Rova 2004
+              Tuomo Valkonen 2005-2007
+
+by Ragnar Rova <rr@mima.x.se>
+
+INTRODUCTION
+
+This module gives ion3 XrandR support. It updates ions screen size when
+a screen size change event is received.
+
+INSTALLATION
+
+        1. Edit Makefile to ensure TOPDIR points to your top-level ion source
+           directory with a system.mk that matches the version of ion installed
+           on your system.
+
+        2. Run make.
+
+        3. Either run (as root)
+                # make install
+           or (as yourself),
+                $ mkdir -p ~/.ion3/lib
+                $ cp .libs/mod_xrandr.* ~/.ion3/lib
+        4. Add dopath("mod_xrandr") to ~/.ion3/cfg_ion.lua. 
+        5. (Re)start Ion.
+		
+
+LIMITATIONS
+
+The module only supports screen size changes. Nothing else.
