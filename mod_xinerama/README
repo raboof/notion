@@ -1,0 +1,95 @@
+Notion Xinerama module 
+
+* By Tomáš Ebenlendr and Arnout Engelen
+* Based on work by Thomas Themel <themel0r@wannabehacker.com>
+* Based on the mod_xrandr skeleton
+
+INTRODUCTION
+
+This module provides multi-head support to Notion. It uses the Xinerama API,
+and thus can be used with any X Server that exposes functionality through this 
+API, notably RandR (used by both ATI and nVidia) and TwinView (used by nVidia).
+
+(it is based on the module that gave ion3 its Xinerama support back that was 
+killed on 20070117)
+
+INSTALLATION
+
+        1. Edit Makefile to ensure TOPDIR points to your top-level notion source
+           directory with a system.mk that matches the version of notion installed
+           on your system.
+
+        2. Run make.
+
+        3. Either run (as root)
+                # make install
+           or (as yourself),
+                $ mkdir -p ~/.notion/lib
+                $ cp .libs/mod_xinerama.{so,lc} ~/.notion/lib
+        4. Add dopath("mod_xinerama") to ~/.notion/cfg_notion.lua. See below
+	   for possible status bar issues.
+        5. (Re)start Ion.
+		
+CONFIGURATION
+
+If you don't like current behaviour, you can set up screens differently,
+by placing following code in cfg_xinerama.lua:
+
+local screens = mod_xinerama.query_screens()
+
+if (screens) then
+    -- -- now you can edit the 'screens' table in lua,
+    -- -- e.g.:
+    -- local merged_screens = mod_xinerama.merge_contained_screens(screens)
+    -- -- or (current behaviour):
+    -- local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
+    -- -- and finally setup the screens:
+    mod_xinerama.setup_screens(merged_screens)
+end
+
+REFRESHING
+
+When the screen topology changes, the locations, sizes and mergings of windows
+may be recalculated. The Xinerama API does not support notifications of 
+topology changes, but these might be received through other means, such as 
+mod_xrandr. 
+
+If you're satisfied with the default merge algorithm, you may simply call
+mod_xinerama.refresh(). If you want to use your own merging algorithm, you
+may call mod_xinerama.setup_screens(merged_screens) again.
+
+LIMITATIONS
+
+For some reason, loading the statusbar module _BEFORE_ the Xinerama module hides
+the status bar. To work around this, load mod_xinerama before loading the
+statusbar module.
+
+This does not contain the Sun Xinerama support that was in the original ion3
+because I don't have a machine running Solaris ready. Adding it should be rather
+trivial with access to the original ion code and a Solaris machine.
+
+WRAPPING goto_next_scr/goto_prev_scr
+
+Without altering the notion source, it doesn't seem possible to get
+goto_next_scr/goto_prev_scr to properly wrap around on the last/first screen.
+This can be worked around in lua, though:
+
+function next_wrap()
+        scr = ioncore.goto_next_screen()
+        if obj_is(scr, "WRootWin") then
+                ioncore.goto_nth_screen(0)
+        end
+end
+
+function prev_wrap() 
+        scr = ioncore.goto_prev_screen()
+        if obj_is(scr, "WRootWin") then
+                ioncore.goto_nth_screen(-1)
+        end
+end
+                       
+defbindings("WScreen", {
+    bdoc("Go to next/previous screen on multihead setup."),
+    kpress(META.."Shift+comma", "prev_wrap()"),
+    kpress(META.."Shift+period", "next_wrap()"),
+})
