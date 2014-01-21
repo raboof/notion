@@ -1,0 +1,5 @@
+
+The TODO.riot file containg an Ion TODO list has been created with the
+riot outliner available from <http://iki.fi/tuomov/riot/>. The file is,
+however, just an mbox file, so you can read it with your favourite 
+threading mail user agent. For example: mutt -f TODO.riot
