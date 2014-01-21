@@ -1,0 +1,26 @@
+
+Vítejte v Notionu!
+
+Pokud jste ještě nikdy Notion nepoužívali, silně vám doporučujeme
+prostudovat si před pokračováním jeho manuálovou stránku. Kopii
+manuálové stránky naleznete níže, ale můžete se k ní kdykoliv vrátit
+například stiskem klávesy <F1> následované klávesou <Enter>, nebo
+v terminálu spuštěním příkazu 'man notion'. (Předpokládáme, že jste
+Notion nainstalovali standardním způsobem a že systémové příkazy ví, kde
+naleznou manuálovou stránku.)
+
+Jestliže jste příliš nedočkaví a přeze všechna doporučení si
+manuálovou stránku nepřečtete, měli byste alespoň vědět, že klávesou
+<F2> by se měl spustit emulátor terminálu (xterm) a že do hlavního
+menu se dostanete klávesou <F12>.
+
+Až se budete cítit připraveni na psaní vlastních konfiguračních
+souborů (jednou k tomu stejně dojde), prostudujte si konfigurační
+manuál dostupný na webových stránkách Notionu. Předtím ale doporučujeme
+Notion nějakou dobu používat, abyste pochytili základní koncepty nutné
+pro porozumění konfiguračních souborů.
+
+
+---- Následuje manuálová stránka ----
+
+

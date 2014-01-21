@@ -1,0 +1,23 @@
+};
+
+int do_precomposition(int base, int comb) {
+  int min = 0;
+  int max = sizeof(precompositions) / sizeof(precompositions[0]) - 1;
+  int mid;
+  int sought = (base << 16) | comb, that;
+
+  /* binary search */
+  while (max >= min) {
+    mid = (min + max) / 2;
+    that = (precompositions[mid].base << 16) | (precompositions[mid].comb);
+    if (that < sought) {
+      min = mid + 1;
+    } else if (that > sought) {
+      max = mid - 1;
+    } else {
+      return precompositions[mid].replacement;
+    }
+  }
+  /* no match */
+  return -1;
+}

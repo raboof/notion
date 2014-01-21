@@ -1,0 +1,116 @@
+
+libextl
+
+Copyright (c) Tuomo Valkonen 2003-2005.
+<tuomov at iki.fi>
+
+Libextl is a small library for very easily extending programs with Lua
+scripting. By default the library depends on my libtu available from the
+same repository. However, this can be changed by redefining things in
+private.h and types.h.
+
+Libextl supports exporting functions that operate on basic data types (int,
+bool, double, [const] char*) and references to Lua tables and functions
+(ExtlTab, ExtlFn) simply by prefixing the function definition with the
+keywords EXTL_EXPORT, EXTL_EXPORT_AS or EXTL_EXPORT_MEMBER. More complex
+data must, however, either be proxied libtu objects (or objects of some
+other object system with the appropriate macros redefined), or Lua tables.
+The binding glue is, however, generated as painlessly as for functions that
+operate on basic data types with all pointers to a type with a name that
+begins with an uppercase letter considered as such objects. Libextl also
+provides functions to manipulate Lua tables through references to these, and
+ways to call and load Lua code.
+
+
+BASIC USAGE
+
+Include <libextl/extl.h> in your source files.
+
+In your Makefile, process source files with libextl-mkexports to generate
+exports.c. Pass it the option '-module modname' if you want non-class
+functions to be put in a table "modname". (This will however introduce
+naming restrictions on the C side; see below.)
+
+Call 'exit_init' and '[modname_]register_exports' at the beginning of your
+program and '[modname_]unregister_exports' and 'extl_deinit' at the end of
+it.
+
+Mark exported functions as follows in your source files:
+
+  * Global or module functions:
+  
+      EXTL_EXPORT
+      int foobar(const char *s)
+      {
+          ...
+      }
+
+  * Classes and methods:
+   
+      EXTL_CLASS(Foo, Obj)
+   
+      EXTL_EXPORT_MEMBER
+      void foo_set_callback(Foo *cls, ExtlFn fn)
+
+    'Obj' here stands for the base class of the object system (one in libtu
+     by default), but more generally the second parameter to EXTL_CLASS must
+     be the name of parent class of the first parameter.
+
+  * Export in given module (plain table) or class:
+  
+      EXTL_EXPORT_AS(baz, somefun)
+      ExtlTab just_some_name_we_dont_use_on_the_lua_side()
+  
+
+If you pass libextl-mkexport the option '-module modname', then all
+EXTL_EXPORTed functions must be prefixed with 'modname_' and will be put in
+the global table 'modname'. If you want to export a function directly in the
+global namespace when building a module, use EXTL_EXPORT_AS(global,
+funcname).
+
+
+ADDITIONAL ROUTINES
+
+'luaextl.h' lists a number of routines for accessing references to tables,
+and calling Lua functions. How to use them should be fairly obvious.
+
+'readconfig.h' lists a number of routines to load source or compiled files
+from a specified path. Their usage should, again, be fairly obvious. These
+lookup routines are exported to the Lua side as well in the form of the
+function 'dopath'.
+
+
+USING ANOTHER OBJECT SYSTEM/USING WITHOUT LIBTU
+
+Redefine appropriate macros in private.h and types.h.
+
+
+NOTES ON DATA REFERENCES
+
+* CHAR* VS. CONST CHAR*
+
+libextl follows the following conventions with regard to const and non-const
+char* pointers:
+
+'const char*' as parameter is considered owned by the caller, and the called
+function must do nothing beyond accessing it during its execution.
+
+'char*' as parameter is considered owned by the called function, and it must
+take care of freeing the parameter when no longer needed.
+
+'const char*' as return value is considered owned by the called function,
+and caller must consider it unsafe to use after subsequent calls to related
+code.
+
+'char*' as return value is considered owned by the caller, and it must take
+care of freeing the value when no longer needed.
+
+
+* EXTLTAB AND EXTLFN
+
+These references are always owned as a caller. Thus, if a called function
+wants to store a reference to such a parameter, it must create a new one
+with extl_ref_fn or extl_ref_table. Note that these functions do not return
+the same reference as passed; there are no reference counters, just a table
+of references to hold the garbage collector from claiming the object
+(luaL_ref/luaL_unref).

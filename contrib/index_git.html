@@ -1,0 +1,642 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Notion scripts collection</title>
+<link href="default.css" title="Default" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<div class=title><h1>Notion scripts collection</h1></div>
+
+Here are some scripts for Notion. All of them are in the public domain unless
+otherwise mentioned in the source file.
+<p>
+
+<ul class="contents">
+<li><a href="#scripts">Scripts</a>
+<li><a href="#keybindings">Key bindings</a>
+<li><a href="#styles">Styles</a>
+<li><a href="#statusbar">Statusbar monitors</a>
+<li><a href="#instructions">Instructions</a>
+    <ul>
+        <li><a href="#using">Using</a>
+        <li><a href="#download">Downloading</a>
+        <li><a href="#contrib">Contributing</a>
+    </ul>
+    <li><a href="#legacy">Legacy</a>
+    <ul>
+        <li><a href="#LEGACYscripts">Scripts</a>
+        <li><a href="#LEGACYstatusbar">Statusbar monitors</a>
+    </ul>
+</ul>
+
+<h2>Scripts</h2>
+<a name="scripts"></a>
+
+<dl>
+    <!-- New scripts in alphabetical order, please -->
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/app.lua;hb=HEAD">app.lua</a>
+    <dd> Start an application if it's not running, but go to it if it's
+        already started. There's also a function to replace query_editfile
+        which will use a running emacs instance (starting it if necessary,
+        of course).
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/autoprop.lua;hb=HEAD">autoprop.lua</a>
+    <dd> Automatically create a winprop for the given client targeted to
+    the given frame. Allows them to be saved and reloaded automatically.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/bookmarks.lua;hb=HEAD">bookmarks.lua</a>
+    <dd> Bookmarks support
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/cfg_dock2.lua;hb=HEAD">cfg_dock2.lua</a>
+    <dd> A dock configuration with lots of added control.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/collapse.lua;hb=HEAD">collapse.lua</a>
+    <dd> Collapse frames on a WTiling into a single frame
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/exec_show.lua;hb=HEAD">exec_show.lua</a>
+    <dd> Execute some shell-command (tail, head, grep etc) and display the result.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/float-sb.lua;hb=HEAD">float-sb.lua</a>
+    <dd> Example of a floating toggleable statusbar.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/goto_by_tag.lua;hb=HEAD">goto_by_tag.lua</a>
+    <dd> Sets focus to the first client with a given tag. This tag is defined 
+    using a winprop. For example you might give the tag "B" to your browser and 
+    then use the binding META+U B to directly jump to your browser.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/lock_frame.lua;hb=HEAD">lock_frame.lua</a>
+    <dd> 'Lock' selected frames so they don't close via the keyboard. 
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/min_tabs.lua;hb=HEAD">min_tabs.lua</a>
+    <dd> Show tabs precisely when two or more windows in an notion frame
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/move_current.lua;hb=HEAD">move_current.lua</a>
+    <dd> Move current window in a frame to another frame in specified
+         direction
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/mp.lua;hb=HEAD">mp.lua</a>
+    <dd> Mark next mapped window to be attached to a specified object
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/mpd.lua;hb=HEAD">mpd.lua</a>
+    <dd> Control a MusicPD server 
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/named_scratchpad.lua;hb=HEAD">named_scratchpad.lua</a>
+    <dd> Toggle (and create) scratchpads by name.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/net_client_list.lua;hb=HEAD">net_client_list.lua</a>
+    <dd> Maintain the _NET_CLIENT_LIST property (and the
+         _NET_CLIENT_LIST_STACKING property incorrectly) on the root window.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/nowarp_scratchpad.lua;hb=HEAD">nowarp_scratchpad.lua</a>
+    <dd> Keeps notion from warping the pointer when activating a scratchpad
+         region.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/panel.lua;hb=HEAD">panel.lua</a>
+    <dd> Facilitates placing arbitrary windows with the <tt>is_panel</tt>
+         winprop set to true, as the stdisp.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/query_url.lua;hb=HEAD">query_url.lua</a>
+    <dd> Open a URL, completing on Opera bookmark file. Should be easy to
+         support other browsers.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/rss_feed.lua;hb=HEAD">rss_feed.lua</a>
+    <dd> A simple rss-reader script
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/rss_feed_hh.lua;hb=HEAD">rss_feed_hh.lua</a>
+    <dd> Some small improvements to match rss_feed my personal taste.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/schedule.lua;hb=HEAD">schedule.lua</a>
+    <dd> Schedule some messages to show up at specified times in the statusbar.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/send_to_ws.lua;hb=HEAD">send_to_ws.lua</a>
+    <dd> Quickly send to another workspace.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/show_submap.lua;hb=HEAD">show_submap.lua</a></dt>
+    <dd> Displays an infowin with the currently active submap.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/simple_bindings.lua;hb=HEAD">simple_bindings.lua</a></dt>
+    <dd> Add a first pass at the simple bindings script.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/stock.lua;hb=HEAD">stock.lua</a></dt>
+    <dd> An applet for retrieving and displaying stock market information
+      from <a href="http://finance.yahoo.com">http://finance.yahoo.com.</a> 
+      You can set up a portfolio and monitor its intraday performance.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/switch_bindings.lua;hb=HEAD">switch_bindings.lua</a>
+    <dd> Switch between key-bindings. You can temporarily disable keybindings and
+    restore them later when necessary.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/tabmenu.lua;hb=HEAD">tabmenu.lua</a>
+    <dd> A grabmenu-based alternative to tabs.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/weather.lua;hb=HEAD">weather.lua</a></dt>
+    <dd> This script allows you to retreive weather information from one or more
+    weather observation stations and display it in the statusbar.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/wrap_workspace_or_screen.lua;hb=HEAD">wrap_workspace_or_screen.lua</a></dt>
+    <dd> When switching focus over the border of a workspace, wrap to the next 
+    workspace or screen.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/xkbion.lua;hb=HEAD">xkbion.lua</a></dt>
+    <dd> This script allows you to use independent keyboard layouts for different windows in Notion.
+    It uses a window property to store the XKB groups, so you can restart Notion without losing
+    settings for each window.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/zoom.lua;hb=HEAD">zoom.lua</a>
+    <dd> Simulates larswm-like window zooming.
+
+</dl>
+
+<h2>Key bindings</h2>
+<a name="keybindings"></a>
+<dl>
+    <!-- New scripts in alphabetical order, please -->
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=keybindings/cfg_mouse.lua;hb=HEAD">cfg_mouse.lua</a>
+    <dd> Make the mouse pull its weight. </dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=keybindings/dans_bindings.lua;hb=HEAD">dans_bindings.lua</a>
+    <dd> Keybindings for more intuitive WIonWS navigation.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=keybindings/emacs_bindings.lua;hb=HEAD">emacs_bindings.lua</a>
+    <dd> Emacs-like keybindings </dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=keybindings/vim_bindings.lua;hb=HEAD">vim_bindings.lua</a>
+    <dd> Vim-like keybindings for Notion queries.</dd>
+</dl>
+
+<h2>Styles</h2>
+<a name="styles"></a>
+
+<dl>
+    <!-- New scripts in alphabetical order, please -->
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_alex.lua;hb=HEAD">look_alex.lua</a>
+    <dd> Black tabs, green text and borders.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_asm.lua;hb=HEAD">look_asm.lua</a></dt>
+    <dd> A clean grey-blue theme with not too big tabs.</dd>
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_atme.lua;hb=HEAD">look_atme.lua</a>
+    <dd> A style which just looks nice.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_awesome.lua;hb=HEAD">look_awesome.lua</a>
+    <dd> Inspired by look_clean, comes fully-equipped with big, friendly
+         tabs, tasty single-pixel borders, and a sprinkling of transparency.
+         Makes use of the
+         <a href="http://www.is-vn.bg/hamster/jimmy-en.html">Terminus</a>
+         font.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_awesome_sm.lua;hb=HEAD">look_awesome_sm.lua</a>
+    <dd> A style based on look_awesome above, but with smaller
+         fonts and paddings and no transparency by default.
+         This style makes use of the 'nexus' font for tabs.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_awesome_yaarg.lua;hb=HEAD">look_awesome_yaarg.lua</a>
+    <dd> A style based on look-awesome-sm above, but with darker colours
+    to give a more somber feel.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_bas.lua;hb=HEAD">look_bas.lua</a>
+    <dd> A style which colors fit the mozilla-bb background. It makes
+         use of the techy artwiz font.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_blue.lua;hb=HEAD">look_blue.lua</a>
+    <dd> A blue/gray theme based on look_violet.lua, with a nice clean look.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_bluecurve.lua;hb=HEAD">look_bluecurve.lua</a>
+    <dd> A theme that fits the colors of the bluecurve-theme by
+     <a href="http://www.redhat.com">Redhat</a>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_cleanpastel.lua;hb=HEAD">look_cleanpastel.lua</a>
+    <dd> Similar to stock look-clean* styles, but greenish.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_cleansteel.lua;hb=HEAD">look_cleansteel.lua</a>
+    <dd> The stock look-brownsteel style with borders removed on tiled
+         workspaces for cleaner look.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_cleansteel_trans.lua;hb=HEAD">look_cleansteel_trans.lua</a>
+    <dd> Based on look_cleansteel, but with transparent backgrounds,
+         smaller font sizes, and a coloured notification.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_cleanwhite.lua;hb=HEAD">look_cleanwhite.lua</a>
+    <dd> A bright theme that fits white terminals and white Emacs
+         windows.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_cool.lua;hb=HEAD">look_cool.lua</a>
+    <dd> A style based on look-awesome, made to fit the KDE color scheme
+         "plastic-grey". Made by Steffen Liebergeld (26.08.2004).
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_gtk2.lua;hb=HEAD">look_gtk2.lua</a>
+    <dd> A theme that fits the default GTK+2 colors. It makes use of the
+         terminus and artwiz fonts.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_minimalist.lua;hb=HEAD">look_minimalist.lua</a>
+    <dd> A simple gold/red style with relatively large frame borders
+         designed to increase usability with the minimal tabs modification.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_moy.lua;hb=HEAD">look_moy.lua</a>
+    <dd> Grey and violet simple theme.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_ootput.lua;hb=HEAD">look_ootput.lua</a>
+    <dd> A non-obtrusive style with clear distinctions between active borders
+    and less active borders. This style makes use of the
+    <a href="http://www.tobias-jung.de/seekingprofont/index.html">Profont</a> font.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_ootput_dark.lua;hb=HEAD">look_ootput_dark.lua</a>
+    <dd> A darker version of look_ootput that is easier on the eyes.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_outback.lua;hb=HEAD">look_outback.lua</a>
+    <dd> A warm style with sandy hints and distinctive contrast.
+	<a href="http://www.csh.rit.edu/~apox/images/screenshots/20080408.png">Screenshot</a>.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_qt.lua;hb=HEAD">look_qt.lua</a>
+    <dd> A drawing engine configuration file that reads settings
+     from <a href="http://trolltech.com/products/qt/">Qt</a>
+     configuration file ~/.qt/qtrc.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_tibi.lua;hb=HEAD">look_tibi.lua</a>
+    <dd> A style which clearly emphasizes active elements and thus
+      lets you quickly recognize them.  The `accent' color is
+      configurable.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_tiny.lua;hb=HEAD">look_tiny.lua</a>
+    <dd> A major modification of look_minimalist, aiming to keep
+         everything small while not making anything unattractive.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_tiny_min_tabs.lua;hb=HEAD">look_tiny_min_tabs.lua</a>
+    <dd> A major modification of look_minimalist, aiming to keep
+         everything small while not making anything unattractive.
+         For use with min_tabs.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=styles/look_whitecode.lua;hb=HEAD">look_whitecode.lua</a>
+    <dd> Clean white/light grey theme. Comes handy for glare displays as
+         reflection is not as evil as with a dark theming.
+         I recommend background color #808080 for a cool look in floating
+         workspaces.
+         <small>(Tested only on my LCD, so no idea what it looks like on a CRT)</small>
+
+ </dl>
+
+<h2>Statusbar</h2>
+<a name="statusbar"></a>
+
+All statusbar monitors are loaded automatically based on the statusbar 
+template. <strong>Do not attempt to load them manually</strong> (especially
+not the statusd scripts). Please see <a href="#instructions">instructions</a>
+below for more information.
+
+<h3>Internal monitors</h3>
+<a name="statusbar-internal"></a>
+
+<dl>
+    <!-- New scripts in alphabetical order, please -->
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusbar/statusbar_act.lua;hb=HEAD">statusbar_act.lua</a>
+    <dd> Activity (urgency flag, new unacted-upon transients, etc.) 
+         display for the statusbar.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusbar/statusbar_external.lua;hb=HEAD">statusbar_external.lua</a>
+    <dd> Show output of external programs or scripts in statusbar. If you are using ion-3ds-20060107 or later, using <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_exec.lua;hb=HEAD">statusd_exec.lua</a> instead of this old version is suggested.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusbar/statusbar_fname.lua;hb=HEAD">statusbar_fname.lua</a>
+    <dd> Show the focused frame name in the statusbar.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusbar/statusbar_wsname.lua;hb=HEAD">statusbar_wsname.lua</a>
+    <dd> Shows the current workspace name in the statusbar, can also show a list of workspaces and indicate the current one. The current workspace indicator is customizable. This script also allows for per-head workspace information.
+
+</dl>
+
+
+<h3>Notion-statusd monitors</h3>
+<a name="statusd"></a>
+
+These monitors are run within the separate <tt>notion-statusd</tt> program.
+Note that many of them depend on the Linux <tt>/proc</tt> filesystem and
+thus will not work on other systems.
+
+<dl>
+    <!-- New scripts in alphabetical order, please -->
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_amarok.lua;hb=HEAD">statusd_amarok.lua</a>
+    <dd> Notion-statusd monitor reporting the current song from <a href="http://amarok.kde.org/">Amarok</a>.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_binclock.lua;hb=HEAD">statusd_binclock.lua</a>
+    <dd> Notion-statusd binary clock in two possible modes: Plain binary (numbers) and character mode (dots, lines, etc).
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_bitcoin.lua;hb=HEAD">statusd_bitcoin.lua</a>
+    <dd> Notion-statusd monitor reporting bitcoin speed in khash/s and balance
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_bsdbatt.lua;hb=HEAD">statusd_bsdbatt.lua</a>
+    <dd> Notion-statusd monitor for FreeBSD ACPI CMBATT status. Uses the sysctl interface.</dd>
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_cpufreq.lua;hb=HEAD">statusd_cpufreq.lua</a>
+    <dd> Notion-statusd monitor reporting current CPU speed in KHz, MHz, or GHz.  Uses the <code>/proc</code> filesystem and <code>cpufreq</code>.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_cpuspeed.lua;hb=HEAD">statusd_cpuspeed.lua</a>
+    <dd> Notion-statusd monitor reporting current CPU speed; works with apm.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_cpustat.lua;hb=HEAD">statusd_cpustat.lua</a>
+    <dd> Notion-statusd monitor reporting current CPU stats using the Linux <code>/proc/stat</code> interface.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_df.lua;hb=HEAD">statusd_df.lua</a>
+    <dd> Notion-statusd monitor reporting free disk space.  Depends on <code>df</code>.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_dgs.lua;hb=HEAD">statusd_dgs.lua</a>
+    <dd> Notion-statusd monitor reporting on any games waiting for a move
+        on <a href="www.dragongoserver.net">www.dragongoserver.net</a>.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_drives.lua;hb=HEAD">statusd_drives.lua</a>
+    <dd> Notion-statusd monitor reporting on connected drives
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_exec.lua;hb=HEAD">statusd_exec.lua</a>
+    <dd> Show output of external programs or scripts in statusbar. Uses non-blocking reads and can be used with both continously outputting and periodically run programs. Allows highlighting with regexp matching.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_flashing.lua;hb=HEAD">statusd_flashing.lua</a>
+    <dd> Notion-statusd multi-purpose monitor. Show blinking alarms when some defined files or directories have changed. It can be used to monitor email inboxes, security logs, etc.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_fortune.lua;hb=HEAD">statusd_fortune.lua</a>
+    <dd> Notion-statusd monitor displaying fortunes.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_inetaddr.lua;hb=HEAD">statusd_inetaddr.lua</a>
+    <dd> Notion-statusd monitor reporting current IP address from ifconfig.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_iwinfo.lua;hb=HEAD">statusd_iwinfo.lua</a>
+    <dd> Notion-statusd monitor reporting minimal wireless info.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_laptopstatus.lua;hb=HEAD">statusd_laptopstatus.lua</a>
+    <dd> Notion-statusd monitor reporting CPU speed &amp; temperature and battery status; works with acpi.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_maildir.lua;hb=HEAD">statusd_maildir.lua</a>
+    <dd> Notion-statusd monitor showing mailcount of a Maildir.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_mem.lua;hb=HEAD">statusd_mem.lua</a>
+    <dd> Notion-statusd monitor reporting current memory usage with selective alarms and non blocking I/O. Depends on Linux <code>free</code> command.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_meminfo.lua;hb=HEAD">statusd_meminfo.lua</a>
+    <dd> Notion-statusd monitor reporting current memory and swap usage.  Depends on the Linux <code>/proc/meminfo</code> interface.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_moc.lua;hb=HEAD">statusd_moc.lua</a>
+    <dd> Notion-statusd monitor reporting <a href="http://moc.daper.net">moc</a> information and status.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_mocmon.lua;hb=HEAD">statusd_mocmon.lua</a>
+    <dd> Notion-statusd monitor reporting <a href="http://moc.daper.net">moc</a> information. This is actually
+         just a modification of <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_xmmsip.lua;hb=HEAD">statusd_xmmsip.lua</a> using the idea of
+	 non-blocking I/O as shown in <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_mocp.lua;hb=HEAD">statusd_mocp.lua</a>.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_mocp.lua;hb=HEAD">statusd_mocp.lua</a>
+    <dd> Notion-statusd monitor reporting <a href="http://moc.daper.net">moc</a>
+         status.  This is a stripped down, non-blocking I/O version of the
+         above.  It is useful with
+         <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/rotate_statusbar.lua;hb=HEAD">rotate_statusbar.lua</a>.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_mpd-socket.lua;hb=HEAD">statusd_mpd-socket.lua</a>
+    <dd> Notion-statusd monitor reporting <a href="http://www.musicpd.org">mpd</a> information and status. Uses a socket interface to avoid some performance issues with the original.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_mpd.lua;hb=HEAD">statusd_mpd.lua</a>
+    <dd> Notion-statusd monitor reporting <a href="http://www.musicpd.org">mpd</a> information and status.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_netmon.lua;hb=HEAD">statusd_netmon.lua</a>
+    <dd> Notion-statusd network monitor reporting network activity.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_nginfo.lua;hb=HEAD">statusd_nginfo.lua</a>
+    <dd> Notion-statusd monitor reporting Nagios server(s) status.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_nmaild.lua;hb=HEAD">statusd_nmaild.lua</a>
+    <dd> Notion-statusd Maildir monitor with selective alarms, counters for different filters and optional command launcher when a new email is detected.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_orpheus.lua;hb=HEAD">statusd_orpheus.lua</a>
+    <dd> Notion-statusd monitor reporting song currently being played by orpheus.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_pytone.lua;hb=HEAD">statusd_pytone.lua</a>
+    <dd> Notion-statusd monitor reporting song currently being played by pytone.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_ticker.lua;hb=HEAD">statusd_ticker.lua</a>
+    <dd> Notion-statusd monitor which scrolls the output of specified programs.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_uname.lua;hb=HEAD">statusd_uname.lua</a>
+    <dd> Notion-statusd monitor for reporting uname.  It is primarily a simple
+         example of how to use statusd.popen_bgread() with coroutines for
+         non-blocking I/O.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_uptime.lua;hb=HEAD">statusd_uptime.lua</a>
+    <dd> Notion-statusd monitor reporting the system uptime.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_volume.lua;hb=HEAD">statusd_volume.lua</a>
+    <dd> Notion-statusd monitor reporting sound volume values (currently, master and pcm). Depends on aumix.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_weather.lua;hb=HEAD">statusd_weather.lua</a>
+    <dd> Notion-statusd monitor reporting weather.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_xmms.lua;hb=HEAD">statusd_xmms.lua</a>
+    <dd> Notion-statusd monitor reporting song currently selected in xmms' playlist.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_xmms2.lua;hb=HEAD">statusd_xmms2.lua</a>
+    <dd> Song as "Artist - Title"
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/statusd_xmmsip.lua;hb=HEAD">statusd_xmmsip.lua</a>
+    <dd> Notion-statusd monitor(s) reporting information from a xmms-infopipe-plugin's pipe.
+         Can be customized in various ways.
+</dl>
+
+<!--See the Wiki for
+<a href="http://wiki.ael.be/ion/index.php/LuaScripts">more</a> scripts,
+and add your own.-->
+
+<h2>Instructions</h2>
+<a name="instructions"></a>
+
+<h3>Using</h3>
+<a name="using"></a>
+
+To use any of the scripts, follow these directions.
+
+<ol>
+<li>Create the directory <tt>~/.notion/</tt>, if it does not exist yet.
+<li>Copy the script in this directory.
+<li>Depending on the type of script, do the following.
+    <dl>
+    
+    <!-- Extra space in tag to not confuse verify_index.pl hack -->
+    <dt >Proper scripts
+    <dd>Copy <tt>cfg_notion.lua</tt> in <tt>~/.notion/</tt>, if it does not
+        contain one already. This file can usually be found in either
+        <tt>/usr/local/etc/notion/</tt> or <tt>/etc/X11/notion/</tt>.
+        Then add the suitably modified line
+<pre>
+dopath("name of script without extension")
+</pre>
+        at the end of the file (in <tt>~/.notion/</tt>).
+
+    <dt >Statusbar
+    <dd>Make sure you have <tt>cfg_statusbar.lua</tt> in <tt>~/.notion/</tt>, 
+        and add one of the monitors provided by the script in the template
+        <em>without</em> the <tt>statusd_</tt> or such prefix.
+        
+    <dt >Styles
+    <dd>That's it. You can choose <tt>styles/refresh-list</tt> from
+        the <b>F12</b> main menu to have a running instance of Ion
+        find it, and then choose the style from the same menu.
+        
+    </dl>
+</ol>
+
+Some scripts may need further setup. For more information, see 
+the scripts themselves, and the
+<a href="http://notion.sourceforge.net/notionconf"
+>documentation</a>.
+
+
+<h3>Downloading a copy</h3>
+<a name="download"></a>
+
+A copy of this collection is shipped with each release of Notion.
+
+If you really need the latest version get it from git:
+<pre>
+git clone git://notion.git.sourceforge.net/gitroot/notion/contrib
+</pre>
+This will get you a fully functional copy of the repository in the
+directory <tt>contrib</tt>. 
+<p>
+To update a previously downloaded repository, use <tt>git pull</tt>.
+The command <tt>git log </tt> can be used to view the list of
+changes, and there is also an 
+<a href="http://notion.git.sourceforge.net/git/gitweb.cgi?p=notion/contrib;a=atom">RSS feed</a>
+of the most 
+<a href="http://notion.git.sourceforge.net/git/gitweb.cgi?p=notion/contrib;a=summary">recent changes</a>.
+
+<h3>Contributing</h3>
+<a name="contrib"></a>
+
+This section needs to be improved. For now, create a patch and submit it to the <a href="http://sourceforge.net/tracker/?group_id=314802&atid=1324530">sf.net patches tracker</a>, publish it on the <a href="http://sourceforge.net/mail/?group_id=314802">mailinglists</a>, or both. 
+
+<h2>Legacy</h2>
+<a name="legacy"></a>
+The scripts below are known to be broken and are only included for curiosity's sake. They range from being completely outdated and irrelevant to only requiring a minor fix. If you discover a legacy script whose functionality you would find useful, please file a bug report asking for the script to be fixed, or, even better, fix the script yourself. :-)
+<h3>Scripts</h3>
+<a name="LEGACYscripts"></a>
+<dl>
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/adapt_menus.lua;hb=HEAD">adapt_menus.lua</a>
+    <dd> Functions for creating a hierarchy of menus for various clients
+             available. Key features are an attempt to organise by type hints (from
+             the window titles) and collapse submenus when they contain only a few items.
+             
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/alt_resize.lua;hb=HEAD">alt_resize.lua</a>
+    <dd> Possibly more intuitive resizing bindings.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/bindsearch.lua;hb=HEAD">bindsearch.lua</a>
+    <dd> Search the current bindings table by key or by command.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/closeorkill.lua;hb=HEAD">closeorkill.lua</a>
+    <dd> Kill client on second close try if it did not respond to close
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/ctrl_statusbar.lua;hb=HEAD">ctrl_statusbar.lua</a>
+    <dd> Menu-driven controller for the statusbar. Modules can be enabled/
+    disabled from the menu, without requiring to edit the configuration file.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/cwin_sp.lua;hb=HEAD">cwin_sp.lua</a>
+    <dd> Create per-clientwin scratchpads
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/document_menus.lua;hb=HEAD">document_menus.lua</a>
+    <dd> Navigate the filesystem using notion menus.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/enumerate.lua;hb=HEAD">enumerate.lua</a>
+    <dd> Adds "X." in front of the client windows, which may make switching
+    between client-windows with MOD+n a little easier .
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/environment_placement_hook.lua;hb=HEAD">environment_placement_hook.lua</a>
+    <dd> Linux-only placement hook which detects the presence of an ION_USE_WS
+    environment variable in the processes of new windows, and uses that to
+    determine where to place them.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/frame_client_menu.lua;hb=HEAD">frame_client_menu.lua</a>
+    <dd> Adds a 'Client windows' submenu to a frame's context menu, the menu contains all the clients in the current frame.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/go_frame_or_desk.lua;hb=HEAD">go_frame_or_desk.lua</a>
+    <dd> Replaced by wrap_workspace_or_screen. (selects frame in the specified direction. If there is
+         no frame at that location, instead the next workspace
+         in the direction becomes active)
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/goto_multihead.lua;hb=HEAD">goto_multihead.lua</a>
+    <dd> A version of <tt>goto_dir</tt> that may be useful on
+         multihead setups.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/heuristics.lua;hb=HEAD">heuristics.lua</a>
+    <dd> Window placement heuristics for tiled workspaces
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/histcompl.lua;hb=HEAD">histcompl.lua</a>
+    <dd> History completion support for the line editor
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/named_floating_groupws.lua;hb=HEAD">named_floating_groupws.lua</a>
+    <dd> Toggle (and create) floating WGroupWS:s by name.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/nest_ws.lua;hb=HEAD">nest_ws.lua</a>
+    <dd> Attach workspaces to windows, to e.g. have a WIonWS inside a
+    WFloatWS, or vice versa
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/nextact.lua;hb=HEAD">nextact.lua</a>
+    <dd> Go to first found region with activity flag set.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/notifybox.lua;hb=HEAD">notifybox.lua</a>
+    <dd> Show notification boxes, similar to the activity notification.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/rotate_statusbar.lua;hb=HEAD">rotate_statusbar.lua</a>
+    <dd> Rotate the statusbar between different templates.  This will
+         automatically load all of the modules for notion-statusd.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/xinerama_switcher.lua;hb=HEAD">xinerama_switcher.lua</a></dt>
+    <dd> Replaced by wrap_workspace_or_screen. (This is similar to (and based on) <a
+      href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=scripts/legacy/go_frame_or_desk.lua;hb=HEAD">go_frame_or_desk.lua</a> but adds
+    the ability to move between screens too. Left/right switch between
+    screens, up/down between workspaces.)</dd>
+</dl>
+
+<h3>Statusbar monitors</h3>
+<a name="LEGACYstatusbar"></a>
+
+<h4>Internal monitors</h4>
+<a name="LEGACYstatusbar-internal"></a>
+<dl>
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusbar/legacy/statusbar_workspace.lua;hb=HEAD">statusbar_workspace.lua</a>
+    <dd> Show current workspace name in statusbar, or a list of workspace numbers with the active one indicated.
+</dl>
+
+<h4>Notion-statusd monitors</h4>
+<a name="statusd"></a>
+<dl>
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_apm.lua;hb=HEAD">statusd_apm.lua</a>
+    <dd> Notion-statusd monitor reporting APM status; works on OpenBSD 4.0 by executing
+    external program every minute. Now with hints for battery state and
+    external A/C connection.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_apm2.lua;hb=HEAD">statusd_apm2.lua</a>
+    <dd> Notion-statusd monitor reporting APM status; works on FreeBSD by executing apm as an external program every minute. Added hints for a bit more color. Even though this is apm2, save it as statusd_apm.lua.
+
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_batt.lua;hb=HEAD">statusd_batt.lua</a>
+    <dd> Notion-statusd monitor reporting battery status; works with apm.
+    
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_iface.lua;hb=HEAD">statusd_iface.lua</a>
+    <dd> Notion-statusd monitor reporting currently used network
+    interface.
+
+    <dt> <a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_info.lua;hb=HEAD">statusd_info.lua</a>
+    <dd> Notion-statusd monitor reporting current CPU, RAM, and swap usage. Depends on <code>top</code> and <code>free</code>.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_linuxbatt.lua;hb=HEAD">statusd_linuxbatt.lua</a>
+    <dd> Notion-statusd monitor reporting battery percentage and status using the Linux <code>/proc/acpi</code> interface.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_mcpu.lua;hb=HEAD">statusd_mcpu.lua</a>
+    <dd> Notion-statusd monitor reporting multiple CPUs usage (average and per-CPU); works with <code>/proc/stat</code>.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_sysmon.lua;hb=HEAD">statusd_sysmon.lua</a>
+    <dd> Notion-statusd monitor for reporting various system resources.
+
+    <dt><a href="gitweb.cgi?p=notion/contrib;a=blob_plain;f=statusd/legacy/statusd_volume2.lua;hb=HEAD">statusd_volume2.lua</a>
+    <dd> Notion-statusd monitor reporting master sound volume and state (on or muted). Depends on <code>amixer</code>. Despite being named "statusd_volume2.lua", the script needs to be relabeled "statusd_volume.lua" to work.
+</dl>
+
+
+</body>
+</html>
