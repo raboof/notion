@@ -1,0 +1,165 @@
+.TH NOTION 1
+.SH NIMI
+Notion - X11 ikkunanhallintaohjelma
+.SH SELOSTE
+.B notion
+.I "[valinnat]"
+.SH "KUVAUS"
+
+Notion on näppäimistökäyttäjiä silmälläpitäen suunniteltu laatoitusta ja 
+välilehtiä hyödyntävä ikkunanhallintaohjelma X11:lle.
+ 
+.SH "VALINNAT"
+.TP
+.B \-display kone:palvelin.näyttö
+X palvelin, johon ottaa yhteys.
+.TP
+.B \-conffile asetustiedosto
+Käytettävä asetustiedosto.
+.TP
+.B \-searchdir dir
+Hakupolkuun lisättävä hakemisto, josta löytyy asetus- ja muita tiedostoja.
+.TP
+.B \-oneroot
+Hallitse vain oletusnäyttöä X-palvelimilla, joissa on useampi perinteinen
+(ei Xinerama) näyttö/juuri-ikkuna. Tämä näyttö voidaan valita \-display
+parametrillä tai DISPLAY ympäristömuuttujalla.
+.TP
+.B \-session session_name
+Istunnon nimi. Tämä vaikuttaa talletustiedostojen sijaintiin.
+.TP
+.B \-help
+Näytä komentorivin ohje.
+.TP
+.B \-version
+Näytä Notionin versio.
+.TP
+.B \-about
+Näytä tietoja Notionista (versio, tekijä, lisenssi).
+
+.SH PERUSKÄSITTEET
+
+Tämä kappale on katsaus erilaisiin niin kutsuttuihin \fBkappaleisiin\fP,
+joita ilmenee Notionin hallitsemalla X-näytöllä, ja niiden suhteisiin 
+tavallisessa kokoonpanossa. Sinun tarvitse ymmärtää nämä suhteet 
+tietääksesi milloin mitkäkin alempana kuvattavat näppäinsidonnat 
+ovat käytettävissäsi. Jos kaipaat vielä tarkempaa kuvausta, esimerkiksi
+tehdäksesi omat asetustiedostot, katso Notionin seittisivulta saatavaa 
+yksityiskohtaisempaa dokumentaatiota.
+
+Ylimmän tason kappaleista, joilla on merkitystä tässä yhteydessä, 
+kutsutaan \fBnäytöiksi\fP. Ne vastaavat fyysisiä näyttöjä. Näytöt
+sisältävät \fBtyöpöytiä\fP (jotka ovat itse eräänlaisia \fBryhmiä\fP)
+ja kokoruudun tilassa olevia \fBasiakasikkunoita\fP. Nämä kappaleet ovat 
+\fBlomitettu\fP siten, että vain yksi voi näkyä kerrallaan.
+
+Työpöydät voivat vuorostaan sisältää \fBlaatoituksia\fP sekä
+kelluvia/irroitettuja \fBkehyksiä\fP. Laatoitukset taasen sisältävät
+\fBkehyksiä\fP laatoitettuna täyttämään koko näytön, sekä mahdollisesti
+tilapalkin tai telakan (dock). Näyttöjen tapaan kehykset lomittavat 
+muita kappaleita, mutta tässä tapauksessa lähinnä asiakasikkuna\fBryhmiä\fP. 
+Kehykset ovat suurimman osan ajasta ainut asia, minkä näet Notionista. Niillä
+voi olla reunakoristukset, ja lisäksi kehyksissä on \fBvälilehti\fP 
+jokaiselle lomitetulle kappaleelle.
+
+\fBKyselyt\fP ovat näyttöjen tai kehysten alaosiin imestyviä laatikoita,
+jotka odottavat sinulta tekstin syöttöä jonkin siitä riippuvan toiminnon
+suorittamiseksi. Useimmat kyselyt tukevat tab-täydennystä.
+
+
+.SH SIDONNAT
+
+Nämä ovat oletusarvoiset näppäin- ja osoitinsidonnat. Näppäinmuunninta
+(\fBMod1\fP) vastaava näppäin riippuu järjestelmästäsi. PC-tietokoneilla,
+joissa on XFree86 se on todennäköisesti vasen Alt-näppäin (\fBAlt_L\fP).
+Suneilla se on luultavasti sidottu timanttinäppäimiin. Käytä komentoa
+\fIxmodmap(1x)\fP selvittääksesi asian tarkemmin.
+
+Otsikkojen perässä hakasuluissa oleva merkkijono ilmoittaa moduulin,
+jonka asetustiedosto määrittelee alla olevat sidonnat.
+
+.SS Yleisesti saatavilla olevat sidonnat
+
+BINDINGS:WScreen
+
+.SS Näytöillä ja kaikissa kehyksissä toimivat sidonnat
+
+BINDINGS:WMPlex
+
+.SS Kaikissa kehyksissä toimivat sidonnat
+
+BINDINGS:WFrame
+
+.SS Näytöillä ja ylimmän tason kehyksissä (ei ns. transientit) toimivat sidonnat
+
+BINDINGS:WMPlex.toplevel
+
+.SS Ylimmän tason kehyksissä (ei ns. transientit) toimivat sidonnat
+
+BINDINGS:WFrame.toplevel
+
+.SS Kelluvissa/irroitetuissa kehyksissä toimivat sidonnat
+
+BINDINGS:WFrame.floating
+
+.SS Laatoituksien ja laatoitettujen kehysten sidonnat [mod_tiling]
+
+BINDINGS:WTiling
+.\" BINDINGS:WFrame.tiled
+
+.SS Asiakasikkunoiden sidonnat
+
+BINDINGS:WClientWin
+BINDINGS:WGroupCW
+
+.SS Siirto- ja koonmuutostilan sidonnat
+
+BINDINGS:WMoveresMode
+
+.SS Viestilaatikoiden ja kyselyiden sidonnat [mod_query]
+
+BINDINGS:WInput
+
+.SS Tekstinmuokkaussidonnat kyselyihin [mod_query]
+
+Nämä näppäinsidonnat vastaavat tekstieditorin \fIjoe(1)\fP sidontoja.
+Leikkaus ja liimaus toimii kuitenkin tavanomaisemmin, joskin näppäimet
+ovat vastaavat.
+
+BINDINGS:WEdln
+
+.SS Valikoiden sidonnat [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH TIEDOSTOT JA HAKEMISTOT
+.TP
+.B ETCDIR/cfg_notion.lua
+Järjestelmän oletusarvoinen pääasetustiedosto.
+.TP
+.B ETCDIR/cfg_*.lua
+Muita asetustiedostoja.
+.TP
+.B ETCDIR/look_*.lua
+Ulkonäön asetustiedostoja.
+.TP
+.B ~/.notion/
+Käyttäjän asetustiedostot.
+.TP
+.B ~/.notion/cfg_notion.lua
+Käyttäjän oletusarvoinen pääasetustiedosto.
+
+.SH KATSO MYÖS
+Notionin kotisivu, \fIhttp://iki.fi/tuomov/ion/\fP (englanniksi).
+.PP
+Dokumentti "Configuring and extending Notion with Lua" (englanniksi)
+nähtävissä Notionin kotisivulla.
+.PP
+.I DOCDIR/
+.PP
+\fIX(7x)\fP, \fInotionflux(1)\fP, \fIjoe(1)\fP
+
+.SH TEKIJÄ
+Notionin on kirjoittanut Notion Team
+Ionin on kirjoittanut Tuomo Valkonen <tuomov at iki.fi>.

@@ -1,0 +1,162 @@
+.TH NOTION 1
+.SH NAME
+Notion - an X11 window manager
+.SH SYNOPSIS
+.B notion
+.I "[options]"
+.SH "DESCRIPTION"
+
+Notion is a tiling tabbed window manager designed with keyboard users in mind.
+ 
+.SH "OPTIONS"
+.TP
+.B \-display host:display.screen
+X display to manage
+.TP
+.B \-conffile configfile
+Configuration file to use instead of default
+.TP
+.B \-searchdir dir
+Directory to search for configuration files and other scripts
+.TP
+.B \-oneroot
+On X servers with multiple (traditional non-Xinerama) screens, manage only
+default screen (root window), not all, as given by the \-display option or
+in the DISPLAY environment variable.
+.TP
+.B \-session session_name
+Set session name. This option affects where workspace and other save files are
+put (~/.notion/session_name if option set).
+.TP
+.B \-help
+Show help on command line options
+.TP
+.B \-version
+Show version
+.TP
+.B \-about
+Show about text (version, author, license)
+
+.SH BASIC CONCEPTS
+
+This section is an overview of the types objects that appear on an X
+display managed by Notion and their relationships in a standard setup. This
+information is necessary to understand the operations and availability
+of the different key bindings explained below. For a more detailed 
+explanation, needed for writing custom bindings configuration files,
+see the additional documentation available from the Notion Web page.
+
+The top-level objects that matter in the case at hand are \fBscreens\fP.
+They correspond to physical screens. Screens contain \fBworkspaces\fP
+(which are a kind of \fBgroup\fP), and \fBclient windows\fP put into full
+screen mode. These objects are \fBmultiplexed\fP in the sense that only
+one can be displayed at a time.
+
+Workspaces themselves may contain \fBtilings\fP and detached/floating
+\fBframes\fP. A workspace containing no tilings and only detached/floating
+windows is also called a \fBfloating workspace\fP. Tilings themselves contain 
+\fBframes\fP tiled to fill the screen, and possibly a statusbar or dock. Akin 
+to screens, frames multiplex other objects, but in this case mostly client 
+window \fBgroups\fP. Most of the time, frames are the only trace of Notion 
+you see on the screen. Frames may have border decorations, and they have a 
+\fBtab\fP for each multiplexed object.
+
+\fBQueries\fP are boxes that appear at the bottoms of frames or screens 
+to ask you for textual input to execute an action that depends on it.
+Most queries support tab-completion.
+
+
+.SH BINDINGS
+
+These are the default key and pointer bindings. (\fBMod1\fP) depends on your
+system. On PC:s with XFree86 it is probably bound to the left Alt key
+(\fBAlt_L\fP). On Suns it is usually bound to the diamond keys
+(\fBMeta_L\fP, \fBMeta_R\fP). Use \fIxmodmap(1x)\fP to find out.
+
+The string in square brackets after a binding group heading below indicates
+the module whose configuration file defines these bindings.
+
+.SS Globally available bindings
+
+BINDINGS:WScreen
+
+.SS Bindings operating on all frames and screens
+
+BINDINGS:WMPlex
+
+.SS Bindings operating on all frames
+
+BINDINGS:WFrame
+
+.SS Bindings operating on top-level (non-transient) frames and screens
+
+BINDINGS:WMPlex.toplevel
+
+.SS Bindings operating on top-level (non-transient) frames
+
+BINDINGS:WFrame.toplevel
+
+.SS Bindings for floating/detached frames
+
+BINDINGS:WFrame.floating
+
+.SS Bindings for tilings and tiled frames [mod_tiling]
+
+BINDINGS:WTiling
+.\" BINDINGS:WFrame.tiled
+
+.SS Bindings for client windows
+
+BINDINGS:WClientWin
+BINDINGS:WGroupCW
+
+.SS Move/resize mode bindings
+
+BINDINGS:WMoveresMode
+
+.SS Bindings for message boxes and queries [mod_query]
+
+BINDINGS:WInput
+
+.SS Bindings for editing in queries [mod_query]
+
+These bindings are similar to those of the \fIjoe(1)\fP text editor.
+Cut, copy and paste works in a more conventional manner, though, but
+the keys are equivalent.
+
+BINDINGS:WEdln
+
+.SS Bindings for menus [mod_menu]
+
+BINDINGS:WMenu
+
+
+.SH FILES AND DIRECTORIES
+.TP
+.B ETCDIR/cfg_notion.lua
+System default main configuration files
+.TP
+.B ETCDIR/cfg_*.lua
+Other configuration files.
+.TP
+.B ETCDIR/look_*.lua
+Colour scheme configuration files
+.TP
+.B ~/.notion/
+User configuration files
+.TP
+.B ~/.notion/cfg_notion.lua
+User default main configuration file (overrides system default)
+
+.SH SEE ALSO
+The Notion home page, \fIhttp://notion.sf.net/\fP
+.PP
+The document "Configuring and extending Notion with Lua" found on the
+Notion home page.
+.PP
+.I DOCDIR/
+.PP
+\fIX(7x)\fP, \fInotionflux(1)\fP, \fIjoe(1)\fP
+
+.SH AUTHOR
+Notion was written by the Notion team, based on Ion which was written by Tuomo Valkonen <tuomov at iki.fi>.
