@@ -100,6 +100,11 @@ static ExtlFn get_layout_fn;
  *                          stay focused in order to be added to the focus list.
  *                          If this value is set <=0, this logic is disabled:
  *                          the focus list is updated immediately \\
+ *  \var{activity_notification_on_all_screens} & (boolean) If enabled, activity
+ *                          notifiers are displayed on ALL the screens, not just
+ *                          the screen that contains the window producing the
+ *                          notification. This is only relevant on multi-head
+ *                          setups. By default this is disabled \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -160,7 +165,10 @@ void ioncore_set(ExtlTab tab)
 
     if(extl_table_gets_i(tab, "focuslist_insert_delay", &dd))
         ioncore_g.focuslist_insert_delay=maxof(0, dd);
-    
+
+    extl_table_gets_b(tab, "activity_notification_on_all_screens",
+                      &(ioncore_g.activity_notification_on_all_screens));
+
     ioncore_set_moveres_accel(tab);
     
     ioncore_groupws_set(tab);
@@ -202,6 +210,8 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
     extl_table_sets_i(tab, "focuslist_insert_delay", ioncore_g.focuslist_insert_delay);
+    extl_table_sets_b(tab, "activity_notification_on_all_screens",
+                      ioncore_g.activity_notification_on_all_screens);
 
     extl_table_sets_s(tab, "window_stacking_request", 
                       stringintmap_key(win_stackrq, 

@@ -166,7 +166,8 @@ static void screen_managed_activity(WScreen *scr)
      * pois (+ n) 
      */
     FOR_ALL_ON_OBJLIST(WRegion*, reg, actlist, tmp){
-        if(region_screen_of(reg)!=scr || ws_mapped(scr, reg))
+        if(!ioncore_g.activity_notification_on_all_screens &&
+           (region_screen_of(reg)!=scr || ws_mapped(scr, reg)))
             continue;
         if(region_name(reg)==NULL)
             continue;
@@ -238,7 +239,7 @@ unnotify:
 }
 
 
-static void screen_do_update_notifywin(WScreen *scr)
+static void _screen_do_update_notifywin(WScreen *scr)
 {
     if(ioncore_g.screen_notify)
         screen_managed_activity(scr);
@@ -246,6 +247,19 @@ static void screen_do_update_notifywin(WScreen *scr)
         screen_unnotify(scr);
 }
 
+static void screen_do_update_notifywin(WScreen *scr)
+{
+  if( ioncore_g.activity_notification_on_all_screens )
+  {
+    WScreen* scr_iterated;
+    FOR_ALL_SCREENS(scr_iterated)
+    {
+      _screen_do_update_notifywin(scr_iterated);
+    }
+  }
+  else
+    _screen_do_update_notifywin(scr);
+}
 
 /*}}}*/
 
