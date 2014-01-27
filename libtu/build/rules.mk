@@ -58,9 +58,10 @@ TO_CLEAN := $(TO_CLEAN) $(EXPORTS_C) $(EXPORTS_H)
 
 _exports: $(EXPORTS_C)
 
-$(EXPORTS_H): $(EXPORTS_C)
-
-$(EXPORTS_C):
+# this funny syntax (more than one pattern-based target) is meant to tell Make
+# that this rule makes BOTH of these targets. Look at the last paragraph of
+# http://www.gnu.org/software/make/manual/html_node/Pattern-Intro.html
+%xports.c %xports.h:
 	$(MKEXPORTS) -module $(MAKE_EXPORTS) -o $(EXPORTS_C) -h $(EXPORTS_H) $(SOURCES)
 
 else # !MAKE_EXPORTS
