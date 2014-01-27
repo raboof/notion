@@ -52,6 +52,8 @@ test: $(SOURCES)
 tags:
 	exuberant-ctags -R . $(TOPDIR)
 
+mod_xinerama.o: exports.h
+
 ################ ls_xinerama utility ###############
 
 ls_xinerama: ls_xinerama.c

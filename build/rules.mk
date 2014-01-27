@@ -143,7 +143,7 @@ ifneq ($(PRELOAD_MODULES),1)
 CC_PICFLAGS=-fPIC -DPIC
 LD_SHAREDFLAGS=-shared
 
-%.o: %.c $(EXPORTS_H)
+%.o: %.c
 	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
 # notion might not link to Xext, so modules will have to link to it themselves
@@ -163,7 +163,7 @@ else # PRELOAD_MODULES
 PICOPT=-fPIC -DPIC
 LINKOPT=-shared
 
-%.o: %.c $(EXPORTS_H)
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
@@ -191,7 +191,7 @@ endif #MODULE_STUB
 else # !MODULE
 
 
-%.o: %.c $(EXPORTS_H)
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
