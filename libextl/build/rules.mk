@@ -23,10 +23,8 @@ endif
 .PHONY: subdirs
 .PHONY: subdirs-clean
 .PHONY: subdirs-realclean
-.PHONY: subdirs-depend
 .PHONY: subdirs-install
 .PHONY: _install
-.PHONY: _depend
 .PHONY: _exports
 
 all: subdirs _exports $(TARGETS)
@@ -34,8 +32,6 @@ all: subdirs _exports $(TARGETS)
 clean: subdirs-clean _clean
 
 realclean: subdirs-realclean _clean _realclean
-
-depend: subdirs-depend _depend
 
 install: subdirs-install _install
 
@@ -47,8 +43,6 @@ ifdef MAKE_EXPORTS
 
 EXPORTS_C = exports.c
 EXPORTS_H = exports.h
-
-DEPEND_DEPENDS += $(EXPORTS_H)
 
 TO_CLEAN := $(TO_CLEAN) $(EXPORTS_C) $(EXPORTS_H)
 
@@ -135,7 +129,7 @@ endif# !MODULE
 ######################################
 
 _clean:
-	$(RM) -f $(TO_CLEAN) core $(DEPEND_FILE) $(OBJS) libextl.a
+	$(RM) -f $(TO_CLEAN) core *.d $(OBJS) libextl.a
 
 _realclean:
 	$(RM) -f $(TO_REALCLEAN) $(TARGETS)
@@ -161,16 +155,8 @@ etc_install:
 # Dependencies
 ######################################
 
-ifdef SOURCES
-
-_depend: $(DEPEND_DEPENDS)
-	$(MAKE_DEPEND)
-
-ifeq ($(DEPEND_FILE),$(wildcard $(DEPEND_FILE)))
-include $(DEPEND_FILE)
-endif
-
-endif
+CFLAGS += -MMD
+-include *.d
 
 # Subdirectories
 ######################################
@@ -179,9 +165,6 @@ ifdef SUBDIRS
 
 subdirs:
 	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i; done
-
-subdirs-depend:
-	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i depend; done
 
 subdirs-clean:
 	set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i clean; done
