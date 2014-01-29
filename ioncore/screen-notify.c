@@ -96,6 +96,16 @@ static void do_unnotify(Watch *watch)
     }
 }
 
+// returns the position or the stdisp, or -1 if there isn't one
+static int get_stdisp_pos(WScreen *scr)
+{
+    WRegion* stdisp=NULL;
+    WMPlexSTDispInfo info;
+
+    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
+
+    return (stdisp!=NULL) ? info.pos : -1;
+}
 
 /*}}}*/
 
@@ -105,15 +115,11 @@ static void do_unnotify(Watch *watch)
 
 static WInfoWin *get_notifywin(WScreen *scr)
 {
-    WRegion *stdisp=NULL;
-    WMPlexSTDispInfo info;
-    uint pos=MPLEX_STDISP_TL;
-    
-    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
-    if(stdisp!=NULL)
-        pos=info.pos;
-    
-    return do_get_notifywin(scr, &scr->notifywin_watch, pos, "actnotify");
+    int stdisp_pos = get_stdisp_pos(scr);
+    return do_get_notifywin(scr,
+                                     &scr->notifywin_watch,
+                                     (stdisp_pos >= 0) ? stdisp_pos : MPLEX_STDISP_TL,
+                                     "actnotify");
 }
 
 
@@ -269,26 +275,11 @@ static void screen_do_update_notifywin(WScreen *scr)
 
 static WInfoWin *get_infowin(WScreen *scr)
 {
-    WRegion *stdisp=NULL;
-    WMPlexSTDispInfo info;
-    uint pos=MPLEX_STDISP_TR;
-    
-    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
-    if(stdisp!=NULL && info.pos==MPLEX_STDISP_TR)
-        pos=MPLEX_STDISP_BR;
-    
-    return do_get_notifywin(scr, &scr->infowin_watch, pos, "tab-info");
-}
-
-
-void screen_windowinfo(WScreen *scr, const char *str)
-{
-    WInfoWin *iw=get_infowin(scr);
-    
-    if(iw!=NULL){
-        int maxw=REGION_GEOM(scr).w/3;
-        infowin_set_text(iw, str, maxw);
-    }
+    int stdisp_pos = get_stdisp_pos(scr);
+    return do_get_notifywin(scr,
+                                     &scr->infowin_watch,
+                                     (stdisp_pos == MPLEX_STDISP_TR) ? MPLEX_STDISP_BR : MPLEX_STDISP_TR,
+                                     "tab-info");
 }
 
 
@@ -332,13 +323,12 @@ static void screen_do_update_infowin(WScreen *scr)
     
     if(tag || act){
         const char *n=region_displayname(reg);
-        WInfoWin *iw;
-                
-        screen_windowinfo(scr, n);
-        
-        iw=(WInfoWin*)scr->infowin_watch.obj;
-        
+        WInfoWin *iw=get_infowin(scr);
+    
         if(iw!=NULL){
+            int maxw=REGION_GEOM(scr).w/3;
+            infowin_set_text(iw, n, maxw);
+
             GrStyleSpec *spec=infowin_stylespec(iw);
             
             init_attr();
