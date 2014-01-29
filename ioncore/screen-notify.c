@@ -28,7 +28,7 @@
 /*{{{ Generic stuff */
 
 
-static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, uint pos,
+static WInfoWin *do_get_popup_win(WScreen *scr, Watch *watch, uint pos,
                                   char *style)
 {
 
@@ -116,10 +116,10 @@ static int get_stdisp_pos(WScreen *scr)
 static WInfoWin *get_notifywin(WScreen *scr)
 {
     int stdisp_pos = get_stdisp_pos(scr);
-    return do_get_notifywin(scr,
-                                     &scr->notifywin_watch,
-                                     (stdisp_pos >= 0) ? stdisp_pos : MPLEX_STDISP_TL,
-                                     "actnotify");
+    return do_get_popup_win(scr,
+                            &scr->notifywin_watch,
+                            (stdisp_pos >= 0) ? stdisp_pos : MPLEX_STDISP_TL,
+                            "actnotify");
 }
 
 
@@ -276,10 +276,10 @@ static void screen_do_update_notifywin(WScreen *scr)
 static WInfoWin *get_infowin(WScreen *scr)
 {
     int stdisp_pos = get_stdisp_pos(scr);
-    return do_get_notifywin(scr,
-                                     &scr->infowin_watch,
-                                     (stdisp_pos == MPLEX_STDISP_TR) ? MPLEX_STDISP_BR : MPLEX_STDISP_TR,
-                                     "tab-info");
+    return do_get_popup_win(scr,
+                            &scr->infowin_watch,
+                            (stdisp_pos == MPLEX_STDISP_TR) ? MPLEX_STDISP_BR : MPLEX_STDISP_TR,
+                            "tab-info");
 }
 
 
