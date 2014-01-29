@@ -19,6 +19,7 @@
 #include "xwindow.h"
 #include "regbind.h"
 #include "log.h"
+#include "screen-notify.h"
 
 
 /*{{{ Hooks. */
@@ -325,6 +326,8 @@ void region_got_focus(WRegion *reg)
      */
     if(reg->active_sub==NULL && !OBJ_IS(reg, WClientWin))
         rootwin_install_colormap(region_rootwin_of(reg), None); 
+
+    screen_update_workspace_indicatorwin( reg );
 }
 
 

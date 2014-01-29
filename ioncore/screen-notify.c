@@ -10,6 +10,7 @@
 
 #include <libtu/minmax.h>
 #include <libmainloop/defer.h>
+#include <libmainloop/signal.h>
 
 #include "common.h"
 #include "global.h"
@@ -348,6 +349,118 @@ static void screen_do_update_infowin(WScreen *scr)
 }
 
 
+
+/*}}}*/
+
+
+/*{{{ workspace indicator win */
+
+// A single timer for ALL the screens
+static WTimer*   workspace_indicator_remove_timer   = NULL;
+static WScreen*  workspace_indicator_active_screen  = NULL;
+static WGroupWS* workspace_indicator_last_workspace = NULL;
+
+static WInfoWin *get_workspace_indicatorwin(WScreen *scr)
+{
+    return do_get_popup_win(scr,
+                            &scr->workspace_indicatorwin_watch,
+                            MPLEX_STDISP_BL,
+                            "tab-info");
+}
+
+
+void screen_unnotify_workspace_indicatorwin(void)
+{
+    if( workspace_indicator_active_screen != NULL)
+    {
+        do_unnotify(&workspace_indicator_active_screen->workspace_indicatorwin_watch);
+        workspace_indicator_active_screen    = NULL;
+    }
+
+    if( workspace_indicator_remove_timer )
+        timer_reset( workspace_indicator_remove_timer );
+}
+
+static void timer_expired__workspace_indicator_remove(WTimer* dummy1, Obj* dummy2)
+{
+    if( workspace_indicator_active_screen != NULL )
+        screen_unnotify_workspace_indicatorwin();
+}
+
+// Called when a region is focused. In response this function may either put up
+// a new workspace-indicator or remove an existing one
+void screen_update_workspace_indicatorwin(WRegion* reg_focused)
+{
+    if( ioncore_g.workspace_indicator_timeout <= 0 )
+        return;
+
+    WScreen* scr = region_screen_of(reg_focused);
+    WRegion* mplex;
+    if( scr == NULL ||
+        (mplex = mplex_mx_current(&(scr->mplex))) == NULL ||
+        !OBJ_IS(mplex, WGroupWS) ||
+        mplex->ni.name == NULL)
+    {
+        screen_unnotify_workspace_indicatorwin();
+        return;
+    }
+
+    // remove the indicator from the other screen that it is on (if it IS on
+    // another screen)
+    if( workspace_indicator_active_screen != NULL &&
+        workspace_indicator_active_screen != scr )
+    {
+        screen_unnotify_workspace_indicatorwin();
+    }
+    else if( (WGroupWS*)mplex == workspace_indicator_last_workspace )
+        // If I'm already on this workspace, do nothing
+        return;
+
+    const char* name = mplex->ni.name;
+
+    WInfoWin *iw=get_workspace_indicatorwin(scr);
+
+    if(iw!=NULL){
+        int maxw=REGION_GEOM(scr).w/3;
+        infowin_set_text(iw, name, maxw);
+
+        GrStyleSpec *spec=infowin_stylespec(iw);
+        init_attr();
+        gr_stylespec_unalloc(spec);
+
+        gr_stylespec_set(spec, GR_ATTR(selected));
+        gr_stylespec_set(spec, GR_ATTR(not_dragged));
+        gr_stylespec_set(spec, GR_ATTR(active));
+    }
+
+    // set up the indicator on THIS screen
+    workspace_indicator_active_screen  = scr;
+    workspace_indicator_last_workspace = (WGroupWS*)mplex;
+
+    // create and set the timer
+    if( workspace_indicator_remove_timer == NULL )
+        workspace_indicator_remove_timer = create_timer();
+    if( workspace_indicator_remove_timer == NULL )
+        return;
+
+    timer_set(workspace_indicator_remove_timer, ioncore_g.workspace_indicator_timeout,
+              (WTimerHandler*)timer_expired__workspace_indicator_remove, NULL);
+}
+
+void screen_unnotify_if_screen( WScreen* reg )
+{
+    if( reg == workspace_indicator_active_screen )
+        screen_unnotify_workspace_indicatorwin();
+}
+
+void screen_unnotify_if_workspace( WGroupWS* reg)
+{
+    if( reg == workspace_indicator_last_workspace )
+    {
+        screen_unnotify_workspace_indicatorwin();
+        workspace_indicator_last_workspace = NULL;
+    }
+}
 
 /*}}}*/
 

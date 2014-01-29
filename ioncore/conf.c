@@ -105,6 +105,12 @@ static ExtlFn get_layout_fn;
  *                          the screen that contains the window producing the
  *                          notification. This is only relevant on multi-head
  *                          setups. By default this is disabled \\
+ *  \var{workspace_indicator_timeout} & (integer) If enabled, a workspace
+ *                          indicator comes up at the bottom-left of the screen
+ *                          when a new workspace is selected. This indicator
+ *                          stays active for only as long as indicated by this
+ *                          variable (in ms). Timeout values <=0 disable the
+ *                          indicator altogether. This is disabled by default \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -166,6 +172,9 @@ void ioncore_set(ExtlTab tab)
     if(extl_table_gets_i(tab, "focuslist_insert_delay", &dd))
         ioncore_g.focuslist_insert_delay=maxof(0, dd);
 
+    if(extl_table_gets_i(tab, "workspace_indicator_timeout", &dd))
+        ioncore_g.workspace_indicator_timeout=maxof(0, dd);
+
     extl_table_gets_b(tab, "activity_notification_on_all_screens",
                       &(ioncore_g.activity_notification_on_all_screens));
 
@@ -210,6 +219,7 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
     extl_table_sets_i(tab, "focuslist_insert_delay", ioncore_g.focuslist_insert_delay);
+    extl_table_sets_i(tab, "workspace_indicator_timeout", ioncore_g.workspace_indicator_timeout);
     extl_table_sets_b(tab, "activity_notification_on_all_screens",
                       ioncore_g.activity_notification_on_all_screens);
 

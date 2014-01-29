@@ -60,6 +60,7 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     
     watch_init(&(scr->notifywin_watch));
     watch_init(&(scr->infowin_watch));
+    watch_init(&(scr->workspace_indicatorwin_watch));
 
     attr.background_pixmap=ParentRelative;
     attrflags=CWBackPixmap;

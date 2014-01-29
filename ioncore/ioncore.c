@@ -369,6 +369,7 @@ static bool init_global()
     ioncore_g.autosave_layout=TRUE;
     ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;
     ioncore_g.focuslist_insert_delay=CF_FOCUSLIST_INSERT_DELAY;
+    ioncore_g.workspace_indicator_timeout=CF_WORKSPACE_INDICATOR_TIMEOUT;
     ioncore_g.activity_notification_on_all_screens=FALSE;
 
     ioncore_g.enc_utf8=FALSE;

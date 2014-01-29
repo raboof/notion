@@ -29,6 +29,7 @@
 #include "return.h"
 #include "key.h"
 #include "log.h"
+#include "screen-notify.h"
 
 #define D2(X)
 
@@ -972,12 +973,21 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how)
         xwindow_set_text_property(((WWindow*)reg)->win, XA_WM_NAME, p, 1);
     }
 
-    // if the region that's waiting to be added to the focuslist is being
-    // deleted, cancel the insertion
-    if( how == ioncore_g.notifies.deinit &&
-        reg == region_focuslist_region_awaiting_insertion() )
+    if( how == ioncore_g.notifies.deinit )
     {
-      region_focuslist_awaiting_insertion_cancel();
+        // if the region that's waiting to be added to the focuslist is being
+        // deleted, cancel the insertion
+        if( reg == region_focuslist_region_awaiting_insertion() )
+        {
+            region_focuslist_awaiting_insertion_cancel();
+        }
+
+        // if we're deleting a screen or a workspace that is currently being
+        // indicated, remove the indication
+        if( obj_is((Obj*)reg, &CLASSDESCR(WScreen)))
+            screen_unnotify_if_screen((WScreen*)reg);
+        else if( obj_is((Obj*)reg, &CLASSDESCR(WGroupWS)))
+            screen_unnotify_if_workspace( (WGroupWS*)reg);
     }
 }
 

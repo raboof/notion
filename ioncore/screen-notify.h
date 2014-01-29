@@ -15,11 +15,16 @@
 
 void screen_unnotify_infowin(WScreen *scr);
 void screen_unnotify_notifywin(WScreen *scr);
+void screen_unnotify_workspace_indicatorwin(void); // there's just one indicator
 
 void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how);
 
 void screen_update_infowin(WScreen *scr);
 void screen_update_notifywin(WScreen *scr);
+void screen_update_workspace_indicatorwin(WRegion* reg_focused);
+
+void screen_unnotify_if_screen( WScreen* reg);
+void screen_unnotify_if_workspace( WGroupWS* reg);
 
 extern void ioncore_screen_activity_notify(WRegion *reg, WRegionNotify how);
 
