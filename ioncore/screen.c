@@ -121,8 +121,8 @@ void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
 
-    screen_unnotify(scr);
-    screen_nowindowinfo(scr);
+    screen_unnotify_notifywin(scr);
+    screen_unnotify_infowin(scr);
     
     mplex_deinit((WMPlex*)scr);
 }

@@ -128,7 +128,7 @@ void screen_notify(WScreen *scr, const char *str)
 }
 
 
-void screen_unnotify(WScreen *scr)
+void screen_unnotify_notifywin(WScreen *scr)
 {
     do_unnotify(&scr->notifywin_watch);
 }
@@ -235,7 +235,7 @@ static void screen_managed_activity(WScreen *scr)
     return;
 
 unnotify:    
-    screen_unnotify(scr);
+    screen_unnotify_notifywin(scr);
 }
 
 
@@ -244,7 +244,7 @@ static void _screen_do_update_notifywin(WScreen *scr)
     if(ioncore_g.screen_notify)
         screen_managed_activity(scr);
     else
-        screen_unnotify(scr);
+        screen_unnotify_notifywin(scr);
 }
 
 static void screen_do_update_notifywin(WScreen *scr)
@@ -292,7 +292,7 @@ void screen_windowinfo(WScreen *scr, const char *str)
 }
 
 
-void screen_nowindowinfo(WScreen *scr)
+void screen_unnotify_infowin(WScreen *scr)
 {
     do_unnotify(&scr->infowin_watch);
 }
@@ -353,7 +353,7 @@ static void screen_do_update_infowin(WScreen *scr)
         }
             
     }else{
-        screen_nowindowinfo(scr);
+        screen_unnotify_infowin(scr);
     }
 }
 
