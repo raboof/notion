@@ -411,6 +411,19 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
     return scr;
 }
 
+/*EXTL_DOC
+ * Warp the cursor pointer to this location
+ *
+ * I'm not *entirely* sure what 'safe' means, but this doesn't change internal
+ * notion state, so I guess it's 'safe'...
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+void rootwin_warp_pointer(WRootWin *root, int x, int y)
+{
+    XWarpPointer(ioncore_g.dpy, None, WROOTWIN_ROOT(root), 0, 0, 0, 0, x, y);
+}
+
 
 /*EXTL_DOC
  * Returns the first WRootWin
