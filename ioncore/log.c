@@ -23,8 +23,7 @@ const char* loglevel_names[] = {
 LogLevel minimumLevel(LogCategory category)
 {
     switch(category){
-        case FONT:
-            /** For https://sourceforge.net/p/notion/bugs/63/ */
+        case VALGRIND:
             return DEBUG;
         default:
             return INFO;

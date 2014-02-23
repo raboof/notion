@@ -18,7 +18,8 @@ typedef enum{
 
 typedef enum{
     GENERAL,
-    FONT
+    FONT,
+    VALGRIND /* Useful while debugging valgrind warnings */
 } LogCategory;
 
 
