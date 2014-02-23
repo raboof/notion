@@ -11,11 +11,6 @@ reproduced below), extended and modified with the following terms:
     - A version that does not significantly differ from one of the
       copyright holder's releases, must be provided by default.
 
-    - Versions not based on the copyright holder's latest release (on 
-      the corresponding "branch", such as Ion3(tm)), must within 28 days
-      of this release, be prominently marked as (potentially) obsolete
-      and unsupported.
-
     - Significantly altered versions may be provided only if the user
       explicitly requests for those modifications to be applied, and 
       is prominently notified that the software is no longer considered 
@@ -60,27 +55,8 @@ integrate the software with the target platform, without obstructing the
 standard behaviour, are insignificant. Everything else is significant, 
 unless expressly declared otherwise by the copyright holder. 
 
-Distributions: For example, suppose an aggregate distribution of software
-provides an `installpkg` command for installing packages. Then the action
-`installpkg ion3` (resp. `installpkg ion`) should provide the latest release
-of Ion3 (resp. the latest stable release) 28 days from release date at the
-latest, or prominently notify the user that the provided version is (likely
-to be) obsolete and unsupported. The latest release being provided by
-default, or prominently appearing in a listing, constitutes prominent
-marking of earlier releases as obsolete. Specific versions (including
-modified versions) may be provided if the user explicitly requests for
-those, within the constraints set above.
 
-The intent of these terms is to curb the power that "distributions", as
-the primary sources of software for many users, have in defining what
-is perceived as Ion. By providing significantly modified versions and
-out-dated development snapshots without prominently mentioning this fact,
-they do not present the work in a light that the author can agree with,
-and create a burden of dealing with (new) users seeking for support for
-such versions.
-
-
----
+- ---
 
 
                   GNU LESSER GENERAL PUBLIC LICENSE
