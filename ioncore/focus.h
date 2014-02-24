@@ -62,9 +62,7 @@ WRegion *ioncore_current();
 extern void region_pointer_focus_hack(WRegion *reg);
 
 // focuslist delayed insertion logic stuff
-void           region_focuslist_awaiting_insertion_cancel(void);
-void           region_focuslist_awaiting_insertion_trigger(void);
-const WRegion* region_focuslist_region_awaiting_insertion(void);
+void region_focuslist_awaiting_insertion_cancel_if_is( WRegion* reg );
 
 // testing/debugging helper
 void region_focuslist_debugprint(void);

@@ -22,6 +22,8 @@
 #include "screen-notify.h"
 
 
+static void region_focuslist_awaiting_insertion_trigger(void);
+
 /*{{{ Hooks. */
 
 
@@ -253,16 +255,16 @@ static void schedule_focuslist_insert_timer(WRegion *reg)
             (WTimerHandler*)timer_expired__focuslist_insert, NULL);
 }
 
-
-void region_focuslist_awaiting_insertion_cancel(void)
+void region_focuslist_awaiting_insertion_cancel_if_is( WRegion* reg )
 {
-  if( focuslist_insert_timer == NULL )
-    return;
-
-  timer_reset(focuslist_insert_timer);
+    if( region_awaiting_insertion == reg &&
+        focuslist_insert_timer    != NULL )
+    {
+        timer_reset(focuslist_insert_timer);
+    }
 }
 
-void region_focuslist_awaiting_insertion_trigger(void)
+static void region_focuslist_awaiting_insertion_trigger(void)
 {
   if( focuslist_insert_timer    != NULL &&
       region_awaiting_insertion != NULL )
@@ -270,11 +272,6 @@ void region_focuslist_awaiting_insertion_trigger(void)
     timer_expired__focuslist_insert(NULL,NULL);
     timer_reset(focuslist_insert_timer);
   }
-}
-
-const WRegion* region_focuslist_region_awaiting_insertion(void)
-{
-  return region_awaiting_insertion;
 }
 
 

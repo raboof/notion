@@ -977,10 +977,7 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how)
     {
         // if the region that's waiting to be added to the focuslist is being
         // deleted, cancel the insertion
-        if( reg == region_focuslist_region_awaiting_insertion() )
-        {
-            region_focuslist_awaiting_insertion_cancel();
-        }
+        region_focuslist_awaiting_insertion_cancel_if_is( reg );
 
         // if we're deleting a screen or a workspace that is currently being
         // indicated, remove the indication
