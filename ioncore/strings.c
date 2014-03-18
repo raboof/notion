@@ -443,7 +443,6 @@ char *grbrush_make_label(GrBrush *brush, const char *str, uint maxw)
     for(rule=shortenrules; rule!=NULL; rule=rule->next){
         if(fits && !rule->always)
             continue;
-        LOG(DEBUG, VALGRIND, "Applying regex %s to string %s, matching %d", rule->rule, str, nmatch);
         ret=regexec(&(rule->re), str, nmatch, pmatch, 0);
         if(ret!=0)
             continue;
