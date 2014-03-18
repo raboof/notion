@@ -36,6 +36,7 @@
 #include <ioncore/event.h>
 #include <ioncore/mplex.h>
 #include <ioncore/xwindow.h>
+#include <ioncore/log.h>
 #include <ioncore/../version.h>
 
 #include "exports.h"
@@ -81,6 +82,8 @@ bool handle_xrandr_event(XEvent *ev)
         WFitParams fp;
         WScreen *screen;
         bool pivot=FALSE;
+        LOG(DEBUG, RANDR, "XRRScreenChangeNotifyEvent size %dx%d (%dx%d mm)", 
+            rev->width, rev->height, rev->mwidth, rev->mheight);
         
         screen=XWINDOW_REGION_OF_T(rev->root, WScreen);
         
