@@ -345,10 +345,25 @@ bool region_may_control_focus(WRegion *reg)
 
 
 /*Time ioncore_focus_time=CurrentTime;*/
+bool ioncore_focus_is_ancestor(WRegion* child, WRegion* parent) {
+    return child==parent 
+        || (REGION_PARENT_REG(parent)!=NULL 
+            && (child==REGION_PARENT_REG(parent)
+                || (REGION_PARENT_REG(REGION_PARENT_REG(parent))!=NULL 
+                    && child==REGION_PARENT_REG(REGION_PARENT_REG(parent)))));
+}
 
+bool ioncore_focus_share_ancestor(WRegion* one, WRegion* other) {
+    if(one==NULL || other==NULL){
+        return FALSE;
+    }
 
-void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input)
-{
+    return ioncore_focus_is_ancestor(one, other)
+        || (REGION_PARENT_REG(one)!=NULL 
+          && (ioncore_focus_is_ancestor(REGION_PARENT_REG(one), other)));
+}
+
+void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input) { 
     if(warp)
         region_do_warp(reg);
     
@@ -358,7 +373,7 @@ void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, in
     region_set_await_focus(reg);
     if(set_input)
         XSetInputFocus(ioncore_g.dpy, win, RevertToParent, time);
-    else if(reg->parent != NULL && reg->parent->win != NULL)
+    else if(reg->parent!=NULL && !ioncore_focus_share_ancestor(reg, ioncore_current())) 
         XSetInputFocus(ioncore_g.dpy, reg->parent->win, RevertToParent, time);
 }
 
