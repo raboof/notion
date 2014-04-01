@@ -70,8 +70,18 @@ defwinprop {
     transient_mode = "current",
 }
 defwinprop {
+    class = "jetbrains-idea-ce",
+    instance = "sun-awt-X11-XDialogPeer",
+    transient_mode = "current",
+}
+defwinprop {
     class = "jetbrains-idea",
     instance = "sun-awt-X11-XWindowPeer",
+    transient_mode = "current",
+}
+defwinprop {
+    class = "jetbrains-idea",
+    instance = "sun-awt-X11-XDialogPeer",
     transient_mode = "current",
 }
 
