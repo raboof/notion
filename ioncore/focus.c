@@ -12,10 +12,12 @@
 #include "global.h"
 #include "window.h"
 #include "region.h"
+#include "frame.h"
 #include "colormap.h"
 #include "activity.h"
 #include "xwindow.h"
 #include "regbind.h"
+#include "log.h"
 
 
 /*{{{ Hooks. */
@@ -345,22 +347,33 @@ bool region_may_control_focus(WRegion *reg)
 
 
 /*Time ioncore_focus_time=CurrentTime;*/
-bool ioncore_focus_is_ancestor(WRegion* child, WRegion* parent) {
-    return child==parent 
-        || (REGION_PARENT_REG(parent)!=NULL 
-            && (child==REGION_PARENT_REG(parent)
-                || (REGION_PARENT_REG(REGION_PARENT_REG(parent))!=NULL 
-                    && child==REGION_PARENT_REG(REGION_PARENT_REG(parent)))));
-}
 
-bool ioncore_focus_share_ancestor(WRegion* one, WRegion* other) {
-    if(one==NULL || other==NULL){
+bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
+    WWindow* parent = reg->parent;
+
+    LOG(FOCUS, DEBUG, "Region %s refusing focus", reg->ni.name);
+
+    if(parent==NULL)
         return FALSE;
+
+    /** 
+     * If the region is refusing focus, this might be because the mouse 
+     * entered it but it doesn't accept any focus (like in the case of 
+     * oclock). In that case we want to focus its parent WTiling, if any.
+     * 
+     * However, when for example IntelliJ IDEA's main window is refusing 
+     * the focus because some transient completion popup is open, we want
+     * to leave the focus alone.
+     */
+    LOG(FOCUS, DEBUG, "Parent is %s", parent->region.ni.name);
+
+    if (obj_is((Obj*)parent, &CLASSDESCR(WFrame))
+        && ((WFrame*)parent)->mode == FRAME_MODE_TILED) {
+        LOG(FOCUS, DEBUG, "Parent %s is a tiled WFrame", parent->region.ni.name);
+        return TRUE;
     }
 
-    return ioncore_focus_is_ancestor(one, other)
-        || (REGION_PARENT_REG(one)!=NULL 
-          && (ioncore_focus_is_ancestor(REGION_PARENT_REG(one), other)));
+    return FALSE;
 }
 
 void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input) { 
@@ -371,10 +384,12 @@ void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, in
         return;
     
     region_set_await_focus(reg);
+
     if(set_input)
         XSetInputFocus(ioncore_g.dpy, win, RevertToParent, time);
-    else if(reg->parent!=NULL && !ioncore_focus_share_ancestor(reg, ioncore_current())) 
+    else if(ioncore_should_focus_parent_when_refusing_focus(reg)) {
         XSetInputFocus(ioncore_g.dpy, reg->parent->win, RevertToParent, time);
+   }
 }
 
 
