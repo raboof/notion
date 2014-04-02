@@ -123,7 +123,7 @@ void region_deinit(WRegion *reg)
     
     region_unregister(reg);
 
-    region_focuslist_deinit(reg);
+    region_focus_deinit(reg);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));

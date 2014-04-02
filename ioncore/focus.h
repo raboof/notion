@@ -48,7 +48,9 @@ extern bool region_is_active(WRegion *reg, bool pseudoact_ok);
 extern void region_focuslist_remove_with_mgrs(WRegion *reg);
 extern void region_focuslist_push(WRegion *reg);
 extern void region_focuslist_move_after(WRegion *reg, WRegion *after);
-extern void region_focuslist_deinit(WRegion *reg);
+
+/* Notify the focus handling that the region is deinit'ing */
+extern void region_focus_deinit(WRegion *reg);
 
 extern WRegion *ioncore_goto_previous();
 
