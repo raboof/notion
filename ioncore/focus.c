@@ -62,7 +62,7 @@ void region_focuslist_move_after(WRegion *reg, WRegion *after)
 }
 
 
-void region_focuslist_deinit(WRegion *reg)
+static void region_focuslist_deinit(WRegion *reg)
 {
     WRegion *replace=region_manager_or_parent(reg);
     
@@ -255,7 +255,7 @@ static void schedule_focuslist_insert_timer(WRegion *reg)
             (WTimerHandler*)timer_expired__focuslist_insert, NULL);
 }
 
-void region_focuslist_awaiting_insertion_cancel_if_is( WRegion* reg )
+static void region_focuslist_awaiting_insertion_cancel_if_is( WRegion* reg )
 {
     if( region_awaiting_insertion == reg &&
         focuslist_insert_timer    != NULL )
@@ -350,6 +350,20 @@ void region_lost_focus(WRegion *reg)
     
     region_inactivated(reg);
     region_notify_change(reg, ioncore_g.notifies.inactivated);
+}
+
+
+void region_focus_deinit(WRegion *reg)
+{
+    // if the region that's waiting to be added to the focuslist is being
+    // deleted, cancel the insertion
+    if(region_awaiting_insertion)
+        region_focuslist_awaiting_insertion_cancel_if_is(reg);
+
+    region_focuslist_deinit(reg);
+
+    if(ioncore_g.focus_current==reg)
+        ioncore_g.focus_current=ioncore_g.focuslist;
 }
 
 

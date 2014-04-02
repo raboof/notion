@@ -124,7 +124,7 @@ void region_deinit(WRegion *reg)
     
     region_unregister(reg);
 
-    region_focuslist_deinit(reg);
+    region_focus_deinit(reg);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));
@@ -971,20 +971,6 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how)
     if(how==ioncore_g.notifies.name && obj_is((Obj*)reg, &CLASSDESCR(WWindow))){
         p[0] = region_name(reg);
         xwindow_set_text_property(((WWindow*)reg)->win, XA_WM_NAME, p, 1);
-    }
-
-    if( how == ioncore_g.notifies.deinit )
-    {
-        // if the region that's waiting to be added to the focuslist is being
-        // deleted, cancel the insertion
-        region_focuslist_awaiting_insertion_cancel_if_is( reg );
-
-        // if we're deleting a screen or a workspace that is currently being
-        // indicated, remove the indication
-        if( obj_is((Obj*)reg, &CLASSDESCR(WScreen)))
-            screen_unnotify_if_screen((WScreen*)reg);
-        else if( obj_is((Obj*)reg, &CLASSDESCR(WGroupWS)))
-            screen_unnotify_if_workspace( (WGroupWS*)reg);
     }
 }
 

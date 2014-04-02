@@ -124,6 +124,7 @@ void screen_deinit(WScreen *scr)
 
     screen_unnotify_notifywin(scr);
     screen_unnotify_infowin(scr);
+    screen_unnotify_if_screen(scr);
     
     mplex_deinit((WMPlex*)scr);
 }
