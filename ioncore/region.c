@@ -29,6 +29,7 @@
 #include "return.h"
 #include "key.h"
 #include "log.h"
+#include "screen-notify.h"
 
 #define D2(X)
 

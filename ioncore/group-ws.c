@@ -27,6 +27,7 @@
 #include "resize.h"
 #include "conf.h"
 #include "saveload.h"
+#include "screen-notify.h"
 
 
 /*{{{ Settings */
@@ -329,6 +330,9 @@ WGroupWS *create_groupws(WWindow *parent, const WFitParams *fp)
 void groupws_deinit(WGroupWS *ws)
 {    
     extl_unref_table(ws->initial_outputs);
+
+    screen_unnotify_if_workspace(ws);
+
     group_deinit(&(ws->grp));
 }
 

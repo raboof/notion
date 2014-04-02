@@ -60,6 +60,7 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     
     watch_init(&(scr->notifywin_watch));
     watch_init(&(scr->infowin_watch));
+    watch_init(&(scr->workspace_indicatorwin_watch));
 
     attr.background_pixmap=ParentRelative;
     attrflags=CWBackPixmap;
@@ -121,8 +122,9 @@ void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
 
-    screen_unnotify(scr);
-    screen_nowindowinfo(scr);
+    screen_unnotify_notifywin(scr);
+    screen_unnotify_infowin(scr);
+    screen_unnotify_if_screen(scr);
     
     mplex_deinit((WMPlex*)scr);
 }

@@ -129,15 +129,6 @@ LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
 # might allow for those optimisations to be taken without any  special
 # libc or compiler options.
 
-
-##
-## make depend
-##
-
-DEPEND_FILE=.depend
-DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
-MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
-
 ##
 ## AR
 ##

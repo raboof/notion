@@ -18,10 +18,13 @@ MAKE_EXPORTS=mod_xkbevents
 
 MODULE=mod_xkbevents
 
+
 ######################################
 
 include $(TOPDIR)/build/rules.mk
 
 ######################################
+
+mod_xkbevents.o: exports.h
 
 _install: module_install

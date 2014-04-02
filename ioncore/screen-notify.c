@@ -10,6 +10,7 @@
 
 #include <libtu/minmax.h>
 #include <libmainloop/defer.h>
+#include <libmainloop/signal.h>
 
 #include "common.h"
 #include "global.h"
@@ -28,7 +29,7 @@
 /*{{{ Generic stuff */
 
 
-static WInfoWin *do_get_notifywin(WScreen *scr, Watch *watch, uint pos,
+static WInfoWin *do_get_popup_win(WScreen *scr, Watch *watch, uint pos,
                                   char *style)
 {
 
@@ -96,6 +97,16 @@ static void do_unnotify(Watch *watch)
     }
 }
 
+// returns the position or the stdisp, or -1 if there isn't one
+static int get_stdisp_pos(WScreen *scr)
+{
+    WRegion* stdisp=NULL;
+    WMPlexSTDispInfo info;
+
+    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
+
+    return (stdisp!=NULL) ? info.pos : -1;
+}
 
 /*}}}*/
 
@@ -105,15 +116,11 @@ static void do_unnotify(Watch *watch)
 
 static WInfoWin *get_notifywin(WScreen *scr)
 {
-    WRegion *stdisp=NULL;
-    WMPlexSTDispInfo info;
-    uint pos=MPLEX_STDISP_TL;
-    
-    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
-    if(stdisp!=NULL)
-        pos=info.pos;
-    
-    return do_get_notifywin(scr, &scr->notifywin_watch, pos, "actnotify");
+    int stdisp_pos = get_stdisp_pos(scr);
+    return do_get_popup_win(scr,
+                            &scr->notifywin_watch,
+                            (stdisp_pos >= 0) ? stdisp_pos : MPLEX_STDISP_TL,
+                            "actnotify");
 }
 
 
@@ -128,7 +135,7 @@ void screen_notify(WScreen *scr, const char *str)
 }
 
 
-void screen_unnotify(WScreen *scr)
+void screen_unnotify_notifywin(WScreen *scr)
 {
     do_unnotify(&scr->notifywin_watch);
 }
@@ -166,7 +173,8 @@ static void screen_managed_activity(WScreen *scr)
      * pois (+ n) 
      */
     FOR_ALL_ON_OBJLIST(WRegion*, reg, actlist, tmp){
-        if(region_screen_of(reg)!=scr || ws_mapped(scr, reg))
+        if(!ioncore_g.activity_notification_on_all_screens &&
+           (region_screen_of(reg)!=scr || ws_mapped(scr, reg)))
             continue;
         if(region_name(reg)==NULL)
             continue;
@@ -234,18 +242,31 @@ static void screen_managed_activity(WScreen *scr)
     return;
 
 unnotify:    
-    screen_unnotify(scr);
+    screen_unnotify_notifywin(scr);
 }
 
 
-static void screen_do_update_notifywin(WScreen *scr)
+static void _screen_do_update_notifywin(WScreen *scr)
 {
     if(ioncore_g.screen_notify)
         screen_managed_activity(scr);
     else
-        screen_unnotify(scr);
+        screen_unnotify_notifywin(scr);
 }
 
+static void screen_do_update_notifywin(WScreen *scr)
+{
+  if( ioncore_g.activity_notification_on_all_screens )
+  {
+    WScreen* scr_iterated;
+    FOR_ALL_SCREENS(scr_iterated)
+    {
+      _screen_do_update_notifywin(scr_iterated);
+    }
+  }
+  else
+    _screen_do_update_notifywin(scr);
+}
 
 /*}}}*/
 
@@ -255,30 +276,15 @@ static void screen_do_update_notifywin(WScreen *scr)
 
 static WInfoWin *get_infowin(WScreen *scr)
 {
-    WRegion *stdisp=NULL;
-    WMPlexSTDispInfo info;
-    uint pos=MPLEX_STDISP_TR;
-    
-    mplex_get_stdisp(&scr->mplex, &stdisp, &info);
-    if(stdisp!=NULL && info.pos==MPLEX_STDISP_TR)
-        pos=MPLEX_STDISP_BR;
-    
-    return do_get_notifywin(scr, &scr->infowin_watch, pos, "tab-info");
+    int stdisp_pos = get_stdisp_pos(scr);
+    return do_get_popup_win(scr,
+                            &scr->infowin_watch,
+                            (stdisp_pos == MPLEX_STDISP_TR) ? MPLEX_STDISP_BR : MPLEX_STDISP_TR,
+                            "tab-info");
 }
 
 
-void screen_windowinfo(WScreen *scr, const char *str)
-{
-    WInfoWin *iw=get_infowin(scr);
-    
-    if(iw!=NULL){
-        int maxw=REGION_GEOM(scr).w/3;
-        infowin_set_text(iw, str, maxw);
-    }
-}
-
-
-void screen_nowindowinfo(WScreen *scr)
+void screen_unnotify_infowin(WScreen *scr)
 {
     do_unnotify(&scr->infowin_watch);
 }
@@ -318,13 +324,12 @@ static void screen_do_update_infowin(WScreen *scr)
     
     if(tag || act){
         const char *n=region_displayname(reg);
-        WInfoWin *iw;
-                
-        screen_windowinfo(scr, n);
-        
-        iw=(WInfoWin*)scr->infowin_watch.obj;
-        
+        WInfoWin *iw=get_infowin(scr);
+    
         if(iw!=NULL){
+            int maxw=REGION_GEOM(scr).w/3;
+            infowin_set_text(iw, n, maxw);
+
             GrStyleSpec *spec=infowin_stylespec(iw);
             
             init_attr();
@@ -339,11 +344,123 @@ static void screen_do_update_infowin(WScreen *scr)
         }
             
     }else{
-        screen_nowindowinfo(scr);
+        screen_unnotify_infowin(scr);
     }
 }
 
 
+
+/*}}}*/
+
+
+/*{{{ workspace indicator win */
+
+// A single timer for ALL the screens
+static WTimer*   workspace_indicator_remove_timer   = NULL;
+static WScreen*  workspace_indicator_active_screen  = NULL;
+static WGroupWS* workspace_indicator_last_workspace = NULL;
+
+static WInfoWin *get_workspace_indicatorwin(WScreen *scr)
+{
+    return do_get_popup_win(scr,
+                            &scr->workspace_indicatorwin_watch,
+                            MPLEX_STDISP_BL,
+                            "tab-info");
+}
+
+
+void screen_unnotify_workspace_indicatorwin(void)
+{
+    if( workspace_indicator_active_screen != NULL)
+    {
+        do_unnotify(&workspace_indicator_active_screen->workspace_indicatorwin_watch);
+        workspace_indicator_active_screen    = NULL;
+    }
+
+    if( workspace_indicator_remove_timer )
+        timer_reset( workspace_indicator_remove_timer );
+}
+
+static void timer_expired__workspace_indicator_remove(WTimer* dummy1, Obj* dummy2)
+{
+    if( workspace_indicator_active_screen != NULL )
+        screen_unnotify_workspace_indicatorwin();
+}
+
+// Called when a region is focused. In response this function may either put up
+// a new workspace-indicator or remove an existing one
+void screen_update_workspace_indicatorwin(WRegion* reg_focused)
+{
+    if( ioncore_g.workspace_indicator_timeout <= 0 )
+        return;
+
+    WScreen* scr = region_screen_of(reg_focused);
+    WRegion* mplex;
+    if( scr == NULL ||
+        (mplex = mplex_mx_current(&(scr->mplex))) == NULL ||
+        !OBJ_IS(mplex, WGroupWS) ||
+        mplex->ni.name == NULL)
+    {
+        screen_unnotify_workspace_indicatorwin();
+        return;
+    }
+
+    // remove the indicator from the other screen that it is on (if it IS on
+    // another screen)
+    if( workspace_indicator_active_screen != NULL &&
+        workspace_indicator_active_screen != scr )
+    {
+        screen_unnotify_workspace_indicatorwin();
+    }
+    else if( (WGroupWS*)mplex == workspace_indicator_last_workspace )
+        // If I'm already on this workspace, do nothing
+        return;
+
+    const char* name = mplex->ni.name;
+
+    WInfoWin *iw=get_workspace_indicatorwin(scr);
+
+    if(iw!=NULL){
+        int maxw=REGION_GEOM(scr).w/3;
+        infowin_set_text(iw, name, maxw);
+
+        GrStyleSpec *spec=infowin_stylespec(iw);
+        init_attr();
+        gr_stylespec_unalloc(spec);
+
+        gr_stylespec_set(spec, GR_ATTR(selected));
+        gr_stylespec_set(spec, GR_ATTR(not_dragged));
+        gr_stylespec_set(spec, GR_ATTR(active));
+    }
+
+    // set up the indicator on THIS screen
+    workspace_indicator_active_screen  = scr;
+    workspace_indicator_last_workspace = (WGroupWS*)mplex;
+
+    // create and set the timer
+    if( workspace_indicator_remove_timer == NULL )
+        workspace_indicator_remove_timer = create_timer();
+    if( workspace_indicator_remove_timer == NULL )
+        return;
+
+    timer_set(workspace_indicator_remove_timer, ioncore_g.workspace_indicator_timeout,
+              (WTimerHandler*)timer_expired__workspace_indicator_remove, NULL);
+}
+
+void screen_unnotify_if_screen( WScreen* reg )
+{
+    if( reg == workspace_indicator_active_screen )
+        screen_unnotify_workspace_indicatorwin();
+}
+
+void screen_unnotify_if_workspace( WGroupWS* reg)
+{
+    if( reg == workspace_indicator_last_workspace )
+    {
+        screen_unnotify_workspace_indicatorwin();
+        workspace_indicator_last_workspace = NULL;
+    }
+}
 
 /*}}}*/
 

@@ -183,16 +183,6 @@ C99_SOURCE?=-std=c99 -DCF_HAS_VA_COPY
 # might allow for those optimisations to be taken without any  special
 # libc or compiler options.
 
-
-##
-## make depend
-##
-
-DEPEND_FILE=.depend
-DO_MAKE_DEPEND=$(CC) -MM $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES)
-MAKE_DEPEND=$(DO_MAKE_DEPEND) $(SOURCES) > $(DEPEND_FILE)
-
-
 ##
 ## AR
 ##

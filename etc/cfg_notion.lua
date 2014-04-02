@@ -70,6 +70,17 @@ ioncore.set{
     -- focus list. Set this to <=0 (or comment it out) to disable the logic, and
     -- update the focus list immediately
     --focuslist_insert_delay=1000,
+
+    -- If enabled, activity notifiers are displayed on ALL the screens, not just
+    -- the screen that contains the window producing the notification. This is
+    -- only relevant on multi-head setups. By default this is disabled
+    --activity_notification_on_all_screens=false,
+
+    -- If enabled, a workspace indicator comes up at the bottom-left of the
+    -- screen when a new workspace is selected. This indicator stays active for
+    -- only as long as indicated by this variable (in ms). Timeout values <=0
+    -- disable the indicator altogether. This is disabled by default
+    --workspace_indicator_timeout=0,
 }
 
 

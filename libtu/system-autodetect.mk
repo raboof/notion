@@ -58,14 +58,6 @@ LDFLAGS=-g $(LIBS) $(EXTRA_LIBS)
 
 
 ##
-## make depend
-##
-
-DEPEND_FILE=.depend
-MAKE_DEPEND=$(CC) -M $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) > $(DEPEND_FILE)
-
-
-##
 ## AR
 ##
 

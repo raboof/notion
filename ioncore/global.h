@@ -113,7 +113,9 @@ DECLSTRUCT(WGlobal){
     Time usertime_diff_current;
     Time usertime_diff_new;
     Time focuslist_insert_delay;
-    
+    Time workspace_indicator_timeout;
+    bool activity_notification_on_all_screens;
+
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */
     bool enc_utf8; /* mb encoding is utf8? */

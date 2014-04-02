@@ -20,6 +20,7 @@ MODULE=mod_xrandr
 MODULE_STUB=mod_xrandr.lua
 ETC=cfg_xrandr.lua
 
+
 ######################################
 
 include $(TOPDIR)/build/rules.mk
@@ -51,3 +52,5 @@ test: $(SOURCES)
 .PHONY: tags
 tags:
 	exuberant-ctags -R . $(TOPDIR)
+
+mod_xrandr.o: exports.h
