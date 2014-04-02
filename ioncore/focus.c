@@ -21,6 +21,8 @@
 #include "log.h"
 
 
+static void region_focuslist_awaiting_insertion_trigger(void);
+
 /*{{{ Hooks. */
 
 
@@ -67,14 +69,6 @@ static void region_focuslist_deinit(WRegion *reg)
         region_focuslist_move_after(replace, reg);
         
     UNLINK_ITEM(ioncore_g.focuslist, reg, active_next, active_prev);
-}
-
-void region_focus_deinit(WRegion *reg)
-{
-    region_focuslist_deinit(reg);
-
-    if(ioncore_g.focus_current==reg)
-        ioncore_g.focus_current=ioncore_g.focuslist;
 }
 
 
@@ -261,7 +255,7 @@ static void schedule_focuslist_insert_timer(WRegion *reg)
 }
 
 
-void region_focuslist_awaiting_insertion_cancel(void)
+static void region_focuslist_awaiting_insertion_cancel(void)
 {
   if( focuslist_insert_timer == NULL )
     return;
@@ -269,7 +263,7 @@ void region_focuslist_awaiting_insertion_cancel(void)
   timer_reset(focuslist_insert_timer);
 }
 
-void region_focuslist_awaiting_insertion_trigger(void)
+static void region_focuslist_awaiting_insertion_trigger(void)
 {
   if( focuslist_insert_timer    != NULL &&
       region_awaiting_insertion != NULL )
@@ -277,11 +271,6 @@ void region_focuslist_awaiting_insertion_trigger(void)
     timer_expired__focuslist_insert(NULL,NULL);
     timer_reset(focuslist_insert_timer);
   }
-}
-
-const WRegion* region_focuslist_region_awaiting_insertion(void)
-{
-  return region_awaiting_insertion;
 }
 
 
@@ -358,6 +347,20 @@ void region_lost_focus(WRegion *reg)
     
     region_inactivated(reg);
     region_notify_change(reg, ioncore_g.notifies.inactivated);
+}
+
+
+void region_focus_deinit(WRegion *reg)
+{
+    // if the region that's waiting to be added to the focuslist is being
+    // deleted, cancel the insertion
+    if(region_awaiting_insertion)
+        region_focuslist_awaiting_insertion_cancel();
+
+    region_focuslist_deinit(reg);
+
+    if(ioncore_g.focus_current==reg)
+        ioncore_g.focus_current=ioncore_g.focuslist;
 }
 
 
