@@ -426,7 +426,7 @@ bool region_may_control_focus(WRegion *reg)
 bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
     WWindow* parent = reg->parent;
 
-    LOG(FOCUS, DEBUG, "Region %s refusing focus", reg->ni.name);
+    LOG(DEBUG, FOCUS, "Region %s refusing focus", reg->ni.name);
 
     if(parent==NULL)
         return FALSE;
@@ -440,11 +440,11 @@ bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
      * the focus because some transient completion popup is open, we want
      * to leave the focus alone.
      */
-    LOG(FOCUS, DEBUG, "Parent is %s", parent->region.ni.name);
+    LOG(DEBUG, FOCUS, "Parent is %s", parent->region.ni.name);
 
     if (obj_is((Obj*)parent, &CLASSDESCR(WFrame))
         && ((WFrame*)parent)->mode == FRAME_MODE_TILED) {
-        LOG(FOCUS, DEBUG, "Parent %s is a tiled WFrame", parent->region.ni.name);
+        LOG(DEBUG, FOCUS, "Parent %s is a tiled WFrame", parent->region.ni.name);
         return TRUE;
     }
 
