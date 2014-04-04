@@ -401,7 +401,6 @@ void screen_update_workspace_indicatorwin(WRegion* reg_focused)
         !OBJ_IS(mplex, WGroupWS) ||
         mplex->ni.name == NULL)
     {
-        screen_unnotify_workspace_indicatorwin();
         return;
     }
 
