@@ -9,7 +9,7 @@
 #ifndef NOTION_IONCORE_LOG_H
 
 typedef enum{
-    DEBUG, /** Not usually shown, but can be useful for debugging */
+    DEBUG = 0, /** Not usually shown, but can be useful for debugging */
     INFO,  /** Usually shown, does not necessarily indicate an error */
     WARN,  /** Usually shown, indicates a likely but non-fatal misconfiguration/error */
     ERROR  /** Shown, indicates an error */
