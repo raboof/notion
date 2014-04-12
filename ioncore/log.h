@@ -23,10 +23,10 @@ typedef enum{
 
 
 /** When logging from C code, don't use this function directly, use the LOG macro instead */
-extern void log_message(LogLevel level, LogCategory category, const char *file, const int line, const char* message, ...);
+extern void log_message(LogLevel level, LogCategory category, const char *file, const int line, const char* function, const char* message, ...);
 
 #if __STDC_VERSION__ >= 199901L
-#define LOG(level, category, ...) log_message(level, category, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG(level, category, ...) log_message(level, category, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 extern void LOG(LogLevel level, LogCategory category, const char* message, ...);
 #endif
