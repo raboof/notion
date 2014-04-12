@@ -618,6 +618,8 @@ void region_pointer_focus_hack(WRegion *reg)
 
 void region_focuslist_debugprint(void)
 {
+  WRegion* reg;
+
   LOG(DEBUG, GENERAL, "focus list start =========================");
   LOG(DEBUG, GENERAL, "currently-focused region ");
   region_debugprint_parents( ioncore_g.focus_current );
@@ -627,7 +629,7 @@ void region_focuslist_debugprint(void)
   region_debugprint_parents( ioncore_g.focuslist );
   LOG(DEBUG, GENERAL, "");
 
-  WRegion* reg = ioncore_g.focuslist;
+  reg = ioncore_g.focuslist;
   while(1)
   {
     LOG(DEBUG, GENERAL, "%p (%s)", (void*)reg, reg != NULL ? reg->ni.name : "NULL");
