@@ -1,3 +1,4 @@
+# on Debian in lua-posix 
 require "posix"
 
 function sleep(sec)
@@ -22,12 +23,14 @@ sleep(1)
 
 print '(Hopefully) started Xdummy.'
 
-local testsets = { 'basic_test', 'xinerama' }
+local testsets = { 'basic_test', 'xinerama', 'xrandr' }
 local errors = 0
 
 for i,testset in ipairs(testsets) do
 
   posix.setenv('HOME', testset);
+  
+  os.execute("rm -r " .. testset .. "/.notion/default-session--7")
 
   print ('Starting notion in ./' .. testset .. '...')
   local notionpid = posix.fork()
