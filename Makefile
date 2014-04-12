@@ -34,7 +34,21 @@ _install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(DOCDIR); \
 	done
 
+dist:
+	PWD=`pwd` ;\
+	DIR=`basename "$$PWD"` ;\
+	RELEASE=`./nextversion.sh` ;\
+	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"$$RELEASE\"/" version.h ;\
+	git tag $$RELEASE ; git push --tags ;\
+	cd .. ;\
+	tar --exclude-vcs -czf notion-$$RELEASE-src.tar.gz $$DIR ;\
+	tar --exclude-vcs -cjf notion-$$RELEASE-src.tar.bz2 $$DIR ;\
+	cd $$DIR ;\
+	git checkout version.h
+
 .PHONY: test
 
 test:
+	$(MAKE) -C mod_xrandr test
+	$(MAKE) -C mod_xinerama test
 	$(MAKE) -C test
