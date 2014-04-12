@@ -106,6 +106,8 @@ extern WStacking *group_find_to_focus(WGroup *ws, WStacking *to_try);
 extern WRegion *region_groupleader_of(WRegion *reg);
 /*extern WRegion *region_group_of(WRegion *reg);*/
 
+extern ExtlTab group_get_configuration(WGroup *ws);
+
 
 typedef WStackingFilter WGroupIterFilter;
 typedef WStackingIterTmp WGroupIterTmp;
