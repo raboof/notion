@@ -155,7 +155,7 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 # asprintf and vasprintf in the c library. (gnu libc has.)
 # If HAS_SYSTEM_ASPRINTF is not defined, an implementation
 # in sprintf_2.2/ is used.
-#HAS_SYSTEM_ASPRINTF=1
+HAS_SYSTEM_ASPRINTF=1
 
 # If you're on an archaic system (such as relatively recent *BSD releases)
 # without even dummy multibyte/widechar and localisation support, you may 
