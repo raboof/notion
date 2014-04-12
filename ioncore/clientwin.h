@@ -42,6 +42,7 @@
 #define CLIENTWIN_UNMAP_RQ           0x40000
 #define CLIENTWIN_NEED_CFGNTFY       0x80000
 
+#define CLIENTWIN_SET_INPUT         0x400000
 
 DECLCLASS(WClientWin){
     WRegion region;

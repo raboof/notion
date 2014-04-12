@@ -206,6 +206,19 @@ void clientwin_get_size_hints(WClientWin *cwin)
     }
 }
 
+void clientwin_get_input_wm_hint(WClientWin *cwin)
+{
+    XWMHints *hints;
+
+    hints=XGetWMHints(ioncore_g.dpy, cwin->win);
+
+    cwin->flags|=CLIENTWIN_SET_INPUT;
+    if(hints!=NULL){
+        if(hints->flags&InputHint && !hints->input)
+            cwin->flags&=~CLIENTWIN_SET_INPUT;
+        XFree((void*)hints);
+    }
+}
 
 void clientwin_get_set_name(WClientWin *cwin)
 {
@@ -343,6 +356,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     clientwin_get_protocols(cwin);
     clientwin_get_winprops(cwin);
     clientwin_get_size_hints(cwin);
+    clientwin_get_input_wm_hint(cwin);
 
     netwm_update_allowed_actions(cwin);
     
@@ -1018,7 +1032,7 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
         send_clientmsg(cwin->win, ioncore_g.atom_wm_take_focus, stmp);
     }
 
-    region_finalise_focusing((WRegion*)cwin, cwin->win, warp);
+    region_finalise_focusing((WRegion*)cwin, cwin->win, warp, cwin->flags&CLIENTWIN_SET_INPUT);
     
     XSync(ioncore_g.dpy, 0);
 }
