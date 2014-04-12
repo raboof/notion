@@ -104,11 +104,11 @@ defbindings("WScreen", {
 -- These bindings affect client windows directly.
 
 defbindings("WClientWin", {
-    bdoc("Nudge the client window. This might help with some "..
-         "programs' resizing problems."),
-    kpress_wait(META.."L", "WClientWin.nudge(_)"),
-    
     submap(META.."K", {
+       bdoc("Nudge the client window. This might help with some "..
+         "programs' resizing problems."),
+       kpress_wait(META.."L", "WClientWin.nudge(_)"),
+
        bdoc("Kill client owning the client window."),
        kpress("C", "WClientWin.kill(_)"),
        
@@ -152,6 +152,9 @@ defbindings("WMPlex.toplevel", {
     bdoc("Toggle tag of current object."),
     kpress(META.."T", "WRegion.set_tagged(_sub, 'toggle')", "_sub:non-nil"),
 
+    bdoc("Lock screen"),
+    kpress(META.."L", "notioncore.exec_on(_, notioncore.lookup_script('notion-lock'))"),
+    
     bdoc("Query for manual page to be displayed."),
     kpress(ALTMETA.."F1", "mod_query.query_man(_, ':man')"),
 
@@ -223,6 +226,9 @@ defbindings("WFrame", {
     mdrag("Button1@tab", "WFrame.p_tabdrag(_)"),
     mdrag("Button2@tab", "WFrame.p_tabdrag(_)"),
            
+    bdoc("Switch to next/previous object within the frame."),
+    mclick(META.."Button4", "WFrame.switch_next(_)"), 
+    mclick(META.."Button5", "WFrame.switch_prev(_)"),
 })
 
 -- Frames for transient windows ignore this bindmap
