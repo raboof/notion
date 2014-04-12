@@ -13,6 +13,8 @@
 #include "region.h"
 #include "screen.h"
 
+void screen_unnotify(WScreen *scr);
+void screen_nowindowinfo(WScreen *scr);
 
 void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how);
 

@@ -120,6 +120,9 @@ WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id)
 void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
+
+    screen_unnotify(scr);
+    screen_nowindowinfo(scr);
     
     mplex_deinit((WMPlex*)scr);
 }
@@ -329,15 +332,11 @@ int screen_id(WScreen *scr)
 
 static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 {
-/*
-    I'm not so sure this is neccessary and it interferes somewhat with 
-    multi-monitor workspace rearrangements
-
     bool onmxlist=FALSE, others=FALSE;
     WLListNode *lnode;
     WLListIterTmp tmp;
     
-    if(OBJ_IS(reg, WGroupWS)){
+    if(scr==scr->prev_scr && OBJ_IS(reg, WGroupWS)){
         FOR_ALL_NODES_ON_LLIST(lnode, scr->mplex.mx_list, tmp){
             if(lnode->st->reg==reg){
                 onmxlist=TRUE;
@@ -348,11 +347,10 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
         }
 
         if(onmxlist && !others){
-            warn(TR("Only workspace may not be destroyed/detached."));
+            warn(TR("Only workspace on only screen may not be destroyed/detached."));
             return NULL;
         }
     }
-*/
     
     return reg;
 }

@@ -33,6 +33,12 @@ StringIntMap frame_idxs[]={
     END_STRINGINTMAP
 };
 
+StringIntMap win_stackrq[]={
+    {"ignore", IONCORE_WINDOWSTACKINGREQUEST_IGNORE},
+    {"activate",  IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE},
+    END_STRINGINTMAP
+};
+
 static bool get_winprop_fn_set=FALSE;
 static ExtlFn get_winprop_fn;
 
@@ -109,10 +115,9 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "autosave_layout", &(ioncore_g.autosave_layout));
 
     if(extl_table_gets_s(tab, "window_stacking_request", &tmp)){
-        if(strcmp(tmp, "ignore")==0)
-            ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;
-        else if(strcmp(tmp, "activate")==0)
-            ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE;
+        ioncore_g.window_stacking_request=stringintmap_value(win_stackrq, 
+                                                         tmp,
+                                                         ioncore_g.window_stacking_request);
         free(tmp);
     }
     
@@ -174,18 +179,10 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
 
-    const char *window_stacking_request_string;
-    switch(ioncore_g.window_stacking_request)
-    {
-        case IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE:
-            window_stacking_request_string = "activate";
-            break;
-        case IONCORE_WINDOWSTACKINGREQUEST_IGNORE:
-        default:
-            window_stacking_request_string = "ignore";
-            break;
-    }
-    extl_table_sets_s(tab, "window_stacking_request", window_stacking_request_string);
+    extl_table_sets_s(tab, "window_stacking_request", 
+                      stringintmap_key(win_stackrq, 
+                                       ioncore_g.window_stacking_request,
+                                       NULL));
 
     extl_table_sets_s(tab, "frame_default_index", 
                       stringintmap_key(frame_idxs, 

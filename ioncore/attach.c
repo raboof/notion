@@ -19,6 +19,7 @@
 #include "extlconv.h"
 #include "names.h"
 #include "focus.h"
+#include "screen-notify.h"
 
 
 /*{{{ Helper */
@@ -50,6 +51,7 @@ static WRegion *doit_reparent(WRegion *mgr,
 {
     WFitParams fp2;
     WRegion *disposeroot;
+    WScreen *old_scr=region_screen_of(reg);
     
     if(!region_ancestor_check(mgr, reg)){
         warn(TR("Attempt to make region %s manage its ancestor %s."),
@@ -82,6 +84,11 @@ static WRegion *doit_reparent(WRegion *mgr,
     }
     
     region_detach_manager(reg);
+    
+    if(old_scr!=NULL)
+        screen_update_notifywin(old_scr);
+    
+    ioncore_screen_activity_notify(reg, ioncore_g.notifies.activity);
     
     if(!cont(mgr, reg, cont_param)){
         WScreen *scr=region_screen_of(reg);
