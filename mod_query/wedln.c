@@ -30,7 +30,6 @@
 #include "inputp.h"
 #include "complete.h"
 #include "main.h"
-#include "utildefines.h"
 
 
 #define WEDLN_BRUSH(X) ((X)->input.brush)
@@ -49,7 +48,7 @@ static int calc_text_y(WEdln *wedln, const WRectangle *geom)
 }
 
 
-static int wedln_draw_strsect(WEdln *wedln, const WRectangle *UNUSED(geom),
+static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom, 
                               int x, int y, const char *str, int len,
                               GrAttr a)
 {
@@ -180,7 +179,7 @@ static bool wedln_update_cursor(WEdln *wedln, int iw)
     int vstart=wedln->vstart;
     int point=wedln->edln.point;
     int len=wedln->edln.psize;
-    /*int mark=wedln->edln.mark;*/ /*UNUSED*/
+    int mark=wedln->edln.mark;
     const char *str=wedln->edln.p;
     bool ret;
     
@@ -472,6 +471,7 @@ void wedln_draw(WEdln *wedln, bool complete)
 static void wedln_set_info(WEdln *wedln, const char *info)
 {
     WRectangle tageom;
+    char *p;
     
     if(wedln->info!=NULL){
         free(wedln->info);
@@ -713,7 +713,7 @@ static bool wedln_do_call_completor(WEdln *wedln, int id, int cycle)
 }
 
 
-static void timed_complete(WTimer *UNUSED(tmr), Obj *obj)
+static void timed_complete(WTimer *tmr, Obj *obj)
 {
     WEdln *wedln=(WEdln*)obj;
     
@@ -1071,7 +1071,7 @@ void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 }
 
 
-static const char *wedln_style(WEdln *UNUSED(wedln))
+static const char *wedln_style(WEdln *wedln)
 {
     return "input-edln";
 }

@@ -22,7 +22,6 @@
 #include "binding.h"
 #include "focus.h"
 #include "bindmaps.h"
-#include "utildefines.h"
 
 
 /*{{{ Resize accelerator */
@@ -92,8 +91,14 @@ static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
     return (int)(t1-t2);
 }
 
+#define SIGN_NZ(X) ((X) < 0 ? -1 : 1)
 
-void moveresmode_accel(WMoveresMode *UNUSED(mode), int *wu, int *hu, int accel_mode)
+static double max(double a, double b)
+{
+    return (a<b ? b : a);
+}
+
+void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 {
     struct timeval tv;
     long adiff, udiff;
@@ -149,6 +154,7 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
     WBinding *binding=NULL;
+    WBindmap **bindptr;
     WMoveresMode *mode;
     
     if(ev->type==KeyRelease)
@@ -188,7 +194,7 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 static WTimer *resize_timer=NULL;
 
 
-static void tmr_end_resize(WTimer *UNUSED(unused), WMoveresMode *mode)
+static void tmr_end_resize(WTimer *unused, WMoveresMode *mode)
 {
     if(mode!=NULL)
         moveresmode_cancel(mode);

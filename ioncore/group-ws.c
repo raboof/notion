@@ -28,7 +28,6 @@
 #include "conf.h"
 #include "saveload.h"
 #include "screen-notify.h"
-#include "utildefines.h"
 
 
 /*{{{ Settings */
@@ -246,11 +245,12 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
 
 WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
                                            const WManageParams *param,
-                                           int UNUSED(unused))
+                                           int unused)
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;
     WPHolder *ph;
+    bool tmp;
     
     ap.stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(ap.stack_above==NULL)

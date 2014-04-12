@@ -24,8 +24,6 @@
 #include <ioncore/rectangle.h>
 #include <ioncore/saveload.h>
 #include <ioncore/names.h>
-
-#include "utildefines.h"
 #include "tiling.h"
 #include "split.h"
 #include "split-stdisp.h"
@@ -58,7 +56,7 @@ int split_other_pos(WSplit *split, int dir)
 }
 
 
-static int UNUSED_FUNCTION(reg_calcresize)(WRegion *reg, int dir, int nsize)
+static int reg_calcresize(WRegion *reg, int dir, int nsize)
 {
     int tmp;
     
@@ -84,7 +82,7 @@ static int infadd(int x, int y)
 }
 
 
-static int UNUSED_FUNCTION(infsub)(int x, int y)
+static int infsub(int x, int y)
 {
     if(x==INT_MAX)
         return INT_MAX;
@@ -320,7 +318,7 @@ void splitst_deinit(WSplitST *split)
 /*{{{ Size bounds management */
 
 
-static void splitregion_update_bounds(WSplitRegion *node, bool UNUSED(recursive))
+static void splitregion_update_bounds(WSplitRegion *node, bool recursive)
 {
     WSizeHints hints;
     WSplit *snode=(WSplit*)node;
@@ -339,7 +337,7 @@ static void splitregion_update_bounds(WSplitRegion *node, bool UNUSED(recursive)
 }
 
 
-static void splitst_update_bounds(WSplitST *node, bool UNUSED(rec))
+static void splitst_update_bounds(WSplitST *node, bool rec)
 {
     WSplit *snode=(WSplit*)node;
 
@@ -411,6 +409,8 @@ void split_update_bounds(WSplit *node, bool recursive)
 
 void splitsplit_update_geom_from_children(WSplitSplit *node)
 {
+    WSplit *split=(WSplit*)node;
+    
     if(node->dir==SPLIT_VERTICAL){
         ((WSplit*)node)->geom.h=node->tl->geom.h+node->br->geom.h;
         ((WSplit*)node)->geom.y=node->tl->geom.y;
@@ -549,16 +549,16 @@ static WSplit *dodge_stdisp(WSplit *node, bool keep_within)
 
 
 static void split_do_resize_default(WSplit *node, const WRectangle *ng, 
-                                    WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
-                                    bool UNUSED(transpose))
+                                    WPrimn hprimn, WPrimn vprimn, 
+                                    bool transpose)
 {
     node->geom=*ng;
 }
 
 
 static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng, 
-                                  WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
-                                  bool UNUSED(transpose))
+                                  WPrimn hprimn, WPrimn vprimn, 
+                                  bool transpose)
 {
     assert(node->reg!=NULL);
     region_fit(node->reg, ng, REGION_FIT_EXACT);
@@ -932,6 +932,7 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
     WSplitST *st;
     WRectangle stg;
     WRectangle rstg;
+    WRectangle ngr;
     int ori;
 
     if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)
@@ -1018,7 +1019,7 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
     return ret;
 }
 
-bool splitst_do_restore(WSplit *UNUSED(node), int UNUSED(dir))
+bool splitst_do_restore(WSplit *node, int dir)
 {
     return FALSE;
 }
@@ -1111,7 +1112,7 @@ void splitregion_do_maxhelper(WSplitRegion *node, int dir, int action)
         frame->flags&=~FRAME_KEEP_FLAGS;
 }
 
-void splitst_do_maxhelper(WSplit *UNUSED(node), int UNUSED(dir), int UNUSED(action))
+void splitst_do_maxhelper(WSplit *node, int dir, int action)
 {
     return;
 }
@@ -1172,7 +1173,7 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
     return ret;
 }
 
-bool splitst_do_verify(WSplit *UNUSED(node), int UNUSED(dir))
+bool splitst_do_verify(WSplit *node, int dir)
 {
     return TRUE;
 }
@@ -1500,12 +1501,9 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
     
     return extl_table_from_rectangle(&ogeom);
     
-    /* UNUSED */
-#if 0
 err:
     warn(TR("Invalid node."));
     return extl_table_none();
-#endif
 }
 
 
@@ -1557,8 +1555,8 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
                               int minsize, WRegionSimpleCreateFn *fn, 
                               WWindow *parent)
 {
-    int objmin;
-    int s, sn, so;
+    int objmin, objmax;
+    int s, sn, so, pos;
     WSplitSplit *nsplit;
     WSplitRegion *nnode;
     WSplitInner *psplit;
@@ -1791,7 +1789,7 @@ static bool defaultfilter(WSplit *node)
 
 
 static WSplit *split_current_todir_default(WSplit *node, 
-                                           WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
+                                           WPrimn hprimn, WPrimn vprimn,
                                            WSplitFilter *filter)
 {
     if(filter==NULL)
@@ -1898,7 +1896,7 @@ WSplit *split_nextto(WSplit *node, WPrimn hprimn, WPrimn vprimn,
 }
 
 
-void splitinner_mark_current_default(WSplitInner *split, WSplit *UNUSED(child))
+void splitinner_mark_current_default(WSplitInner *split, WSplit *child)
 {
     if(((WSplit*)split)->parent!=NULL)
         splitinner_mark_current(((WSplit*)split)->parent, (WSplit*)split);

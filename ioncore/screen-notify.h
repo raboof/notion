@@ -15,7 +15,7 @@
 
 void screen_unnotify_infowin(WScreen *scr);
 void screen_unnotify_notifywin(WScreen *scr);
-void screen_unnotify_workspace_indicatorwin(void); /* there's just one indicator */
+void screen_unnotify_workspace_indicatorwin(void); // there's just one indicator
 
 void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how);
 

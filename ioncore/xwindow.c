@@ -132,6 +132,7 @@ bool xwindow_pointer_pos(Window rel, int *px, int *py)
 
 void xwindow_get_sizehints(Window win, XSizeHints *hints)
 {
+    int minh, minw;
     long supplied=0;
     
     memset(hints, 0, sizeof(*hints));

@@ -18,7 +18,6 @@
 #include <ioncore/resize.h>
 #include "wmessage.h"
 #include "inputp.h"
-#include "utildefines.h"
 
 
 #define WMSG_BRUSH(WMSG) ((WMSG)->input.brush)
@@ -236,7 +235,7 @@ static void wmsg_deinit(WMessage *wmsg)
 }
 
 
-static const char *wmsg_style(WMessage *UNUSED(wmsg))
+static const char *wmsg_style(WMessage *wmsg)
 {
     return "input-message";
 }

@@ -16,7 +16,6 @@
 #include "brush.h"
 #include "font.h"
 #include "private.h"
-#include "utildefines.h"
 
 #include <X11/extensions/shape.h>
 
@@ -417,7 +416,7 @@ void debrush_menuentry_extras(DEBrush *brush,
                               const GrFontExtents *fnte,
                               const GrStyleSpec *a1, 
                               const GrStyleSpec *a2, 
-                              bool pre, int UNUSED(index))
+                              bool pre, int index)
 {
     int tx, ty;
 
@@ -437,7 +436,7 @@ void debrush_menuentry_extras(DEBrush *brush,
 
 
 void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom, 
-                         DEColourGroup *cg, bool UNUSED(needfill))
+                         DEColourGroup *cg, bool needfill)
 {
     GC gc=brush->d->normal_gc;
     
@@ -559,7 +558,7 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
 
 #define MAXSHAPE 16
 
-void debrush_set_window_shape(DEBrush *brush, bool UNUSED(rough),
+void debrush_set_window_shape(DEBrush *brush, bool rough,
                               int n, const WRectangle *rects)
 {
     XRectangle r[MAXSHAPE];

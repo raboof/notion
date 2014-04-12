@@ -32,6 +32,7 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
                           ExtlFn handler, ExtlFn completor, 
                           ExtlFn cycle, ExtlFn bcycle)
 {
+    WRectangle geom;
     WEdlnCreateParams fnp;
     WMPlexAttachParams par;
     WEdln *wedln;

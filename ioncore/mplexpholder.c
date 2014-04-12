@@ -17,13 +17,12 @@
 #include "llist.h"
 #include "framedpholder.h"
 #include "basicpholder.h"
-#include "utildefines.h"
 
 
 /*{{{ Primitives */
 
 
-static bool on_ph_list(WMPlexPHolder *UNUSED(ll), WMPlexPHolder *ph)
+static bool on_ph_list(WMPlexPHolder *ll, WMPlexPHolder *ph)
 {
     return ph->prev!=NULL;
 }
@@ -114,7 +113,7 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 /*{{{ Init/deinit */
 
 
-static void mplex_get_attach_params(WMPlex *UNUSED(mplex), WStacking *st,
+static void mplex_get_attach_params(WMPlex *mplex, WStacking *st,
                                     WMPlexAttachParams *param)
 {
     param->flags=(MPLEX_ATTACH_SIZEPOLICY|
@@ -264,6 +263,7 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
 {
     WRegionAttachData data2;
     WFramedPHolder *fph;
+    WPHolder *root;
     WRegion *res;
     RP rp;
     
@@ -487,7 +487,7 @@ WRegion *mplex_rescue_attach(WMPlex *mplex, int flags, WRegionAttachData *data)
 }
 
 
-WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *UNUSED(mgd))
+WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
 {
 #if 0
     WStacking *st=mplex_find_stacking(mplex, mgd);

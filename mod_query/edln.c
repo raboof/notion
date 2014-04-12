@@ -292,7 +292,7 @@ static int do_edln_back(Edln *edln)
 
 void edln_back(Edln *edln)
 {
-    /*int p=edln->point;*/
+    int p=edln->point;
     do_edln_back(edln);
     /*if(edln->point!=p)*/
         UPDATE_MOVED(edln->point);

@@ -13,7 +13,6 @@
 #include "global.h"
 #include "property.h"
 #include "xwindow.h"
-#include "utildefines.h"
 #include <libextl/extl.h>
 
 
@@ -24,7 +23,7 @@ static ExtlFn continuation;
 
 #define CLIPATOM(X) XA_PRIMARY
 
-static Atom XA_COMPOUND_TEXT(Display *UNUSED(unused))
+static Atom XA_COMPOUND_TEXT(Display *unused)
 {
     static Atom a=None;
     
@@ -116,6 +115,7 @@ void ioncore_handle_selection(XSelectionEvent *ev)
 {
     Atom prop=ev->property;
     Window win=ev->requestor;
+    WWindow *wwin;
     
     if(prop!=None){
         insert_selection(win, prop);

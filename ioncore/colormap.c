@@ -163,6 +163,7 @@ void clientwin_get_colormaps(WClientWin *cwin)
 void clientwin_clear_colormaps(WClientWin *cwin)
 {
     int i;
+    XWindowAttributes attr;
 
     if(cwin->n_cmapwins==0)
         return;

@@ -28,6 +28,6 @@ extern bool mainloop_register_input_fd(int fd, void *data,
                                        void (*callback)(int fd, void *data));
 extern void mainloop_unregister_input_fd(int fd);
 
-extern void mainloop_select(void);
+extern void mainloop_select();
 
 #endif /* ION_LIBMAINLOOP_SELECT_H */

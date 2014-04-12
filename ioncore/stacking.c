@@ -14,7 +14,6 @@
 #include "stacking.h"
 #include "window.h"
 #include "sizepolicy.h"
-#include "utildefines.h"
 
 
 /*{{{ Alloc */
@@ -150,6 +149,8 @@ static WStacking *link_list_after(WStacking *l1,
                                   WStacking *i1,
                                   WStacking *l2)
 {
+    WStacking *tmp;
+    
     if(i1==l1->prev)
         return link_lists(l1, l2);
     
@@ -407,7 +408,7 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst,
 
 
 void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
-                      WStackingFilter *UNUSED(filt), void *UNUSED(filt_data), bool lower)
+                      WStackingFilter *filt, void *filt_data, bool lower)
 {
     WStacking *tmp=unweave_subtree(stacking, st, lower);
 
@@ -589,7 +590,7 @@ WStacking *stacking_find_to_focus(WStacking *stacking,
 }
 
 
-static bool mapped_filt(WStacking *st, void *UNUSED(unused))
+static bool mapped_filt(WStacking *st, void *unused)
 {
     return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
 }

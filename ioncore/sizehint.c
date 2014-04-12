@@ -69,6 +69,7 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
 {
     int w=*wp, tw, bw=(hints->base_set ? hints->base_width : 0);
     int h=*hp, th, bh=(hints->base_set ? hints->base_height : 0);
+    int bs=0;
     
     if(min && hints->min_set){
         w=maxof(w, hints->min_width);

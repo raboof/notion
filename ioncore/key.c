@@ -22,7 +22,6 @@
 #include "regbind.h"
 #include "strings.h"
 #include "xwindow.h"
-#include "utildefines.h"
 
 
 static void waitrelease(WRegion *reg);
@@ -34,7 +33,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
     static XComposeStatus cs={NULL, 0};
     char buf[32]={0,};
     Status stat;
-    int n;
+    int n, i;
     KeySym ksym;
     
     if(wwin->xic!=NULL){
@@ -96,7 +95,7 @@ void clientwin_quote_next(WClientWin *cwin)
 }
 
 
-static bool waitrelease_handler(WRegion *UNUSED(reg), XEvent *ev)
+static bool waitrelease_handler(WRegion *reg, XEvent *ev)
 {
     return (ioncore_unmod(ev->xkey.state, ev->xkey.keycode)==0);
 }
@@ -206,6 +205,7 @@ static WSubmapState *add_sub(WRegion *reg, uint key, uint state)
 }
 
 
+static XKeyEvent *current_key_event=NULL;
 static uint current_kcb, current_state;
 static bool current_submap;
 

@@ -226,7 +226,7 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
                                              WRegionAttachData *data)
 {
     WRegionAttachData data2;
-    WPHolder *rph;
+    WPHolder *root, *rph;
     WRegion *res;
     RP rp;
     

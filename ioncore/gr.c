@@ -16,7 +16,6 @@
 #include "global.h"
 #include "modules.h"
 #include "gr.h"
-#include "utildefines.h"
 
 
 /*{{{ Lookup and registration */
@@ -449,13 +448,13 @@ bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2)
 /*{{{ Init, deinit */
 
 
-bool grbrush_init(GrBrush *UNUSED(brush))
+bool grbrush_init(GrBrush *brush)
 {
     return TRUE;
 }
 
 
-void grbrush_deinit(GrBrush *UNUSED(brush))
+void grbrush_deinit(GrBrush *brush)
 {
 }
 

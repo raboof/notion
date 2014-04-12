@@ -581,6 +581,7 @@ static void set_initial_focus()
     int x, y, wx, wy;
     uint mask;
     WScreen *scr;
+    WWindow *wwin;
     
     XQueryPointer(ioncore_g.dpy, None, &root, &win,
                   &x, &y, &wx, &wy, &mask);
@@ -654,6 +655,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 void ioncore_deinit()
 {
     Display *dpy;
+    WRootWin *rootwin;
     
     ioncore_g.opmode=IONCORE_OPMODE_DEINIT;
     

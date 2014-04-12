@@ -11,7 +11,6 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -29,7 +28,6 @@
 #include <libextl/extl.h>
 
 #include "notionflux.h"
-#include "utildefines.h"
 
 typedef struct{
     int fd;
@@ -42,6 +40,7 @@ Buf bufs[MAX_SERVED];
 static int listenfd=-1;
 static char *listenfile=NULL;
 static ExtlFn tostringfn;
+static int tmp[CHUNK];
 
 
 /* Without the 'or nil' kludge tostring may have no parameters. */
@@ -143,9 +142,10 @@ static void receive_data(int fd, void *buf_)
 }
 
 
-static void connection_attempt(int lfd, void *UNUSED(data))
+static void connection_attempt(int lfd, void *data)
 {
     int i, fd;
+    Buf *buf=NULL;
     struct sockaddr_un from;
     socklen_t fromlen=sizeof(from);
     
@@ -209,6 +209,7 @@ static void connection_attempt(int lfd, void *UNUSED(data))
 static bool start_listening()
 {
     struct sockaddr_un addr;
+    int sock;
 
     listenfile=tmpnam(NULL);
     if(listenfile==NULL){

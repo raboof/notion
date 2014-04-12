@@ -29,7 +29,6 @@
 #include <ioncore/global.h>
 #include <ioncore/ioncore.h>
 #include "sm_session.h"
-#include "utildefines.h"
 
 
 static IceConn ice_sm_conn=NULL;
@@ -65,7 +64,7 @@ char *mod_sm_get_ion_id()
  unpacks the message and sends it to the client via
  registered callbacks. */
 
-static void sm_process_messages(int UNUSED(fd), void *UNUSED(data))
+static void sm_process_messages(int fd, void *data)
 {
     Bool ret;
     
@@ -78,9 +77,9 @@ static void sm_process_messages(int UNUSED(fd), void *UNUSED(data))
  opened or closed. */
 
 static void sm_ice_watch_fd(IceConn conn,
-                            IcePointer UNUSED(client_data),
+                            IcePointer client_data,
                             Bool opening,
-                            IcePointer *UNUSED(watch_data))
+                            IcePointer *watch_data)
 {
     if(opening){
         if(sm_fd!=-1){ /* shouldn't happen */
@@ -140,20 +139,20 @@ static void sm_set_other_properties()
 {
     char *restore="-session";
     char *clientid="-smclientid";
-    /*char *rmprog="/bin/rm";*/ /*UNUSED*/
-    /*char *rmarg="-rf";*/ /*UNUSED*/
+    char *rmprog="/bin/rm";
+    char *rmarg="-rf";
     int nvals=0, i;
     const char *sdir=NULL, *cid=NULL;
     
-    /*SmPropValue discard_val[3];*/ /*UNUSED*/
-    /*SmProp discard_prop={ SmDiscardCommand, SmLISTofARRAY8, 3, NULL };*/ /*UNSUED*/
+    SmPropValue discard_val[3];
+    SmProp discard_prop={ SmDiscardCommand, SmLISTofARRAY8, 3, NULL };
     SmPropValue restart_hint_val, *restart_val=NULL;
     SmProp restart_hint_prop={ SmRestartStyleHint, SmCARD8, 1, NULL};
     SmProp restart_prop={ SmRestartCommand, SmLISTofARRAY8, 0, NULL};
     
     SmProp *props[2];
     
-    /*discard_prop.vals=discard_val;*/
+    discard_prop.vals=discard_val;
     restart_hint_prop.vals=&restart_hint_val;
     
     props[0]=&restart_prop;
@@ -189,15 +188,12 @@ static void sm_set_other_properties()
     restart_val[nvals++].length=strlen(cid);
     restart_prop.num_vals=nvals;
     restart_prop.vals=restart_val;
-
-#if 0
     discard_val[0].length=strlen(rmprog);
     discard_val[0].value=rmprog;
     discard_val[1].length=strlen(rmarg);
     discard_val[1].value=rmarg;
     discard_val[2].length=strlen(sdir);
     discard_val[2].value=(char*)sdir;
-#endif
 
     SmcSetProperties(sm_conn,
                      sizeof(props)/sizeof(props[0]),
@@ -224,7 +220,7 @@ static void sm_set_properties()
  saving state. This is requested in the save yourself callback by clients
  like this one that manages other clients. */
 
-static void sm_save_yourself_phase2(SmcConn conn, SmPointer UNUSED(client_data))
+static void sm_save_yourself_phase2(SmcConn conn, SmPointer client_data)
 {
     Bool success;
 
@@ -240,12 +236,12 @@ static void sm_save_yourself_phase2(SmcConn conn, SmPointer UNUSED(client_data))
 /* Callback. Called when the client recieves a save yourself
  message from the sm. */
 
-static void sm_save_yourself(SmcConn UNUSED(conn),
-                             SmPointer UNUSED(client_data),
-                             int UNUSED(save_type),
-                             Bool UNUSED(shutdown),
-                             int UNUSED(interact_style),
-                             Bool UNUSED(fast))
+static void sm_save_yourself(SmcConn conn,
+                             SmPointer client_data,
+                             int save_type,
+                             Bool shutdown,
+                             int interact_style,
+                             Bool fast)
 {
     if(!SmcRequestSaveYourselfPhase2(sm_conn, sm_save_yourself_phase2, NULL)){
         warn(TR("Failed to request save-yourself-phase2 from "
@@ -259,7 +255,7 @@ static void sm_save_yourself(SmcConn UNUSED(conn),
 
 /* Response to the shutdown cancelled message */
 
-static void sm_shutdown_cancelled(SmcConn conn, SmPointer UNUSED(client_data))
+static void sm_shutdown_cancelled(SmcConn conn, SmPointer client_data)
 {
     save_complete_fn=NULL;
     if(!sent_save_done){
@@ -270,7 +266,7 @@ static void sm_shutdown_cancelled(SmcConn conn, SmPointer UNUSED(client_data))
 
 /* Callback */
 
-static void sm_save_complete(SmcConn UNUSED(conn), SmPointer UNUSED(client_data))
+static void sm_save_complete(SmcConn conn, SmPointer client_data)
 {
     if(save_complete_fn){
         save_complete_fn();
@@ -280,7 +276,7 @@ static void sm_save_complete(SmcConn UNUSED(conn), SmPointer UNUSED(client_data)
 
 /* Callback */
 
-static void sm_die(SmcConn conn, SmPointer UNUSED(client_data))
+static void sm_die(SmcConn conn, SmPointer client_data)
 {
     assert(conn==sm_conn);
     ioncore_do_exit();

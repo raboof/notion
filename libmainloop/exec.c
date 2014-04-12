@@ -39,8 +39,8 @@ void mainloop_do_exec(const char *cmd)
 {
     char *argv[4];
 
-    argv[0]=(char*)SHELL_NAME;
-    argv[1]=(char*)SHELL_ARG;
+    argv[0]=SHELL_NAME;
+    argv[1]=SHELL_ARG;
     argv[2]=(char*)cmd; /* stupid execve... */
     argv[3]=NULL;
     execvp(SHELL_PATH, argv);

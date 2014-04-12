@@ -27,7 +27,6 @@
 
 #include "main.h"
 #include "exports.h"
-#include "utildefines.h"
 
 
 /*{{{ Module information */
@@ -54,14 +53,14 @@ char mod_sp_ion_api_version[]=NOTION_API_VERSION;
 
 
 static WRegion *create_frame_scratchpad(WWindow *parent, const WFitParams *fp,
-                                        void *UNUSED(param))
+                                        void *unused)
 {
     return (WRegion*)create_frame(parent, fp, FRAME_MODE_UNKNOWN, "Scratchpad Frame");
 }
 
 
 static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp, 
-                                 void *UNUSED(param))
+                                 void *unused)
 {
     WRegion *reg;
     WRegionAttachData data;

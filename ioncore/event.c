@@ -23,7 +23,7 @@
 #include "focus.h"
 #include "exec.h"
 #include "ioncore.h"
-#include "utildefines.h"
+
 
 
 /*{{{ Hooks */
@@ -200,7 +200,7 @@ void ioncore_flushfocus()
 /*{{{ X connection FD handler */
 
 
-void ioncore_x_connection_handler(int UNUSED(conn), void *UNUSED(unused))
+void ioncore_x_connection_handler(int conn, void *unused)
 {
     XEvent ev;
 

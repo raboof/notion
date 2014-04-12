@@ -15,7 +15,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "utildefines.h"
 #include "readconfig.h"
 #include "extl.h"
 #include "private.h"
@@ -104,6 +103,7 @@ bool extl_set_userdirs(const char *appname)
 bool extl_set_sessiondir(const char *session)
 {
     char *tmp;
+    bool ret=FALSE;
     
     if(strchr(session, '/')!=NULL){
         tmp=extl_scopy(session);
@@ -192,7 +192,7 @@ static int try_etcpath(const char *const *files,
                        ExtlTryConfigFn *tryfn, void *tryfnparam)
 {
     const char *const *file=NULL;
-    int ret, ret2=EXTL_TRYCONFIG_NOTFOUND;
+    int i, ret, ret2=EXTL_TRYCONFIG_NOTFOUND;
     char *path, *colon, *dir;
 
     if(sessiondir!=NULL){
@@ -370,7 +370,7 @@ char *extl_lookup_script(const char *file, const char *sp)
     return tmp;
 }
 
-static int warn_notfound(const char *file, void *UNUSED(param))
+static int warn_notfound(const char *file, void *param)
 {
     warn(TR("Tried: '%s'"), file);
 
@@ -434,12 +434,14 @@ ExtlTab extl_extl_read_savefile(const char *basename)
 /*}}}*/
 
 
-/*{{{Â extl_get_savefile */
+/*{{{ extl_get_savefile */
 
 
 static bool ensuredir(char *f)
 {
     char *p;
+    int tryno=0;
+    bool ret=TRUE;
     
     if(access(f, F_OK)==0)
         return TRUE;

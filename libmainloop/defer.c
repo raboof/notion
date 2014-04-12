@@ -20,7 +20,6 @@
 #include <libtu/locale.h>
 #include <libtu/debug.h>
 #include "defer.h"
-#include "utildefines.h"
 
 
 DECLSTRUCT(WDeferred){
@@ -45,7 +44,7 @@ static WDeferred dbuf[N_DBUF];
 static int dbuf_used=0;
 
 
-static WDeferred *alloc_defer(void)
+static WDeferred *alloc_defer()
 {
     int i;
     
@@ -72,7 +71,7 @@ static void free_defer(WDeferred *d)
 }
 
 
-static void defer_watch_handler(Watch *w, Obj *UNUSED(obj))
+static void defer_watch_handler(Watch *w, Obj *obj)
 {
     WDeferred *d=(WDeferred*)w;
     
@@ -199,6 +198,9 @@ static void do_execute(WDeferred *d)
 
 void mainloop_execute_deferred_on_list(WDeferred **list)
 {
+    Obj *obj;
+    void (*action)(Obj*);
+    
     while(*list!=NULL){
         WDeferred *d=*list;
         UNLINK_ITEM(*list, d, next, prev);
@@ -207,7 +209,7 @@ void mainloop_execute_deferred_on_list(WDeferred **list)
 }
 
 
-void mainloop_execute_deferred(void)
+void mainloop_execute_deferred()
 {
     mainloop_execute_deferred_on_list(&deferred);
 }

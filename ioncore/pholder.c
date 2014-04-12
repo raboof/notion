@@ -11,16 +11,15 @@
 #include "attach.h"
 #include "pholder.h"
 #include "focus.h"
-#include "utildefines.h"
 
 
-bool pholder_init(WPHolder *UNUSED(ph))
+bool pholder_init(WPHolder *ph)
 {
     return TRUE;
 }
 
 
-void pholder_deinit(WPHolder *UNUSED(ph))
+void pholder_deinit(WPHolder *ph)
 {
 }
 

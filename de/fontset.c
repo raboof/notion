@@ -105,6 +105,7 @@ XFontSet de_create_font_in_current_locale(const char *fontname)
     XFontSet fs;
     char **missing=NULL, *def="-";
     int nmissing=0;
+    int i;
     
     LOG(DEBUG, FONT, "Creating fontset for: %s", fontname);
     

@@ -11,13 +11,13 @@
 #define LIBTU_MINMAX_H
 
 
-static inline int minof(int x, int y)
+static int minof(int x, int y)
 {
     return (x<y ? x : y);
 }
 
 
-static inline int maxof(int x, int y)
+static int maxof(int x, int y)
 {
     return (x>y ? x : y);
 }

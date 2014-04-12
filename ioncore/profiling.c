@@ -54,8 +54,6 @@ void ioncore_profiling_start(char* filename) {
     current_time = malloc(sizeof(struct timespec));
     fp_trace = fopen(filename, "w");
     extl_sethook(profileLuaCall);
-#else
-	(void)filename;
 #endif
 }
 

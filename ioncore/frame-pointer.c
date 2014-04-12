@@ -29,7 +29,6 @@
 #include "names.h"
 #include "presize.h"
 #include "llist.h"
-#include "utildefines.h"
 
 
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
@@ -130,6 +129,7 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
     WBinding *binding=NULL;
+    WBindmap **bindptr;
     
     if(ev->type==KeyRelease)
         return FALSE;
@@ -151,6 +151,7 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 
 static void setup_dragwin(WFrame *frame, uint tab)
 {
+    WRectangle g;
     WRootWin *rw;
     WFitParams fp;
     const char *tab_style=framemode_get_tab_style(frame->mode);
@@ -180,10 +181,10 @@ static void setup_dragwin(WFrame *frame, uint tab)
 }
 
 
-static void p_tabdrag_motion(WFrame *UNUSED(frame), XMotionEvent *UNUSED(ev),
+static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
                              int dx, int dy)
 {
-    /*WRootWin *rootwin=region_rootwin_of((WRegion*)frame);*/
+    WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
 
     p_tab_x+=dx;
     p_tab_y+=dy;
@@ -202,7 +203,7 @@ static void p_tabdrag_motion(WFrame *UNUSED(frame), XMotionEvent *UNUSED(ev),
 static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev,
                             int dx, int dy)
 {
-    /*WRootWin *rootwin=region_rootwin_of((WRegion*)frame);*/
+    WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
 
     if(p_tabnum<0)
         return;
@@ -305,6 +306,7 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 {
     WRegion *sub=NULL;
     WRegion *dropped_on;
+    Window win=None;
 
     sub=sub_at_tab(frame);
     

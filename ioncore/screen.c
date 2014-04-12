@@ -35,7 +35,6 @@
 #include "conf.h"
 #include "activity.h"
 #include "screen-notify.h"
-#include "utildefines.h"
 
 
 WHook *screen_managed_changed_hook=NULL;
@@ -359,7 +358,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 }
 
 
-static bool screen_may_dispose(WScreen *UNUSED(scr))
+static bool screen_may_dispose(WScreen *scr)
 {
     return TRUE;
 }
@@ -412,13 +411,12 @@ ExtlTab screen_get_configuration(WScreen *scr)
     return mplex_get_configuration(&scr->mplex);
 }
 
-#if 0
+
 static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp, 
                                   WRegionLoadCreateFn *fn)
 {
     return fn(parent, fp, extl_table_none());
 }
-#endif
 
 
 static bool create_initial_ws(WScreen *scr)
@@ -446,6 +444,10 @@ static bool create_initial_ws(WScreen *scr)
 
 bool screen_init_layout(WScreen *scr, ExtlTab tab)
 {
+    char *name;
+    ExtlTab substab, subtab;
+    int n, i;
+
     if(tab==extl_table_none())
         return create_initial_ws(scr);
     

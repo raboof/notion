@@ -165,6 +165,7 @@ static bool separated(const WRegionNameInfo *ni1,
 {
     int l1, l2;
     int i1, i2;
+    int mc;
     
     assert(ni1->name!=NULL);
     
@@ -346,8 +347,10 @@ static bool use_name_exact(WRegion *reg, WNamespace *ns, const char *name)
 
 static bool use_name_parseany(WRegion *reg, WNamespace *ns, const char *name)
 {
-    int inst;
+    int l, inst;
     const char *startinst;
+    
+    l=strlen(name);
     
     inst=parseinst(name, &startinst);
     if(inst>=0){
@@ -538,6 +541,7 @@ WClientWin *ioncore_lookup_clientwin(const char *name)
 static bool do_list(ExtlFn fn, WNamespace *ns, const char *typenam)
 {
     Rb_node node;
+    int n=0;
     
     if(!ns->initialised)
         return FALSE;

@@ -31,7 +31,6 @@
 #include <ioncore/resize.h>
 #include "menu.h"
 #include "main.h"
-#include "utildefines.h"
 
 
 #define MENU_WIN(MENU) ((MENU)->win.win)
@@ -192,7 +191,7 @@ static void menu_calc_size(WMenu *menu, bool maxexact,
     GrBorderWidths bdw, e_bdw;
     char *str;
     int i;
-    int bdh, maxew=menu->max_entry_w;
+    int nath, bdh, maxew=menu->max_entry_w;
     
     grbrush_get_border_widths(menu->brush, &bdw);
     grbrush_get_border_widths(menu->entry_brush, &e_bdw);
@@ -454,6 +453,7 @@ static void calc_entry_dimens(WMenu *menu)
 static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 {
     GrBrush *brush, *entry_brush;
+    char *st;
     const char *style=(menu->big_mode 
                        ? "input-menu-big"
                        : (menu->pmenu_mode
@@ -590,7 +590,8 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
                const WMenuCreateParams *params)
 {
     Window win;
-
+    int i;
+    
     menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
     
     if(menu->entries==NULL){
@@ -1190,7 +1191,7 @@ static void scroll_down(WTimer *timer, WMenu *menu)
 }
 
 
-static void end_scroll(WMenu *UNUSED(menu))
+static void end_scroll(WMenu *menu)
 {
     reset_scroll_timer();
 }
@@ -1318,7 +1319,7 @@ void menu_release(WMenu *menu, XButtonEvent *ev)
 }
 
 
-void menu_motion(WMenu *menu, XMotionEvent *ev, int UNUSED(dx), int UNUSED(dy))
+void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy)
 {
     menu_select_entry_at(menu, ev->x_root, ev->y_root);
     check_scroll(menu, ev->x_root, ev->y_root);
@@ -1333,7 +1334,7 @@ void menu_button(WMenu *menu, XButtonEvent *ev)
 }
 
 
-int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **UNUSED(reg_ret))
+int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret)
 {
     menu_button(menu, ev);
     menu=menu_head(menu);
@@ -1375,6 +1376,7 @@ static void menu_insstr(WMenu *menu, const char *buf, size_t n)
         entry=menu->selected_entry;
         do{
             if(menu->entries[entry].title!=NULL){
+                size_t l=strlen(menu->entries[entry].title);
                 if(libtu_strcasestr(menu->entries[entry].title, newta)){
                     found=TRUE;
                     break;

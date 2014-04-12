@@ -29,6 +29,7 @@ static void create_normal_gc(DEStyle *style, WRootWin *rootwin)
 {
     XGCValues gcv;
     ulong gcvmask;
+    GC gc;
 
     /* Create normal gc */
     gcv.line_style=LineSolid;

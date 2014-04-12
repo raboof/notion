@@ -69,8 +69,6 @@
 #include <libtu/misc.h>
 #include <libtu/output.h>
 
-#include "utildefines.h"
-
 #define STRDUP(X) scopy(X)
 #define DISPOSE(X) free(X)
 #define NEW(T, X)  ALLOC_N(T, X)
@@ -331,6 +329,7 @@ STATIC int SplitPath(const char *path,char **dirpart,char **filepart)
  */
 STATIC int SplitRelativePath(const char *path,char **dirpart,char **filepart)
 {
+    static char	DOT[] = "./";
     static char EOL[] = "\0";
     char *dpart;
     char *fpart;
@@ -439,7 +438,7 @@ static char *el_complete(char *pathname,int *unique)
 }
 #endif
 
-static int complete_homedir(const char *username, char ***cp_ret, char **UNUSED(beg))
+static int complete_homedir(const char *username, char ***cp_ret, char **beg)
 {
 	struct passwd *pw;
 	char *name;
@@ -541,7 +540,7 @@ static int tilde_complete(char *path, char **retpath)
  **  Return all possible completions.
  */
 int do_complete_file(char *pathname, char ***avp, char **beg,
-                     void *UNUSED(unused))
+					 void *unused)
 {
     char	*dir;
     char	*file, *path=NULL, *tt;
@@ -597,7 +596,7 @@ int do_complete_file(char *pathname, char ***avp, char **beg,
  **  Return all possible completions.
  */
 int do_complete_file_with_path(char *pathname, char ***avp, char **beg,
-                               void *UNUSED(unused))
+							   void *unused)
 {
     char	*dir;
     char	*file, *path=NULL, *tt;

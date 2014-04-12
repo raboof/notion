@@ -82,7 +82,7 @@ static void frame_tabs_width_calculate_equal(WFrame *frame)
 */
 static int frame_shaped_recalc_bar_size_equal(WFrame *frame)
 {
-    int bar_w, tmaxw=frame->tabs_params.tab_min_w, tmp=0;
+    int bar_w, textw=0, tmaxw=frame->tabs_params.tab_min_w, tmp=0;
     GrBorderWidths bdw;
     uint bdtotal;
     int i, m;
