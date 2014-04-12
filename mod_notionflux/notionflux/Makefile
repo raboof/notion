@@ -14,9 +14,9 @@ INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
 
 LIBS += $(X11_LIBS) 
 
-SOURCES=notionflux.c
+EXTRA_EXECUTABLE = notionflux
 
-TARGETS=notionflux
+SOURCES=notionflux.c
 
 ######################################
 
@@ -24,9 +24,4 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-notionflux: $(SOURCES)
-	$(CC) $< $(CFLAGS) $(LDFLAGS) -o $@
-
-_install:
-	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) notionflux $(DESTDIR)$(BINDIR)
+_install: executable_install
