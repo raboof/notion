@@ -6,7 +6,7 @@ use warnings;
 my $executablename = $ARGV[0];
 my %entries = ();
 
-print "events: Milliseconds\n";
+print "events: Microseconds\n";
 
 my @msAlreadyAccountedFor = (0,0,0,0,0,0,0);
 my @callstack = ();
@@ -17,7 +17,7 @@ $callframe{"file"} = "toplevel";
 $callframe{"line"} = 0;
 push(@callstack, \%callframe);
 
-while (<STDIN> =~ /^(\w)\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{5})\d*/) {
+while (<STDIN> =~ /^(\w)\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{6})\d*/) {
   my ($action, $calledfunction, $calledfile, $calledline, 
 	$callerfunction, $callerfile, $callerline, $sec, $msec) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
   my $callkey = "$calledfile$calledline $callerfile$callerline";

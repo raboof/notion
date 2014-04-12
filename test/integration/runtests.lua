@@ -33,6 +33,7 @@ for i,testset in ipairs(testsets) do
   os.execute("rm -r " .. testset .. "/.notion/default-session--7")
 
   print ('Starting notion in ./' .. testset .. '...')
+
   local notionpid = posix.fork()
   if (notionpid == 0) then
     local result,errstr,errno = posix.exec("../../notion/notion", "-noerrorlog", "-display", ":7")
@@ -59,6 +60,7 @@ for i,testset in ipairs(testsets) do
 
   print 'Killing notion process...'
   posix.kill(notionpid)
+  sleep(1)
 
 end
 

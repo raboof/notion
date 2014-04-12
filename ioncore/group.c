@@ -145,6 +145,13 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
         
         if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg!=NULL)
             region_detach_manager(ws->managed_stdisp->reg);
+        else if(ws->bottom!=NULL && ws->bottom->reg!=NULL &&
+                HAS_DYN(ws->bottom->reg, region_unmanage_stdisp)){
+            /* Usually the stdisp will not be managed by the group itself, but
+             * rather by the WTiling managed by the group, see
+             * group_manage_stdisp. */
+            region_unmanage_stdisp(ws->bottom->reg, TRUE, TRUE);
+        }
         
         assert(ws->managed_stdisp==NULL);
         
