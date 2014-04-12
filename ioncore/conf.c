@@ -77,6 +77,10 @@ static ExtlFn get_layout_fn;
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
  *  \var{autoraise} & (boolean) Autoraise regions in groups on goto. \\
  *  \var{autosave_layout} & (boolean) Automatically save layout on restart and exit. \\
+ *  \var{window_stacking_request} & (string) How to respond to window-stacking
+ *                          requests. \codestr{ignore} to do nothing,
+ *                          \codestr{activate} to set the activity flag on a
+ *                          window requesting to be stacked Above. \\
  * \end{tabularx}
  * 
  * When a keyboard resize function is called, and at most \var{kbresize_t_max} 
@@ -103,6 +107,14 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "unsqueeze", &(ioncore_g.unsqueeze_enabled));
     extl_table_gets_b(tab, "autoraise", &(ioncore_g.autoraise));
     extl_table_gets_b(tab, "autosave_layout", &(ioncore_g.autosave_layout));
+
+    if(extl_table_gets_s(tab, "window_stacking_request", &tmp)){
+        if(strcmp(tmp, "ignore")==0)
+            ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;
+        else if(strcmp(tmp, "activate")==0)
+            ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE;
+        free(tmp);
+    }
     
     if(extl_table_gets_s(tab, "frame_default_index", &tmp)){
         ioncore_g.frame_default_index=stringintmap_value(frame_idxs, 
@@ -161,7 +173,19 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "unsqueeze", ioncore_g.unsqueeze_enabled);
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
-    
+
+    const char *window_stacking_request_string;
+    switch(ioncore_g.window_stacking_request)
+    {
+        case IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE:
+            window_stacking_request_string = "activate";
+            break;
+        case IONCORE_WINDOWSTACKINGREQUEST_IGNORE:
+        default:
+            window_stacking_request_string = "ignore";
+            break;
+    }
+    extl_table_sets_s(tab, "window_stacking_request", window_stacking_request_string);
 
     extl_table_sets_s(tab, "frame_default_index", 
                       stringintmap_key(frame_idxs, 

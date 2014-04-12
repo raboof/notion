@@ -41,6 +41,11 @@ enum{
     IONCORE_FOCUSNEXT_FALLBACK
 };
 
+enum{
+    IONCORE_WINDOWSTACKINGREQUEST_IGNORE,
+    IONCORE_WINDOWSTACKINGREQUEST_ACTIVATE
+};
+
 
 INTRSTRUCT(WGlobal);
 
@@ -93,6 +98,7 @@ DECLSTRUCT(WGlobal){
     bool unsqueeze_enabled;
     bool autoraise;
     bool autosave_layout;
+    int  window_stacking_request;
     
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */
