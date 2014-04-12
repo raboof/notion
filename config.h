@@ -31,10 +31,10 @@
 #define CF_USERTIME_DIFF_CURRENT 2000
 #define CF_USERTIME_DIFF_NEW 4000
 
-// disable this by default
+/* disable this by default */
 #define CF_FOCUSLIST_INSERT_DELAY 0
 
-// disable this by default
+/* disable this by default */
 #define CF_WORKSPACE_INDICATOR_TIMEOUT 0
 
 /* Cursors

@@ -504,8 +504,8 @@ void mainloop_trap_signals(const sigset_t *which)
     sigemptyset(&oldset);
     sigprocmask(SIG_SETMASK, &set, &oldset);
 
-    // I do not handle SIG{ILL,SEGV,FPE,BUS} since there's not much I can do in
-    // response
+    /* I do not handle SIG{ILL,SEGV,FPE,BUS} since there's not much I can do in
+     * response */
 
     DEADLY(SIGHUP);
     DEADLY(SIGQUIT);

@@ -87,8 +87,8 @@ WRegion *ioncore_goto_previous()
     if(ioncore_g.focuslist==NULL)
         return NULL;
 
-    // We're trying to access the focus list from lua (likely from the UI). I
-    // thus force any pending focuslist updates to complete now
+    /* We're trying to access the focus list from lua (likely from the UI). I
+     * thus force any pending focuslist updates to complete now */
     region_focuslist_awaiting_insertion_trigger();
     
     /* Find the first region on focus history list that isn't currently
@@ -123,8 +123,8 @@ bool ioncore_focushistory_i(ExtlFn iterfn)
     if(ioncore_g.focuslist==NULL)
         return FALSE;
     
-    // We're trying to access the focus list from lua (likely from the UI). I
-    // thus force any pending focuslist updates to complete now
+    /* We're trying to access the focus list from lua (likely from the UI). I
+     * thus force any pending focuslist updates to complete now */
     region_focuslist_awaiting_insertion_trigger();
 
     /* Find the first region on focus history list that isn't currently
@@ -236,7 +236,7 @@ static void timer_expired__focuslist_insert(WTimer* dummy1, Obj* dummy2)
 
 static void schedule_focuslist_insert_timer(WRegion *reg)
 {
-  // if the delay is disabled, add to the list NOW
+  /* if the delay is disabled, add to the list NOW */
   if( ioncore_g.focuslist_insert_delay <= 0 )
   {
     region_focuslist_push(reg);
@@ -291,9 +291,9 @@ void region_got_focus(WRegion *reg)
 
     if(reg->active_sub==NULL)
     {
-      // I update the current focus indicator right now. The focuslist is
-      // updated on a timer to keep the list ordered by importance (to keep
-      // windows that the user quickly cycles through at the bottom of the list)
+      /* I update the current focus indicator right now. The focuslist is
+       * updated on a timer to keep the list ordered by importance (to keep
+       * windows that the user quickly cycles through at the bottom of the list) */
       ioncore_g.focus_current = reg;
       schedule_focuslist_insert_timer(reg);
     }
@@ -355,8 +355,8 @@ void region_lost_focus(WRegion *reg)
 
 void region_focus_deinit(WRegion *reg)
 {
-    // if the region that's waiting to be added to the focuslist is being
-    // deleted, cancel the insertion
+    /* if the region that's waiting to be added to the focuslist is being
+     * deleted, cancel the insertion */
     if(region_awaiting_insertion)
         region_focuslist_awaiting_insertion_cancel_if_is(reg);
 

@@ -89,9 +89,9 @@ DECLSTRUCT(WGlobal){
      */
     WRegion* focuslist;
 
-    // This is the region that is currently focused. It is usually the first
-    // item in the focuslist, but not always. It isn't the first item if
-    // focuslist_insert_delay is enabled, and the corresponding timer is active
+    /* This is the region that is currently focused. It is usually the first
+     * item in the focuslist, but not always. It isn't the first item if
+     * focuslist_insert_delay is enabled, and the corresponding timer is active */
     WRegion* focus_current;
 
     

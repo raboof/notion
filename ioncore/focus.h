@@ -63,7 +63,7 @@ WRegion *ioncore_current();
 
 extern void region_pointer_focus_hack(WRegion *reg);
 
-// testing/debugging helper
+/* testing/debugging helper */
 void region_focuslist_debugprint(void);
 
 #endif /* ION_IONCORE_FOCUS_H */
