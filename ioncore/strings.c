@@ -14,6 +14,7 @@
 #include "common.h"
 #include "global.h"
 #include "strings.h"
+#include "utildefines.h"
 
 
 /*{{{ String scanning */
@@ -188,7 +189,7 @@ int str_len(const char *p)
 
 /*{{{ Title shortening */
 
-
+#if 0
 static char *scatn3(const char *p1, int l1,
                     const char *p2, int l2,
                     const char *p3, int l3)
@@ -202,6 +203,7 @@ static char *scatn3(const char *p1, int l1,
     }
     return p;
 }
+#endif
 
 INTRSTRUCT(SR);
     

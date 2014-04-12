@@ -227,7 +227,7 @@ void frame_clear_shape(WFrame *frame)
 static void free_title(WFrame *frame, int i)
 {
     if(frame->titles[i].text!=NULL){
-        free(frame->titles[i].text);
+        free((void *)frame->titles[i].text);
         frame->titles[i].text=NULL;
     }
 }
@@ -238,7 +238,7 @@ void frame_recalc_bar(WFrame *frame, bool complete)
     int textw, i;
     WLListIterTmp tmp;
     WRegion *sub;
-    char *title;
+    const char *title;
     bool set_shape;
 
     if(frame->bar_brush==NULL || frame->titles==NULL)
@@ -324,7 +324,6 @@ void frame_draw(const WFrame *frame, bool complete)
 void frame_brushes_updated(WFrame *frame)
 {
     WFrameBarMode barmode;
-    ExtlTab tab;
     char *s;
 
     if(frame->brush==NULL)

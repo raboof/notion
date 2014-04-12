@@ -41,6 +41,7 @@
 #include "stacking.h"
 #include "group.h"
 #include "navi.h"
+#include "utildefines.h"
 
 
 #define SUBS_MAY_BE_MAPPED(MPLEX) \
@@ -451,7 +452,6 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 
 void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
 {
-    WRectangle geom;
     WMPlexIterTmp tmp;
     WStacking *node;
     WFitParams fp2;
@@ -491,7 +491,6 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
                                  const WRQGeomParams *rq,
                                  WRectangle *geomret)
 {
-    WRectangle rg;
     WFitParams fp;
     WStacking *node;
 
@@ -706,7 +705,7 @@ static WStacking *has_stacking_within(WMPlex *mplex, WRegion *reg)
  */
 static WStacking *mplex_to_focus(WMPlex *mplex)
 {
-    WStacking *foc=NULL, *fallback=NULL;
+    WStacking *foc=NULL;
     WRegion *reg=NULL;
     
     foc=maybe_focusable(REGION_ACTIVE_SUB(mplex));
@@ -1215,9 +1214,9 @@ static bool mplex_stack(WMPlex *mplex, WStacking *st)
 
 static void mplex_unstack(WMPlex *mplex, WStacking *st)
 {
-    WStacking *stacking;
+    /*WStacking *stacking;*/
     
-    stacking=mplex_get_stacking(mplex);
+    /*stacking=mplex_get_stacking(mplex);*/
     
     stacking_unstack(&mplex->win, st);
 }
@@ -1232,7 +1231,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     WStacking *node=NULL;
     WLListNode *lnode=NULL;
     WMPlexAttachParams *param=&ph->param;
-    bool mx_was_empty, sw, modal, mcf, hidden;
+    bool mx_was_empty, sw /*, modal */, mcf, hidden;
     WSizePolicy szplcy;
     uint level;
     
@@ -1246,10 +1245,10 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
             : (param->flags&MPLEX_ATTACH_UNNUMBERED
                ? SIZEPOLICY_FULL_BOUNDS
                : SIZEPOLICY_FULL_EXACT));
-
+#if 0
     modal=(param->flags&MPLEX_ATTACH_LEVEL
            && param->level>=STACKING_LEVEL_MODAL1);
-    
+#endif
     level=(param->flags&MPLEX_ATTACH_LEVEL
            ? param->level
            : (param->flags&MPLEX_ATTACH_UNNUMBERED
@@ -1446,11 +1445,10 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 }
 
 
-static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
+static void get_params(WMPlex *UNUSED(mplex), ExtlTab tab, int mask,
                        WMPlexAttachParams *par)
 {
     int tmp;
-    char *tmpstr;
     int ok=~mask;
     
     if(ok&MPLEX_ATTACH_LEVEL){
@@ -1600,7 +1598,6 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     WMPlexAttachParams ap;
     WPHolder *ph=NULL;
     WMPlexPHolder *mph;
-    WLListNode *after;
     
     /* Check current */ {
         WStacking *cur=mplex_current_node(mplex);
@@ -1832,7 +1829,7 @@ static StringIntMap pos_map[]={
 };
 
 
-static bool do_attach_stdisp(WRegion *mplex, WRegion *reg, void *unused)
+static bool do_attach_stdisp(WRegion *UNUSED(mplex), WRegion *UNUSED(reg), void *UNUSED(unused))
 {
     /* We do not actually manage the stdisp. */
     return TRUE;
@@ -1883,7 +1880,6 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     if(s==NULL || strcmp(s, "replace")==0){
         WRegionAttachData data;
         WFitParams fp;
-        int o2;
         
         fp.g.x=0;
         fp.g.y=0;
@@ -2107,7 +2103,7 @@ static void save_node(WMPlex *mplex, ExtlTab subs, int *n,
 
 ExtlTab mplex_get_configuration(WMPlex *mplex)
 {
-    ExtlTab tab, subs, stdisptab;
+    ExtlTab tab, subs /*, stdisptab*/;
     WMPlexIterTmp tmp;
     WLListIterTmp ltmp;
     WLListNode *lnode;

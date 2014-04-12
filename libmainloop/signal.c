@@ -22,6 +22,7 @@
 #include <libtu/locale.h>
 #include <libtu/output.h>
 
+#include "utildefines.h"
 #include "signal.h"
 #include "hooks.h"
 
@@ -114,7 +115,7 @@ bool libmainloop_get_timeout(struct timeval *tv)
 }
 
 
-static void do_timer_set()
+static void do_timer_set(void)
 {
     struct itimerval val={{0, 0}, {0, 0}};
     
@@ -176,13 +177,13 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     return ret;
 }
 
-static bool mrsh_usr2(void (*fn)(void), void *p)
+static bool mrsh_usr2(void (*fn)(void), void *UNUSED(p))
 {
     fn();
     return TRUE;
 }
 
-static bool mrsh_usr2_extl(ExtlFn fn, void *p)
+static bool mrsh_usr2_extl(ExtlFn fn, void *UNUSED(p))
 {
     bool ret;
     ExtlTab t=extl_create_table();
@@ -192,7 +193,7 @@ static bool mrsh_usr2_extl(ExtlFn fn, void *p)
 }
 
 
-bool mainloop_check_signals()
+bool mainloop_check_signals(void)
 {
     struct timeval current_time;
     WTimer *q;
@@ -267,7 +268,7 @@ void mainloop_block_signals(sigset_t *oldmask)
 }
 
 
-bool mainloop_unhandled_signals()
+bool mainloop_unhandled_signals(void)
 {
     return (usr2_sig || wait_sig || kill_sig || had_tmr);
 }
@@ -299,11 +300,10 @@ bool timer_is_set(WTimer *timer)
 }
 
 
-void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
-                  Obj *obj, ExtlFn fn)
+static void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
+                         Obj *obj, ExtlFn fn)
 {
     WTimer *q, **qptr;
-    bool set=FALSE;
     
     timer_reset(timer);
 
@@ -395,7 +395,7 @@ void timer_deinit(WTimer *timer)
 }
 
 
-WTimer *create_timer()
+WTimer *create_timer(void)
 {
     CREATEOBJ_IMPL(WTimer, timer, (p));
 }
@@ -434,7 +434,7 @@ static void deadly_signal_handler(int signal_num)
 }
 
 
-static void chld_handler(int signal_num)
+static void chld_handler(int UNUSED(signal_num))
 {
 #if 0
     pid_t pid;
@@ -447,7 +447,7 @@ static void chld_handler(int signal_num)
 #endif
 }
 
-static void usr2_handler(int signal_num)
+static void usr2_handler(int UNUSED(signal_num))
 {
     usr2_sig=1;
 }
@@ -463,13 +463,13 @@ static void exit_handler(int signal_num)
 }
 
 
-static void timer_handler(int signal_num)
+static void timer_handler(int UNUSED(signal_num))
 {
     had_tmr=TRUE;
 }
 
 
-static void ignore_handler(int signal_num)
+static void ignore_handler(int UNUSED(signal_num))
 {
     
 }

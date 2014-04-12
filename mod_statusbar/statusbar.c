@@ -30,13 +30,12 @@
 #include "statusbar.h"
 #include "main.h"
 #include "draw.h"
+#include "utildefines.h"
 
 
 static void statusbar_set_elems(WStatusBar *sb, ExtlTab t);
 static void statusbar_free_elems(WStatusBar *sb);
-static void statusbar_update_natural_size(WStatusBar *p);
 static void statusbar_arrange_systray(WStatusBar *p);
-static int statusbar_systray_x(WStatusBar *p);
 static void statusbar_rearrange(WStatusBar *sb, bool rs);
 static void do_calc_systray_w(WStatusBar *p, WSBElem *el);
 static void statusbar_calc_systray_w(WStatusBar *p);
@@ -418,7 +417,7 @@ static WSBElem *statusbar_unassociate_systray(WStatusBar *sb, WRegion *reg)
 
     
 
-static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
+static void do_calc_systray_w(WStatusBar *UNUSED(p), WSBElem *el)
 {
     WRegion *reg;
     PtrListIterTmp tmp;
@@ -489,7 +488,7 @@ static void systray_adjust_size(WRegion *reg, WRectangle *g)
 
 static WRegion *statusbar_do_attach_final(WStatusBar *sb,
                                           WRegion *reg,
-                                          void *unused)
+                                          void *UNUSED(param))
 {
     WFitParams fp;
     WSBElem *el;
@@ -538,7 +537,7 @@ static WRegion *statusbar_do_attach(WStatusBar *sb, WRegionAttachData *data)
 }
 
 
-static WRegion *statusbar_attach_ph(WStatusBar *sb, int flags,
+static WRegion *statusbar_attach_ph(WStatusBar *sb, int UNUSED(flags),
                                     WRegionAttachData *data)
 {
     return statusbar_do_attach(sb, data);
@@ -546,8 +545,8 @@ static WRegion *statusbar_attach_ph(WStatusBar *sb, int flags,
 
 
 static WPHolder *statusbar_prepare_manage(WStatusBar *sb, 
-                                          const WClientWin *cwin,
-                                          const WManageParams *param,
+                                          const WClientWin *UNUSED(cwin),
+                                          const WManageParams *UNUSED(param),
                                           int priority)
 {
     if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_LOW))
@@ -651,7 +650,7 @@ bool statusbar_fitrep(WStatusBar *sb, WWindow *par, const WFitParams *fp)
 WPHolder *statusbar_prepare_manage_transient(WStatusBar *sb, 
                                              const WClientWin *cwin,
                                              const WManageParams *param,
-                                             int unused)
+                                             int UNUSED(unused))
 {
     WRegion *mgr=REGION_MANAGER(sb);
     
@@ -779,7 +778,6 @@ static void spread_stretch(WStatusBar *sb)
     int i, j, k;
     int diff;
     WSBElem *el, *lel, *rel;
-    const char *str;
     
     for(i=0; i<sb->nelems; i++){
         el=&(sb->elems[i]);
@@ -977,7 +975,7 @@ void statusbar_updategr(WStatusBar *p)
 /*{{{ Misc */
 
 
-int statusbar_orientation(WStatusBar *sb)
+int statusbar_orientation(WStatusBar *UNUSED(sb))
 {
     return REGION_ORIENTATION_HORIZONTAL;
 }
@@ -1003,7 +1001,7 @@ ExtlTab mod_statusbar_statusbars()
 
 
 WStatusBar *mod_statusbar_find_suitable(WClientWin *cwin,
-                                        const WManageParams *param)
+                                        const WManageParams *UNUSED(param))
 {
     WStatusBar *sb;
 

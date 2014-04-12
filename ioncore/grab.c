@@ -22,6 +22,7 @@
 #include "event.h"
 #include "cursor.h"
 #include "grab.h"
+#include "utildefines.h"
 
 
 /*{{{ Definitions */
@@ -88,7 +89,7 @@ static void ungrab_kb_ptr()
 static void do_holder_remove(WRegion *holder, bool killed);
 
 
-static void grab_watch_handler(Watch *w, Obj *obj)
+static void grab_watch_handler(Watch *UNUSED(w), Obj *obj)
 {
     do_holder_remove((WRegion*)obj, TRUE);
 }

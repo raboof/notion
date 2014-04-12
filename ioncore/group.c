@@ -42,6 +42,7 @@
 #include "frame.h"
 #include "float-placement.h"
 #include "return.h"
+#include "utildefines.h"
 
 
 static void group_place_stdisp(WGroup *ws, WWindow *parent,
@@ -564,7 +565,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
                                         WSizePolicy szplcy)
 {
     WStacking *st=NULL, *tmp=NULL;
-    Window bottom=None, top=None;
     WStacking **stackingp=group_get_stackingp(ws);
     WFrame *frame;
     
@@ -742,8 +742,7 @@ WRegion *group_do_attach(WGroup *ws,
                          WRegionAttachData *data)
 {
     WFitParams fp;
-    WRegion *reg;
-    
+
     if(ws->bottom!=NULL && param->bottom){
         warn(TR("'bottom' already set."));
         return NULL;
@@ -1063,7 +1062,7 @@ static WStacking *prv(WGroup *ws, WStacking *st, bool wrap)
 typedef WStacking *NxtFn(WGroup *ws, WStacking *st, bool wrap);
 
 
-static bool focusable(WGroup *ws, WStacking *st, uint min_level)
+static bool focusable(WGroup *UNUSED(ws), WStacking *st, uint min_level)
 {
     return (st->reg!=NULL
             && REGION_IS_MAPPED(st->reg)
@@ -1323,7 +1322,6 @@ ExtlTab group_get_configuration(WGroup *ws)
     ExtlTab tab, mgds, subtab, g;
     WStacking *st;
     WGroupIterTmp tmp;
-    WMPlex *par;
     int n=0;
     WRectangle tmpg;
     
@@ -1378,7 +1376,6 @@ void group_do_load(WGroup *ws, ExtlTab tab)
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
                 WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
-                WRegionAttachData data;
                 WFitParams fp;
                 WPHolder *ph;
                 

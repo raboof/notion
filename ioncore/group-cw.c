@@ -292,9 +292,7 @@ void groupcw_deinit(WGroupCW *cwg)
 WRegion *groupcw_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WGroupCW *cwg;
-    ExtlTab substab, subtab;
-    int i, n;
-    
+
     cwg=create_groupcw(par, fp);
     
     if(cwg==NULL)

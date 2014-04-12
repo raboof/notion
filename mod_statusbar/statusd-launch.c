@@ -37,7 +37,6 @@ static bool process_pipe(int fd, ExtlFn fn,
 {
     char buf[BL];
     int n;
-    bool fnret;
     
     *eagain=FALSE;
     

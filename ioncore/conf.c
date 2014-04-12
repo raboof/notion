@@ -124,9 +124,8 @@ static ExtlFn get_layout_fn;
 EXTL_EXPORT
 void ioncore_set(ExtlTab tab)
 {
-    int dd, rd;
-    char *wst, *tmp;
-    ExtlTab t;
+    int dd;
+    char *tmp;
     ExtlFn fn;
     
     extl_table_gets_b(tab, "opaque_resize", &(ioncore_g.opaque_resize));

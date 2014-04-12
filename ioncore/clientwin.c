@@ -41,6 +41,7 @@
 #include "return.h"
 #include "conf.h"
 #include "group.h"
+#include "utildefines.h"
 
 
 static void set_clientwin_state(WClientWin *cwin, int state);
@@ -78,9 +79,10 @@ void clientwin_get_protocols(WClientWin *cwin)
 }
 
 
-static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
-                                          const char *propname,
-                                          WSizePolicy value)
+static WSizePolicy UNUSED_FUNCTION(get_sizepolicy_winprop)(
+        WClientWin *cwin,
+        const char *propname,
+        WSizePolicy value)
 {
     char *szplcy;
 
@@ -663,6 +665,7 @@ void clientwin_tfor_changed(WClientWin *cwin)
          region_name((WRegion*)cwin));
 #else
     warn(TR("Changes is WM_TRANSIENT_FOR property are unsupported."));
+    (void)cwin;
 #endif        
 }
 
@@ -711,8 +714,6 @@ static bool reparent_root(WClientWin *cwin)
 
 void clientwin_deinit(WClientWin *cwin)
 {
-    WRegion *reg;
-    
     if(cwin->win!=None){
         region_pointer_focus_hack(&cwin->region);
 
@@ -823,7 +824,7 @@ void clientwin_kill(WClientWin *cwin)
 }
 
 
-void clientwin_rqclose(WClientWin *cwin, bool relocate_ignored)
+void clientwin_rqclose(WClientWin *cwin, bool UNUSED(relocate_ignored))
 {
     /* Ignore relocate parameter -- client windows can always be 
      * destroyed by the application in any case, so way may just as
@@ -1130,7 +1131,7 @@ EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
     char **p=NULL, **p2=NULL, *wrole=NULL;
-    int n=0, n2=0, n3=0, tmp=0;
+    int n=0, n2=0, n3=0;
     Window tforwin=None;
     ExtlTab tab;
     bool dockapp_hack=FALSE;

@@ -135,12 +135,13 @@ static void mainloop()
 extern bool statusd_register_exports();
 extern void statusd_unregister_exports();
 
-
+#if 0
 static void stdout_closed(int fd, void *data)
 {
     exit(EXIT_SUCCESS);
 }
 
+#endif
 
 int main(int argc, char*argv[])
 {

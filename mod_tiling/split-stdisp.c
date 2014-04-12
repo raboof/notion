@@ -10,6 +10,8 @@
 #include <ioncore/common.h>
 #include <ioncore/mplex.h>
 #include <ioncore/resize.h>
+
+#include "utildefines.h"
 #include "split.h"
 #include "split-stdisp.h"
 #include "tiling.h"
@@ -51,7 +53,7 @@ static int other_dir(int dir)
 }
 
 
-static void swap(int *x, int *y)
+static void UNUSED_FUNCTION(swap)(int *x, int *y)
 {
     int z=*x;
     *x=*y;
@@ -59,7 +61,7 @@ static void swap(int *x, int *y)
 }
 
 
-static void swapptr(WSplit **x, WSplit **y)
+static void UNUSED_FUNCTION(swapptr)(WSplit **x, WSplit **y)
 {
     void *z=*x;
     *x=*y;
@@ -67,7 +69,7 @@ static void swapptr(WSplit **x, WSplit **y)
 }
 
 
-static void swapgeom(WRectangle *g, WRectangle *h)
+static void UNUSED_FUNCTION(swapgeom)(WRectangle *g, WRectangle *h)
 {
     WRectangle tmp=*g;
     *g=*h;
@@ -270,8 +272,6 @@ static void rot_rs_rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
 
 static void flip_right(WSplitSplit *a, WSplitSplit *p)
 {
-    WSplit *tmp;
-    
     assert(a->tl==(WSplit*)p);
     
     /* Right flip:
@@ -336,8 +336,6 @@ static void rot_rs_flip_right(WSplitSplit *a, WSplitSplit *p)
 
 static void flip_left(WSplitSplit *a, WSplitSplit *p)
 {
-    WSplit *tmp;
-    
     assert(a->br==(WSplit*)p);
     
     /* Left flip:

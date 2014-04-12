@@ -81,7 +81,6 @@ bool handle_xrandr_event(XEvent *ev)
         
         WFitParams fp;
         WScreen *screen;
-        bool pivot=FALSE;
         LOG(DEBUG, RANDR, "XRRScreenChangeNotifyEvent size %dx%d (%dx%d mm)", 
             rev->width, rev->height, rev->mwidth, rev->mheight);
         
@@ -140,7 +139,6 @@ bool handle_xrandr_event(XEvent *ev)
 static bool check_pivots()
 {
     WScreen *scr;
-    XRRScreenConfiguration *cfg;
     
     rotations=make_rb();
     
@@ -219,8 +217,6 @@ ExtlTab mod_xrandr_get_all_outputs()
     ExtlTab result = extl_create_table();
    
     for(i=0; i < res->noutput; i++){
-        int x,y;
-        int w,h;
         XRROutputInfo *output_info = XRRGetOutputInfo(ioncore_g.dpy, res, res->outputs[i]);
         if(output_info->crtc != None){
             XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(ioncore_g.dpy, res, output_info->crtc);

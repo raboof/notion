@@ -96,14 +96,14 @@ static void check_input_fds(fd_set *rfds)
 
 /*{{{ Select */
 
-void mainloop_select()
+void mainloop_select(void)
 {
     fd_set rfds;
     int nfds=0;
     int ret=0;
     
     
-#if _POSIX_SELECT || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
+#if (defined _POSIX_SELECT && _POSIX_SELECT) || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
     {
         sigset_t oldmask;
 

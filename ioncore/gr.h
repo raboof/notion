@@ -60,7 +60,7 @@ typedef struct{
 #define GR_TEXTELEM_INIT {NULL, 0, GR_STYLESPEC_INIT}
 
 typedef struct{
-    char *text;
+    const char *text;
     int iw;
     GrStyleSpec attr;
 } GrTextElem;

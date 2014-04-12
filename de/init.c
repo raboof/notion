@@ -186,7 +186,6 @@ void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 {
     
     uint i=0, nfailed=0, n=extl_table_get_n(tab);
-    char *name;
     ExtlTab sub;
     
     if(n==0)
@@ -293,7 +292,6 @@ static const char * const known_values[]={
 static bool filter_extras_iter_fn(ExtlAny k, ExtlAny v, void *p)
 {
     ExtlTab *tgt=(ExtlTab*)p;
-    const char *s;
     int i;
     
     if(k.type!='s' && k.type!='S')
@@ -361,9 +359,7 @@ EXTL_EXPORT
 bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
     DEStyle *style, *based_on=NULL;
-    int based_on_score=-1;
     char *fnt, *bss;
-    uint n;
 
     if(name==NULL)
         return FALSE;

@@ -28,6 +28,7 @@
 #include <libtu/dlist.h>
 #include <libtu/util.h>
 
+#include "utildefines.h"
 #include "readconfig.h"
 #include "luaextl.h"
 #include "private.h"
@@ -77,21 +78,21 @@ static void lua_rawset_check(lua_State *st, int index)
 }
 
 
-static void lua_rawseti_check(lua_State *st, int index, int n)
+static void UNUSED_FUNCTION(lua_rawseti_check)(lua_State *st, int index, int n)
 {
     CHECK_TABLE(st, index);
     lua_rawseti(st, index, n);
 }
 
 
-static void lua_rawget_check(lua_State *st, int index)
+static void UNUSED_FUNCTION(lua_rawget_check)(lua_State *st, int index)
 {
     CHECK_TABLE(st, index);
     lua_rawget(st, index);
 }
 
 
-static void lua_rawgeti_check(lua_State *st, int index, int n)
+static void UNUSED_FUNCTION(lua_rawgeti_check)(lua_State *st, int index, int n)
 {
     CHECK_TABLE(st, index);
     lua_rawgeti(st, index, n);
@@ -392,7 +393,6 @@ bool __obj_is(Obj *obj, const char *typename);
 
 static int extl_current_file_or_dir(lua_State *st, bool dir)
 {
-    int r;
     lua_Debug ar;
     const char *s, *p;
     
@@ -1015,7 +1015,7 @@ bool extl_table_eq(ExtlTab t1, ExtlTab t2)
 /*}}}*/
 
 
-/*{{{ Table/get */
+/*{{{ Table/get */
 
 
 typedef struct{
@@ -1178,7 +1178,6 @@ static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
 int extl_table_get_n(ExtlTab ref)
 {
     GetNParams params;
-    int oldtop;
     
     params.ref=ref;
     params.n=0;
@@ -1192,7 +1191,7 @@ int extl_table_get_n(ExtlTab ref)
 /*}}}*/
 
 
-/*{{{ Table/set */
+/*{{{ Table/set */
 
 
 static bool extl_table_dodo_set2(lua_State *st, TableParams2 *params)
@@ -1315,7 +1314,7 @@ bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val)
 /*}}}*/
 
 
-/*{{{ Table/clear entry */
+/*{{{ Table/clear entry */
 
 
 static bool extl_table_dodo_clear2(lua_State *st, TableParams2 *params)
@@ -1508,7 +1507,6 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
  */
 static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 {
-    bool ret=TRUE;
     int n=0, m=0;
     
     if(lua_isnil(st, -1))
@@ -1919,7 +1917,7 @@ static int extl_l1_call_handler(lua_State *st)
 #ifdef EXTL_LOG_ERRORS    
     WarnChain ch;
 #endif    
-    L1Param param={{NULL, }, {NULL, }, NULL, 0, 0, 0};
+	L1Param param={{{NULL}, }, {{NULL}, }, NULL, 0, 0, 0};
     L1Param *old_param;
     int ret;
     int n=lua_gettop(st);
@@ -2055,7 +2053,7 @@ typedef struct{
 
 static bool extl_do_register_function(lua_State *st, RegData *data)
 {
-    ExtlExportedFnSpec *spec=data->spec, *spec2;
+    ExtlExportedFnSpec *spec=data->spec;
 #if LUA_VERSION_NUM>=502
     int ind;
 #else
@@ -2554,7 +2552,6 @@ extern bool extl_serialise(const char *file, ExtlTab tab)
 void extl_dohook(lua_State *L, lua_Debug *ar)
 {
     enum ExtlHookEvent event;
-    const char *source;
 
     lua_getinfo(L, "Sn", ar);
     if (ar->event == LUA_HOOKCALL)

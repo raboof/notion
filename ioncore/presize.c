@@ -11,6 +11,7 @@
 #include "window.h"
 #include "pointer.h"
 #include "grab.h"
+#include "utildefines.h"
 
 
 /*{{{ Resize */
@@ -69,7 +70,7 @@ void window_p_resize_prepare(WWindow *wwin, XButtonEvent *ev)
 }
 
 
-static void p_moveres_end(WWindow *wwin, XButtonEvent *ev)
+static void p_moveres_end(WWindow *wwin, XButtonEvent *UNUSED(ev))
 {
     WMoveresMode *mode=moveres_mode((WRegion*)wwin);
     if(mode!=NULL)
@@ -93,7 +94,7 @@ static void confine_to_parent(WWindow *wwin)
 }
 
 
-static void p_resize_motion(WWindow *wwin, XMotionEvent *ev, int dx, int dy)
+static void p_resize_motion(WWindow *wwin, XMotionEvent *UNUSED(ev), int dx, int dy)
 {
     WMoveresMode *mode=moveres_mode((WRegion*)wwin);
     if(mode!=NULL){
@@ -136,7 +137,7 @@ void window_p_resize(WWindow *wwin)
 /*{{{ Move */
 
 
-static void p_move_motion(WWindow *wwin, XMotionEvent *ev, int dx, int dy)
+static void p_move_motion(WWindow *wwin, XMotionEvent *UNUSED(ev), int dx, int dy)
 {
     WMoveresMode *mode=moveres_mode((WRegion*)wwin);
     if(mode!=NULL)

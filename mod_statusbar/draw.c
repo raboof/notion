@@ -12,6 +12,7 @@
 #include <ioncore/mplex.h>
 #include "statusbar.h"
 #include "draw.h"
+#include "utildefines.h"
 
 
 static void calc_elems_x(WRectangle *g, WSBElem *elems, int nelems)
@@ -56,7 +57,6 @@ void statusbar_calculate_xs(WStatusBar *sb)
     GrBorderWidths bdw;
     WMPlex *mgr=NULL;
     bool right_align=FALSE;
-    int minx, maxx;
     int nleft=0, nright=0;
     
     if(sb->brush==NULL || sb->elems==NULL)
@@ -106,7 +106,7 @@ void statusbar_calculate_xs(WStatusBar *sb)
 
 static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
                        WSBElem *elems, int nelems, bool needfill, 
-                       bool complete)
+                       bool UNUSED(complete))
 {
     int prevx=g->x;
     int maxx=g->x+g->w;
@@ -150,7 +150,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     WRectangle g;
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    Window win=sb->wwin.win;
+    /*Window win=sb->wwin.win;*/ /*UNUSED*/
     int ty;
 
     if(sb->brush==NULL)

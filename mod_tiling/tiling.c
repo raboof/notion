@@ -39,10 +39,8 @@
 #include "splitfloat.h"
 #include "split-stdisp.h"
 #include "main.h"
+#include "utildefines.h"
 
-
-
-static WTilingIterTmp tiling_iter_default_tmp;
 
 
 /*{{{ Some helper routines */
@@ -83,7 +81,7 @@ static bool check_node(WTiling *ws, WSplit *split)
 /*{{{ Dynfun implementations */
 
 
-static void reparent_mgd(WRegion *sub, WWindow *par)
+static void UNUSED_FUNCTION(reparent_mgd)(WRegion *sub, WWindow *par)
 {
     WFitParams subfp;
     subfp.g=REGION_GEOM(sub);
@@ -97,7 +95,6 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
 
 bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
 {
-    WTilingIterTmp tmp;
     bool ok=FALSE;
     
     if(par!=NULL){
@@ -118,7 +115,6 @@ bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
     REGION_GEOM(ws)=fp->g;
     
     if(ws->split_tree!=NULL){
-        bool done=FALSE;
         if(fp->mode&REGION_FIT_ROTATE)
             ok=split_rotate_to(ws->split_tree, &(fp->g), fp->rotation);
         if(!ok)
@@ -195,7 +191,7 @@ void tiling_do_set_focus(WTiling *ws, bool warp)
 static WTimer *restack_timer=NULL;
 
 
-static void restack_handler(WTimer *tmr, Obj *obj)
+static void restack_handler(WTimer *UNUSED(tmr), Obj *obj)
 {
     if(obj!=NULL){
         WTiling *ws=(WTiling*)obj;
@@ -333,7 +329,6 @@ static void tiling_create_stdispnode(WTiling *ws, WRegion *stdisp,
                                     int corner, int orientation, 
                                     bool fullsize)
 {
-    int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
     WRectangle *wg=&REGION_GEOM(ws), dg;
     WSplitST *stdispnode;
     WSplitSplit *split;
@@ -483,7 +478,6 @@ void tiling_manage_stdisp(WTiling *ws, WRegion *stdisp,
 
 bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
 {
-    Window bottom=None, top=None;
     WFrame *frame;
     
     if(TILING_STDISP_OF(ws)!=reg){
@@ -622,8 +616,7 @@ void tiling_deinit(WTiling *ws)
 {
     WRegion *reg;
     WTilingIterTmp tmp;
-    WMPlex *remanage_mplex=NULL;
-    
+
     tiling_unmanage_stdisp(ws, FALSE, TRUE);
 
     FOR_ALL_MANAGED_BY_TILING(reg, ws, tmp){
@@ -742,7 +735,7 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
 }
 
 
-static bool mplexfilter(WSplit *node)
+static bool UNUSED_FUNCTION(mplexfilter)(WSplit *node)
 {
     WSplitRegion *regnode=OBJ_CAST(node, WSplitRegion);
     
@@ -1456,7 +1449,7 @@ ExtlTab tiling_get_configuration(WTiling *ws)
 /*{{{ Load */
 
 
-WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab UNUSED(tab))
 {
     WSplitST *st;
 

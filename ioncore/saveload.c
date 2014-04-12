@@ -79,8 +79,6 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     WRegionLoadCreateFn* fn=NULL;
     WRegClassInfo *info=NULL;
     WRegion *reg=NULL;
-    bool grouped=FALSE;
-    char *grouped_name=NULL;
     WPHolder **old_ph_p;
     
     if(!extl_table_gets_s(tab, "type", &objclass))

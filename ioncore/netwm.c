@@ -111,7 +111,6 @@ bool netwm_check_initial_fullscreen(WClientWin *cwin)
 {
 
     int i, n;
-    int ret=0;
     long *data;
     
     n=xwindow_get_property(cwin->win, atom_net_wm_state, XA_ATOM,
@@ -330,9 +329,9 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
     WClientWin *cur=OBJ_CAST(ioncore_g.focus_current, WClientWin);
     /* the new window */
     Window win=region_xwindow((WRegion*)cwin);
-    Time now=ioncore_get_timestamp(); /* TODO: should really use the event.. */
+    /*Time now=ioncore_get_timestamp();*/ /* TODO: should really use the event.. */
     /* user time, current window user time */
-    CARD32 ut=0, cut=0;
+    CARD32 ut=0;
     /* whether the new (got) and current (gotcut) windows had their usertime 
      * set */
     bool got=FALSE, gotcut=FALSE;
@@ -345,6 +344,7 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
             return;
         curwin=region_xwindow((WRegion*)cur);
         gotcut=xwindow_get_cardinal_property(curwin, atom_net_wm_user_time, &cut);
+        (void)gotcut;
     }
     
     got=xwindow_get_cardinal_property(win, atom_net_wm_user_time, &ut);

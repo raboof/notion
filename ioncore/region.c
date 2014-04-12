@@ -30,6 +30,7 @@
 #include "key.h"
 #include "log.h"
 #include "screen-notify.h"
+#include "utildefines.h"
 
 #define D2(X)
 
@@ -481,7 +482,7 @@ bool region_may_dispose(WRegion *reg)
 }
 
 
-static WRegion *region_managed_disposeroot_default(WRegion *mgr, WRegion *reg)
+static WRegion *region_managed_disposeroot_default(WRegion *UNUSED(mgr), WRegion *reg)
 {
     return reg;
 }

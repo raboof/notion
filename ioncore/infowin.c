@@ -17,6 +17,7 @@
 #include "gr.h"
 #include "event.h"
 #include "strings.h"
+#include "utildefines.h"
 
 
 /*{{{ Init/deinit */
@@ -106,7 +107,7 @@ void infowin_deinit(WInfoWin *p)
 /*{{{ Drawing and geometry */
 
 
-void infowin_draw(WInfoWin *p, bool complete)
+void infowin_draw(WInfoWin *p, bool UNUSED(complete))
 {
     WRectangle g;
     
