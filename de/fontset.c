@@ -1,5 +1,5 @@
 /*
- * ion/de/fontset.c
+ * notion/de/fontset.c
  * 
  * This file contains routines to attempt to add fonts to a font pattern
  * so that XCreateFontSet will not fail because the given font(s) do not
@@ -39,13 +39,11 @@
 
 #include <ioncore/common.h>
 #include <ioncore/global.h>
+#include <ioncore/log.h>
 
 #ifndef CF_FONT_ELEMENT_SIZE
 #define CF_FONT_ELEMENT_SIZE 50
 #endif
-
-#define FNT_D(X) /*X*/
-
 
 static const char *get_font_element(const char *pattern, char *buf,
                                     int bufsiz, ...) 
@@ -112,18 +110,19 @@ XFontSet de_create_font_set(const char *fontname)
     char *pattern2=NULL;
     int i;
     
-    FNT_D(fprintf(stderr, "FNTRQ: %s\n", fontname));
+    LOG(DEBUG, FONT, "Creating fontset for: %s", fontname);
     
     fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
 
     if(fs && nmissing==0){
         if(missing!=NULL) 
             XFreeStringList(missing);
+        LOG(DEBUG, FONT, "Found a font without missing charsets for %s, returning it.", fontname);
         return fs;
     }
     
     /* Not a warning, nothing serious */
-    FNT_D(fprintf(stderr, "Failed to load fontset.\n"));
+    LOG(DEBUG, FONT, "Failed to load fontset.");
     
     if(!fs){
         char *lcc=NULL;
@@ -137,6 +136,7 @@ XFontSet de_create_font_set(const char *fontname)
         
         setlocale(LC_CTYPE, "C");
         
+        LOG(DEBUG, FONT, "Found a font with %d missing charsets for %s, trying with the C locale.", nmissing, fontname);
         fs=XCreateFontSet(ioncore_g.dpy, fontname, &missing, &nmissing, &def);
         
         if(lcc!=NULL){
@@ -153,6 +153,8 @@ XFontSet de_create_font_set(const char *fontname)
         XFontsOfFontSet(fs, &fontstructs, &fontnames);
         nfontname=fontnames[0];
     }
+
+    LOG(DEBUG, FONT, "Doing the no_fontset_kludge with fontname %s.", nfontname);
 
     get_font_element(nfontname, weight, CF_FONT_ELEMENT_SIZE,
                      "-medium-", "-bold-", "-demibold-", "-regular-", NULL);
@@ -186,16 +188,17 @@ XFontSet de_create_font_set(const char *fontname)
     if(pattern2==NULL)
         return NULL;
 
-    FNT_D(fprintf(stderr, "NRQ: %s\n", pattern2));
+    LOG(DEBUG, FONT, "no_fontset_kludge resulted in fontname %s", pattern2);
     
     nfontname=pattern2;
     
     if(nmissing)
         XFreeStringList(missing);
-    if(fs)
+    if(fs){
         XFreeFontSet(ioncore_g.dpy, fs);
+        LOG(DEBUG, FONT, "Trying '%s'.", nfontname);
+    }
 
-    FNT_D(if(fs) fprintf(stderr, "Trying '%s'.\n", nfontname));
     
     fs=XCreateFontSet(ioncore_g.dpy, nfontname, &missing, &nmissing, &def);
     
