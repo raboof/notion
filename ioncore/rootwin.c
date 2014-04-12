@@ -240,7 +240,6 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     fp.g.h=DisplayHeight(dpy, xscr);
     
     if(!window_do_init((WWindow*)rootwin, NULL, &fp, root, "WRootWin")){
-        free(rootwin);
         return FALSE;
     }
 
@@ -260,7 +259,6 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     
     scr=create_screen(rootwin, &fp, xscr);
     if(scr==NULL){
-        free(rootwin);
         return FALSE;
     }
     region_set_manager((WRegion*)scr, (WRegion*)rootwin);
