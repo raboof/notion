@@ -235,9 +235,9 @@ static bool start_listening()
     {
       int fl=fcntl(listenfd, F_GETFD);
       if(fl!=-1)
-	fl=fcntl(listenfd, F_SETFD, fl|FD_CLOEXEC);
+          fl=fcntl(listenfd, F_SETFD, fl|FD_CLOEXEC);
       if(fl==-1)
-	goto errwarn;
+          goto errwarn;
     }
 
     if(bind(listenfd, (struct sockaddr*) &addr, 

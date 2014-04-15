@@ -1520,8 +1520,8 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 
         if(atom__kde_net_wm_system_tray_window_for==None){
             atom__kde_net_wm_system_tray_window_for=XInternAtom(ioncore_g.dpy,
-        							"_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",
-        							False);
+                                                                "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",
+                                                                False);
         }
         if(XGetWindowProperty(ioncore_g.dpy, cwin->win,
                               atom__kde_net_wm_system_tray_window_for, 0,

@@ -105,7 +105,7 @@ static void waitrelease(WRegion *reg)
 {
     if(ioncore_modstate()==0)
         return;
-	
+
     /* We need to grab on the root window as <reg> might have been
      * ioncore_defer_destroy:ed by the binding handler (the most common case
      * for using this kpress_wait!). In such a case the grab may

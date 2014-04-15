@@ -213,7 +213,7 @@ bool handle_xkb_event(XEvent *ev)
 EXTL_EXPORT
 int mod_xkbevents_lock_group(int state)
 {
-	return XkbLockGroup(ioncore_g.dpy, XkbUseCoreKbd, state);
+    return XkbLockGroup(ioncore_g.dpy, XkbUseCoreKbd, state);
 }
 
 /*EXTL_DOC
@@ -223,7 +223,7 @@ int mod_xkbevents_lock_group(int state)
 EXTL_EXPORT
 int mod_xkbevents_lock_modifiers(int affect, int values)
 {
-	return XkbLockModifiers(ioncore_g.dpy, XkbUseCoreKbd, affect, values);
+    return XkbLockModifiers(ioncore_g.dpy, XkbUseCoreKbd, affect, values);
 }
 
 /*{{{ Init & deinit */

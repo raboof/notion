@@ -152,18 +152,18 @@ static void frame_add_mode_bindmaps(WFrame *frame)
     WFrameMode modea=framemode_unalt(frame->mode);
     
     if(modea==FRAME_MODE_FLOATING){
-	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else if(modea==FRAME_MODE_TRANSIENT){
         region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else{
         /* mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT || mode==FRAME_MODE_UNKNOWN */
-	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
-    } 
+    }
 }
 
 
@@ -233,7 +233,7 @@ bool frame_set_mode_extl(WFrame *frame, const char *modestr)
     
     idx=stringintmap_ndx(frame_modes, modestr);
     if(idx<0)
-	return FALSE;
+        return FALSE;
     
     frame_set_mode(frame, frame_modes[idx].value);
     
@@ -556,7 +556,7 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
             rq2.geom.x+=off.x;
         else
             rq2.geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
-	
+
         if(rq->flags&REGION_RQGEOM_WEAK_Y)
             rq2.geom.y+=off.y;
         else

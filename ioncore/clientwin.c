@@ -86,7 +86,7 @@ static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
 
     if(extl_table_gets_s(cwin->proptab, propname, &szplcy)){
         string2sizepolicy(szplcy, &value);
-	free(szplcy);
+        free(szplcy);
     }
     return value;
 }

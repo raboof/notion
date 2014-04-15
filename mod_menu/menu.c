@@ -813,10 +813,10 @@ static void show_sub(WMenu *menu, int n)
             extl_protect(NULL);
             extl_call(fn, NULL, "i", &(fnp.initial));
             extl_unprotect(NULL);
-	    extl_unref_fn(fn);
+            extl_unref_fn(fn);
         }else{
             extl_table_getis(menu->tab, n+1, "initial", 'i', &(fnp.initial));
-	}
+        }
     }
 
     submenu=create_menu(par, &fp, &fnp);

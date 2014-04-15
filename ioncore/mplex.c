@@ -1102,7 +1102,7 @@ static WRegion *do_navi(WMPlex *mplex, WStacking *sti,
                     return region_navi_cont((WRegion*)mplex, st->reg, data);
             }
         }
-	        
+
         if(st==sti)
             break;
     }

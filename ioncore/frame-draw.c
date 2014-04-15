@@ -348,7 +348,7 @@ void frame_brushes_updated(WFrame *frame)
             barmode=FRAME_BAR_SHAPED;
         else if(strcmp(s, "none")==0)
             barmode=FRAME_BAR_NONE;
-	free(s);
+        free(s);
     }
         
     frame->barmode=barmode;
