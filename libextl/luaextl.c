@@ -392,7 +392,6 @@ bool __obj_is(Obj *obj, const char *typename);
 
 static int extl_current_file_or_dir(lua_State *st, bool dir)
 {
-    int r;
     lua_Debug ar;
     const char *s, *p;
     
@@ -1178,7 +1177,6 @@ static bool extl_table_do_get_n(lua_State *st, GetNParams *params)
 int extl_table_get_n(ExtlTab ref)
 {
     GetNParams params;
-    int oldtop;
     
     params.ref=ref;
     params.n=0;
@@ -1508,7 +1506,6 @@ static bool extl_get_retvals(lua_State *st, int m, ExtlDoCallParam *param)
  */
 static bool extl_dodo_call_vararg(lua_State *st, ExtlDoCallParam *param)
 {
-    bool ret=TRUE;
     int n=0, m=0;
     
     if(lua_isnil(st, -1))
@@ -2554,7 +2551,6 @@ extern bool extl_serialise(const char *file, ExtlTab tab)
 void extl_dohook(lua_State *L, lua_Debug *ar)
 {
     enum ExtlHookEvent event;
-    const char *source;
 
     lua_getinfo(L, "Sn", ar);
     if (ar->event == LUA_HOOKCALL)

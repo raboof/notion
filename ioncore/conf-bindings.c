@@ -93,7 +93,6 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
         }
         
         if(!button && keysym!=NoSymbol){
-            int tmp;
             if(*ksb_ret!=NoSymbol){
                 warn_obj(str, TR("Insane key combination."));
                 break;
@@ -257,7 +256,6 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
     int action=0;
     uint ksb=0, mod=0;
-    WBinding *bnd=NULL;
     ExtlTab subtab;
     ExtlFn func;
     bool wr=FALSE;
@@ -378,7 +376,6 @@ static char *get_mods(uint state)
 static char *get_key(char *mods, uint ksb)
 {
     const char *s=XKeysymToString(ksb);
-    char *ret=NULL;
     
     if(s==NULL){
         warn(TR("Unable to convert keysym to string."));
@@ -392,7 +389,6 @@ static char *get_key(char *mods, uint ksb)
 static char *get_button(char *mods, uint ksb)
 {
     const char *s=stringintmap_key(button_map, ksb, NULL);
-    char *ret=NULL;
     
     if(s==NULL){
         warn(TR("Unable to convert button to string."));

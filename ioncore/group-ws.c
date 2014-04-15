@@ -250,7 +250,6 @@ WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;
     WPHolder *ph;
-    bool tmp;
     
     ap.stack_above=OBJ_CAST(REGION_PARENT(param->tfor), WRegion);
     if(ap.stack_above==NULL)

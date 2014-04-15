@@ -34,8 +34,7 @@ static WInfoWin *do_get_popup_win(WScreen *scr, Watch *watch, uint pos,
 {
 
     WInfoWin *iw=(WInfoWin*)(watch->obj);
-    WFitParams fp;
-    
+
     if(iw==NULL){
         WMPlexAttachParams param=MPLEXATTACHPARAMS_INIT;
         

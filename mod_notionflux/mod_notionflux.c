@@ -40,7 +40,6 @@ Buf bufs[MAX_SERVED];
 static int listenfd=-1;
 static char *listenfile=NULL;
 static ExtlFn tostringfn;
-static int tmp[CHUNK];
 
 
 /* Without the 'or nil' kludge tostring may have no parameters. */
@@ -145,7 +144,6 @@ static void receive_data(int fd, void *buf_)
 static void connection_attempt(int lfd, void *data)
 {
     int i, fd;
-    Buf *buf=NULL;
     struct sockaddr_un from;
     socklen_t fromlen=sizeof(from);
     
@@ -209,7 +207,6 @@ static void connection_attempt(int lfd, void *data)
 static bool start_listening()
 {
     struct sockaddr_un addr;
-    int sock;
 
     listenfile=tmpnam(NULL);
     if(listenfile==NULL){
@@ -233,14 +230,14 @@ static bool start_listening()
     strcpy(addr.sun_path, listenfile);
 
     {
-      int fl=fcntl(listenfd, F_GETFD);
-      if(fl!=-1)
-          fl=fcntl(listenfd, F_SETFD, fl|FD_CLOEXEC);
-      if(fl==-1)
-          goto errwarn;
+        int fl=fcntl(listenfd, F_GETFD);
+        if(fl!=-1)
+            fl=fcntl(listenfd, F_SETFD, fl|FD_CLOEXEC);
+        if(fl==-1)
+            goto errwarn;
     }
 
-    if(bind(listenfd, (struct sockaddr*) &addr, 
+    if(bind(listenfd, (struct sockaddr*) &addr,
             strlen(addr.sun_path)+sizeof(addr.sun_family))<0){
         goto errwarn;
     }

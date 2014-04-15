@@ -270,8 +270,6 @@ static void rot_rs_rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
 
 static void flip_right(WSplitSplit *a, WSplitSplit *p)
 {
-    WSplit *tmp;
-    
     assert(a->tl==(WSplit*)p);
     
     /* Right flip:
@@ -336,8 +334,6 @@ static void rot_rs_flip_right(WSplitSplit *a, WSplitSplit *p)
 
 static void flip_left(WSplitSplit *a, WSplitSplit *p)
 {
-    WSplit *tmp;
-    
     assert(a->br==(WSplit*)p);
     
     /* Left flip:

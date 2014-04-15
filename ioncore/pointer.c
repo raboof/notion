@@ -128,8 +128,6 @@ XEvent *ioncore_current_pointer_event()
 
 static void call_button(WBinding *binding, XButtonEvent *ev)
 {
-    WButtonHandler *fn;
-
     if(binding==NULL)
         return;
 
@@ -163,8 +161,6 @@ static void call_motion_end(XButtonEvent *ev)
 static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
                               int dx, int dy)
 {
-    WMotionHandler *fn;
-    
     if(binding==NULL)
         return;
 

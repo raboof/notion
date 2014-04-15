@@ -228,7 +228,6 @@ const char *frame_mode_extl(WFrame *frame)
 EXTL_EXPORT_AS(WFrame, set_mode)
 bool frame_set_mode_extl(WFrame *frame, const char *modestr)
 {
-    WFrameMode mode;
     int idx;
     
     idx=stringintmap_ndx(frame_modes, modestr);
@@ -303,8 +302,6 @@ int frame_nth_tab_w(WFrame *frame, int n)
 
 void frame_update_attr_nth(WFrame *frame, int i)
 {
-    WRegion *reg;
-    
     if(i<0 || i>=frame->titles_n)
         return;
 
@@ -525,7 +522,6 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
         WRQGeomParams rq2=RQGEOMPARAMS_INIT;
         int gravity=ForgetGravity;
         WRectangle off;
-        WRegion *par;
         
         rq2.geom=rq->geom;
         rq2.flags=rq->flags&(REGION_RQGEOM_WEAK_ALL
@@ -663,8 +659,6 @@ bool frame_set_shaded(WFrame *frame, int sp)
     bool set=(frame->flags&FRAME_SHADED);
     bool nset=libtu_do_setparam(sp, set);
     WRQGeomParams rq=RQGEOMPARAMS_INIT;
-    GrBorderWidths bdw;
-    int h;
 
     if(!XOR(nset, set))
         return nset;
@@ -898,7 +892,6 @@ ExtlTab frame_get_configuration(WFrame *frame)
 
 void frame_do_load(WFrame *frame, ExtlTab tab)
 {
-    int flags=0;
     int p=0, s=0;
     
     if(extl_table_gets_i(tab, "saved_x", &p) &&

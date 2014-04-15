@@ -56,7 +56,6 @@ void statusbar_calculate_xs(WStatusBar *sb)
     GrBorderWidths bdw;
     WMPlex *mgr=NULL;
     bool right_align=FALSE;
-    int minx, maxx;
     int nleft=0, nright=0;
     
     if(sb->brush==NULL || sb->elems==NULL)
@@ -150,7 +149,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     WRectangle g;
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    Window win=sb->wwin.win;
+    /*Window win=sb->wwin.win;*/ /*UNUSED*/
     int ty;
 
     if(sb->brush==NULL)

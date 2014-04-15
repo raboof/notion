@@ -263,7 +263,6 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
 {
     WRegionAttachData data2;
     WFramedPHolder *fph;
-    WPHolder *root;
     WRegion *res;
     RP rp;
     

@@ -103,7 +103,6 @@ bool extl_set_userdirs(const char *appname)
 bool extl_set_sessiondir(const char *session)
 {
     char *tmp;
-    bool ret=FALSE;
     
     if(strchr(session, '/')!=NULL){
         tmp=extl_scopy(session);
@@ -192,7 +191,7 @@ static int try_etcpath(const char *const *files,
                        ExtlTryConfigFn *tryfn, void *tryfnparam)
 {
     const char *const *file=NULL;
-    int i, ret, ret2=EXTL_TRYCONFIG_NOTFOUND;
+    int ret, ret2=EXTL_TRYCONFIG_NOTFOUND;
     char *path, *colon, *dir;
 
     if(sessiondir!=NULL){
@@ -440,8 +439,6 @@ ExtlTab extl_extl_read_savefile(const char *basename)
 static bool ensuredir(char *f)
 {
     char *p;
-    int tryno=0;
-    bool ret=TRUE;
     
     if(access(f, F_OK)==0)
         return TRUE;

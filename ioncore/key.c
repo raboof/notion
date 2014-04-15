@@ -33,7 +33,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
     static XComposeStatus cs={NULL, 0};
     char buf[32]={0,};
     Status stat;
-    int n, i;
+    int n;
     KeySym ksym;
     
     if(wwin->xic!=NULL){
@@ -205,7 +205,6 @@ static WSubmapState *add_sub(WRegion *reg, uint key, uint state)
 }
 
 
-static XKeyEvent *current_key_event=NULL;
 static uint current_kcb, current_state;
 static bool current_submap;
 

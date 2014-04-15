@@ -80,7 +80,6 @@ void check_new_user_help()
     const char *userdir=extl_userdir();
     char *oldbeard=NULL;
     char *tmp=NULL, *cmd=NULL;
-    pid_t pid;
     bool ret;
 
     if(userdir==NULL){

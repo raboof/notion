@@ -711,8 +711,6 @@ static bool reparent_root(WClientWin *cwin)
 
 void clientwin_deinit(WClientWin *cwin)
 {
-    WRegion *reg;
-    
     if(cwin->win!=None){
         region_pointer_focus_hack(&cwin->region);
 

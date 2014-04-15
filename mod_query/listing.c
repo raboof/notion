@@ -124,7 +124,6 @@ static void string_calc_parts(GrBrush *brush, int maxw, char *str,
 {
     int wrapw=grbrush_get_text_width(brush, "\\", 1);
     int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
-    int i, s;
 
     iinf->n_parts=0;
     iinf->len=strlen(str);
@@ -188,7 +187,7 @@ static int col_fit(int w, int itemw, int spacing)
 static bool one_row_up(WListing *l, int *ip, int *rp)
 {
     int i=*ip, r=*rp;
-    int ir=ITEMROWS(l, i);
+    /*int ir=ITEMROWS(l, i);*/ /*UNUSED*/
     
     if(r>0){
         (*rp)--;
@@ -305,8 +304,6 @@ void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l)
 
 void deinit_listing(WListing *l)
 {
-    int i;
-    
     if(l->strs==NULL)
         return;
     

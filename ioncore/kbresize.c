@@ -154,7 +154,6 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
     WBinding *binding=NULL;
-    WBindmap **bindptr;
     WMoveresMode *mode;
     
     if(ev->type==KeyRelease)

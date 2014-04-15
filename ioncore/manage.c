@@ -180,7 +180,7 @@ bool clientwin_do_manage_default(WClientWin *cwin,
     WScreen *scr=NULL;
     WPHolder *ph=NULL;
     int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
-    bool ok, uq=FALSE;
+    bool uq=FALSE;
     WRegion *createroot=NULL;
 
     /* Find a suitable screen */
@@ -397,7 +397,6 @@ bool region_do_rescue_this(WRegion *tosave_, WRescueInfo *info, int ph_flags)
 bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                                    WRegionIterator *iter, void *st)
 {
-    bool res=FALSE;
     int fails=0;
 
     if(info->failed_get)

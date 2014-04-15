@@ -41,8 +41,6 @@ static GrStyleSpec tabmenuentry_spec=GR_STYLESPEC_INIT;
 bool debrush_init(DEBrush *brush, Window win,
                   const GrStyleSpec *spec, DEStyle *style)
 {
-    GrStyleSpec tmp;
-    
     brush->d=style;
     brush->extras_fn=NULL;
     brush->indicator_w=0;

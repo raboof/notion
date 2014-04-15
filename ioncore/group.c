@@ -44,9 +44,6 @@
 #include "return.h"
 
 
-static void group_place_stdisp(WGroup *ws, WWindow *parent,
-                                 int pos, WRegion *stdisp);
-
 static void group_remanage_stdisp(WGroup *ws);
 
 static void group_do_set_bottom(WGroup *grp, WStacking *st);
@@ -564,7 +561,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
                                         WSizePolicy szplcy)
 {
     WStacking *st=NULL, *tmp=NULL;
-    Window bottom=None, top=None;
     WStacking **stackingp=group_get_stackingp(ws);
     WFrame *frame;
     
@@ -742,8 +738,7 @@ WRegion *group_do_attach(WGroup *ws,
                          WRegionAttachData *data)
 {
     WFitParams fp;
-    WRegion *reg;
-    
+
     if(ws->bottom!=NULL && param->bottom){
         warn(TR("'bottom' already set."));
         return NULL;
@@ -1323,7 +1318,6 @@ ExtlTab group_get_configuration(WGroup *ws)
     ExtlTab tab, mgds, subtab, g;
     WStacking *st;
     WGroupIterTmp tmp;
-    WMPlex *par;
     int n=0;
     WRectangle tmpg;
     
@@ -1378,7 +1372,6 @@ void group_do_load(WGroup *ws, ExtlTab tab)
         for(i=1; i<=n; i++){
             if(extl_table_geti_t(substab, i, &subtab)){
                 WGroupAttachParams par=GROUPATTACHPARAMS_INIT;
-                WRegionAttachData data;
                 WFitParams fp;
                 WPHolder *ph;
                 

@@ -444,10 +444,6 @@ static bool create_initial_ws(WScreen *scr)
 
 bool screen_init_layout(WScreen *scr, ExtlTab tab)
 {
-    char *name;
-    ExtlTab substab, subtab;
-    int n, i;
-
     if(tab==extl_table_none())
         return create_initial_ws(scr);
     

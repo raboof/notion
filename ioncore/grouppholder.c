@@ -17,9 +17,6 @@
 #include "grouppholder.h"
 
 
-static void group_watch_handler(Watch *watch, Obj *ws);
-
-
 /*{{{ Primitives */
 
 
@@ -226,7 +223,7 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
                                              WRegionAttachData *data)
 {
     WRegionAttachData data2;
-    WPHolder *root, *rph;
+    WPHolder *rph;
     WRegion *res;
     RP rp;
     

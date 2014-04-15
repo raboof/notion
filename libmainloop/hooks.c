@@ -29,7 +29,6 @@ static Rb_node named_hooks=NULL;
 /* If hk==NULL to register, new is attempted to be created. */
 WHook *mainloop_register_hook(const char *name, WHook *hk)
 {
-    bool created=FALSE;
     char *nnm;
     
     if(hk==NULL)

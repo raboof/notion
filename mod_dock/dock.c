@@ -1324,7 +1324,6 @@ static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *unused)
 {
     WDockApp *dockapp, *before_dockapp;
     WRectangle geom;
-    WFitParams fp;
     bool draw_border=TRUE;
     int pos=INT_MAX;
      
@@ -1393,7 +1392,6 @@ EXTL_EXPORT_MEMBER
 bool dock_attach(WDock *dock, WRegion *reg)
 {
     WRegionAttachData data;
-    WFitParams fp;
     
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;

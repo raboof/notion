@@ -303,7 +303,6 @@ void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
                   Obj *obj, ExtlFn fn)
 {
     WTimer *q, **qptr;
-    bool set=FALSE;
     
     timer_reset(timer);
 

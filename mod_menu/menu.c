@@ -191,7 +191,7 @@ static void menu_calc_size(WMenu *menu, bool maxexact,
     GrBorderWidths bdw, e_bdw;
     char *str;
     int i;
-    int nath, bdh, maxew=menu->max_entry_w;
+    int bdh, maxew=menu->max_entry_w;
     
     grbrush_get_border_widths(menu->brush, &bdw);
     grbrush_get_border_widths(menu->entry_brush, &e_bdw);
@@ -453,7 +453,6 @@ static void calc_entry_dimens(WMenu *menu)
 static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 {
     GrBrush *brush, *entry_brush;
-    char *st;
     const char *style=(menu->big_mode 
                        ? "input-menu-big"
                        : (menu->pmenu_mode
@@ -590,8 +589,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
                const WMenuCreateParams *params)
 {
     Window win;
-    int i;
-    
+
     menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
     
     if(menu->entries==NULL){
@@ -1376,7 +1374,6 @@ static void menu_insstr(WMenu *menu, const char *buf, size_t n)
         entry=menu->selected_entry;
         do{
             if(menu->entries[entry].title!=NULL){
-                size_t l=strlen(menu->entries[entry].title);
                 if(libtu_strcasestr(menu->entries[entry].title, newta)){
                     found=TRUE;
                     break;

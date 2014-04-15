@@ -125,7 +125,6 @@ static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
 
 static void moveres_draw_infowin(WMoveresMode *mode)
 {
-    WRectangle geom;
     char *buf;
     
     if(mode->infowin==NULL)
@@ -165,7 +164,6 @@ static void moveres_draw_infowin(WMoveresMode *mode)
 static void moveres_draw_rubberband(WMoveresMode *mode)
 {
     WRectangle rgeom=mode->geom;
-    int rx, ry;
     WRootWin *rootwin=(mode->reg==NULL 
                        ? NULL 
                        : region_rootwin_of(mode->reg));

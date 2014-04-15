@@ -200,9 +200,6 @@ static void preinit_gr(WRootWin *rootwin)
 }
 
 
-static Atom net_virtual_roots=None;
-
-
 static bool rootwin_init(WRootWin *rootwin, int xscr)
 {
     Display *dpy=ioncore_g.dpy;

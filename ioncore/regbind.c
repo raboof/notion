@@ -205,8 +205,7 @@ WBinding *region_lookup_keybinding(WRegion *reg,
     WBinding *binding=NULL;
     const WSubmapState *s=NULL;
     WBindmap *bindmap=NULL;
-    int i;
-    
+
     *binding_owner_ret=reg;
 
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
@@ -272,7 +271,6 @@ static void add_bindings(WRegion *reg, WRegion *r2)
 {
     WRegion *rx=REGION_MANAGER(r2);
     WRegBindingInfo *rbind, *rb2;
-    WBinding *binding=NULL;
     
     if(rx!=NULL && REGION_PARENT_REG(rx)==reg){
         /* The recursion is here to get the bindmaps correctly ordered. */

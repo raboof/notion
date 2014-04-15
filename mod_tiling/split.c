@@ -409,8 +409,6 @@ void split_update_bounds(WSplit *node, bool recursive)
 
 void splitsplit_update_geom_from_children(WSplitSplit *node)
 {
-    WSplit *split=(WSplit*)node;
-    
     if(node->dir==SPLIT_VERTICAL){
         ((WSplit*)node)->geom.h=node->tl->geom.h+node->br->geom.h;
         ((WSplit*)node)->geom.y=node->tl->geom.y;
@@ -1555,8 +1553,8 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
                               int minsize, WRegionSimpleCreateFn *fn, 
                               WWindow *parent)
 {
-    int objmin, objmax;
-    int s, sn, so, pos;
+    int objmin;
+    int s, sn, so;
     WSplitSplit *nsplit;
     WSplitRegion *nnode;
     WSplitInner *psplit;

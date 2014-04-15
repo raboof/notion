@@ -451,7 +451,6 @@ bool mplex_fitrep(WMPlex *mplex, WWindow *par, const WFitParams *fp)
 
 void mplex_do_fit_managed(WMPlex *mplex, WFitParams *fp)
 {
-    WRectangle geom;
     WMPlexIterTmp tmp;
     WStacking *node;
     WFitParams fp2;
@@ -491,7 +490,6 @@ static void mplex_managed_rqgeom(WMPlex *mplex, WRegion *sub,
                                  const WRQGeomParams *rq,
                                  WRectangle *geomret)
 {
-    WRectangle rg;
     WFitParams fp;
     WStacking *node;
 
@@ -706,7 +704,7 @@ static WStacking *has_stacking_within(WMPlex *mplex, WRegion *reg)
  */
 static WStacking *mplex_to_focus(WMPlex *mplex)
 {
-    WStacking *foc=NULL, *fallback=NULL;
+    WStacking *foc=NULL;
     WRegion *reg=NULL;
     
     foc=maybe_focusable(REGION_ACTIVE_SUB(mplex));
@@ -1215,9 +1213,9 @@ static bool mplex_stack(WMPlex *mplex, WStacking *st)
 
 static void mplex_unstack(WMPlex *mplex, WStacking *st)
 {
-    WStacking *stacking;
+    /*WStacking *stacking;*/
     
-    stacking=mplex_get_stacking(mplex);
+    /*stacking=mplex_get_stacking(mplex);*/
     
     stacking_unstack(&mplex->win, st);
 }
@@ -1450,7 +1448,6 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
                        WMPlexAttachParams *par)
 {
     int tmp;
-    char *tmpstr;
     int ok=~mask;
     
     if(ok&MPLEX_ATTACH_LEVEL){
@@ -1600,7 +1597,6 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
     WMPlexAttachParams ap;
     WPHolder *ph=NULL;
     WMPlexPHolder *mph;
-    WLListNode *after;
     
     /* Check current */ {
         WStacking *cur=mplex_current_node(mplex);
@@ -1883,7 +1879,6 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     if(s==NULL || strcmp(s, "replace")==0){
         WRegionAttachData data;
         WFitParams fp;
-        int o2;
         
         fp.g.x=0;
         fp.g.y=0;
@@ -2107,7 +2102,7 @@ static void save_node(WMPlex *mplex, ExtlTab subs, int *n,
 
 ExtlTab mplex_get_configuration(WMPlex *mplex)
 {
-    ExtlTab tab, subs, stdisptab;
+    ExtlTab tab, subs /*, stdisptab*/;
     WMPlexIterTmp tmp;
     WLListIterTmp ltmp;
     WLListNode *lnode;

@@ -149,8 +149,6 @@ static WStacking *link_list_after(WStacking *l1,
                                   WStacking *i1,
                                   WStacking *l2)
 {
-    WStacking *tmp;
-    
     if(i1==l1->prev)
         return link_lists(l1, l2);
     

@@ -284,7 +284,6 @@ void ioncore_handle_mapping_notify(XEvent *ev)
 void ioncore_handle_expose(const XExposeEvent *ev)
 {
     WWindow *wwin;
-    WRootWin *rootwin;
     XEvent tmp;
     
     while(XCheckWindowEvent(ioncore_g.dpy, ev->window, ExposureMask, &tmp))
@@ -460,13 +459,13 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
 void ioncore_handle_buttonpress(XEvent *ev)
 {
     XEvent tmp;
-    Window win_pressed;
+    /*Window win_pressed;*/ /*UNUSED*/
     bool finished=FALSE;
 
     if(ioncore_grab_held())
         return;
 
-    win_pressed=ev->xbutton.window;
+    /*win_pressed=ev->xbutton.window;*/
     
     if(!ioncore_do_handle_buttonpress(&(ev->xbutton)))
         return;

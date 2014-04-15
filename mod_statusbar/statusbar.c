@@ -779,7 +779,6 @@ static void spread_stretch(WStatusBar *sb)
     int i, j, k;
     int diff;
     WSBElem *el, *lel, *rel;
-    const char *str;
     
     for(i=0; i<sb->nelems; i++){
         el=&(sb->elems[i]);

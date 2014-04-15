@@ -198,9 +198,6 @@ static void do_execute(WDeferred *d)
 
 void mainloop_execute_deferred_on_list(WDeferred **list)
 {
-    Obj *obj;
-    void (*action)(Obj*);
-    
     while(*list!=NULL){
         WDeferred *d=*list;
         UNLINK_ITEM(*list, d, next, prev);
