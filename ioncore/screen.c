@@ -412,13 +412,6 @@ ExtlTab screen_get_configuration(WScreen *scr)
 }
 
 
-static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp, 
-                                  WRegionLoadCreateFn *fn)
-{
-    return fn(parent, fp, extl_table_none());
-}
-
-
 static bool create_initial_ws(WScreen *scr)
 {
     WRegion *reg=NULL;

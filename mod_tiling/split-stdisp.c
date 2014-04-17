@@ -51,30 +51,6 @@ static int other_dir(int dir)
 }
 
 
-static void swap(int *x, int *y)
-{
-    int z=*x;
-    *x=*y;
-    *y=z;
-}
-
-
-static void swapptr(WSplit **x, WSplit **y)
-{
-    void *z=*x;
-    *x=*y;
-    *y=z;
-}
-
-
-static void swapgeom(WRectangle *g, WRectangle *h)
-{
-    WRectangle tmp=*g;
-    *g=*h;
-    *h=tmp;
-}
-
-
 int stdisp_recommended_w(WSplitST *stdisp)
 {
     if(stdisp->regnode.reg==NULL)

@@ -184,7 +184,6 @@ void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg,
 
 void de_get_extra_cgrps(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
 {
-    
     uint i=0, nfailed=0, n=extl_table_get_n(tab);
     ExtlTab sub;
     

@@ -509,6 +509,12 @@ function write_exports(h)
 #include <libextl/extl.h>
 #include <libextl/private.h>
 
+/* quiet warnings for generated code */
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-macros"
+#endif
+
 ]])
     -- end blockwrite
 

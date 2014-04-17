@@ -189,20 +189,6 @@ int str_len(const char *p)
 /*{{{ Title shortening */
 
 
-static char *scatn3(const char *p1, int l1,
-                    const char *p2, int l2,
-                    const char *p3, int l3)
-{
-    char *p=ALLOC_N(char, l1+l2+l3+1);
-    
-    if(p!=NULL){
-        strncat(p, p1, l1);
-        strncat(p, p2, l2);
-        strncat(p, p3, l3);
-    }
-    return p;
-}
-
 INTRSTRUCT(SR);
     
 DECLSTRUCT(SR){

@@ -643,30 +643,16 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
                                  bool just_update_minmax)
 {
     WDockApp *dockapp=NULL, *thisdockapp=NULL, thisdockapp_copy;
-    WRectangle parent_geom, dock_geom, border_dock_geom;
+    WRectangle dock_geom, border_dock_geom;
     GrBorderWidths dock_bdw, dockapp_bdw;
     int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0;
     int pos, grow;
     WRectangle tile_size;
-    WWindow *par=REGION_PARENT(dock);
     
     /* dock_resize calls with NULL parameters. */
     assert(reg!=NULL || (geomret==NULL && !(flags&REGION_RQGEOM_TRYONLY)));
     
     dock_get_pos_grow(dock, &pos, &grow);
-
-    /* Determine parent and tile geoms */
-    parent_geom.x=0;
-    parent_geom.y=0;
-    if(par!=NULL){
-        parent_geom.w=REGION_GEOM(par).w;
-        parent_geom.h=REGION_GEOM(par).h;
-    }else{
-        /* Should not happen in normal operation. */
-        parent_geom.w=1;
-        parent_geom.h=1;
-    }
-    
     dock_get_tile_size(dock, &tile_size);
 
     /* Determine dock and dockapp border widths */
@@ -1222,7 +1208,6 @@ WDock *mod_dock_create(ExtlTab tab)
 
     /* Final setup */    
     if(floating){
-        const WRectangle *pg=&REGION_GEOM(screen);
         WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
         WRegionAttachData data;
         

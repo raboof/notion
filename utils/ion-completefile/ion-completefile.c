@@ -73,7 +73,6 @@
 #define DISPOSE(X) free(X)
 #define NEW(T, X)  ALLOC_N(T, X)
 #define STATIC static
-#define EL_CONST const
 #define SIZE_T int
 #define MEM_INC 64
 #define COPYFROMTO(new, p, len) \
@@ -85,14 +84,6 @@
 #endif
 
 typedef struct dirent DIRENTRY;
-
-static void el_add_slash(char *path,char *p)
-{
-    struct stat sb;
-
-    if (stat(path, &sb) >= 0)
-        (void)strcat(p, S_ISDIR(sb.st_mode) ? "/" : " ");
-}
 
 static int el_is_directory(char *path)
 {
@@ -133,20 +124,6 @@ static int el_is_executable(char *path)
     }
     return (0);
 }
-
-
-/*
- **  strcmp-like sorting predicate for qsort.
- */
-/*STATIC int compare(EL_CONST void *p1,EL_CONST void *p2)
- {
- EL_CONST char	**v1;
- EL_CONST char	**v2;
- * 
- v1 = (EL_CONST char **)p1;
- v2 = (EL_CONST char **)p2;
- return strcmp(*v1, *v2);
- }*/
 
 /*
  **  Fill in *avp with an array of names that match file, up to its length.
@@ -329,7 +306,6 @@ STATIC int SplitPath(const char *path,char **dirpart,char **filepart)
  */
 STATIC int SplitRelativePath(const char *path,char **dirpart,char **filepart)
 {
-    static char	DOT[] = "./";
     static char EOL[] = "\0";
     char *dpart;
     char *fpart;
@@ -364,79 +340,6 @@ STATIC int SplitRelativePath(const char *path,char **dirpart,char **filepart)
     *filepart = fpart;
     return 0;
 }
-
-/*
- **  Attempt to complete the pathname, returning an allocated copy.
- **  Fill in *unique if we completed it, or set it to 0 if ambiguous.
- */
-#if 0
-static char *el_complete(char *pathname,int *unique)
-{
-    char	**av;
-    char	*dir;
-    char	*file;
-    char	*new;
-    char	*p;
-    SIZE_T	ac;
-    SIZE_T	end;
-    SIZE_T	i;
-    SIZE_T	j;
-    SIZE_T	len;
-
-    if (SplitPath(pathname, &dir, &file) < 0)
-        return NULL;
-
-    if ((ac = FindMatches(dir, file, &av)) == 0) {
-        DISPOSE(dir);
-        DISPOSE(file);
-        return NULL;
-    }
-
-    p = NULL;
-    len = strlen(file);
-    if (ac == 1) {
-        /* Exactly one match -- finish it off. */
-        *unique = 1;
-        j = strlen(av[0]) - len + 2;
-        if ((p = NEW(char, j + 1)) != NULL) {
-            COPYFROMTO(p, av[0] + len, j);
-            if ((new = NEW(char, strlen(dir) + strlen(av[0]) + 2)) != NULL) {
-                (void)strcpy(new, dir);
-                (void)strcat(new, "/");
-                (void)strcat(new, av[0]);
-                el_add_slash(new, p);
-                DISPOSE(new);
-            }
-        }
-    }
-    else {
-        *unique = 0;
-        if (len) {
-            /* Find largest matching substring. */
-            for (i = len, end = strlen(av[0]); i < end; i++)
-                for (j = 1; j < ac; j++)
-                    if (av[0][i] != av[j][i])
-                        goto breakout;
-breakout:
-            if (i > len) {
-                j = i - len + 1;
-                if ((p = NEW(char, j)) != NULL) {
-                    COPYFROMTO(p, av[0] + len, j);
-                    p[j - 1] = '\0';
-                }
-            }
-        }
-    }
-
-    /* Clean up and return. */
-    DISPOSE(dir);
-    DISPOSE(file);
-    for (i = 0; i < ac; i++)
-        DISPOSE(av[i]);
-    DISPOSE(av);
-    return p;
-}
-#endif
 
 static int complete_homedir(const char *username, char ***cp_ret, char **beg)
 {

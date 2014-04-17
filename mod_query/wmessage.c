@@ -21,7 +21,6 @@
 
 
 #define WMSG_BRUSH(WMSG) ((WMSG)->input.brush)
-#define WMSG_WIN(WMSG) ((WMSG)->input.win.win)
 
 
 /*{{{ Sizecalc */

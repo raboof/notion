@@ -402,10 +402,6 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
         d->stipple_gc=tmp;
         swapped=FALSE;
     }
-    /*if(MATCHES2("*-*-*-dragged", a1, a2)){
-        XFillRectangle(ioncore_g.dpy, win, d->stipple_gc, 
-                       g->x, g->y, g->w, g->h);
-    }*/
 }
 
 

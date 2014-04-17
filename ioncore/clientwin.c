@@ -78,20 +78,6 @@ void clientwin_get_protocols(WClientWin *cwin)
 }
 
 
-static WSizePolicy get_sizepolicy_winprop(WClientWin *cwin,
-                                          const char *propname,
-                                          WSizePolicy value)
-{
-    char *szplcy;
-
-    if(extl_table_gets_s(cwin->proptab, propname, &szplcy)){
-        string2sizepolicy(szplcy, &value);
-        free(szplcy);
-    }
-    return value;
-}
-
-
 #define SIZEHINT_PROPS (CLIENTWIN_PROP_MAXSIZE|   \
                         CLIENTWIN_PROP_MINSIZE|   \
                         CLIENTWIN_PROP_ASPECT|    \
@@ -1128,7 +1114,7 @@ EXTL_EXPORT_MEMBER
 ExtlTab clientwin_get_ident(WClientWin *cwin)
 {
     char **p=NULL, **p2=NULL, *wrole=NULL;
-    int n=0, n2=0, n3=0, tmp=0;
+    int n=0, n2=0, n3=0;
     Window tforwin=None;
     ExtlTab tab;
     bool dockapp_hack=FALSE;

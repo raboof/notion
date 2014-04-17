@@ -1498,10 +1498,6 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
     splittree_rqgeom(node, flags, &geom, &ogeom);
     
     return extl_table_from_rectangle(&ogeom);
-    
-err:
-    warn(TR("Invalid node."));
-    return extl_table_none();
 }
 
 

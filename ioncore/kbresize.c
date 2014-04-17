@@ -91,13 +91,6 @@ static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
     return (int)(t1-t2);
 }
 
-#define SIGN_NZ(X) ((X) < 0 ? -1 : 1)
-
-static double max(double a, double b)
-{
-    return (a<b ? b : a);
-}
-
 void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 {
     struct timeval tv;
