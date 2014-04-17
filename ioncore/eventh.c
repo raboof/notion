@@ -459,14 +459,11 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
 void ioncore_handle_buttonpress(XEvent *ev)
 {
     XEvent tmp;
-    /*Window win_pressed;*/ /*UNUSED*/
     bool finished=FALSE;
 
     if(ioncore_grab_held())
         return;
 
-    /*win_pressed=ev->xbutton.window;*/
-    
     if(!ioncore_do_handle_buttonpress(&(ev->xbutton)))
         return;
 

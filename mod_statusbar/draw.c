@@ -149,7 +149,6 @@ void statusbar_draw(WStatusBar *sb, bool complete)
     WRectangle g;
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    /*Window win=sb->wwin.win;*/ /*UNUSED*/
     int ty;
 
     if(sb->brush==NULL)

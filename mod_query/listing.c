@@ -187,7 +187,6 @@ static int col_fit(int w, int itemw, int spacing)
 static bool one_row_up(WListing *l, int *ip, int *rp)
 {
     int i=*ip, r=*rp;
-    /*int ir=ITEMROWS(l, i);*/ /*UNUSED*/
     
     if(r>0){
         (*rp)--;

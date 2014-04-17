@@ -179,7 +179,6 @@ static bool wedln_update_cursor(WEdln *wedln, int iw)
     int vstart=wedln->vstart;
     int point=wedln->edln.point;
     int len=wedln->edln.psize;
-    /*int mark=wedln->edln.mark;*/ /*UNUSED*/
     const char *str=wedln->edln.p;
     bool ret;
     
