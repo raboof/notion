@@ -23,6 +23,13 @@
 
 #define XOR(X, Y) (((X)==0) != ((Y)==0))
 
+/* UNUSED macro, for function argument */
+#ifdef __GNUC__
+#  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#else
+#  define UNUSED(x) UNUSED_ ## x
+#endif
+
 extern void* malloczero(size_t size);
 extern void* remalloczero(void *ptr, size_t oldsize, size_t newsize);
 

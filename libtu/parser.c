@@ -664,7 +664,7 @@ static bool try_include_dir(Tokenizer *tokz, const char *dir, int dlen,
 }
 
 
-static bool opt_include(Tokenizer *tokz, int n, Token *toks)
+static bool opt_include(Tokenizer *tokz, int UNUSED(n), Token *toks)
 {
     const char *fname=TOK_STRING_VAL(toks+1);
     const char *lastndx=NULL;

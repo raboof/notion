@@ -72,7 +72,7 @@ static void optimise(ObjList **objlist)
 }
 
 
-void watch_handler(Watch *watch, Obj *obj)
+void watch_handler(Watch *watch, Obj *UNUSED(obj))
 {
     ObjList *node=(ObjList*)watch;
     
