@@ -190,7 +190,7 @@ void tiling_do_set_focus(WTiling *ws, bool warp)
 static WTimer *restack_timer=NULL;
 
 
-static void restack_handler(WTimer *tmr, Obj *obj)
+static void restack_handler(WTimer *UNUSED(tmr), Obj *obj)
 {
     if(obj!=NULL){
         WTiling *ws=(WTiling*)obj;
