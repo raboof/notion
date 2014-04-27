@@ -48,9 +48,8 @@ static int calc_text_y(WEdln *wedln, const WRectangle *geom)
 }
 
 
-static int wedln_draw_strsect(WEdln *wedln, const WRectangle *geom, 
-                              int x, int y, const char *str, int len,
-                              GrAttr a)
+static int wedln_draw_strsect(WEdln *wedln, int x, int y, const char *str, 
+                              int len, GrAttr a)
 {
     if(len==0)
         return 0;
@@ -77,7 +76,7 @@ static void dispu(const char* s, int l)
 
 #define DSTRSECT(LEN, A)                                    \
     if(LEN>0){                                              \
-        tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty, \
+        tx+=wedln_draw_strsect(wedln, geom->x+tx, ty,       \
                                str, LEN, GR_ATTR(A));       \
         str+=LEN; len-=LEN;                                 \
     }
@@ -121,7 +120,7 @@ static void wedln_do_draw_str_box(WEdln *wedln, const WRectangle *geom,
             DSTRSECT(cursor, normal);
         }
         if(len==0){
-            tx+=wedln_draw_strsect(wedln, geom, geom->x+tx, ty,
+            tx+=wedln_draw_strsect(wedln, geom->x+tx, ty,
                                    " ", 1, GR_ATTR(cursor));
         }else{
             ll=str_nextoff(str, 0);

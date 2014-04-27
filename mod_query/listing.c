@@ -36,7 +36,7 @@ static int strings_maxw(GrBrush *brush, char **strs, int nstrs)
 }
 
 
-static int getbeg(GrBrush *brush, int maxw, char *str, int l, int *wret)
+static int getbeg(GrBrush *brush, int maxw, char *str, int *wret)
 {
     int n=0, nprev=0, w;
     GrFontExtents fnte;
@@ -98,7 +98,7 @@ static void string_do_calc_parts(GrBrush *brush, int maxw, char *str, int l,
     w=grbrush_get_text_width(brush, str, l);
     
     if(w>rmaxw){
-        l2=getbeg(brush, rmaxw-wrapw, str, l, &w);
+        l2=getbeg(brush, rmaxw-wrapw, str, &w);
         if(l2<=0)
             l2=1;
     }
