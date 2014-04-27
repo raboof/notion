@@ -2052,7 +2052,7 @@ typedef struct{
 
 static bool extl_do_register_function(lua_State *st, RegData *data)
 {
-    ExtlExportedFnSpec *spec=data->spec, *spec2;
+    ExtlExportedFnSpec *spec=data->spec;
 #if LUA_VERSION_NUM>=502
     int ind;
 #else

@@ -298,21 +298,16 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 {
     bool mcf=region_may_control_focus((WRegion*)ws);
     WStacking *st, *next_st=NULL;
-    bool was_stdisp=FALSE, was_bottom=FALSE;
     bool was_current=FALSE;
     
     st=group_find_stacking(ws, reg);
 
     if(st!=NULL){
-        if(st==ws->bottom){
-            was_bottom=TRUE;
+        if(st==ws->bottom)
             group_do_set_bottom(ws, NULL);
-        }
         
-        if(st==ws->managed_stdisp){
+        if(st==ws->managed_stdisp)
             ws->managed_stdisp=NULL;
-            was_stdisp=TRUE;
-        }
             
         if(st==ws->current_managed){
             ws->current_managed=NULL;

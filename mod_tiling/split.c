@@ -930,7 +930,6 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
     WSplitST *st;
     WRectangle stg;
     WRectangle rstg;
-    WRectangle ngr;
     int ori;
 
     if(!OBJ_IS(ws, WTiling) || ((WTiling*)ws)->stdispnode==NULL)

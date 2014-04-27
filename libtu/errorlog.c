@@ -70,7 +70,6 @@ static void log_warn_handler(const char *message)
 {
     const char *p=strchr(message, '\n');
     static int lineno=0;
-    int alternat=0;
     
     add_to_log(current_log, lineno==0 ? ">> " : "   ", 3);
     

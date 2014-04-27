@@ -1230,7 +1230,7 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
     WStacking *node=NULL;
     WLListNode *lnode=NULL;
     WMPlexAttachParams *param=&ph->param;
-    bool mx_was_empty, sw, modal, mcf, hidden;
+    bool mx_was_empty, sw, mcf, hidden;
     WSizePolicy szplcy;
     uint level;
     
@@ -1245,9 +1245,6 @@ bool mplex_do_attach_final(WMPlex *mplex, WRegion *reg, WMPlexPHolder *ph)
                ? SIZEPOLICY_FULL_BOUNDS
                : SIZEPOLICY_FULL_EXACT));
 
-    modal=(param->flags&MPLEX_ATTACH_LEVEL
-           && param->level>=STACKING_LEVEL_MODAL1);
-    
     level=(param->flags&MPLEX_ATTACH_LEVEL
            ? param->level
            : (param->flags&MPLEX_ATTACH_UNNUMBERED

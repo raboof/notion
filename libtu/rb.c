@@ -248,7 +248,7 @@ Rb_node rb_find_pkey(Rb_node n, const void *key)
 
 Rb_node rb_insert_b(Rb_node n, const void *key, void *val)
 {
-  Rb_node newleft, newright, newnode, list, p;
+  Rb_node newleft, newright, newnode, p;
  
   if (ishead(n)) {
     if (n->p.root == n) {         /* Tree is empty */
@@ -328,7 +328,6 @@ static void single_rotate(Rb_node y, int l)
 {
   int rl=0, ir=0;
   Rb_node x=NULL, yp=NULL;
-  void *tmp=NULL;
  
   ir = isroot(y);
   yp = y->p.parent;
