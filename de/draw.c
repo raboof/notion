@@ -412,7 +412,7 @@ void debrush_menuentry_extras(DEBrush *brush,
                               const GrFontExtents *fnte,
                               const GrStyleSpec *a1, 
                               const GrStyleSpec *a2, 
-                              bool pre, int index)
+                              bool pre, int UNUSED(index))
 {
     int tx, ty;
 
@@ -432,7 +432,7 @@ void debrush_menuentry_extras(DEBrush *brush,
 
 
 void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom, 
-                         DEColourGroup *cg, bool needfill)
+                         DEColourGroup *cg, bool UNUSED(needfill))
 {
     GC gc=brush->d->normal_gc;
     
@@ -554,7 +554,7 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
 
 #define MAXSHAPE 16
 
-void debrush_set_window_shape(DEBrush *brush, bool rough,
+void debrush_set_window_shape(DEBrush *brush, bool UNUSED(rough),
                               int n, const WRectangle *rects)
 {
     XRectangle r[MAXSHAPE];

@@ -234,7 +234,7 @@ static void wmsg_deinit(WMessage *wmsg)
 }
 
 
-static const char *wmsg_style(WMessage *wmsg)
+static const char *wmsg_style(WMessage *UNUSED(wmsg))
 {
     return "input-message";
 }

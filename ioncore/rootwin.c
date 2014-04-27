@@ -45,7 +45,7 @@ static bool redirect_error=FALSE;
 static bool ignore_badwindow=TRUE;
 
 
-static int my_redirect_error_handler(Display *dpy, XErrorEvent *ev)
+static int my_redirect_error_handler(Display *UNUSED(dpy), XErrorEvent *UNUSED(ev))
 {
     redirect_error=TRUE;
     return 0;
@@ -325,21 +325,21 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 }
 
 
-static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
-                           const WFitParams *fp)
+static bool rootwin_fitrep(WRootWin *UNUSED(rootwin), WWindow *UNUSED(par), 
+                           const WFitParams *UNUSED(fp))
 {
     D(warn("Don't know how to reparent or fit root windows."));
     return FALSE;
 }
 
 
-static void rootwin_map(WRootWin *rootwin)
+static void rootwin_map(WRootWin *UNUSED(rootwin))
 {
     D(warn("Attempt to map a root window."));
 }
 
 
-static void rootwin_unmap(WRootWin *rootwin)
+static void rootwin_unmap(WRootWin *UNUSED(rootwin))
 {
     D(warn("Attempt to unmap a root window -- impossible."));
 }
@@ -350,7 +350,7 @@ static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
     region_unset_manager(reg, (WRegion*)rootwin);
 }
 
-static WRegion *rootwin_managed_disposeroot(WRootWin *rootwin, WRegion *reg)
+static WRegion *rootwin_managed_disposeroot(WRootWin *UNUSED(rootwin), WRegion *reg)
 {
     WScreen *scr=OBJ_CAST(reg, WScreen);
     if(scr!=NULL && scr==scr->prev_scr){

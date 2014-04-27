@@ -369,7 +369,7 @@ char *extl_lookup_script(const char *file, const char *sp)
     return tmp;
 }
 
-static int warn_notfound(const char *file, void *param)
+static int warn_notfound(const char *file, void *UNUSED(param))
 {
     warn(TR("Tried: '%s'"), file);
 

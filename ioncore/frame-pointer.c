@@ -179,7 +179,7 @@ static void setup_dragwin(WFrame *frame, uint tab)
 }
 
 
-static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
+static void p_tabdrag_motion(WFrame *UNUSED(frame), XMotionEvent *UNUSED(ev),
                              int dx, int dy)
 {
     p_tab_x+=dx;

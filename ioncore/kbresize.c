@@ -186,7 +186,7 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
 static WTimer *resize_timer=NULL;
 
 
-static void tmr_end_resize(WTimer *unused, WMoveresMode *mode)
+static void tmr_end_resize(WTimer *UNUSED(unused), WMoveresMode *mode)
 {
     if(mode!=NULL)
         moveresmode_cancel(mode);

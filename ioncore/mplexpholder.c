@@ -22,7 +22,7 @@
 /*{{{ Primitives */
 
 
-static bool on_ph_list(WMPlexPHolder *ll, WMPlexPHolder *ph)
+static bool on_ph_list(WMPlexPHolder *UNUSED(ll), WMPlexPHolder *ph)
 {
     return ph->prev!=NULL;
 }

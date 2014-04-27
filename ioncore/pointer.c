@@ -204,7 +204,7 @@ static bool handle_key(WRegion *reg, XEvent *ev)
 }
 
 
-static void pointer_grab_killed(WRegion *unused)
+static void pointer_grab_killed(WRegion *UNUSED(unused))
 {
     if(p_reg!=NULL && p_killed_handler!=NULL)
         p_killed_handler(p_reg);

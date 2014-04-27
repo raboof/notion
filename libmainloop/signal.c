@@ -176,13 +176,13 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     return ret;
 }
 
-static bool mrsh_usr2(void (*fn)(void), void *p)
+static bool mrsh_usr2(void (*fn)(void), void *UNUSED(p))
 {
     fn();
     return TRUE;
 }
 
-static bool mrsh_usr2_extl(ExtlFn fn, void *p)
+static bool mrsh_usr2_extl(ExtlFn fn, void *UNUSED(p))
 {
     bool ret;
     ExtlTab t=extl_create_table();
@@ -433,7 +433,7 @@ static void deadly_signal_handler(int signal_num)
 }
 
 
-static void chld_handler(int signal_num)
+static void chld_handler(int UNUSED(signal_num))
 {
 #if 0
     pid_t pid;
@@ -446,7 +446,7 @@ static void chld_handler(int signal_num)
 #endif
 }
 
-static void usr2_handler(int signal_num)
+static void usr2_handler(int UNUSED(signal_num))
 {
     usr2_sig=1;
 }
@@ -462,13 +462,13 @@ static void exit_handler(int signal_num)
 }
 
 
-static void timer_handler(int signal_num)
+static void timer_handler(int UNUSED(signal_num))
 {
     had_tmr=TRUE;
 }
 
 
-static void ignore_handler(int signal_num)
+static void ignore_handler(int UNUSED(signal_num))
 {
     
 }

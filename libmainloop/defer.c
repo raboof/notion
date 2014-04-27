@@ -71,7 +71,7 @@ static void free_defer(WDeferred *d)
 }
 
 
-static void defer_watch_handler(Watch *w, Obj *obj)
+static void defer_watch_handler(Watch *w, Obj *UNUSED(obj))
 {
     WDeferred *d=(WDeferred*)w;
     

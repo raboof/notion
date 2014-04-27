@@ -245,7 +245,7 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
 
 WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
                                            const WManageParams *param,
-                                           int unused)
+                                           int UNUSED(unused))
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;

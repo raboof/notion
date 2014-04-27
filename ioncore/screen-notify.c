@@ -380,7 +380,7 @@ void screen_unnotify_workspace_indicatorwin(void)
         timer_reset( workspace_indicator_remove_timer );
 }
 
-static void timer_expired__workspace_indicator_remove(WTimer* dummy1, Obj* dummy2)
+static void timer_expired__workspace_indicator_remove(WTimer* UNUSED(dummy1), Obj* UNUSED(dummy2))
 {
     if( workspace_indicator_active_screen != NULL )
         screen_unnotify_workspace_indicatorwin();
@@ -480,7 +480,7 @@ void screen_update_notifywin(WScreen *scr)
 }
 
 
-void screen_managed_notify(WScreen *scr, WRegion *reg, WRegionNotify how)
+void screen_managed_notify(WScreen *scr, WRegion *UNUSED(reg), WRegionNotify how)
 {
     if(how==ioncore_g.notifies.tag)
         screen_update_infowin(scr);

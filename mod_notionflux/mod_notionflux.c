@@ -142,7 +142,7 @@ static void receive_data(int fd, void *buf_)
 }
 
 
-static void connection_attempt(int lfd, void *data)
+static void connection_attempt(int lfd, void *UNUSED(data))
 {
     int i, fd;
     struct sockaddr_un from;

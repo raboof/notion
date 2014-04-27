@@ -760,7 +760,7 @@ bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how)
 }
 
 
-void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
+void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub), WRegionNotify how)
 {
     bool complete;
 
@@ -831,7 +831,7 @@ WRegion *frame_managed_disposeroot(WFrame *frame, WRegion *reg)
 }
 
 
-int frame_default_index(WFrame *frame)
+int frame_default_index(WFrame *UNUSED(frame))
 {
     return ioncore_g.frame_default_index;
 }

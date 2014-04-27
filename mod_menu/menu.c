@@ -1317,7 +1317,7 @@ void menu_release(WMenu *menu, XButtonEvent *ev)
 }
 
 
-void menu_motion(WMenu *menu, XMotionEvent *ev, int dx, int dy)
+void menu_motion(WMenu *menu, XMotionEvent *ev, int UNUSED(dx), int UNUSED(dy))
 {
     menu_select_entry_at(menu, ev->x_root, ev->y_root);
     check_scroll(menu, ev->x_root, ev->y_root);
@@ -1332,7 +1332,7 @@ void menu_button(WMenu *menu, XButtonEvent *ev)
 }
 
 
-int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **reg_ret)
+int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **UNUSED(reg_ret))
 {
     menu_button(menu, ev);
     menu=menu_head(menu);

@@ -711,7 +711,7 @@ static bool wedln_do_call_completor(WEdln *wedln, int id, int cycle)
 }
 
 
-static void timed_complete(WTimer *tmr, Obj *obj)
+static void timed_complete(WTimer *UNUSED(tmr), Obj *obj)
 {
     WEdln *wedln=(WEdln*)obj;
     
@@ -1069,7 +1069,7 @@ void wedln_insstr(WEdln *wedln, const char *buf, size_t n)
 }
 
 
-static const char *wedln_style(WEdln *wedln)
+static const char *wedln_style(WEdln *UNUSED(wedln))
 {
     return "input-edln";
 }

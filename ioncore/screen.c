@@ -358,7 +358,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 }
 
 
-static bool screen_may_dispose(WScreen *scr)
+static bool screen_may_dispose(WScreen *UNUSED(scr))
 {
     return TRUE;
 }

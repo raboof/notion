@@ -446,7 +446,7 @@ void moveresmode_delta_move(WMoveresMode *mode,
 
 
 void moveresmode_rqgeom(WMoveresMode *mode, WRQGeomParams *rq, 
-                        WRectangle *rret)
+                        WRectangle *UNUSED(rret))
 {
     mode->mode=MOVERES_SIZE;
     moveresmode_do_newgeom(mode, rq);
@@ -601,7 +601,7 @@ void region_managed_rqgeom_absolute(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
+void region_managed_rqgeom_allow(WRegion *UNUSED(mgr), WRegion *reg,
                                  const WRQGeomParams *rq,
                                  WRectangle *geomret)
 {
@@ -613,8 +613,8 @@ void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
-                                   const WRQGeomParams *rq,
+void region_managed_rqgeom_unallow(WRegion *UNUSED(mgr), WRegion *reg,
+                                   const WRQGeomParams *UNUSED(rq),
                                    WRectangle *geomret)
 {
     if(geomret!=NULL)

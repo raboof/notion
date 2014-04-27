@@ -1305,7 +1305,7 @@ WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Client window management setup */
 
 
-static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *unused)
+static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *UNUSED(unused))
 {
     WDockApp *dockapp, *before_dockapp;
     WRectangle geom;
@@ -1385,20 +1385,20 @@ bool dock_attach(WDock *dock, WRegion *reg)
 }
 
 
-static bool dock_handle_drop(WDock *dock, int x, int y,
+static bool dock_handle_drop(WDock *dock, int UNUSED(x), int UNUSED(y),
                              WRegion *dropped)
 {
     return dock_attach(dock, dropped);
 }
 
 
-static WRegion *dock_ph_handler(WDock *dock, int flags, WRegionAttachData *data)
+static WRegion *dock_ph_handler(WDock *dock, int UNUSED(flags), WRegionAttachData *data)
 {
     return dock_do_attach(dock, data);
 }
 
     
-static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
+static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *UNUSED(mgd))
 {
     return (WPHolder*)create_basicpholder((WRegion*)dock,
                                           ((WBasicPHolderHandler*)
@@ -1406,7 +1406,7 @@ static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
 }
 
 
-static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *cwin,
+static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *UNUSED(cwin),
                                      const WManageParams *param UNUSED,
                                      int priority)
 {

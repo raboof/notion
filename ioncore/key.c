@@ -95,7 +95,7 @@ void clientwin_quote_next(WClientWin *cwin)
 }
 
 
-static bool waitrelease_handler(WRegion *reg, XEvent *ev)
+static bool waitrelease_handler(WRegion *UNUSED(reg), XEvent *ev)
 {
     return (ioncore_unmod(ev->xkey.state, ev->xkey.keycode)==0);
 }

@@ -1828,7 +1828,7 @@ static StringIntMap pos_map[]={
 };
 
 
-static bool do_attach_stdisp(WRegion *mplex, WRegion *reg, void *unused)
+static bool do_attach_stdisp(WRegion *UNUSED(mplex), WRegion *UNUSED(reg), void *UNUSED(unused))
 {
     /* We do not actually manage the stdisp. */
     return TRUE;

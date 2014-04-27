@@ -588,7 +588,7 @@ WStacking *stacking_find_to_focus(WStacking *stacking,
 }
 
 
-static bool mapped_filt(WStacking *st, void *unused)
+static bool mapped_filt(WStacking *st, void *UNUSED(unused))
 {
     return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
 }

@@ -151,7 +151,7 @@ bool ioncore_focushistory_i(ExtlFn iterfn)
 static Watch await_watch=WATCH_INIT;
 
 
-static void await_watch_handler(Watch *watch, WRegion *prev)
+static void await_watch_handler(Watch *UNUSED(watch), WRegion *prev)
 {
     WRegion *r;
     while(1){
@@ -228,7 +228,7 @@ WRegion *ioncore_await_focus()
 static WTimer*  focuslist_insert_timer=NULL;
 static WRegion* region_awaiting_insertion;
 
-static void timer_expired__focuslist_insert(WTimer* dummy1, Obj* dummy2)
+static void timer_expired__focuslist_insert(WTimer* UNUSED(dummy1), Obj* UNUSED(dummy2))
 {
   region_focuslist_push(region_awaiting_insertion);
   region_awaiting_insertion = NULL;

@@ -318,7 +318,7 @@ void splitst_deinit(WSplitST *split)
 /*{{{ Size bounds management */
 
 
-static void splitregion_update_bounds(WSplitRegion *node, bool recursive)
+static void splitregion_update_bounds(WSplitRegion *node, bool UNUSED(recursive))
 {
     WSizeHints hints;
     WSplit *snode=(WSplit*)node;
@@ -337,7 +337,7 @@ static void splitregion_update_bounds(WSplitRegion *node, bool recursive)
 }
 
 
-static void splitst_update_bounds(WSplitST *node, bool rec)
+static void splitst_update_bounds(WSplitST *node, bool UNUSED(rec))
 {
     WSplit *snode=(WSplit*)node;
 
@@ -547,16 +547,16 @@ static WSplit *dodge_stdisp(WSplit *node, bool keep_within)
 
 
 static void split_do_resize_default(WSplit *node, const WRectangle *ng, 
-                                    WPrimn hprimn, WPrimn vprimn, 
-                                    bool transpose)
+                                    WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn), 
+                                    bool UNUSED(transpose))
 {
     node->geom=*ng;
 }
 
 
 static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng, 
-                                  WPrimn hprimn, WPrimn vprimn, 
-                                  bool transpose)
+                                  WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn), 
+                                  bool UNUSED(transpose))
 {
     assert(node->reg!=NULL);
     region_fit(node->reg, ng, REGION_FIT_EXACT);
@@ -1017,7 +1017,7 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
     return ret;
 }
 
-bool splitst_do_restore(WSplit *node, int dir)
+bool splitst_do_restore(WSplit *UNUSED(node), int UNUSED(dir))
 {
     return FALSE;
 }
@@ -1110,7 +1110,7 @@ void splitregion_do_maxhelper(WSplitRegion *node, int dir, int action)
         frame->flags&=~FRAME_KEEP_FLAGS;
 }
 
-void splitst_do_maxhelper(WSplit *node, int dir, int action)
+void splitst_do_maxhelper(WSplit *UNUSED(node), int UNUSED(dir), int UNUSED(action))
 {
     return;
 }
@@ -1171,7 +1171,7 @@ bool splitregion_do_verify(WSplitRegion *node, int dir)
     return ret;
 }
 
-bool splitst_do_verify(WSplit *node, int dir)
+bool splitst_do_verify(WSplit *UNUSED(node), int UNUSED(dir))
 {
     return TRUE;
 }
@@ -1783,7 +1783,7 @@ static bool defaultfilter(WSplit *node)
 
 
 static WSplit *split_current_todir_default(WSplit *node, 
-                                           WPrimn hprimn, WPrimn vprimn,
+                                           WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
                                            WSplitFilter *filter)
 {
     if(filter==NULL)
@@ -1890,7 +1890,7 @@ WSplit *split_nextto(WSplit *node, WPrimn hprimn, WPrimn vprimn,
 }
 
 
-void splitinner_mark_current_default(WSplitInner *split, WSplit *child)
+void splitinner_mark_current_default(WSplitInner *split, WSplit *UNUSED(child))
 {
     if(((WSplit*)split)->parent!=NULL)
         splitinner_mark_current(((WSplit*)split)->parent, (WSplit*)split);

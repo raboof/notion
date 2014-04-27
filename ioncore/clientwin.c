@@ -807,7 +807,7 @@ void clientwin_kill(WClientWin *cwin)
 }
 
 
-void clientwin_rqclose(WClientWin *cwin, bool relocate_ignored)
+void clientwin_rqclose(WClientWin *cwin, bool UNUSED(relocate_ignored))
 {
     /* Ignore relocate parameter -- client windows can always be 
      * destroyed by the application in any case, so way may just as
