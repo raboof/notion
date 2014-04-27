@@ -66,17 +66,6 @@
 /*}}}*/
 
 
-/*{{{ Macros */
-
-#ifdef __GNUC__
-#define UNUSED __attribute__ ((unused))
-#else
-#define UNUSED
-#endif
-
-/*}}}*/
-
-
 /*{{{ Variables */
 
 #include "../version.h"
@@ -1407,7 +1396,7 @@ static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *UNUSED(mgd))
 
 
 static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *UNUSED(cwin),
-                                     const WManageParams *param UNUSED,
+                                     const WManageParams *UNUSED(param),
                                      int priority)
 {
     if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_LOW))
