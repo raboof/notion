@@ -28,6 +28,7 @@
 #include "activity.h"
 #include "netwm.h"
 #include "xwindow.h"
+#include "log.h"
 
 
 /*{{{ ioncore_handle_event */
@@ -235,7 +236,9 @@ void ioncore_handle_property(const XPropertyEvent *ev)
         }
         XFree(hints);
     }else if(ev->atom==XA_WM_NORMAL_HINTS){
-        clientwin_get_size_hints(cwin);
+        int ret=clientwin_get_size_hints(cwin);
+        if(ret<0&&ev->state==PropertyNewValue)
+            LOG(WARN, GENERAL, "Retrieving sizehints failed for cwin '%s'", cwin->region.ni.name);
     }else if(ev->atom==XA_WM_NAME){
         if(!(cwin->flags&CLIENTWIN_USE_NET_WM_NAME))
             clientwin_get_set_name(cwin);

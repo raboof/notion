@@ -67,7 +67,12 @@ DECLCLASS(WClientWin){
 
 
 extern void clientwin_get_protocols(WClientWin *cwin);
-extern void clientwin_get_size_hints(WClientWin *cwin);
+/**
+ * On failure, sets cwin->sizehints based on winprops and returns -1
+ * On success, sets cwin->sizehints based on WM_NORMAL_HINTS and winprops 
+ * and returns a nonnegative value.
+ */
+extern int clientwin_get_size_hints(WClientWin *cwin);
 extern void clientwin_unmapped(WClientWin *cwin);
 extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);
