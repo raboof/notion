@@ -153,15 +153,10 @@ static void clientwin_get_winprops(WClientWin *cwin)
     }
 }
 
-
-int clientwin_get_size_hints(WClientWin *cwin)
+void clientwin_apply_size_hint_winprops(WClientWin *cwin)
 {
     XSizeHints tmp=cwin->size_hints;
-    int ret;
-    
-    ret=xwindow_get_sizehints(cwin->win, &(cwin->size_hints));
-    
-    /** Apply winprop settings (even when xwindow_get_sizehints failed) */
+
     if(cwin->flags&CLIENTWIN_PROP_I_MAXSIZE){
         cwin->size_hints.flags&=~PMaxSize;
     }else if(cwin->flags&CLIENTWIN_PROP_MAXSIZE){
@@ -193,8 +188,21 @@ int clientwin_get_size_hints(WClientWin *cwin)
         cwin->size_hints.height_inc=tmp.height_inc;
         cwin->size_hints.flags|=PResizeInc;
     }
+}
 
+int clientwin_get_size_hints(WClientWin *cwin)
+{
+    int ret=xwindow_get_sizehints(cwin->win, &(cwin->size_hints));
+
+    clientwin_apply_size_hint_winprops(cwin);
+    
     return ret;
+}
+
+void clientwin_reset_size_hints(WClientWin *cwin)
+{
+    memset(&(cwin->size_hints), 0, sizeof(cwin->size_hints));
+    clientwin_apply_size_hint_winprops(cwin);
 }
 
 void clientwin_get_input_wm_hint(WClientWin *cwin)

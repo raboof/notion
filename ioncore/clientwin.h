@@ -73,6 +73,8 @@ extern void clientwin_get_protocols(WClientWin *cwin);
  * and returns a nonnegative value.
  */
 extern int clientwin_get_size_hints(WClientWin *cwin);
+/** Resets cwin->sizehints based on winprops. */
+extern void clientwin_reset_size_hints(WClientWin *cwin);
 extern void clientwin_unmapped(WClientWin *cwin);
 extern void clientwin_destroyed(WClientWin *cwin);
 extern void clientwin_kill(WClientWin *cwin);

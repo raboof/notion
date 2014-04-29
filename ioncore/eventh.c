@@ -236,9 +236,11 @@ void ioncore_handle_property(const XPropertyEvent *ev)
         }
         XFree(hints);
     }else if(ev->atom==XA_WM_NORMAL_HINTS){
-        int ret=clientwin_get_size_hints(cwin);
-        if(ret<0&&ev->state==PropertyNewValue)
-            LOG(WARN, GENERAL, "Retrieving sizehints failed for cwin '%s'", cwin->region.ni.name);
+        if(ev->state==PropertyNewValue){
+            if(clientwin_get_size_hints(cwin)<0)
+                LOG(WARN, GENERAL, "Retrieving sizehints failed for cwin '%s'", cwin->region.ni.name);
+        }else if(ev->state==PropertyDelete)
+            clientwin_reset_size_hints(cwin);
     }else if(ev->atom==XA_WM_NAME){
         if(!(cwin->flags&CLIENTWIN_USE_NET_WM_NAME))
             clientwin_get_set_name(cwin);
