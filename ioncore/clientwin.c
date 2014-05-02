@@ -153,56 +153,58 @@ static void clientwin_get_winprops(WClientWin *cwin)
     }
 }
 
-void clientwin_apply_size_hint_winprops(WClientWin *cwin)
+void clientwin_apply_size_hint_winprops(XSizeHints original, WClientWin *cwin)
 {
-    XSizeHints tmp=cwin->size_hints;
-
     if(cwin->flags&CLIENTWIN_PROP_I_MAXSIZE){
         cwin->size_hints.flags&=~PMaxSize;
     }else if(cwin->flags&CLIENTWIN_PROP_MAXSIZE){
-        cwin->size_hints.max_width=tmp.max_width;
-        cwin->size_hints.max_height=tmp.max_height;
+        cwin->size_hints.max_width=original.max_width;
+        cwin->size_hints.max_height=original.max_height;
         cwin->size_hints.flags|=PMaxSize;
     }
     
     if(cwin->flags&CLIENTWIN_PROP_I_MINSIZE){
         cwin->size_hints.flags&=~PMinSize;
     }else if(cwin->flags&CLIENTWIN_PROP_MINSIZE){
-        cwin->size_hints.min_width=tmp.min_width;
-        cwin->size_hints.min_height=tmp.min_height;
+        cwin->size_hints.min_width=original.min_width;
+        cwin->size_hints.min_height=original.min_height;
         cwin->size_hints.flags|=PMinSize;
     }
     
     if(cwin->flags&CLIENTWIN_PROP_I_ASPECT){
         cwin->size_hints.flags&=~PAspect;
     }else if(cwin->flags&CLIENTWIN_PROP_ASPECT){
-        cwin->size_hints.min_aspect=tmp.min_aspect;
-        cwin->size_hints.max_aspect=tmp.max_aspect;
+        cwin->size_hints.min_aspect=original.min_aspect;
+        cwin->size_hints.max_aspect=original.max_aspect;
         cwin->size_hints.flags|=PAspect;
     }
     
     if(cwin->flags&CLIENTWIN_PROP_I_RSZINC){
         cwin->size_hints.flags&=~PResizeInc;
     }else if(cwin->flags&CLIENTWIN_PROP_RSZINC){
-        cwin->size_hints.width_inc=tmp.width_inc;
-        cwin->size_hints.height_inc=tmp.height_inc;
+        cwin->size_hints.width_inc=original.width_inc;
+        cwin->size_hints.height_inc=original.height_inc;
         cwin->size_hints.flags|=PResizeInc;
     }
 }
 
 int clientwin_get_size_hints(WClientWin *cwin)
 {
+    XSizeHints original=cwin->size_hints;
+
     int ret=xwindow_get_sizehints(cwin->win, &(cwin->size_hints));
 
-    clientwin_apply_size_hint_winprops(cwin);
+    clientwin_apply_size_hint_winprops(original, cwin);
     
     return ret;
 }
 
 void clientwin_reset_size_hints(WClientWin *cwin)
 {
+    XSizeHints original=cwin->size_hints;
+
     memset(&(cwin->size_hints), 0, sizeof(cwin->size_hints));
-    clientwin_apply_size_hint_winprops(cwin);
+    clientwin_apply_size_hint_winprops(original, cwin);
 }
 
 void clientwin_get_input_wm_hint(WClientWin *cwin)
