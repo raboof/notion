@@ -43,7 +43,14 @@ local function saferead(file)
 end
 
 local function get_mpd_status()
+    
+    -- The first version of cmd_string is the original, however, some versions
+    -- of MPD close the socket too quickly if close is included. If you see the
+    -- message: error querying mpd status
+    -- then try the second version.
     local cmd_string = "status\ncurrentsong\nclose\n"
+--    local cmd_string = "status\ncurrentsong\n"
+
     if settings.password ~= nil then
         cmd_string = "password " .. settings.password .. "\n" .. cmd_string
     end
@@ -79,12 +86,19 @@ local function get_mpd_status()
     repeat
         data = saferead(mpd)
         if data == nil then break end
-
+	
         local _,_,attrib,val = string.find(data, "(.-): (.*)")
         if attrib == "time" then
             _,_,info.pos,info.len = string.find(val, "(%d+):(%d+)")
-            info.pos = string.format("%d:%02d", math.floor(info.pos / 60), math.mod(info.pos, 60))
-            info.len = string.format("%d:%02d", math.floor(info.len / 60), math.mod(info.len, 60))
+
+	    -- Around Lua 5.1, math.mod() was renamed math.fmod().
+	    if type(math.mod) == "function" then
+               info.pos = string.format("%d:%02d", math.floor(info.pos / 60), math.mod(info.pos, 60))
+               info.len = string.format("%d:%02d", math.floor(info.len / 60), math.mod(info.len, 60))
+	    else
+               info.pos = string.format("%d:%02d", math.floor(info.pos / 60), math.fmod(info.pos, 60))
+               info.len = string.format("%d:%02d", math.floor(info.len / 60), math.fmod(info.len, 60))
+	    end
         elseif attrib == "state" then
             info.state = val
         end
