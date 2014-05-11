@@ -46,7 +46,7 @@ function clientlist_menu(frame, sub, popup)
                        if reg == sub then
                            initial = #myframemenu + 1
                        end
-                       myframemenu[#myframemenu + 1] = ioncore.menuentry(reg:current():name(), function() reg:goto() end)
+                       myframemenu[#myframemenu + 1] = ioncore.menuentry(reg:current():name(), function() reg:goto_focus() end)
 
                        return true
                    end)

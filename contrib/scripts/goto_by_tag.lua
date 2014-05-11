@@ -65,6 +65,6 @@ goto_by_tag = function(tag)
         end
     end)
     if s then
-        s:goto()
+        s:goto_focus()
     end
 end

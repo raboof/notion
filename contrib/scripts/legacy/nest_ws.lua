@@ -31,15 +31,15 @@ function nest_ws_menu(frame, cwin, name)
 	local nestmenu = {}
 
 	if mod_ionws then
-	    table.insert(nestmenu, menuentry("WIonWS",   "_:attach_new({type=\"WIonWS\"  }):goto()"))
+	    table.insert(nestmenu, menuentry("WIonWS",   "_:attach_new({type=\"WIonWS\"  }):goto_focus()"))
 	end
 
 	if mod_floatws then
-	    table.insert(nestmenu, menuentry("WFloatWS", "_:attach_new({type=\"WFloatWS\"}):goto()"))
+	    table.insert(nestmenu, menuentry("WFloatWS", "_:attach_new({type=\"WFloatWS\"}):goto_focus()"))
 	end
 
 	if mod_panews then
-	    table.insert(nestmenu, menuentry("WPaneWS",  "_:attach_new({type=\"WPaneWS\" }):goto()"))
+	    table.insert(nestmenu, menuentry("WPaneWS",  "_:attach_new({type=\"WPaneWS\" }):goto_focus()"))
 	end
 
 	if #nestmenu > 0 then
@@ -59,7 +59,7 @@ end
 
 -- Legacy
 defmenu("menuattach", {
-    menuentry("WIonWS",   "_:attach_new({type=\"WIonWS\"  }):goto()"),
-    menuentry("WFloatWS", "_:attach_new({type=\"WFloatWS\"}):goto()"),
-    menuentry("WPaneWS",  "_:attach_new({type=\"WPaneWS\" }):goto()"),
+    menuentry("WIonWS",   "_:attach_new({type=\"WIonWS\"  }):goto_focus()"),
+    menuentry("WFloatWS", "_:attach_new({type=\"WFloatWS\"}):goto_focus()"),
+    menuentry("WPaneWS",  "_:attach_new({type=\"WPaneWS\" }):goto_focus()"),
 })

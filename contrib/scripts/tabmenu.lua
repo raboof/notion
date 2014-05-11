@@ -41,7 +41,7 @@ function tabmenu.tabmenu(_, _sub, index)
     local m={}
     _:mx_i(function(r)
                local e=menuentry(tabmenu.hack_displayname(r),
-                                 function() r:goto() end)
+                                 function() r:goto_focus() end)
                table.insert(m, e)
                 if r==_sub
                     then i=#m
