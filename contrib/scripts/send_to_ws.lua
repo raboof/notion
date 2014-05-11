@@ -105,7 +105,7 @@ function send_to_ws(cwin, action, jumpto)
     end
 
     if jumpto then
-	cwin:goto()
+	cwin:goto_focus()
     end
 end
 
@@ -122,5 +122,5 @@ function send_to_new_ws(cwin, wstype, jumpto)
 	newws=scr:attach_new{type="WTiling"}
 	newws:current():attach(cwin)
     end
-    if jumpto then cwin:goto() end
+    if jumpto then cwin:goto_focus() end
 end

@@ -31,10 +31,10 @@ function go_frame_or_desk(workspace, direction)
       workspace:goto_dir(direction)
    elseif direction == "left" then
       screen:switch_prev()
-      screen:current():farthest("right"):goto()
+      screen:current():farthest("right"):goto_focus()
    elseif direction == "right" then
       screen:switch_next()
-      screen:current():farthest("left"):goto()
+      screen:current():farthest("left"):goto_focus()
    end
 end
 

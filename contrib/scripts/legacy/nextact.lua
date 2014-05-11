@@ -17,6 +17,6 @@ end
 function goto_nextact()
     local l=filteri(WRegion.is_activity, ioncore.clientwin_list())
     if l[1] then
-        l[1]:goto()
+        l[1]:goto_focus()
     end
 end

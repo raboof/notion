@@ -87,9 +87,9 @@ function zoom_client(curframe, curclient, options)
       curframe:attach(zoomclient)
    end
    if zoomclient and options.goto then
-      zoomclient:goto() -- make it activated in the frame
+      zoomclient:goto_focus() -- make it activated in the frame
    end
    if curclient and options.goto then
-      curclient:goto()
+      curclient:goto_focus()
    end
 end

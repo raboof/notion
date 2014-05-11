@@ -34,5 +34,5 @@ function goto_multihead.goto_next(ws, dir)
         end
     end
     
-    nxt:goto()
+    nxt:goto_focus()
 end

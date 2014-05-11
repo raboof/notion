@@ -37,7 +37,7 @@
 -- Sep 2005, initial version, David Tweed
 
 function mkentryJump(frame,tgt,name)
-    return ioncore.menuentry(name, function() tgt:goto() end)
+    return ioncore.menuentry(name, function() tgt:goto_focus() end)
 end
 
 function mkentryClose(frame,tgt,name)
@@ -50,7 +50,7 @@ end
 
 function attachHere(frame,tgt)
     if tgt:manager()==frame then
-        tgt:goto()
+        tgt:goto_focus()
     else
         frame:attach(tgt,{switchto=true})
     end

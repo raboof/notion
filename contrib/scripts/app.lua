@@ -72,7 +72,7 @@ end
 function app.byname(prog, name, where)
    local win = ioncore.lookup_clientwin(name)
    if win then
-      ioncore.defer(function () win:goto() end)
+      ioncore.defer(function () win:goto_focus() end)
    else
       if where then
 	  ioncore.exec_on(where, prog)
@@ -85,7 +85,7 @@ end
 function app.byclass(prog, class, where)
    local win = app.match_class(class)[1]
    if win then
-      ioncore.defer(function () win:goto() end)
+      ioncore.defer(function () win:goto_focus() end)
    else
       if where then
 	  ioncore.exec_on(where, prog)
@@ -98,7 +98,7 @@ end
 function app.byinstance(prog, class, instance, where)
    local win = app.match_class(class, instance)[1]
    if win then
-      ioncore.defer(function () win:goto() end)
+      ioncore.defer(function () win:goto_focus() end)
    else
       if where then
 	  ioncore.exec_on(where, prog)
@@ -112,7 +112,7 @@ function app.emacs_eval(expr)
    local emacswin = app.match_class("Emacs")[1]
    if emacswin then
       ioncore.exec("gnuclient -batch -eval '"..expr.."'")
-      ioncore.defer(function () emacswin:goto() end)
+      ioncore.defer(function () emacswin:goto_focus() end)
    else
       ioncore.exec("emacs -eval '"..expr.."'")
    end

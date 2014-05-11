@@ -28,5 +28,5 @@ function collapse.collapse(ws)
    ws:managed_i (function (region)
                     return collapse.take_frame_to_here(region, current)
                  end)
-   current:goto()
+   current:goto_focus()
 end
