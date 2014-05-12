@@ -8,6 +8,7 @@
  */
 
 #include <string.h>
+#include <sys/types.h>
 
 #include "types.h"
 #include "obj.h"
@@ -246,6 +247,7 @@ void do_watch_reset(Watch *watch, bool call)
     
     UNLINK_ITEM(obj->obj_watches, watch, next, prev);
     watch->obj=NULL;
+    fprintf(stderr, "Reset watch %p\n", watch);
     
     if(call && handler!=NULL)
         handler(watch, obj);

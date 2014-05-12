@@ -63,6 +63,7 @@ static WDeferred *alloc_defer()
 
 static void free_defer(WDeferred *d)
 {
+    fprintf(stderr, "Free-ing deferred %p\n", d);
     if(d>=dbuf && d<dbuf+N_DBUF){
         dbuf_used&=~1<<((d-dbuf)/sizeof(WDeferred));
         return;
@@ -74,6 +75,8 @@ static void free_defer(WDeferred *d)
 static void defer_watch_handler(Watch *w, Obj *UNUSED(obj))
 {
     WDeferred *d=(WDeferred*)w;
+
+    fprintf(stderr, "Called back for deletion of %p\n", d);
     
     UNLINK_ITEM(*(WDeferred**)(d->list), d, next, prev);
     
@@ -112,6 +115,7 @@ bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action,
         return FALSE;
     }
     
+    fprintf(stderr, "New deferred action at %p with object %p\n", d, obj);
     d->action=action;
     d->list=list;
     d->fn=extl_fn_none();
@@ -183,15 +187,12 @@ static void do_execute(WDeferred *d)
     Obj *obj=d->watch.obj;
     WDeferredAction *a=d->action;
     ExtlFn fn=d->fn;
-    
+
+    fprintf(stderr, "Called back for execution of %p for object %p\n", d, obj);
     watch_reset(&(d->watch));
     free_defer(d);
     
     if(a!=NULL){
-        /* The deferral should not be on the list, if there
-         * was an object, and it got destroyed.
-         */
-        /*if(obj!=NULL)*/
         a(obj);
     }else if(fn!=extl_fn_none()){
         extl_call(fn, NULL, NULL);

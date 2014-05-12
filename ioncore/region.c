@@ -508,6 +508,11 @@ WRegion *region_disposeroot(WRegion *reg)
 bool region_rqdispose(WRegion *reg)
 {
     WRegion *root;
+
+    if(reg==NULL){
+        LOG(ERROR, GENERAL, "region_rqdispose called with null parameter");
+        return FALSE;
+    }
     
     if(!region_may_dispose(reg))
         return FALSE;
