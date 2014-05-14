@@ -391,11 +391,6 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
 
 static int prevsel=-1;
 
-static bool filteridx_sel(WListing *l, int i)
-{
-    return (i==prevsel || i==l->selected_str);
-}
-
 
 void draw_listing(GrBrush *brush, const WRectangle *geom,
                   WListing *l, int mode, GrAttr selattr)

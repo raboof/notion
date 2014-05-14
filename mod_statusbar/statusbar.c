@@ -34,9 +34,7 @@
 
 static void statusbar_set_elems(WStatusBar *sb, ExtlTab t);
 static void statusbar_free_elems(WStatusBar *sb);
-static void statusbar_update_natural_size(WStatusBar *p);
 static void statusbar_arrange_systray(WStatusBar *p);
-static int statusbar_systray_x(WStatusBar *p);
 static void statusbar_rearrange(WStatusBar *sb, bool rs);
 static void do_calc_systray_w(WStatusBar *p, WSBElem *el);
 static void statusbar_calc_systray_w(WStatusBar *p);

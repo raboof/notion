@@ -104,8 +104,7 @@ void statusbar_calculate_xs(WStatusBar *sb)
 
 
 static void draw_elems(GrBrush *brush, WRectangle *g, int ty,
-                       WSBElem *elems, int nelems, bool needfill, 
-                       bool complete)
+                       WSBElem *elems, int nelems, bool needfill)
 {
     int prevx=g->x;
     int maxx=g->x+g->w;
@@ -176,7 +175,7 @@ void statusbar_draw(WStatusBar *sb, bool complete)
 
     ty=(g.y+fnte.baseline+(g.h-fnte.max_height)/2);
         
-    draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems, TRUE, complete);
+    draw_elems(sb->brush, &g, ty, sb->elems, sb->nelems, TRUE);
     
     grbrush_end(sb->brush);
 }

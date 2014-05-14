@@ -56,19 +56,6 @@ int split_other_pos(WSplit *split, int dir)
 }
 
 
-static int reg_calcresize(WRegion *reg, int dir, int nsize)
-{
-    int tmp;
-    
-    if(dir==SPLIT_HORIZONTAL)
-        tmp=region_min_w(reg);
-    else
-        tmp=region_min_h(reg);
-    
-    return (nsize<tmp ? tmp : nsize);
-}
-
-
 /* No, these are not even supposed to be proper/consistent 
  * Z \cup {\infty, -\infty} calculation rules. 
  */
@@ -79,17 +66,6 @@ static int infadd(int x, int y)
         return INT_MAX;
     else
         return x+y;
-}
-
-
-static int infsub(int x, int y)
-{
-    if(x==INT_MAX)
-        return INT_MAX;
-    else if(y==INT_MAX)
-        return 0;
-    else
-        return x-y;
 }
 
 
