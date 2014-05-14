@@ -64,7 +64,7 @@ static WDeferred *alloc_defer()
 static void free_defer(WDeferred *d)
 {
     if(d>=dbuf && d<dbuf+N_DBUF){
-        dbuf_used&=~1<<((d-dbuf)/sizeof(WDeferred));
+        dbuf_used&=~(1<<(d-dbuf));
         return;
     }
     FREE(d);
