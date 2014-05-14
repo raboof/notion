@@ -442,8 +442,7 @@ static int tilde_complete(char *path, char **retpath)
 /*
  **  Return all possible completions.
  */
-int do_complete_file(char *pathname, char ***avp, char **beg,
-                     void *unused)
+int do_complete_file(char *pathname, char ***avp, char **beg)
 {
     char	*dir;
     char	*file, *path=NULL, *tt;
@@ -498,8 +497,7 @@ int do_complete_file(char *pathname, char ***avp, char **beg,
 /*
  **  Return all possible completions.
  */
-int do_complete_file_with_path(char *pathname, char ***avp, char **beg,
-                               void *unused)
+int do_complete_file_with_path(char *pathname, char ***avp, char **beg)
 {
     char	*dir;
     char	*file, *path=NULL, *tt;
@@ -588,9 +586,9 @@ int main(int argc, char *argv[])
             wp=TRUE;
         }else{
             if(wp){
-                n=do_complete_file_with_path(argv[i], &avp, &beg, NULL);
+                n=do_complete_file_with_path(argv[i], &avp, &beg);
             }else{
-                n=do_complete_file(argv[i], &avp, &beg, NULL);
+                n=do_complete_file(argv[i], &avp, &beg);
             }
 
             if(beg){

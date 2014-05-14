@@ -239,7 +239,6 @@ int main(int argc, char*argv[])
     if(ioncore_startup(display, cfgfile, stflags))
         may_continue=TRUE;
 
-fail:
     if(!may_continue)
         warn(TR("Refusing to start due to encountered errors."));
     else

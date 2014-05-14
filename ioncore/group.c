@@ -117,12 +117,6 @@ WGroupIterTmp group_iter_default_tmp;
 /*{{{ region dynfun implementations */
 
 
-static void group_fit(WGroup *ws, const WRectangle *geom)
-{
-    REGION_GEOM(ws)=*geom;
-}
-
-
 bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
 {
     WGroupIterTmp tmp;
@@ -1186,24 +1180,6 @@ WStacking *group_find_stacking(WGroup *ws, WRegion *r)
         return NULL;
     
     return ioncore_find_stacking(r);
-}
-
-
-static WStacking *find_stacking_if_not_on_ws(WGroup *ws, Window w)
-{
-    WRegion *r=xwindow_region_of(w);
-    WStacking *st=NULL;
-    
-    while(r!=NULL){
-        if(REGION_MANAGER(r)==(WRegion*)ws)
-            break;
-        st=group_find_stacking(ws, r);
-        if(st!=NULL)
-            break;
-        r=REGION_MANAGER(r);
-    }
-    
-    return st;
 }
 
 

@@ -734,15 +734,6 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
 }
 
 
-static bool mplexfilter(WSplit *node)
-{
-    WSplitRegion *regnode=OBJ_CAST(node, WSplitRegion);
-    
-    return (regnode!=NULL && regnode->reg!=NULL &&
-            OBJ_IS(regnode->reg, WMPlex));
-}
-
-
 static WPHolder *find_ph_result=NULL;
 static WRegion *find_ph_param=NULL;
 

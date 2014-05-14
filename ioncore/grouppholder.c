@@ -169,12 +169,6 @@ void grouppholder_deinit(WGroupPHolder *ph)
 /*{{{ Dynfuns */
 
 
-static WPHolder *get_recreate_ph(WGroupPHolder *ph)
-{
-    return get_head(ph)->recreate_pholder;
-}
-
-
 typedef struct{
     WGroupPHolder *ph, *ph_head;
     WRegionAttachData *data;

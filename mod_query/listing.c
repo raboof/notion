@@ -389,9 +389,6 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
 }
 
 
-static int prevsel=-1;
-
-
 void draw_listing(GrBrush *brush, const WRectangle *geom,
                   WListing *l, int mode, GrAttr selattr)
 {
