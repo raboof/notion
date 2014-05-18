@@ -2536,7 +2536,7 @@ extern bool extl_serialize(const char *file, ExtlTab tab)
     strcat(tmp_file, ".XXXXXX");
     fd = mkstemp(tmp_file);
     if(fd == -1) {
-        extl_warn_err_obj(file);
+        extl_warn_err_obj(tmp_file);
         return FALSE;
     }
 
@@ -2544,7 +2544,7 @@ extern bool extl_serialize(const char *file, ExtlTab tab)
     d.f=fdopen(fd, "w");
     
     if(d.f==NULL){
-        extl_warn_err_obj(file);
+        extl_warn_err_obj(tmp_file);
         unlink(tmp_file);
         return FALSE;
     }
