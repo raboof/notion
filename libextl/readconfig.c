@@ -500,7 +500,7 @@ bool extl_write_savefile(const char *basename, ExtlTab tab)
     char *fname=extl_get_savefile(basename);
     
     if(fname!=NULL){
-        ret=extl_serialise(fname, tab);
+        ret=extl_serialize(fname, tab);
         free(fname);
     }
     

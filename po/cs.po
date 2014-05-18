@@ -896,7 +896,7 @@ msgstr "Dosažena maximální hloubka serializace."
 
 #: ../../libextl-3/luaextl.c:2501
 #, c-format
-msgid "Unable to serialise type %s."
+msgid "Unable to serialize type %s."
 msgstr "Nemohu serializovat typ %s."
 
 #: ../../libextl-3/luaextl.c:2532

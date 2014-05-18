@@ -249,7 +249,7 @@ bool ioncore_init_layout()
             return FALSE;
         }
         warn(TR(backup_msg), backup);
-        if(!extl_serialise(backup, tab))
+        if(!extl_serialize(backup, tab))
             warn(TR("Failed backup."));
         free(backup);
     }

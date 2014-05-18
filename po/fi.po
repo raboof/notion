@@ -909,7 +909,7 @@ msgstr "Suurin mahdollinen talletuksen rekursiosyvyys saavutettu."
 
 #: ../../libextl-3/luaextl.c:2501
 #, c-format
-msgid "Unable to serialise type %s."
+msgid "Unable to serialize type %s."
 msgstr "Tyyppiä %s ei voida tallettaa."
 
 #: ../../libextl-3/luaextl.c:2532
