@@ -18,6 +18,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <lua.h>
 #include <lualib.h>
@@ -2527,12 +2528,24 @@ extern bool extl_serialise(const char *file, ExtlTab tab)
 {
     SerData d;
     bool ret;
+    int fd;
+    char tmp_file[strlen(file) + 8];
+
+    tmp_file[0] = '\0';
+    strcat(tmp_file, file);
+    strcat(tmp_file, ".XXXXXX");
+    fd = mkstemp(tmp_file);
+    if(fd == -1) {
+        extl_warn_err_obj(file);
+        return FALSE;
+    }
 
     d.tab=tab;
-    d.f=fopen(file, "w");
+    d.f=fdopen(fd, "w");
     
     if(d.f==NULL){
         extl_warn_err_obj(file);
+        unlink(tmp_file);
         return FALSE;
     }
     
@@ -2544,7 +2557,16 @@ extern bool extl_serialise(const char *file, ExtlTab tab)
     fprintf(d.f, "\n\n");
     
     fclose(d.f);
-    
+
+    if(ret && rename(tmp_file, file) != 0) {
+        extl_warn_err_obj(file);
+        ret = FALSE;
+    }
+
+    if(!ret) {
+        unlink(tmp_file);
+    }
+
     return ret;
 }
 
