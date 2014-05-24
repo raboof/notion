@@ -49,7 +49,7 @@ defbindings("WFrame", {
     bdoc("Toggle tagged."),
     mpress(MOD1.."Button2", "_sub:set_tagged('toggle')"),
     bdoc("Attach tagged regions."),
-    mpress(MOD1.."Shift+Button2", "_:attach_tagged()"),
+    mpress(MOD1.."Shift+Button2", "_:tagged_attach()"),
     
     -- For mouse users I highly recommend button2 as a mainmenu, 
     -- otherwise it would be difficult to start programs using the mouse.

@@ -166,7 +166,7 @@ Emacs.WMPlex = {
     -- kpress(META.."space", "WRegion.set_tagged(_sub, 'toggle')"),
 
     bdoc("Attach tagged objects to this frame."),
-    kpress(META.."Control+space", "WFrame.attach_tagged(_)"),
+    kpress(META.."Control+space", "WFrame.tagged_attach(_)"),
 
     bdoc("Query for Lua code to execute."),
     kpress(META.."Shift+colon", "mod_query.query_lua(_)"),
