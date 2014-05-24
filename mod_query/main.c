@@ -70,7 +70,7 @@ ModQueryConfig mod_query_config={
  *  \var{caseicompl} & (boolean) Turn some completions case-insensitive
  *      (default: false). \\
  *  \var{substrcompl} & (boolean) Complete on sub-strings in some cases
- *      (default: ftrue). \\
+ *      (default: true). \\
  * \end{tabularx}
  */
 EXTL_EXPORT
