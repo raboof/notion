@@ -115,7 +115,10 @@ local function parse_rss(str)
     end
     feeds[src] = new
     rss_string = ""
-    table.foreach(feeds, reconstruct_rss)
+    for k,v in pairs(feeds) do
+       reconstruct_rss(k,v)
+    end
+
     rss_length = string.len(rss_string)
     rss_string = rss_string .. string.sub(rss_string, 1, rss_feed.width)
     count = 1

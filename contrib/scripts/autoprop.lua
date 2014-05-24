@@ -66,15 +66,15 @@ local function load_autoprops()
     return
   end
 
-  table.foreach(d, function(k, tab)
-                    defwinprop{
-                      class=tab.class,
-                      instance=tab.instance,
-                      role=tab.role,
-                      target=tab.target
-                    }
-                    autoprops[tab.class..tab.role..tab.instance]=tab
-                   end)
+  for k,tab in pairs(d) do
+     defwinprop{
+        class=tab.class,
+        instance=tab.instance,
+        role=tab.role,
+        target=tab.target
+     }
+     autoprops[tab.class..tab.role..tab.instance]=tab
+  end
 end
 
 local function init()
