@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     
     if(argc>1){
         if(argc!=3 || strcmp(argv[1], "-e")!=0)
-            die("Usage: ionflux [-e code]");
+            die("Usage: notionflux [-e code]");
             
         if(strlen(argv[2])>=MAX_DATA)
             die("Too much data.");
