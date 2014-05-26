@@ -1,3 +1,6 @@
+Notion is a fork of Ion. Here's the old changelog from the Ion project. The git
+history holds this data for Notion
+
 
 ion-3-20081002
 --------------
