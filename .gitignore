@@ -1,6 +1,7 @@
 TAGS
 tags
 .project
+*.d
 *.a
 *.o
 *.so
@@ -17,3 +18,4 @@ notion/preload.c
 utils/ion-completeman
 utils/ion-statusd/ion-statusd
 utils/ion-completefile/ion-completefile
+cscope.*
