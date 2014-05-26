@@ -67,9 +67,6 @@ See also:
    a `.xinitrc` should usually do much more setup than simply start a few
    programs of your choice.
 
-Please see the file `RELNOTES` for additional release-specific installation
-and configuration notes.
-
 
 Some optional installation steps
 --------------------------------
