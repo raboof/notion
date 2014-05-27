@@ -13,7 +13,7 @@
 -- QUICKSTART
 -- 1. In template of you cfg_statusbar.lua insert: "%stock" (without quotes)
 -- 2. Insert, in you cfg_ion.lua or run: dopath("stock")
--- 3. press MOD1+F10 to get the menu
+-- 3. press META+F10 to get the menu
 -- 4. Add a ticket: e.g. "^N225" (without quotes) to monitor the Nikkei index.  
 
 
@@ -102,8 +102,8 @@
 -- key bindings
 -- you can (should) change the key bindings to your liking
 defbindings("WMPlex", {
-	       kpress(MOD1.."F10", "mod_query.query_menu(_, 'stockmenu', 'StockMonitor Menu: ')"),
-	       kpress(MOD1.."Shift+F10", "StockMonitor.add_ticket(_)"),
+	       kpress(META.."F10", "mod_query.query_menu(_, 'stockmenu', 'StockMonitor Menu: ')"),
+	       kpress(META.."Shift+F10", "StockMonitor.add_ticket(_)"),
 	    })
 defmenu("stockmenu", {
 	   menuentry("update now",        "StockMonitor.update()"),

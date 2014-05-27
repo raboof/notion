@@ -61,7 +61,7 @@
 -- mymonitor2 = new_wm("LIBP")
 
 -- You can create a new monitor also at run time. Get the Lua code prompt
--- (usually MOD1+F3) and run:
+-- (usually META+F3) and run:
 -- mymonitor3 = new_wm("LIBC")
 
 -- Do not set any station in cfg_statusbar.lua, since that station would
@@ -75,7 +75,7 @@
 
 -- Each monitor can be also configured at run-time.
 -- For instance: if you are monitoring only one station, get the Lua code
--- prompt (usually MOD1+F3) and run:
+-- prompt (usually META+F3) and run:
 -- WeatherMonitor.config.unit.tempC = "C"
 -- or
 -- WeatherMonitor.config.critical.tempC = "15"
@@ -95,7 +95,7 @@
 -- mon2 = new_wm("KNYC")
 -- (Remember: in single mode the name of the object is WeatherMonitor.)
 
--- Get the Lua code prompt (usually MOD1+F3) and:
+-- Get the Lua code prompt (usually META+F3) and:
 -- 1. to force one monitor to update the data:
 -- mon1.update()
 

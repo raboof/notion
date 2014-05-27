@@ -25,15 +25,15 @@
 --  Screenshot: http://silenceisdefeat.org/~chv/pics/screenshots/2docks.png
 --
 --
--- Mod1+K D E   toggle between floating and embedded modes
--- Mod1+K D F	flip
--- Mod1+K D T	transpose
--- Mod1+K D R	"resize mode" (it will move but not resize)
--- Mod1+K D A	attach clientwin to dock
+-- META+K D E   toggle between floating and embedded modes
+-- META+K D F	flip
+-- META+K D T	transpose
+-- META+K D R	"resize mode" (it will move but not resize)
+-- META+K D A	attach clientwin to dock
 -- Button1	flip
 -- Button2	transpose
 -- ___________
--- |7   8   9|  Mod1+K D (number) to move a floating dock.
+-- |7   8   9|  META+K D (number) to move a floating dock.
 -- |         |  Same for embedded dock, limited to 1,3,7,9.
 -- |4   5   6|   
 -- |         |  
@@ -120,11 +120,11 @@ ioncore.write_savefile("dock_settings", docktable)
 defbindings("WScreen", {
 
     bdoc("Toggle floating dock."),
-    kpress(MOD1.."D", "mod_dock.set_floating_shown_on(_, 'toggle')"),
+    kpress(META.."D", "mod_dock.set_floating_shown_on(_, 'toggle')"),
 })
 
 defbindings("WMPlex", {
-    submap(MOD1.."K", { 
+    submap(META.."K", { 
 	submap("D", {
 	    kpress("A", "get_dock(_:screen_of()):attach(_sub)", "_sub:WClientWin"),
 	}),
@@ -132,7 +132,7 @@ defbindings("WMPlex", {
 })
 
 defbindings("WScreen", {
-    submap(MOD1.."K", {
+    submap(META.."K", {
 	submap("D", {
 	    kpress("KP_7", "get_dock(_):set{pos='tl'}"),
 	    kpress("KP_8", "get_dock(_):set{pos='tc'}"),
@@ -221,7 +221,7 @@ defbindings("WDock", {
     -- You can actually drag a floating dock anywhere.
     -- Position will be lost when ion restarts.
     mdrag("Button1", "_:p_move()"),
-    mdrag(MOD1.."Button1", "_:p_move()"),
+    mdrag(META.."Button1", "_:p_move()"),
 })
 
 function flip_dock_direction(dock)

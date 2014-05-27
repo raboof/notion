@@ -107,7 +107,7 @@ local sections = {}
 for k,v in pairs(fenv) do
     local section, bindstr, keystr
 
-    keystr = v:gsub("([MCS])%-", {M = "Mod1+", C = "Control+", S = "Shift+"})
+    keystr = v:gsub("([MCS])%-", {M = "META+", C = "Control+", S = "Shift+"})
 
     if bindings[k] then
         bindstr = bindings[k].funcstr

@@ -52,6 +52,6 @@ end
 
 defbindings("WMPlex", {
     bdoc("Execute a command and show the result."),
-    kpress(MOD1.."F4", "exec_and_show(_)"),     -- change the binding to your liking
+    kpress(META.."F4", "exec_and_show(_)"),     -- change the binding to your liking
 })
 

@@ -20,7 +20,7 @@
 Example: bindsearch("K X") yields:
 
 WIonWS
- [kcb] = Mod1+K
+ [kcb] = META+K
  [action] = kpress
  [submap] = table: 0x8254478
  [cmd] = WIonWS.unsplit_at(_, _sub)

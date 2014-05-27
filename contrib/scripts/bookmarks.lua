@@ -4,8 +4,8 @@
 -- 
 -- Bookmarks support for Ion3
 -- 
--- MOD1+b n        Go to bookmark n (n=0..9)
--- MOD1+b Shift+n  Set bookmark n
+-- META+b n        Go to bookmark n (n=0..9)
+-- META+b Shift+n  Set bookmark n
 -- 
 
 local bms={}
@@ -25,12 +25,12 @@ end
 for k=0, 9 do
     local bm=tostring(k)
     defbindings("WScreen", {
-        submap(MOD1.."b", {
+        submap(META.."b", {
             kpress(bm, function() bookmarks.goto_bm(bm) end),
         })
     })
     defbindings("WFrame", {
-        submap(MOD1.."b", {
+        submap(META.."b", {
             kpress("Shift+"..bm, 
                    function(frame) bookmarks.set(bm, frame) end),
         })

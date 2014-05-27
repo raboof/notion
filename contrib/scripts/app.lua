@@ -28,8 +28,8 @@
 -- If you use a multihead setup you can use something like this to start
 -- applictions on your current screen
 --
--- kpress(MOD1.."C", "app.byname('xterm -title shell', 'shell', _)"),
--- kpress(MOD1.."T", "app.byclass('emacs', 'Emacs', _)"),
+-- kpress(META.."C", "app.byname('xterm -title shell', 'shell', _)"),
+-- kpress(META.."T", "app.byclass('emacs', 'Emacs', _)"),
 --
 -- For emacs users there's also app.emacs_eval, and app.query_editfile,
 -- which interacts with any currently running emacs process (using

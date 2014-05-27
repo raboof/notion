@@ -233,7 +233,7 @@ end
 ctrl_statusbar.init()
 
 ioncore.defbindings("WScreen", {
-    kpress(MOD1.."V", "mod_menu.bigmenu(_, _sub, ctrl_statusbar.show_list)")
+    kpress(META.."V", "mod_menu.bigmenu(_, _sub, ctrl_statusbar.show_list)")
 })
 
 ioncore.defbindings("WStatusBar", {

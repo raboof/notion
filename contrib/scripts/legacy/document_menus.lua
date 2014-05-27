@@ -33,11 +33,11 @@ defmenu("useful folders", {
 })
 
 defbindings("WMPlex", { 
-    kpress(MOD1.."minus", "mod_menu.menu(_, _sub, 'useful folders')"),
+    kpress(META.."minus", "mod_menu.menu(_, _sub, 'useful folders')"),
 })
     
 defbindings("WScreen", {
-    submap(MOD1.."K", {
+    submap(META.."K", {
         kpress("minus", "docmenus.toggle_dotfiles()"),
     }),
 })

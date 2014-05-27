@@ -14,10 +14,10 @@
 -- The following keybindings may be useful:
 --
 --defbindings("WIonWS", {
---    kpress(MOD1.."Up", "xinerama_switcher_up(_)"),
---    kpress(MOD1.."Down", "xinerama_switcher_down(_)"),
---    kpress(MOD1.."Right", "xinerama_switcher_right(_)"),
---    kpress(MOD1.."Left", "xinerama_switcher_left(_)"),
+--    kpress(META.."Up", "xinerama_switcher_up(_)"),
+--    kpress(META.."Down", "xinerama_switcher_down(_)"),
+--    kpress(META.."Right", "xinerama_switcher_right(_)"),
+--    kpress(META.."Left", "xinerama_switcher_left(_)"),
 --})
 --
 -- Based on go_desk_or_desk lua by Rene van Bevern <rvb@pro-linux.de>, 2005

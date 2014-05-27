@@ -207,13 +207,13 @@ end
 --
 defbindings("WMPlex", {
     -- you can change the key bindings to your liking
-    kpress(MOD1.."F5", "schedule.ask_message(_)"),
-    kpress(MOD1.."Shift+F5", function ()  -- clear notification
+    kpress(META.."F5", "schedule.ask_message(_)"),
+    kpress(META.."Shift+F5", function ()  -- clear notification
                 mod_statusbar.inform("schedule", "")
                 mod_statusbar.inform("schedule_hint", "")
                 mod_statusbar.update()
             end),
-    kpress(MOD1.."Control+F5", "schedule.show_all(_)"),
+    kpress(META.."Control+F5", "schedule.show_all(_)"),
 })
 
 dopath(schedule.save_filename, true)    -- read any saved notifications

@@ -20,7 +20,7 @@
 
 defbindings("WScreen", {
 
-    -- Switching workspaces can be done from anywhere using Mod1 and
+    -- Switching workspaces can be done from anywhere using META and
     -- the wheel, or without the keyboard by using the wheel over
     -- the left, right or bottom edges of the screen, or over a border
     -- or an empty frame.
@@ -29,8 +29,8 @@ defbindings("WScreen", {
     --  of the screen, most of them do.)
     mpress("Button4", "WScreen.switch_prev(_)"),
     mpress("Button5", "WScreen.switch_next(_)"),
-    mpress(MOD1.."Button4", "WScreen.switch_prev(_)"),
-    mpress(MOD1.."Button5", "WScreen.switch_next(_)"),
+    mpress(META.."Button4", "WScreen.switch_prev(_)"),
+    mpress(META.."Button5", "WScreen.switch_next(_)"),
 
     -- When a WClientWin is set to fullscreen mode, the mouse
     -- can do little about it unless there happen to be gaps
@@ -44,12 +44,12 @@ defbindings("WScreen", {
 defbindings("WFrame", {
 
     bdoc("Bring up a context menu from anywhere in the frame."),
-    mpress(MOD1.."Shift+Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
+    mpress(META.."Shift+Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
 
     bdoc("Toggle tagged."),
-    mpress(MOD1.."Button2", "_sub:set_tagged('toggle')"),
+    mpress(META.."Button2", "_sub:set_tagged('toggle')"),
     bdoc("Attach tagged regions."),
-    mpress(MOD1.."Shift+Button2", "_:tagged_attach()"),
+    mpress(META.."Shift+Button2", "_:tagged_attach()"),
     
     -- For mouse users I highly recommend button2 as a mainmenu, 
     -- otherwise it would be difficult to start programs using the mouse.
@@ -73,11 +73,11 @@ defbindings("WFrame", {
     mpress("Button5", "_:parent():switch_next()"),
     mpress("Button4", "_:parent():switch_prev()"),
 
-    mpress(MOD1.."Button4", "_:parent():switch_prev()"),
-    mpress(MOD1.."Button5", "_:parent():switch_next()"),
+    mpress(META.."Button4", "_:parent():switch_prev()"),
+    mpress(META.."Button5", "_:parent():switch_next()"),
     
-    bdoc("Drag without aiming for a tab, using Mod1+Shift"),
-    mdrag(MOD1.."Shift+Button1", "WFrame.p_tabdrag(_)"),
+    bdoc("Drag without aiming for a tab, using META+Shift"),
+    mdrag(META.."Shift+Button1", "WFrame.p_tabdrag(_)"),
 
 --[[ These should already have happened in cfg_bindings.lua.
 --  Uncomment if necessary.
@@ -88,10 +88,10 @@ defbindings("WFrame", {
     
     bdoc("Resize the frame."),
     mdrag("Button1@border", "WFrame.p_resize(_)"),
-    mdrag(MOD1.."Button3", "WFrame.p_resize(_)"),
+    mdrag(META.."Button3", "WFrame.p_resize(_)"),
     
     bdoc("Move the frame."),
-    mdrag(MOD1.."Button1", "WFrame.p_move(_)"),
+    mdrag(META.."Button1", "WFrame.p_move(_)"),
     
     bdoc("Move objects between frames by dragging and dropping the tab."),
     mdrag("Button1@tab", "WFrame.p_tabdrag(_)"),
@@ -101,8 +101,8 @@ defbindings("WFrame", {
 
     -- Using alsa-utils, by any chance?  Have some volume control.
     --[[
-    mpress(MOD1.."Control+Button4", "ioncore.exec_on(_, 'amixer set PCM 1+')"),
-    mpress(MOD1.."Control+Button5", "ioncore.exec_on(_, 'amixer set PCM 1-')"),
+    mpress(META.."Control+Button4", "ioncore.exec_on(_, 'amixer set PCM 1+')"),
+    mpress(META.."Control+Button5", "ioncore.exec_on(_, 'amixer set PCM 1-')"),
     --]]
 })
 
@@ -124,13 +124,13 @@ defbindings("WFrame", {
 else
 defbindings("WFrame", {
     bdoc("Show/hide tab"),
-    mclick(MOD1.."Shift+Button1", "WFrame.set_tabbar(_, 'toggle')"),
+    mclick(META.."Shift+Button1", "WFrame.set_tabbar(_, 'toggle')"),
 
     bdoc("Quickly rename a frame."),
-    mpress(MOD1.."Shift+Control+Button3", "mod_query.query_renameframe(_)"),
+    mpress(META.."Shift+Control+Button3", "mod_query.query_renameframe(_)"),
 
-    mpress(MOD1.."Shift+Button5", "WScreen.switch_next(_)"),
-    mpress(MOD1.."Shift+Button4", "WScreen.switch_prev(_)"),
+    mpress(META.."Shift+Button5", "WScreen.switch_next(_)"),
+    mpress(META.."Shift+Button4", "WScreen.switch_prev(_)"),
 })
 end    
 

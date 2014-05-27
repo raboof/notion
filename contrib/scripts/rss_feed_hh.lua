@@ -6,7 +6,7 @@
 --
 -- Use:
 -- You have to dopath() this script for it to work. I have set a binding
--- MOD1+F11 for a popup-menu. You can also add %rss to the statusbar, which
+-- META+F11 for a popup-menu. You can also add %rss to the statusbar, which
 -- will show a scrolling list of titles. You might want to give it a try
 -- before disabling. :)
 --
@@ -25,7 +25,7 @@
 -- * Added Flag which allows to toggle if a feed will be displayed in
 --   the statusbar
 -- * A feed in the menu now opens the coresponding url in firefox
--- * Now uses MOD1+F11 by default, so it doesnt overlap with the
+-- * Now uses META+F11 by default, so it doesnt overlap with the
 --   menu anymore
 -- * I found the source-information in the statusbar distrubing so I removed
 --   it
@@ -240,7 +240,7 @@ end
 init_rss()
 
 ioncore.defbindings("WScreen", {
-    kpress(MOD1.."Shift+D", "mod_query.message(_, rss_desc)"),
-    kpress(MOD1.."F11", 'mod_menu.bigmenu(_, _sub, show_menu)'),
+    kpress(META.."Shift+D", "mod_query.message(_, rss_desc)"),
+    kpress(META.."F11", 'mod_menu.bigmenu(_, _sub, show_menu)'),
 })
 

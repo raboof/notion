@@ -18,10 +18,10 @@
 -- To use this function you need to bind keys for WIonWS, for exmaple:
 --
 --defbindings("WIonWS", {
---    kpress(MOD1.."Up", "go_frame_or_desk_up(_)"),
---    kpress(MOD1.."Down", "go_frame_or_desk_down(_)"),
---    kpress(MOD1.."Right", "go_frame_or_desk_right(_)"),
---    kpress(MOD1.."Left", "go_frame_or_desk_left(_)"),
+--    kpress(META.."Up", "go_frame_or_desk_up(_)"),
+--    kpress(META.."Down", "go_frame_or_desk_down(_)"),
+--    kpress(META.."Right", "go_frame_or_desk_right(_)"),
+--    kpress(META.."Left", "go_frame_or_desk_left(_)"),
 --})
 
 function go_frame_or_desk(workspace, direction)
