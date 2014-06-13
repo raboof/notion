@@ -13,7 +13,9 @@
 #include <ioncore/common.h>
 #include <ioncore/log.h>
 #include "font.h"
+#ifndef HAVE_X11_XFT
 #include "fontset.h"
+#endif /* ! HAVE_X11_XFT */
 #include "brush.h"
 #include "precompose.h"
 
@@ -106,6 +108,9 @@ const char *de_default_fontname()
 
 DEFont *de_load_font(const char *fontname)
 {
+#ifdef HAVE_X11_XFT
+    XftFont *font;
+#endif
     DEFont *fnt;
     XFontSet fontset=NULL;
     XFontStruct *fontstruct=NULL;
@@ -120,7 +125,8 @@ DEFont *de_load_font(const char *fontname)
             return fnt;
         }
     }
-    
+
+#ifndef HAVE_X11_XFT
     if(ioncore_g.use_mb && !(ioncore_g.enc_utf8 && iso10646_font(fontname))){
         LOG(DEBUG, FONT, "Loading fontset %s", fontname); 
         fontset=de_create_font_set(fontname);
@@ -149,13 +155,34 @@ DEFont *de_load_font(const char *fontname)
         return NULL;
     }
     
+#else /* HAVE_X11_XFT */
+#define CF_FALLBACK_FONT_NAME "fixed"
+    if(strncmp(fontname, "xft:", 4)==0){
+        font=XftFontOpenName(ioncore_g.dpy, DefaultScreen(ioncore_g.dpy), fontname+4);
+    }else{
+        font=XftFontOpenXlfd(ioncore_g.dpy, DefaultScreen(ioncore_g.dpy), fontname);
+    }
+    
+    if(font==NULL){
+        if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
+            warn(TR("Could not load font \"%s\", trying \"%s\""),
+             fontname, CF_FALLBACK_FONT_NAME);
+            return de_load_font(CF_FALLBACK_FONT_NAME);
+        }
+        return NULL;
+    }
+#endif /* HAVE_X11_XFT */
     fnt=ALLOC(DEFont);
     
     if(fnt==NULL)
         return NULL;
     
+#ifndef HAVE_X11_XFT
     fnt->fontset=fontset;
     fnt->fontstruct=fontstruct;
+#else
+    fnt->font=font;
+#endif
     fnt->pattern=scopy(fontname);
     fnt->next=NULL;
     fnt->prev=NULL;
@@ -175,11 +202,13 @@ bool de_set_font_for_style(DEStyle *style, DEFont *font)
     style->font=font;
     font->refcount++;
     
+#ifndef HAVE_X11_XFT
     if(style->font->fontstruct!=NULL){
         XSetFont(ioncore_g.dpy, style->normal_gc, 
                  style->font->fontstruct->fid);
     }
 
+#endif /* ! HAVE_X11_XFT */
     return TRUE;
 }
 
@@ -194,11 +223,13 @@ bool de_load_font_for_style(DEStyle *style, const char *fontname)
     if(style->font==NULL)
         return FALSE;
     
+#ifndef HAVE_X11_XFT
     if(style->font->fontstruct!=NULL){
         XSetFont(ioncore_g.dpy, style->normal_gc, 
                  style->font->fontstruct->fid);
     }
     
+#endif /* ! HAVE_X11_XFT */
     return TRUE;
 }
 
@@ -208,10 +239,15 @@ void de_free_font(DEFont *font)
     if(--font->refcount!=0)
         return;
     
+#ifndef HAVE_X11_XFT
     if(font->fontset!=NULL)
         XFreeFontSet(ioncore_g.dpy, font->fontset);
     if(font->fontstruct!=NULL)
         XFreeFont(ioncore_g.dpy, font->fontstruct);
+#else /* HAVE_X11_XFT */
+    if(font->font!=NULL)
+        XftFontClose(ioncore_g.dpy, font->font);
+#endif /* HAVE_X11_XFT */
     if(font->pattern!=NULL)
         free(font->pattern);
     
@@ -239,6 +275,7 @@ void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte)
 
 void defont_get_font_extents(DEFont *font, GrFontExtents *fnte)
 {
+#ifndef HAVE_X11_XFT
     if(font->fontset!=NULL){
         XFontSetExtents *ext=XExtentsOfFontSet(font->fontset);
         if(ext==NULL)
@@ -254,7 +291,14 @@ void defont_get_font_extents(DEFont *font, GrFontExtents *fnte)
         fnte->baseline=fnt->ascent;
         return;
     }
-    
+#else /* HAVE_X11_XFT */
+    if(font->font!=NULL){
+        fnte->max_height=font->font->ascent+font->font->descent;
+        fnte->max_width=font->font->max_advance_width;
+        fnte->baseline=font->font->ascent;
+        return;
+    }
+#endif /* HAVE_X11_XFT */
 fail:
     DE_RESET_FONT_EXTENTS(fnte);
 }
@@ -271,6 +315,7 @@ uint debrush_get_text_width(DEBrush *brush, const char *text, uint len)
 
 uint defont_get_text_width(DEFont *font, const char *text, uint len)
 {
+#ifndef HAVE_X11_XFT
     if(font->fontset!=NULL){
         XRectangle lext;
 #ifdef CF_DE_USE_XUTF8
@@ -298,6 +343,18 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
     }else{
         return 0;
     }
+#else /* HAVE_X11_XFT */
+    if(font->font!=NULL){
+        XGlyphInfo extents;
+        if(ioncore_g.enc_utf8)
+            XftTextExtentsUtf8(ioncore_g.dpy, font->font, (XftChar8*)text, len, &extents);
+        else
+            XftTextExtents8(ioncore_g.dpy, font->font, (XftChar8*)text, len, &extents);
+        return extents.xOff;
+    }else{
+        return 0;
+    }
+#endif /* HAVE_X11_XFT */
 }
 
 
@@ -307,17 +364,18 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
 /*{{{ String drawing */
 
 
+#ifndef HAVE_X11_XFT
 void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
-                                    const char *str, int len, bool needfill, 
+                                    const char *str, int len, bool needfill,
                                     DEColourGroup *colours)
 {
     GC gc=brush->d->normal_gc;
 
     if(brush->d->font==NULL)
         return;
-    
+
     XSetForeground(ioncore_g.dpy, gc, colours->fg);
-    
+
     if(!needfill){
         if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
@@ -366,6 +424,43 @@ void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
     }
 }
 
+#else /* HAVE_X11_XFT */
+void debrush_do_draw_string_default(DEBrush *brush,
+                                    int x, int y, const char *str,
+                                    int len, bool needfill,
+                                    DEColourGroup *colours)
+{
+    Window win = brush->win;
+    GC gc=brush->d->normal_gc;
+    XftDraw *draw;
+    XftFont *font;
+
+    if(brush->d->font==NULL)
+        return;
+
+    font=brush->d->font->font;
+    draw=debrush_get_draw(brush, win);
+
+    if(needfill){
+        XGlyphInfo extents;
+        if(ioncore_g.enc_utf8){
+            XftTextExtentsUtf8(ioncore_g.dpy, font, (XftChar8*)str, len,
+                               &extents);
+        }else{
+            XftTextExtents8(ioncore_g.dpy, font, (XftChar8*)str, len, &extents);
+            XftDrawRect(draw, &(colours->bg), x-extents.x, y-extents.y,
+                        extents.width+10, extents.height);
+        }
+    }
+
+    if(ioncore_g.enc_utf8){
+        XftDrawStringUtf8(draw, &(colours->fg), font, x, y, (XftChar8*)str,
+                          len);
+    }else{
+        XftDrawString8(draw, &(colours->fg), font, x, y, (XftChar8*)str, len);
+    }
+}
+#endif /* HAVE_X11_XFT */
 
 void debrush_do_draw_string(DEBrush *brush, int x, int y,
                             const char *str, int len, bool needfill, 

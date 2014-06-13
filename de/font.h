@@ -12,6 +12,9 @@
 
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
+#ifdef HAVE_X11_XFT
+#include <X11/Xft/Xft.h>
+#endif /* HAVE_X11_XFT */
 
 INTRSTRUCT(DEFont);
 
@@ -27,6 +30,9 @@ DECLSTRUCT(DEFont){
     int refcount;
     XFontSet fontset;
     XFontStruct *fontstruct;
+#ifdef HAVE_X11_XFT /* HAVE_X11_XFT */
+    XftFont *font;
+#endif /* HAVE_X11_XFT */
     DEFont *next, *prev;
 };
 

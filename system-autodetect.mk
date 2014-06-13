@@ -100,6 +100,19 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 
 ##
+## Xft support
+##
+
+#USE_XFT=1
+
+ifeq ($(USE_XFT),1)
+    X11_INCLUDES += `pkg-config xft --cflags`
+    X11_LIBS += `pkg-config xft --libs`
+    DEFINES += -DHAVE_X11_XFT
+endif
+
+
+##
 ## Localisation
 ##
 
