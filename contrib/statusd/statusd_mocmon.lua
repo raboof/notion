@@ -240,7 +240,7 @@ local function fetch_data(partial_data)
   
   if mocdata and mocdata ~= "" 
     then
-      for attribute, value in string.gfind(mocdata, "([^:]*):([^\n]*)\n")
+      for attribute, value in string.gmatch(mocdata, "([^:]*):([^\n]*)\n")
         do
 	  infotable[attribute] = string.gsub(value, "^%s*(.*)", "%1")
 	end

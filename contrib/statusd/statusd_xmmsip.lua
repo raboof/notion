@@ -265,7 +265,7 @@ local function fetch_data(partial_data)
   
   if pipedata and pipedata ~= "" 
     then
-      for attribute, value in string.gfind(pipedata, "([^:]*):%s*([^\n]*)\n")
+      for attribute, value in string.gmatch(pipedata, "([^:]*):%s*([^\n]*)\n")
         do
 	  infotable[attribute] = value
 	end

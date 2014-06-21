@@ -78,7 +78,7 @@ local function tokenize(str)
     local i = 0
     local k = nil
 
-    for k in string.gfind(str, '(%w+)') do
+    for k in string.gmatch(str, '(%w+)') do
         ret[i] = k
         i = i + 1
     end

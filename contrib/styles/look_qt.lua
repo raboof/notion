@@ -56,7 +56,7 @@ for line in io.lines(qtrcfile) do
 
         if paletteid > 0 then
             local i = 1
-            for v in string.gfind(line, "(#[0-9a-fA-F]+)") do
+            for v in string.gmatch(line, "(#[0-9a-fA-F]+)") do
                 palette[paletteid][i] = v
                 i = i+1
             end

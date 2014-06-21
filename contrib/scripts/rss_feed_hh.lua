@@ -126,7 +126,7 @@ local function parse_rss(str, show_in_sb, show_name)
     __, _ = string.find(data, "[^\n]+")
     if __ then src = string.sub(data, __, _) end
 
-    -- for title, desc in string.gfind(data,".-<item[^s].-<title>(.-)</title>.-<description>(.-)</description>.-</item>") do
+    -- for title, desc in string.gmatch(data,".-<item[^s].-<title>(.-)</title>.-<description>(.-)</description>.-</item>") do
     title, desc, data, link = get_next(data)
     while title do
         title = clean(title)

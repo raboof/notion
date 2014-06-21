@@ -59,7 +59,7 @@ local function get_cpustat()
    local uptime_interv = current_uptime - last_uptime
 
    local t = {}
-   for tmp in string.gfind(s, "%s+(%d+)") do
+   for tmp in string.gmatch(s, "%s+(%d+)") do
       table.insert(t, tonumber(tmp))
    end
 

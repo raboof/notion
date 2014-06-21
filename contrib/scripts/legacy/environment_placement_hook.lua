@@ -34,7 +34,7 @@ local function get_environment_of(pid)
     file:close()
 
     local rv = {}
-    for k, v in string.gfind(envstr, "(.-)=(.-)\\000") do
+    for k, v in string.gmatch(envstr, "(.-)=(.-)\\000") do
 	rv[k] = v
     end
     return rv
