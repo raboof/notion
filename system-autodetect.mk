@@ -103,7 +103,7 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 ## Xft support
 ##
 
-#USE_XFT=1
+USE_XFT?=$(shell (pkg-config --exists xft && echo 1))
 
 ifeq ($(USE_XFT),1)
     X11_INCLUDES += `pkg-config xft --cflags`
