@@ -20,10 +20,10 @@
 INTRSTRUCT(DEColourGroup);
 
 
-#ifndef HAVE_X11_XFT
-typedef unsigned long DEColour;
-#else /* HAVE_X11_XFT */
+#ifdef HAVE_X11_XFT
 typedef XftColor DEColour;
+#else /* HAVE_X11_XFT */
+typedef unsigned long DEColour;
 #endif /* HAVE_X11_XFT */
 
 

@@ -20,10 +20,10 @@
 #include <X11/extensions/shape.h>
 
 
-#ifndef HAVE_X11_XFT
-#  define PIXEL(x) x
-#else /* HAVE_X11_XFT */
+#ifdef HAVE_X11_XFT
 #  define PIXEL(x) (x).pixel
+#else /* HAVE_X11_XFT */
+#  define PIXEL(x) x
 #endif /* HAVE_X11_XFT */
 
 
