@@ -114,10 +114,18 @@ XFontSet de_create_font_in_current_locale(const char *fontname)
         if(nmissing==0)
             LOG(DEBUG, FONT, "Found a font without missing charsets for %s, returning it.", fontname);
         else {
-            int i;
+            int i,n;
+            char **names;
+            struct XFontStruct **fonts;
+
             LOG(INFO, FONT, "Found a font with %d missing charsets for %s:", nmissing, fontname);
             for(i=0;i<nmissing;i++)
                 LOG(DEBUG, FONT, "* %s", missing[i]);
+            n = XFontsOfFontSet(fs, &fonts, &names);
+
+            LOG(DEBUG, FONT, "Font consists of fonts:");
+            for(i=0;i<n;i++)
+                LOG(DEBUG, FONT, "* %s", names[i]);
         }
     }else{
         LOG(WARN, FONT, "Found no font for %s.", fontname);

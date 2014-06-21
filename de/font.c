@@ -13,9 +13,11 @@
 #include <ioncore/common.h>
 #include <ioncore/log.h>
 #include "font.h"
-#ifndef HAVE_X11_XFT
+#ifdef HAVE_X11_XFT
+#include <fontconfig/fontconfig.h>
+#else
 #include "fontset.h"
-#endif /* ! HAVE_X11_XFT */
+#endif /* HAVE_X11_XFT */
 #include "brush.h"
 #include "precompose.h"
 
@@ -128,7 +130,7 @@ DEFont *de_load_font(const char *fontname)
 
 #ifndef HAVE_X11_XFT
     if(ioncore_g.use_mb && !(ioncore_g.enc_utf8 && iso10646_font(fontname))){
-        LOG(DEBUG, FONT, "Loading fontset %s", fontname); 
+        LOG(DEBUG, FONT, "Loading fontset %s", fontname);
         fontset=de_create_font_set(fontname);
         if(fontset!=NULL){
             if(XContextDependentDrawing(fontset)){
@@ -138,7 +140,7 @@ DEFont *de_load_font(const char *fontname)
             }
         }
     }else{
-        LOG(DEBUG, FONT, "Loading fontstruct %s", fontname); 
+        LOG(DEBUG, FONT, "Loading fontstruct %s", fontname);
         fontstruct=XLoadQueryFont(ioncore_g.dpy, fontname);
     }
     
@@ -156,7 +158,7 @@ DEFont *de_load_font(const char *fontname)
     }
     
 #else /* HAVE_X11_XFT */
-#define CF_FALLBACK_FONT_NAME "fixed"
+    LOG(DEBUG, FONT, "Loading font %s via XFT", fontname);
     if(strncmp(fontname, "xft:", 4)==0){
         font=XftFontOpenName(ioncore_g.dpy, DefaultScreen(ioncore_g.dpy), fontname+4);
     }else{
@@ -164,12 +166,17 @@ DEFont *de_load_font(const char *fontname)
     }
     
     if(font==NULL){
-        if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
+        if(strcmp(fontname, default_fontname)!=0){
             warn(TR("Could not load font \"%s\", trying \"%s\""),
-             fontname, CF_FALLBACK_FONT_NAME);
-            return de_load_font(CF_FALLBACK_FONT_NAME);
+                fontname, default_fontname);
+            fnt=de_load_font(default_fontname);
+            if(fnt==NULL)
+                LOG(WARN, FONT, TR("Failed to load fallback font."));
+            return fnt;
         }
         return NULL;
+    }else{
+        FcPatternPrint(font->pattern);
     }
 #endif /* HAVE_X11_XFT */
     fnt=ALLOC(DEFont);
