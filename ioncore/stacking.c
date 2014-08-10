@@ -126,43 +126,6 @@ static WStacking *link_lists(WStacking *l1, WStacking *l2)
 }
 
 
-static WStacking *link_list_before(WStacking *l1, 
-                                   WStacking *i1,
-                                   WStacking *l2)
-{
-    WStacking *tmp;
-    
-    if(i1==l1)
-        return link_lists(l2, l1);
-    
-    l2->prev->next=i1;
-    i1->prev->next=l2;
-    tmp=i1->prev;
-    i1->prev=l2->prev;
-    l2->prev=tmp;
-    
-    return l1;
-}
-
-
-static WStacking *link_list_after(WStacking *l1, 
-                                  WStacking *i1,
-                                  WStacking *l2)
-{
-    WStacking *tmp;
-    
-    if(i1==l1->prev)
-        return link_lists(l1, l2);
-    
-    i1->next->prev=l2->prev;
-    l2->prev->next=i1->next;
-    i1->next=l2;
-    l2->prev=i1;
-    
-    return l1;
-}
-
-
 WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 {
     WStacking *nxt=NULL, *st;
@@ -590,7 +553,7 @@ WStacking *stacking_find_to_focus(WStacking *stacking,
 }
 
 
-static bool mapped_filt(WStacking *st, void *unused)
+static bool mapped_filt(WStacking *st, void *UNUSED(unused))
 {
     return (st->reg!=NULL && REGION_IS_MAPPED(st->reg));
 }

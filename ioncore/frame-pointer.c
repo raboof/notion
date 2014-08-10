@@ -129,7 +129,6 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
     WBinding *binding=NULL;
-    WBindmap **bindptr;
     
     if(ev->type==KeyRelease)
         return FALSE;
@@ -151,7 +150,6 @@ static bool tabdrag_kbd_handler(WRegion *reg, XEvent *xev)
 
 static void setup_dragwin(WFrame *frame, uint tab)
 {
-    WRectangle g;
     WRootWin *rw;
     WFitParams fp;
     const char *tab_style=framemode_get_tab_style(frame->mode);
@@ -181,11 +179,9 @@ static void setup_dragwin(WFrame *frame, uint tab)
 }
 
 
-static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
+static void p_tabdrag_motion(WFrame *UNUSED(frame), XMotionEvent *UNUSED(ev),
                              int dx, int dy)
 {
-    WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
-
     p_tab_x+=dx;
     p_tab_y+=dy;
     
@@ -203,8 +199,6 @@ static void p_tabdrag_motion(WFrame *frame, XMotionEvent *ev,
 static void p_tabdrag_begin(WFrame *frame, XMotionEvent *ev,
                             int dx, int dy)
 {
-    WRootWin *rootwin=region_rootwin_of((WRegion*)frame);
-
     if(p_tabnum<0)
         return;
     
@@ -306,7 +300,6 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
 {
     WRegion *sub=NULL;
     WRegion *dropped_on;
-    Window win=None;
 
     sub=sub_at_tab(frame);
     
@@ -364,20 +357,8 @@ void frame_p_tabdrag(WFrame *frame)
 EXTL_EXPORT_MEMBER
 void frame_p_switch_tab(WFrame *frame)
 {
-    /*WRegion *sub;*/
-    
     if(ioncore_pointer_grab_region()!=(WRegion*)frame)
         return;
-    
-    /*
-    sub=sub_at_tab(frame);
-    if(sub!=NULL){
-        bool mcf=region_may_control_focus((WRegion*)frame);
-        region_goto_flags(sub, (mcf 
-                                ? REGION_GOTO_FOCUS|REGION_GOTO_NOWARP 
-                                : 0));
-    }
-    */
     
     mplex_switch_nth((WMPlex*)frame, p_tabnum);
 }

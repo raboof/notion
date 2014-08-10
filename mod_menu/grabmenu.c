@@ -62,7 +62,6 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     WMenuCreateParams fnp;
     WMPlexAttachParams par;
     WMenu *menu;
-    XKeyEvent *ev;
     uint state, kcb;
     bool sub;
     

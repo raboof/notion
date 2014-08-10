@@ -20,11 +20,10 @@ const char* loglevel_names[] = {
 };
 
 /** For this category, show log messages at this loglevel and above */
-LogLevel minimumLevel(LogCategory category)
+static LogLevel minimumLevel(LogCategory category)
 {
     switch(category){
-        case FONT:
-            /** For https://sourceforge.net/p/notion/bugs/63/ */
+        case VALGRIND:
             return DEBUG;
         default:
             return INFO;
@@ -33,14 +32,14 @@ LogLevel minimumLevel(LogCategory category)
 
 #define TIME_BUFFER_MAXSIZE 100
 
-void printtime(FILE *stream, const char *format, time_t time)
+static void printtime(FILE *stream, const char *format, time_t time)
 {
     char buf[TIME_BUFFER_MAXSIZE];
     strftime(buf, TIME_BUFFER_MAXSIZE, format, localtime(&time));
     fprintf(stream, "%s", buf);
 }
 
-void vlog_message(LogLevel level, LogCategory category, const char *file, int line, const char *function, const char *message, va_list argp)
+static void vlog_message(LogLevel level, LogCategory category, const char *file, int line, const char *function, const char *message, va_list argp)
 {
     if(level >= minimumLevel(category)){
         printtime(stderr, "%F %T ", time(NULL));

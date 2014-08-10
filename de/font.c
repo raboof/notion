@@ -27,9 +27,6 @@
 #define UTF_1 0x80
 #define UTF_2 0xC0
 #define UTF_3 0xE0
-#define UTF_4 0xF0
-#define UTF_5 0xF8
-#define UTF_6 0xFC
 
 static void toucs(const char *str_, int len, XChar2b **str16, int *len16)
 {

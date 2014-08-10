@@ -28,7 +28,8 @@
 #include "region-iter.h"
 #include "return.h"
 #include "key.h"
-
+#include "log.h"
+#include "screen-notify.h"
 
 #define D2(X)
 
@@ -123,7 +124,7 @@ void region_deinit(WRegion *reg)
     
     region_unregister(reg);
 
-    region_focuslist_deinit(reg);
+    region_focus_deinit(reg);
 
     if(ioncore_g.focus_next==reg){
         D(warn("Region to be focused next destroyed[2]."));
@@ -480,7 +481,7 @@ bool region_may_dispose(WRegion *reg)
 }
 
 
-static WRegion *region_managed_disposeroot_default(WRegion *mgr, WRegion *reg)
+static WRegion *region_managed_disposeroot_default(WRegion *UNUSED(mgr), WRegion *reg)
 {
     return reg;
 }
@@ -972,6 +973,48 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how)
         xwindow_set_text_property(((WWindow*)reg)->win, XA_WM_NAME, p, 1);
     }
 }
+
+/*}}}*/
+
+/*{{{ Debug printers */
+
+#define REGION_DEBUGPRINT( what, next )                                 \
+  do {                                                                  \
+    int indent = 1;                                                     \
+    char line_indent[24];                                               \
+    line_indent[0] = ' ';                                               \
+    line_indent[1] = '\0';                                              \
+                                                                        \
+    LOG(DEBUG, GENERAL, what " list start ========:");                  \
+    while( reg != NULL )                                                \
+    {                                                                   \
+      LOG(DEBUG, GENERAL, "%s%p (%s)", line_indent, (void*)reg, reg->ni.name); \
+                                                                        \
+      if( indent == sizeof(line_indent )-1 )                            \
+      {                                                                 \
+        LOG(DEBUG, GENERAL, "too long. cut off");                       \
+        break;                                                          \
+      }                                                                 \
+                                                                        \
+      reg = next;                                                       \
+      line_indent[indent] = ' ';                                        \
+      indent++;                                                         \
+      line_indent[indent] = '\0';                                       \
+    }                                                                   \
+    LOG(DEBUG, GENERAL, what " list end ==========");                   \
+  } while(0)
+
+void region_debugprint_parents ( const WRegion* reg )
+{
+  REGION_DEBUGPRINT( "parent", reg->parent && reg->parent->region.ni.name ? &reg->parent->region : NULL );
+}
+
+void region_debugprint_managers( const WRegion* reg )
+{
+  REGION_DEBUGPRINT( "manager", reg->manager );
+}
+
+#undef REGION_DEBUGPRINT
 
 /*}}}*/
 

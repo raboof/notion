@@ -13,13 +13,13 @@
 #include "focus.h"
 
 
-bool pholder_init(WPHolder *ph)
+bool pholder_init(WPHolder *UNUSED(ph))
 {
     return TRUE;
 }
 
 
-void pholder_deinit(WPHolder *ph)
+void pholder_deinit(WPHolder *UNUSED(ph))
 {
 }
 

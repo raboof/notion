@@ -142,19 +142,19 @@ XineramaQueryScreens(
     XineramaScreenInfo		*scrnInfo = NULL;
     initFakeXinerama();
     if(num_screens) {
-	if((scrnInfo = Xmalloc(sizeof(XineramaScreenInfo) * num_screens))) {
-	    int i;
+        if((scrnInfo = Xmalloc(sizeof(XineramaScreenInfo) * num_screens))) {
+            int i;
 
-	    for(i = 0; i < num_screens; i++) {
-		scrnInfo[i].screen_number = i;
-		scrnInfo[i].x_org 	  = screen_info[ i ].x_org;
-		scrnInfo[i].y_org 	  = screen_info[ i ].y_org;
-		scrnInfo[i].width 	  = screen_info[ i ].width;
-		scrnInfo[i].height 	  = screen_info[ i ].height;
-	    }
+            for(i = 0; i < num_screens; i++) {
+                scrnInfo[i].screen_number = i;
+                scrnInfo[i].x_org 	  = screen_info[ i ].x_org;
+                scrnInfo[i].y_org 	  = screen_info[ i ].y_org;
+                scrnInfo[i].width 	  = screen_info[ i ].width;
+                scrnInfo[i].height 	  = screen_info[ i ].height;
+            }
 
-	    *number = num_screens;
-	} else
+            *number = num_screens;
+        } else
             ;
     }
     return scrnInfo;

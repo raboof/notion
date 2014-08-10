@@ -53,6 +53,8 @@ include $(TOPDIR)/build/rules.mk
 profiling.o: profiling.c
 	$(CC) $(CFLAGS:-finstrument-functions=) -c profiling.c -o profiling.o
 
+ioncore.o: exports.h
+
 ioncore.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@

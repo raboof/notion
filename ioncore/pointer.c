@@ -128,8 +128,6 @@ XEvent *ioncore_current_pointer_event()
 
 static void call_button(WBinding *binding, XButtonEvent *ev)
 {
-    WButtonHandler *fn;
-
     if(binding==NULL)
         return;
 
@@ -163,8 +161,6 @@ static void call_motion_end(XButtonEvent *ev)
 static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
                               int dx, int dy)
 {
-    WMotionHandler *fn;
-    
     if(binding==NULL)
         return;
 
@@ -208,7 +204,7 @@ static bool handle_key(WRegion *reg, XEvent *ev)
 }
 
 
-static void pointer_grab_killed(WRegion *unused)
+static void pointer_grab_killed(WRegion *UNUSED(unused))
 {
     if(p_reg!=NULL && p_killed_handler!=NULL)
         p_killed_handler(p_reg);

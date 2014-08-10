@@ -352,6 +352,7 @@ static bool init_global()
     ioncore_g.warp_next=FALSE;
     ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_OTHER;
     
+    ioncore_g.focuslist=NULL;
     ioncore_g.focus_current=NULL;
 
     ioncore_g.input_mode=IONCORE_INPUTMODE_NORMAL;
@@ -367,7 +368,10 @@ static bool init_global()
     ioncore_g.autoraise=TRUE;
     ioncore_g.autosave_layout=TRUE;
     ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;
-    
+    ioncore_g.focuslist_insert_delay=CF_FOCUSLIST_INSERT_DELAY;
+    ioncore_g.workspace_indicator_timeout=CF_WORKSPACE_INDICATOR_TIMEOUT;
+    ioncore_g.activity_notification_on_all_screens=FALSE;
+
     ioncore_g.enc_utf8=FALSE;
     ioncore_g.enc_sb=TRUE;
     ioncore_g.use_mb=FALSE;
@@ -577,7 +581,6 @@ static void set_initial_focus()
     int x, y, wx, wy;
     uint mask;
     WScreen *scr;
-    WWindow *wwin;
     
     XQueryPointer(ioncore_g.dpy, None, &root, &win,
                   &x, &y, &wx, &wy, &mask);
@@ -651,7 +654,6 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 void ioncore_deinit()
 {
     Display *dpy;
-    WRootWin *rootwin;
     
     ioncore_g.opmode=IONCORE_OPMODE_DEINIT;
     

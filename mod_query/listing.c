@@ -36,7 +36,7 @@ static int strings_maxw(GrBrush *brush, char **strs, int nstrs)
 }
 
 
-static int getbeg(GrBrush *brush, int maxw, char *str, int l, int *wret)
+static int getbeg(GrBrush *brush, int maxw, char *str, int *wret)
 {
     int n=0, nprev=0, w;
     GrFontExtents fnte;
@@ -98,7 +98,7 @@ static void string_do_calc_parts(GrBrush *brush, int maxw, char *str, int l,
     w=grbrush_get_text_width(brush, str, l);
     
     if(w>rmaxw){
-        l2=getbeg(brush, rmaxw-wrapw, str, l, &w);
+        l2=getbeg(brush, rmaxw-wrapw, str, &w);
         if(l2<=0)
             l2=1;
     }
@@ -124,7 +124,6 @@ static void string_calc_parts(GrBrush *brush, int maxw, char *str,
 {
     int wrapw=grbrush_get_text_width(brush, "\\", 1);
     int ciw=grbrush_get_text_width(brush, CONT_INDENT, CONT_INDENT_LEN);
-    int i, s;
 
     iinf->n_parts=0;
     iinf->len=strlen(str);
@@ -188,7 +187,6 @@ static int col_fit(int w, int itemw, int spacing)
 static bool one_row_up(WListing *l, int *ip, int *rp)
 {
     int i=*ip, r=*rp;
-    int ir=ITEMROWS(l, i);
     
     if(r>0){
         (*rp)--;
@@ -305,8 +303,6 @@ void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l)
 
 void deinit_listing(WListing *l)
 {
-    int i;
-    
     if(l->strs==NULL)
         return;
     
@@ -390,14 +386,6 @@ static void do_draw_listing(GrBrush *brush, const WRectangle *geom,
         x+=l->itemw;
         c++;
     }
-}
-
-
-static int prevsel=-1;
-
-static bool filteridx_sel(WListing *l, int i)
-{
-    return (i==prevsel || i==l->selected_str);
 }
 
 

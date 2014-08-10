@@ -448,13 +448,13 @@ bool gr_stylespec_equals(const GrStyleSpec *s1, const GrStyleSpec *s2)
 /*{{{ Init, deinit */
 
 
-bool grbrush_init(GrBrush *brush)
+bool grbrush_init(GrBrush *UNUSED(brush))
 {
     return TRUE;
 }
 
 
-void grbrush_deinit(GrBrush *brush)
+void grbrush_deinit(GrBrush *UNUSED(brush))
 {
 }
 

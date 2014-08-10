@@ -199,4 +199,7 @@ extern WHook *region_notify_hook;
 
 void ioncore_region_notify(WRegion *reg, WRegionNotify how);
 
+void region_debugprint_parents ( const WRegion* reg );
+void region_debugprint_managers( const WRegion* reg );
+
 #endif /* ION_IONCORE_REGION_H */

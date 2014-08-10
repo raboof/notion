@@ -17,9 +17,6 @@
 #include "grouppholder.h"
 
 
-static void group_watch_handler(Watch *watch, Obj *ws);
-
-
 /*{{{ Primitives */
 
 
@@ -172,12 +169,6 @@ void grouppholder_deinit(WGroupPHolder *ph)
 /*{{{ Dynfuns */
 
 
-static WPHolder *get_recreate_ph(WGroupPHolder *ph)
-{
-    return get_head(ph)->recreate_pholder;
-}
-
-
 typedef struct{
     WGroupPHolder *ph, *ph_head;
     WRegionAttachData *data;
@@ -226,7 +217,7 @@ static WRegion *grouppholder_attach_recreate(WGroupPHolder *ph, int flags,
                                              WRegionAttachData *data)
 {
     WRegionAttachData data2;
-    WPHolder *root, *rph;
+    WPHolder *rph;
     WRegion *res;
     RP rp;
     

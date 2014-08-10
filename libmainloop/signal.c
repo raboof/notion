@@ -176,13 +176,13 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     return ret;
 }
 
-static bool mrsh_usr2(void (*fn)(void), void *p)
+static bool mrsh_usr2(void (*fn)(void), void *UNUSED(p))
 {
     fn();
     return TRUE;
 }
 
-static bool mrsh_usr2_extl(ExtlFn fn, void *p)
+static bool mrsh_usr2_extl(ExtlFn fn, void *UNUSED(p))
 {
     bool ret;
     ExtlTab t=extl_create_table();
@@ -303,7 +303,6 @@ void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
                   Obj *obj, ExtlFn fn)
 {
     WTimer *q, **qptr;
-    bool set=FALSE;
     
     timer_reset(timer);
 
@@ -422,16 +421,6 @@ IMPLCLASS(WTimer, Obj, timer_deinit, NULL);
 
 /*{{{ Signal handling */
 
-
-static void fatal_signal_handler(int signal_num)
-{
-    set_warn_handler(NULL);
-    warn(TR("Caught fatal signal %d. Dying without deinit."), signal_num); 
-    signal(signal_num, SIG_DFL);
-    kill(getpid(), signal_num);
-}
-
-           
 static void deadly_signal_handler(int signal_num)
 {
     set_warn_handler(NULL);
@@ -444,7 +433,7 @@ static void deadly_signal_handler(int signal_num)
 }
 
 
-static void chld_handler(int signal_num)
+static void chld_handler(int UNUSED(signal_num))
 {
 #if 0
     pid_t pid;
@@ -457,7 +446,7 @@ static void chld_handler(int signal_num)
 #endif
 }
 
-static void usr2_handler(int signal_num)
+static void usr2_handler(int UNUSED(signal_num))
 {
     usr2_sig=1;
 }
@@ -473,13 +462,13 @@ static void exit_handler(int signal_num)
 }
 
 
-static void timer_handler(int signal_num)
+static void timer_handler(int UNUSED(signal_num))
 {
     had_tmr=TRUE;
 }
 
 
-static void ignore_handler(int signal_num)
+static void ignore_handler(int UNUSED(signal_num))
 {
     
 }
@@ -495,7 +484,6 @@ static void ignore_handler(int signal_num)
 
 #define IFTRAP(X) if(sigismember(which, X))
 #define DEADLY(X) IFTRAP(X) signal(X, deadly_signal_handler);
-#define FATAL(X) IFTRAP(X) signal(X, fatal_signal_handler);
 #define IGNORE(X) IFTRAP(X) signal(X, SIG_IGN)
 
 
@@ -514,16 +502,14 @@ void mainloop_trap_signals(const sigset_t *which)
     sigemptyset(&set);
     sigemptyset(&oldset);
     sigprocmask(SIG_SETMASK, &set, &oldset);
-    
+
+    /* I do not handle SIG{ILL,SEGV,FPE,BUS} since there's not much I can do in
+     * response */
+
     DEADLY(SIGHUP);
     DEADLY(SIGQUIT);
     DEADLY(SIGINT);
     DEADLY(SIGABRT);
-
-    FATAL(SIGILL);
-    FATAL(SIGSEGV);
-    FATAL(SIGFPE);
-    FATAL(SIGBUS);
     
     IGNORE(SIGTRAP);
     /*IGNORE(SIGWINCH);*/
@@ -576,7 +562,6 @@ void mainloop_trap_signals(const sigset_t *which)
 }
 
 #undef IGNORE
-#undef FATAL
 #undef DEADLY
 
 

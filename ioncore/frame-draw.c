@@ -324,7 +324,6 @@ void frame_draw(const WFrame *frame, bool complete)
 void frame_brushes_updated(WFrame *frame)
 {
     WFrameBarMode barmode;
-    ExtlTab tab;
     char *s;
 
     if(frame->brush==NULL)
@@ -348,7 +347,7 @@ void frame_brushes_updated(WFrame *frame)
             barmode=FRAME_BAR_SHAPED;
         else if(strcmp(s, "none")==0)
             barmode=FRAME_BAR_NONE;
-	free(s);
+        free(s);
     }
         
     frame->barmode=barmode;

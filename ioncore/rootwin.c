@@ -45,7 +45,7 @@ static bool redirect_error=FALSE;
 static bool ignore_badwindow=TRUE;
 
 
-static int my_redirect_error_handler(Display *dpy, XErrorEvent *ev)
+static int my_redirect_error_handler(Display *UNUSED(dpy), XErrorEvent *UNUSED(ev))
 {
     redirect_error=TRUE;
     return 0;
@@ -200,9 +200,6 @@ static void preinit_gr(WRootWin *rootwin)
 }
 
 
-static Atom net_virtual_roots=None;
-
-
 static bool rootwin_init(WRootWin *rootwin, int xscr)
 {
     Display *dpy=ioncore_g.dpy;
@@ -240,7 +237,6 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     fp.g.h=DisplayHeight(dpy, xscr);
     
     if(!window_do_init((WWindow*)rootwin, NULL, &fp, root, "WRootWin")){
-        free(rootwin);
         return FALSE;
     }
 
@@ -260,7 +256,6 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     
     scr=create_screen(rootwin, &fp, xscr);
     if(scr==NULL){
-        free(rootwin);
         return FALSE;
     }
     region_set_manager((WRegion*)scr, (WRegion*)rootwin);
@@ -330,21 +325,21 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 }
 
 
-static bool rootwin_fitrep(WRootWin *rootwin, WWindow *par, 
-                           const WFitParams *fp)
+static bool rootwin_fitrep(WRootWin *UNUSED(rootwin), WWindow *UNUSED(par), 
+                           const WFitParams *UNUSED(fp))
 {
     D(warn("Don't know how to reparent or fit root windows."));
     return FALSE;
 }
 
 
-static void rootwin_map(WRootWin *rootwin)
+static void rootwin_map(WRootWin *UNUSED(rootwin))
 {
     D(warn("Attempt to map a root window."));
 }
 
 
-static void rootwin_unmap(WRootWin *rootwin)
+static void rootwin_unmap(WRootWin *UNUSED(rootwin))
 {
     D(warn("Attempt to unmap a root window -- impossible."));
 }
@@ -355,7 +350,7 @@ static void rootwin_managed_remove(WRootWin *rootwin, WRegion *reg)
     region_unset_manager(reg, (WRegion*)rootwin);
 }
 
-static WRegion *rootwin_managed_disposeroot(WRootWin *rootwin, WRegion *reg)
+static WRegion *rootwin_managed_disposeroot(WRootWin *UNUSED(rootwin), WRegion *reg)
 {
     WScreen *scr=OBJ_CAST(reg, WScreen);
     if(scr!=NULL && scr==scr->prev_scr){
@@ -409,6 +404,19 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
     }
     
     return scr;
+}
+
+/*EXTL_DOC
+ * Warp the cursor pointer to this location
+ *
+ * I'm not *entirely* sure what 'safe' means, but this doesn't change internal
+ * notion state, so I guess it's 'safe'...
+ */
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+void rootwin_warp_pointer(WRootWin *root, int x, int y)
+{
+    XWarpPointer(ioncore_g.dpy, None, WROOTWIN_ROOT(root), 0, 0, 0, 0, x, y);
 }
 
 

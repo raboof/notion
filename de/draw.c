@@ -402,10 +402,6 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
         d->stipple_gc=tmp;
         swapped=FALSE;
     }
-    /*if(MATCHES2("*-*-*-dragged", a1, a2)){
-        XFillRectangle(ioncore_g.dpy, win, d->stipple_gc, 
-                       g->x, g->y, g->w, g->h);
-    }*/
 }
 
 
@@ -416,7 +412,7 @@ void debrush_menuentry_extras(DEBrush *brush,
                               const GrFontExtents *fnte,
                               const GrStyleSpec *a1, 
                               const GrStyleSpec *a2, 
-                              bool pre, int index)
+                              bool pre, int UNUSED(index))
 {
     int tx, ty;
 
@@ -436,7 +432,7 @@ void debrush_menuentry_extras(DEBrush *brush,
 
 
 void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom, 
-                         DEColourGroup *cg, bool needfill)
+                         DEColourGroup *cg, bool UNUSED(needfill))
 {
     GC gc=brush->d->normal_gc;
     
@@ -558,7 +554,7 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
 
 #define MAXSHAPE 16
 
-void debrush_set_window_shape(DEBrush *brush, bool rough,
+void debrush_set_window_shape(DEBrush *brush, bool UNUSED(rough),
                               int n, const WRectangle *rects)
 {
     XRectangle r[MAXSHAPE];
@@ -571,25 +567,25 @@ void debrush_set_window_shape(DEBrush *brush, bool rough,
         n=MAXSHAPE;
     
     if(n==0){
-	/* n==0 should clear the shape. As there's absolutely no
-	 * documentation for XShape (as is typical of all sucky X
-	 * extensions), I don't know how the shape should properly 
-	 * be cleared. Thus we just use a huge rectangle.
-	 */
-	n=1;
-	r[0].x=0;
-	r[0].y=0;
-	r[0].width=USHRT_MAX;
-	r[0].height=USHRT_MAX;
+        /* n==0 should clear the shape. As there's absolutely no
+         * documentation for XShape (as is typical of all sucky X
+         * extensions), I don't know how the shape should properly
+         * be cleared. Thus we just use a huge rectangle.
+         */
+        n=1;
+        r[0].x=0;
+        r[0].y=0;
+        r[0].width=USHRT_MAX;
+        r[0].height=USHRT_MAX;
     }else{
-	for(i=0; i<n; i++){
-	    r[i].x=rects[i].x;
-	    r[i].y=rects[i].y;
-	    r[i].width=rects[i].w;
-	    r[i].height=rects[i].h;
-	}
+        for(i=0; i<n; i++){
+            r[i].x=rects[i].x;
+            r[i].y=rects[i].y;
+            r[i].width=rects[i].w;
+            r[i].height=rects[i].h;
+        }
     }
-    
+
     XShapeCombineRectangles(ioncore_g.dpy, brush->win,
                             ShapeBounding, 0, 0, r, n,
                             ShapeSet, Unsorted);

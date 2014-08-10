@@ -1,35 +1,35 @@
 .TH NOTION 1
 .SH NÁZEV
 Notion - správce oken systému X11
-.SH PØEHLED
+.SH PŘEHLED
 .B notion
 .I "[volby]"
 .SH "POPIS"
 
-Notion je dla¾dicový správce oken se zálo¾kami navr¾ený pro klávesnicové u¾ivatele.
+Notion je dlaždicový správce oken se záložkami navržený pro klávesnicové uživatele.
 
 .SH "VOLBY"
 .TP
-.B \-display poèítaè:displej.obrazovka
+.B \-display počítač:displej.obrazovka
 X displej, který se má spravovat
 .TP
 .B \-conffile soubor
-Konfiguraèní soubor, který se má pou¾ít
+Konfigurační soubor, který se má použít
 .TP
-.B \-searchdir adresáø
-Adresáø, ve kterém se budou hledat konfiguraèní soubory a ostatní skripty
+.B \-searchdir adresář
+Adresář, ve kterém se budou hledat konfigurační soubory a ostatní skripty
 .TP
 .B \-oneroot
 Na X serverech s více obrazovkami (ne-Xinerama) bude spravovat pouze výchozí
-obrazovku (koøenové okno). (Tedy ne v¹echny, které byly zadány v parametru
-\-display nebo v promìnné DISPLAY.)
+obrazovku (kořenové okno). (Tedy ne všechny, které byly zadány v parametru
+\-display nebo v proměnné DISPLAY.)
 .TP
 .B \-session název_sezení
-Nastaví název sezení. Tato volba ovlivní, kam se ulo¾í pracovní plochy
-a ostatní soubory. Pokud není nastavená, pou¾ije se ~/.notion/session_name.
+Nastaví název sezení. Tato volba ovlivní, kam se uloží pracovní plochy
+a ostatní soubory. Pokud není nastavená, použije se ~/.notion/session_name.
 .TP
 .B \-help
-Zobrazí nápovìdu k pøíkazovým parametrùm
+Zobrazí nápovědu k příkazovým parametrům
 .TP
 .B \-version
 Zobrazí verzi
@@ -39,127 +39,127 @@ Zobrazí informace o programu (verze, autor, copyright)
 
 .SH Základní pojetí
 
-Tato sekce pøiná¹í pøehled typù objektù, které se objevují na X displeji
+Tato sekce přináší přehled typů objektů, které se objevují na X displeji
 spravovaném Notionem. To je nezbytné pro pochopení operací s objekty a pro
-pochopení, proè jsou rùzná klávesová pøiøazení dostupná jen u nìkterých
-objektù. Podrobnìj¹í popis nutný pro psaní vlastních pøizpùsobení naleznete
+pochopení, proč jsou různá klávesová přiřazení dostupná jen u některých
+objektů. Podrobnější popis nutný pro psaní vlastních přizpůsobení naleznete
 na webových stránkách Notionu.
 
-Nejvy¹¹ími objekty jsou \fBobrazovky\fP, které odpovídají fyzickým
-obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP (co¾ je nìco jako
-\fBskupiny\fP) a \fBklientská okna\fP v celoobrazovkovém re¾imu. V jeden
-okam¾ik mù¾e být na obrazovce zobrazen právì jeden takový objekt.
+Nejvyššími objekty jsou \fBobrazovky\fP, které odpovídají fyzickým
+obrazovkám. Obrazovky obsahují \fBpracovní plochy\fP (což je něco jako
+\fBskupiny\fP) a \fBklientská okna\fP v celoobrazovkovém režimu. V jeden
+okamžik může být na obrazovce zobrazen právě jeden takový objekt.
 
-Pracovní plochy mohou obsahovat \fBdla¾dice\fP a odpojené/plovoucí
-\fBrámy\fP. Dla¾dice obsahují \fBrámy\fP tak, aby bezezbytku vyplnily
-(vydlá¾dily) celou obrazovku, a pøípadnì stavový øádek a dok. Podobnì
-jako obrazovky obsahují i rámy dal¹í objekty, ale v tomto pøípadì ji¾
-jde vìt¹inou o \fBskupiny\fP klientských oken. Po vìt¹inu èasu bývají
-rámy jedinou viditelnou èástí Notionu - volitelnì mohou mít kolem sebe
-orámování a pro ka¾dého potomka zobrazují \fBzálo¾ku\fP.
+Pracovní plochy mohou obsahovat \fBdlaždice\fP a odpojené/plovoucí
+\fBrámy\fP. Dlaždice obsahují \fBrámy\fP tak, aby bezezbytku vyplnily
+(vydláždily) celou obrazovku, a případně stavový řádek a dok. Podobně
+jako obrazovky obsahují i rámy další objekty, ale v tomto případě již
+jde většinou o \fBskupiny\fP klientských oken. Po většinu času bývají
+rámy jedinou viditelnou částí Notionu - volitelně mohou mít kolem sebe
+orámování a pro každého potomka zobrazují \fBzáložku\fP.
 
-Dal¹í viditelnou èástí jsou \fBdotazy\fP. Nejde o nic jiného ne¾ obdélníky,
-které se objeví ve spodní èásti rámù nebo obrazovek v¾dy, kdy¾ se Notion ptá
-na nìjakou informaci (tøeba název okna pro pøipojení, nebo název programu,
-který se má spustit). Vìt¹ina dotazù podporuje doplòování klávesou tab.
+Další viditelnou částí jsou \fBdotazy\fP. Nejde o nic jiného než obdélníky,
+které se objeví ve spodní části rámů nebo obrazovek vždy, když se Notion ptá
+na nějakou informaci (třeba název okna pro připojení, nebo název programu,
+který se má spustit). Většina dotazů podporuje doplňování klávesou tab.
 
 
-.SH PØIØAZENÍ
+.SH PŘIŘAZENÍ
 
-Toto jsou výchozí pøiøazení klávesových zkratek. Pøiøazení modifikátoru
-(\fBMod1\fP) závisí na systému. Na PCèkách s XFree86 bude nejspí¹ navázán
+Toto jsou výchozí přiřazení klávesových zkratek. Přiřazení modifikátoru
+(\fBMod1\fP) závisí na systému. Na PCčkách s XFree86 bude nejspíš navázán
 na levou klávesu Alt (\fBAlt_L\fP). Na Sunech je obvykle namapován na klávesy
-s diamanty (\fBMeta_L\fP, \fBMeta_R\fP). Konkrétní pøiøazení zjistíte
+s diamanty (\fBMeta_L\fP, \fBMeta_R\fP). Konkrétní přiřazení zjistíte
 programem \fIxmodmap(1)\fP.
 
-Øetìzec v hranatých závorkách urèuje modul, jeho¾ konfiguraèní soubor
-definuje toto pøiøazení.
+Řetězec v hranatých závorkách určuje modul, jehož konfigurační soubor
+definuje toto přiřazení.
 
-.SS Globální pøiøazení
+.SS Globální přiřazení
 
 BINDINGS:WScreen
 
-.SS Pøiøazení pro práci s rámy a obrazovkami
+.SS Přiřazení pro práci s rámy a obrazovkami
 
 BINDINGS:WMPlex
 
-.SS Pøiøazení pro práci se v¹emi rámy
+.SS Přiřazení pro práci se všemi rámy
 
 BINDINGS:WFrame
 
-.SS Pøiøazení pro práci s nejvy¹¹ími rámy (ne s doèasnými) a obrazovkami
+.SS Přiřazení pro práci s nejvyššími rámy (ne s dočasnými) a obrazovkami
 
 BINDINGS:WMPlex.toplevel
 
-.SS Pøiøazení pro práci s nejvy¹¹ími rámy (ne s doèasnými)
+.SS Přiřazení pro práci s nejvyššími rámy (ne s dočasnými)
 
 BINDINGS:WFrame.toplevel
 
-.SS Pøiøazení pro práci s plovoucími/odpojenými rámy
+.SS Přiřazení pro práci s plovoucími/odpojenými rámy
 
 BINDINGS:WFrame.floating
 
-.SS Pøiøazení pro dla¾dicové plochy a rámy [mod_tiling]
+.SS Přiřazení pro dlaždicové plochy a rámy [mod_tiling]
 
 BINDINGS:WTiling
 .\" BINDINGS:WFrame.tiled
 
-.SS Pøiøazení pro klientská okna
+.SS Přiřazení pro klientská okna
 
 BINDINGS:WClientWin
 BINDINGS:WGroupCW
 
-.SS Pøiøazení pro pøesun/zmìnu velikosti
+.SS Přiřazení pro přesun/změnu velikosti
 
 BINDINGS:WMoveresMode
 
-.SS Pøiøazení pro informaèní zprávy a dotazy [mod_query]
+.SS Přiřazení pro informační zprávy a dotazy [mod_query]
 
 BINDINGS:WInput
 
-.SS Pøiøazení pro úpravu dotazù [mod_query]
+.SS Přiřazení pro úpravu dotazů [mod_query]
 
 Tyto jsou podobné jako v textovém editoru \fIjoe(1)\fP.
-Vyjmutí, kopírování a vlo¾ení sice pracují mírnì konvenènìji, ale
+Vyjmutí, kopírování a vložení sice pracují mírně konvenčněji, ale
 klávesy jsou shodné.
 
 BINDINGS:WEdln
 
-.SS Pøiøazení pro menu [mod_menu]
+.SS Přiřazení pro menu [mod_menu]
 
 BINDINGS:WMenu
 
 
-.SH SOUBORY A ADRESÁØE
+.SH SOUBORY A ADRESÁŘE
 .TP
 .B ETCDIR/cfg_notion.lua
-Hlavní systémový konfiguraèní soubor
+Hlavní systémový konfigurační soubor
 .TP
 .B ETCDIR/cfg_*.lua
-Ostatní konfiguraèní soubory
+Ostatní konfigurační soubory
 .TP
 .B ETCDIR/look_*.lua
 Soubory nastavující barevné schéma
 .TP
 .B ~/.notion/
-U¾ivatelské konfiguraèní soubory
+Uživatelské konfigurační soubory
 .TP
 .B ~/.notion/cfg_notion.lua
-Hlavní u¾ivatelský konfiguraèní soubor (pøepisuje systémové nastavení)
+Hlavní uživatelský konfigurační soubor (přepisuje systémové nastavení)
 
 .SH VIZ TAKÉ
 Domovská stránka Notionu \fIhttp://notion.sf.net/\fP
 .PP
 Dokument "Configuring and extending Notion with Lua" k nalezení
-tamté¾.
+tamtéž.
 .PP
 .I DOCDIR/
 .PP
-\fIX(7x)\fP, \fIjoe(1)\fP
+\fIX(7x)\fP, \fInotionflux(1)\fP, \fIjoe(1)\fP
 
 .SH AUTOR
 Notion napsal Notion Team
 Ion napsal Tuomo Valkonen <tuomov at iki.fi>.
 
-.SH PØEKLAD
-Do èe¹tiny pøelo¾il Miroslav Kuøe <kurem at debian.cz>.
+.SH PŘEKLAD
+Do češtiny přeložil Miroslav Kuře <kurem at debian.cz>.

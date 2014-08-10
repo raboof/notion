@@ -66,17 +66,6 @@
 /*}}}*/
 
 
-/*{{{ Macros */
-
-#ifdef __GNUC__
-#define UNUSED __attribute__ ((unused))
-#else
-#define UNUSED
-#endif
-
-/*}}}*/
-
-
 /*{{{ Variables */
 
 #include "../version.h"
@@ -643,30 +632,16 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
                                  bool just_update_minmax)
 {
     WDockApp *dockapp=NULL, *thisdockapp=NULL, thisdockapp_copy;
-    WRectangle parent_geom, dock_geom, border_dock_geom;
+    WRectangle dock_geom, border_dock_geom;
     GrBorderWidths dock_bdw, dockapp_bdw;
     int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0;
     int pos, grow;
     WRectangle tile_size;
-    WWindow *par=REGION_PARENT(dock);
     
     /* dock_resize calls with NULL parameters. */
     assert(reg!=NULL || (geomret==NULL && !(flags&REGION_RQGEOM_TRYONLY)));
     
     dock_get_pos_grow(dock, &pos, &grow);
-
-    /* Determine parent and tile geoms */
-    parent_geom.x=0;
-    parent_geom.y=0;
-    if(par!=NULL){
-        parent_geom.w=REGION_GEOM(par).w;
-        parent_geom.h=REGION_GEOM(par).h;
-    }else{
-        /* Should not happen in normal operation. */
-        parent_geom.w=1;
-        parent_geom.h=1;
-    }
-    
     dock_get_tile_size(dock, &tile_size);
 
     /* Determine dock and dockapp border widths */
@@ -1222,7 +1197,6 @@ WDock *mod_dock_create(ExtlTab tab)
 
     /* Final setup */    
     if(floating){
-        const WRectangle *pg=&REGION_GEOM(screen);
         WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
         WRegionAttachData data;
         
@@ -1320,11 +1294,10 @@ WRegion *dock_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 /*{{{ Client window management setup */
 
 
-static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *unused)
+static bool dock_do_attach_final(WDock *dock, WRegion *reg, void *UNUSED(unused))
 {
     WDockApp *dockapp, *before_dockapp;
     WRectangle geom;
-    WFitParams fp;
     bool draw_border=TRUE;
     int pos=INT_MAX;
      
@@ -1393,7 +1366,6 @@ EXTL_EXPORT_MEMBER
 bool dock_attach(WDock *dock, WRegion *reg)
 {
     WRegionAttachData data;
-    WFitParams fp;
     
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
@@ -1402,20 +1374,20 @@ bool dock_attach(WDock *dock, WRegion *reg)
 }
 
 
-static bool dock_handle_drop(WDock *dock, int x, int y,
+static bool dock_handle_drop(WDock *dock, int UNUSED(x), int UNUSED(y),
                              WRegion *dropped)
 {
     return dock_attach(dock, dropped);
 }
 
 
-static WRegion *dock_ph_handler(WDock *dock, int flags, WRegionAttachData *data)
+static WRegion *dock_ph_handler(WDock *dock, int UNUSED(flags), WRegionAttachData *data)
 {
     return dock_do_attach(dock, data);
 }
 
     
-static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
+static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *UNUSED(mgd))
 {
     return (WPHolder*)create_basicpholder((WRegion*)dock,
                                           ((WBasicPHolderHandler*)
@@ -1423,8 +1395,8 @@ static WPHolder *dock_managed_get_pholder(WDock *dock, WRegion *mgd)
 }
 
 
-static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *cwin,
-                                     const WManageParams *param UNUSED,
+static WPHolder *dock_prepare_manage(WDock *dock, const WClientWin *UNUSED(cwin),
+                                     const WManageParams *UNUSED(param),
                                      int priority)
 {
     if(!MANAGE_PRIORITY_OK(priority, MANAGE_PRIORITY_LOW))
@@ -1520,8 +1492,8 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 
         if(atom__kde_net_wm_system_tray_window_for==None){
             atom__kde_net_wm_system_tray_window_for=XInternAtom(ioncore_g.dpy,
-        							"_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",
-        							False);
+                                                                "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",
+                                                                False);
         }
         if(XGetWindowProperty(ioncore_g.dpy, cwin->win,
                               atom__kde_net_wm_system_tray_window_for, 0,

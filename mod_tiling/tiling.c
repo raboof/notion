@@ -42,9 +42,6 @@
 
 
 
-static WTilingIterTmp tiling_iter_default_tmp;
-
-
 /*{{{ Some helper routines */
 
 
@@ -97,7 +94,6 @@ static void reparent_mgd(WRegion *sub, WWindow *par)
 
 bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
 {
-    WTilingIterTmp tmp;
     bool ok=FALSE;
     
     if(par!=NULL){
@@ -118,7 +114,6 @@ bool tiling_fitrep(WTiling *ws, WWindow *par, const WFitParams *fp)
     REGION_GEOM(ws)=fp->g;
     
     if(ws->split_tree!=NULL){
-        bool done=FALSE;
         if(fp->mode&REGION_FIT_ROTATE)
             ok=split_rotate_to(ws->split_tree, &(fp->g), fp->rotation);
         if(!ok)
@@ -195,7 +190,7 @@ void tiling_do_set_focus(WTiling *ws, bool warp)
 static WTimer *restack_timer=NULL;
 
 
-static void restack_handler(WTimer *tmr, Obj *obj)
+static void restack_handler(WTimer *UNUSED(tmr), Obj *obj)
 {
     if(obj!=NULL){
         WTiling *ws=(WTiling*)obj;
@@ -333,7 +328,6 @@ static void tiling_create_stdispnode(WTiling *ws, WRegion *stdisp,
                                     int corner, int orientation, 
                                     bool fullsize)
 {
-    int flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
     WRectangle *wg=&REGION_GEOM(ws), dg;
     WSplitST *stdispnode;
     WSplitSplit *split;
@@ -483,7 +477,6 @@ void tiling_manage_stdisp(WTiling *ws, WRegion *stdisp,
 
 bool tiling_managed_add_default(WTiling *ws, WRegion *reg)
 {
-    Window bottom=None, top=None;
     WFrame *frame;
     
     if(TILING_STDISP_OF(ws)!=reg){
@@ -622,8 +615,7 @@ void tiling_deinit(WTiling *ws)
 {
     WRegion *reg;
     WTilingIterTmp tmp;
-    WMPlex *remanage_mplex=NULL;
-    
+
     tiling_unmanage_stdisp(ws, FALSE, TRUE);
 
     FOR_ALL_MANAGED_BY_TILING(reg, ws, tmp){
@@ -739,15 +731,6 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     
     if(!norestore && other!=NULL && act && mcf)
         region_warp(other);
-}
-
-
-static bool mplexfilter(WSplit *node)
-{
-    WSplitRegion *regnode=OBJ_CAST(node, WSplitRegion);
-    
-    return (regnode!=NULL && regnode->reg!=NULL &&
-            OBJ_IS(regnode->reg, WMPlex));
 }
 
 

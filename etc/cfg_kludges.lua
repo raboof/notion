@@ -63,6 +63,27 @@ defwinprop{
 }
 --]]
 
+-- InteiilJ IDEA - I wonder whether we should do this for *all* sun-awt-X11-XWindowPeer windows
+defwinprop {
+    class = "jetbrains-idea-ce",
+    instance = "sun-awt-X11-XWindowPeer",
+    transient_mode = "current",
+}
+defwinprop {
+    class = "jetbrains-idea-ce",
+    instance = "sun-awt-X11-XDialogPeer",
+    transient_mode = "current",
+}
+defwinprop {
+    class = "jetbrains-idea",
+    instance = "sun-awt-X11-XWindowPeer",
+    transient_mode = "current",
+}
+defwinprop {
+    class = "jetbrains-idea",
+    instance = "sun-awt-X11-XDialogPeer",
+    transient_mode = "current",
+}
 
 
 -- Define some additional title shortening rules to use when the full

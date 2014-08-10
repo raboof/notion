@@ -27,7 +27,12 @@ extern void xwindow_do_set_focus(Window win);
 
 extern void xwindow_set_cursor(Window win, int cursor);
 
-extern void xwindow_get_sizehints(Window win, XSizeHints *hints);
+/** 
+ * On failure, clears winprops and returns -1.
+ * On success, sets hints according to the window's WM_NORMAL_HINTS and 
+ * returns a nonnegative value.
+ */
+extern int xwindow_get_sizehints(Window win, XSizeHints *hints);
 
 extern bool xwindow_pointer_pos(Window rel, int *px, int *py);
 

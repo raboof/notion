@@ -51,30 +51,6 @@ static int other_dir(int dir)
 }
 
 
-static void swap(int *x, int *y)
-{
-    int z=*x;
-    *x=*y;
-    *y=z;
-}
-
-
-static void swapptr(WSplit **x, WSplit **y)
-{
-    void *z=*x;
-    *x=*y;
-    *y=z;
-}
-
-
-static void swapgeom(WRectangle *g, WRectangle *h)
-{
-    WRectangle tmp=*g;
-    *g=*h;
-    *h=tmp;
-}
-
-
 int stdisp_recommended_w(WSplitST *stdisp)
 {
     if(stdisp->regnode.reg==NULL)
@@ -270,8 +246,6 @@ static void rot_rs_rotate_left(WSplitSplit *a, WSplitSplit *p, WSplit *y)
 
 static void flip_right(WSplitSplit *a, WSplitSplit *p)
 {
-    WSplit *tmp;
-    
     assert(a->tl==(WSplit*)p);
     
     /* Right flip:
@@ -336,8 +310,6 @@ static void rot_rs_flip_right(WSplitSplit *a, WSplitSplit *p)
 
 static void flip_left(WSplitSplit *a, WSplitSplit *p)
 {
-    WSplit *tmp;
-    
     assert(a->br==(WSplit*)p);
     
     /* Left flip:

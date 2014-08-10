@@ -121,7 +121,6 @@ int edln_do_completions(Edln *edln, char **completions, int ncomp,
                         bool nosort)
 {
     int len;
-    int i;
     
     if(ncomp==0){
         return 0;

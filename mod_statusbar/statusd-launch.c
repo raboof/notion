@@ -37,7 +37,6 @@ static bool process_pipe(int fd, ExtlFn fn,
 {
     char buf[BL];
     int n;
-    bool fnret;
     
     *eagain=FALSE;
     
@@ -190,8 +189,8 @@ int mod_statusbar__terminate_statusd(int pid)
         return -1;
     }
 
-    // Send SIGHUP to the specified statusd process to indicate
-    // that we're done.
+    /* Send SIGHUP to the specified statusd process to indicate
+     * that we're done. */
     kill( (pid_t)pid, SIGHUP);
 
     return 0;

@@ -32,7 +32,6 @@ static Rb_node retrb=NULL;
 bool region_do_set_return(WRegion *reg, WPHolder *ph)
 {
     Rb_node node;
-    int found=0;
     
     assert(!OBJ_IS_BEING_DESTROYED(reg));
     

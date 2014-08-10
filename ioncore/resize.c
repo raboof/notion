@@ -125,7 +125,6 @@ static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
 
 static void moveres_draw_infowin(WMoveresMode *mode)
 {
-    WRectangle geom;
     char *buf;
     
     if(mode->infowin==NULL)
@@ -165,7 +164,6 @@ static void moveres_draw_infowin(WMoveresMode *mode)
 static void moveres_draw_rubberband(WMoveresMode *mode)
 {
     WRectangle rgeom=mode->geom;
-    int rx, ry;
     WRootWin *rootwin=(mode->reg==NULL 
                        ? NULL 
                        : region_rootwin_of(mode->reg));
@@ -448,7 +446,7 @@ void moveresmode_delta_move(WMoveresMode *mode,
 
 
 void moveresmode_rqgeom(WMoveresMode *mode, WRQGeomParams *rq, 
-                        WRectangle *rret)
+                        WRectangle *UNUSED(rret))
 {
     mode->mode=MOVERES_SIZE;
     moveresmode_do_newgeom(mode, rq);
@@ -603,7 +601,7 @@ void region_managed_rqgeom_absolute(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
+void region_managed_rqgeom_allow(WRegion *UNUSED(mgr), WRegion *reg,
                                  const WRQGeomParams *rq,
                                  WRectangle *geomret)
 {
@@ -615,8 +613,8 @@ void region_managed_rqgeom_allow(WRegion *mgr, WRegion *reg,
 }
 
 
-void region_managed_rqgeom_unallow(WRegion *mgr, WRegion *reg,
-                                   const WRQGeomParams *rq,
+void region_managed_rqgeom_unallow(WRegion *UNUSED(mgr), WRegion *reg,
+                                   const WRQGeomParams *UNUSED(rq),
                                    WRectangle *geomret)
 {
     if(geomret!=NULL)

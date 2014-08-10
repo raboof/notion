@@ -161,7 +161,7 @@ bool ioncore_init_module_support()
 }
 
 
-static int try_load(const char *file, void *param)
+static int try_load(const char *file, void *UNUSED(param))
 {
     dlhandle handle=NULL;
     const char *slash, *dot;

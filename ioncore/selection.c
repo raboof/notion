@@ -115,7 +115,6 @@ void ioncore_handle_selection(XSelectionEvent *ev)
 {
     Atom prop=ev->property;
     Window win=ev->requestor;
-    WWindow *wwin;
     
     if(prop!=None){
         insert_selection(win, prop);

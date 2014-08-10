@@ -14,7 +14,7 @@ WELCOME_TARGETS=\
 	welcome.txt \
 	$(foreach tr, $(TRANSLATIONS), welcome.$(tr).txt)
 
-TARGETS=notion.1 $(foreach tr, $(TRANSLATIONS), notion.$(tr).1) \
+TARGETS=notion.1 notionflux.1 $(foreach tr, $(TRANSLATIONS), notion.$(tr).1) \
 	$(WELCOME_TARGETS)
 
 MKMAN=$(LUA) ../build/mkman.lua $(MKMAN_DEFS)
@@ -45,6 +45,9 @@ notion.1: notion.in $(CONFIGS)
 notion.%.1: notion.%.in $(CONFIGS) ../po/%.po
 	$(MKMAN) -po ../po/$*.po -i $< -o $@ $(CONFIGS)
 
+notionflux.1: notionflux.in $(CONFIGS)
+	$(MKMAN) -i $< -o $@ $(CONFIGS)
+
 welcome%txt: welcome%head notion%1
 	(cat welcome$*head; \
 	$(NROFF) notion$*1 | $(FILTERCRAP)) > $@
@@ -52,6 +55,7 @@ welcome%txt: welcome%head notion%1
 _install:
 	$(INSTALLDIR) $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m $(DATA_MODE) notion.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m $(DATA_MODE) notionflux.1 $(DESTDIR)$(MANDIR)/man1
 	for tr in $(TRANSLATIONS); do \
 		$(INSTALLDIR) $(DESTDIR)$(MANDIR)/$$tr/man1 ; \
 		$(INSTALL) -m $(DATA_MODE) notion.$$tr.1 $(DESTDIR)$(MANDIR)/$$tr/man1/notion.1 ; \
