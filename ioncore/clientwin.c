@@ -1468,7 +1468,7 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     convert_geom(fp, cwin, &rg);
     REGION_GEOM(cwin)=rg;
     do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
-    XResizeWindow(ioncore_g.dpy, win, MAXOF(1, rg.w), maxof(1, rg.h));
+    XResizeWindow(ioncore_g.dpy, win, MAXOF(1, rg.w), MAXOF(1, rg.h));
     
     if(!postmanage_check(cwin, &attr)){
         clientwin_destroyed(cwin);
