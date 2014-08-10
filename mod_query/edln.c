@@ -613,7 +613,7 @@ static void edln_do_set_hist(Edln *edln, int e, bool match)
         edln->histent=e;
         edln_setstr(edln, str);
         edln->point=(match
-                     ? minof(edln->point, edln->psize) 
+                     ? MINOF(edln->point, edln->psize) 
                      : edln->psize);
         edln->mark=-1;
         edln->modified=FALSE;

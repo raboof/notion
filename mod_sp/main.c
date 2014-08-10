@@ -82,8 +82,8 @@ static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp,
     par.szplcy=SIZEPOLICY_FREE_GLUE;
     
     par.geom_set=TRUE;
-    par.geom.w=minof(fp->g.w, CF_SCRATCHPAD_DEFAULT_W);
-    par.geom.h=minof(fp->g.h, CF_SCRATCHPAD_DEFAULT_H);
+    par.geom.w=MINOF(fp->g.w, CF_SCRATCHPAD_DEFAULT_W);
+    par.geom.h=MINOF(fp->g.h, CF_SCRATCHPAD_DEFAULT_H);
     par.geom.x=(fp->g.w-par.geom.w)/2;
     par.geom.y=(fp->g.h-par.geom.h)/2;
     
