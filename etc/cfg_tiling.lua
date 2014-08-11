@@ -3,7 +3,6 @@
 --
 
 -- Bindings for the tilings. 
-
 defbindings("WTiling", {
     bdoc("Split current frame vertically."),
     kpress(META.."S", "WTiling.split_at(_, _sub, 'bottom', true)"),
@@ -13,6 +12,7 @@ defbindings("WTiling", {
     kpress(META.."N", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
     mclick(META.."Shift+Button4", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
     mclick(META.."Shift+Button5", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
+
     bdoc("Go to frame right/left of current frame."),
     kpress(META.."Tab", "ioncore.goto_next(_sub, 'right')"),
     submap(META.."K", {
@@ -26,9 +26,7 @@ defbindings("WTiling", {
     }),
 })
 
-
--- Frame bindings
-
+-- Frame bindings.
 defbindings("WFrame.floating", {
     submap(META.."K", {
         bdoc("Tile frame, if no tiling exists on the workspace"),
@@ -36,9 +34,7 @@ defbindings("WFrame.floating", {
     }),
 })
 
-
 -- Context menu for tiled workspaces.
-
 defctxmenu("WTiling", "Tiling", {
     menuentry("Destroy frame", 
               "WTiling.unsplit_at(_, _sub)"),
@@ -74,11 +70,8 @@ defctxmenu("WTiling", "Tiling", {
     }),
 })
 
-
 -- Extra context menu extra entries for floatframes. 
-
 defctxmenu("WFrame.floating", "Floating frame", {
     append=true,
     menuentry("New tiling", "mod_tiling.mkbottom(_)"),
 })
-
