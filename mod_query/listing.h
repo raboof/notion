@@ -37,7 +37,7 @@ DECLSTRUCT(WListing){
 
 #define LISTING_DRAW_COMPLETE 1
 #define LISTING_DRAW_ALL 0
-#define LISTING_DRAW_SELECTED(X) minof(-1, -(X)-2)
+#define LISTING_DRAW_SELECTED(X) MINOF(-1, -(X)-2)
 #define LISTING_DRAW_GET_SELECTED(X) (-(X)-2)
 
     

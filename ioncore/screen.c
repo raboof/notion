@@ -142,8 +142,8 @@ void screen_managed_geom(WScreen *scr, WRectangle *geom)
     geom->y=scr->managed_off.y;
     geom->w=REGION_GEOM(scr).w+scr->managed_off.w;
     geom->h=REGION_GEOM(scr).h+scr->managed_off.h;
-    geom->w=maxof(geom->w, 0);
-    geom->h=maxof(geom->h, 0);
+    geom->w=MAXOF(geom->w, 0);
+    geom->h=MAXOF(geom->h, 0);
 }
 
 

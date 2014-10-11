@@ -56,8 +56,8 @@ WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr)
 
 Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom, const char *name)
 {
-    int w=maxof(1, geom->w);
-    int h=maxof(1, geom->h);
+    int w=MAXOF(1, geom->w);
+    int h=MAXOF(1, geom->h);
     const char *p[1];
     Window window;
     

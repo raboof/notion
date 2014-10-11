@@ -60,9 +60,9 @@ void ioncore_set_moveres_accel(ExtlTab tab)
     if(extl_table_gets_d(tab, "kbresize_maxacc", &maxacc))
        accelmax=(maxacc>0 ? maxacc*maxacc : 1);
     if(extl_table_gets_i(tab, "kbresize_delay", &rd))
-        resize_delay=maxof(0, rd);
+        resize_delay=MAXOF(0, rd);
     if(extl_table_gets_i(tab, "edge_resistance", &er))
-        ioncore_edge_resistance=maxof(0, er);
+        ioncore_edge_resistance=MAXOF(0, er);
 }
 
 

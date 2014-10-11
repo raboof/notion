@@ -63,7 +63,7 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
 {
     fd_set rfds;
     struct timeval tv, endtime, now;
-    int nfds=maxof(outfd, errfd);
+    int nfds=MAXOF(outfd, errfd);
     int retval;
     bool dummy, doneseen, eagain=FALSE;
     

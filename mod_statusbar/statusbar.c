@@ -170,7 +170,7 @@ static WSBElem *get_sbelems(ExtlTab t, int *nret, int *filleridxret)
                     extl_table_gets_s(tt, "tmpl", &(el[i].tmpl));
                     extl_table_gets_i(tt, "align", &(el[i].align));
                     extl_table_gets_i(tt, "zeropad", &(el[i].zeropad));
-                    el[i].zeropad=maxof(el[i].zeropad, 0);
+                    el[i].zeropad=MAXOF(el[i].zeropad, 0);
                 }else if(el[i].type==WSBELEM_SYSTRAY){
                     const char *tmp;
                     
@@ -283,13 +283,14 @@ static void calc_elem_w(WStatusBar *p, WSBElem *el, GrBrush *brush)
     }
     
     if(el->type==WSBELEM_METER){
+        int str_w = 0;
+
         str=(el->text!=NULL ? el->text : STATUSBAR_NX_STR);
         el->text_w=grbrush_get_text_width(brush, str, strlen(str));
         str=el->tmpl;
-        el->max_w=maxof((str!=NULL
-                         ? grbrush_get_text_width(brush, str, strlen(str))
-                         : 0),
-                        el->text_w);
+        
+        str_w=str!=NULL ? grbrush_get_text_width(brush, str, strlen(str)) : 0;
+        el->max_w=MAXOF(str_w, el->text_w);
     }else{
         str=el->text;
         el->text_w=(str!=NULL
@@ -331,11 +332,11 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
         totw+=p->elems[i].max_w;
         
     FOR_ALL_ON_PTRLIST(WRegion*, reg, p->traywins, tmp){
-        stmh=maxof(stmh, REGION_GEOM(reg).h);
+        stmh=MAXOF(stmh, REGION_GEOM(reg).h);
     }
     
     p->natural_w=bdw.left+totw+bdw.right;
-    p->natural_h=maxof(stmh, fnte.max_height)+bdw.top+bdw.bottom;
+    p->natural_h=MAXOF(stmh, fnte.max_height)+bdw.top+bdw.bottom;
 }
 
 
@@ -427,7 +428,7 @@ static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
         w=w+REGION_GEOM(reg).w+padding;
     }
     
-    el->text_w=maxof(0, w);
+    el->text_w=MAXOF(0, w);
     el->max_w=el->text_w; /* for now */
 }
 
@@ -768,7 +769,7 @@ static void positive_stretch(WStatusBar *sb)
     int i;
     
     for(i=0; i<sb->nelems; i++)
-        sb->elems[i].stretch=maxof(0, sb->elems[i].stretch);
+        sb->elems[i].stretch=MAXOF(0, sb->elems[i].stretch);
 }
 
 

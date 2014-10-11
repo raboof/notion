@@ -442,8 +442,8 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     
     mplex_managed_geom((WMPlex*)frame, &subgeom);
     
-    woff=maxof(REGION_GEOM(frame).w-subgeom.w, 0);
-    hoff=maxof(REGION_GEOM(frame).h-subgeom.h, 0);
+    woff=MAXOF(REGION_GEOM(frame).w-subgeom.w, 0);
+    hoff=MAXOF(REGION_GEOM(frame).h-subgeom.h, 0);
 
     if(FRAME_CURRENT(frame)!=NULL)
         region_size_hints(FRAME_CURRENT(frame), hints_ret);
@@ -537,8 +537,8 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
         off.w=REGION_GEOM(frame).w-off.w;
         off.h=REGION_GEOM(frame).h-off.h;
 
-        rq2.geom.w=maxof(rq2.geom.w+off.w, 0);
-        rq2.geom.h=maxof(rq2.geom.h+off.h, 0);
+        rq2.geom.w=MAXOF(rq2.geom.w+off.w, 0);
+        rq2.geom.h=MAXOF(rq2.geom.h+off.h, 0);
     
         /*region_size_hints_correct((WRegion*)frame, &(geom.w), &(geom.h), TRUE);*/
     

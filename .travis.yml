@@ -2,8 +2,12 @@ language: c
 compiler:
   - gcc
   - clang
+env:
+  - C99_SOURCE=""
+  - 
+matrix:
+  exclude:
+    - compiler: clang
+      env: C99_SOURCE=""
+before_install: sudo apt-get install lua5.2 liblua5.2-dev 
 script: make
-
-branches:
-  only:
-    - travis

@@ -50,7 +50,7 @@ void ioncore_groupws_set(ExtlTab tab)
         free(method);
     }
     if(extl_table_gets_i(tab, "float_placement_padding", &fpp))
-        ioncore_placement_padding=maxof(0, fpp);
+        ioncore_placement_padding=MAXOF(0, fpp);
 }
 
 

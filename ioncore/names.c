@@ -125,7 +125,7 @@ static int compare_nameinfos(const WRegionNameInfo *ni1,
     
     /* Check name part first */
     
-    mc=strncmp(ni1->name, ni2->name, minof(l1, l2));
+    mc=strncmp(ni1->name, ni2->name, MINOF(l1, l2));
     
     if(mc!=0)
         return mc;

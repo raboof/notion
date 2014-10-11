@@ -109,8 +109,8 @@ void frame_adjust_to_initial(WFrame *frame, const WFitParams *fp,
      */
     region_size_hints(reg, &szh);
     sizehints_correct(&szh, &iw, &ih, TRUE, TRUE);
-    rqg.w=maxof(1, iw+(REGION_GEOM(frame).w-mg.w));
-    rqg.h=maxof(1, ih+(REGION_GEOM(frame).h-mg.h));
+    rqg.w=MAXOF(1, iw+(REGION_GEOM(frame).w-mg.w));
+    rqg.h=MAXOF(1, ih+(REGION_GEOM(frame).h-mg.h));
     
     if(!(fp->mode&REGION_FIT_WHATEVER))
         rectangle_constrain(&rqg, &fp->g);
