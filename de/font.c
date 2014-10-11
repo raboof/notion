@@ -395,9 +395,9 @@ void debrush_do_draw_string_default(DEBrush *brush,
                                &extents);
         }else{
             XftTextExtents8(ioncore_g.dpy, font, (XftChar8*)str, len, &extents);
-            XftDrawRect(draw, &(colours->bg), x-extents.x, y-extents.y,
-                        extents.width+10, extents.height);
         }
+        XftDrawRect(draw, &(colours->bg), x-extents.x, y-extents.y,
+                    extents.width+10, extents.height);
     }
 
     if(ioncore_g.enc_utf8){
