@@ -142,6 +142,8 @@ bool handle_xkb_event(XEvent *ev)
     WHook *hook=NULL;
     XkbEvent *kev=NULL;
     WHookMarshallExtl *fn=NULL;
+    WGroupParams pgp;
+    WBellParams pbp;
 
     if(ev->type!=xkb_event_code)
         return FALSE;
@@ -151,46 +153,44 @@ bool handle_xkb_event(XEvent *ev)
     switch(kev->any.xkb_type){
     case XkbStateNotify:
         {
-            WGroupParams p2;
-            p=&p2;
+            p=&pgp;
 
             hook=xkb_group_event;
             fn=(WHookMarshallExtl*)mrsh_group_extl;
 
-            PARAM_ANY(p2,state);
+            PARAM_ANY(pgp,state);
 
-            p2.group=CHANGED(State,group);
-            p2.base_group=CHANGED(Base,base_group);
-            p2.latched_group=CHANGED(Latch,latched_group);
-            p2.locked_group=CHANGED(Lock,locked_group);
+            pgp.group=CHANGED(State,group);
+            pgp.base_group=CHANGED(Base,base_group);
+            pgp.latched_group=CHANGED(Latch,latched_group);
+            pgp.locked_group=CHANGED(Lock,locked_group);
         }
         break;
     case XkbBellNotify:
         {
-            WBellParams p2;
-            p=&p2;
+            p=&pbp;
 
             hook=xkb_bell_event;
             fn=(WHookMarshallExtl*)mrsh_bell_extl;
 
-            PARAM_ANY(p2,bell);
+            PARAM_ANY(pbp,bell);
 
-            p2.percent=kev->bell.percent;
-            p2.pitch=kev->bell.pitch;
-            p2.duration=kev->bell.duration;
+            pbp.percent=kev->bell.percent;
+            pbp.pitch=kev->bell.pitch;
+            pbp.duration=kev->bell.duration;
 
-            p2.bell_class=kev->bell.bell_class;
-            p2.bell_id=kev->bell.bell_id;
+            pbp.bell_class=kev->bell.bell_class;
+            pbp.bell_id=kev->bell.bell_id;
 
-            p2.name=NULL;
+            pbp.name=NULL;
             if(kev->bell.name!=None)
-                p2.name=get_atom_name(kev->bell.name);
+                pbp.name=get_atom_name(kev->bell.name);
 
-            p2.window=NULL;
+            pbp.window=NULL;
             if(kev->bell.window!=None)
-                p2.window=XWINDOW_REGION_OF_T(kev->bell.window, WClientWin);
+                pbp.window=XWINDOW_REGION_OF_T(kev->bell.window, WClientWin);
 
-            p2.event_only=kev->bell.event_only;
+            pbp.event_only=kev->bell.event_only;
         }
         break;
     }
