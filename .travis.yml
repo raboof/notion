@@ -5,6 +5,7 @@ compiler:
 env:
   - C99_SOURCE=""
   - 
+  - USE_XFT=0
 matrix:
   exclude:
     - compiler: clang
