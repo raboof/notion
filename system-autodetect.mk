@@ -2,6 +2,9 @@
 ## System settings
 ##
 
+# Some system may have custom pkg-config executable name
+PKG_CONFIG ?= pkg-config
+
 ##
 ## Installation paths
 ##
