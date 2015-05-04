@@ -13,6 +13,7 @@ exports.[ch]
 po/*.mo
 man/*.1
 man/welcome*.txt
+mod_notionflux/notionflux/notionflux
 notion/notion
 notion/preload.c
 utils/ion-completeman
