@@ -28,7 +28,7 @@ LUA_VERSION ?= $(or $(shell $(PKG_CONFIG) --variable=V $(LUA_PKG)),5.0)
 # prior to 5.1 the lib didn't include version in name.
 LUA_SUFFIX := $(if $(findstring $(LUA_VERSION),5.0),,$(LUA_VERSION))
 
-LUA_LIBS     := $(or $(shell $(PKG_CONFIG) --libs $(LUA_PKG)),      $(error "pkg-config couldn't find linker flags for lua$(LUA_SUFFIX)!"))
+LUA_LIBS     := $(or $(shell $(PKG_CONFIG) --libs $(LUA_PKG)), $(error "pkg-config couldn't find linker flags for lua$(LUA_SUFFIX)!"))
 LUA_INCLUDES := $(shell $(PKG_CONFIG) --cflags $(LUA_PKG))
-LUA          := $(or $(shell which lua$(LUA_SUFFIX)),               $(error No lua$(LUA_SUFFIX) interpreter found!))
-LUAC         := $(or $(shell which luac$(LUA_SUFFIX)),              $(error No lua$(LUA_SUFFIX) compiler found!))
+LUA          := $(or $(shell which lua$(LUA_SUFFIX)),          $(shell which lua),  $(error No lua$(LUA_SUFFIX) interpreter found!))
+LUAC         := $(or $(shell which luac$(LUA_SUFFIX)),         $(shell which luac), $(error No lua$(LUA_SUFFIX) compiler found!))
