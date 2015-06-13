@@ -1,6 +1,5 @@
-
 Notion
-===
+======
 
 Copyright (c) the Notion team 2010-2014.
 Copyright (c) Tuomo Valkonen 1999-2009.
