@@ -2589,12 +2589,14 @@ void extl_dohook(lua_State *L, lua_Debug *ar)
 int extl_sethook(ExtlHook hook)
 {
     current_hook = hook;
-    return lua_sethook(l_st, extl_dohook, LUA_MASKCALL | LUA_MASKRET, -1);
+    lua_sethook(l_st, extl_dohook, LUA_MASKCALL | LUA_MASKRET, -1);
+    return 0;
 }
 
 int extl_resethook()
 {
-    return lua_sethook(l_st, NULL, 0, -1);
+    lua_sethook(l_st, NULL, 0, -1);
+    return 0;
 }
 
 /*}}}*/
