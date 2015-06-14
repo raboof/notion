@@ -190,8 +190,8 @@ enum ExtlHookEvent {
 
 typedef void (*ExtlHook) (const enum ExtlHookEvent event, const char *name, const char *source, int currentline);
 
-int extl_sethook(ExtlHook hook);
-int extl_resethook();
+void extl_sethook(ExtlHook hook);
+void extl_resethook();
 
 /* Misc. */
 
