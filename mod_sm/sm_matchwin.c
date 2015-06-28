@@ -189,8 +189,11 @@ static WWinMatch *match_cwin(WClientWin *cwin)
     if(n<=0)
         assert(wm_name==NULL);
     
-    XGetClassHint(ioncore_g.dpy, cwin->win, &clss);
-    
+    if (!XGetClassHint(ioncore_g.dpy, cwin->win, &clss)) {
+        warn("XGetClassHint failed");
+        return NULL;
+    }
+
     for(; match!=NULL; match=match->next){
         
         win_match=0;
