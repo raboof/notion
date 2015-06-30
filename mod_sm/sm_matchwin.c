@@ -178,7 +178,7 @@ static WWinMatch *match_cwin(WClientWin *cwin)
 {
     WWinMatch *match=NULL;
     int win_match;
-    XClassHint clss = { NULL, NULL };
+    XClassHint clss={NULL, NULL};
     char *client_id=mod_sm_get_client_id(cwin->win);
     char *window_role=mod_sm_get_window_role(cwin->win);
     char *wm_cmd=mod_sm_get_window_cmd(cwin->win);
@@ -189,7 +189,7 @@ static WWinMatch *match_cwin(WClientWin *cwin)
     if(n<=0)
         assert(wm_name==NULL);
     
-    if (!XGetClassHint(ioncore_g.dpy, cwin->win, &clss)) {
+    if (!XGetClassHint(ioncore_g.dpy, cwin->win, &clss)){
         warn("XGetClassHint failed");
         goto done;
     }
