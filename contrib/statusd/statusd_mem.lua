@@ -60,6 +60,8 @@
 local mem_timer
 local defaults = { update_interval = 15*1000, free_alarm = 50, used_alarm = 50, units = "m" }
 local settings = table.join(statusd.get_config("mem"), defaults)
+local free_version_major
+local free_version_minor
 
 ------- MEM MONITOR :----------------------------------------------------------------------
 
@@ -75,9 +77,23 @@ local function show_meminfo(status)
 		statusd.inform("mem_free", free)
 		statusd.inform("mem_shared", shared)
 		statusd.inform("mem_buffers", buffers)
-		statusd.inform("mem_cached", cached)
-		statusd.inform("mem_hused", tostring(used - cached - buffers))
-		statusd.inform("mem_hfree", tostring(free + cached + buffers))
+		--
+		if (3.3 <= free_version_major) and (10 <= free_version_minor) then
+		  local avail = cached
+		  -- In 3.3.10 and later, there is no separate cached column. Instead it is
+		  -- the total amount available. So...
+
+		  -- Use the buffers amount for cached
+		  statusd.inform("mem_cached", buffers)
+		  -- Total used is now total - available
+		  statusd.inform("mem_hused", tostring(total - avail))
+		  -- Total free is the amount available
+		  statusd.inform("mem_hfree", avail)
+		else
+		  statusd.inform("mem_cached", cached)
+		  statusd.inform("mem_hused", tostring(used - cached - buffers))
+		  statusd.inform("mem_hfree", tostring(free + cached + buffers))
+		end
 		--
 		statusd.inform("mem_used_hint",
 		used*100/total >= settings.used_alarm and "critical" or "important")
@@ -93,10 +109,32 @@ local function show_meminfo(status)
 end
 
 local function update_mem()
-	statusd.popen_bgread("free -"..settings.units.."o", coroutine.wrap(show_meminfo))
+	if (3.3 <= free_version_major) and (10 <= free_version_minor) then
+	  statusd.popen_bgread("free -"..settings.units, coroutine.wrap(show_meminfo))
+	else
+	  statusd.popen_bgread("free -"..settings.units.."o", coroutine.wrap(show_meminfo))
+	end
 	mem_timer:set(settings.update_interval, update_mem)
 end
 
+local function get_free_version()
+      local ok, _, version_info
+      
+      -- Run free with the -V option to get its version information
+      fh = io.popen("free -V", "r")
+      version_info = fh:read()
+      fh.close()
+      
+      ok, _, free_version_major, free_version_minor =--
+        string.find(version_info, "(%d+%.%d+)%.(%d+)")
+
+      if not ok then statusd.inform("mem_template", "--") return end
+
+      free_version_major = tonumber(free_version_major)
+      free_version_minor = tonumber(free_version_minor)
+end
+
+get_free_version()
 mem_timer = statusd.create_timer()
 update_mem()
 
