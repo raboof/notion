@@ -67,42 +67,46 @@ local free_version_minor
 
 local function show_meminfo(status)
 	while status do	
-		local ok, _, total, used, free, shared, buffers, cached =--
+                local buffers, cached, avail, hused
+	        local ok, _, total, used, free, shared, col5, col6 =--
 		string.find(status, "Mem:%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)")
 		--
 		if not ok then statusd.inform("mem_template", "--") return end
+		--
+		if (3.3 <= free_version_major) and (10 <= free_version_minor) then
+		  -- In 3.3.10 and later, there is no separate cached column. Instead it is
+		  -- the total amount available. So...
+
+		  -- Total available is simply column 6
+		  avail = col6
+		  -- Use the buffers amount for cached
+		  buffers = col5
+		  cached = col5
+		  -- Total used is now total - available
+		  hused = total - avail
+		else
+		  buffers = col5
+		  cached = col6
+		  avail = free + cached + buffers
+		end
 		--
 		statusd.inform("mem_total", total)
 		statusd.inform("mem_used", used)
 		statusd.inform("mem_free", free)
 		statusd.inform("mem_shared", shared)
 		statusd.inform("mem_buffers", buffers)
-		--
-		if (3.3 <= free_version_major) and (10 <= free_version_minor) then
-		  local avail = cached
-		  -- In 3.3.10 and later, there is no separate cached column. Instead it is
-		  -- the total amount available. So...
-
-		  -- Use the buffers amount for cached
-		  statusd.inform("mem_cached", buffers)
-		  -- Total used is now total - available
-		  statusd.inform("mem_hused", tostring(total - avail))
-		  -- Total free is the amount available
-		  statusd.inform("mem_hfree", avail)
-		else
-		  statusd.inform("mem_cached", cached)
-		  statusd.inform("mem_hused", tostring(used - cached - buffers))
-		  statusd.inform("mem_hfree", tostring(free + cached + buffers))
-		end
+		statusd.inform("mem_cached", cached)
+		statusd.inform("mem_hused", hused)
+		statusd.inform("mem_hfree", avail)
 		--
 		statusd.inform("mem_used_hint",
 		used*100/total >= settings.used_alarm and "critical" or "important")
 		statusd.inform("mem_hused_hint",
-		(used - cached - buffers)*100/total >= settings.used_alarm and "critical" or "important")
+		hused*100/total >= settings.used_alarm and "critical" or "important")
 		statusd.inform("mem_free_hint",
 		free*100/total <= settings.free_alarm and "critical" or "important")
 		statusd.inform("mem_hfree_hint",
-		(free + cached + buffers)*100/total <= settings.free_alarm and "critical" or "important")
+		avail*100/total <= settings.free_alarm and "critical" or "important")
 		--
 		status = coroutine.yield()
 	end
