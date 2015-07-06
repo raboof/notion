@@ -128,10 +128,15 @@ local function get_free_version()
       ok, _, free_version_major, free_version_minor =--
         string.find(version_info, "(%d+%.%d+)%.(%d+)")
 
-      if not ok then statusd.inform("mem_template", "--") return end
-
-      free_version_major = tonumber(free_version_major)
-      free_version_minor = tonumber(free_version_minor)
+      if ok then 
+	 free_version_major = tonumber(free_version_major)
+	 free_version_minor = tonumber(free_version_minor)
+      else
+	 -- If we can't determine version number default to 0.0, which will
+	 -- enable prior behavior.
+	 free_version_major = 0
+	 free_version_minor = 0
+      end
 end
 
 get_free_version()
