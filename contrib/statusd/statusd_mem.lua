@@ -97,8 +97,8 @@ local function show_meminfo(status)
 		statusd.inform("mem_shared", shared)
 		statusd.inform("mem_buffers", buffers)
 		statusd.inform("mem_cached", cached)
-		statusd.inform("mem_hused", tostring(hused))
-		statusd.inform("mem_hfree", tostring(avail))
+		statusd.inform("mem_hused", string.format('%0d', hused))
+		statusd.inform("mem_hfree", string.format('%0d', avail))
 		--
 		statusd.inform("mem_used_hint",
 		used*100/total >= settings.used_alarm and "critical" or "important")
