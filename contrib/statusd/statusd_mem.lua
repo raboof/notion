@@ -88,6 +88,7 @@ local function show_meminfo(status)
 			buffers = col5
 			cached = col6
 			avail = free + cached + buffers
+			hused = used - cached - buffers
 		end
 		--
 		statusd.inform("mem_total", total)
@@ -96,8 +97,8 @@ local function show_meminfo(status)
 		statusd.inform("mem_shared", shared)
 		statusd.inform("mem_buffers", buffers)
 		statusd.inform("mem_cached", cached)
-		statusd.inform("mem_hused", hused)
-		statusd.inform("mem_hfree", avail)
+		statusd.inform("mem_hused", tostring(hused))
+		statusd.inform("mem_hfree", tostring(avail))
 		--
 		statusd.inform("mem_used_hint",
 		used*100/total >= settings.used_alarm and "critical" or "important")
