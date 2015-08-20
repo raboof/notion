@@ -5,7 +5,7 @@
 
 -- Shows assigned IP address for each configured interface.
 
--- Uses /sbin/ifconfig to fetch current iface's data
+-- Uses `/sbin/ip addr show` to fetch current iface's data
 
 -- Configuration:
 
@@ -16,7 +16,7 @@
 -- -----------  -----------             -------
 -- iface        interface               eth0
 -- ipv4         IPv4 address            192.168.1.1
--- ipv6         IPv6 address              ::1
+-- ipv6         IPv6 address            fe80::208:54ff:fe68:7e2c
 
 -- `interfaces' table contains the interfaces to be monitored.
 -- `separator' is placed between the entries in the output.
@@ -38,21 +38,23 @@ local inetaddr2_timer = statusd.create_timer()
 
 local function get_inetaddr_ifcfg(iface)
     local r_table = {}
-    local inet4_match = "inet addr:"
-    local inet6_match = "inet6 addr:"
+    local inet4_match = "inet "
+    local inet6_match = "inet6 "
     local inet4_addr = "none"
     local inet6_addr = "none"
-	local f = io.popen("/sbin/ifconfig " .. iface)
-	if not f then
-		return nil
+    local f = io.popen("/sbin/ip addr show  " .. iface .. " 2>/dev/null")
+    if not f then
+        return nil
     end
     while true do
         local line = f:read("*l")
         if line == nil then break end
         if (string.match(line, inet4_match)) then
-            inet4_addr = line:match("inet addr:(%d+%.%d+%.%d+%.%d+)")
-        elseif (string.match(line, inet4_match)) then
-            inet6_addr = line:match(("([a-fA-F0-9]*):"):rep(8):gsub(":$","$"))
+            inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)")
+            if inet4_addr == nil then inet4_addr = "none" end
+        elseif (string.match(line, inet6_match)) then
+	    inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+)/")
+            if inet6_addr == nil then inet6_addr = "none" end
         end
     end
     f:close()
