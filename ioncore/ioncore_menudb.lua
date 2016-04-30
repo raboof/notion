@@ -197,6 +197,71 @@ end
 menus.focuslist=function() return focuslist(true) end
 menus.focuslist_=function() return focuslist(false) end
 
+local function ws_or_fullscreen_of(reg)
+    local ws=ioncore.find_manager(reg, "WGroupWS")
+    local is_scratch=false
+
+    if not ws then
+        -- Fullscreen windows doesn't have a WGroupWS manager
+        -- but are the child of Screen
+        ws=obj_is(reg:parent(), "WScreen") and reg
+        -- Scratchpads can be a frame
+        local frame=ioncore.find_manager(reg, "WFrame")
+        is_scratch=mod_sp and frame and mod_sp.is_scratchpad(frame)
+    else
+        -- Or a ws
+        is_scratch=mod_sp and mod_sp.is_scratchpad(ws)
+    end
+
+    if not ws or is_scratch then
+        -- Ignore scratchpads
+        return false
+    else
+        return ws
+    end
+end
+
+function menus.workspacefocuslist()
+    local entries={}
+    local seen={}
+    local iter_=addto(entries)
+    local focused_ws=ws_or_fullscreen_of(ioncore.current())
+    -- Ignore the currently focused workspace
+    if focused_ws then
+        seen[focused_ws]=true
+    end
+
+    local function iter(reg)
+        local ws=ws_or_fullscreen_of(reg)
+
+        -- If we started in a scratchpad consider the first visited
+        -- workspace as the one we started in and ignore it
+        if not focused_ws and ws then
+            focused_ws=ws
+            seen[ws]=true
+        end
+
+        if ws and not seen[ws] then
+            iter_(ws)
+            seen[ws]=true
+        end
+        return true
+    end
+
+    -- Add workspaces which have had focus
+    ioncore.focushistory_i(iter)
+
+    -- Add the rest
+    ioncore.region_i(iter, "WGroupWS")
+
+    -- Add create workspace entry
+    local create_ws=menuentry(" -- Create new workspace -- ",
+                              "mod_query.query_workspace(_)")
+    table.insert(entries, create_ws)
+
+    return entries
+end
+
 -- }}}
 
 
