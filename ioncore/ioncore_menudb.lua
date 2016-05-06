@@ -262,6 +262,33 @@ function menus.workspacefocuslist()
     return entries
 end
 
+--DOC
+-- Go to and return to a previously active workspace (if any).
+--
+-- Note that this function is asynchronous; the region will not
+-- actually have received the focus when this function returns.
+function ioncore.goto_previous_workspace()
+    local ws
+    local focused_ws=ws_or_fullscreen_of(ioncore.current())
+
+    local function iter(reg)
+        ws=ws_or_fullscreen_of(reg)
+
+        if ws and not (ws==focused_ws) then
+            return false
+        end
+        return true
+    end
+
+    -- Add workspaces which have had focus
+    ioncore.focushistory_i(iter)
+
+    if ws then
+        ws:goto_focus()
+    end
+    return ws
+end
+
 -- }}}
 
 
