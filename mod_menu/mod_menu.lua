@@ -52,6 +52,7 @@ end
 -- \var{param}. The initial entry can be specified as the field
 -- \var{initial} as an integer starting from 1. Menus can be made
 -- to use a bigger style by setting the field \var{big} to \code{true}.
+-- The position can be set using the field \var{sizepolicy}.
 function mod_menu.menu(mplex, sub, menu_or_name, param) 
    local function menu_stdmenu(m, s, menu)
         return ioncore.unsqueeze(mod_menu.do_menu(m, s, menu, param))

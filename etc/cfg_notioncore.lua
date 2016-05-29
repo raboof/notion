@@ -188,6 +188,9 @@ defbindings("WMPlex.toplevel", {
         -- (_chld) is a group 'bottom' and detaches the whole group in that
         -- case.
         kpress("D", "ioncore.detach(_chld, 'toggle')", "_chld:non-nil"),
+
+        bdoc("Menu for recently used workspaces."),
+        kpress("G", "mod_menu.menu(_, _sub, 'workspacefocuslist')"),
     }),
 })
 

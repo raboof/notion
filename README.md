@@ -1,8 +1,9 @@
-
 Notion
-===
+======
 
-Copyright (c) the Notion team 2010-2014.
+[![Build Status](https://travis-ci.org/raboof/notion.svg?branch=master)](https://travis-ci.org/raboof/notion)
+
+Copyright (c) the Notion team 2010-2015.
 Copyright (c) Tuomo Valkonen 1999-2009.
 
 http://notion.sf.net

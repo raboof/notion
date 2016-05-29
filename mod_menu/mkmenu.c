@@ -50,7 +50,8 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
-    par.szplcy=SIZEPOLICY_FULL_BOUNDS;
+    if (FALSE==extl_table_gets_sizepolicy(param, "sizepolicy", &par.szplcy))
+        par.szplcy=SIZEPOLICY_FULL_BOUNDS;
     par.level=STACKING_LEVEL_MODAL1+2;
     
     return (WMenu*)mplex_do_attach_new(mplex, &par,
