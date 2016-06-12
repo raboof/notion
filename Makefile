@@ -12,7 +12,7 @@ include modulelist.mk
 
 INSTALL_SUBDIRS=\
 	$(MODULE_LIST) \
-	ioncore notion etc utils man po
+	ioncore notion etc utils man po contrib/scripts
 
 SUBDIRS = $(LIBS_SUBDIRS) $(INSTALL_SUBDIRS)
 
