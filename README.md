@@ -140,8 +140,8 @@ written by Tomohiro Kubota, but see the file for details.
 
 Various (minor) patches have been contributed by other individuals 
 unlisted  here. See the mailing list archives and the darcs source 
-repository history at <http://iki.fi/tuomov/repos/>. For translators
-see the individual `.po` files in `po/`.
+repository history (previously at <http://iki.fi/tuomov/repos/>).
+For translators see the individual `.po` files in `po/`.
 
 The code in `de/unicode' (producing `de/precompose.c') is taken from
 xterm.
