@@ -501,8 +501,8 @@ bool region_do_warp_default(WRegion *reg)
         if(px>=x && py>=y && px<x+w && py<y+h)
             return TRUE;
     }
-    
-    rootwin_warp_pointer(root, x+5, y+5);
+
+    rootwin_warp_pointer(root, x+w/2, y+h/2);
         
     return TRUE;
 }
