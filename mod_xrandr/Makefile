@@ -9,13 +9,13 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR)
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR) $(shell pkg-config --cflags-only-I xrandr)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(shell $(PKG_CONFIG) --cflags-only-other xrandr)
 
 SOURCES=mod_xrandr.c
 
 MAKE_EXPORTS=mod_xrandr
-LIBS = $(X11_LIBS) -lXrandr
+LIBS = $(X11_LIBS) $(shell $(PKG_CONFIG) --libs xrandr)
 MODULE=mod_xrandr
 MODULE_STUB=mod_xrandr.lua
 ETC=cfg_xrandr.lua
@@ -45,7 +45,7 @@ tarball: $(SOURCES) $(ETC) $(DOCS) Makefile
 
 .PHONY: test
 test: $(SOURCES)
-	for i in test_xrandr*.lua ; do echo 'Testing' $$i ; lua $$i ; done
+	for i in test_xrandr*.lua ; do echo 'Testing' $$i ; $(LUA) $$i ; done
 
 ######################################
 
