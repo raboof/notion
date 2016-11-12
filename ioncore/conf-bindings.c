@@ -94,7 +94,7 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
         
         if(!button && keysym!=NoSymbol){
             if(*ksb_ret!=NoSymbol){
-                warn_obj(str, TR("Insane key combination."));
+                warn_obj(str, TR("Multiple key symbols found. If you want to define a key combination, use a modifier and a key. Use xmodmap to see which keys are mapped to which modifiers."));
                 break;
             }
             if(XKeysymToKeycode(ioncore_g.dpy, keysym)==0){
@@ -115,7 +115,7 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
                 }
             
                 if(!button || *ksb_ret!=NoSymbol){
-                    warn_obj(str, TR("Insane button combination."));
+                    warn_obj(str, TR("Both a key and a mouse button found. If you want to define a combination of key and button, use a modifier and a button. Use xmodmap to see which keys are mapped to which modifiers."));
                     break;
                 }
                 *ksb_ret=button_map[i].value;
