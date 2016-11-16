@@ -644,7 +644,7 @@ fail2:
 }
 
 
-void clientwin_tfor_changed(WClientWin *cwin)
+void clientwin_tfor_changed(WClientWin *UNUSED(cwin))
 {
 #if 0
     WManageParams param=MANAGEPARAMS_INIT;

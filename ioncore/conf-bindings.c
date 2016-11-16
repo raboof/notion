@@ -399,7 +399,7 @@ static char *get_button(char *mods, uint ksb)
 }
 
 
-static bool get_kpress(WBindmap *bindmap, WBinding *b, ExtlTab t)
+static bool get_kpress(WBindmap *UNUSED(bindmap), WBinding *b, ExtlTab t)
 {
     char *mods;
     char *key;
