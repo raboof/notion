@@ -3,7 +3,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-int main() {
+int main()
+{
     Display *dpy = XOpenDisplay(NULL);
     int xinerama_event_base;
     int xinerama_error_base;
