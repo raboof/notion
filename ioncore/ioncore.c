@@ -362,6 +362,9 @@ static bool init_global()
     ioncore_g.usertime_diff_new=CF_USERTIME_DIFF_NEW;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
+    ioncore_g.warp_margin=5;
+    ioncore_g.warp_factor[0]=0.0;
+    ioncore_g.warp_factor[1]=0.0;
     ioncore_g.switchto_new=TRUE;
     ioncore_g.no_mousefocus=FALSE;
     ioncore_g.unsqueeze_enabled=TRUE;

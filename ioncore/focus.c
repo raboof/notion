@@ -455,7 +455,7 @@ bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
 void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input) { 
     if(warp) {
         WRegion* reg_warp=find_warp_to_reg(reg);
-        if(reg_warp!=NULL && region_is_cursor_inside(reg_warp)){
+        if(reg_warp!=NULL && !region_is_cursor_inside(reg_warp)){
             region_do_warp(reg_warp);
         }
     }
@@ -513,7 +513,22 @@ bool region_do_warp_default(WRegion *reg)
     
     region_rootpos(reg, &x, &y);
     
-    rootwin_warp_pointer(root, x+5, y+5);
+    x+=REGION_GEOM(reg).w*ioncore_g.warp_factor[0];
+    y+=REGION_GEOM(reg).h*ioncore_g.warp_factor[1];
+
+    if(ioncore_g.warp_factor[0] < 0.5) {
+        x+=ioncore_g.warp_margin;
+    }else if(ioncore_g.warp_factor[0] > 0.5) {
+        x-=ioncore_g.warp_margin;
+    }
+
+    if(ioncore_g.warp_factor[1] < 0.5) {
+        y+=ioncore_g.warp_margin;
+    }else if(ioncore_g.warp_factor[1] > 0.5) {
+        y-=ioncore_g.warp_margin;
+    }
+
+    rootwin_warp_pointer(root, x, y);
         
     return TRUE;
 }
