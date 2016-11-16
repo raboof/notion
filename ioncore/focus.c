@@ -23,6 +23,7 @@
 
 
 static void region_focuslist_awaiting_insertion_trigger(void);
+static WRegion *find_warp_to_reg(WRegion *reg);
 
 /*{{{ Hooks. */
 
@@ -452,9 +453,13 @@ bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
 }
 
 void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input) { 
-    if(warp)
-        region_do_warp(reg);
-    
+    if(warp) {
+        WRegion* reg_warp=find_warp_to_reg(reg);
+        if(reg_warp!=NULL && region_is_cursor_inside(reg_warp)){
+            region_do_warp(reg_warp);
+        }
+    }
+
     if(REGION_IS_ACTIVE(reg) && ioncore_await_focus()==NULL)
         return;
     
@@ -468,7 +473,6 @@ void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, in
 }
 
 
-
 static WRegion *find_warp_to_reg(WRegion *reg)
 {
     if(reg==NULL)
@@ -478,21 +482,15 @@ static WRegion *find_warp_to_reg(WRegion *reg)
     return find_warp_to_reg(region_manager_or_parent(reg));
 }
 
-
-bool region_do_warp_default(WRegion *reg)
+bool region_is_cursor_inside(WRegion *reg)
 {
     int x, y, w, h, px=0, py=0;
     WRootWin *root;
-    
-    reg=find_warp_to_reg(reg);
-    
-    if(reg==NULL)
-        return FALSE;
-    
-    D(fprintf(stderr, "region_do_warp %p %s\n", reg, OBJ_TYPESTR(reg)));
-    
+
+    D(fprintf(stderr, "region_is_cursor_inside %p %s\n", reg, OBJ_TYPESTR(reg)));
+
     root=region_rootwin_of(reg);
-    
+
     region_rootpos(reg, &x, &y);
     w=REGION_GEOM(reg).w;
     h=REGION_GEOM(reg).h;
@@ -501,6 +499,19 @@ bool region_do_warp_default(WRegion *reg)
         if(px>=x && py>=y && px<x+w && py<y+h)
             return TRUE;
     }
+    return FALSE;
+}
+
+bool region_do_warp_default(WRegion *reg)
+{
+    int x, y;
+    WRootWin *root;
+
+    D(fprintf(stderr, "region_do_warp %p %s\n", reg, OBJ_TYPESTR(reg)));
+    
+    root=region_rootwin_of(reg);
+    
+    region_rootpos(reg, &x, &y);
     
     rootwin_warp_pointer(root, x+5, y+5);
         
