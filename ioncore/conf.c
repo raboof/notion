@@ -58,6 +58,10 @@ static ExtlFn get_layout_fn;
  *                        object in question at every step (true). \\
  *  \var{warp} &          (boolean) Should focusing operations move the 
  *                        pointer to the object to be focused? \\
+ *  \var{warp_margin} &   (integer) Border offset in pixels to apply
+ *                        to the cursor when warping. \\
+ *  \var{warp_factor} &   (double[2]) X & Y factor to offset the cursor.
+ *                        between 0 and 1, where 0.5 is the center. \\
  *  \var{switchto} &      (boolean) Should a managing \type{WMPlex} switch
  *                        to a newly mapped client window? \\
  *  \var{screen_notify} & (boolean) Should notification tooltips be displayed
@@ -130,6 +134,9 @@ void ioncore_set(ExtlTab tab)
     
     extl_table_gets_b(tab, "opaque_resize", &(ioncore_g.opaque_resize));
     extl_table_gets_b(tab, "warp", &(ioncore_g.warp_enabled));
+    extl_table_gets_i(tab, "warp_margin", &(ioncore_g.warp_margin));
+    extl_table_gets_d(tab, "warp_factor_x", &(ioncore_g.warp_factor[0]));
+    extl_table_gets_d(tab, "warp_factor_y", &(ioncore_g.warp_factor[1]));
     extl_table_gets_b(tab, "switchto", &(ioncore_g.switchto_new));
     extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
     extl_table_gets_b(tab, "framed_transients", &(ioncore_g.framed_transients));
