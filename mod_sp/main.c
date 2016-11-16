@@ -192,9 +192,10 @@ bool mod_sp_set_shown_on(WMPlex *mplex, const char *how)
 
     if(!found){
         int sp=libtu_string_to_setparam(how);
-        if(sp==SETPARAM_SET || sp==SETPARAM_TOGGLE)
+        if(sp==SETPARAM_SET || sp==SETPARAM_TOGGLE){
             found=(create(mplex, 0)!=NULL);
             res=found;
+        }
     }
     
     return res;
