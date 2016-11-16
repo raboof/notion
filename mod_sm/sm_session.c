@@ -143,16 +143,16 @@ static void sm_set_other_properties()
     char *rmarg="-rf";
     int nvals=0, i;
     const char *sdir=NULL, *cid=NULL;
-    
-    SmPropValue discard_val[3];
-    SmProp discard_prop={ SmDiscardCommand, SmLISTofARRAY8, 3, NULL };
+
+    /*SmPropValue discard_val[3];*/
+    /*SmProp discard_prop={ SmDiscardCommand, SmLISTofARRAY8, 3, NULL };*/
     SmPropValue restart_hint_val, *restart_val=NULL;
     SmProp restart_hint_prop={ SmRestartStyleHint, SmCARD8, 1, NULL};
     SmProp restart_prop={ SmRestartCommand, SmLISTofARRAY8, 0, NULL};
     
     SmProp *props[2];
-    
-    discard_prop.vals=discard_val;
+
+    /*discard_prop.vals=discard_val;*/
     restart_hint_prop.vals=&restart_hint_val;
     
     props[0]=&restart_prop;
@@ -188,12 +188,14 @@ static void sm_set_other_properties()
     restart_val[nvals++].length=strlen(cid);
     restart_prop.num_vals=nvals;
     restart_prop.vals=restart_val;
+    /*
     discard_val[0].length=strlen(rmprog);
     discard_val[0].value=rmprog;
     discard_val[1].length=strlen(rmarg);
     discard_val[1].value=rmarg;
     discard_val[2].length=strlen(sdir);
     discard_val[2].value=(char*)sdir;
+    */
 
     SmcSetProperties(sm_conn,
                      sizeof(props)/sizeof(props[0]),

@@ -1441,7 +1441,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 }
 
 
-static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
+static void get_params(WMPlex *UNUSED(mplex), ExtlTab tab, int mask,
                        WMPlexAttachParams *par)
 {
     int tmp;

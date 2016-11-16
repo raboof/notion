@@ -113,7 +113,7 @@ void mplexpholder_do_unlink(WMPlexPHolder *ph, WMPlex *mplex)
 /*{{{ Init/deinit */
 
 
-static void mplex_get_attach_params(WMPlex *mplex, WStacking *st,
+static void mplex_get_attach_params(WMPlex *UNUSED(mplex), WStacking *st,
                                     WMPlexAttachParams *param)
 {
     param->flags=(MPLEX_ATTACH_SIZEPOLICY|
@@ -486,7 +486,7 @@ WRegion *mplex_rescue_attach(WMPlex *mplex, int flags, WRegionAttachData *data)
 }
 
 
-WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *mgd)
+WPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, WRegion *UNUSED(mgd))
 {
 #if 0
     WStacking *st=mplex_find_stacking(mplex, mgd);

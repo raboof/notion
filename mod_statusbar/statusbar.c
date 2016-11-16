@@ -417,7 +417,7 @@ static WSBElem *statusbar_unassociate_systray(WStatusBar *sb, WRegion *reg)
 
     
 
-static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
+static void do_calc_systray_w(WStatusBar *UNUSED(p), WSBElem *el)
 {
     WRegion *reg;
     PtrListIterTmp tmp;
@@ -1001,7 +1001,7 @@ ExtlTab mod_statusbar_statusbars()
 
 
 WStatusBar *mod_statusbar_find_suitable(WClientWin *cwin,
-                                        const WManageParams *param)
+                                        const WManageParams *UNUSED(param))
 {
     WStatusBar *sb;
 
