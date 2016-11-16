@@ -231,35 +231,34 @@ static WRegion* region_awaiting_insertion;
 
 static void timer_expired__focuslist_insert(WTimer* UNUSED(dummy1), Obj* UNUSED(dummy2))
 {
-  region_focuslist_push(region_awaiting_insertion);
-  region_awaiting_insertion = NULL;
+    region_focuslist_push(region_awaiting_insertion);
+    region_awaiting_insertion = NULL;
 }
 
 static void schedule_focuslist_insert_timer(WRegion *reg)
 {
-  /* if the delay is disabled, add to the list NOW */
-  if( ioncore_g.focuslist_insert_delay <= 0 )
-  {
-    region_focuslist_push(reg);
-    return;
-  }
+    /* if the delay is disabled, add to the list NOW */
+    if(ioncore_g.focuslist_insert_delay<=0){
+        region_focuslist_push(reg);
+        return;
+    }
 
-  if( focuslist_insert_timer == NULL)
-  {
-    focuslist_insert_timer=create_timer();
-    if( focuslist_insert_timer == NULL )
-      return;
-  }
+    if(focuslist_insert_timer==NULL){
+        focuslist_insert_timer=create_timer();
+        if(focuslist_insert_timer==NULL){
+            return;
+        }
+    }
 
-  region_awaiting_insertion = reg;
-  timer_set(focuslist_insert_timer, ioncore_g.focuslist_insert_delay,
-            (WTimerHandler*)timer_expired__focuslist_insert, NULL);
+    region_awaiting_insertion=reg;
+    timer_set(focuslist_insert_timer, ioncore_g.focuslist_insert_delay,
+              (WTimerHandler*)timer_expired__focuslist_insert, NULL);
 }
 
 static void region_focuslist_awaiting_insertion_cancel_if_is( WRegion* reg )
 {
-    if( region_awaiting_insertion == reg &&
-        focuslist_insert_timer    != NULL )
+    if(region_awaiting_insertion==reg &&
+       focuslist_insert_timer   !=NULL)
     {
         timer_reset(focuslist_insert_timer);
     }
@@ -267,12 +266,12 @@ static void region_focuslist_awaiting_insertion_cancel_if_is( WRegion* reg )
 
 static void region_focuslist_awaiting_insertion_trigger(void)
 {
-  if( focuslist_insert_timer    != NULL &&
-      region_awaiting_insertion != NULL )
-  {
-    timer_expired__focuslist_insert(NULL,NULL);
-    timer_reset(focuslist_insert_timer);
-  }
+    if(focuslist_insert_timer   !=NULL &&
+       region_awaiting_insertion!=NULL)
+    {
+        timer_expired__focuslist_insert(NULL, NULL);
+        timer_reset(focuslist_insert_timer);
+    }
 }
 
 
@@ -424,7 +423,8 @@ bool region_may_control_focus(WRegion *reg)
 
 /*Time ioncore_focus_time=CurrentTime;*/
 
-bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
+bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg)
+{
     WWindow* parent = reg->parent;
 
     LOG(DEBUG, FOCUS, "Region %s refusing focus", reg->ni.name);
@@ -443,8 +443,9 @@ bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
      */
     LOG(DEBUG, FOCUS, "Parent is %s", parent->region.ni.name);
 
-    if (obj_is((Obj*)parent, &CLASSDESCR(WFrame))
-        && ((WFrame*)parent)->mode == FRAME_MODE_TILED) {
+    if(obj_is((Obj*)parent, &CLASSDESCR(WFrame))
+       && ((WFrame*)parent)->mode == FRAME_MODE_TILED)
+    {
         LOG(DEBUG, FOCUS, "Parent %s is a tiled WFrame", parent->region.ni.name);
         return TRUE;
     }
@@ -452,7 +453,8 @@ bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
     return FALSE;
 }
 
-void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input) { 
+void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input)
+{
     if(warp) {
         WRegion* reg_warp=find_warp_to_reg(reg);
         if(reg_warp!=NULL && !region_is_cursor_inside(reg_warp)){
@@ -644,33 +646,32 @@ void region_pointer_focus_hack(WRegion *reg)
 
 void region_focuslist_debugprint(void)
 {
-  WRegion* reg;
+    WRegion* reg;
 
-  LOG(DEBUG, GENERAL, "focus list start =========================");
-  LOG(DEBUG, GENERAL, "currently-focused region ");
-  region_debugprint_parents( ioncore_g.focus_current );
-  LOG(DEBUG, GENERAL, "");
+    LOG(DEBUG, GENERAL, "focus list start =========================");
+    LOG(DEBUG, GENERAL, "currently-focused region ");
+    region_debugprint_parents( ioncore_g.focus_current );
+    LOG(DEBUG, GENERAL, "");
 
-  LOG(DEBUG, GENERAL, "top-of-focuslist ");
-  region_debugprint_parents( ioncore_g.focuslist );
-  LOG(DEBUG, GENERAL, "");
+    LOG(DEBUG, GENERAL, "top-of-focuslist ");
+    region_debugprint_parents( ioncore_g.focuslist );
+    LOG(DEBUG, GENERAL, "");
 
-  reg = ioncore_g.focuslist;
-  while(1)
-  {
-    LOG(DEBUG, GENERAL, "%p (%s)", (void*)reg, reg != NULL ? reg->ni.name : "NULL");
+    reg = ioncore_g.focuslist;
+    while(1){
+        LOG(DEBUG, GENERAL, "%p (%s)", (void*)reg, reg != NULL ? reg->ni.name : "NULL");
 
-    if( reg              == NULL             ||
-        reg->active_next == NULL             ||
-        reg              == reg->active_next )
-    {
-      break;
+        if(reg              == NULL             ||
+           reg->active_next == NULL             ||
+           reg              == reg->active_next )
+        {
+            break;
+        }
+
+        reg = reg->active_next;
     }
 
-    reg = reg->active_next;
-  }
-
-  LOG(DEBUG, GENERAL, "focus list end =========================");
+    LOG(DEBUG, GENERAL, "focus list end =========================");
 }
 
 /*}}}*/
