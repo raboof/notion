@@ -452,10 +452,13 @@ bool ioncore_should_focus_parent_when_refusing_focus(WRegion* reg){
 }
 
 void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, int set_input) { 
-    if(warp && !region_is_cursor_inside(reg)){
-        region_do_warp(reg);
+    if(warp) {
+        WRegion* reg_warp=find_warp_to_reg(reg);
+        if(reg_warp!=NULL && region_is_cursor_inside(reg_warp)){
+            region_do_warp(reg_warp);
+        }
     }
-    
+
     if(REGION_IS_ACTIVE(reg) && ioncore_await_focus()==NULL)
         return;
     
@@ -484,11 +487,6 @@ bool region_is_cursor_inside(WRegion *reg)
     int x, y, w, h, px=0, py=0;
     WRootWin *root;
 
-    reg=find_warp_to_reg(reg);
-
-    if(reg==NULL)
-        return FALSE;
-
     D(fprintf(stderr, "region_is_cursor_inside %p %s\n", reg, OBJ_TYPESTR(reg)));
 
     root=region_rootwin_of(reg);
@@ -506,14 +504,9 @@ bool region_is_cursor_inside(WRegion *reg)
 
 bool region_do_warp_default(WRegion *reg)
 {
-    int x, y, w, h, px=0, py=0;
+    int x, y;
     WRootWin *root;
-    
-    reg=find_warp_to_reg(reg);
-    
-    if(reg==NULL)
-        return FALSE;
-    
+
     D(fprintf(stderr, "region_do_warp %p %s\n", reg, OBJ_TYPESTR(reg)));
     
     root=region_rootwin_of(reg);
