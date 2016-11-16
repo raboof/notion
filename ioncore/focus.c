@@ -23,6 +23,7 @@
 
 
 static void region_focuslist_awaiting_insertion_trigger(void);
+static WRegion *find_warp_to_reg(WRegion *reg);
 
 /*{{{ Hooks. */
 
@@ -470,7 +471,6 @@ void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time time, in
         XSetInputFocus(ioncore_g.dpy, reg->parent->win, RevertToParent, time);
    }
 }
-
 
 
 static WRegion *find_warp_to_reg(WRegion *reg)
