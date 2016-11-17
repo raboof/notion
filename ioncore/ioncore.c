@@ -675,8 +675,10 @@ void ioncore_deinit()
 
     ioncore_deinit_bindmaps();
 
+    stringstore_deinit();
+
     mainloop_unregister_input_fd(ioncore_g.conn);
-    
+
     dpy=ioncore_g.dpy;
     ioncore_g.dpy=NULL;
     

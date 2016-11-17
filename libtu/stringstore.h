@@ -21,5 +21,6 @@ extern StringId stringstore_find_n(const char *str, uint l);
 extern StringId stringstore_alloc_n(const char *str, uint l);
 extern void stringstore_free(StringId id);
 extern void stringstore_ref(StringId id);
+extern void stringstore_free_all(void);
 
 #endif /* LIBTU_STRINGSTORE_H */
