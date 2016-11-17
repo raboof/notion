@@ -129,16 +129,19 @@ void xwindow_set_integer_property(Window win, Atom a, int value)
 /* WM_STATE
  */
 
-bool xwindow_get_state_property(Window win, int *state)
+bool xwindow_get_state_property(Window win, unsigned int *state)
 {
-    CARD32 *p=NULL;
+    struct{
+        CARD32 state;
+        XID    icon;
+    }*p;
     
     if(xwindow_get_property(win, ioncore_g.atom_wm_state, 
                             ioncore_g.atom_wm_state, 
                             2L, FALSE, (uchar**)&p)<=0)
         return FALSE;
     
-    *state=*p;
+    *state=p->state;
     
     XFree((void*)p);
     
@@ -146,16 +149,19 @@ bool xwindow_get_state_property(Window win, int *state)
 }
 
 
-void xwindow_set_state_property(Window win, int state)
+void xwindow_set_state_property(Window win, unsigned int state)
 {
-    CARD32 data[2];
-    
-    data[0]=state;
-    data[1]=None;
+    struct{
+        CARD32 state;
+        XID    icon;
+    }data;
+
+    data.state = state;
+    data.icon = None;
     
     XChangeProperty(ioncore_g.dpy, win,
                     ioncore_g.atom_wm_state, ioncore_g.atom_wm_state,
-                    32, PropModeReplace, (uchar*)data, 2);
+                    32, PropModeReplace, (uchar*)&data, 2);
 }
 
 

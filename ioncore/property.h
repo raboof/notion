@@ -20,8 +20,8 @@ extern char *xwindow_get_string_property(Window win, Atom a, int *nret);
 extern void xwindow_set_string_property(Window win, Atom a, const char *value);
 extern bool xwindow_get_integer_property(Window win, Atom a, int *vret);
 extern void xwindow_set_integer_property(Window win, Atom a, int value);
-extern bool xwindow_get_state_property(Window win, int *state);
-extern void xwindow_set_state_property(Window win, int state);
+extern bool xwindow_get_state_property(Window win, unsigned int *state);
+extern void xwindow_set_state_property(Window win, unsigned int  state);
 extern char **xwindow_get_text_property(Window win, Atom a, int *nret);
 
 /** 
