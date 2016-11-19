@@ -43,7 +43,7 @@
 #include "group.h"
 
 
-static void set_clientwin_state(WClientWin *cwin, int state);
+static void set_clientwin_state(WClientWin *cwin, unsigned int state);
 static bool send_clientmsg(Window win, Atom a, Time stmp);
 
 
@@ -843,7 +843,7 @@ void clientwin_rqclose(WClientWin *cwin, bool UNUSED(relocate_ignored))
 /*{{{ State (hide/show) */
 
 
-static void set_clientwin_state(WClientWin *cwin, int state)
+static void set_clientwin_state(WClientWin *cwin, unsigned int state)
 {
     if(cwin->state!=state){
         cwin->state=state;
