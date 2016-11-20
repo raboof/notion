@@ -53,14 +53,14 @@ de.defstyle("tab", {
         background_colour = "#901010",
         foreground_colour = "#eeeeee",
     }),
-    
+
     de.substyle("*-*-*-selected-activity", {
         shadow_colour = "#600808",
         highlight_colour = "#c04040",
         background_colour = "#b03030",
         foreground_colour = "#ffffff",
     }),
-    
+
     de.substyle("*-*-*-tabnumber", {
         background_colour = "black",
         foreground_colour = "green",

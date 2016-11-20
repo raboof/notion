@@ -1,7 +1,7 @@
 -- Authors: Andrea Rossato <arossato@istitutocolli.org>
 -- License: GPL, version 2 or later
 -- Last Changed: 2006-07-07
--- 
+--
 -- weather.lua
 
 --
@@ -40,20 +40,20 @@
 
 -- Here's the list of all available data:
 -- %weather_location
--- %weather_country 
+-- %weather_country
 -- %weather_date
 -- %weather_time (time of the latest report: your local time)
 -- %weather_tempF (Fahrenheit)
--- %weather_tempC (Celsius) 
+-- %weather_tempC (Celsius)
 -- %weather_dewpointF (Fahrenheit)
--- %weather_dewpointC (Celsius) 
--- %weather_humidity 
+-- %weather_dewpointC (Celsius)
+-- %weather_humidity
 -- %weather_pressure (hPa)
--- %weather_wind 
+-- %weather_wind
 -- %weather_windspeed (MPH)
 -- %weather_sky
 -- %weather_weather
- 
+
 -- - If you want to monitor more stations you need to create a monitor
 -- object for each one with the new_wm() function. After
 -- dopath("weather") write something like:
@@ -118,7 +118,7 @@
 
 -- LEGAL
 -- Copyright (C) 2006  Andrea Rossato
- 
+
 -- This program is free software; you can redistribute it and/or
 -- modify it under the terms of the GNU General Public License
 -- as published by the Free Software Foundation; either version 2
@@ -170,12 +170,12 @@ function new_wm(station)
       status_timer = ioncore.create_timer(),
       url = "http://weather.noaa.gov/pub/data/observations/metar/decoded/",
       paths = ioncore.get_paths(),
-      data = { 
+      data = {
 	 timezone = tonumber(os.date("%z"))
       },
    }
 
-   -- process configuration: 
+   -- process configuration:
    -- - config in cfg_statusbar.lua will overwrite default config
    -- - run-time configuration (to be saved at run-time with this.save_config())
    --    will overwrite default config but will be overwtitten by cfg_statusbar.lua
@@ -201,7 +201,7 @@ function new_wm(station)
    -- retrive data from server
    this.update_data = function()
                          -- wget options
-                         -- -b  go into the background (otherwise it will hang ion startup 
+                         -- -b  go into the background (otherwise it will hang ion startup
                          --     until data file is download)
                          -- -o  output error log (specify filename if you want to save output)
 			 local command = "wget -b -o /dev/null -O "..this.paths.sessiondir.."/"..this.config.station..".dat "..
@@ -218,22 +218,22 @@ function new_wm(station)
    -- process retrived data and store them in this.data
    this.process_data = function()
 			  local s = this.raw_data
-			  _, _, this.data.location, this.data.country = 
-			     string.find(s, "^(.+)%,%s(.+)%(%u+%)" ) 
-			  _, _, this.data.date, this.data.time = 
-			     string.find(s, ".+%/%s([%d.]+)%s(%d+)%sUTC" ) 
-			  _, _, this.data.wind, this.data.windspeed = 
-			     string.find(s, "Wind%:%s(.+%sat%s(%d+)%sMPH)" ) 
-			  _, _, this.data.sky = string.find(s, "Sky%sconditions:%s(.-)%c" ) 
-			  _, _, this.data.tempF, this.data.tempC = 
-			     string.find(s, "Temperature:%s([%d%.]+)%sF%s%(([%d%.]+)%sC%)%c" ) 
-			  _, _, this.data.dewpointF, this.data.dewpointC = 
-			     string.find(s, "Dew%sPoint:%s([%d%.]+)%sF%s%(([%d%.]+)%sC%)" ) 
-			  _, _, this.data.humidity = 
-			     string.find(s, "Relative%sHumidity:%s(%d+)%%") 
-			  _, _, this.data.pressure = 
-			     string.find(s, "Pressure%s.+%((.+)%shPa%)" ) 
-			  _, _, this.data.weather = 
+			  _, _, this.data.location, this.data.country =
+			     string.find(s, "^(.+)%,%s(.+)%(%u+%)" )
+			  _, _, this.data.date, this.data.time =
+			     string.find(s, ".+%/%s([%d.]+)%s(%d+)%sUTC" )
+			  _, _, this.data.wind, this.data.windspeed =
+			     string.find(s, "Wind%:%s(.+%sat%s(%d+)%sMPH)" )
+			  _, _, this.data.sky = string.find(s, "Sky%sconditions:%s(.-)%c" )
+			  _, _, this.data.tempF, this.data.tempC =
+			     string.find(s, "Temperature:%s([%d%.]+)%sF%s%(([%d%.]+)%sC%)%c" )
+			  _, _, this.data.dewpointF, this.data.dewpointC =
+			     string.find(s, "Dew%sPoint:%s([%d%.]+)%sF%s%(([%d%.]+)%sC%)" )
+			  _, _, this.data.humidity =
+			     string.find(s, "Relative%sHumidity:%s(%d+)%%")
+			  _, _, this.data.pressure =
+			     string.find(s, "Pressure%s.+%((.+)%shPa%)" )
+			  _, _, this.data.weather =
 			     string.find(s, "Weather:%s(.-)%c" )
 			  this.format_time()
 		       end
@@ -241,23 +241,23 @@ function new_wm(station)
    -- format teh time string to get hh:mm
    this.format_time = function()
 			 local time
-			 if this.data.time then 
+			 if this.data.time then
 			    time = tonumber(this.data.time) + tonumber(this.data.timezone)
 			 else return
 			 end
-			 if time > 2400 then 
-			    time = tostring(time - 2400) 
+			 if time > 2400 then
+			    time = tostring(time - 2400)
 			 end
-			 if string.match(time, "^%d%d$") then 
-			    time = "00"..time 
+			 if string.match(time, "^%d%d$") then
+			    time = "00"..time
 			 end
-			 if string.match(time, "^%d%d%d$") then 
-			    time = "0"..time 
+			 if string.match(time, "^%d%d%d$") then
+			    time = "0"..time
 			 end
 			 this.data.time = tostring(time):gsub("(%d%d)(%d%d)","%1%:%2")
 		      end
 
-   -- get threshold information 
+   -- get threshold information
    this.get_hint = function(meter, val)
 		      local hint = "normal"
 		      local crit = this.config.critical[meter]
@@ -291,7 +291,7 @@ function new_wm(station)
    --
    -- some public methods
    --
-   -- save object state (each monitor will store its configuration in 
+   -- save object state (each monitor will store its configuration in
    -- a file named cfg_weather_XXXX where XXXX is the station code
    -- this configuration will apply only to the monitor watching that
    -- station. In other words, you cannot set the default station for
@@ -316,8 +316,8 @@ function new_wm(station)
 			     this.show_data(mplex)
 			  end
 
-   -- changes station. the new station will not be saved: 
-   -- to change station edit the configuration or start the 
+   -- changes station. the new station will not be saved:
+   -- to change station edit the configuration or start the
    -- monitor with the station as a paramenter, like:
    -- mymon = new_wm("KNYC")
    this.set_station = function(mplex)
@@ -325,7 +325,7 @@ function new_wm(station)
 					    this.config.station = str;
 					    this.init()
 					 end
-			 mod_query.query(mplex, TR("Enter a station code:"), nil, handler, 
+			 mod_query.query(mplex, TR("Enter a station code:"), nil, handler,
 					 nil, "weather")
 		      end
 
@@ -342,7 +342,7 @@ function new_wm(station)
    -- initialize the object
    this.process_config()
    this.init()
-   return { 
+   return {
       config = this.config,
       data = this.data,
       save_config = this.save_config,

@@ -113,7 +113,7 @@ de.defstyle("tab-menuentry", {
     text_align = "left",
     highlight_pixels = 0,
     shadow_pixels = 0,
-    --make tab menus bright rather than drab even with inactive tabs 
+    --make tab menus bright rather than drab even with inactive tabs
     de.substyle("inactive-unselected", {
        shadow_colour = "#dfb700",
        highlight_colour = "#ffe700",

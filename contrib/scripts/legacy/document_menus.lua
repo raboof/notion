@@ -1,9 +1,9 @@
 -- Authors: Canaan Hadley-Voth
 -- License: Unknown
 -- Last Changed: 2005-12-20
--- 
+--
 -- document_menus.lua
--- 
+--
 -- Canaan Hadley-Voth
 --
 -- Navigate the filesystem by way of ion menu.
@@ -21,7 +21,7 @@
 defmenu("useful folders", {
     -- Define commonly used locations here.
     -- Or skip this defmenu and put something like the following under mainmenu...
-    
+
     submenu("/", function() return docmenus.getfiletable("/") end, {noautoexpand=true}),
     submenu("~", function() return docmenus.getfiletable(os.getenv("HOME")) end, {noautoexpand=true}),
     submenu(".ion3/", function() return docmenus.getfiletable(ioncore.get_paths().userdir) end, {noautoexpand=true}),
@@ -32,10 +32,10 @@ defmenu("useful folders", {
     -- mod_query.query_editfile is sufficient for that.)
 })
 
-defbindings("WMPlex", { 
+defbindings("WMPlex", {
     kpress(META.."minus", "mod_menu.menu(_, _sub, 'useful folders')"),
 })
-    
+
 defbindings("WScreen", {
     submap(META.."K", {
         kpress("minus", "docmenus.toggle_dotfiles()"),
@@ -68,7 +68,7 @@ function docmenus.getfiletable(dirpath)
     local safedirpath
     -- os shell is used for the menu's directory listing.
     --
-    -- lscommand can be customized, to a point.  
+    -- lscommand can be customized, to a point.
     -- Scrap the -L to keep from following symbolic links.
     -- Just don't remove -p.
     local lscommand = "ls -Lp"
@@ -77,12 +77,12 @@ function docmenus.getfiletable(dirpath)
     if string.sub(dirpath, -1) ~= "/" then
 	dirpath = dirpath.."/"
     end
-    
+
     safedirpath = string.gsub(dirpath, "\\", "\\\\")
     safedirpath = string.gsub(safedirpath, "\"", "\\\"")
 
     local ls = assert(io.popen(lscommand.." \""..safedirpath.."\"", "r"))
-    
+
     for menufile in pairs(ls:lines()) do
 	if menufile == "./" then menufile = "." end
 
@@ -97,7 +97,7 @@ function docmenus.getfiletable(dirpath)
     	end
     end
     ls:close()
-    
+
     return filetable
 end
 
@@ -105,7 +105,7 @@ function docmenus.file(menustr,path)
     path = string.shell_safe(path)
     path = string.gsub(path, "\\", "\\\\")
     path = string.gsub(path, "\"", "\\\"")
-    return menuentry(menustr, 
+    return menuentry(menustr,
 	"docmenus.doexec(_, \""..path.."\")"
     )
 end

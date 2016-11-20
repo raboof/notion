@@ -48,7 +48,7 @@ local defaults = {
    separator = "  ",
    update_interval = 1000, -- 1 second
 }
-                
+
 local settings = table.join(statusd.get_config("df"), defaults)
 
 local df_timer = statusd.create_timer()

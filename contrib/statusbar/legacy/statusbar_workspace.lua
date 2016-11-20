@@ -5,7 +5,7 @@
 -- statusbar_workspace.lua
 --
 -- Show current workspace name or number in the statusbar.
--- 
+--
 -- Put any of these in cfg_statusbar.lua's template-line:
 --  %workspace_name
 --  %workspace_frame
@@ -21,7 +21,7 @@
 --
 -- version 2
 -- added 2006-02-14 by Canaan Hadley-Voth:
---  * %workspace_pager shows a list of workspace numbers 
+--  * %workspace_pager shows a list of workspace numbers
 --    with the current one indicated:
 --
 --    1i  2i  [3f]  4p  5c
@@ -38,7 +38,7 @@
 --    Much faster this way.
 --
 -- version 3
--- update for ion-3rc-20070506 on 2007-05-09 
+-- update for ion-3rc-20070506 on 2007-05-09
 -- by Kevin Granade <kevin dot granade at gmail dot com>
 --
 -- Updated to use new wx_ api
@@ -46,11 +46,11 @@
 -- Added %workspace_name_pager, which works similarly to %workspace_pager,
 --   but instead displays the name of each workspace
 -- Added display for WGroupWS to %workspace_pager, displayed as 'g'
--- 
+--
 
 local function update_frame()
     local fr
-    ioncore.defer( function() 
+    ioncore.defer( function()
 	local cur=ioncore.current()
 	if obj_is(cur, "WClientWin") and
 	  obj_is(cur:parent(), "WMPlex") then

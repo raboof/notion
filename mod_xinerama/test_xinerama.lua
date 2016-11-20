@@ -51,13 +51,13 @@ end
 -- }}}
 
 -- {{{ mock notion context
-notioncore = { 
+notioncore = {
   load_module = function() return 1 end,
   rootwin = function() return nil end,
   screens_updated = function(root) return 1 end
 }
 
-function dopath() 
+function dopath()
 end
 
 _G["mod_xinerama"] = {
@@ -146,7 +146,7 @@ do_test("merge_overlapping_screens",{
 0 ____________________
 1 |         |    |   |
 2 |         |    |   |
-3 |         ~~~~~|~~~~    
+3 |         ~~~~~|~~~~
 4 |       _______|________
 5 |       |      |       |
 6 ~~~~~~~~~~~~~~~~       |

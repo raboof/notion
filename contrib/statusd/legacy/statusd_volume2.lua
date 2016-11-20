@@ -7,9 +7,9 @@
 -- Written by Randall Wald
 -- email: randy@rwald.com
 -- Released under the GPL
--- 
+--
 -- Based on a public domain script written by Benjamin Sigonneau
--- 
+--
 -- This script uses "amixer" to find volume information. If you don't have
 -- "amixer," this script will fail. Sorry.
 -- Though this is labeled "statusd_volume2.lua", rename it to

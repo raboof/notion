@@ -208,7 +208,7 @@ init_mpd = function ()
     -- Open the socket
     --statusd.inform("mpd","Opening connection...")
     success,errstr = open_socket()
-    if not success then 
+    if not success then
         statusd.inform("mpd",errstr)
         -- go to sleep for a while, then try again
         mpd_timer:set(settings.retry_interval, init_mpd)

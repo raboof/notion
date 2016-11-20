@@ -72,12 +72,12 @@ function do_query_mocp()
         else
 
         local moc_leftsect, moc_percent, moc_progress = "--", "--", "--"
-        if moc_totalsec and moc_currentsec then 
+        if moc_totalsec and moc_currentsec then
 	    moc_leftsec = tostring(moc_totalsec - moc_currentsec)
 	    moc_percent = tostring(math.floor(moc_currentsec * 100 / moc_totalsec))
             moc_progress = moc_make_progress_bar(moc_percent)
         end
-        
+
         if moc_state == "PLAY"
         then return moc_title, moc_state, "playing", moc_file, moc_title, moc_artist, moc_songtitle, moc_album, moc_totaltime, moc_currenttime, moc_timeleft, moc_totalsec, moc_currentsec, moc_bitrate, moc_rate, moc_leftsec, moc_percent, moc_progress
         else return moc_title.." [paused]" , moc_state, "paused", moc_file, moc_title, moc_artist, moc_songtitle, moc_album, moc_totaltime, moc_currenttime, moc_timeleft, moc_totalsec, moc_currentsec, moc_bitrate, moc_rate, moc_leftsec, moc_percent, moc_progress

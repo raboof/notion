@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_tabnum.lua -- Ioncore tab numbering support
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2007-2009.
 --
 -- See the included file LICENSE for details.
@@ -39,7 +39,7 @@ end
 function ioncore.tabnum.clear()
     local st=framestate
     framestate={}
-    
+
     for f, s in pairs(st) do
         if s=='set' then
             if obj_exists(f) then

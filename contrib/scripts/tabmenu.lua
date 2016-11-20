@@ -8,7 +8,7 @@
 --
 -- This script introduces a tabmenu function that can be used to
 -- display a grabmenu corresponding to the tabs of a frame. It can
--- be useful if you choose to disable the tab-bars of frames, to 
+-- be useful if you choose to disable the tab-bars of frames, to
 -- replace the META+K N/P bindings with the following:
 --
 -- ioncore.defbindings("WFrame.toplevel", {
@@ -48,7 +48,7 @@ function tabmenu.tabmenu(_, _sub, index)
                 end
                 return true
             end)
-    
+
     if #m==0 then
         table.insert(m, menuentry("<empty frame>", function() end))
         i=nil
@@ -61,7 +61,7 @@ function tabmenu.tabmenu(_, _sub, index)
     elseif index=='last' then
         i=#m
     end
-    
+
     mod_menu.grabmenu(_, nil, m, {initial=i})
 end
 

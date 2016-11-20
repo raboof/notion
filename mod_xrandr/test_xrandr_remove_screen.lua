@@ -6,7 +6,7 @@ function iter(t, cb)
 end
 
 function move(ws, from, to)
-  if from[1] == ws then 
+  if from[1] == ws then
     table.remove(from, 1)
     table.insert(to, ws)
   else
@@ -52,14 +52,14 @@ function obj_is(o, t)
 end
 
 WGroupWS = {
-  get_initial_outputs = function(ws) 
+  get_initial_outputs = function(ws)
     if ws == firstws then return { 'VGA1' } end
     if ws == secondws then return { 'VGA1' } end
     return nil
   end
 }
 
-notioncore = { 
+notioncore = {
   rootwin = function() end,
   screens_updated = function(rootwin) end,
   load_module = function() return 1 end,
@@ -68,17 +68,17 @@ notioncore = {
       local next = callback(firstscreen)
       if next then callback(secondscreen) end
   end,
-  find_screen_id = function(screen_id) 
-    if screen_id == 0 then return firstscreen 
-    else 
+  find_screen_id = function(screen_id)
+    if screen_id == 0 then return firstscreen
+    else
       if screen_id == 1 then return secondscreen
-      else return nil 
+      else return nil
         end
     end
   end
 }
 
-function dopath() 
+function dopath()
 end
 
 -- all outputs reported by xrander. Notably, the second screen is (now) missing.

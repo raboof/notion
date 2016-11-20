@@ -1,6 +1,6 @@
 --
--- look_greenlight for Notion's default drawing engine. 
--- 
+-- look_greenlight for Notion's default drawing engine.
+--
 
 if not gr.select_engine("de") then
     return
@@ -15,14 +15,14 @@ de.defstyle("*", {
     shadow_colour = "#666666",
     background_colour = "#333333",
     foreground_colour = "#cccccc",
-    
+
     shadow_pixels = 1,
     highlight_pixels = 1,
     padding_pixels = 1,
     spacing = 0,
     border_style = "elevated",
     border_sides = "tb",
-    
+
     font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
     text_align = "center",
 })
@@ -37,7 +37,7 @@ de.defstyle("frame", {
 de.defstyle("tab", {
     font = "-*-helvetica-medium-r-normal-*-10-*-*-*-*-*-*-*",
     spacing = 1,
-    
+
     de.substyle("active-selected", {
         highlight_colour = "#8ac267",
         shadow_colour = "#8ac267",
@@ -54,7 +54,7 @@ de.defstyle("tab", {
 de.defstyle("input", {
     text_align = "left",
     spacing = 1,
-    
+
     de.substyle("*-selection", {
         background_colour = "#354743",
     }),
@@ -68,6 +68,6 @@ de.defstyle("input", {
 
 dopath("lookcommon_clean")
 
-    
+
 -- Refresh objects' brushes.
 gr.refresh()

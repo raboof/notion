@@ -5,7 +5,7 @@
 -- statusd_netmon.lua: monitor the speed of a network interface
 --
 -- Thanx to Tuomo for pointing out a problem in the previous script.
--- 
+--
 -- In case this doesn't work for someone, do let me know :)
 --
 -- Author
@@ -85,7 +85,7 @@ local function tokenize(str)
     return ret
 end
 
--- 
+--
 -- get the connection count
 --
 local function get_connection_count()
@@ -259,24 +259,24 @@ local function sanity_check()
     if not string.find(s, settings.device) then
         return false        -- the device does not exist
     end
-    
+
     return true
 end
 
 --
 -- start the timer
--- 
+--
 local function init_netmon_monitor()
     if sanity_check() then
         timer = statusd.create_timer()
         last[0], last[1] = parse_netmon_info()
-        
+
         if settings.show_avg == 1 then
             for i=0,settings.avg_sec-1 do
                 history_in[i], history_out[i] = 0, 0
             end
         end
-        
+
         statusd.inform("netmon_template", "xxxxxxxxxxxxxxxxxxxxxxx")
         update_netmon_info()
     else

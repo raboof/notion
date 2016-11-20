@@ -3,7 +3,7 @@
 -- Last Changed: Unknown
 --
 -- look_blue, based on look-cleanviolet
--- 
+--
 
 if not gr.select_engine("de") then
     return
@@ -18,13 +18,13 @@ de.defstyle("*", {
     shadow_colour = "#eeeeff",
     background_colour = "#9999bb",
     foreground_colour = "#444477",
-    
+
     shadow_pixels = 1,
     highlight_pixels = 1,
     padding_pixels = 1,
     spacing = 0,
     border_style = "elevated",
-    
+
     font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
     text_align = "center",
 })
@@ -49,7 +49,7 @@ de.defstyle("frame-tiled", {
 de.defstyle("tab", {
     based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
-    
+
     de.substyle("active-selected", {
         highlight_colour = "#9999bb",
         shadow_colour = "#9999bb",
@@ -88,7 +88,7 @@ de.defstyle("input", {
     shadow_colour = "#9999bb",
     background_colour = "#34639f",
     foreground_colour = "#eeeeff",
-    
+
     de.substyle("*-selection", {
         background_colour = "#9999ff",
         foreground_colour = "#333366",
@@ -101,6 +101,6 @@ de.defstyle("input", {
 })
 
 dopath("lookcommon_clean")
-    
+
 -- Refresh objects' brushes.
 gr.refresh()

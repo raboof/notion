@@ -10,7 +10,7 @@ local secondscreen = {
     id = function() return 1 end
 }
 
-notioncore = { 
+notioncore = {
   load_module = function() return 1 end,
   get_hook = function() return { add = function() end; } end,
   region_i = function(callback, type)
@@ -19,10 +19,10 @@ notioncore = {
   end
 }
 
-function dopath() 
+function dopath()
 end
 
-local all_outputs = { VGA1 = { x=0, y=0, w=1680, h=1050, name='VGA1' }, LVDS1 = { x=1680, y=0, w=1920, h=1080, name='LVDS1' } } 
+local all_outputs = { VGA1 = { x=0, y=0, w=1680, h=1050, name='VGA1' }, LVDS1 = { x=1680, y=0, w=1920, h=1080, name='LVDS1' } }
 
 _G["mod_xrandr"] = {
 --  query_screens = function() end

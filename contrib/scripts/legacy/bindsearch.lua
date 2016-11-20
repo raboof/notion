@@ -3,18 +3,18 @@
 -- Last Changed: Unknown
 --
 -- bindsearch.lua
--- 
+--
 -- Canaan Hadley-Voth.
 --
 -- Bindings are spread across distant files, some are created
--- dynamically, and some are negated by others.  I use this to 
+-- dynamically, and some are negated by others.  I use this to
 -- tell me exactly what is bound right now.
 --
 -- Search (in all sections) for bound keys or bound commands.
 -- There can be multiple search terms separated by spaces, but
--- they would have to appear in the specified order.  Output 
+-- they would have to appear in the specified order.  Output
 -- is a WMessage with a section of the bindings table.
--- 
+--
 --[[
 
 Example: bindsearch("K X") yields:
@@ -76,7 +76,7 @@ function bindsearch(str, field)
 	    fullkcb=string.gsub(fullkcb, "AnyModifier", " ")
 	    if (field==nil or field=="kcb") and string.find(fullkcb, str) then
 		found=true
-	    elseif field=="cmd" and bind.cmd and 
+	    elseif field=="cmd" and bind.cmd and
 	      string.find(string.lower(bind.cmd), string.lower(str)) then
 		found=true
 	    elseif field=="class" and class==str then

@@ -25,12 +25,12 @@ end
 
 local function read_translations(pofile)
     local f, err=io.open(pofile)
-    if not f then 
-        error(err) 
+    if not f then
+        error(err)
     end
-    
+
     local msgid, msgstr, st, en
-    
+
     for l in f:lines() do
         if string.find(l, "^msgid") then
             if msgid then
@@ -57,7 +57,7 @@ local function read_translations(pofile)
         assert(msgstr)
         translations[msgid]=msgstr
     end
-    
+
     f:close()
 end
 
@@ -69,10 +69,10 @@ end
 local function dobindings(f, bindings)
     local p={}
     local dummy = function() end
-    
+
     p.META="Mod4+"
     p.ALTMETA=""
-    
+
     p.dopath=dummy
     p.defmenu=dummy
     p.defctxmenu=dummy
@@ -81,15 +81,15 @@ local function dobindings(f, bindings)
     p.submap_enter=dummy
     p.submap_leave=dummy
     p.submap_wait=dummy
-    
+
     p.ioncore={
         set=dummy,
     }
-    
+
     function p.bdoc(text)
         return {action = "doc", text = text}
     end
-    
+
     function p.submap(kcb_, list)
         if not list then
             return function(lst)
@@ -98,21 +98,21 @@ local function dobindings(f, bindings)
         end
         return {action = "kpress", kcb = kcb_, submap = list}
     end
-    
+
     local function putcmd(cmd, guard, t)
         t.cmd=cmd
         t.guard=guard
         return t
     end
-    
+
     function p.kpress(keyspec, cmd, guard)
         return putcmd(cmd, guard, {action = "kpress", kcb = keyspec})
     end
-    
+
     function p.kpress_wait(keyspec, cmd, guard)
         return putcmd(cmd, guard, {action = "kpress_wait", kcb = keyspec})
     end
-    
+
     local function mact(act_, kcb_, cmd, guard)
         local st, en, kcb2_, area_=string.find(kcb_, "([^@]*)@(.*)")
         return putcmd(cmd, guard, {
@@ -121,15 +121,15 @@ local function dobindings(f, bindings)
             area = area_,
         })
     end
-    
+
     function p.mclick(buttonspec, cmd, guard)
         return mact("mclick", buttonspec, cmd, guard)
     end
-    
+
     function p.mdblclick(buttonspec, cmd, guard)
         return mact("mdblclick", buttonspec, cmd, guard)
     end
-    
+
     function p.mpress(buttonspec, cmd, guard)
         return mact("mpress", buttonspec, cmd, guard)
     end
@@ -137,12 +137,12 @@ local function dobindings(f, bindings)
     function p.mdrag(buttonspec, cmd, guard)
         return mact("mdrag", buttonspec, cmd, guard)
     end
-    
+
     function ins(t, v)
         if not t.seen then
             t.seen={}
         end
-        
+
         if (not v.kcb) or v.submap then
             -- Submap rebinds are not presently handled
             table.insert(t, v)
@@ -161,7 +161,7 @@ local function dobindings(f, bindings)
             end
         end
     end
-    
+
     function p.defbindings(context, bnd)
         if not bindings[context] then
             bindings[context]={}
@@ -169,21 +169,21 @@ local function dobindings(f, bindings)
             -- Reset documentation
             table.insert(bindings[context], { action = "doc", text = nil })
         end
-        
+
         for _, v in ipairs(bnd) do
             ins(bindings[context], v)
         end
     end
 
     local env=setmetatable({}, {
-        __index=p, 
-        __newindex=function(x) 
+        __index=p,
+        __newindex=function(x)
                        error("Setting global "..tostring(x))
                    end,
     })
-    
+
     local fn, err
-    
+
     if _ENV then
         fn, err=loadfile(f, nil, env)
     else
@@ -201,7 +201,7 @@ local function dobindings(f, bindings)
     fn()
     return bindings
 end
-    
+
 -- }}}
 
 
@@ -210,7 +210,7 @@ end
 local function docgroup_bindings(bindings)
     local out={}
     local outi=0
-    
+
     local function parsetable(t, prefix)
         --for _, v in ipairs(t) do
         -- ipairs doesn't like nil values, that e.g. submap_wait dummy might generate
@@ -235,18 +235,18 @@ local function docgroup_bindings(bindings)
             end
         end
     end
-    
+
     if outi~=0 and #out[outi].bindings==0 then
         out[outi]=nil
     end
-    
+
     parsetable(bindings, "")
-    
+
     return out
 end
 
 
-local function combine_bindings(v)    
+local function combine_bindings(v)
     local nact={
         ["mpress"]=TR("press"),
         ["mclick"]=TR("click"),
@@ -270,23 +270,23 @@ local function combine_bindings(v)
             end
         end
     end
-    
+
     return s
-end    
+end
 
 local function write_bindings_man(db)
     local function write_binding_man(v)
         return '.TP\n.B '..combine_bindings(v)..'\n'..gettext(v.doc or "?")..'\n'
     end
-    
+
     local s=""
-    
+
     for _, v in ipairs(db) do
         if #(v.bindings)>0 then
             s=s..write_binding_man(v)
         end
     end
-    
+
     return s
 end
 
@@ -334,7 +334,7 @@ if not of then
 end
 
 for l in f:lines() do
-    l=string.gsub(l, '%s*BINDINGS:([%w%.%-]+)%s*', 
+    l=string.gsub(l, '%s*BINDINGS:([%w%.%-]+)%s*',
                   function(s)
                       if not bindings[s] then
                           --error('No bindings for '..s)
@@ -343,11 +343,11 @@ for l in f:lines() do
                       local db=docgroup_bindings(bindings[s])
                       return write_bindings_man(db)
                   end)
-    
+
     for pat, rep in pairs(replaces) do
         l=string.gsub(l, pat, rep)
     end
-    
+
     of:write(l..'\n')
 end
 

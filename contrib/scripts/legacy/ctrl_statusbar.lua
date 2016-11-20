@@ -1,7 +1,7 @@
 -- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>
 -- License: Public domain
 -- Last Changed: Unknown
--- 
+--
 -- USAGE: back-up the cfg_statusbar.lua. Rename this one to cfg_statusbar.lua,
 -- make changes in settings.active and settings.inactive (look below) to meet
 -- your needs (for farther changes, look into save_statusbar.lua, which will
@@ -123,7 +123,7 @@ end
 
 -- Move a monitor from active to inactive
 function ctrl_statusbar.disable_active(_)
-    table.insert(ctrl_statusbar.settings.inactive, 
+    table.insert(ctrl_statusbar.settings.inactive,
             table.remove(ctrl_statusbar.settings.active, _))
     refresh_statusd()
 end
@@ -131,7 +131,7 @@ end
 -- Move a monitor from inactive to active
 function ctrl_statusbar.insert_active(_, ind)
     if ind == -1 then
-        table.insert(ctrl_statusbar.settings.active, 
+        table.insert(ctrl_statusbar.settings.active,
                 table.remove(ctrl_statusbar.settings.inactive, _))
     else
         table.insert(ctrl_statusbar.settings.active, ind,
@@ -200,7 +200,7 @@ function ctrl_statusbar.show_list(mplex)
                         "ctrl_statusbar.exchange(\"" .. _ .. "\", \"" .. __ .. "\")"))
             end
         end
-        
+
         table.insert(sub, menuentry("Disable " ..s,
                 "ctrl_statusbar.disable_active(\"" .. _ .. "\")"))
         table.insert(ret, submenu(s, sub))
@@ -217,16 +217,16 @@ function ctrl_statusbar.show_list(mplex)
             table.insert(sub, menuentry("Insert after " .. t,
                     "ctrl_statusbar.insert_active(\"" .. _ .. "\", \"" .. (__+1) .. "\")"))
         end
-        
+
         table.insert(sub, menuentry("Delete " ..s,
                 "ctrl_statusbar.delete_module(\"" .. _ .. "\")"))
         table.insert(ret, submenu('! ' .. s, sub))
     end
-    
+
     table.insert(ret, menuentry("Add a new Template",
         "mod_query.query(_, TR('New template'), nil, ctrl_statusbar.add_module, function () end, 'ctrl_statusbar')"))
     table.insert(ret, menuentry("Save template", ctrl_statusbar.save_template))
-    
+
     return ret
 end
 

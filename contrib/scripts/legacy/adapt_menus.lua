@@ -3,7 +3,7 @@
 -- Last Changed: September 2005
 --
 -- this builds up a menu framework for performing some client operation
--- say, jumping to the client or attaching the client ot the current 
+-- say, jumping to the client or attaching the client ot the current
 -- frame. it assumes that helpful applications either tend to have titles of
 -- the form or will allow their title s to be set to something roughly of the
 -- form "<type>: <details>", so the top-level menu performs a split on the
@@ -13,7 +13,7 @@
 
 -- however, if
 -- a first level menu would exceed a certain size then a grouping into
--- another layer of submenus is performed on the basis of the first 
+-- another layer of submenus is performed on the basis of the first
 -- letter of detail string (suppressing sub-menus that would be below a
 -- certain number of elements). note the aim is NOT consistency across
 -- invocations but to try and on-the-fly make clients as easy to find & access
@@ -150,7 +150,7 @@ function makelistEngine(frame,title,mkentry,lst,
                 collapseTwoLevels(sndLevMenu,mkentry,v,frame,"rest")
             else
                 for j,w in pairs(v) do
-                    --if we'd only have 1 or 2 element submenu, stick them in submenu directly 
+                    --if we'd only have 1 or 2 element submenu, stick them in submenu directly
                     if #(w)<=2 then
                             -- use the sub-instance on "sub-menu direct entries"
                             insertListIntoMenu(sndLevMenu,mkentry,w,frame,"rest")

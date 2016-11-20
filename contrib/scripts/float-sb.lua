@@ -9,11 +9,11 @@ local floatsbscr=ioncore.find_screen_id(0)
 local floatsb
 
 floatsb=floatsbscr:attach_new{
-    type="WStatusBar", 
-    unnumbered=true, 
-    sizepolicy='northwest', 
-    template='/ %date /', 
-    passive=true, 
+    type="WStatusBar",
+    unnumbered=true,
+    sizepolicy='northwest',
+    template='/ %date /',
+    passive=true,
     level=2
 }
 

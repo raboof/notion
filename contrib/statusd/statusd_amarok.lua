@@ -18,7 +18,7 @@ local function amarok_dcop()
    return amarok
 end
 
-local function amarok_status()        
+local function amarok_status()
    local f = io.popen('dcop amarok player status 2> /dev/null', 'r')
    local status = f:read('*l')
    f:close()

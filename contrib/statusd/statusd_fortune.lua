@@ -49,11 +49,11 @@
 -- to enable offending fortunes but I personally don't like them that much...
 -- In my opinion the statusbar should offer things like scrolling text but
 -- eventually I will implement this in a later release of this monitor...
--- 
+--
 -- Enabling 'newlinetrick' basicly makes this program look at the ending and
 -- beginning of the two lines and check if they are *meant* to be separated.
 -- Currently this merges lines that end and begin with lower-case-letters and
--- silently removes newlines in front of 'cite-signs' (e.g. 
+-- silently removes newlines in front of 'cite-signs' (e.g.
 -- "...blah\n-- Hendrik" becomes "...blah -- Hendrik").
 --
 -- Example configuration :
@@ -69,7 +69,7 @@
 --     },
 --     ...
 --     ...
---  
+--
 --   rotate_statusbar.settings = {
 --    ...
 --    ...
@@ -78,7 +78,7 @@
 --      "[ %fortune ]%filler%systray",
 --      ...
 --      ...
---      
+--
 -- This setup makes the basic fortune update all 30 seconds and prepends
 -- every fortune with 'Fortune : '. Also using rotate_statusbar I decided
 -- to give fortunes the full bar turning of the date-monitor so I don't
@@ -153,7 +153,7 @@ local function receive_fortune_status(partial_data)
       -- we get here if e.g. the command was not found...
       fortunestring = "could not obtain a fortune! ("..last_error..")"
   end
-  
+
   -- perform newline-merging
   if settings.newlinetrick
     then
@@ -162,10 +162,10 @@ local function receive_fortune_status(partial_data)
       -- trick 2 : 'cite-signs'
       fortunestring = string.gsub(fortunestring, "([^\n]*)[%c%s]*(--.*)", "%1 %2")
   end
-  
+
   -- flatspace is such a silly name...
   local f = flatspace(fortunestring)
-  
+
   -- calculate time to wait
   local waittime =
     settings.interval
@@ -173,10 +173,10 @@ local function receive_fortune_status(partial_data)
        settings.minwait -- minimun
       ,1000 * (string.len(f) / settings.cpers) -- maybe more
     )
-    
+
   -- feed the monitor
   statusd.inform("fortune", settings.prefix..f..settings.postfix)
-  
+
   -- update callback
   fortune_timer:set(waittime, update_fortune)
 end

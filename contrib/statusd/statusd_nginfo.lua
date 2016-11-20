@@ -3,22 +3,22 @@
 -- Last Changed: 2008-05-08
 --
 -- statusd_nginfo.lua
--- 
+--
 -- Made by Raffaello Pelagalli (raffa at niah.org)
--- 
+--
 -- Started on  Sun Mar  9 00:22:31 2008 Raffaello Pelagalli
 -- Last update Thu May  8 23:29:32 2008 Raffaello Pelagalli
--- 
+--
 -- This library is free software; you can redistribute it and/or
 -- modify it under the terms of the GNU Lesser General Public
 -- License as published by the Free Software Foundation; either
 -- version 2.1 of the License, or (at your option) any later version.
--- 
+--
 -- This library is distributed in the hope that it will be useful,
 -- but WITHOUT ANY WARRANTY; without even the implied warranty of
 -- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 -- Lesser General Public License for more details.
--- 
+--
 -- You should have received a copy of the GNU Lesser General Public
 -- License along with this library; if not, write to the Free Software
 -- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -39,7 +39,7 @@
 --    ...
 -- }
 --
--- Need to be used with nginfo.pl script from 
+-- Need to be used with nginfo.pl script from
 -- http://redstack.net/blog/index.php/2008/05/08/nagios-status-report-in-ion3-statusbar.html
 
 require "lxp"
@@ -48,8 +48,8 @@ local error = false
 
 local status = {0, 0, 0, 0}
 
-local defaults = { 
-   update_interval=30*1000, 
+local defaults = {
+   update_interval=30*1000,
    urls = { },
 }
 
@@ -59,7 +59,7 @@ nginfo_callbacks = {
    StartElement = function (parser, name)
                      if (name == "current_state") then
                         nginfo_callbacks.CharacterData = function (parser, val)
-                                                            status[tonumber(val) + 1] = 
+                                                            status[tonumber(val) + 1] =
                                                                status[tonumber(val) + 1] + 1
                                                          end
                      end
@@ -86,18 +86,18 @@ function get_nginfo ()
    local errstr = " ERROR while reading data"
    for n, url in pairs(settings.urls) do
       b, c, h = http.request(url)
-      if not (c == 200) then 
-         error = true 
+      if not (c == 200) then
+         error = true
          errstr = errstr .. " (NET " .. tostring(c) .. ")"
       else
          local st, err = pcall(parse, b)
-         if not st then 
-            error = true 
+         if not st then
+            error = true
             errstr = errstr .. " (XML" .. err .. ")"
          end
       end
    end
-   
+
    if not error then
       errstr = ""
    end
@@ -114,7 +114,7 @@ local function update_nginfo()
       statusd.inform("nginfo_hint", "critical")
    elseif (status[2] > 0) then
       statusd.inform("nginfo_hint", "important")
-   else 
+   else
       statusd.inform("nginfo_hint", "normal")
    end
    ng_timer:set(settings.update_interval, update_nginfo)

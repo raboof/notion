@@ -1,6 +1,6 @@
--- For honest workspaces, the initial outputs information, which determines the 
--- physical screen that a workspace wants to be on, is part of the C class 
--- WGroupWS. For "full screen workspaces" and scratchpads, we only keep this 
+-- For honest workspaces, the initial outputs information, which determines the
+-- physical screen that a workspace wants to be on, is part of the C class
+-- WGroupWS. For "full screen workspaces" and scratchpads, we only keep this
 -- information in a temporary list.
 InitialOutputs={}
 
@@ -23,7 +23,7 @@ function setInitialOutputs(ws, outputs)
 end
 
 function nilOrEmpty(t)
-    return not t or empty(t) 
+    return not t or empty(t)
 end
 
 function mod_xrandr.workspace_added(ws)
@@ -43,7 +43,7 @@ function for_all_workspaces_do(fn)
     notioncore.region_i(function(scr)
         scr:managed_i(function(ws)
             table.insert(workspaces, ws)
-            return true 
+            return true
         end)
         return true
     end, "WScreen")
@@ -56,7 +56,7 @@ function mod_xrandr.workspaces_added()
     for_all_workspaces_do(mod_xrandr.workspace_added)
 end
 
-function mod_xrandr.screenmanagedchanged(tab) 
+function mod_xrandr.screenmanagedchanged(tab)
     if tab.mode == 'add' then
         mod_xrandr.workspace_added(tab.sub);
     end
@@ -127,7 +127,7 @@ end
 
 function singleton(t)
     local first = next(t)
-    return first and not next(t, first) 
+    return first and not next(t, first)
 end
 
 function is_scratchpad(ws)
@@ -148,11 +148,11 @@ function find_scratchpad(screen)
 end
 
 function move_if_needed(workspace, screen_id)
-    local screen = notioncore.find_screen_id(screen_id) 
+    local screen = notioncore.find_screen_id(screen_id)
 
     if workspace:screen_of() ~= screen then
         if is_scratchpad(workspace) then
-        -- Moving a scratchpad to another screen is not meaningful, so instead we move 
+        -- Moving a scratchpad to another screen is not meaningful, so instead we move
         -- its content
             local content={}
             workspace:bottom():managed_i(function(reg)
@@ -181,13 +181,13 @@ function mod_xrandr.rearrangeworkspaces(max_screen_id)
 
     local all_outputs = mod_xrandr.get_all_outputs()
 
-    -- When moving a "full screen workspace" to another screen, we seem to lose 
-    -- its placeholder and thereby the possibility to return it from full 
-    -- screen later. Let's therefore try to close any full screen workspace 
+    -- When moving a "full screen workspace" to another screen, we seem to lose
+    -- its placeholder and thereby the possibility to return it from full
+    -- screen later. Let's therefore try to close any full screen workspace
     -- before rearranging.
     full_screen_workspaces={}
     for_all_workspaces_do(function(ws)
-        if obj_is(ws, "WGroupCW") then table.insert(full_screen_workspaces, ws) 
+        if obj_is(ws, "WGroupCW") then table.insert(full_screen_workspaces, ws)
         end
         return true
     end)
@@ -211,7 +211,7 @@ function mod_xrandr.rearrangeworkspaces(max_screen_id)
     for_all_workspaces_do(roundone)
 
     for workspace,screens in pairs(wanderers) do
-        -- TODO add to screen with least # of workspaces instead of just the 
+        -- TODO add to screen with least # of workspaces instead of just the
         -- first one that applies
         if screens[workspace:screen_of():name()] then
             add_safe(new_mapping, workspace:screen_of():id(), workspace)
@@ -225,7 +225,7 @@ function mod_xrandr.rearrangeworkspaces(max_screen_id)
     end
 
     for screen_id,workspaces in pairs(new_mapping) do
-        -- move workspace to that 
+        -- move workspace to that
         for i,workspace in pairs(workspaces) do
             move_if_needed(workspace, screen_id)
         end
@@ -247,7 +247,7 @@ function mod_xrandr.screenlayoutupdated()
 
     if screens then
         mod_xinerama.close_invisible_screens(max_screen_id)
-    end 
+    end
 
     mod_xinerama.populate_empty_screens()
 

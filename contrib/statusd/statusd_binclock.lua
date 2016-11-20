@@ -13,14 +13,14 @@
 -->	This is an example template (could be better):  - -===^---  -  I will explain it.
 --	
 --	HOW TO READ:
---	In the "mono-character" Ion display, you need to read characters as : and =, 
+--	In the "mono-character" Ion display, you need to read characters as : and =,
 --	like two different characters: one at the top, one at the bottom.
 --
 --	In the example, equals are actually two different bars, one at the top and other
 --	at the bottom. The little triangle (a square or some weird symbol if your font
---	doesn't support that character) represents a separator between hours and seconds so:  
+--	doesn't support that character) represents a separator between hours and seconds so:
 --	
---	- Upper-left represents hours: 2^4 .. 2^0 in 12 hours format. 
+--	- Upper-left represents hours: 2^4 .. 2^0 in 12 hours format.
 --	  (4 characters from 'right to left' after separator)
 --	- Bottom-left represents minutes: 2^6 ... 2^0
 --	  (6 characters from 'right to left' after separator)
@@ -55,14 +55,14 @@
 --
 --	DEPENDS: No dependencies.
 --
---	INSECTS: 
+--	INSECTS:
 --    * On non UTF-8 environments, default values for separator symbol and
 --     	upper symbol are prone to not work. So, change them in settings please.
 --   ** If you put the clock on the left corner the left black spaces will disapear,
 --	use l_border (left border) or r_border characters in settings to avoid that.
 --
---	LAST CHANGES: 
---	0.1 -> 0.1.c 
+--	LAST CHANGES:
+--	0.1 -> 0.1.c
 --	[ Changed 'while' for 'repeat' (It is almost 5X faster)]
 --	[ Removed 2 useless tables ]
 --	[ Changed if then else statements for logical statements:
@@ -101,7 +101,7 @@ local function convert_time()				--> Six cycles to get binary
 	tonumber(os.date("%I")), tonumber(os.date("%M")), tonumber(os.date("%S"))
 	local i, j = 32, 1
 	
-	repeat               
+	repeat
 		pattern[j] = hours >=i and 1 or 0
 		pattern[j + 7] = minutes >=i and 1 or 0
 		pattern[j + 14] = seconds >=i and 1 or 0

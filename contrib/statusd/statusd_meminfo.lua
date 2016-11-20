@@ -63,7 +63,7 @@ local function get_meminfo()
    while (i < string.len(s)) do
       local j, k, v
       i, j, k, v = string.find(s, "([%w_]+):%s+(%d+) kB\n", i)
-      if (i == nil) then return nil end	 
+      if (i == nil) then return nil end	
       meminfo_table[k] = tonumber(v)
       i = j+1
    end

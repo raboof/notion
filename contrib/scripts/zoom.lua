@@ -1,7 +1,7 @@
 -- Authors: Rene van Bevern <rvb@pro-linux.de>, Etan Reisner <deryni@gmail.com>
 -- License: Public domain
 -- Last Changed: Unknown
--- 
+--
 -- zoom.lua
 --
 -- exchanges current client window with the active client window of the frame
