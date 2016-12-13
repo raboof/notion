@@ -2,7 +2,7 @@
  * notion/notion/notion.c
  *
  * Copyright (c) the Notion team 2013.
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -40,37 +40,37 @@
  * Instead, I've reinvented the wheel in libtu :(.
  */
 static OptParserOpt ion_opts[]={
-    {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", 
+    {OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr",
      DUMMY_TR("X display to use")},
-    
-    {'c', "conffile", OPT_ARG, "config_file", 
+
+    {'c', "conffile", OPT_ARG, "config_file",
      DUMMY_TR("Configuration file")},
-    
-    {'s', "searchdir", OPT_ARG, "dir", 
+
+    {'s', "searchdir", OPT_ARG, "dir",
      DUMMY_TR("Add directory to search path")},
 
     {OPT_ID('o'), "oneroot",  0, NULL,
      DUMMY_TR("Manage default screen only")},
 
-    {OPT_ID('s'), "session",  OPT_ARG, "session_name", 
+    {OPT_ID('s'), "session",  OPT_ARG, "session_name",
      DUMMY_TR("Name of session (affects savefiles)")},
-    
-    {OPT_ID('S'), "smclientid", OPT_ARG, "client_id", 
+
+    {OPT_ID('S'), "smclientid", OPT_ARG, "client_id",
      DUMMY_TR("Session manager client ID")},
 
-    {OPT_ID('N'), "noerrorlog", 0, NULL, 
+    {OPT_ID('N'), "noerrorlog", 0, NULL,
      DUMMY_TR("Do not create startup error log and display it "
               "with xmessage.")},
-    
-    {'h', "help", 0, NULL, 
+
+    {'h', "help", 0, NULL,
      DUMMY_TR("Show this help")},
-    
+
     {'V', "version", 0, NULL,
      DUMMY_TR("Show program version")},
-    
+
     {OPT_ID('a'), "about", 0, NULL,
      DUMMY_TR("Show about text")},
-    
+
     END_OPTPARSEROPTS
 };
 
@@ -86,32 +86,32 @@ void check_new_user_help()
         warn(TR("Could not get user configuration file directory."));
         return;
     }
-    
+
     libtu_asprintf(&oldbeard, "%s/.welcome_msg_displayed", userdir);
-    
+
     if(oldbeard==NULL)
         return;
-    
+
     if(access(oldbeard, F_OK)==0){
         free(oldbeard);
         return;
     }
 
     libtu_asprintf(&tmp, TR("%s/welcome.txt"), SHAREDIR);
-    
+
     if(tmp!=NULL){
         if(access(tmp, F_OK)==0)
             libtu_asprintf(&cmd, "%s %s", CF_XMESSAGE, tmp);
         else
             libtu_asprintf(&cmd, "%s %s/welcome.txt", CF_XMESSAGE, SHAREDIR);
-    
+
         free(tmp);
-        
+
         if(cmd!=NULL){
             ret=ioncore_exec(cmd);
-    
+
             free(cmd);
-    
+
             if(ret){
                 /* This should actually be done when less or xmessage returns,
                  * but that would mean yet another script...
@@ -153,16 +153,16 @@ int main(int argc, char*argv[])
     char *localedir;
 
     libtu_init(argv[0]);
-    
+
 #ifdef CF_RELOCATABLE_BIN_LOCATION
     prefix_set(argv[0], CF_RELOCATABLE_BIN_LOCATION);
 #endif
-    
+
     localedir=prefix_add(LOCALEDIR);
-    
+
     if(!ioncore_init(CF_EXECUTABLE, argc, argv, localedir))
         return EXIT_FAILURE;
-    
+
     if(localedir!=NULL)
         free(localedir);
 
@@ -174,7 +174,7 @@ int main(int argc, char*argv[])
     extl_set_userdirs(CF_EXECUTABLE);
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
-    
+
     while((opt=optparser_get_opt())){
         switch(opt){
         case OPT_ID('d'):
@@ -243,7 +243,7 @@ int main(int argc, char*argv[])
         warn(TR("Refusing to start due to encountered errors."));
     else
         check_new_user_help();
-    
+
     if(ef!=NULL){
         pid_t pid=-1;
         if(errorlog_end(&el) && ioncore_g.dpy!=NULL){
@@ -276,9 +276,9 @@ int main(int argc, char*argv[])
 
     if(!may_continue)
         return EXIT_FAILURE;
-    
+
     ioncore_mainloop();
-    
+
     /* The code should never return here */
     return EXIT_SUCCESS;
 }

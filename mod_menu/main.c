@@ -1,7 +1,7 @@
 /*
  * ion/mod_menu/main.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -51,7 +51,7 @@ void mod_menu_deinit()
 bool mod_menu_init()
 {
     mod_menu_menu_bindmap=ioncore_alloc_bindmap("WMenu", NULL);
-    
+
     if(mod_menu_menu_bindmap==NULL)
         return FALSE;
 
@@ -59,9 +59,9 @@ bool mod_menu_init()
         mod_menu_deinit();
         return FALSE;
     }
-    
+
     /*ioncore_read_config("cfg_menu", NULL, TRUE);*/
-    
+
     return TRUE;
 }
 

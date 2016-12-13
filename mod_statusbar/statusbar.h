@@ -1,7 +1,7 @@
 /*
  * ion/mod_statusbar/statusbar.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -35,7 +35,7 @@ typedef enum{
     WSBELEM_FILLER=4,
     WSBELEM_SYSTRAY=5
 } WSBElemType;
-  
+
 
 INTRSTRUCT(WSBElem);
 
@@ -68,12 +68,12 @@ DECLCLASS(WStatusBar){
     bool systray_enabled;
 };
 
-extern bool statusbar_init(WStatusBar *p, WWindow *parent, 
+extern bool statusbar_init(WStatusBar *p, WWindow *parent,
                            const WFitParams *fp);
 extern WStatusBar *create_statusbar(WWindow *parent, const WFitParams *fp);
 extern void statusbar_deinit(WStatusBar *p);
 
-extern WRegion *statusbar_load(WWindow *par, const WFitParams *fp, 
+extern WRegion *statusbar_load(WWindow *par, const WFitParams *fp,
                                ExtlTab tab);
 
 extern void statusbar_set_natural_w(WStatusBar *p, const char *str);

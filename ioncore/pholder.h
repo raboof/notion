@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/pholder.h
  *
- * Copyright (c) Tuomo Valkonen 2005-2009. 
+ * Copyright (c) Tuomo Valkonen 2005-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -31,7 +31,7 @@ extern void pholder_deinit(WPHolder *ph);
 DYNFUN WRegion *pholder_do_attach(WPHolder *ph, int flags,
                                   WRegionAttachData *data);
 
-extern WRegion *pholder_attach_(WPHolder *ph, int flags, 
+extern WRegion *pholder_attach_(WPHolder *ph, int flags,
                                 WRegionAttachData *data);
 
 extern bool pholder_attach(WPHolder *ph, int flags, WRegion *reg);

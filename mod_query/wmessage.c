@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/wmessage.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -52,17 +52,17 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
         g.h=max_geom.h;
         g.x=0;
         g.y=0;
-        
+
         fit_listing(WMSG_BRUSH(wmsg), &g, &(wmsg->listing));
 
         grbrush_get_border_widths(WMSG_BRUSH(wmsg), &bdw);
-        
+
         h=bdw.top+bdw.bottom+wmsg->listing.toth;
     }
-    
+
     if(h>max_geom.h || !(wmsg->input.last_fp.mode&REGION_FIT_BOUNDS))
         h=max_geom.h;
-    
+
     geom->h=h;
     geom->w=max_geom.w;
     geom->y=max_geom.y+max_geom.h-geom->h;
@@ -73,13 +73,13 @@ static void wmsg_calc_size(WMessage *wmsg, WRectangle *geom)
 void wmsg_size_hints(WMessage *wmsg, WSizeHints *hints_ret)
 {
     int w=1, h=1;
-    
+
     if(WMSG_BRUSH(wmsg)!=NULL){
         mod_query_get_minimum_extents(WMSG_BRUSH(wmsg), FALSE, &w, &h);
 
         w+=grbrush_get_text_width(WMSG_BRUSH(wmsg), "xxxxx", 5);
     }
-    
+
     hints_ret->min_set=TRUE;
     hints_ret->min_width=w;
     hints_ret->min_height=h;
@@ -108,22 +108,22 @@ static void init_attr()
 static void wmsg_draw(WMessage *wmsg, bool complete)
 {
     WRectangle geom;
-    
+
     if(WMSG_BRUSH(wmsg)==NULL)
         return;
-    
+
     get_geom(wmsg, FALSE, &geom);
-    
-    grbrush_begin(WMSG_BRUSH(wmsg), &geom, 
+
+    grbrush_begin(WMSG_BRUSH(wmsg), &geom,
                   (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
-    
+
     grbrush_set_attr(WMSG_BRUSH(wmsg), REGION_IS_ACTIVE(wmsg)
                                        ? GR_ATTR(active)
                                        : GR_ATTR(inactive));
-    
-    draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing), 
+
+    draw_listing(WMSG_BRUSH(wmsg), &geom, &(wmsg->listing),
                  FALSE, GRATTR_NONE);
-    
+
     grbrush_end(WMSG_BRUSH(wmsg));
 }
 
@@ -162,7 +162,7 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
     char *cmsg;
     const char *p;
     size_t l;
-    
+
     p=msg;
     while(1){
         n=n+1;
@@ -171,18 +171,18 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
             break;
         p=p+1;
     }
-    
+
     if(n==0)
         return FALSE;
-        
+
     ptr=ALLOC_N(char*, n);
-    
+
     if(ptr==NULL)
         return FALSE;
-    
+
     for(k=0; k<n; k++)
         ptr[k]=NULL;
-    
+
     p=msg;
     k=0;
     while(k<n){
@@ -204,12 +204,12 @@ static bool wmsg_init(WMessage *wmsg, WWindow *par, const WFitParams *fp,
             break;
         p=p+l+1;
     }
-    
+
     init_attr();
-    
+
     init_listing(&(wmsg->listing));
     setup_listing(&(wmsg->listing), ptr, k, TRUE);
-    
+
     if(!input_init((WInput*)wmsg, par, fp)){
         deinit_listing(&(wmsg->listing));
         return FALSE;
@@ -260,5 +260,5 @@ static DynFunTab wmsg_dynfuntab[]={
 EXTL_EXPORT
 IMPLCLASS(WMessage, WInput, wmsg_deinit, wmsg_dynfuntab);
 
-    
+
 /*}}}*/

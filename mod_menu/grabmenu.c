@@ -1,7 +1,7 @@
 /*
  * ion/mod_menu/grabmenu.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -23,7 +23,7 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
 {
     XKeyEvent *ev=&xev->xkey;
     WMenu *menu=(WMenu*)reg;
-    
+
     if(ev->type==KeyRelease){
         if(ioncore_unmod(ev->state, ev->keycode)==0){
             menu_finish(menu);
@@ -31,10 +31,10 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
         }
         return FALSE;
     }
-    
+
     if(reg==NULL)
         return FALSE;
-    
+
     if(ev->keycode==menu->gm_kcb){
         if(menu->gm_state==ev->state)
             menu_select_next(menu);
@@ -43,7 +43,7 @@ static bool grabmenu_handler(WRegion *reg, XEvent *xev)
         else if(menu->gm_state==AnyModifier)
             menu_select_next(menu);
     }
-    
+
     return FALSE;
 }
 
@@ -64,23 +64,23 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     WMenu *menu;
     uint state, kcb;
     bool sub;
-    
+
     if(!ioncore_current_key(&kcb, &state, &sub))
         return NULL;
-    
+
     if(state==0){
         WMenu *menu=mod_menu_do_menu(mplex, handler, tab, param);
         /*
         if(menu!=NULL && cycle!=extl_fn_none()){
-            uint kcb, state; 
-        
+            uint kcb, state;
+
             menu->cycle_bindmap=region_add_cycle_bindmap((WRegion*)menu,
                                                          kcb, state, ???,
                                                          ???);
         }*/
         return menu;
     }
-    
+
     fnp.handler=handler;
     fnp.tab=tab;
     fnp.pmenu_mode=FALSE;
@@ -99,17 +99,17 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
 
     menu=(WMenu*)mplex_do_attach_new(mplex, &par,
                                      (WRegionCreateFn*)create_menu,
-                                     (void*)&fnp); 
-    
+                                     (void*)&fnp);
+
     if(menu==NULL)
         return NULL;
- 
+
     menu->gm_kcb=kcb;
     menu->gm_state=state;
-    
-    ioncore_grab_establish((WRegion*)menu, grabmenu_handler, 
+
+    ioncore_grab_establish((WRegion*)menu, grabmenu_handler,
                            grabkilled_handler, 0);
-    
+
     return menu;
 }
 

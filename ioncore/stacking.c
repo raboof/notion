@@ -22,7 +22,7 @@
 WStacking *create_stacking()
 {
     WStacking *st=ALLOC(WStacking);
-    
+
     if(st!=NULL){
         st->reg=NULL;
         st->above=NULL;
@@ -32,7 +32,7 @@ WStacking *create_stacking()
         st->lnode=NULL;
         st->pseudomodal=FALSE;
     }
-    
+
     return st;
 }
 
@@ -44,7 +44,7 @@ void stacking_free(WStacking *st)
            /*st->above==NULL &&*/
            st->lnode==NULL &&
            st->reg==NULL);
-    
+
     free(st);
 }
 
@@ -62,10 +62,10 @@ WStacking *ioncore_find_stacking(WRegion *reg)
 {
     Rb_node node=NULL;
     int found=0;
-    
+
     if(stacking_of_reg!=NULL)
         node=rb_find_pkey_n(stacking_of_reg, reg, &found);
-    
+
     return (found ? (WStacking*)node->v.val : NULL);
 }
 
@@ -74,16 +74,16 @@ void stacking_unassoc(WStacking *st)
 {
     Rb_node node=NULL;
     int found=0;
-    
+
     if(st->reg==NULL)
         return;
-    
+
     if(stacking_of_reg!=NULL)
         node=rb_find_pkey_n(stacking_of_reg, st->reg, &found);
-    
+
     if(node!=NULL)
         rb_delete_node(node);
-    
+
     st->reg=NULL;
 }
 
@@ -91,7 +91,7 @@ void stacking_unassoc(WStacking *st)
 bool stacking_assoc(WStacking *st, WRegion *reg)
 {
     assert(st->reg==NULL);
-    
+
     if(stacking_of_reg==NULL){
         stacking_of_reg=make_rb();
         if(stacking_of_reg==NULL)
@@ -100,7 +100,7 @@ bool stacking_assoc(WStacking *st, WRegion *reg)
 
     if(rb_insertp(stacking_of_reg, reg, st)==NULL)
         return FALSE;
-    
+
     st->reg=reg;
     return TRUE;
 }
@@ -115,8 +115,8 @@ bool stacking_assoc(WStacking *st, WRegion *reg)
 
 static WStacking *link_lists(WStacking *l1, WStacking *l2)
 {
-    /* As everywhere, doubly-linked lists without the forward 
-     * link in last item! 
+    /* As everywhere, doubly-linked lists without the forward
+     * link in last item!
      */
     WStacking *tmp=l2->prev;
     l1->prev->next=l2;
@@ -129,11 +129,11 @@ static WStacking *link_lists(WStacking *l1, WStacking *l2)
 WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 {
     WStacking *nxt=NULL, *st;
-    
+
     /*st=regst->next;*/
-    
+
     UNLINK_ITEM(par->stacking, regst, next, prev);
-            
+
     /*while(st!=NULL){*/
     for(st=par->stacking; st!=NULL; st=st->next){
         if(st->above==regst){
@@ -142,13 +142,13 @@ WStacking *stacking_unstack(WWindow *par, WStacking *regst)
         }
         /*st=st->next;*/
     }
-    
+
     if(nxt==NULL)
         nxt=regst->above;
-    
+
     if(regst->above==NULL)
         regst->above=NULL;
-    
+
     return nxt;
 }
 
@@ -162,19 +162,19 @@ static bool cf(WStackingFilter *filt, void *filt_data, WStacking *st)
 static bool check_unweave(WStacking *st)
 {
     /* 2: unknown, 1: yes, 0: no */
-    
+
     if(st->to_unweave==2){
         if(st->above!=NULL)
             st->to_unweave=check_unweave(st->above);
         else
             st->to_unweave=0;
     }
-    
+
     return st->to_unweave;
 }
 
 
-WStacking *stacking_unweave(WStacking **stacking, 
+WStacking *stacking_unweave(WStacking **stacking,
                             WStackingFilter *filt, void *filt_data)
 {
     WStacking *np=NULL;
@@ -185,10 +185,10 @@ WStacking *stacking_unweave(WStacking **stacking,
         if(st->above==NULL && cf(filt, filt_data, st))
             st->to_unweave=1;
     }
-    
+
     for(st=*stacking; st!=NULL; st=st->next)
         check_unweave(st);
-    
+
     for(st=*stacking; st!=NULL; st=next){
         next=st->next;
         if(st->to_unweave==1){
@@ -196,7 +196,7 @@ WStacking *stacking_unweave(WStacking **stacking,
             LINK_ITEM(np, st, next, prev);
         }
     }
-    
+
     return np;
 }
 
@@ -209,11 +209,11 @@ static int check_above_lvl(WStacking *st)
     return st->level;
 }
 
-    
+
 static void enforce_level_sanity(WStacking **np)
 {
     WStacking *st;
-    
+
     /* Make sure that the levels of stuff stacked 'above' match
      * the level of the thing stacked above.
      */
@@ -221,7 +221,7 @@ static void enforce_level_sanity(WStacking **np)
         check_above_lvl(st);
 
     /* And now make sure things are ordered by levels. */
-    st=*np; 
+    st=*np;
     while(st->next!=NULL){
         if(st->next->level < st->level){
             WStacking *st2=st->next;
@@ -240,7 +240,7 @@ static void get_bottom(WStacking *st, Window fb_win,
                        Window *other, int *mode)
 {
     Window bottom=None, top=None;
-    
+
     while(st!=NULL){
         if(st->reg!=NULL){
             region_stacking(st->reg, &bottom, &top);
@@ -252,13 +252,13 @@ static void get_bottom(WStacking *st, Window fb_win,
         }
         st=st->next;
     }
-    
+
     *other=fb_win;
     *mode=Above;
 }
 
 
-static void stacking_do_weave(WStacking **stacking, WStacking **np, 
+static void stacking_do_weave(WStacking **stacking, WStacking **np,
                               bool below, Window fb_win)
 {
     WStacking *st, *ab;
@@ -268,26 +268,26 @@ static void stacking_do_weave(WStacking **stacking, WStacking **np,
 
     if(*np==NULL)
         return;
-    
+
     /* Should do nothing.. */
     enforce_level_sanity(np);
-    
+
     ab=*stacking;
-    
+
     while(*np!=NULL){
         lvl=(*np)->level;
-        
+
         while(ab!=NULL){
             if(ab->level>lvl || (below && ab->level==lvl))
                 break;
             ab=ab->next;
         }
         get_bottom(ab, fb_win, &other, &mode);
-        
+
         st=*np;
 
         UNLINK_ITEM(*np, st, next, prev);
-        
+
         region_restack(st->reg, other, mode);
 
         if(ab!=NULL){
@@ -339,10 +339,10 @@ static void collect_last(WStacking **dst, WStacking **src, WStacking *st)
 static void collect_above(WStacking **dst, WStacking **src, WStacking *regst)
 {
     WStacking *stabove, *stnext;
-    
+
     for(stabove=*src; stabove!=NULL; stabove=stnext){
         stnext=stabove->next;
-        
+
         if(is_above(stabove, regst))
             collect_last(dst, src, stabove);
     }
@@ -353,7 +353,7 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst,
                                   bool parents)
 {
     WStacking *tmp=NULL;
-    
+
     if(parents){
         WStacking *st=regst;
         while(st!=NULL){
@@ -363,9 +363,9 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst,
     }else{
         collect_first(&tmp, stacking, regst);
     }
-    
+
     collect_above(&tmp, stacking, regst);
-    
+
     return tmp;
 }
 
@@ -405,7 +405,7 @@ WStacking *window_get_stacking(WWindow *wwin)
 /*{{{ Stacking list iteration */
 
 
-void stacking_iter_init(WStackingIterTmp *tmp, 
+void stacking_iter_init(WStackingIterTmp *tmp,
                         WStacking *st,
                         WStackingFilter *filt,
                         void *filt_data)
@@ -419,7 +419,7 @@ void stacking_iter_init(WStackingIterTmp *tmp,
 WStacking *stacking_iter_nodes(WStackingIterTmp *tmp)
 {
     WStacking *next=NULL;
-    
+
     while(tmp->st!=NULL){
         next=tmp->st;
         tmp->st=tmp->st->next;
@@ -427,7 +427,7 @@ WStacking *stacking_iter_nodes(WStackingIterTmp *tmp)
             break;
         next=NULL;
     }
-    
+
     return next;
 }
 
@@ -439,7 +439,7 @@ WRegion *stacking_iter(WStackingIterTmp *tmp)
 }
 
 
-void stacking_iter_mgr_init(WStackingIterTmp *tmp, 
+void stacking_iter_mgr_init(WStackingIterTmp *tmp,
                             WStacking *st,
                             WStackingFilter *filt,
                             void *filt_data)
@@ -453,7 +453,7 @@ void stacking_iter_mgr_init(WStackingIterTmp *tmp,
 WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp)
 {
     WStacking *next=NULL;
-    
+
     while(tmp->st!=NULL){
         next=tmp->st;
         tmp->st=tmp->st->mgr_next;
@@ -461,7 +461,7 @@ WStacking *stacking_iter_mgr_nodes(WStackingIterTmp *tmp)
             break;
         next=NULL;
     }
-    
+
     return next;
 }
 
@@ -472,83 +472,83 @@ WRegion *stacking_iter_mgr(WStackingIterTmp *tmp)
     return (st!=NULL ? st->reg : NULL);
 }
 
-    
+
 /*}}}*/
 
 
 /*{{{ Focus */
 
 
-uint stacking_min_level(WStacking *stacking, 
-                        WStackingFilter *include_filt, 
+uint stacking_min_level(WStacking *stacking,
+                        WStackingFilter *include_filt,
                         void *filt_data)
 {
     uint min_level=STACKING_LEVEL_BOTTOM;
     WStacking *st=NULL;
-    
+
     if(stacking==NULL)
         return STACKING_LEVEL_BOTTOM;
-    
+
     st=stacking;
     do{
         st=st->prev;
-        
-        if(st->reg!=NULL 
+
+        if(st->reg!=NULL
            && !(st->reg->flags&REGION_SKIP_FOCUS)
            && cf(include_filt, filt_data, st)){
-            
+
             if(st->level>=STACKING_LEVEL_MODAL1)
                 min_level=st->level;
-            
+
             break;
         }
     }while(st!=stacking);
-    
+
     return min_level;
 }
 
 
-WStacking *stacking_find_to_focus(WStacking *stacking, 
+WStacking *stacking_find_to_focus(WStacking *stacking,
                                   WStacking *to_try,
-                                  WStackingFilter *include_filt, 
-                                  WStackingFilter *approve_filt, 
+                                  WStackingFilter *include_filt,
+                                  WStackingFilter *approve_filt,
                                   void *filt_data)
 {
     uint min_level=STACKING_LEVEL_BOTTOM;
     WStacking *st=NULL, *found=NULL;
-    
+
     if(stacking==NULL)
         return NULL;
-    
+
     st=stacking;
     do{
         st=st->prev;
-        
+
         if(st->reg==NULL)
             continue;
-        
+
         if(st!=to_try && (st->reg->flags&REGION_SKIP_FOCUS ||
                           !cf(include_filt, filt_data, st))){
             /* skip */
             continue;
         }
-        
+
         if(st->level<min_level)
             break; /* no luck */
-        
+
         if(st==to_try)
             return st;
-            
+
         if(found==NULL && cf(approve_filt, filt_data, st)){
             found=st;
             if(to_try==NULL)
                 break;
         }
-            
+
         if(st->level>=STACKING_LEVEL_MODAL1)
             min_level=MAXOF(min_level, st->level);
     }while(st!=stacking);
-    
+
     return found;
 }
 
@@ -571,15 +571,15 @@ static bool mgr_filt(WStacking *st, void *mgr_)
 }
 
 
-WStacking *stacking_find_to_focus_mapped(WStacking *stacking, 
+WStacking *stacking_find_to_focus_mapped(WStacking *stacking,
                                          WStacking *to_try,
                                          WRegion *mgr)
 {
     if(mgr==NULL){
-        return stacking_find_to_focus(stacking, to_try, mapped_filt, 
+        return stacking_find_to_focus(stacking, to_try, mapped_filt,
                                       NULL, NULL);
     }else{
-        return stacking_find_to_focus(stacking, to_try, mapped_filt, 
+        return stacking_find_to_focus(stacking, to_try, mapped_filt,
                                       mgr_filt, mgr);
     }
 }
@@ -593,10 +593,10 @@ uint stacking_min_level_mapped(WStacking *stacking)
 
 bool stacking_must_focus(WStacking *stacking, WStacking *st)
 {
-    WStacking *stf=stacking_find_to_focus(stacking, NULL, 
+    WStacking *stf=stacking_find_to_focus(stacking, NULL,
                                           mapped_filt_neq, NULL, st);
-    
-    return (stf==NULL || 
+
+    return (stf==NULL ||
             (st->level>stf->level &&
              st->level>=STACKING_LEVEL_MODAL1));
 }

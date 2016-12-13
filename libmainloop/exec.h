@@ -1,7 +1,7 @@
 /*
  * ion/libmainloop/exec.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -17,12 +17,12 @@
 extern void mainloop_do_exec(const char *cmd);
 extern pid_t mainloop_fork(void (*fn)(void *p), void *p,
                            int *infd, int *outfd, int *errfd);
-extern pid_t mainloop_do_spawn(const char *cmd, 
+extern pid_t mainloop_do_spawn(const char *cmd,
                               void (*initenv)(void *p), void *p,
                               int *infd, int *outfd, int *errfd);
 extern pid_t mainloop_spawn(const char *cmd);
 
-extern pid_t mainloop_popen_bgread(const char *cmd, 
+extern pid_t mainloop_popen_bgread(const char *cmd,
                                    void (*initenv)(void *p), void *p,
                                    ExtlFn handler, ExtlFn errhandler);
 

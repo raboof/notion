@@ -1,7 +1,7 @@
 /*
  * ion/mod_menu/menu.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -32,23 +32,23 @@ DECLCLASS(WMenu){
     GrBrush *entry_brush;
 
     WFitParams last_fp;
-    
+
     bool pmenu_mode;
     bool big_mode;
     int n_entries, selected_entry;
     int first_entry, vis_entries;
     int max_entry_w, entry_h, entry_spacing;
     WMenuEntry *entries;
-    
+
     WMenu *submenu;
-    
+
     ExtlTab tab;
     ExtlFn handler;
-    
+
     char *typeahead;
-    
+
     uint gm_kcb, gm_state;
-    
+
     /*WBindmap *cycle_bindmap;*/
 };
 

@@ -1,7 +1,7 @@
 /*
  * libtu/stringstore.h
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
+ * Copyright (c) Tuomo Valkonen 2004-2007.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.

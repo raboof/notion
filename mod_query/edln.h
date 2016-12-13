@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/edln.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -19,7 +19,7 @@ typedef void EdlnUpdateHandler(void*, int from, int mode);
 #define EDLN_UPDATE_MOVED   0x01
 #define EDLN_UPDATE_CHANGED 0x02
 #define EDLN_UPDATE_NEW     0x04
-        
+
 DECLSTRUCT(Edln){
     char *p;
     char *tmp_p;

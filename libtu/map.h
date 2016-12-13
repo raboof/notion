@@ -1,7 +1,7 @@
 /*
  * libtu/map.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -21,7 +21,7 @@ typedef struct _StringIntMap{
 extern int stringintmap_ndx(const StringIntMap *map, const char *str);
 extern int stringintmap_value(const StringIntMap *map, const char *str,
                               int dflt);
-extern const char *stringintmap_key(const StringIntMap *map, 
+extern const char *stringintmap_key(const StringIntMap *map,
                                     int value, const char *dflt);
 
 
@@ -42,7 +42,7 @@ DECLFUNPTRMAP(FunPtr);
 extern int stringfunptrmap_ndx(const StringFunPtrMap *map, const char *str);
 extern FunPtr stringfunptrmap_value(const StringFunPtrMap *map, const char *str,
                               FunPtr dflt);
-extern const char *stringfunptrmap_key(const StringFunPtrMap *map, 
+extern const char *stringfunptrmap_key(const StringFunPtrMap *map,
                                     FunPtr value, const char *dflt);
 
 

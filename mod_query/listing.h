@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/listing.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -40,12 +40,12 @@ DECLSTRUCT(WListing){
 #define LISTING_DRAW_SELECTED(X) MINOF(-1, -(X)-2)
 #define LISTING_DRAW_GET_SELECTED(X) (-(X)-2)
 
-    
+
 extern void init_listing(WListing *l);
 extern void setup_listing(WListing *l, char **strs, int nstrs, bool onecol);
 extern void deinit_listing(WListing *l);
 extern void fit_listing(GrBrush *brush, const WRectangle *geom, WListing *l);
-extern void draw_listing(GrBrush *brush, const WRectangle *geom, WListing *l, 
+extern void draw_listing(GrBrush *brush, const WRectangle *geom, WListing *l,
                          bool complete, GrAttr selattr);
 extern bool scrollup_listing(WListing *l);
 extern bool scrolldown_listing(WListing *l);

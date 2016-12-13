@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/pholder.c
  *
- * Copyright (c) Tuomo Valkonen 2005-2009. 
+ * Copyright (c) Tuomo Valkonen 2005-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -37,10 +37,10 @@ WRegion *pholder_do_attach(WPHolder *ph, int flags,
 bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
 {
     WRegionAttachData data;
-        
+
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
-    
+
     return (pholder_do_attach(ph, flags, &data)!=NULL);
 }
 
@@ -48,13 +48,13 @@ bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
 bool pholder_attach_mcfgoto(WPHolder *ph, int flags, WRegion *reg)
 {
     bool cf=region_may_control_focus(reg);
-    
+
     if(!pholder_attach(ph, flags, reg))
         return FALSE;
-        
+
     if(cf)
         region_goto(reg);
-    
+
     return TRUE;
 }
 
@@ -76,8 +76,8 @@ WRegion *pholder_target(WPHolder *ph)
 static bool pholder_do_check_reparent_default(WPHolder *ph, WRegion *reg)
 {
     WRegion *target=pholder_do_target(ph);
-    
-    return (target==NULL 
+
+    return (target==NULL
             ? FALSE
             : region_ancestor_check(target, reg));
 }
@@ -95,7 +95,7 @@ bool pholder_check_reparent(WPHolder *ph, WRegion *reg)
 {
     return pholder_do_check_reparent(ph, reg);
 }
-    
+
 
 bool pholder_do_goto(WPHolder *ph)
 {
@@ -128,7 +128,7 @@ bool pholder_stale(WPHolder *ph)
 WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd)
 {
     WPHolder *ret=NULL;
-    CALL_DYN_RET(ret, WPHolder*, region_managed_get_pholder, 
+    CALL_DYN_RET(ret, WPHolder*, region_managed_get_pholder,
                  reg, (reg, mgd));
     return ret;
 }
@@ -140,7 +140,7 @@ WPHolder *region_get_rescue_pholder_for(WRegion *reg, WRegion *mgd)
         return FALSE;
     }else{
         WPHolder *ret=NULL;
-    
+
         CALL_DYN_RET(ret, WPHolder*, region_get_rescue_pholder_for,
                      reg, (reg, mgd));
         return ret;
@@ -162,7 +162,7 @@ WPHolder *region_get_rescue_pholder(WRegion *reg)
             break;
         reg=mgr;
     }
-    
+
     return ph;
 }
 
@@ -174,10 +174,10 @@ WPHolder *pholder_either(WPHolder *a, WPHolder *b)
 
 
 static DynFunTab pholder_dynfuntab[]={
-    {(DynFun*)pholder_do_check_reparent, 
+    {(DynFun*)pholder_do_check_reparent,
      (DynFun*)pholder_do_check_reparent_default},
-     
-    {(DynFun*)pholder_stale, 
+
+    {(DynFun*)pholder_stale,
      (DynFun*)pholder_stale_default},
 
     END_DYNFUNTAB

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/screen-notify.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -37,58 +37,58 @@ static WInfoWin *do_get_popup_win(WScreen *scr, Watch *watch, uint pos,
 
     if(iw==NULL){
         WMPlexAttachParams param=MPLEXATTACHPARAMS_INIT;
-        
+
         param.flags=(MPLEX_ATTACH_UNNUMBERED|
                      MPLEX_ATTACH_SIZEPOLICY|
                      MPLEX_ATTACH_GEOM|
                      MPLEX_ATTACH_LEVEL|
                      MPLEX_ATTACH_PASSIVE);
         param.level=STACKING_LEVEL_ON_TOP;
-        
+
         param.geom.x=0;
         param.geom.y=0;
         param.geom.w=1;
         param.geom.h=1;
-        
+
         switch(pos){
         case MPLEX_STDISP_TL:
             param.szplcy=SIZEPOLICY_GRAVITY_NORTHWEST;
             param.geom.x=0;
             break;
-            
+
         case MPLEX_STDISP_TR:
             param.szplcy=SIZEPOLICY_GRAVITY_NORTHEAST;
             param.geom.x=REGION_GEOM(scr).w-1;
             break;
-            
+
         case MPLEX_STDISP_BL:
             param.szplcy=SIZEPOLICY_GRAVITY_SOUTHWEST;
             param.geom.x=0;
             param.geom.y=REGION_GEOM(scr).h-1;
             break;
-            
+
         case MPLEX_STDISP_BR:
             param.szplcy=SIZEPOLICY_GRAVITY_SOUTHEAST;
             param.geom.x=REGION_GEOM(scr).w-1;
             param.geom.y=REGION_GEOM(scr).h-1;
             break;
         }
-        
+
 
         iw=(WInfoWin*)mplex_do_attach_new(&scr->mplex, &param,
-                                          (WRegionCreateFn*)create_infowin, 
+                                          (WRegionCreateFn*)create_infowin,
                                           style);
-        
+
         if(iw!=NULL)
             watch_setup(watch, (Obj*)iw, NULL);
     }
-    
+
     return iw;
 }
 
 
 static void do_unnotify(Watch *watch)
-{    
+{
     Obj *iw=watch->obj;
     if(iw!=NULL){
         watch_reset(watch);
@@ -126,7 +126,7 @@ static WInfoWin *get_notifywin(WScreen *scr)
 void screen_notify(WScreen *scr, const char *str)
 {
     WInfoWin *iw=get_notifywin(scr);
-    
+
     if(iw!=NULL){
         int maxw=REGION_GEOM(scr).w/3;
         infowin_set_text(iw, str, maxw);
@@ -144,13 +144,13 @@ static bool ws_mapped(WScreen *scr, WRegion *reg)
 {
     while(1){
         WRegion *mgr=REGION_MANAGER(reg);
-        
+
         if(mgr==NULL)
             return FALSE;
-        
+
         if(mgr==(WRegion*)scr)
             return REGION_IS_MAPPED(reg);
-        
+
         reg=mgr;
     }
 }
@@ -167,9 +167,9 @@ static void screen_managed_activity(WScreen *scr)
     PtrList *found=NULL;
     int nfound=0, nadded=0;
     int w=0, maxw=REGION_GEOM(scr).w/4;
-    
+
     /* Lisäksi minimipituus (10ex tms.), ja sen yli menevät jätetään
-     * pois (+ n) 
+     * pois (+ n)
      */
     FOR_ALL_ON_OBJLIST(WRegion*, reg, actlist, tmp){
         if(!ioncore_g.activity_notification_on_all_screens &&
@@ -180,38 +180,38 @@ static void screen_managed_activity(WScreen *scr)
         if(ptrlist_insert_last(&found, reg))
             nfound++;
     }
-    
+
     if(found==NULL)
         goto unnotify;
-    
+
     iw=get_notifywin(scr);
-    
+
     if(iw==NULL)
         return;
-        
+
     if(iw->brush==NULL)
         goto unnotify;
-    
+
     notstr=scopy(TR("act: "));
-    
+
     if(notstr==NULL)
         goto unnotify;
-    
+
     FOR_ALL_ON_PTRLIST(WRegion*, reg, found, tmp2){
         const char *nm=region_name(reg);
         char *nstr=NULL, *label=NULL;
-        
+
         w=grbrush_get_text_width(iw->brush, notstr, strlen(notstr));
 
         if(w>=maxw)
             break;
-        
+
         label=grbrush_make_label(iw->brush, nm, maxw-w);
         if(label!=NULL){
             nstr=(nadded>0
                   ? scat3(notstr, ", ", label)
                   : scat(notstr, label));
-            
+
             if(nstr!=NULL){
                 free(notstr);
                 notstr=nstr;
@@ -220,27 +220,27 @@ static void screen_managed_activity(WScreen *scr)
             free(label);
         }
     }
-    
+
     if(nfound > nadded){
         char *nstr=NULL;
-        
+
         libtu_asprintf(&nstr, "%s  +%d", notstr, nfound-nadded);
-        
+
         if(nstr!=NULL){
             free(notstr);
             notstr=nstr;
         }
     }
-    
+
     ptrlist_clear(&found);
-    
+
     infowin_set_text(iw, notstr, 0);
-    
+
     free(notstr);
-    
+
     return;
 
-unnotify:    
+unnotify:
     screen_unnotify_notifywin(scr);
 }
 
@@ -319,28 +319,28 @@ static void screen_do_update_infowin(WScreen *scr)
     bool tag=(reg!=NULL && region_is_tagged(reg));
     bool act=(reg!=NULL && region_is_activity_r(reg) && !REGION_IS_ACTIVE(scr));
     bool sac=REGION_IS_ACTIVE(scr);
-    
+
     if(tag || act){
         const char *n=region_displayname(reg);
         WInfoWin *iw=get_infowin(scr);
-    
+
         if(iw!=NULL){
             int maxw=REGION_GEOM(scr).w/3;
             infowin_set_text(iw, n, maxw);
 
             GrStyleSpec *spec=infowin_stylespec(iw);
-            
+
             init_attr();
-            
+
             gr_stylespec_unalloc(spec);
-            
+
             gr_stylespec_set(spec, GR_ATTR(selected));
             gr_stylespec_set(spec, GR_ATTR(not_dragged));
             gr_stylespec_set(spec, sac ? GR_ATTR(active) : GR_ATTR(inactive));
             gr_stylespec_set(spec, tag ? GR_ATTR(tagged) : GR_ATTR(not_tagged));
             gr_stylespec_set(spec, act ? GR_ATTR(activity) : GR_ATTR(no_activity));
         }
-            
+
     }else{
         screen_unnotify_infowin(scr);
     }
@@ -467,14 +467,14 @@ void screen_unnotify_if_workspace( WGroupWS* reg)
 
 void screen_update_infowin(WScreen *scr)
 {
-    mainloop_defer_action((Obj*)scr, 
+    mainloop_defer_action((Obj*)scr,
                           (WDeferredAction*)screen_do_update_infowin);
 }
 
 
 void screen_update_notifywin(WScreen *scr)
 {
-    mainloop_defer_action((Obj*)scr, 
+    mainloop_defer_action((Obj*)scr,
                           (WDeferredAction*)screen_do_update_notifywin);
 }
 

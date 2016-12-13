@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/xwindow.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -25,11 +25,11 @@
 WRegion *xwindow_region_of(Window win)
 {
     WRegion *reg;
-    
+
     if(XFindContext(ioncore_g.dpy, win, ioncore_g.win_context,
                     (XPointer*)&reg)!=0)
         return NULL;
-    
+
     return reg;
 }
 
@@ -37,13 +37,13 @@ WRegion *xwindow_region_of(Window win)
 WRegion *xwindow_region_of_t(Window win, const ClassDescr *descr)
 {
     WRegion *reg=xwindow_region_of(win);
-    
+
     if(reg==NULL)
         return NULL;
-    
+
     if(!obj_is((Obj*)reg, descr))
         return NULL;
-    
+
     return reg;
 }
 
@@ -60,7 +60,7 @@ Window create_xwindow(WRootWin *rw, Window par, const WRectangle *geom, const ch
     int h=MAXOF(1, geom->h);
     const char *p[1];
     Window window;
-    
+
     window = XCreateSimpleWindow(ioncore_g.dpy, par, geom->x, geom->y, w, h,
                                0, 0, BlackPixel(ioncore_g.dpy, rw->xscr));
     p[0] = name;
@@ -80,7 +80,7 @@ void xwindow_restack(Window win, Window other, int stack_mode)
 {
     XWindowChanges wc;
     int wcmask;
-    
+
     wcmask=CWStackMode;
     wc.stack_mode=stack_mode;
     if(other!=None){
@@ -133,7 +133,7 @@ bool xwindow_pointer_pos(Window rel, int *px, int *py)
 int xwindow_get_sizehints(Window win, XSizeHints *hints)
 {
     long supplied=0;
-    
+
     if (XGetWMNormalHints(ioncore_g.dpy, win, hints, &supplied)!=0){
         xsizehints_sanity_adjust(hints);
         return 0;

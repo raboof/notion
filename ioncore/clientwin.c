@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/clientwin.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -60,19 +60,19 @@ void clientwin_get_protocols(WClientWin *cwin)
 {
     Atom *protocols=NULL, *p;
     int n;
-    
+
     cwin->flags&=~(CLIENTWIN_P_WM_DELETE|CLIENTWIN_P_WM_TAKE_FOCUS);
-    
+
     if(!XGetWMProtocols(ioncore_g.dpy, cwin->win, &protocols, &n))
         return;
-    
+
     for(p=protocols; n; n--, p++){
         if(*p==ioncore_g.atom_wm_delete)
             cwin->flags|=CLIENTWIN_P_WM_DELETE;
         else if(*p==ioncore_g.atom_wm_take_focus)
             cwin->flags|=CLIENTWIN_P_WM_TAKE_FOCUS;
     }
-    
+
     if(protocols!=NULL)
         XFree((char*)protocols);
 }
@@ -109,11 +109,11 @@ static void clientwin_get_winprops(WClientWin *cwin)
     ExtlTab tab, tab2;
     char *s;
     int i1, i2;
-    
+
     tab=ioncore_get_winprop(cwin);
-    
+
     cwin->proptab=tab;
-    
+
     if(tab==extl_table_none())
         return;
 
@@ -122,25 +122,25 @@ static void clientwin_get_winprops(WClientWin *cwin)
 
     if(extl_table_is_bool_set(tab, "acrobatic"))
         cwin->flags|=CLIENTWIN_PROP_ACROBATIC;
-    
+
     if(extl_table_is_bool_set(tab, "lazy_resize"))
         cwin->flags|=CLIENTWIN_PROP_LAZY_RESIZE;
-    
+
     DO_SZH("max_size", CLIENTWIN_PROP_MAXSIZE, CLIENTWIN_PROP_I_MAXSIZE,
            PMaxSize, max_width, max_height, { });
-           
+
     DO_SZH("min_size", CLIENTWIN_PROP_MINSIZE, CLIENTWIN_PROP_I_MINSIZE,
            PMinSize, min_width, min_height, { });
-           
+
     DO_SZH("resizeinc", CLIENTWIN_PROP_RSZINC, CLIENTWIN_PROP_I_RSZINC,
            PResizeInc, width_inc, height_inc, { });
 
     DO_SZH("aspect", CLIENTWIN_PROP_ASPECT, CLIENTWIN_PROP_I_ASPECT,
-           PAspect, min_aspect.x, min_aspect.y, 
+           PAspect, min_aspect.x, min_aspect.y,
            { cwin->size_hints.max_aspect.x=i1;
              cwin->size_hints.max_aspect.y=i2;
            });
-           
+
     if(extl_table_is_bool_set(tab, "ignore_cfgrq"))
         cwin->flags|=CLIENTWIN_PROP_IGNORE_CFGRQ;
 
@@ -162,7 +162,7 @@ void clientwin_apply_size_hint_winprops(XSizeHints original, WClientWin *cwin)
         cwin->size_hints.max_height=original.max_height;
         cwin->size_hints.flags|=PMaxSize;
     }
-    
+
     if(cwin->flags&CLIENTWIN_PROP_I_MINSIZE){
         cwin->size_hints.flags&=~PMinSize;
     }else if(cwin->flags&CLIENTWIN_PROP_MINSIZE){
@@ -170,7 +170,7 @@ void clientwin_apply_size_hint_winprops(XSizeHints original, WClientWin *cwin)
         cwin->size_hints.min_height=original.min_height;
         cwin->size_hints.flags|=PMinSize;
     }
-    
+
     if(cwin->flags&CLIENTWIN_PROP_I_ASPECT){
         cwin->size_hints.flags&=~PAspect;
     }else if(cwin->flags&CLIENTWIN_PROP_ASPECT){
@@ -178,7 +178,7 @@ void clientwin_apply_size_hint_winprops(XSizeHints original, WClientWin *cwin)
         cwin->size_hints.max_aspect=original.max_aspect;
         cwin->size_hints.flags|=PAspect;
     }
-    
+
     if(cwin->flags&CLIENTWIN_PROP_I_RSZINC){
         cwin->size_hints.flags&=~PResizeInc;
     }else if(cwin->flags&CLIENTWIN_PROP_RSZINC){
@@ -195,7 +195,7 @@ int clientwin_get_size_hints(WClientWin *cwin)
     int ret=xwindow_get_sizehints(cwin->win, &(cwin->size_hints));
 
     clientwin_apply_size_hint_winprops(original, cwin);
-    
+
     return ret;
 }
 
@@ -225,7 +225,7 @@ void clientwin_get_set_name(WClientWin *cwin)
 {
     char **list=NULL;
     int n=0;
-    
+
     if(ioncore_g.use_mb)
         list=netwm_get_name(cwin);
 
@@ -253,13 +253,13 @@ void clientwin_get_set_name(WClientWin *cwin)
 bool clientwin_get_switchto(const WClientWin *cwin)
 {
     bool b;
-    
+
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT)
         return FALSE;
-    
+
     if(extl_table_gets_b(cwin->proptab, "switchto", &b))
         return b;
-    
+
     return ioncore_g.switchto_new;
 }
 
@@ -268,7 +268,7 @@ int clientwin_get_transient_mode(const WClientWin *cwin)
 {
     char *s;
     int mode=TRANSIENT_MODE_NORMAL;
-    
+
     if(extl_table_gets_s(cwin->proptab, "transient_mode", &s)){
         if(strcmp(s, "current")==0)
             mode=TRANSIENT_MODE_CURRENT;
@@ -290,7 +290,7 @@ static void configure_cwin_bw(Window win, int bw)
 {
     XWindowChanges wc;
     ulong wcmask=CWBorderWidth;
-    
+
     wc.border_width=bw;
     XConfigureWindow(ioncore_g.dpy, win, wcmask, &wc);
 }
@@ -299,9 +299,9 @@ static void configure_cwin_bw(Window win, int bw)
 static void set_sane_gravity(Window win)
 {
     XSetWindowAttributes attr;
-    
+
     attr.win_gravity=NorthWestGravity;
-    
+
     XChangeWindowAttributes(ioncore_g.dpy, win,
                             CWWinGravity, &attr);
 }
@@ -315,13 +315,13 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->flags=0;
     cwin->win=win;
     cwin->state=WithdrawnState;
-    
+
     fp.g.x=attr->x;
     fp.g.y=attr->y;
     fp.g.w=attr->width;
     fp.g.h=attr->height;
     fp.mode=REGION_FIT_EXACT;
-    
+
     /* The idiot who invented special server-supported window borders that
      * are not accounted for in the window size should be "taken behind a
      * sauna".
@@ -329,12 +329,12 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     cwin->orig_bw=attr->border_width;
     configure_cwin_bw(cwin->win, 0);
     if(cwin->orig_bw!=0 && cwin->size_hints.flags&PWinGravity){
-        fp.g.x+=xgravity_deltax(cwin->size_hints.win_gravity, 
+        fp.g.x+=xgravity_deltax(cwin->size_hints.win_gravity,
                                -cwin->orig_bw, -cwin->orig_bw);
-        fp.g.y+=xgravity_deltay(cwin->size_hints.win_gravity, 
+        fp.g.y+=xgravity_deltay(cwin->size_hints.win_gravity,
                                -cwin->orig_bw, -cwin->orig_bw);
     }
-    
+
     set_sane_gravity(cwin->win);
 
     cwin->n_cmapwins=0;
@@ -348,7 +348,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
     cwin->region.flags|=REGION_GRAB_ON_PARENT;
     region_add_bindmap(&cwin->region, ioncore_clientwin_bindmap);
-        
+
     XSelectInput(ioncore_g.dpy, win, cwin->event_mask);
 
     clientwin_register(cwin);
@@ -360,7 +360,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     clientwin_get_input_wm_hint(cwin);
 
     netwm_update_allowed_actions(cwin);
-    
+
     XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)cwin);
     XAddToSaveSet(ioncore_g.dpy, win);
 
@@ -380,18 +380,18 @@ WClientWin *clientwin_get_transient_for(const WClientWin *cwin)
 {
     Window tforwin;
     WClientWin *tfor=NULL;
-    
+
     if(clientwin_get_transient_mode(cwin)!=TRANSIENT_MODE_NORMAL)
         return NULL;
 
     if(!XGetTransientForHint(ioncore_g.dpy, cwin->win, &tforwin))
         return NULL;
-    
+
     if(tforwin==None)
         return NULL;
-    
+
     tfor=XWINDOW_REGION_OF_T(tforwin, WClientWin);
-    
+
     if(tfor==cwin){
         warn(TR("The transient_for hint for \"%s\" points to itself."),
              region_name((WRegion*)cwin));
@@ -407,7 +407,7 @@ WClientWin *clientwin_get_transient_for(const WClientWin *cwin)
     }else{
         return tfor;
     }
-    
+
     return NULL;
 }
 
@@ -418,12 +418,12 @@ static bool postmanage_check(WClientWin *cwin, XWindowAttributes *attr)
      * do not seem to catch all cases of window destroyal.
      */
     XSync(ioncore_g.dpy, False);
-    
+
     if(XGetWindowAttributes(ioncore_g.dpy, cwin->win, attr))
         return TRUE;
-    
+
     warn(TR("Window %#x disappeared."), cwin->win);
-    
+
     return FALSE;
 }
 
@@ -442,11 +442,11 @@ static bool do_manage_mrsh_extl(ExtlFn fn, void **p)
     WManageParams *mp=(WManageParams*)p[1];
     ExtlTab t=manageparams_to_table(mp);
     bool ret=FALSE;
-    
+
     extl_call(fn, "ot", "b", cwin, t, &ret);
-    
+
     extl_unref_table(t);
-    
+
     return (ret && REGION_MANAGER(cwin)!=NULL);
 }
 
@@ -466,12 +466,12 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
     void *mrshpm[2];
 
     param.dockapp=FALSE;
-    
+
     /* Is the window already being managed? */
     cwin=XWINDOW_REGION_OF_T(win, WClientWin);
     if(cwin!=NULL)
         return cwin;
-    
+
     /* Select for UnmapNotify and DestroyNotify as the
      * window might get destroyed or unmapped in the meanwhile.
      */
@@ -482,27 +482,27 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
             warn(TR("Window %#x disappeared."), win);
         goto fail2;
     }
-    
+
     /* Is it a dockapp?
      */
     hints=XGetWMHints(ioncore_g.dpy, win);
-    
+
     if(hints!=NULL){
         if(hints->flags&StateHint)
             init_state=hints->initial_state;
-    
-        if(!param.dockapp && init_state==WithdrawnState && 
+
+        if(!param.dockapp && init_state==WithdrawnState &&
            hints->flags&IconWindowHint && hints->icon_window!=None){
             Window icon_win=hints->icon_window;
             XWindowAttributes icon_attr;
-            
+
             if(!XGetWindowAttributes(ioncore_g.dpy, icon_win, &icon_attr)){
                 if(maprq)
                     warn(TR("Window %#x disappeared."), win);
                 XFree((void*)hints);
                 goto fail2;
             }
-             
+
             if(!maprq){
                 if(attr.map_state==IsViewable){
                     /* The dockapp might be displaying its "main" window if no
@@ -524,14 +524,14 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
             if(param.dockapp){
                 char **p=NULL;
                 int n=0;
-                
+
                 xwindow_unmanaged_selectinput(win, 0);
                 xwindow_unmanaged_selectinput(icon_win, StructureNotifyMask);
-                
+
                 /* Copy WM_CLASS as _ION_DOCKAPP_HACK */
 
                 p=xwindow_get_text_property(win, XA_WM_CLASS, &n);
-                
+
                 if(p!=NULL){
                     xwindow_set_text_property(icon_win, ioncore_g.atom_dockapp_hack,
                                               (const char **)p, n);
@@ -541,17 +541,17 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
                     xwindow_set_text_property(icon_win, ioncore_g.atom_dockapp_hack,
                                               pdummy, 2);
                 }
-                
+
                 win=icon_win;
                 attr=icon_attr;
             }
         }
-        
+
         XFree((void*)hints);
     }
-    
+
     /* Do we really want to manage it? */
-    if(!param.dockapp && (attr.override_redirect || 
+    if(!param.dockapp && (attr.override_redirect ||
         (!maprq && attr.map_state!=IsViewable))){
         goto fail2;
     }
@@ -572,7 +572,7 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
 
     /* Allocate and initialize */
     cwin=create_clientwin((WWindow*)rootwin, win, &attr);
-    
+
     if(cwin==NULL){
         warn_err();
         goto fail2;
@@ -581,16 +581,16 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
     param.geom=REGION_GEOM(cwin);
     param.maprq=maprq;
     param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
-    param.switchto=(init_state!=IconicState && 
+    param.switchto=(init_state!=IconicState &&
                     (param.jumpto || clientwin_get_switchto(cwin)));
     param.gravity=(cwin->size_hints.flags&PWinGravity
                    ? cwin->size_hints.win_gravity
                    : ForgetGravity);
     param.tfor=clientwin_get_transient_for(cwin);
-    
+
     if(!extl_table_gets_b(cwin->proptab, "userpos", &param.userpos))
         param.userpos=(cwin->size_hints.flags&USPosition);
-    
+
     if(cwin->flags&SIZEHINT_PROPS){
         /* If size hints have been messed with, readjust requested geometry
          * here. If programs themselves give incompatible geometries and
@@ -599,26 +599,26 @@ WClientWin* ioncore_manage_clientwin(Window win, bool maprq)
         region_size_hints_correct((WRegion*)cwin, &param.geom.w, &param.geom.h,
                                   FALSE);
     }
-    
+
     if(maprq)
         netwm_check_manage_user_time(cwin, &param);
 
     mrshpm[0]=cwin;
     mrshpm[1]=&param;
-        
-    if(!hook_call_alt(clientwin_do_manage_alt, &mrshpm, 
+
+    if(!hook_call_alt(clientwin_do_manage_alt, &mrshpm,
                       (WHookMarshall*)do_manage_mrsh,
                       (WHookMarshallExtl*)do_manage_mrsh_extl)){
         warn(TR("Unable to manage client window %#x."), win);
         goto failure;
     }
-    
+
     if(ioncore_g.opmode==IONCORE_OPMODE_NORMAL &&
-       !region_is_fully_mapped((WRegion*)cwin) && 
+       !region_is_fully_mapped((WRegion*)cwin) &&
        !region_skip_focus((WRegion*)cwin)){
         region_set_activity((WRegion*)cwin, SETPARAM_SET);
     }
-    
+
     if(postmanage_check(cwin, &attr)){
         /* Check for focus_next==NULL does not play nicely with
          * pointer_focus_hack.
@@ -648,7 +648,7 @@ void clientwin_tfor_changed(WClientWin *cwin)
     param.tfor=clientwin_get_transient_for(cwin);
     if(param.tfor==NULL)
         return;
-    
+
     region_rootpos((WRegion*)cwin, &(param.geom.x), &(param.geom.y));
     param.geom.w=REGION_GEOM(cwin).w;
     param.geom.h=REGION_GEOM(cwin).h;
@@ -657,13 +657,13 @@ void clientwin_tfor_changed(WClientWin *cwin)
     param.switchto=region_may_control_focus((WRegion*)cwin);
     param.jumpto=extl_table_is_bool_set(cwin->proptab, "jumpto");
     param.gravity=ForgetGravity;
-    
+
     CALL_ALT_B(succeeded, clientwin_do_manage_alt, (cwin, &param));
     warn("WM_TRANSIENT_FOR changed for \"%s\".",
          region_name((WRegion*)cwin));
 #else
     warn(TR("Changes is WM_TRANSIENT_FOR property are unsupported."));
-#endif        
+#endif
 }
 
 
@@ -679,12 +679,12 @@ static bool reparent_root(WClientWin *cwin)
     WWindow *par;
     Window dummy;
     int x=0, y=0;
-    
+
     if(!XGetWindowAttributes(ioncore_g.dpy, cwin->win, &attr))
         return FALSE;
-    
+
     par=REGION_PARENT(cwin);
-    
+
     if(par==NULL){
         x=REGION_GEOM(cwin).x;
         y=REGION_GEOM(cwin).y;
@@ -693,18 +693,18 @@ static bool reparent_root(WClientWin *cwin)
         int db=REGION_GEOM(par).h-REGION_GEOM(cwin).h-REGION_GEOM(cwin).y;
         dr=MAXOF(dr, 0);
         db=MAXOF(db, 0);
-        
-        XTranslateCoordinates(ioncore_g.dpy, par->win, attr.root, 0, 0, 
+
+        XTranslateCoordinates(ioncore_g.dpy, par->win, attr.root, 0, 0,
                               &x, &y, &dummy);
 
-        x-=xgravity_deltax(cwin->size_hints.win_gravity, 
+        x-=xgravity_deltax(cwin->size_hints.win_gravity,
                            MAXOF(0, REGION_GEOM(cwin).x), dr);
-        y-=xgravity_deltay(cwin->size_hints.win_gravity, 
+        y-=xgravity_deltay(cwin->size_hints.win_gravity,
                            MAXOF(0, REGION_GEOM(cwin).y), db);
     }
-    
+
     XReparentWindow(ioncore_g.dpy, cwin->win, attr.root, x, y);
-    
+
     return TRUE;
 }
 
@@ -716,10 +716,10 @@ void clientwin_deinit(WClientWin *cwin)
 
         xwindow_unmanaged_selectinput(cwin->win, 0);
         XUnmapWindow(ioncore_g.dpy, cwin->win);
-        
+
         if(cwin->orig_bw!=0)
             configure_cwin_bw(cwin->win, cwin->orig_bw);
-        
+
         if(reparent_root(cwin)){
             if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT){
                 XMapWindow(ioncore_g.dpy, cwin->win);
@@ -732,13 +732,13 @@ void clientwin_deinit(WClientWin *cwin)
                 netwm_delete_state(cwin);
             }
         }
-        
+
         XRemoveFromSaveSet(ioncore_g.dpy, cwin->win);
         XDeleteContext(ioncore_g.dpy, cwin->win, ioncore_g.win_context);
     }
-    
+
     clientwin_clear_colormaps(cwin);
-    
+
     region_deinit((WRegion*)cwin);
 }
 
@@ -760,13 +760,13 @@ static bool mrsh_u_extl(ExtlFn fn, void *param)
 static void clientwin_do_unmapped(WClientWin *cwin, Window win)
 {
     cwin->flags|=CLIENTWIN_UNMAP_RQ;
-    
+
     /* First try a graceful chain-dispose */
     if(!region_rqdispose((WRegion*)cwin)){
         /* But force dispose anyway */
         region_dispose((WRegion*)cwin);
     }
-    
+
     hook_call(clientwin_unmapped_hook, &win, mrsh_u_c, mrsh_u_extl);
 }
 
@@ -798,20 +798,20 @@ void clientwin_destroyed(WClientWin *cwin)
 static bool send_clientmsg(Window win, Atom a, Time stmp)
 {
     XClientMessageEvent ev = {0};
-    
+
     ev.type=ClientMessage;
     ev.window=win;
     ev.message_type=ioncore_g.atom_wm_protocols;
     ev.format=32;
     ev.data.l[0]=a;
     ev.data.l[1]=stmp;
-    
+
     return (XSendEvent(ioncore_g.dpy, win, False, 0L, (XEvent*)&ev)!=0);
 }
 
 
 /*EXTL_DOC
- * Attempt to kill (with \code{XKillWindow}) the client that owns 
+ * Attempt to kill (with \code{XKillWindow}) the client that owns
  * the X window correspoding to \var{cwin}.
  */
 EXTL_EXPORT_MEMBER
@@ -823,13 +823,13 @@ void clientwin_kill(WClientWin *cwin)
 
 void clientwin_rqclose(WClientWin *cwin, bool UNUSED(relocate_ignored))
 {
-    /* Ignore relocate parameter -- client windows can always be 
+    /* Ignore relocate parameter -- client windows can always be
      * destroyed by the application in any case, so way may just as
      * well assume relocate is always set.
      */
-    
+
     if(cwin->flags&CLIENTWIN_P_WM_DELETE){
-        send_clientmsg(cwin->win, ioncore_g.atom_wm_delete, 
+        send_clientmsg(cwin->win, ioncore_g.atom_wm_delete,
                        ioncore_get_timestamp());
     }else{
         warn(TR("Client does not support the WM_DELETE protocol."));
@@ -861,7 +861,7 @@ static void hide_clientwin(WClientWin *cwin)
                     -2*REGION_GEOM(cwin).w, -2*REGION_GEOM(cwin).h);
         return;
     }
-    
+
     set_clientwin_state(cwin, IconicState);
     XSelectInput(ioncore_g.dpy, cwin->win,
                  cwin->event_mask&~(StructureNotifyMask|EnterWindowMask));
@@ -878,7 +878,7 @@ static void show_clientwin(WClientWin *cwin)
         if(cwin->state==NormalState)
             return;
     }
-    
+
     XSelectInput(ioncore_g.dpy, cwin->win,
                  cwin->event_mask&~(StructureNotifyMask|EnterWindowMask));
     XMapWindow(ioncore_g.dpy, cwin->win);
@@ -897,12 +897,12 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
 {
     XEvent ce;
     Window win;
-    
+
     if(cwin==NULL)
         return;
-    
+
     win=cwin->win;
-    
+
     ce.xconfigure.type=ConfigureNotify;
     ce.xconfigure.event=win;
     ce.xconfigure.window=win;
@@ -913,7 +913,7 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
     ce.xconfigure.border_width=cwin->orig_bw;
     ce.xconfigure.above=None;
     ce.xconfigure.override_redirect=False;
-    
+
     XSelectInput(ioncore_g.dpy, win, cwin->event_mask&~StructureNotifyMask);
     XSendEvent(ioncore_g.dpy, win, False, StructureNotifyMask, &ce);
     XSelectInput(ioncore_g.dpy, win, cwin->event_mask);
@@ -923,7 +923,7 @@ void clientwin_notify_rootpos(WClientWin *cwin, int rootx, int rooty)
 static void sendconfig_clientwin(WClientWin *cwin)
 {
     int rootx, rooty;
-    
+
     region_rootpos(&cwin->region, &rootx, &rooty);
     clientwin_notify_rootpos(cwin, rootx, rooty);
 }
@@ -938,17 +938,17 @@ static void do_reparent_clientwin(WClientWin *cwin, Window win, int x, int y)
 }
 
 
-static void convert_geom(const WFitParams *fp, 
+static void convert_geom(const WFitParams *fp,
                          WClientWin *cwin, WRectangle *geom)
 {
     WFitParams fptmp=*fp;
     WSizePolicy szplcy=SIZEPOLICY_FULL_EXACT;
-    
+
     /*if(cwin->szplcy!=SIZEPOLICY_DEFAULT)
         szplcy=cwin->szplcy;*/
-    
+
     sizepolicy(&szplcy, (WRegion*)cwin, NULL, REGION_RQGEOM_WEAK_ALL, &fptmp);
-    
+
     *geom=fptmp.g;
 }
 
@@ -965,7 +965,7 @@ static bool postpone_resize(WClientWin *cwin)
 }
 
 
-static bool clientwin_fitrep(WClientWin *cwin, WWindow *np, 
+static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
                              const WFitParams *fp)
 {
     WRectangle geom;
@@ -974,7 +974,7 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
 
     if(np!=NULL && !region_same_rootwin((WRegion*)cwin, (WRegion*)np))
         return FALSE;
-    
+
     if(fp->mode&REGION_FIT_WHATEVER){
         geom.x=fp->g.x;
         geom.y=fp->g.y;
@@ -983,15 +983,15 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
     }else{
         geom=fp->g;
     }
-    
+
     changes=(REGION_GEOM(cwin).x!=geom.x ||
              REGION_GEOM(cwin).y!=geom.y ||
              REGION_GEOM(cwin).w!=geom.w ||
              REGION_GEOM(cwin).h!=geom.h);
-    
+
     if(np==NULL && !changes)
         return TRUE;
-    
+
     if(np!=NULL){
         region_unset_parent((WRegion*)cwin);
 
@@ -1002,35 +1002,35 @@ static bool clientwin_fitrep(WClientWin *cwin, WWindow *np,
          * also, update netwm properties after setting the parent, because
          * the new state of _NET_WM_STATE_FULLSCREEN is determined based on
          * the parent of the cwin.
-         */                                                                                     
+         */
         region_set_parent((WRegion*)cwin, np);
         netwm_update_state(cwin);
 
         do_reparent_clientwin(cwin, np->win, geom.x, geom.y);
         sendconfig_clientwin(cwin);
-        
+
         if(!REGION_IS_FULLSCREEN(cwin))
             cwin->flags&=~CLIENTWIN_FS_RQ;
     }
-    
+
     if (postpone_resize(cwin))
         return TRUE;
-    
+
     REGION_GEOM(cwin)=geom;
-    
+
     w=MAXOF(1, geom.w);
     h=MAXOF(1, geom.h);
-    
+
     if(cwin->flags&CLIENTWIN_PROP_ACROBATIC && !REGION_IS_MAPPED(cwin)){
         XMoveResizeWindow(ioncore_g.dpy, cwin->win,
-                          -2*REGION_GEOM(cwin).w, -2*REGION_GEOM(cwin).h, 
+                          -2*REGION_GEOM(cwin).w, -2*REGION_GEOM(cwin).h,
                           w, h);
     }else{
         XMoveResizeWindow(ioncore_g.dpy, cwin->win, geom.x, geom.y, w, h);
     }
-    
+
     cwin->flags&=~CLIENTWIN_NEED_CFGNTFY;
-    
+
     return TRUE;
 }
 
@@ -1058,7 +1058,7 @@ static void clientwin_do_set_focus(WClientWin *cwin, bool warp)
     }else{
         region_finalise_focusing((WRegion*)cwin, cwin->win, warp, CurrentTime, cwin->flags&CLIENTWIN_SET_INPUT);
     }
-    
+
     XSync(ioncore_g.dpy, 0);
 }
 
@@ -1067,7 +1067,7 @@ void clientwin_restack(WClientWin *cwin, Window other, int mode)
 {
     xwindow_restack(cwin->win, other, mode);
 }
-       
+
 
 void clientwin_stacking(WClientWin *cwin, Window *bottomret, Window *topret)
 {
@@ -1120,7 +1120,7 @@ static int clientwin_orientation(WClientWin *cwin)
 /*EXTL_DOC
  * Returns a table containing the properties \code{WM_CLASS} (table entries
  * \var{instance} and \var{class}) and  \code{WM_WINDOW_ROLE} (\var{role})
- * properties for \var{cwin}. If a property is not set, the corresponding 
+ * properties for \var{cwin}. If a property is not set, the corresponding
  * field(s) are unset in the  table.
  */
 EXTL_SAFE
@@ -1132,23 +1132,23 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
     Window tforwin=None;
     ExtlTab tab;
     bool dockapp_hack=FALSE;
-    
+
     p=xwindow_get_text_property(cwin->win, XA_WM_CLASS, &n);
-    
+
     p2=xwindow_get_text_property(cwin->win, ioncore_g.atom_dockapp_hack, &n2);
-    
+
     dockapp_hack=(n2>0);
-    
+
     if(p==NULL){
         /* Some dockapps do actually have WM_CLASS, so use it. */
         p=p2;
         n=n2;
         p2=NULL;
     }
-    
-    wrole=xwindow_get_string_property(cwin->win, ioncore_g.atom_wm_window_role, 
+
+    wrole=xwindow_get_string_property(cwin->win, ioncore_g.atom_wm_window_role,
                                       &n3);
-    
+
     tab=extl_create_table();
     if(n>=2 && p[1]!=NULL)
         extl_table_sets_s(tab, "class", p[1]);
@@ -1156,22 +1156,22 @@ ExtlTab clientwin_get_ident(WClientWin *cwin)
         extl_table_sets_s(tab, "instance", p[0]);
     if(wrole!=NULL)
         extl_table_sets_s(tab, "role", wrole);
-    
-    if(XGetTransientForHint(ioncore_g.dpy, cwin->win, &tforwin) 
+
+    if(XGetTransientForHint(ioncore_g.dpy, cwin->win, &tforwin)
        && tforwin!=None){
         extl_table_sets_b(tab, "is_transient", TRUE);
     }
-    
+
     if(dockapp_hack)
         extl_table_sets_b(tab, "is_dockapp", TRUE);
-    
+
     if(p!=NULL)
         XFreeStringList(p);
     if(p2!=NULL)
         XFreeStringList(p2);
     if(wrole!=NULL)
         free(wrole);
-    
+
     return tab;
 }
 
@@ -1188,15 +1188,15 @@ static bool check_fs_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
     if((ev->value_mask&(CWWidth|CWHeight))==(CWWidth|CWHeight)){
         WRegion *grp=region_groupleader_of((WRegion*)cwin);
         WScreen *scr=clientwin_fullscreen_chkrq(cwin, ev->width, ev->height);
-        
+
         if(scr!=NULL && REGION_MANAGER(grp)!=(WRegion*)scr){
             bool sw=clientwin_fullscreen_may_switchto(cwin);
-            
+
             cwin->flags|=CLIENTWIN_FS_RQ;
-            
+
             if(!region_fullscreen_scr(grp, scr, sw))
                 cwin->flags&=~CLIENTWIN_FS_RQ;
-                
+
             return TRUE;
         }
     }
@@ -1223,27 +1223,27 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
         int gdx=0, gdy=0;
 
         rq.flags=REGION_RQGEOM_WEAK_ALL|REGION_RQGEOM_ABSOLUTE;
-        
+
         if(cwin->size_hints.flags&PWinGravity){
             rq.flags|=REGION_RQGEOM_GRAVITY;
             rq.gravity=cwin->size_hints.win_gravity;
         }
-        
+
         /* Do I need to insert another disparaging comment on the person who
-         * invented special server-supported window borders that are not 
+         * invented special server-supported window borders that are not
          * accounted for in the window size? Keep it simple, stupid!
          */
         if(cwin->size_hints.flags&PWinGravity){
-            gdx=xgravity_deltax(cwin->size_hints.win_gravity, 
+            gdx=xgravity_deltax(cwin->size_hints.win_gravity,
                                -cwin->orig_bw, -cwin->orig_bw);
-            gdy=xgravity_deltay(cwin->size_hints.win_gravity, 
+            gdy=xgravity_deltay(cwin->size_hints.win_gravity,
                                -cwin->orig_bw, -cwin->orig_bw);
         }
-        
+
         region_rootpos((WRegion*)cwin, &(rq.geom.x), &(rq.geom.y));
         rq.geom.w=REGION_GEOM(cwin).w;
         rq.geom.h=REGION_GEOM(cwin).h;
-        
+
         if(ev->value_mask&CWWidth){
             /* If x was not changed, keep reference point where it was */
             if(cwin->size_hints.flags&PWinGravity){
@@ -1272,9 +1272,9 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
             rq.flags&=~REGION_RQGEOM_WEAK_Y;
             rq.flags&=~REGION_RQGEOM_WEAK_H;
         }
-        
+
         region_rqgeom((WRegion*)cwin, &rq, NULL);
-        
+
         result = TRUE;
     }
 
@@ -1295,7 +1295,7 @@ static bool check_normal_cfgrq(WClientWin *cwin, XConfigureRequestEvent *ev)
             break;
         }
     }
-    
+
     return result;
 }
 
@@ -1305,7 +1305,7 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 {
     if(ev->value_mask&CWBorderWidth)
         cwin->orig_bw=ev->border_width;
-    
+
     cwin->flags|=CLIENTWIN_NEED_CFGNTFY;
 
     if(!(cwin->flags&CLIENTWIN_PROP_IGNORE_CFGRQ)){
@@ -1333,10 +1333,10 @@ void clientwin_handle_configure_request(WClientWin *cwin,
 EXTL_EXPORT_MEMBER
 void clientwin_nudge(WClientWin *cwin)
 {
-    XResizeWindow(ioncore_g.dpy, cwin->win, 
+    XResizeWindow(ioncore_g.dpy, cwin->win,
                   2*REGION_GEOM(cwin).w, 2*REGION_GEOM(cwin).h);
     XFlush(ioncore_g.dpy);
-    XResizeWindow(ioncore_g.dpy, cwin->win, 
+    XResizeWindow(ioncore_g.dpy, cwin->win,
                   REGION_GEOM(cwin).w, REGION_GEOM(cwin).h);
 }
 
@@ -1373,23 +1373,23 @@ static ExtlTab clientwin_get_configuration(WClientWin *cwin)
     ExtlTab tab;
     SMCfgCallback *cfg_cb;
     SMAddCallback *add_cb;
-    
+
     tab=region_get_base_configuration((WRegion*)cwin);
 
     extl_table_sets_d(tab, "windowid", (double)(cwin->win));
-    
+
     if(last_checkcode!=0){
         chkc=last_checkcode++;
-        xwindow_set_integer_property(cwin->win, ioncore_g.atom_checkcode, 
+        xwindow_set_integer_property(cwin->win, ioncore_g.atom_checkcode,
                                      chkc);
         extl_table_sets_i(tab, "checkcode", chkc);
     }
 
     ioncore_get_sm_callbacks(&add_cb, &cfg_cb);
-    
+
     if(cfg_cb!=NULL)
         cfg_cb(cwin, tab);
-    
+
     return tab;
 }
 
@@ -1399,12 +1399,12 @@ static void do_sm(ExtlTab tab)
     SMAddCallback *add_cb;
     SMCfgCallback *cfg_cb;
     WPHolder *ph;
-    
+
     ioncore_get_sm_callbacks(&add_cb, &cfg_cb);
-    
+
     if(add_cb!=NULL){
         ph=ioncore_get_load_pholder();
-    
+
         if(ph!=NULL){
             if(!add_cb(ph, tab))
                 destroy_obj((Obj*)ph);
@@ -1412,7 +1412,7 @@ static void do_sm(ExtlTab tab)
     }
 }
 
-    
+
 WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     double wind=0;
@@ -1422,12 +1422,12 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     XWindowAttributes attr;
     WRectangle rg;
     bool got_chkc=FALSE;
-    
+
     if(!extl_table_gets_d(tab, "windowid", &wind) ||
        !extl_table_gets_i(tab, "checkcode", &chkc)){
         return NULL;
     }
-    
+
     win=(Window)wind;
 
     if(XWINDOW_REGION_OF(win)!=NULL){
@@ -1435,46 +1435,46 @@ WRegion *clientwin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         return NULL;
     }
 
-    got_chkc=xwindow_get_integer_property(win, ioncore_g.atom_checkcode, 
+    got_chkc=xwindow_get_integer_property(win, ioncore_g.atom_checkcode,
                                           &real_chkc);
-    
+
     if(!got_chkc || real_chkc!=chkc){
         do_sm(tab);
         return NULL;
     }
 
     /* Found it! */
-    
+
     if(!XGetWindowAttributes(ioncore_g.dpy, win, &attr)){
         warn(TR("Window %#x disappeared."), win);
         return NULL;
     }
-    
+
     if(attr.root!=region_root_of((WRegion*)par))
         return NULL;
-        
-    if(attr.override_redirect || 
+
+    if(attr.override_redirect ||
        (ioncore_g.opmode==IONCORE_OPMODE_INIT && attr.map_state!=IsViewable)){
         warn(TR("Saved client window does not want to be managed."));
         return NULL;
     }
-    
+
     cwin=create_clientwin(par, win, &attr);
-    
+
     if(cwin==NULL)
         return FALSE;
-    
+
     /* Reparent and resize taking limits set by size hints into account */
     convert_geom(fp, cwin, &rg);
     REGION_GEOM(cwin)=rg;
     do_reparent_clientwin(cwin, par->win, rg.x, rg.y);
     XResizeWindow(ioncore_g.dpy, win, MAXOF(1, rg.w), MAXOF(1, rg.h));
-    
+
     if(!postmanage_check(cwin, &attr)){
         clientwin_destroyed(cwin);
         return NULL;
     }
-    
+
     return (WRegion*)cwin;
 }
 
@@ -1491,37 +1491,37 @@ static DynFunTab clientwin_dynfuntab[]={
 
     {region_map,
      clientwin_map},
-    
+
     {region_unmap,
      clientwin_unmap},
-    
-    {region_do_set_focus, 
+
+    {region_do_set_focus,
      clientwin_do_set_focus},
-    
-    {region_notify_rootpos, 
+
+    {region_notify_rootpos,
      clientwin_notify_rootpos},
-    
-    {region_restack, 
+
+    {region_restack,
      clientwin_restack},
 
-    {region_stacking, 
+    {region_stacking,
      clientwin_stacking},
-    
-    {(DynFun*)region_xwindow, 
+
+    {(DynFun*)region_xwindow,
      (DynFun*)clientwin_x_window},
-    
-    {region_activated, 
+
+    {region_activated,
      clientwin_activated},
-    
-    {region_size_hints, 
+
+    {region_size_hints,
      clientwin_size_hints},
-     
-    {(DynFun*)region_orientation, 
+
+    {(DynFun*)region_orientation,
      (DynFun*)clientwin_orientation},
-    
-    {(DynFun*)region_rqclose, 
+
+    {(DynFun*)region_rqclose,
      (DynFun*)clientwin_rqclose},
-    
+
     {(DynFun*)region_get_configuration,
      (DynFun*)clientwin_get_configuration},
 

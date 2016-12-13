@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/activity.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -14,12 +14,12 @@
 #include <libextl/extl.h>
 #include "region.h"
 
-/** 
- * Manipulate the 'activity' flag of this region. If the region is already 
+/**
+ * Manipulate the 'activity' flag of this region. If the region is already
  * active the 'activity'-flag will remain off.
  *
  * @param sp SET, UNSET or TOGGLE
- * @returns the new value of the 'activity' flag 
+ * @returns the new value of the 'activity' flag
  */
 extern bool region_set_activity(WRegion *reg, int sp);
 extern bool region_is_activity(WRegion* re);

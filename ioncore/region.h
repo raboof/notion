@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/region.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -93,7 +93,7 @@ DECLSTRUCT(WPrepareFocusResult){
 
 DECLCLASS(WRegion){
     Obj obj;
-    
+
     WRectangle geom;
     void *rootwin;
     bool flags;
@@ -101,17 +101,17 @@ DECLCLASS(WRegion){
     WWindow *parent;
     WRegion *children;
     WRegion *p_next, *p_prev;
-    
+
     void *bindings;
     WSubmapState *submapstat;
-    
+
     WRegion *active_sub;
     WRegion *active_prev, *active_next;
-    
+
     WRegionNameInfo ni;
-    
+
     WRegion *manager;
-    
+
     int mgd_activity;
 };
 
@@ -135,11 +135,11 @@ DYNFUN void region_notify_rootpos(WRegion *reg, int x, int y);
 DYNFUN bool region_may_dispose(WRegion *reg);
 DYNFUN WRegion *region_managed_control_focus(WRegion *mgr, WRegion *reg);
 DYNFUN void region_managed_remove(WRegion *reg, WRegion *sub);
-DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub, 
+DYNFUN bool region_managed_prepare_focus(WRegion *reg, WRegion *sub,
                                          int flags, WPrepareFocusResult *res);
 DYNFUN void region_managed_notify(WRegion *reg, WRegion *sub, WRegionNotify how);
 DYNFUN WRegion *region_managed_disposeroot(WRegion *mgr, WRegion *reg);
-DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub, 
+DYNFUN bool region_managed_rqorder(WRegion *reg, WRegion *sub,
                                    WRegionOrder order);
 
 DYNFUN void region_child_removed(WRegion *reg, WRegion *sub);
@@ -154,9 +154,9 @@ extern bool region_rqorder(WRegion *reg, WRegionOrder order);
 extern bool region_prepare_focus(WRegion *reg, int flags,
                                  WPrepareFocusResult *res);
 
-extern void region_fit(WRegion *reg, const WRectangle *geom, 
+extern void region_fit(WRegion *reg, const WRectangle *geom,
                        WRegionFitMode mode);
-extern bool region_reparent(WRegion *reg, WWindow *target, 
+extern bool region_reparent(WRegion *reg, WWindow *target,
                             const WRectangle *geom, WRegionFitMode mode);
 
 extern void region_updategr_default(WRegion *reg);

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/screen.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -47,7 +47,7 @@ DECLCLASS(WScreen){
     Watch workspace_indicatorwin_watch;
 };
 
-extern bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, 
+extern bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp,
                         int id);
 
 extern WScreen *create_screen(WRootWin *parent, const WFitParams *fp, int id);

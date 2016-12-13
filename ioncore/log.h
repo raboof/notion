@@ -1,7 +1,7 @@
 /*
  * notion/ioncore/log.h
  *
- * Copyright (c) the Notion team 2013. 
+ * Copyright (c) the Notion team 2013.
  *
  * See the included file LICENSE for details.
  */

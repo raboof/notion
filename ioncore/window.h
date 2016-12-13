@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/window.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -24,15 +24,15 @@ DECLCLASS(WWindow){
 };
 
 
-extern bool window_init(WWindow *p, /*@notnull@*/ WWindow *parent, 
+extern bool window_init(WWindow *p, /*@notnull@*/ WWindow *parent,
                         const WFitParams *fp, const char *name);
 /**
  * @param parent required when 'win' is 'None'.
- * @param win    the window to initialize. A new window is created when 'win' 
+ * @param win    the window to initialize. A new window is created when 'win'
  *               is 'None'.
  * @param name   the name of the newly created Window
  */
-extern bool window_do_init(WWindow *p, WWindow *parent, 
+extern bool window_do_init(WWindow *p, WWindow *parent,
                            const WFitParams *fp, Window win, const char *name);
 extern void window_deinit(WWindow *win);
 
@@ -49,7 +49,7 @@ extern void window_do_set_focus(WWindow *wwin, bool warp);
 
 extern void window_do_fitrep(WWindow *wwin, WWindow *parent,
                              const WRectangle *geom);
-extern bool window_fitrep(WWindow *wwin, WWindow *parent, 
+extern bool window_fitrep(WWindow *wwin, WWindow *parent,
                           const WFitParams *fp);
 extern void window_notify_subs_move(WWindow *wwin);
 
