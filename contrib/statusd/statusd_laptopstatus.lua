@@ -30,7 +30,7 @@
 -- %laptopstatus_batterypercent
 -- %laptopstatus_batterytimeleft
 -- %laptopstatus_batterydrain
--- 
+--
 -- Template example: template="[ %date || load:% %>load || CPU: %laptopstatus_cpuspeed %laptopstatus_temperature || BATT: %laptopstatus_batterypercent %laptopstatus_batterytimeleft %laptopstatus_batterydrain ]"
 --
 -- You can also run this script with lua interpreter and see if you get
@@ -67,7 +67,7 @@ if statusd ~= nil then
 end
 
 --
--- CODE 
+-- CODE
 --
 local laptopstatus_timer
 local RingBuffer = {}
@@ -86,8 +86,8 @@ end
 function RingBuffer:add(val)
    if self.current > self.size then
        self.current = 1
-   end 
-   self.elements[self.current] = val 
+   end
+   self.elements[self.current] = val
    self.current = self.current + 1
 end
 
@@ -98,7 +98,7 @@ function average(array)
     end
     if #array ~= 0 then
        return sum / #array
-   else 
+   else
        return 0
    end
 end
@@ -108,14 +108,14 @@ rates_buffer = RingBuffer.create(20)
 
 function read_val(file)
     local fd = io.open(file)
-    if fd then 
+    if fd then
         local value = fd:read("*a")
         fd:close()
         return value
     end
 end
 
--- Returns the full path of the first subdirectory of "path" containing a file 
+-- Returns the full path of the first subdirectory of "path" containing a file
 -- with name "filename" and first line equal to "content"
 function lookup_subdir(path, filename, content)
     if path:sub(-1) ~= "/" then path = path .. "/" end
@@ -229,7 +229,7 @@ local function get_battery_sysfs()
         if on_ac() then
             timeleft = AC
         elseif last_power ~= nil and now < last_power then
-            rate_sysfs = last_power - now 
+            rate_sysfs = last_power - now
             rates_buffer:add(rate_sysfs)
             secs = statusd_laptopstatus.interval * (now / average(rates_buffer.elements))
             mins = secs / 60
@@ -238,7 +238,7 @@ local function get_battery_sysfs()
             timeleft = string.format("%02d:%02d", hours, mins)
         else
             timeleft = NA
-        end 
+        end
         last_power = now
 
        if percent <= statusd_laptopstatus.batterypercent_important then percenthint = "important" end
@@ -255,7 +255,7 @@ local function get_battery_procfs()
   if pcall(function ()
        local status
        local statecontents = read_val(bat_dir .. "state")
-  
+
        status, _, lastfull = string.find(read_val(bat_dir .. "info"), "last full capacity:%s+(%d+).*")
        if not status then error("could not get full battery capacity") end
        lastfull = tonumber(lastfull)
@@ -284,12 +284,12 @@ local function get_battery_procfs()
           mins = math.floor(mins - (hours * 60))
           timeleft = string.format("%02d:%02d", hours, mins)
        end
-  
-       if secs ~= nil and secs <= statusd_laptopstatus.batterytimeleft_important then timelefthint = "important" end 
+
+       if secs ~= nil and secs <= statusd_laptopstatus.batterytimeleft_important then timelefthint = "important" end
        if secs ~= nil and secs <= statusd_laptopstatus.batterytimeleft_critical then timelefthint = "critical" end
        if percent <= statusd_laptopstatus.batterypercent_important then percenthint = "important" end
        if percent <= statusd_laptopstatus.batterypercent_critical then percenthint = "critical" end
-  
+
        return { percent=string.format("%02d%%", percent), timeleft=timeleft, drain=tostring(rate)..rateunit, percenthint=percenthint, timelefthint=timelefthint}
   else return { percent=NA, timeleft=NA, drain=NA, percenthint=percenthint, timelefthint=timelefthint} end
 end
@@ -297,7 +297,7 @@ end
 local function get_battery()
     if bat_sys then
         return get_battery_sysfs()
-    else 
+    else
         return get_battery_procfs()
     end
 end
@@ -321,7 +321,7 @@ function do_init()
         bat_sys=false
     end
 
-    temp_dir=lookup_subdir(sys_dir .. "thermal", "type", "acpitz") or lookup_subdir(sys_dir .. "thermal", "type", "thermal zone") 
+    temp_dir=lookup_subdir(sys_dir .. "thermal", "type", "acpitz") or lookup_subdir(sys_dir .. "thermal", "type", "thermal zone")
     temp_sys=true
     if(not temp_dir) then
         temp_dir=lookup_subdir(proc_dir .. "thermal_zone", "temperature")

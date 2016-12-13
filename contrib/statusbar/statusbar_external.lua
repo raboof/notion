@@ -52,7 +52,7 @@ end
 -- language enough to output what you would want the
 -- statusbar to show.
 --
--- 
+--
 -- -- How to use it?
 --
 -- Short version:
@@ -73,7 +73,7 @@ end
 --  name with preceding % (for example %meter_name)
 --  into your statusbar template which is usually set
 --  in cfg_statusbar.lua.
--- 
+--
 -- * external_program
 --  The program to execute. The last line of each
 --  flushed output this program writes to stdout is
@@ -119,7 +119,7 @@ end
 -- Ion process but in a separate process and thus this
 -- script can not be loaded from that file!
 --
--- 
+--
 
 ---------------------------------------------------------
 
@@ -162,7 +162,7 @@ function start_execute(key)
           -- remove all but the last line
           data = string.gsub( data, "\n$", "" )
           data = string.gsub( data, ".*\n", "" );
-        
+
           local sets = statusbar_external[key]
           local t_key = sets.template_key
           local t_length = sets.meter_length
@@ -182,14 +182,14 @@ function start_execute(key)
              if ( type( re ) == 'string' ) then
                 re = { re }
              end
-            
+
              for _, r in ipairs( re ) do
                 if ( string.find( data, r ) ) then
                    mod_statusbar.inform(t_key .. "_hint", hint)
                 end
              end
           end
-   
+
           mod_statusbar.update()
 
           return timers[key]:set(statusbar_external[key].execute_delay,

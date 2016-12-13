@@ -1,7 +1,7 @@
 --
--- look_newviolet for Notion's default drawing engine. 
+-- look_newviolet for Notion's default drawing engine.
 -- Based on look_cleanviolet
--- 
+--
 
 if not gr.select_engine("de") then
     return
@@ -14,14 +14,14 @@ de.defstyle("*", {
     shadow_colour = "#e7e7ff",
     background_colour = "#b8b8c8",
     foreground_colour = "#000000",
-    
+
     shadow_pixels = 1,
     highlight_pixels = 2,
     padding_pixels = 1,
     spacing = 1,
     border_style = "elevated",
     border_sides = "tb",
-    
+
     font = "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*",
     text_align = "center",
 })
@@ -29,7 +29,7 @@ de.defstyle("*", {
 
 de.defstyle("tab", {
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
-    
+
     de.substyle("active-selected", {
         highlight_colour = "#aaaacc",
         shadow_colour = "#aaaacc",
@@ -50,7 +50,7 @@ de.defstyle("input", {
     text_align = "left",
     highlight_colour = "#eeeeff",
     shadow_colour = "#eeeeff",
-    
+
     de.substyle("*-selection", {
         background_colour = "#666699",
         foreground_colour = "#000000",

@@ -1,4 +1,4 @@
--- 
+--
 
 if package.loaded["mod_xrandr"] then return end
 
@@ -10,7 +10,7 @@ local mod_xrandr=_G["mod_xrandr"]
 
 assert(mod_xrandr)
 
-if not package.loaded["mod_xinerama"] then 
+if not package.loaded["mod_xinerama"] then
     dopath("mod_xinerama")
 end
 
@@ -38,7 +38,7 @@ function falls_within(geom)
     end
 end
 
-function mod_xrandr.get_outputs_within(all_outputs, screen) 
+function mod_xrandr.get_outputs_within(all_outputs, screen)
     return filter(all_outputs, falls_within(screen:geom()))
 end
 

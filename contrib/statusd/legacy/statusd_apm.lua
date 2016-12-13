@@ -14,7 +14,7 @@
 -- 	Add "apm={}," to mod_statusbar.launch_statusd,
 -- 	Modify "template" to include %apm_ variables
 -- 	  e.g. template="[ %date || load:% %>load || bat: %apm_pct%%, A/C %apm_ac ],"
--- 
+--
 -- Available variables:
 -- 	%apm_state	high, low, critical
 -- 	%apm_pct	battery life (in percent)

@@ -6,7 +6,7 @@
 --
 -- You can schedule some messages to show up in the statusbar at
 -- specified times.
--- 
+--
 -- Syntax:
 -- y <year> <month> <date> <hour> <minute> <message>
 --      or
@@ -167,11 +167,11 @@ function schedule.add_message(mplex, str)
 end
 
 function schedule.ask_message(mplex)
-    mod_query.query(mplex, TR("Schedule notification:"), nil, schedule.add_message, 
+    mod_query.query(mplex, TR("Schedule notification:"), nil, schedule.add_message,
             nil, "schedule")
 end
 
--- 
+--
 -- show the scheduled notifications
 --
 function schedule.show_all(mplex)

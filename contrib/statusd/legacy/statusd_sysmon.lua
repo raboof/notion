@@ -5,7 +5,7 @@
 -- filename :   statusd_sysmon.lua
 -- version  :   2.0
 -- date     :   2005-03-29
--- 
+--
 -- system monitor for Ion3 WM statusbar
 -- Written by Vladimir Chizhov < jagoterr *at* gmail *dot* com >
 -- I'll apreciate any comments, bug reports and feature requests :)
@@ -19,11 +19,11 @@
 if not statusd_sysmon then
 statusd_sysmon = {
     -- UPDATE INTERVAL
-    -- 
+    --
     interval=10*1000,
-    
+
     -- TEMPLATE STRING
-    -- 
+    --
     -- COMMON:
     -- %%               - percents symbol (%)
     -- ${expression}    - evaluates lua expression
@@ -35,7 +35,7 @@ statusd_sysmon = {
     --                      - there is a global function 'dpr' defined in this script
     --                      for decreasing double numbers' precision (see this
     --                      function comments for more information and the example templates)
-    -- 
+    --
     -- RAM:
     -- %mem_total       - total available memory
     -- %mem_used        - used memory
@@ -43,17 +43,17 @@ statusd_sysmon = {
     -- %mem_buffers     - buffered memory
     -- %mem_cached      - cached memory
     -- %mem_shared      - shared memory
-    -- 
+    --
     -- SWAP:
     -- %swap_total       - total available swap space
     -- %swap_used        - used swap space
     -- %swap_free        - free swap space
-    -- 
+    --
     -- FS (FileSystem):
     -- %{fs_total       mount_point}    - total available space on filesystem
     -- %{fs_used        mount_point}    - used space on filesystem
     -- %{fs_free        mount_point}    - free space on filesystem
-    -- 
+    --
     -- TEMPLATE EXAMPLES:
     --
     -- simple swap statistics
@@ -75,14 +75,14 @@ statusd_sysmon = {
     template = "RAM: %mem_used / %mem_total MB (${dpr (%mem_used / %mem_total * 100, 1)} %%) * SWAP: %swap_used / %swap_total MB (${dpr (%swap_used / %swap_total * 100, 1)} %%) * /: %{fs_used /} / %{fs_total /} (${dpr (%{fs_used /} / %{fs_total /} * 100, 1)} %%)",
 
     -- DIMENSION for monitors
-    -- 
+    --
     -- b - bytes
     -- k - kilobytes
     -- m - megabytes
     -- g - gigabytes
-    -- 
+    --
     -- dimension for RAM and SWAP
-    -- 
+    --
     mem_dimension   = "m",
     -- dimension for filesystems
     --
@@ -131,7 +131,7 @@ local function parse_free_command ()
     local s = f:read('*a')
     f:close()
     local st, en
-    
+
     st, en,
     metrics.mem_total,
     metrics.mem_used,
@@ -172,11 +172,11 @@ local sysmon_timer
 -- Main calculating of values, template parsing and Ion statusd updating
 local function update_sysmon ()
     local sysmon_st = settings.template
-    
+
     parse_free_command ()
 
     parse_df_command ()
-    
+
     -- filling the template by actual values
     sysmon_st = string.gsub (sysmon_st, "%%%{([%w%_]+)%s+(%S-)%}", function (arg1, arg2)
         return(metrics[arg1.."->"..arg2] or "")

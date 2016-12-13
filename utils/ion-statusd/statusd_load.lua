@@ -1,6 +1,6 @@
 --
 -- ion/mod_statusbar/ion-statusd/statusd_load.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- See the included file LICENSE for details.
@@ -9,7 +9,7 @@
 --
 -- We should really use getloadavg(3) instead and move the meter to
 -- Ion side to get properly up-to-date loads. But until such an export
--- is made, and we use potentially blocking files and external programs, 
+-- is made, and we use potentially blocking files and external programs,
 -- this meter must be in ion-statusd.
 --
 

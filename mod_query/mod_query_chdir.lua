@@ -1,8 +1,8 @@
 --
 -- ion/query/mod_query_chdir.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2009.
--- 
+--
 -- See the included file LICENSE for details.
 --
 
@@ -25,9 +25,9 @@ end
 
 local function ws_chdir(mplex, params)
     local nwd=params[1]
-    
+
     ws=assert(ioncore.find_manager(mplex, "WGroupWS"))
-    
+
     if not empty_path(nwd) and relative_path(nwd) then
         local owd=ioncore.get_dir_for(ws)
         if empty_path(owd) then

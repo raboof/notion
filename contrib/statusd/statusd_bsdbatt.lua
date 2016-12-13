@@ -27,7 +27,7 @@
 -- SUCH DAMAGE.
 --
 -- statusd_bsdbatt.lua
--- 
+--
 -- Uses sysctl interface to fetch ACPI CMBAT status on FreeBSD.
 -- Add bsdbatt_life and bsdbatt_time fields to status bar template.
 --

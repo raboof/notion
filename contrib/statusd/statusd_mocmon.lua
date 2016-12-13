@@ -13,7 +13,7 @@
 --
 -- But when I took a closer look at the moc scripts I really did not like what
 -- they offer and adapting the mocmon stuff for them is quite easy...
--- 
+--
 -- Written by Hendrik Iben < hiben at tzi dot de >
 --
 -- How to use :
@@ -38,7 +38,7 @@
 --  mocmon_sstate    : same as above but all lowercase
 --  mocmon_bitrate   : Current bitrate
 --  mocmon_rate      : Sampling frequency
---  
+--
 --  mocmon_user      : String resulting from 'user_format'-string
 --  			  or 'stopped'-string
 --
@@ -48,7 +48,7 @@
 --
 --  Setting up the 'user_format'-string is done by forming a string where each
 --  mocmon_x-monitor is referenced to by '%x%'
---  
+--
 --  example :
 --  	"...%mocmon_state %mocmon_title ..blub..." in cfg_statusbar template
 --  	
@@ -67,24 +67,24 @@
 --
 --  speaking of configuration you might want a description of what the settings
 --  do and what the defaults are :
--- 
+--
 --  mocinfo      : command to query moc (mocp -i)
 --  interval     : delay between checking moc (5 seconds)
 --  do_monitors  : inform statusd of all monitors or just of mocmon_user (true)
 --  user_format  : template for mocmon_user (see in code)
 --  stoppped     : replacement for mocmon_user when mocp is not found or moc
 --                 is stoppped (see in code)
---  
+--
 --  Requirements :
 --  ion3 (tested with 20060305 gentoo ebuild)
 --  lua (tested with 5.0.2)
 --  moc (tested with 2.4.0)
---  
+--
 --  Serving suggestions :
 --  I use the rotate_statusbar replacement for the standard statusbar as I
 --  want to display a lot of things but not always...
 --  moc-status information takes quite a bit of space so you might consider
---  doing it a bit like me .. but of course in your own special and 
+--  doing it a bit like me .. but of course in your own special and
 --  unique way. ;-)
 --
 --  This is my current setup :
@@ -112,17 +112,17 @@
 --       "[ %fortune ]%filler%systray",
 --     ...
 --     ...
---     
+--
 --  This setup updates the information every second showing the status of
---  moc, the current title, the time that is left and the total time 
+--  moc, the current title, the time that is left and the total time
 --  of the current song.
 --  Additionally when moc is not running a get a reminder to turn it on,
 --  and as I do not need the other monitors they are disabled.
 --
 --  Happy listening!
---  
---  Feel free to contact me if you discover bugs or want to comment on this.  
---  
+--
+--  Feel free to contact me if you discover bugs or want to comment on this.
+--
 --
 -- You are free to distribute this software under the terms of the GNU
 -- General Public License Version 2.
@@ -235,10 +235,10 @@ local function fetch_data(partial_data)
       mocdata = mocdata .. partial_data
       partial_data = coroutine.yield()
     end
-    
+
   local running = true -- assume the best
-  
-  if mocdata and mocdata ~= "" 
+
+  if mocdata and mocdata ~= ""
     then
       for attribute, value in string.gmatch(mocdata, "([^:]*):([^\n]*)\n")
         do
@@ -249,7 +249,7 @@ local function fetch_data(partial_data)
       running = false
       infotable[valueassoc["mocmon_state"]]="NOT RUNNING"
   end
-   
+
   -- compute things like time left or divide things by 1000...
   infotable = addSpecialValues(infotable)
   -- scan for nil-values and fix them with '?'
@@ -260,7 +260,7 @@ local function fetch_data(partial_data)
     then
       stopped = true
   end
-  
+
   -- if we are to update the monitors...
   if settings.do_monitors
     then
@@ -270,7 +270,7 @@ local function fetch_data(partial_data)
           statusd.inform(k, ""..infotable[v])
         end
   end
- 
+
   -- create appropriate user-string
   if running and (not stopped)
     then
@@ -278,7 +278,7 @@ local function fetch_data(partial_data)
     else
       statusd.inform("mocmon_user", settings.not_running)
   end
-  
+
   mocmon_timer:set(settings.interval, update_mocmon)
 end
 

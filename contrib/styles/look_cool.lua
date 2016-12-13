@@ -16,14 +16,14 @@ de.defstyle("*", {
     padding_colour = "#000000",--#778BA0",
 
     transparent_background = false,
-    
+
     border_style = "elevated",
 
     highlight_pixels = 0,
     shadow_pixels = 0,
     padding_pixels = 0,
     spacing = 0,
-    
+
     font = "-xos4-terminus-medium-r-normal--14-*-*-*-*-*-*-*",
     text_align = "center",
 })
@@ -171,7 +171,7 @@ de.defstyle("tab-menuentry-pmenu", {
 
 de.defstyle("input", {
     based_on = "*",
-    
+
     foreground_colour = "#000000",
     background_colour = "#9DAABA",
     padding_colour = "#9CAAB4",

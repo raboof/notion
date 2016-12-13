@@ -45,7 +45,7 @@ local function update_drives()
  			if i ~= "" then
  				parts = parts..i.." "
  			end
- 		end 
+ 		end
  		if parts ~= "" then
  			result = result.."["..parts:sub(1,-2).."]"
  		end

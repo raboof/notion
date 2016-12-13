@@ -13,7 +13,7 @@ print ('Screen 0: ' .. notioncore.find_screen_id(0):mx_nth(0):name() )
 if notioncore.find_screen_id(1):mx_count() ~= 1 then
   return "Initial screen 1 should have 1 workspace instead of " .. notioncore.find_screen_id(1):mx_count()
 end
-print ('Screen 1: ' .. notioncore.find_screen_id(1):mx_nth(0):name()) 
+print ('Screen 1: ' .. notioncore.find_screen_id(1):mx_nth(0):name())
 
 os.execute("cp xrandr/fakexinerama-2monitors xrandr/.fakexinerama")
 
@@ -23,7 +23,7 @@ print('Updating layout when there is 2 screens present')
 mod_xrandr.screenlayoutupdated()
 
 if notioncore.find_screen_id(0):mx_count() ~= 1 then
-  return "After updating screen 0 should have 1 workspaces instead of " .. 
+  return "After updating screen 0 should have 1 workspaces instead of " ..
     notioncore.find_screen_id(0):mx_count() .. ": " .. mx_names(notioncore.find_screen_id(0))
 end
 if notioncore.find_screen_id(1):mx_count() ~= 1 then

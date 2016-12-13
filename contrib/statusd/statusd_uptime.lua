@@ -3,7 +3,7 @@
 -- Last Changed: Unknown
 --
 -- statusd_uptime.lua
--- 
+--
 -- Author
 -- Sadrul Habib Chowdhury (Adil)
 -- imadil at gmail dot com
@@ -41,7 +41,7 @@ end
 
 --
 -- start the timer
--- 
+--
 local function init_uptime_monitor()
     timer = statusd.create_timer()
     statusd.inform("uptime_template", "xxxxxxxxxxxxxxx")

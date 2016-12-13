@@ -5,16 +5,16 @@
 ------------------------------------------------------------------------------------
 --	
 --	DESCRIPTION:
---	[ Multi Purpose Monitor for Ion3] 
+--	[ Multi Purpose Monitor for Ion3]
 --	It detects if security logs, mboxes, maildirs, some files, etcetera were
 --	changed. If they were changed in fact, shows a flashing (blinking) alarm with a
 --	message text specified on settings (or default = !!).
 --
 --	If you specify your mail inbox it will do a flashing advise of new email.
---	If you specify a security log it will reflect your security warnings. 
+--	If you specify a security log it will reflect your security warnings.
 --	
 --	You could specify whatever files or directories that do you want to monitor.
--->	All in Unix* like Oses is a file... 
+-->	All in Unix* like Oses is a file...
 --
 --	PLEASE READ THIS:
 --    	  * This is another toy for Ion3.
@@ -53,14 +53,14 @@
 --		files = {"/mnt/Feed_My_Dog", "~/Mail"} --> The intended purpose files (logs, mail)
 --		log = ".ion3/flashing.log"	  	--> Some file in your $HOME[...] path.
 --							    NOTE: $HOME is assumed by 'log'.
---							    Paths not in $HOME are invalid. 
+--							    Paths not in $HOME are invalid.
 --		update_interval = 3000,		  	--> Time in milliseconds to update info.
 --		flash_interval = 300, 		  	--> Speed of flashing pattern. (msecs.)
 --			alarm_message = "!!",	  	--> Flashing Message (defaults are a good bet).
 --			normal_message = "--",	  	--> Normal status message.
---			turn_off = 60,		  	--> This, avoids to show the annoying 
+--			turn_off = 60,		  	--> This, avoids to show the annoying
 --			  			    	    message for ever. The value represents
---		},				 	    cycles (10 * flash_interval msecs.) 
+--		},				 	    cycles (10 * flash_interval msecs.)
 --	}			
 ------------------------------------------------------------------------------------
 --	
@@ -73,9 +73,9 @@
 --
 --	INSECTS: You are the entomologist. You tell me.
 --
--- 	NOTES ON USAGE: 
+-- 	NOTES ON USAGE:
 --      - This script creates his own log of activity. You can choose a name and path on settings.
---      - If you remove the log, alarms will cease (rm -f *.log). Is not necessary to restart Ion. 
+--      - If you remove the log, alarms will cease (rm -f *.log). Is not necessary to restart Ion.
 --      - If you change the settings, the log will be auto-removed and re-written to reflect the changes
 --        without false alarms.
 --      - If, for some impossible circumstance, the status of some file or directory is normal again,
@@ -102,7 +102,7 @@ local defaults = {
 
 	update_interval = 5*1000,    --> Check your files every X milliseconds.
 	flash_interval = 400,        --> Blinking interval in milliseconds.
-	turn_off = 500,		     --> Turn Off the alarm if it annoys you too much time: 
+	turn_off = 500,		     --> Turn Off the alarm if it annoys you too much time:
 				     --  (turn_off*flash_interval) milliseconds.
 				     --> If you want permanent alarms: 3*999*999 is OK.
 }
@@ -193,7 +193,7 @@ end
 
 local function update_timer()
 	confirm_someinfo() 		    --> A function checking something ... and changing between states
-	if is_ok then			   
+	if is_ok then			
 		statusd.inform("flashing", settings.normal_message)
 		statusd.inform("flashing_hint", "normal")
 		flashing_timer:set(settings.update_interval, update_timer) --> Take different update_interval

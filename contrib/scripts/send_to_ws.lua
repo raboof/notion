@@ -1,14 +1,14 @@
 -- Authors: Canaan Hadley-Voth <ugggg@hotmail.com>
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- send_to_ws.lua
 --
 -- written by Canaan Hadley-Voth, ugggg at hotmail
 --
 -- Sends a clientwin to another workspace.
 --
--- On a tiled workspace, the frame sent to will be the most recently active.  
+-- On a tiled workspace, the frame sent to will be the most recently active.
 -- Maximized windows are skipped over in search of an actual workspace.
 -- Focus follows if jumpto is set.
 --
@@ -53,7 +53,7 @@ function send_to_ws(cwin, action, jumpto)
 	curws=curws:manager()
     end
     local curwsindex=scr:get_index(curws)
-    
+
     if type(action)=="string" then
 	if action=="left" then
 	    offset=-1

@@ -6,7 +6,7 @@
 --
 -- Usage:
 --
--- defwinprop { 
+-- defwinprop {
 --      class = 'SomePanel',
 --      instance = 'somepanel',
 --      is_panel = true,
@@ -31,14 +31,14 @@ function panel.manage(cwin, tab)
     if prop and prop.is_panel then
         local scr=cwin:screen_of()
         local exists=false
-        
+
         if panel.check_exists then
             local current=scr:get_stdisp()
             if current and current.reg then
                 exists=true
             end
         end
-        
+
         if not exists then
             return scr:set_stdisp{
                 reg = cwin,
@@ -58,5 +58,5 @@ end
 function panel.unreg()
     ioncore.get_hook("clientwin_do_manage_alt"):remove(panel.manage)
 end
-    
+
 panel.reg()

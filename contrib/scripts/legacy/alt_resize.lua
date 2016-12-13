@@ -27,7 +27,7 @@ alt_resize={}
 
 function alt_resize.resize(m, f, dir)
     local ws = f:manager()
-    
+
     if dir == "left" then
         if ws:right_of(f) then
             m:resize( 0,-1, 0, 0)

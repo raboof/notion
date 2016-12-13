@@ -1,12 +1,12 @@
 -- Authors: Unknown
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- Bookmarks support for Ion3
--- 
+--
 -- META+b n        Go to bookmark n (n=0..9)
 -- META+b Shift+n  Set bookmark n
--- 
+--
 
 local bms={}
 bookmarks={}
@@ -31,7 +31,7 @@ for k=0, 9 do
     })
     defbindings("WFrame", {
         submap(META.."b", {
-            kpress("Shift+"..bm, 
+            kpress("Shift+"..bm,
                    function(frame) bookmarks.set(bm, frame) end),
         })
     })

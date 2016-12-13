@@ -1,7 +1,7 @@
 -- Authors: tyranix
 -- License: Public domain
 -- Last Changed: Unknown
--- 
+--
 -- rotate_statusbar.lua
 --[[
 This replacement for cfg_statusbar.lua will rotate between
@@ -48,7 +48,7 @@ if not rotate_statusbar.init_settings then
         pos='bl',       -- Bottom left corner
         fullsize=false,
         systray=true,   -- In the systray
-        
+
         -- Date format goes here instead of in the configurations below because
         -- it is loaded by ion3?
         -- date_format='%a %Y-%b-%d %H:%M',
@@ -71,7 +71,7 @@ if not rotate_statusbar.configurations then
             critical_threshold=4.0
         },
         --]]
-    
+
         -- Mail meter
         --[[
         mail = {
@@ -89,11 +89,11 @@ if not rotate_statusbar.settings then
         update_interval = 60*1000,
 
         -- Add a table for each status bar you want to have rotated.
-        -- Template. Tokens %string are replaced with the value of the 
+        -- Template. Tokens %string are replaced with the value of the
         -- corresponding meter.
         --
         -- Space preceded by % adds stretchable space for alignment of variable
-        -- meter value widths. > before meter name aligns right using this 
+        -- meter value widths. > before meter name aligns right using this
         -- stretchable space , < left, and | centers.
         -- Meter values may be zero-padded to a width preceding the meter name.
         -- These alignment and padding specifiers and the meter name may be

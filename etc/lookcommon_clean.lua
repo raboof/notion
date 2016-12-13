@@ -48,14 +48,14 @@ de.defstyle("tab", {
         background_colour = "#901010",
         foreground_colour = "#eeeeee",
     }),
-    
+
     de.substyle("*-*-*-selected-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",
         background_colour = "#b03030",
         foreground_colour = "#ffffff",
     }),
-    
+
     de.substyle("*-*-*-tabnumber", {
         background_colour = "black",
         foreground_colour = "green",
@@ -87,7 +87,7 @@ de.defstyle("stdisp", {
     background_colour = "#000000",
     foreground_colour = "grey",
     font="-misc-fixed-medium-r-*-*-13-*-*-*-*-60-*-*",
-    
+
     de.substyle("important", {
         foreground_colour = "green",
     }),

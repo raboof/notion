@@ -1,7 +1,7 @@
 -- Authors: Rene van Bevern <rvb@pro-linux.de>
 -- License: Public domain
 -- Last Changed: 2005
--- 
+--
 -- Goes to the frame in the specified direction. If there is no frame in the
 -- given direction, it goes to the next workspace in the direction, being:
 -- 	left  = previous workspace

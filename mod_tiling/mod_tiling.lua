@@ -1,6 +1,6 @@
 --
 -- ion/mod_menu/mod_tiling.lua -- Tiling module stub loader
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- Ion is free software; you can redistribute it and/or modify it under

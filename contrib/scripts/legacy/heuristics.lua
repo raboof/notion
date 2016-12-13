@@ -3,13 +3,13 @@
 -- Last Changed: 2003
 --
 -- Window placement heuristics for WIonWS:s
--- 
+--
 -- (c) Tuomo Valkonen 2003.
--- 
+--
 
 --
--- In calculating penalties, the area of client window not overlapped by a 
--- frame is multiplied by 
+-- In calculating penalties, the area of client window not overlapped by a
+-- frame is multiplied by
 --     heuristics.shrink_penalty,
 -- the area of frame not overlapped by a client window is multiplied by
 --     heuristics.splurge_penalty,
@@ -18,18 +18,18 @@
 --     heuristics.dist_penalty.
 -- If there is no current frame, this value is taken to be zero. These three
 -- values are summed to obtain the final penalty and the frame with the
--- smallest penalty is chosen. 
--- 
+-- smallest penalty is chosen.
+--
 -- To disable heuristics for a particular window (class), set
 --     ignore_heuristics
 -- in a matching winprop.
--- 
--- To use this code to place windows with user given position in 
--- the frame they mostly overlap, set 
---     heuristics.userpos_by_overlap=true. 
+--
+-- To use this code to place windows with user given position in
+-- the frame they mostly overlap, set
+--     heuristics.userpos_by_overlap=true.
 -- and, to disable other heuristics ,
 --     heuristics.only_overlap=true.
--- 
+--
 
 if not heuristics then
   heuristics = {
@@ -80,10 +80,10 @@ end
 -- }}}
 
 
--- Penalty calculation {{ 
+-- Penalty calculation {{
 
 -- Divide the (rectangular) area spanned by two rectangles into nine smaller
--- rectangles so that each of these smaller rectangles either are fully 
+-- rectangles so that each of these smaller rectangles either are fully
 -- overlapped or not overlapped at all by each of the original rectangles
 -- $A$ and $B$. For example:
 -- \begin{verbatim}
@@ -120,7 +120,7 @@ local function rect_penalty(A, B, w)
     return p
 end
 
--- Calculate the penalty for placing \var{cwin} in \var{frame} 
+-- Calculate the penalty for placing \var{cwin} in \var{frame}
 -- current frame's (if any) center being \var{center}.n
 -- The penalty is given by
 -- \[
@@ -135,23 +135,23 @@ end
 -- 	     \end{cases}
 -- \]
 -- If \var{userpos} is set, then the geometries of \var{frame} and \var{cwin}
--- are used for $A$ and $B$, respectively. Otherwise $A$ and $B$ are 
--- rectangles with $(x, y)=(0, 0)$ and width and height given by \var{frame}'s 
+-- are used for $A$ and $B$, respectively. Otherwise $A$ and $B$ are
+-- rectangles with $(x, y)=(0, 0)$ and width and height given by \var{frame}'s
 -- and \var{cwin}'s geometries.
 function heuristics.penalty(frame, cwin, userpos, center)
-    local w={ 
-        [-1] = heuristics.shrink_penalty, 
+    local w={
+        [-1] = heuristics.shrink_penalty,
         [0]  = 0,
         [1]  = heuristics.splurge_penalty
     }
 
     local p=rect_penalty(geom2rect0(frame:geom()), geom2rect0(cwin:geom()), w)
-    
+
     if center then
         local c2=geom_center(frame:geom())
         p=p+l2metric(center, c2)*heuristics.dist_penalty
     end
-    
+
     return p
 end
 
@@ -170,28 +170,28 @@ function heuristics.get_frame(ws, cwin, userpos)
     if not userpos and heuristics.only_overlap then
         return nil
     end
-    
+
     local wp=get_winprop(cwin)
     if wp and wp.ignore_heuristics then
         return nil
     end
-    
+
     local frames=ws:managed_list()
     local current=ws:current()
     local minpen, minframe, pen, center
-    
+
     if current then
         local g=current:geom()
         center=geom_center(current:geom())
     end
-    
-    for _, frame in frames do 
+
+    for _, frame in frames do
         if userpos and heuristics.userpos_by_overlap then
             pen=heuristics.nonoverlap_penalty(frame, cwin)
         else
             pen=heuristics.penalty(frame, cwin, userpos, center)
         end
-        
+
         if not minframe or pen<minpen then
             minframe=frame
             minpen=pen

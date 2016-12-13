@@ -1,5 +1,5 @@
 -- Authors: Etan Reisner <deryni@gmail.com>
--- License: MIT, see http://opensource.org/licenses/mit-license.php 
+-- License: MIT, see http://opensource.org/licenses/mit-license.php
 -- Last Changed: 2007-01-23
 --
 --[[

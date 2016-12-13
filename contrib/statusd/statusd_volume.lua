@@ -4,7 +4,7 @@
 --
 -- Public domain, written by Benjamin Sigonneau
 -- Allows displaying volume information in the statusbar.
--- 
+--
 -- add some of the following fields into your template in cfg_statusbar.lua:
 --     %volume_master
 --     %volume_pcm
@@ -15,7 +15,7 @@ local function get_volume()
    local f=io.popen('aumix -q','r')
    local s=f:read('*all')
    f:close()
-   local _, _, master, pcm = 
+   local _, _, master, pcm =
       string.find(s, "vol[0-9]? (%d*), .*\n"..
                      "pcm[0-9]? (%d*), .*\n"
                )
@@ -25,7 +25,7 @@ local function get_volume()
    elseif not pcm then
       return unknow
    end
-        
+
   return master.."%", pcm.."%"
 end
 

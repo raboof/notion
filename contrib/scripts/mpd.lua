@@ -1,7 +1,7 @@
 -- Authors: Steve Jothen <sjothen@gmail.com>
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- Small interface to MusicPD
 --
 -- Author: Steve Jothen <sjothen at gmail dot com>
@@ -9,7 +9,7 @@
 -- Requires netcat
 --
 -- Change your path/settings according to your setup
--- 
+--
 -- defbindings("WScreen", {
 --   kpress("KP_6", "MusicPD.next()"),  -- next song
 --   kpress("KP_4", "MusicPD.previous()"), -- previous song
@@ -55,7 +55,7 @@ function MusicPD.create_command(command)
 end
 
 -- calls the command and returns table of key, value pairs
--- 
+--
 function MusicPD.call_command(command)
   local arg_cmd = MusicPD.create_command(command)
   local values = {}
@@ -97,7 +97,7 @@ function MusicPD.volume_up()
   if cur_volume == 100 then
     return nil
   elseif cur_volume + settings.volume_delta > 100 then
-    new_volume = string.format("setvol %d", 100) 
+    new_volume = string.format("setvol %d", 100)
   else
     new_volume = string.format("setvol %d", settings.volume_delta + cur_volume)
   end
@@ -141,7 +141,7 @@ end
 function MusicPD.toggle_play()
   local stats = MusicPD.call_command("status")
   if stats.state == "play" then
-    MusicPD.call_command("pause") 
+    MusicPD.call_command("pause")
   elseif stats.state == "pause" then
     MusicPD.call_command("pause")
   elseif stats.state == "stop" then

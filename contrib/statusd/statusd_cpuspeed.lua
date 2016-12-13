@@ -3,7 +3,7 @@
 -- Last Changed: 2004-11-05
 --
 -- statusd_cpuspeed.lua
--- 
+--
 -- Copyright (c) Relu Patrascu 2004.
 --
 -- Ion is free software; you can redistribute it and/or modify it under

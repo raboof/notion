@@ -1,7 +1,7 @@
 -- Authors: Unknown
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- Go to first found region with activity flag set.
 
 local function filteri(f, l)

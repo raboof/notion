@@ -1,7 +1,7 @@
 -- Authors: David Tweed, Cas Cremers, David Roundy, John Schreiner
 -- License: Unknown
 -- Last Changed: 2007-02-22
--- 
+--
 --[[
 	min_tabs.lua
 
