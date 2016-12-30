@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/bindmaps.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -18,7 +18,7 @@
 #include "regbind.h"
 
 
-/* 
+/*
  * This file contains higher-level bindmap management code
  */
 
@@ -82,10 +82,10 @@ void ioncore_deinit_bindmaps()
 bool ioncore_init_bindmaps()
 {
     known_bindmaps=make_rb();
-    
+
     if(known_bindmaps==NULL)
         return FALSE;
-    
+
     DO_ALLOC(screen, "WScreen", NULL);
     DO_ALLOC(mplex, "WMPlex", NULL);
     DO_ALLOC(mplex_toplevel, "WMPlex.toplevel", NULL);
@@ -99,7 +99,7 @@ bool ioncore_init_bindmaps()
     DO_ALLOC(groupcw, "WGroupCW", NULL);
     DO_ALLOC(groupws, "WGroupWS", NULL);
     DO_ALLOC(clientwin, "WClientWin", NULL);
-    
+
     return TRUE;
 }
 
@@ -108,9 +108,9 @@ bool ioncore_init_bindmaps()
 void ioncore_refresh_bindmaps()
 {
     Rb_node node;
-    
+
     ioncore_update_modmap();
-    
+
     rb_traverse(node,known_bindmaps){
         bindmap_refresh((WBindmap*)rb_val(node));
     }
@@ -123,14 +123,14 @@ WBindmap *ioncore_alloc_bindmap(const char *name, const StringIntMap *areas)
 
     if(bm==NULL)
         return NULL;
-    
+
     bm->areamap=areas;
-    
+
     if(!rb_insert(known_bindmaps, name, bm)){
         bindmap_destroy(bm);
         return NULL;
     }
-    
+
     return bm;
 }
 
@@ -145,10 +145,10 @@ void ioncore_free_bindmap(const char *name, WBindmap *bm)
 {
     int found=0;
     Rb_node node;
-    
+
     node=rb_find_key_n(known_bindmaps, name, &found);
     assert(found!=0 && rb_val(node)==(void*)bm);
-    
+
     rb_delete_node(node);
     bindmap_destroy(bm);
 }
@@ -158,12 +158,12 @@ WBindmap *ioncore_lookup_bindmap(const char *name)
 {
     int found=0;
     Rb_node node;
-    
+
     node=rb_find_key_n(known_bindmaps, name, &found);
-    
+
     if(found==0)
         return NULL;
-    
+
     return (WBindmap*)rb_val(node);
 }
 
@@ -186,28 +186,28 @@ ExtlTab ioncore_do_getbindings()
 {
     Rb_node node;
     ExtlTab tab;
-    
+
     tab=extl_create_table();
-    
+
     rb_traverse(node, known_bindmaps){
         ExtlTab bmtab=bindmap_getbindings((WBindmap*)rb_val(node));
         extl_table_sets_t(tab, (const char*)node->k.key, bmtab);
         extl_unref_table(bmtab);
     }
-    
+
     return tab;
 }
 
 
-WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state, 
+WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state,
                                        ExtlFn cycle, ExtlFn bcycle)
 {
     WBindmap *bindmap=create_bindmap();
     WBinding b;
-    
+
     if(bindmap==NULL)
         return NULL;
-        
+
     b.ksb=XkbKeycodeToKeysym(ioncore_g.dpy, kcb, 0, 0);
     b.kcb=kcb;
     b.state=state;
@@ -216,35 +216,35 @@ WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state,
     b.wait=FALSE;
     b.submap=NULL;
     b.func=extl_ref_fn(cycle);
-    
+
     if(!bindmap_add_binding(bindmap, &b)){
         extl_unref_fn(b.func);
         bindmap_destroy(bindmap);
         return NULL;
     }
-    
+
     if((b.state&ShiftMask)==0 && bcycle!=extl_fn_none()){
         b.func=extl_ref_fn(bcycle);
         b.state|=ShiftMask;
         bindmap_add_binding(bindmap, &b);
     }
-    
+
     return bindmap;
 }
 
 
-WBindmap *region_add_cycle_bindmap(WRegion *reg, uint kcb, uint state, 
+WBindmap *region_add_cycle_bindmap(WRegion *reg, uint kcb, uint state,
                                    ExtlFn cycle, ExtlFn bcycle)
 {
     WBindmap *bindmap=ioncore_create_cycle_bindmap(kcb, state, cycle, bcycle);
-    
+
     if(bindmap!=NULL){
         if(!region_add_bindmap(reg, bindmap)){
             bindmap_destroy(bindmap);
             return NULL;
         }
     }
-    
+
     return bindmap;
 }
 

@@ -1,8 +1,8 @@
 /*
  * ion/ioncore/llist.h
  *
- * Copyright (c) Tuomo Valkonen 2005-2009. 
- * 
+ * Copyright (c) Tuomo Valkonen 2005-2009.
+ *
  * See the included file LICENSE for details.
  */
 
@@ -38,10 +38,10 @@ extern WLListNode *llist_iter(WLListIterTmp *tmp);
 extern WRegion *llist_iter_regions(WLListIterTmp *tmp);
 extern WLListNode *llist_nth_node(WLListNode *list, uint n);
 extern ExtlTab llist_to_table(WLListNode *list);
-extern void llist_link_after(WLListNode **list, 
+extern void llist_link_after(WLListNode **list,
                              WLListNode *after, WLListNode *node);
 extern void llist_link_last(WLListNode **list, WLListNode *node);
-extern WLListNode *llist_index_to_after(WLListNode *list, 
+extern WLListNode *llist_index_to_after(WLListNode *list,
                                         WLListNode *current,
                                         int index);
 extern void llist_unlink(WLListNode **list, WLListNode *node);

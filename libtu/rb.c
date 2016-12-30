@@ -21,13 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301 USA
 
 /* Original code by Jim Plank (plank@cs.utk.edu) */
 /* modified for THINK C 6.0 for Macintosh by Chris Bartley */
- 
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include "rb.h"
- 
+
 static void mk_new_int(Rb_node l, Rb_node r, Rb_node p, int il);
 static Rb_node lprev(Rb_node n);
 static Rb_node rprev(Rb_node n);
@@ -38,7 +38,7 @@ static void rb_iprint_tree(Rb_node t, int level);
 
 /* Gcc complains if non-char* pointer is passed to printf %p  */
 #define DONT_COMPLAIN (char*)
- 
+
 #define isred(n) (n->s.red)
 #define isblack(n) (!isred(n))
 #define isleft(n) (n->s.left)
@@ -58,19 +58,19 @@ static void rb_iprint_tree(Rb_node t, int level);
 #define setnormal(n) { n->s.root = 0; n ->s.head = 0; }
 #define sibling(n) ((isleft(n)) ? n->p.parent->c.child.right \
                                 : n->p.parent->c.child.left)
- 
+
 static void insert(Rb_node item, Rb_node list)	/* Inserts to the end of a list */
 {
   Rb_node last_node;
- 
+
   last_node = list->c.list.blink;
- 
+
   list->c.list.blink = item;
   last_node->c.list.flink = item;
   item->c.list.blink = last_node;
   item->c.list.flink = list;
 }
- 
+
 static void delete_item(Rb_node item)		/* Deletes an arbitrary iterm */
 {
   item->c.list.flink->c.list.blink = item->c.list.blink;
@@ -86,11 +86,11 @@ static void delete_item(Rb_node item)		/* Deletes an arbitrary iterm */
   setblack(new);\
   setnormal(new);\
 }
- 
+
 static void mk_new_int(Rb_node l, Rb_node r, Rb_node p, int il)
 {
   Rb_node newnode;
- 
+
   newnode = (Rb_node) malloc(sizeof(struct rb_node));
   setint(newnode);
   setred(newnode);
@@ -115,9 +115,9 @@ static void mk_new_int(Rb_node l, Rb_node r, Rb_node p, int il)
     p->c.child.right = newnode;
   }
   recolor(newnode);
-}  
-  
-   
+}
+
+
 Rb_node lprev(Rb_node n)
 {
   if (ishead(n)) return n;
@@ -127,7 +127,7 @@ Rb_node lprev(Rb_node n)
   }
   return n->p.parent;
 }
- 
+
 Rb_node rprev(Rb_node n)
 {
   if (ishead(n)) return n;
@@ -137,11 +137,11 @@ Rb_node rprev(Rb_node n)
   }
   return n->p.parent;
 }
- 
+
 Rb_node make_rb()
 {
   Rb_node head;
- 
+
   head = (Rb_node) malloc (sizeof(struct rb_node));
   if(head!=NULL){
       head->c.list.flink = head;
@@ -152,21 +152,21 @@ Rb_node make_rb()
   }
   return head;
 }
- 
+
 Rb_node rb_find_ikey_n(Rb_node n, int ikey, int *fnd)
 {
   *fnd = 0;
   if (!ishead(n)) {
-    fprintf(stderr, "rb_find_ikey_n called on non-head %p\n", 
+    fprintf(stderr, "rb_find_ikey_n called on non-head %p\n",
             DONT_COMPLAIN n);
     exit(1);
   }
   if (n->p.root == n) return n;
   if (ikey == n->c.list.blink->k.ikey) {
     *fnd = 1;
-    return n->c.list.blink; 
+    return n->c.list.blink;
   }
-  if (ikey > n->c.list.blink->k.ikey) return n; 
+  if (ikey > n->c.list.blink->k.ikey) return n;
   else n = n->p.root;
   while (1) {
     if (isext(n)) return n;
@@ -177,17 +177,17 @@ Rb_node rb_find_ikey_n(Rb_node n, int ikey, int *fnd)
     n = (ikey < n->k.lext->k.ikey) ? n->c.child.left : n->c.child.right;
   }
 }
- 
+
 Rb_node rb_find_ikey(Rb_node n, int ikey)
 {
   int fnd;
   return rb_find_ikey_n(n, ikey, &fnd);
 }
- 
+
 Rb_node rb_find_gkey_n(Rb_node n, const void *key, Rb_compfn *fxn, int *fnd)
 {
   int cmp;
- 
+
   *fnd = 0;
   if (!ishead(n)) {
     fprintf(stderr, "rb_find_gkey_n called on non-head %p\n",
@@ -198,9 +198,9 @@ Rb_node rb_find_gkey_n(Rb_node n, const void *key, Rb_compfn *fxn, int *fnd)
   cmp = (*fxn)(key, n->c.list.blink->k.key);
   if (cmp == 0) {
     *fnd = 1;
-    return n->c.list.blink; 
+    return n->c.list.blink;
   }
-  if (cmp > 0) return n; 
+  if (cmp > 0) return n;
   else n = n->p.root;
   while (1) {
     if (isext(n)) return n;
@@ -212,7 +212,7 @@ Rb_node rb_find_gkey_n(Rb_node n, const void *key, Rb_compfn *fxn, int *fnd)
     if (cmp < 0) n = n->c.child.left ; else n = n->c.child.right;
   }
 }
- 
+
 Rb_node rb_find_gkey(Rb_node n, const void *key, Rb_compfn *fxn)
 {
   int fnd;
@@ -223,7 +223,7 @@ Rb_node rb_find_key_n(Rb_node n, const char *key, int *fnd)
 {
   return rb_find_gkey_n(n, key, (Rb_compfn*)strcmp, fnd);
 }
- 
+
 Rb_node rb_find_key(Rb_node n, const char *key)
 {
   int fnd;
@@ -239,7 +239,7 @@ Rb_node rb_find_pkey_n(Rb_node n, const void *key, int *fnd)
 {
   return rb_find_gkey_n(n, key, ptrcmp, fnd);
 }
- 
+
 Rb_node rb_find_pkey(Rb_node n, const void *key)
 {
   int fnd;
@@ -249,7 +249,7 @@ Rb_node rb_find_pkey(Rb_node n, const void *key)
 Rb_node rb_insert_b(Rb_node n, const void *key, void *val)
 {
   Rb_node newleft, newright, newnode, p;
- 
+
   if (ishead(n)) {
     if (n->p.root == n) {         /* Tree is empty */
       mk_new_ext(newnode, key, val);
@@ -275,30 +275,30 @@ Rb_node rb_insert_b(Rb_node n, const void *key, void *val)
     mk_new_int(newleft, n, n->p.parent, isleft(n));
     p = lprev(newleft);
     if (!ishead(p)) p->v.rext = newleft;
-    return newleft;    
+    return newleft;
   }
 }
- 
+
 static void recolor(Rb_node n)
-{  
+{
   Rb_node p, gp, s;
   int done = 0;
- 
+
   while(!done) {
     if (isroot(n)) {
       setblack(n);
       return;
     }
- 
+
     p = n->p.parent;
- 
+
     if (isblack(p)) return;
-    
+
     if (isroot(p)) {
       setblack(p);
       return;
     }
- 
+
     gp = p->p.parent;
     s = sibling(p);
     if (isred(s)) {
@@ -311,7 +311,7 @@ static void recolor(Rb_node n)
     }
   }
   /* p's sibling is black, p is red, gp is black */
-  
+
   if ((isleft(n) == 0) == (isleft(p) == 0)) {
     single_rotate(gp, isleft(n));
     setblack(p);
@@ -323,34 +323,34 @@ static void recolor(Rb_node n)
     setred(gp);
   }
 }
- 
+
 static void single_rotate(Rb_node y, int l)
 {
   int rl=0, ir=0;
   Rb_node x=NULL, yp=NULL;
- 
+
   ir = isroot(y);
   yp = y->p.parent;
   if (!ir) {
     rl = isleft(y);
   }
-  
+
   if (l) {
     x = y->c.child.left;
     y->c.child.left = x->c.child.right;
     setleft(y->c.child.left);
     y->c.child.left->p.parent = y;
     x->c.child.right = y;
-    setright(y);  
+    setright(y);
   } else {
     x = y->c.child.right;
     y->c.child.right = x->c.child.left;
     setright(y->c.child.right);
     y->c.child.right->p.parent = y;
     x->c.child.left = y;
-    setleft(y);  
+    setleft(y);
   }
- 
+
   x->p.parent = yp;
   y->p.parent = x;
   if (ir) {
@@ -367,12 +367,12 @@ static void single_rotate(Rb_node y, int l)
     }
   }
 }
-    
+
 void rb_delete_node(Rb_node n)
 {
   Rb_node s, p, gp;
   char ir;
- 
+
   if (isint(n)) {
     fprintf(stderr, "Cannot delete an internal node: %p\n", DONT_COMPLAIN n);
     exit(1);
@@ -387,7 +387,7 @@ void rb_delete_node(Rb_node n)
     p->p.root = p;
     free(n);
     return;
-  } 
+  }
   s = sibling(n);    /* The only node after deletion */
   if (isroot(p)) {
     s->p.parent = p->p.parent;
@@ -409,9 +409,9 @@ void rb_delete_node(Rb_node n)
   ir = isred(p);
   free(p);
   free(n);
-  
+
   if (isext(s)) {      /* Update proper rext and lext values */
-    p = lprev(s); 
+    p = lprev(s);
     if (!ishead(p)) p->v.rext = s;
     p = rprev(s);
     if (!ishead(p)) p->k.lext = s;
@@ -426,15 +426,15 @@ void rb_delete_node(Rb_node n)
     setblack(s);
     return;
   }
- 
+
   if (ir) return;
- 
+
   /* Recolor */
-  
+
   n = s;
   p = n->p.parent;
   s = sibling(n);
-  while(isblack(p) && isblack(s) && isint(s) && 
+  while(isblack(p) && isblack(s) && isint(s) &&
         isblack(s->c.child.left) && isblack(s->c.child.right)) {
     setred(s);
     n = p;
@@ -442,25 +442,25 @@ void rb_delete_node(Rb_node n)
     p = n->p.parent;
     s = sibling(n);
   }
-  
+
   if (isblack(p) && isred(s)) {  /* Rotation 2.3b */
     single_rotate(p, isright(n));
     setred(p);
     setblack(s);
     s = sibling(n);
   }
-    
+
   { Rb_node x, z; char il;
-    
+
     if (isext(s)) {
       fprintf(stderr, "DELETION ERROR: sibling not internal\n");
       exit(1);
     }
- 
+
     il = isleft(n);
     x = il ? s->c.child.left : s->c.child.right ;
     z = sibling(x);
- 
+
     if (isred(z)) {  /* Rotation 2.3f */
       single_rotate(p, !il);
       setblack(z);
@@ -488,8 +488,8 @@ void rb_delete_node(Rb_node n)
     }
   }
 }
- 
- 
+
+
 void rb_print_tree(Rb_node t, int level)
 {
   int i;
@@ -501,37 +501,37 @@ void rb_print_tree(Rb_node t, int level)
   } else {
     if (isext(t)) {
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Ext node %p: %c,%c: p=%p, k=%s\n", 
-             DONT_COMPLAIN t, isred(t)?'R':'B', isleft(t)?'l':'r', 
+      printf("Ext node %p: %c,%c: p=%p, k=%s\n",
+             DONT_COMPLAIN t, isred(t)?'R':'B', isleft(t)?'l':'r',
              DONT_COMPLAIN t->p.parent, DONT_COMPLAIN t->k.key);
     } else {
       rb_print_tree(t->c.child.left, level+2);
       rb_print_tree(t->c.child.right, level+2);
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Int node %p: %c,%c: l=%p, r=%p, p=%p, lr=(%s,%s)\n", 
+      printf("Int node %p: %c,%c: l=%p, r=%p, p=%p, lr=(%s,%s)\n",
              DONT_COMPLAIN t, isred(t)?'R':'B', isleft(t)?'l':'r',
-             DONT_COMPLAIN t->c.child.left, DONT_COMPLAIN t->c.child.right, 
-             DONT_COMPLAIN t->p.parent, DONT_COMPLAIN t->k.lext->k.key, 
+             DONT_COMPLAIN t->c.child.left, DONT_COMPLAIN t->c.child.right,
+             DONT_COMPLAIN t->p.parent, DONT_COMPLAIN t->k.lext->k.key,
              DONT_COMPLAIN t->v.rext->k.key);
     }
   }
 }
- 
+
 void rb_iprint_tree(Rb_node t, int level)
 {
   int i;
   if (ishead(t) && t->p.parent == t) {
     printf("tree %p is empty\n", DONT_COMPLAIN t);
   } else if (ishead(t)) {
-    printf("Head: %p.  Root = %p, < = %p, > = %p\n", 
+    printf("Head: %p.  Root = %p, < = %p, > = %p\n",
            DONT_COMPLAIN t, DONT_COMPLAIN t->p.root,
-           DONT_COMPLAIN t->c.list.blink, 
+           DONT_COMPLAIN t->c.list.blink,
            DONT_COMPLAIN t->c.list.flink);
     rb_iprint_tree(t->p.root, 0);
   } else {
     if (isext(t)) {
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Ext node %p: %c,%c: p=%p, <=%p, >=%p k=%d\n", 
+      printf("Ext node %p: %c,%c: p=%p, <=%p, >=%p k=%d\n",
              DONT_COMPLAIN t, isred(t)?'R':'B', isleft(t)?'l':'r',
              DONT_COMPLAIN t->p.parent, DONT_COMPLAIN t->c.list.blink,
              DONT_COMPLAIN t->c.list.flink, t->k.ikey);
@@ -539,19 +539,19 @@ void rb_iprint_tree(Rb_node t, int level)
       rb_iprint_tree(t->c.child.left, level+2);
       rb_iprint_tree(t->c.child.right, level+2);
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Int node %p: %c,%c: l=%p, r=%p, p=%p, lr=(%d,%d)\n", 
+      printf("Int node %p: %c,%c: l=%p, r=%p, p=%p, lr=(%d,%d)\n",
              DONT_COMPLAIN t, isred(t)?'R':'B', isleft(t)?'l':'r',
-             DONT_COMPLAIN t->c.child.left, DONT_COMPLAIN t->c.child.right, 
+             DONT_COMPLAIN t->c.child.left, DONT_COMPLAIN t->c.child.right,
              DONT_COMPLAIN t->p.parent, t->k.lext->k.ikey, t->v.rext->k.ikey);
     }
   }
 }
-      
+
 int rb_nblack(Rb_node n)
 {
   int nb;
   if (ishead(n) || isint(n)) {
-    fprintf(stderr, "ERROR: rb_nblack called on a non-external node %p\n", 
+    fprintf(stderr, "ERROR: rb_nblack called on a non-external node %p\n",
             DONT_COMPLAIN n);
     exit(1);
   }
@@ -562,12 +562,12 @@ int rb_nblack(Rb_node n)
   }
   return nb;
 }
- 
+
 int rb_plength(Rb_node n)
 {
   int pl;
   if (ishead(n) || isint(n)) {
-    fprintf(stderr, "ERROR: rb_plength called on a non-external node %p\n", 
+    fprintf(stderr, "ERROR: rb_plength called on a non-external node %p\n",
             DONT_COMPLAIN n);
     exit(1);
   }
@@ -578,25 +578,25 @@ int rb_plength(Rb_node n)
   }
   return pl;
 }
- 
+
 void rb_free_tree(Rb_node n)
 {
   if (!ishead(n)) {
     fprintf(stderr, "ERROR: Rb_free_tree called on a non-head node\n");
     exit(1);
   }
- 
+
   while(rb_first(n) != rb_nil(n)) {
     rb_delete_node(rb_first(n));
   }
   free(n);
 }
- 
+
 void *rb_val(Rb_node n)
 {
   return n->v.val;
 }
- 
+
 Rb_node rb_insert_a(Rb_node nd, const void *key, void *val)
 {
   return rb_insert_b(nd->c.list.flink, key, val);

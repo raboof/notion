@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/binding.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -30,7 +30,7 @@ enum{
 
 #define BINDING_IS_PSEUDO(A) \
     ((A)==BINDING_SUBMAP_ENTER || (A)==BINDING_SUBMAP_RELEASEMOD)
-    
+
 #define BINDMAP_INIT        {0, NULL, NULL, NULL, NULL}
 
 #define FOR_ALL_BINDINGS(B, NODE, MAP) \

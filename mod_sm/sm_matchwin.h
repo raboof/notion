@@ -1,8 +1,8 @@
 /*
  * ion/mod_sm/sm_mathcwin.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2009. 
- * 
+ * Copyright (c) Tuomo Valkonen 2004-2009.
+ *
  * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
  *
  * This is free software; you can redistribute it and/or modify it under
@@ -22,14 +22,14 @@ INTRSTRUCT(WWinMatch);
 
 DECLSTRUCT(WWinMatch){
     WPHolder *pholder;
-    
+
     char *client_id;
     char *window_role;
     char *wclass;
     char *winstance;
     char *wm_name;
     char *wm_cmd;
-    
+
     WWinMatch *next, *prev;
 };
 

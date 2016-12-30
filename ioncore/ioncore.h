@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/focus.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -16,7 +16,7 @@
 
 extern bool ioncore_init(const char *prog, int argc, char *argv[],
                          const char *localedir);
-extern bool ioncore_startup(const char *display, const char *cfgfile, 
+extern bool ioncore_startup(const char *display, const char *cfgfile,
                             int flags);
 extern void ioncore_deinit();
 

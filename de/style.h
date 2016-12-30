@@ -1,7 +1,7 @@
 /*
  * ion/de/style.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -29,7 +29,7 @@ enum{
 };
 
 enum{
-    DEBORDER_ALL=0, 
+    DEBORDER_ALL=0,
     DEBORDER_TB,
     DEBORDER_LR
 };
@@ -53,13 +53,13 @@ DECLSTRUCT(DEStyle){
     GrStyleSpec spec;
     int usecount;
     bool is_fallback;
-    
+
     WRootWin *rootwin;
-    
+
     DEStyle *based_on;
-    
-    GC normal_gc;    
-    
+
+    GC normal_gc;
+
     DEBorder border;
     bool cgrp_alloced;
     DEColourGroup cgrp;
@@ -69,18 +69,18 @@ DECLSTRUCT(DEStyle){
     DEFont *font;
     int textalign;
     uint spacing;
-    
+
     ExtlTab extras_table;
 
     /* Only initialised if used as a DETabBrush */
     bool tabbrush_data_ok;
     GC stipple_gc;
     GC copy_gc;
-    
+
     Pixmap tag_pixmap;
     int tag_pixmap_w;
     int tag_pixmap_h;
-    
+
     DEStyle *next, *prev;
 };
 

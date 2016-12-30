@@ -74,7 +74,7 @@ static bool is_option(const char *p)
           return FALSE;
      return TRUE;
 }
-    
+
 
 /* */
 
@@ -104,19 +104,19 @@ int optparser_get_opt()
             o_chain_ptr=NULL;
 
         o=find_chain_opt(*p, o_opts);
-        
+
         if(o==NULL)
             RET(E_OPT_INVALID_CHAIN_OPTION);
 
         goto do_arg;
     }
-    
+
     if(o_left<1)
         return OPT_ID_END;
 
     o_left--;
     p=*o_current++;
-    
+
     if(*p!='-'){
         dash=FALSE;
         if(o_mode!=OPTP_NO_DASH)
@@ -140,7 +140,7 @@ int optparser_get_opt()
         }
         if(*(p+2)!='\0' && o_mode==OPTP_MIDLONG)
             type=MIDLONG;
-    
+
         p2=p+1;
     }
 
@@ -154,7 +154,7 @@ int optparser_get_opt()
             l=strlen(o->longopt);
             if(strncmp(p2, o->longopt, l)!=0)
                 continue;
-            
+
             if(p2[l]=='\0'){
                 if(O_ARGS(o)==OPT_ARG)
                      RET(E_OPT_MISSING_ARGUMENT);
@@ -172,13 +172,13 @@ int optparser_get_opt()
         }else if(type==MIDLONG){
             if(o->longopt==NULL)
                 continue;
-            
+
             if(strcmp(p2, o->longopt)!=0)
                 continue;
         }else{ /* type==SHORT */
             if(*p2!=(O_ID(o)&~OPT_ID_RESERVED_FLAG))
                 continue;
-               
+
             if(*(p2+1)!='\0'){
                 if(o_mode==OPTP_CHAIN || o_mode==OPTP_NO_DASH){
                     /*valid_chain(p2+1, o_opts)*/
@@ -200,12 +200,12 @@ int optparser_get_opt()
                 }
             }
         }
-        
+
     do_arg:
-        
+
         if(!O_ARGS(o))
             return O_ID(o);
-        
+
         if(!o_left || is_option(*o_current)){
             if(O_ARGS(o)==OPT_OPT_ARG)
                 return O_ID(o);
@@ -215,10 +215,10 @@ int optparser_get_opt()
         o_args_left=1;
         return O_ID(o);
     }
-    
+
     if(dash)
         RET(E_OPT_INVALID_OPTION);
-    
+
     RET(OPT_ID_ARGUMENT);
 #undef RET
 }
@@ -230,7 +230,7 @@ int optparser_get_opt()
 const char* optparser_get_arg()
 {
     const char *p;
-    
+
     if(o_tmp!=NULL){
         /* If o_args_left==0, then were returning an invalid option
          * otherwise an immediate argument (e.g. -funsigned-char
@@ -242,7 +242,7 @@ const char* optparser_get_arg()
         o_tmp=NULL;
         return p;
     }
-        
+
     if(o_args_left<1 || o_left<1)
         return NULL;
 
@@ -257,7 +257,7 @@ const char* optparser_get_arg()
 static void warn_arg(const char *e)
 {
     const char *p=optparser_get_arg();
-    
+
     if(p==NULL)
         warn("%s (null)", e);
     else
@@ -285,7 +285,7 @@ void optparser_print_error()
     case E_OPT_SYNTAX_ERROR:
         warn_arg(TR("Syntax error while parsing"));
         break;
-                 
+
     case E_OPT_MISSING_ARGUMENT:
         warn_opt(TR("Missing argument to"));
         break;
@@ -293,7 +293,7 @@ void optparser_print_error()
     case E_OPT_UNEXPECTED_ARGUMENT:
         warn_opt(TR("No argument expected:"));
         break;
-        
+
     case OPT_ID_ARGUMENT:
         warn(TR("Unexpected argument"));
         break;
@@ -301,7 +301,7 @@ void optparser_print_error()
     default:
         warn(TR("(unknown error)"));
     }
-    
+
     o_tmp=NULL;
     o_error=0;
 }
@@ -313,26 +313,26 @@ void optparser_print_error()
 static uint opt_w(const OptParserOpt *opt, bool midlong)
 {
     uint w=0;
-    
+
     if((opt->optid&OPT_ID_NOSHORT_FLAG)==0){
         w+=2; /* "-o" */
         if(opt->longopt!=NULL)
             w+=2; /* ", " */
     }
-    
+
     if(opt->longopt!=NULL)
         w+=strlen(opt->longopt)+(midlong ? 1 : 2);
-    
+
     if(O_ARGS(opt)){
         if(opt->argname==NULL)
             w+=4;
         else
             w+=1+strlen(opt->argname); /* "=ARG" or " ARG" */
-        
+
         if(O_OPT_ARG(opt))
             w+=2; /* [ARG] */
     }
-    
+
     return w;
 }
 
@@ -349,23 +349,23 @@ static void print_opt(const OptParserOpt *opt, bool midlong,
     FILE *f=stdout;
     const char *p, *p2, *p3;
     uint w=0;
-    
+
     fprintf(f, SPACER1);
-    
+
     /* short opt */
-    
+
     if((O_ID(opt)&OPT_ID_NOSHORT_FLAG)==0){
         fprintf(f, "-%c", O_ID(opt)&~OPT_ID_RESERVED_FLAG);
         w+=2;
-        
+
         if(opt->longopt!=NULL){
             fprintf(f, ", ");
             w+=2;
         }
     }
-    
+
     /* long opt */
-    
+
     if(opt->longopt!=NULL){
         if(midlong){
             w++;
@@ -376,21 +376,21 @@ static void print_opt(const OptParserOpt *opt, bool midlong,
         }
         w+=strlen(opt->longopt);
     }
-    
+
     /* arg */
-    
+
     if(O_ARGS(opt)){
         w++;
         if(opt->longopt!=NULL && !midlong)
             putc('=', f);
         else
             putc(' ', f);
-        
+
         if(O_OPT_ARG(opt)){
             w+=2;
             putc('[', f);
         }
-        
+
         if(opt->argname!=NULL){
             fprintf(f, "%s", opt->argname);
             w+=strlen(opt->argname);
@@ -402,70 +402,70 @@ static void print_opt(const OptParserOpt *opt, bool midlong,
         if(O_OPT_ARG(opt))
             putc(']', f);
     }
-    
+
     while(w++<maxw)
         putc(' ', f);
-    
+
     /* descr */
-    
+
     p=p2=opt->descr;
-    
+
     if(p==NULL){
         putc('\n', f);
         return;
     }
-    
+
     fprintf(f, SPACER2);
 
     maxw+=OFF1+OFF2;
     tw-=maxw;
-    
+
     while(strlen(p)>tw){
         p3=p2=p+tw-2;
-        
+
         while(*p2!=' ' && p2!=p)
             p2--;
-        
+
         while(*p3!=' ' && *p3!='\0')
             p3++;
-        
+
         if((uint)(p3-p2)>tw){
             /* long word - just wrap */
             p2=p+tw-2;
         }
-            
+
         writef(f, p, p2-p);
         if(*p2==' ')
             putc('\n', f);
         else
             fprintf(f, "\\\n");
-        
+
         p=p2+1;
-        
+
         w=maxw;
         while(w--)
             putc(' ', f);
     }
-    
+
     fprintf(f, "%s\n", p);
 }
 
-                      
+
 void optparser_printhelp(int mode, const OptParserOpt *opts)
 {
     uint w, maxw=0;
     const OptParserOpt *o;
     bool midlong=mode&OPTP_MIDLONG;
-    
+
     o=opts;
     for(; O_ID(o); o++){
         w=opt_w(o, midlong);
         if(w>maxw)
             maxw=w;
     }
-    
+
     o=opts;
-    
+
     for(; O_ID(o); o++)
         print_opt(o, midlong, maxw, TERM_W);
 }

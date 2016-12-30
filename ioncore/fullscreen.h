@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/fullscreen.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */

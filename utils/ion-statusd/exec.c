@@ -1,7 +1,7 @@
 /*
  * ion/utils/ion-statusd/exec.c
  *
- * Copyright (c) Tuomo Valkonen 2005-2009. 
+ * Copyright (c) Tuomo Valkonen 2005-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -12,7 +12,7 @@
 
 
 /*EXTL_DOC
- * Run \var{cmd} in the background. 
+ * Run \var{cmd} in the background.
  */
 EXTL_SAFE
 EXTL_EXPORT

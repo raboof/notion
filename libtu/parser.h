@@ -1,7 +1,7 @@
 /*
  * libtu/parser.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -25,7 +25,7 @@
  *     : = conditional        (":c:s")
  *  + = 1 or more times last (most be the last, "l+")
  * special entries:
- * 
+ *
  * "#end"         call this handler at the end of section.
  * "#cancel"     call this handler when recovering from error
  */

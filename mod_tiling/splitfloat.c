@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/splitext.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -31,7 +31,7 @@
 static void splitfloat_set_borderlines(WSplitFloat *split)
 {
     int dir=split->ssplit.dir;
-    
+
     split->tlpwin->bline=(dir==SPLIT_HORIZONTAL
                           ? GR_BORDERLINE_RIGHT
                           : GR_BORDERLINE_BOTTOM);
@@ -42,12 +42,12 @@ static void splitfloat_set_borderlines(WSplitFloat *split)
 }
 
 
-bool splitfloat_init(WSplitFloat *split, const WRectangle *geom, 
+bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
                      WTiling *ws, int dir)
 {
     WFitParams fp;
     WWindow *par=REGION_PARENT(ws);
-    
+
     assert(par!=NULL);
 
     fp.g=*geom;
@@ -63,10 +63,10 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
         destroy_obj((Obj*)split->tlpwin);
         return FALSE;
     }
-    
+
     ((WRegion*)split->brpwin)->flags|=REGION_SKIP_FOCUS;
     ((WRegion*)split->tlpwin)->flags|=REGION_SKIP_FOCUS;
-    
+
     if(!splitsplit_init(&(split->ssplit), geom, dir)){
         destroy_obj((Obj*)split->brpwin);
         destroy_obj((Obj*)split->tlpwin);
@@ -75,14 +75,14 @@ bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
 
     split->tlpwin->splitfloat=split;
     split->brpwin->splitfloat=split;
-    
+
     splitfloat_set_borderlines(split);
 
     if(REGION_IS_MAPPED(ws)){
         region_map((WRegion*)(split->tlpwin));
         region_map((WRegion*)(split->brpwin));
     }
-    
+
     return TRUE;
 }
 
@@ -108,7 +108,7 @@ void splitfloat_deinit(WSplitFloat *split)
         tmp->splitfloat=NULL;
         destroy_obj((Obj*)tmp);
     }
-    
+
     splitsplit_deinit(&(split->ssplit));
 }
 
@@ -119,11 +119,11 @@ void splitfloat_deinit(WSplitFloat *split)
 /*{{{ X window handling */
 
 
-static void stack_stacking_reg(WRegion *reg, 
+static void stack_stacking_reg(WRegion *reg,
                                Window *bottomret, Window *topret)
 {
     Window b=None, t=None;
-    
+
     if(reg!=NULL){
         region_stacking(reg, &b, &t);
         if(*bottomret==None)
@@ -138,7 +138,7 @@ static void stack_stacking_split(WSplit *split,
                                  Window *bottomret, Window *topret)
 {
     Window b=None, t=None;
-    
+
     if(split!=NULL){
         split_stacking(split, &b, &t);
         if(*bottomret==None)
@@ -149,12 +149,12 @@ static void stack_stacking_split(WSplit *split,
 }
 
 
-static void splitfloat_stacking(WSplitFloat *split, 
+static void splitfloat_stacking(WSplitFloat *split,
                                 Window *bottomret, Window *topret)
 {
     *bottomret=None;
     *topret=None;
-    
+
     if(split->ssplit.current!=SPLIT_CURRENT_TL){
         stack_stacking_reg((WRegion*)split->tlpwin, bottomret, topret);
         stack_stacking_split(split->ssplit.tl, bottomret, topret);
@@ -172,7 +172,7 @@ static void splitfloat_stacking(WSplitFloat *split,
 static void stack_restack_reg(WRegion *reg, Window *other, int *mode)
 {
     Window b=None, t=None;
-    
+
     if(reg!=NULL){
         region_restack(reg, *other, *mode);
         region_stacking(reg, &b, &t);
@@ -187,7 +187,7 @@ static void stack_restack_reg(WRegion *reg, Window *other, int *mode)
 static void stack_restack_split(WSplit *split, Window *other, int *mode)
 {
     Window b=None, t=None;
-    
+
     if(split!=NULL){
         split_restack(split, *other, *mode);
         split_stacking(split, &b, &t);
@@ -315,18 +315,18 @@ void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g)
     }
 }
 
-    
+
 static int infadd(int x, int y)
 {
     return ((x==INT_MAX || y==INT_MAX) ? INT_MAX : (x+y));
 }
 
 
-static int splitfloat_get_handle(WSplitFloat *split, int dir, 
+static int splitfloat_get_handle(WSplitFloat *split, int dir,
                                   WSplit *other)
 {
     assert(other==split->ssplit.tl || other==split->ssplit.br);
-    
+
     if(dir!=split->ssplit.dir)
         return 0;
 
@@ -341,7 +341,7 @@ static int splitfloat_get_handle(WSplitFloat *split, int dir,
         else if(other==split->ssplit.br)
             return split->tlpwin->bdw.top;
     }
-    
+
     return 0;
 }
 
@@ -366,7 +366,7 @@ static void splitfloat_update_bounds(WSplitFloat *split, bool recursive)
     WSplit *node=(WSplit*)split;
     int tl_max_w, br_max_w, tl_max_h, br_max_h;
     int tl_min_w, br_min_w, tl_min_h, br_min_h;
-    
+
     if(recursive){
         split_update_bounds(tl, recursive);
         split_update_bounds(br, recursive);
@@ -380,7 +380,7 @@ static void splitfloat_update_bounds(WSplitFloat *split, bool recursive)
     br_min_w=splitfloat_get_min(split, SPLIT_HORIZONTAL, br);
     tl_min_h=splitfloat_get_min(split, SPLIT_VERTICAL, tl);
     br_min_h=splitfloat_get_min(split, SPLIT_VERTICAL, br);
-    
+
     if(split->ssplit.dir==SPLIT_HORIZONTAL){
         node->max_w=infadd(tl_max_w, br_max_w);
         node->min_w=MINOF(tl_min_w, br_min_w);
@@ -403,7 +403,7 @@ void splitfloat_update_handles(WSplitFloat *split, const WRectangle *tlg_,
                                const WRectangle *brg_)
 {
     WRectangle tlg=*tlg_, brg=*brg_;
-    
+
     if(split->ssplit.dir==SPLIT_HORIZONTAL){
         tlg.w=split->tlpwin->bdw.right;
         tlg.x=tlg_->x+tlg_->w-tlg.w;
@@ -413,7 +413,7 @@ void splitfloat_update_handles(WSplitFloat *split, const WRectangle *tlg_,
         tlg.y=tlg_->y+tlg_->h-tlg.h;
         brg.h=split->brpwin->bdw.top;
     }
-    
+
     region_fit((WRegion*)split->tlpwin, &tlg, REGION_FIT_EXACT);
     region_fit((WRegion*)split->brpwin, &brg, REGION_FIT_EXACT);
 }
@@ -428,14 +428,14 @@ static void bound(int *what, int min, int max)
 }
 
 
-static void adjust_sizes(int *tls_, int *brs_, int nsize, 
+static void adjust_sizes(int *tls_, int *brs_, int nsize,
                          int tlmin, int brmin, int tlmax, int brmax,
                          int primn)
 {
     int tls=MAXOF(0, *tls_);
     int brs=MAXOF(0, *brs_);
     nsize=MAXOF(1, nsize);
-    
+
     if(primn==PRIMN_TL){
         tls=MAXOF(1, nsize-brs);
         bound(&tls, tlmin, tlmax);
@@ -458,7 +458,7 @@ static void adjust_sizes(int *tls_, int *brs_, int nsize,
         tls=nsize-brs;
         bound(&tls, tlmin, tlmax);
     }
-    
+
     *tls_=tls;
     *brs_=brs;
 }
@@ -472,7 +472,7 @@ static void adjust_size(int *sz, int dir, WSplitFloat *f, WSplit *s)
 }
 
 
-static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng, 
+static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
                                  int hprimn, int vprimn, bool transpose)
 {
     WRectangle tlg=GEOM(split->ssplit.tl);
@@ -480,7 +480,7 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
     WRectangle ntlg=*ng, nbrg=*ng;
     int dir=split->ssplit.dir;
     bool adjust=TRUE;
-    
+
     splitfloat_tl_cnt_to_pwin(split, &tlg);
     splitfloat_br_cnt_to_pwin(split, &brg);
 
@@ -523,7 +523,7 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
                          splitfloat_get_max(split, dir, split->ssplit.br),
                          vprimn);
         }
-        
+
         nbrg.y=ng->y+ng->h-nbrg.h;
     }else{
         if(ng->w<=tlg.w+brg.w){
@@ -542,7 +542,7 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
             ntlg.w=tlg.w;
             nbrg.w=brg.w;
         }
-        
+
         if(adjust){
             adjust_sizes(&ntlg.w, &nbrg.w, ng->w,
                          splitfloat_get_min(split, dir, split->ssplit.tl),
@@ -551,7 +551,7 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
                          splitfloat_get_max(split, dir, split->ssplit.br),
                          hprimn);
         }
-        
+
         nbrg.x=ng->x+ng->w-nbrg.w;
     }
 
@@ -571,7 +571,7 @@ static void calc_amount(int *amount, int *oamount,
                         const WRectangle *ng, const WRectangle *og)
 {
     *oamount=0;
-    
+
     if(rs>=0){
         if(p->dir==SPLIT_VERTICAL)
             *amount=MAXOF(0, MINOF(rs, GEOM(p).h-ng->h));
@@ -593,8 +593,8 @@ static void calc_amount(int *amount, int *oamount,
 }
 
 
-static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node, 
-                                 RootwardAmount *ha, RootwardAmount *va, 
+static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
+                                 RootwardAmount *ha, RootwardAmount *va,
                                  WRectangle *rg, bool tryonly)
 {
     int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
@@ -604,11 +604,11 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
     int amount=0, oamount=0, omax;
     int thisnode;
     WSplitSplit *p=&(split->ssplit);
-    
+
     assert(!ha->any || ha->tl==0);
     assert(!va->any || va->tl==0);
     assert(p->tl==node || p->br==node);
-    
+
     if(p->tl==node){
         other=p->br;
         thisnode=PRIMN_TL;
@@ -619,7 +619,7 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
 
     ng=GEOM(node);
     og=GEOM(other);
-    
+
     if(thisnode==PRIMN_TL){
         splitfloat_tl_cnt_to_pwin(split, &ng);
         splitfloat_br_cnt_to_pwin(split, &og);
@@ -629,9 +629,9 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
     }
 
     ca=(p->dir==SPLIT_VERTICAL ? va : ha);
-    
+
     omax=splitfloat_get_max(split, p->dir, other);
-    
+
     if(thisnode==PRIMN_TL || ca->any){
         calc_amount(&amount, &oamount, ca->br, p, omax, &ng, &og);
         ca->br-=amount;
@@ -639,15 +639,15 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
         calc_amount(&amount, &oamount, ca->tl, p, omax, &ng, &og);
         ca->tl-=amount;
     }
-    
-    if(((WSplit*)p)->parent==NULL /*|| 
+
+    if(((WSplit*)p)->parent==NULL /*||
        (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/){
         pg=((WSplit*)p)->geom;
     }else{
         splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, ha, va,
                              &pg, tryonly);
     }
-    
+
     assert(pg.w>=0 && pg.h>=0);
 
     nog=pg;
@@ -670,7 +670,7 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
             nng.x=pg.x+pg.w-nng.w;
         hprimn=thisnode;
     }
-    
+
     if(!tryonly){
         GEOM(p)=pg;
 
@@ -681,11 +681,11 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
             splitfloat_update_handles(split, &nog, &nng);
             splitfloat_tl_pwin_to_cnt(split, &nog);
         }
-            
+
         /* Entä jos 'other' on stdisp? */
         split_do_resize(other, &nog, hprimn, vprimn, FALSE);
     }
-    
+
     *rg=nng;
     if(thisnode==PRIMN_TL)
         splitfloat_tl_pwin_to_cnt(split, rg);
@@ -697,9 +697,9 @@ static void splitfloat_do_rqsize(WSplitFloat *split, WSplit *node,
 void splitfloat_flip(WSplitFloat *split)
 {
     WRectangle tlg, brg;
-    
+
     splitsplit_flip_default(&split->ssplit);
-    
+
     tlg=split->ssplit.tl->geom;
     brg=split->ssplit.br->geom;
 
@@ -723,12 +723,12 @@ static void adjust_tls_brs(int *tls, int *brs, int total)
         *tls=MINS;
     if(*brs<=0)
         *brs=MINS;
-    
+
     if(*tls+*brs<total){
         *tls=total*(*tls)/(*tls+*brs);
         *brs=total-(*tls);
     }
-        
+
     *tls=MINOF(MAXOF(MINS, *tls), total);
     *brs=MINOF(MAXOF(MINS, *brs), total);
 }
@@ -739,7 +739,7 @@ static void calc_tlg_brg(const WRectangle *geom, int tls, int brs, int dir,
 {
     *tlg=*geom;
     *brg=*geom;
-    
+
     if(dir==SPLIT_HORIZONTAL){
         adjust_tls_brs(&tls, &brs, geom->w);
         tlg->w=tls;
@@ -767,10 +767,10 @@ WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab)
     set+=(extl_table_gets_i(tab, "tls", &tls)==TRUE);
     set+=(extl_table_gets_i(tab, "brs", &brs)==TRUE);
     set+=(extl_table_gets_s(tab, "dir", &dir_str)==TRUE);
-    
+
     if(set!=3)
         return NULL;
-    
+
     if(strcmp(dir_str, "vertical")==0){
         dir=SPLIT_VERTICAL;
     }else if(strcmp(dir_str, "horizontal")==0){
@@ -795,18 +795,18 @@ WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab)
             brs+=split->brpwin->bdw.top;
         }
     }
-                               
+
     calc_tlg_brg(geom, tls, brs, dir, &tlg, &brg);
-    
+
     splitfloat_update_handles(split, &tlg, &brg);
-    
+
     if(extl_table_gets_t(tab, "tl", &subtab)){
         WRectangle g=tlg;
         splitfloat_tl_pwin_to_cnt(split, &g);
         tl=tiling_load_node(ws, &g, subtab);
         extl_unref_table(subtab);
     }
-    
+
     if(extl_table_gets_t(tab, "br", &subtab)){
         WRectangle g;
         if(tl==NULL){
@@ -818,7 +818,7 @@ WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab)
         br=tiling_load_node(ws, &g, subtab);
         extl_unref_table(subtab);
     }
-    
+
     if(tl==NULL || br==NULL){
         destroy_obj((Obj*)split);
         if(tl!=NULL){
@@ -831,13 +831,13 @@ WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab)
         }
         return NULL;
     }
-    
+
     tl->parent=(WSplitInner*)split;
     br->parent=(WSplitInner*)split;
 
     split->ssplit.tl=tl;
     split->ssplit.br=br;
-    
+
     return (WSplit*)split;
 }
 
@@ -849,7 +849,7 @@ WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, ExtlTab tab)
 
 
 WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
-                                       int nmins, WRegionSimpleCreateFn *fn, 
+                                       int nmins, WRegionSimpleCreateFn *fn,
                                        WTiling *ws)
 {
     WSplitFloat *sf;
@@ -861,20 +861,20 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
     WRegion *nreg;
     WSplitRegion *nnode;
     WSplitInner *psplit;
-    
+
     if(primn!=PRIMN_TL && primn!=PRIMN_BR)
         primn=PRIMN_BR;
 
     split_update_bounds(split_find_root(node), TRUE);
-    
+
     sf=create_splitfloat(&node->geom, ws, dir);
-    
+
     if(sf==NULL)
         return NULL;
-    
+
     omins=(dir==SPLIT_VERTICAL ? node->min_h : node->min_w);
     s=split_size(node, dir);
-    
+
     if(primn==PRIMN_BR){
         bn=BR_BORDER(sf);
         bo=TL_BORDER(sf);
@@ -882,11 +882,11 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
         bn=TL_BORDER(sf);
         bo=BR_BORDER(sf);
     }
-    
+
     mins=MAXOF(omins+bo, nmins+bn);
 
     /* Potentially resize old node. */
-    
+
     splittree_begin_resize();
 
     if(mins>s){
@@ -895,7 +895,7 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
             ng.h=mins;
         else
             ng.w=mins;
-        
+
         split_do_rqgeom_(node, &ng, TRUE, TRUE, &rg, TRUE);
         rs=(dir==SPLIT_VERTICAL ? rg.h : rg.w);
         if(rs<mins){
@@ -908,14 +908,14 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
     }else{
         splittree_scan_stdisp_rootward(node);
     }
-    
+
     /* Calculate geometries. */
-    
+
     sn=MAXOF(nmins+bn, s/2);
     so=MAXOF(omins+bo, s-s/2);
 
     ((WSplit*)sf)->geom=node->geom;
-    
+
     if(primn==PRIMN_TL){
         calc_tlg_brg(&(node->geom), sn, so, dir, &gn, &go);
         splitfloat_update_handles(sf, &gn, &go);
@@ -929,12 +929,12 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
     }
 
     /* Create the region. */
-    
+
     fp.mode=REGION_FIT_EXACT;
     fp.g=gnc;
-    
+
     nreg=fn(REGION_PARENT(ws), &fp);
-    
+
     if(nreg==NULL){
         destroy_obj((Obj*)sf);
         return NULL;
@@ -946,18 +946,18 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
         destroy_obj((Obj*)sf);
         return NULL;
     }
-    
-    /* Now that everything's ok, resize and move original node. */    
-    
-    split_do_resize(node, &goc, 
+
+    /* Now that everything's ok, resize and move original node. */
+
+    split_do_resize(node, &goc,
                     (dir==SPLIT_HORIZONTAL ? primn : PRIMN_ANY),
                     (dir==SPLIT_VERTICAL ? primn : PRIMN_ANY),
                     FALSE);
 
     /* Set up split structure. */
-    
+
     psplit=node->parent;
-    
+
     if(psplit!=NULL)
         splitinner_replace(psplit, node, (WSplit*)sf);
     else
@@ -965,7 +965,7 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
 
     node->parent=(WSplitInner*)sf;
     ((WSplit*)nnode)->parent=(WSplitInner*)sf;
-    
+
     if(primn==PRIMN_BR){
         sf->ssplit.tl=node;
         sf->ssplit.br=(WSplit*)nnode;
@@ -973,9 +973,9 @@ WSplitRegion *splittree_split_floating(WSplit *node, int dir, int primn,
         sf->ssplit.tl=(WSplit*)nnode;
         sf->ssplit.br=node;
     }
-    
+
     /*splittree_end_resize();*/
-    
+
     return nnode;
 }
 

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/tags.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -25,7 +25,7 @@ bool region_set_tagged(WRegion *reg, int sp)
 {
     bool set=(reg->flags&REGION_TAGGED);
     bool nset=libtu_do_setparam(sp, set);
-    
+
     if(XOR(nset, set)){
         if(reg->flags&REGION_TAGGED){
             reg->flags&=~REGION_TAGGED;
@@ -89,18 +89,18 @@ EXTL_EXPORT
 WRegion *ioncore_tagged_first(bool untag)
 {
     WRegion *reg;
-    
+
     if(!untag){
         reg=(WRegion*)OBJLIST_FIRST(WRegion*, taglist);
     }else{
         reg=(WRegion*)objlist_take_first(&taglist);
-    
+
         if(reg!=NULL){
             reg->flags&=~REGION_TAGGED;
             region_notify_change(reg, ioncore_g.notifies.tag);
         }
     }
-    
+
     return reg;
 }
 

@@ -1,8 +1,8 @@
 /*
  * ion/mainloop/select.h
- * 
+ *
  * Based on a contributed readfds code.
- * 
+ *
  * See the included file LICENSE for details.
  */
 

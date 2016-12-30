@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/splitfloat.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -27,12 +27,12 @@ DECLCLASS(WSplitFloat){
 extern bool splitfloat_init(WSplitFloat *split, const WRectangle *geom,
                             WTiling *ws, int dir);
 
-extern WSplitFloat *create_splitfloat(const WRectangle *geom, 
+extern WSplitFloat *create_splitfloat(const WRectangle *geom,
                                       WTiling *ws, int dir);
 
 extern void splitfloat_deinit(WSplitFloat *split);
 
-extern void splitfloat_update_handles(WSplitFloat *split, 
+extern void splitfloat_update_handles(WSplitFloat *split,
                                       const WRectangle *tlg,
                                       const WRectangle *brg);
 extern void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g);
@@ -42,12 +42,12 @@ extern void splitfloat_br_cnt_to_pwin(WSplitFloat *split, WRectangle *g);
 
 extern void splitfloat_flip(WSplitFloat *split);
 
-extern WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom, 
+extern WSplit *load_splitfloat(WTiling *ws, const WRectangle *geom,
                                ExtlTab tab);
 
-extern WSplitRegion *splittree_split_floating(WSplit *node, int dir, 
-                                              int primn, int nmins, 
-                                              WRegionSimpleCreateFn *fn, 
+extern WSplitRegion *splittree_split_floating(WSplit *node, int dir,
+                                              int primn, int nmins,
+                                              WRegionSimpleCreateFn *fn,
                                               WTiling *ws);
 
 #endif /* ION_MOD_TILING_SPLITFLOAT_H */

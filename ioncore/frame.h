@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/frame.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -53,26 +53,26 @@ typedef enum{
     FRAME_BAR_SHAPED,
     FRAME_BAR_NONE
 } WFrameBarMode;
-        
+
 
 
 DECLCLASS(WFrame){
     WMPlex mplex;
-    
+
     int flags;
     WFrameMode mode;
     WRectangle saved_geom;
-    
+
     int tab_dragged_idx;
     void *quasiact_source;
-    
+
     GrBrush *brush;
     GrBrush *bar_brush;
     GrStyleSpec baseattr;
     GrTransparency tr_mode;
     GrTextElem *titles;
     int titles_n;
-    
+
     /* Bar stuff */
     WFrameBarMode barmode;
     int bar_w, bar_h;

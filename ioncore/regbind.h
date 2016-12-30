@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/regbind.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -28,17 +28,17 @@ extern void region_remove_bindmap(WRegion *reg, WBindmap *bindmap);
 
 extern void region_remove_bindings(WRegion *reg);
 
-extern WBinding *region_lookup_keybinding(WRegion *reg, 
-                                          int act, uint state, uint kcb, 
+extern WBinding *region_lookup_keybinding(WRegion *reg,
+                                          int act, uint state, uint kcb,
                                           const WSubmapState *sc,
                                           WRegion **binding_owner_ret);
 extern WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
                                             uint kcb, int area);
 
-extern void rbind_binding_added(const WRegBindingInfo *rbind, 
+extern void rbind_binding_added(const WRegBindingInfo *rbind,
                                 const WBinding *binding,
                                 const WBindmap *bindmap);
-extern void rbind_binding_removed(const WRegBindingInfo *rbind, 
+extern void rbind_binding_removed(const WRegBindingInfo *rbind,
                                   const WBinding *binding,
                                   const WBindmap *bindmap);
 

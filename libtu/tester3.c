@@ -1,7 +1,7 @@
 /*
  * libtu/tester3.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -19,7 +19,7 @@ static const char usage[]=
     "\n"
     "Where options are:\n"
     "$o\n";
-    
+
 
 static OptParserOpt opts[]={
     {'o',    "opt", OPT_ARG, "OPTION", "foo bar baz quk asdf jklö äölk dfgh quik aaaa bbbb cccc dddd eeee ffff"},
@@ -29,7 +29,7 @@ static OptParserOpt opts[]={
     {'x',    "extract", 0, NULL, "asdfasdf"},
     {0, NULL, 0, NULL, NULL}
 };
-    
+
 static OptParserCommonInfo tester3_cinfo={
     NULL,
     usage,
@@ -40,11 +40,11 @@ static OptParserCommonInfo tester3_cinfo={
 int main(int argc, char *argv[])
 {
     int opt;
-    
+
     libtu_init(argv[0]);
-    
+
     optparser_init(argc, argv, OPTP_NO_DASH, opts, &tester3_cinfo);
-    
+
     while((opt=optparser_get_opt())){
         switch(opt){
         case 'o':

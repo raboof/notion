@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/rootwin.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -27,14 +27,14 @@
 DECLCLASS(WRootWin){
     WWindow wwin;
     int xscr;
-    
+
     Colormap default_cmap;
-    
+
     Window *tmpwins;
     int tmpnwins;
-    
+
     Window dummy_win;
-    
+
     GC xor_gc;
 };
 

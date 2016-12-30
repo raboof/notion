@@ -1,7 +1,7 @@
 /*
  * libtu/locale.h
  *
- * Copyright (c) Tuomo Valkonen 2004. 
+ * Copyright (c) Tuomo Valkonen 2004.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.

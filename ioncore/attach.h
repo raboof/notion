@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/attach.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -14,12 +14,12 @@
 #include "window.h"
 
 
-typedef WRegion *WRegionCreateFn(WWindow *parent, 
-                                 const WFitParams *fp, 
+typedef WRegion *WRegionCreateFn(WWindow *parent,
+                                 const WFitParams *fp,
                                  void *param);
 
-typedef WRegion *WRegionAttachFn(WRegion *reg, 
-                                 void *param, 
+typedef WRegion *WRegionAttachFn(WRegion *reg,
+                                 void *param,
                                  WRegionAttachData *data);
 
 

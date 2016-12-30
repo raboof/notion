@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/pointer.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -23,9 +23,9 @@ extern void ioncore_do_handle_motionnotify(XMotionEvent *ev);
 extern XEvent *ioncore_current_pointer_event();
 extern WRegion *ioncore_pointer_grab_region();
 
-extern bool ioncore_set_drag_handlers(WRegion *reg, 
+extern bool ioncore_set_drag_handlers(WRegion *reg,
                                       WMotionHandler *begin,
-                                      WMotionHandler *motion, 
+                                      WMotionHandler *motion,
                                       WButtonHandler *end,
                                       GrabHandler *handler,
                                       GrabKilledHandler *killhandler);

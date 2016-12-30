@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/saveload.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -72,7 +72,7 @@ WPHolder *ioncore_get_load_pholder()
 }
 
 
-WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
+WRegion *create_region_load(WWindow *par, const WFitParams *fp,
                             ExtlTab tab, WPHolder **sm_ph_p)
 {
     char *objclass=NULL, *name=NULL;
@@ -80,17 +80,17 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     WRegClassInfo *info=NULL;
     WRegion *reg=NULL;
     WPHolder **old_ph_p;
-    
+
     if(!extl_table_gets_s(tab, "type", &objclass))
         return NULL;
-    
+
     if(objclass==NULL)
         return NULL;
-    
+
     info=ioncore_lookup_regclass(objclass, FALSE);
     if(info!=NULL)
         fn=info->lc_fn;
-    
+
     if(fn==NULL){
         warn(TR("Unknown class \"%s\", cannot create region."),
              objclass);
@@ -99,14 +99,14 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     }
 
     free(objclass);
-    
+
     old_ph_p=current_ph_p;
     current_ph_p=sm_ph_p;
-    
+
     reg=fn(par, fp, tab);
-    
+
     current_ph_p=old_ph_p;
-    
+
     if(reg!=NULL){
         if(!OBJ_IS(reg, WClientWin)){
             if(extl_table_gets_s(tab, "name", &name)){
@@ -115,11 +115,11 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
             }
         }
     }
-    
+
     return reg;
 }
 
-    
+
 /*}}}*/
 
 
@@ -136,16 +136,16 @@ ExtlTab region_get_base_configuration(WRegion *reg)
 {
     const char *name;
     ExtlTab tab;
-    
+
     tab=extl_create_table();
-    
+
     extl_table_sets_s(tab, "type", OBJ_TYPESTR(reg));
-    
+
     name=region_name(reg);
-    
+
     if(name!=NULL && !OBJ_IS(reg, WClientWin))
         extl_table_sets_s(tab, "name", name);
-    
+
     return tab;
 }
 
@@ -171,13 +171,13 @@ EXTL_EXPORT_AS(WRegion, get_configuration)
 ExtlTab region_get_configuration_extl(WRegion *reg, bool clientwins)
 {
     ExtlTab tab;
-    
+
     get_config_clientwins=clientwins;
-    
+
     tab=region_get_configuration(reg);
-    
+
     get_config_clientwins=TRUE;
-    
+
     return tab;
 }
 
@@ -204,16 +204,16 @@ bool ioncore_init_layout()
     WScreen *scr;
     bool ok;
     int n=0;
-    
+
     ok=extl_read_savefile("saved_layout", &tab);
-    
+
     loading_layout=TRUE;
     layout_load_error=FALSE;
-    
+
     FOR_ALL_SCREENS(scr){
         ExtlTab scrtab=extl_table_none();
         bool scrok=FALSE;
-        
+
         /* Potential Xinerama or such support should set the screen ID
          * of the root window to less than zero, and number its own
          * fake screens up from 0.
@@ -223,9 +223,9 @@ bool ioncore_init_layout()
 
         if(ok)
             scrok=extl_table_geti_t(tab, screen_id(scr), &scrtab);
-        
+
         n+=(TRUE==screen_init_layout(scr, scrtab));
-        
+
         if(scrok)
             extl_unref_table(scrtab);
     }
@@ -236,7 +236,7 @@ bool ioncore_init_layout()
         time_t t=time(NULL);
         char tm[]="saved_layout.backup-YYYYMMDDHHMMSS\0\0\0\0";
         char *backup;
-        
+
         strftime(tm+20, 15, "%Y%m%d%H%M%S", localtime(&t));
         backup=extl_get_savefile(tm);
         if(backup==NULL){
@@ -253,7 +253,7 @@ bool ioncore_init_layout()
             warn(TR("Failed backup."));
         free(backup);
     }
-        
+
     if(n==0){
         warn(TR("Unable to initialise layout on any screen."));
         return FALSE;
@@ -268,19 +268,19 @@ bool ioncore_save_layout()
     WScreen *scr=NULL;
     ExtlTab tab=extl_create_table();
     bool ret;
-    
+
     if(tab==extl_table_none())
         return FALSE;
-    
+
     FOR_ALL_SCREENS(scr){
         ExtlTab scrtab;
-        
+
         /* See note above */
         if(screen_id(scr)<0)
             continue;
-            
+
         scrtab=region_get_configuration((WRegion*)scr);
-        
+
         if(scrtab==extl_table_none()){
             warn(TR("Unable to get configuration for screen %d."),
                  screen_id(scr));
@@ -289,14 +289,14 @@ bool ioncore_save_layout()
             extl_unref_table(scrtab);
         }
     }
-    
+
     ret=extl_write_savefile("saved_layout", tab);
-    
+
     extl_unref_table(tab);
-    
+
     if(!ret)
         warn(TR("Unable to save layout."));
-        
+
     return ret;
 }
 

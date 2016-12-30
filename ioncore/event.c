@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/event.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -36,17 +36,17 @@ WHook *ioncore_handle_event_alt=NULL;
 
 
 /*{{{ Signal check */
-    
+
 
 static void check_signals()
 {
     int kill_sig=mainloop_check_signals();
-    
+
     if(kill_sig!=0){
         if(kill_sig==SIGUSR1){
             ioncore_restart();
             assert(0);
-        } 
+        }
         if(kill_sig==SIGTERM){
             /* Save state if not running under a session manager. */
             ioncore_emergency_snapshot();
@@ -73,7 +73,7 @@ static Time last_timestamp=CurrentTime;
 void ioncore_update_timestamp(XEvent *ev)
 {
     Time tm;
-    
+
     switch(ev->type){
     CHKEV(ButtonPress, XButtonPressedEvent);
     CHKEV(ButtonRelease, XButtonReleasedEvent);
@@ -101,9 +101,9 @@ Time ioncore_get_timestamp()
         /* Idea blatantly copied from wmx */
         XEvent ev;
         Atom dummy;
-        
+
         D(fprintf(stderr, "Attempting to get time from X server."));
-        
+
         dummy=XInternAtom(ioncore_g.dpy, "_ION_TIMEREQUEST", False);
         if(dummy==None){
             warn(TR("Time request from X server failed."));
@@ -118,7 +118,7 @@ Time ioncore_get_timestamp()
         ioncore_get_event(&ev, PropertyChangeMask);
         XPutBackEvent(ioncore_g.dpy, &ev);
     }
-    
+
     return last_timestamp;
 }
 
@@ -132,15 +132,15 @@ Time ioncore_get_timestamp()
 void ioncore_get_event(XEvent *ev, long mask)
 {
     fd_set rfds;
-    
+
     while(1){
         check_signals();
-        
+
         if(XCheckMaskEvent(ioncore_g.dpy, mask, ev)){
             ioncore_update_timestamp(ev);
             return;
         }
-        
+
         FD_ZERO(&rfds);
         FD_SET(ioncore_g.conn, &rfds);
 
@@ -159,9 +159,9 @@ void ioncore_get_event(XEvent *ev, long mask)
 static void skip_enterwindow()
 {
     XEvent ev;
-    
+
     XSync(ioncore_g.dpy, False);
-    
+
     while(XCheckMaskEvent(ioncore_g.dpy, EnterWindowMask, &ev)){
         ioncore_update_timestamp(&ev);
     }
@@ -172,20 +172,20 @@ void ioncore_flushfocus()
 {
     WRegion *next;
     bool warp;
-    
+
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
-        
+
     next=ioncore_g.focus_next;
     warp=ioncore_g.warp_next;
 
     if(next==NULL)
         return;
-        
+
     ioncore_g.focus_next=NULL;
-        
+
     region_do_set_focus(next, warp);
-        
+
     /* Just greedily eating it all away that X has to offer
      * seems to be the best we can do with Xlib.
      */
@@ -220,27 +220,27 @@ void ioncore_x_connection_handler(int UNUSED(conn), void *UNUSED(unused))
 void ioncore_mainloop()
 {
     mainloop_trap_signals(NULL);
-    
+
     ioncore_g.opmode=IONCORE_OPMODE_NORMAL;
 
     while(1){
         check_signals();
         mainloop_execute_deferred();
-        
+
         if(QLength(ioncore_g.dpy)==0){
             XSync(ioncore_g.dpy, False);
-            
+
             if(QLength(ioncore_g.dpy)==0){
                 ioncore_flushfocus();
                 XSync(ioncore_g.dpy, False);
-                
+
                 if(QLength(ioncore_g.dpy)==0){
                     mainloop_select();
                     continue;
                 }
             }
         }
-        
+
         ioncore_x_connection_handler(ioncore_g.conn, NULL);
     }
 }

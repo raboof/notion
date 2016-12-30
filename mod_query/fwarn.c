@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/query.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -25,19 +25,19 @@ WMessage *mod_query_do_warn(WMPlex *mplex, const char *p)
 {
     char *p2;
     WMessage *wmsg;
-    
+
     if(p==NULL)
         return NULL;
-    
+
     p2=scat(TR("Error:\n"), p);
-    
+
     if(p2==NULL)
         return NULL;
-    
+
     wmsg=mod_query_do_message(mplex, p2);
-    
+
     free(p2);
-    
+
     return wmsg;
 }
 
@@ -52,7 +52,7 @@ WMessage *mod_query_do_message(WMPlex *mplex, const char *p)
 
     if(p==NULL)
         return NULL;
-    
+
     par.flags=(MPLEX_ATTACH_SWITCHTO|
                MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|

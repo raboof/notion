@@ -62,7 +62,7 @@ ExtlTab mod_xinerama_query_screens()
         sInfo = XineramaQueryScreens(ioncore_g.dpy, &nRects);
 
         if(!sInfo) return ret;
-       
+
         for(i = 0 ; i < nRects ; ++i) {
             ExtlTab rect = extl_create_table();
             extl_table_sets_i(rect,"x",sInfo[i].x_org);
@@ -104,7 +104,7 @@ ExtlTab mod_xinerama_get_screen_dimensions(WScreen *screen)
 /*
  * Updates WFitParams based on the lua parameters
  *
- * @param screen dimensions (x/y/w/h) 
+ * @param screen dimensions (x/y/w/h)
  */
 static void convert_parameters(ExtlTab screen, WFitParams *fp)
 {
@@ -117,19 +117,19 @@ static void convert_parameters(ExtlTab screen, WFitParams *fp)
     fp->gravity=ForgetGravity;
 }
 
-/* Set up one new screen 
+/* Set up one new screen
  * @param screen the screen to update
- * @param dimensions the new dimensions (x/y/w/h) 
+ * @param dimensions the new dimensions (x/y/w/h)
  */
 EXTL_EXPORT
 bool mod_xinerama_update_screen(WScreen *screen, ExtlTab dimensions)
 {
     WFitParams fp;
-    
+
     convert_parameters(dimensions, &fp);
 
 #ifdef MOD_XINERAMA_DEBUG
-    printf("Updating rectangle #%d: x=%d y=%d width=%u height=%u\n", 
+    printf("Updating rectangle #%d: x=%d y=%d width=%u height=%u\n",
            screen->id, fp.g.x, fp.g.y, fp.g.w, fp.g.h);
 #endif
 
@@ -138,8 +138,8 @@ bool mod_xinerama_update_screen(WScreen *screen, ExtlTab dimensions)
     return TRUE;
 }
 
-/* Set up one new screen 
- * @param screen dimensions (x/y/w/h) 
+/* Set up one new screen
+ * @param screen dimensions (x/y/w/h)
  * @returns true on success, false on failure
  */
 EXTL_EXPORT

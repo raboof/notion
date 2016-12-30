@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/extlconv.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -19,7 +19,7 @@
 bool extl_iter_objlist_(ExtlFn fn, ObjIterator *iter, void *st)
 {
     Obj *obj;
-    
+
     while(1){
         obj=iter(st);
         if(obj==NULL)
@@ -27,7 +27,7 @@ bool extl_iter_objlist_(ExtlFn fn, ObjIterator *iter, void *st)
         if(!extl_iter_obj(fn, obj))
             return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -35,9 +35,9 @@ bool extl_iter_objlist_(ExtlFn fn, ObjIterator *iter, void *st)
 bool extl_iter_objlist(ExtlFn fn, ObjList *list)
 {
     ObjListIterTmp tmp;
-    
+
     objlist_iter_init(&tmp, list);
-    
+
     return extl_iter_objlist_(fn, (ObjIterator*)objlist_iter, &tmp);
 }
 
@@ -45,13 +45,13 @@ bool extl_iter_objlist(ExtlFn fn, ObjList *list)
 bool extl_iter_obj(ExtlFn fn, Obj *obj)
 {
     bool ret1, ret2=FALSE;
-    
+
     extl_protect(NULL);
-    
+
     ret1=extl_call(fn, "o", "b", obj, &ret2);
-    
+
     extl_unprotect(NULL);
-    
+
     return (ret1 && ret2);
 }
 
@@ -65,7 +65,7 @@ bool extl_iter_obj(ExtlFn fn, Obj *obj)
 bool extl_table_is_bool_set(ExtlTab tab, const char *entry)
 {
     bool b;
-    
+
     if(extl_table_gets_b(tab, entry, &b))
         return b;
     return FALSE;
@@ -85,7 +85,7 @@ bool extl_table_to_rectangle(ExtlTab tab, WRectangle *rectret)
        !extl_table_gets_i(tab, "w", &(rectret->w)) ||
        !extl_table_gets_i(tab, "h", &(rectret->h)))
        return FALSE;
-    
+
     return TRUE;
 }
 
@@ -93,17 +93,17 @@ bool extl_table_to_rectangle(ExtlTab tab, WRectangle *rectret)
 ExtlTab extl_table_from_rectangle(const WRectangle *rect)
 {
     ExtlTab tab=extl_create_table();
-    
+
     extl_table_sets_i(tab, "x", rect->x);
     extl_table_sets_i(tab, "y", rect->y);
     extl_table_sets_i(tab, "w", rect->w);
     extl_table_sets_i(tab, "h", rect->h);
-    
+
     return tab;
 }
 
 
-void extl_table_sets_rectangle(ExtlTab tab, const char *nam, 
+void extl_table_sets_rectangle(ExtlTab tab, const char *nam,
                                const WRectangle *rect)
 {
     ExtlTab g=extl_table_from_rectangle(rect);
@@ -112,19 +112,19 @@ void extl_table_sets_rectangle(ExtlTab tab, const char *nam,
 }
 
 
-bool extl_table_gets_rectangle(ExtlTab tab, const char *nam, 
+bool extl_table_gets_rectangle(ExtlTab tab, const char *nam,
                                WRectangle *rect)
 {
     ExtlTab g;
     bool ok;
-    
+
     if(!extl_table_gets_t(tab, nam, &g))
         return FALSE;
-    
+
     ok=extl_table_to_rectangle(g, rect);
-    
+
     extl_unref_table(g);
-    
+
     return ok;
 }
 
@@ -140,12 +140,12 @@ bool extl_table_gets_sizepolicy(ExtlTab tab, const char *nam,
 {
     char *tmpstr;
     bool ret=FALSE;
-    
+
     if(extl_table_gets_s(tab, nam, &tmpstr)){
         ret=string2sizepolicy(tmpstr, szplcy);
         free(tmpstr);
     }
-    
+
     return ret;
 }
 

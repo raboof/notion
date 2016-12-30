@@ -10,7 +10,7 @@
 struct {
   int replacement;
   int base;
-  int comb; 
+  int comb;
 } precompositions[] = {
 { 0x226E, 0x003C, 0x0338},
 { 0x2260, 0x003D, 0x0338},
