@@ -4,13 +4,16 @@
 # rofi -show notion -modi "notion:'./notion_rofi.sh focuslist'" -scroll-method 1
 
 function escape {
-    sed "s/'/\\'/g"
+    sed "s/'/\\\'/g"
 }
 
 MENU_NAME=$1
 
 if [[ -z $2 ]]; then
     # No argument -> generate menu entries
+
+    # Unfortunately there's no good way getting pure stdout from notionflux?
+    # Massage the format of the return string into a usable list.
 
     notionflux -e "return rofi.menu_list('$MENU_NAME')"  \
     | sed -e 's/\\"/"/g' -e 's/^"//' -e 's/\\$//g' -e '$d'
