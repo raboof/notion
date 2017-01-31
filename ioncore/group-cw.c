@@ -170,6 +170,16 @@ const char *groupcw_displayname(WGroupCW *cwg)
     return name;
 }
 
+cairo_surface_t *groupcw_icon(WGroupCW *cwg)
+{
+    cairo_surface_t *icon=NULL;
+
+    if(cwg->grp.bottom!=NULL && cwg->grp.bottom->reg!=NULL)
+        icon=region_icon(cwg->grp.bottom->reg);
+
+    return icon;
+}
+
 
 void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, WRegionNotify how)
 {
@@ -274,6 +284,9 @@ static DynFunTab groupcw_dynfuntab[]={
 
     {(DynFun*)region_displayname,
      (DynFun*)groupcw_displayname},
+
+    {(DynFun*)region_icon,
+     (DynFun*)groupcw_icon},
 
     {region_managed_notify,
      groupcw_managed_notify},

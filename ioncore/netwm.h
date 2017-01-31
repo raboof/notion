@@ -30,6 +30,8 @@ extern char **netwm_get_name(WClientWin *cwin);
 extern void netwm_handle_client_message(const XClientMessageEvent *ev);
 extern bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev);
 
+extern cairo_surface_t *netwm_window_icon(WClientWin *cwin, uint preferred_size);
+
 extern void ioncore_screens_updated(WRootWin *rw);
 
 Atom netwm_window_type(WClientWin *cwin);

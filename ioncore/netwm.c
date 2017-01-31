@@ -9,7 +9,11 @@
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
 
+#include <limits.h>
+#include <stdint.h>
+
 #include <libtu/util.h>
+#include <libtu/minmax.h>
 #include "common.h"
 #include "global.h"
 #include "fullscreen.h"
@@ -36,8 +40,9 @@ static Atom atom_net_wm_allowed_actions=0;
 static Atom atom_net_wm_moveresize=0;
 static Atom atom_net_wm_window_type=0;
 static Atom atom_net_wm_window_type_dialog=0;
+static Atom atom_net_wm_icon=0;
 
-#define N_NETWM 9
+#define N_NETWM 10
 
 static Atom atom_net_supported=0;
 
@@ -65,6 +70,7 @@ void netwm_init()
     atom_net_wm_moveresize=XInternAtom(ioncore_g.dpy, "_NET_WM_MOVERESIZE", False);
     atom_net_wm_window_type=XInternAtom(ioncore_g.dpy, "_NET_WM_WINDOW_TYPE", False);
     atom_net_wm_window_type_dialog=XInternAtom(ioncore_g.dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+    atom_net_wm_icon=XInternAtom(ioncore_g.dpy, "_NET_WM_ICON", False);
 }
 
 
@@ -82,6 +88,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[6]=atom_net_active_window;
     atoms[7]=atom_net_wm_allowed_actions;
     atoms[8]=atom_net_wm_moveresize;
+    atoms[9]=atom_net_wm_icon;
 
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
@@ -327,6 +334,137 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 
 /*}}}*/
+
+
+/*{{{ _NET_WM_ICON stuff */
+
+static cairo_user_data_key_t cairo_userdata_key;
+
+
+/** Create a surface object from this image data.
+ * \param width The width of the image.
+ * \param height The height of the image
+ * \param data The image's data in ARGB format, will be copied by this function.
+ *
+ * Adapted from awesome-wm
+ */
+cairo_surface_t *draw_surface_from_data(int width, int height, ulong *data)
+{
+    unsigned long int len = width * height;
+    unsigned long int i;
+    uint32_t *buffer = ALLOC_N(uint32_t, len);
+    cairo_surface_t *surface;
+
+    /* Cairo wants premultiplied alpha, meh :( */
+    for(i = 0; i < len; i++)
+    {
+        uint32_t cardinal = data[i];
+        uint8_t a = (cardinal >> 24) & 0xff;
+        double alpha = a / 255.0;
+        uint8_t r = ((cardinal >> 16) & 0xff) * alpha;
+        uint8_t g = ((cardinal >>  8) & 0xff) * alpha;
+        uint8_t b = ((cardinal >>  0) & 0xff) * alpha;
+        buffer[i] = (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    surface =
+        cairo_image_surface_create_for_data((unsigned char *) buffer,
+                                            CAIRO_FORMAT_ARGB32,
+                                            width,
+                                            height,
+                                            width*4);
+    /* This makes sure that buffer will be freed */
+    cairo_surface_set_user_data(surface, &cairo_userdata_key, buffer, &free);
+
+    return surface;
+}
+
+
+/**
+ * Extracts the icon from _NET_WM_ICON with size closest matching 'preffered_size'
+ * Returns NULL if no icon is found.
+ * 
+ * Adapted from awesome-wm
+ */
+cairo_surface_t * netwm_window_icon(WClientWin *cwin, uint preferred_size)
+{
+    cairo_surface_t *ret=NULL;
+    ulong *data=NULL, *end, *found_data = 0;
+    uint found_size = 0;
+
+    Atom real_type;
+    ulong length=-1, extra=0;
+    int status;
+
+    int format;
+
+
+    status=XGetWindowProperty(ioncore_g.dpy, cwin->win, atom_net_wm_icon, 0L, UINT_MAX,
+                              False, XA_CARDINAL, &real_type, &format, &length,
+                              &extra, (uchar**)&data);
+
+    /* In theory the server could've returned another type than requested, but I
+     * assume that doesn't happen in practice since 'xwindow_get_property'
+     * doesn't expose that aspect */
+    /* int length = xwindow_get_property(cwin->win, atom_net_wm_icon, XA_CARDINAL, 128*128L, TRUE, p); */
+
+    if(length < 2) {
+        goto cleanup;
+    }
+
+    if (!data) {
+        fprintf(stderr, "_NET_WM_ICON but no data? %d", cwin->win);
+        goto cleanup;
+    }
+
+    end = data + length;
+
+    ulong *data_iter=data;
+
+    /* Goes over the icon data and picks the icon that best matches the size preference.
+     * In case the size match is not exact, picks the closest bigger size if present,
+     * closest smaller size otherwise.
+     */
+    while (data_iter + 1 < end) {
+        /* check whether the data_iter size specified by width and height fits into the array we got */
+        ulong data_size = (ulong) data_iter[0] * data_iter[1];
+        if (data_size > (ulong) (end - data_iter - 2)) {
+            break;   
+        }
+
+        /* use the greater of the two dimensions to match against the preferred size */
+        uint size = MAXOF(data_iter[0], data_iter[1]);
+
+        /* pick the icon if it's a better match than the one we already have */
+        bool found_icon_too_small = found_size < preferred_size;
+        bool found_icon_too_large = found_size > preferred_size;
+        bool icon_empty = data_iter[0] == 0 || data_iter[1] == 0;
+        bool better_because_bigger =  found_icon_too_small && size > found_size;
+        bool better_because_smaller = found_icon_too_large &&
+            size >= preferred_size && size < found_size;
+        if (!icon_empty && (better_because_bigger || better_because_smaller || found_size == 0))
+        {
+            found_data = data_iter;
+            found_size = size;
+        }
+
+        data_iter += data_size + 2;
+    }
+
+    if (!found_data) {
+        goto cleanup;
+    }
+
+    ret=draw_surface_from_data(found_data[0], found_data[1], found_data + 2);
+
+ cleanup:
+    if(data)
+        XFree((void*)data);
+    return ret;
+}
+
+/*}}}*/
+
 
 /*{{{ _NET_WM_VIRTUAL_ROOTS */
 

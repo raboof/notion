@@ -127,6 +127,17 @@ ifeq ($(USE_READLINE),1)
 endif
 
 ##
+## Cairo
+##
+
+CAIRO_LIBS=$(shell $(PKG_CONFIG) --libs cairo)
+CAIRO_INCLUDES=$(shell $(PKG_CONFIG) --cflags cairo)
+
+# Be a bit lazy and include cairo all places x11 is used
+X11_LIBS += $(CAIRO_LIBS)
+X11_INCLUDES += $(CAIRO_INCLUDES)
+
+##
 ## Localisation
 ##
 

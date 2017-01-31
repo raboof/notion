@@ -11,6 +11,8 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <cairo/cairo.h>
+#include <cairo/cairo-xlib.h>
 
 #include <libtu/types.h>
 #include <libtu/output.h>

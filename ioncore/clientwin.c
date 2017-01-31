@@ -225,6 +225,37 @@ void clientwin_get_input_wm_hint(WClientWin *cwin)
     }
 }
 
+
+static cairo_surface_t *scale_cairo_image_surface(cairo_surface_t *source, int target_w, int target_h)
+{
+    int source_w=cairo_image_surface_get_width(source);
+    int source_h=cairo_image_surface_get_height(source);
+
+    cairo_surface_t *result=cairo_surface_create_similar(source, CAIRO_CONTENT_COLOR_ALPHA, target_w, target_h);
+    cairo_t *cr=cairo_create(result);
+    cairo_scale(cr, ((double)target_w)/source_w, ((double)target_h)/source_h);
+    /* https://www.cairographics.org/manual/cairo-cairo-pattern-t.html#cairo-pattern-set-filter
+     * to set interpolation method */
+    cairo_set_source_surface(cr, source, 0, 0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+    return result;
+}
+
+static void clientwin_get_icon(WClientWin *cwin)
+{
+    cairo_surface_t *icon = netwm_window_icon(cwin, 16);
+    if(icon!=NULL && cairo_image_surface_get_width(icon)!=16){
+        /* TODO: Are all icons square? */
+        /* rescale */
+        cairo_surface_t *scaled=scale_cairo_image_surface(icon, 16, 16);
+        cairo_surface_destroy(icon);
+        icon = scaled;
+    }
+
+    cwin->icon=icon;
+}
+
 void clientwin_get_set_name(WClientWin *cwin)
 {
     char **list=NULL;
@@ -317,6 +348,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     WFitParams fp;
 
     cwin->flags=CLIENTWIN_DEFAULT_FLAGS;
+    cwin->icon=NULL;
     cwin->win=win;
     cwin->state=WithdrawnState;
 
@@ -362,6 +394,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     clientwin_get_winprops(cwin);
     clientwin_get_size_hints(cwin);
     clientwin_get_input_wm_hint(cwin);
+    clientwin_get_icon(cwin);
 
     netwm_update_allowed_actions(cwin);
 
@@ -694,6 +727,11 @@ static bool reparent_root(WClientWin *cwin)
 
 void clientwin_deinit(WClientWin *cwin)
 {
+    if(cwin->icon){
+        cairo_surface_destroy(cwin->icon);
+        cwin->icon=NULL;
+    }
+
     if(cwin->win!=None){
         region_pointer_focus_hack(&cwin->region);
 
@@ -1080,6 +1118,12 @@ static void clientwin_size_hints(WClientWin *cwin, WSizeHints *hints_ret)
     }else{
         xsizehints_to_sizehints(&cwin->size_hints, hints_ret);
     }
+}
+
+
+static cairo_surface_t *clientwin_icon(WClientWin *cwin)
+{
+    return cwin->icon;
 }
 
 
@@ -1471,6 +1515,10 @@ static DynFunTab clientwin_dynfuntab[]={
 
     {(DynFun*)region_get_configuration,
      (DynFun*)clientwin_get_configuration},
+
+
+    {(DynFun*)region_icon,
+     (DynFun*)clientwin_icon},
 
     END_DYNFUNTAB
 };

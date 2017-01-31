@@ -509,6 +509,36 @@ void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
     }
 }
 
+void debrush_draw_iconbox(DEBrush *brush,
+                          const WRectangle *geom,
+                          const GrTextElem *elem,
+                          DEColourGroup *cg,
+                          bool needfill,
+                          const GrStyleSpec *a1,
+                          const GrStyleSpec *a2,
+                          int index)
+{
+    WRectangle text_geom=*geom;
+    if(elem->icon){
+        /* Leave space for icon */
+        /* text_geom.x+=16+2; */
+    }
+    debrush_do_draw_textbox(brush, &text_geom, elem->text, cg, needfill,
+                            a1, &elem->attr, index);
+
+    if(elem->icon){
+        /* TODO: Probably not the best idea to lie about the real window dimensions */
+        cairo_surface_t *xsurf=cairo_xlib_surface_create(ioncore_g.dpy, brush->win, DefaultVisual(ioncore_g.dpy, 0), 700, 400);
+        cairo_t *cr = cairo_create(xsurf);
+        cairo_set_source_surface(cr, elem->icon, geom->x+2, geom->y+2);
+        /* cairo_rectangle(cr, geom->x, geom->y, 16, 16); */
+        /* cairo_fill(cr); */
+        cairo_paint(cr);
+        cairo_surface_destroy(xsurf);
+        cairo_destroy(cr);
+    }
+}
+
 
 void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
                             int n, const GrTextElem *elem,
@@ -529,8 +559,10 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
         cg=debrush_get_colour_group2(brush, common_attrib, &elem[i].attr);
 
         if(cg!=NULL){
-            debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
-                                    common_attrib, &elem[i].attr, i);
+            /* debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill, */
+            /*                         common_attrib, &elem[i].attr, i); */
+            debrush_draw_iconbox(brush, &g, &elem[i], cg, needfill,
+                                 common_attrib, &elem[i].attr, i);
         }
 
         if(i==n-1)
