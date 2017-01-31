@@ -551,8 +551,9 @@ void debrush_draw_iconbox(DEBrush *brush,
     debrush_do_draw_box(brush, geom, cg, needfill);
 
     if(elem->icon){
-        /* TODO: Probably not the best idea to lie about the real window dimensions */
-        cairo_surface_t *xsurf=cairo_xlib_surface_create(ioncore_g.dpy, brush->win, DefaultVisual(ioncore_g.dpy, 0), geom->w, geom->h);
+        /* TODO: Probably not the best idea to lie about the real window dimensions (but under reporting seems to work) */
+        /* TODO: How expensive is it to create a new surface per icon? Could easily reuse it */
+        cairo_surface_t *xsurf=cairo_xlib_surface_create(ioncore_g.dpy, brush->win, DefaultVisual(ioncore_g.dpy, 0), geom->x+geom->w, geom->h);
         cairo_t *cr = cairo_create(xsurf);
         cairo_set_source_surface(cr, elem->icon, geom->x+bdw.left+1, geom->y+bdw.top);
         /* cairo_rectangle(cr, geom->x, geom->y, 16, 16); */
