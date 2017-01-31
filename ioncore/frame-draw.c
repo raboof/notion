@@ -408,18 +408,25 @@ void frame_recalc_bar(WFrame *frame)
         textw=frame->titles[i].iw;
         if(textw>0){
             /* TODO: subtract possible icon width */
+            int icon_w=0;
+            if(frame->show_icon){
+                const cairo_surface_t *icon=region_icon(sub);
+                if(icon) {
+                    icon_w=cairo_image_surface_get_width(icon);
+                }
+            }
             if(frame->flags&FRAME_SHOW_NUMBERS){
                 char *s=NULL;
                 const char *name=region_displayname(sub);
                 libtu_asprintf(&s, "[%d] %s", i+1, name);
                 if(s!=NULL){
-                    title=grbrush_make_label(frame->bar_brush, s, textw);
+                    title=grbrush_make_label(frame->bar_brush, s, textw-icon_w);
                     free(s);
                 }else{
                     title=NULL;
                 }
             }else{
-                title=region_make_label(sub, textw, frame->bar_brush);
+                title=region_make_label(sub, textw-icon_w, frame->bar_brush);
             }
             frame->titles[i].text=title;
         }
@@ -498,6 +505,8 @@ void frame_brushes_updated(WFrame *frame)
         free(s);
     }
 
+    grbrush_get_extra(frame->bar_brush, "show_icon", 'b', &frame->show_icon);
+
     frame->barmode=barmode;
 
     if(barmode==FRAME_BAR_NONE || frame->bar_brush==NULL){
@@ -509,7 +518,9 @@ void frame_brushes_updated(WFrame *frame)
         grbrush_get_border_widths(frame->bar_brush, &bdw);
         grbrush_get_font_extents(frame->bar_brush, &fnte);
 
-        frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
+        int inner_h=frame->show_icon ? MAXOF(fnte.max_height,16) : fnte.max_height;
+
+        frame->bar_h=bdw.top+bdw.bottom+inner_h;
     }
 
     /* tabs and bar width calculation stuff */

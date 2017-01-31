@@ -78,6 +78,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->tr_mode=GR_TRANSPARENCY_DEFAULT;
     frame->brush=NULL;
     frame->bar_brush=NULL;
+    frame->show_icon=FALSE;
     frame->mode=mode;
     frame_tabs_width_recalc_init(frame);
 
