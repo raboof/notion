@@ -634,6 +634,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
                            void *valret)
 {
     double d=0;
+    bool b=FALSE;
     const char *str;
 
     if(wasdeadobject!=NULL)
@@ -665,6 +666,22 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
         }else{
             if(valret)
                 *((double*)valret)=d;
+        }
+        return TRUE;
+    case LUA_TBOOLEAN:
+        if(type!='b' && type!='a')
+            return FALSE;
+
+        b=lua_toboolean(st, pos);
+
+        if(type=='b'){
+            if(valret)
+                *((bool*)valret)=b;
+        }else if(type=='a'){
+            if(valret){
+                ((ExtlAny*)valret)->type='b';
+                ((ExtlAny*)valret)->value.b=b;
+            }
         }
         return TRUE;
 
