@@ -75,6 +75,8 @@ void frame_update_attr(WFrame *frame, int i, WRegion *reg)
 
     spec=&frame->titles[i].attr;
 
+    frame->titles[i].icon = reg ? region_icon(reg) : NULL;
+
     selected=(reg==FRAME_CURRENT(frame));
     tagged=(reg!=NULL && reg->flags&REGION_TAGGED);
     dragged=(i==frame->tab_dragged_idx);
@@ -270,6 +272,7 @@ void frame_recalc_bar(WFrame *frame, bool complete)
         free_title(frame, i);
         textw=frame->titles[i].iw;
         if(textw>0){
+            /* TODO: subtract possible icon width */
             title=region_make_label(sub, textw, frame->bar_brush);
             frame->titles[i].text=title;
         }

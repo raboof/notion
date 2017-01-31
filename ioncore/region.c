@@ -198,6 +198,25 @@ void region_do_set_focus(WRegion *reg, bool warp)
     CALL_DYN(region_do_set_focus, reg, (reg, warp));
 }
 
+/*
+ * Returns a icon representing this region. The surface should be an image
+ * surface and the callee is responsible for calling 'cairo_surface_destroy'
+ * when done with the icon. (reference counting)
+ *
+ * NULL if no icon.
+ */
+cairo_surface_t *region_icon(WRegion *reg)
+{
+    cairo_surface_t *icon=NULL;
+    CALL_DYN_RET(icon, cairo_surface_t*, region_icon, reg, (reg));
+
+    if(icon!=NULL){
+        cairo_surface_reference(icon);
+    }
+    return icon;
+}
+
+
 
 /*{{{ Manager region dynfuns */
 
@@ -271,6 +290,11 @@ void region_updategr_default(WRegion *reg)
     FOR_ALL_CHILDREN(reg, sub){
         region_updategr(sub);
     }
+}
+
+cairo_surface_t *region_icon_default(WRegion *reg)
+{
+    return NULL;
 }
 
 
@@ -1058,6 +1082,9 @@ static DynFunTab region_dynfuntab[]={
 
     {(DynFun*)region_displayname,
      (DynFun*)region_name},
+
+    {(DynFun*)region_icon,
+     (DynFun*)region_icon_default},
 
     {region_stacking,
      region_stacking_default},

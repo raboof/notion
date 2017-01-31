@@ -149,6 +149,8 @@ DYNFUN void region_stacking(WRegion *reg, Window *bottomret, Window *topret);
 
 DYNFUN bool region_handle_drop(WRegion *reg, int x, int y, WRegion *dropped);
 
+DYNFUN cairo_surface_t *region_icon(WRegion *reg);
+
 extern bool region_rqorder(WRegion *reg, WRegionOrder order);
 
 extern bool region_prepare_focus(WRegion *reg, int flags,
