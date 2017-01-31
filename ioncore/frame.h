@@ -76,6 +76,7 @@ DECLCLASS(WFrame){
     /* Bar stuff */
     WFrameBarMode barmode;
     int bar_w, bar_h;
+    bool show_icon;
     /* Parameters to calculate tab sizes. */
     TabCalcParams tabs_params;
 };

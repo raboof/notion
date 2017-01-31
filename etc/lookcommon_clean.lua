@@ -42,6 +42,7 @@ de.defstyle("actnotify", {
 })
 
 de.defstyle("tab", {
+    show_icon = true,
     de.substyle("*-*-*-unselected-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",
