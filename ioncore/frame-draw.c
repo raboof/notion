@@ -412,7 +412,7 @@ void frame_recalc_bar(WFrame *frame)
             if(frame->show_icon){
                 const cairo_surface_t *icon=region_icon(sub);
                 if(icon) {
-                    icon_w=cairo_image_surface_get_width(icon);
+                    icon_w=cairo_image_surface_get_width(icon)+3;
                 }
             }
             if(frame->flags&FRAME_SHOW_NUMBERS){
