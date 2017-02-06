@@ -130,6 +130,7 @@ DECLSTRUCT(WGlobal){
                  activity,
                  sub_activity,
                  name,
+                 icon,
                  unset_manager,
                  set_manager,
                  tag,
