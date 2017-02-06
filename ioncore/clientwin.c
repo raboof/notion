@@ -240,6 +240,11 @@ static cairo_surface_t *scale_cairo_image_surface(cairo_surface_t *source, int t
 
 static void clientwin_get_icon(WClientWin *cwin)
 {
+    if(cwin->icon){
+        cairo_surface_destroy(cwin->icon);
+        cwin->icon=NULL;
+    }
+
     cairo_surface_t *icon = netwm_window_icon(cwin, 16);
     if(icon!=NULL && cairo_image_surface_get_width(icon)!=16){
         /* TODO: Are all icons square? */
@@ -250,6 +255,12 @@ static void clientwin_get_icon(WClientWin *cwin)
     }
 
     cwin->icon=icon;
+}
+
+void clientwin_refresh_icon(WClientWin *cwin)
+{
+    clientwin_get_icon(cwin);
+    region_notify_change(cwin, ioncore_g.notifies.icon);
 }
 
 void clientwin_get_set_name(WClientWin *cwin)

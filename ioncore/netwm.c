@@ -42,7 +42,7 @@ static Atom atom_net_wm_allowed_actions=0;
 static Atom atom_net_wm_moveresize=0;
 static Atom atom_net_wm_icon=0;
 
-#define N_NETWM 9
+#define N_NETWM 10
 
 static Atom atom_net_supported=0;
 
@@ -87,6 +87,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[6]=atom_net_active_window;
     atoms[7]=atom_net_wm_allowed_actions;
     atoms[8]=atom_net_wm_moveresize;
+    atoms[9]=atom_net_wm_icon;
 
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
@@ -308,11 +309,15 @@ void netwm_handle_client_message(const XClientMessageEvent *ev)
 
 bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 {
-    if(ev->atom!=atom_net_wm_name)
-        return FALSE;
+    if(ev->atom==atom_net_wm_name){
+        clientwin_get_set_name(cwin);
+        return TRUE;
+    } else if(ev->atom==atom_net_wm_icon){
+        clientwin_refresh_icon(cwin);
+        return TRUE;
+    }
 
-    clientwin_get_set_name(cwin);
-    return TRUE;
+    return FALSE;
 }
 
 

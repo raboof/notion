@@ -775,9 +775,10 @@ void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub), WRegionNotify how
        how==ioncore_g.notifies.name ||
        how==ioncore_g.notifies.activity ||
        how==ioncore_g.notifies.sub_activity ||
-       how==ioncore_g.notifies.tag){
+       how==ioncore_g.notifies.tag ||
+       how==ioncore_g.notifies.icon){
 
-        complete=how==ioncore_g.notifies.name;
+        complete=how==ioncore_g.notifies.name||how==ioncore_g.notifies.icon;
 
         frame_update_attrs(frame);
         frame_recalc_bar(frame, complete);

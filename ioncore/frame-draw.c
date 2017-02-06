@@ -75,6 +75,12 @@ void frame_update_attr(WFrame *frame, int i, WRegion *reg)
 
     spec=&frame->titles[i].attr;
 
+    cairo_surface_t *tab_icon=frame->titles[i].icon;
+    if(tab_icon){
+        cairo_surface_destroy(tab_icon);
+        tab_icon=NULL;
+    }
+
     frame->titles[i].icon = reg ? region_icon(reg) : NULL;
 
     selected=(reg==FRAME_CURRENT(frame));

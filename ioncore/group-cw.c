@@ -213,8 +213,9 @@ cairo_surface_t *groupcw_icon(WGroupCW *cwg)
 
 void groupcw_managed_notify(WGroupCW *cwg, WRegion *reg, WRegionNotify how)
 {
-    if(group_bottom(&cwg->grp)==reg && how==ioncore_g.notifies.name){
-        /* Title has changed */
+    if(group_bottom(&cwg->grp)==reg &&
+       (how==ioncore_g.notifies.name||how==ioncore_g.notifies.icon)){
+        /* Title or icon has changed */
         region_notify_change((WRegion*)cwg, how);
     }
 

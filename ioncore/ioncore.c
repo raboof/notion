@@ -394,6 +394,7 @@ static bool init_global()
     INITSTR(activity);
     INITSTR(sub_activity);
     INITSTR(name);
+    INITSTR(icon);
     INITSTR(unset_manager);
     INITSTR(set_manager);
     INITSTR(unset_return);
