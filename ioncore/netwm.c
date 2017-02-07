@@ -374,7 +374,7 @@ cairo_surface_t *draw_surface_from_data(int width, int height, ulong *data)
  * 
  * Adapted from awesome-wm
  */
-cairo_surface_t * netwm_window_icon(WClientWin *cwin, uint preferred_size)
+cairo_surface_t *netwm_window_icon(WClientWin *cwin, uint preferred_size)
 {
     cairo_surface_t *ret=NULL;
     ulong *data=NULL, *end, *found_data = 0;

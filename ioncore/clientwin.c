@@ -45,6 +45,7 @@
 
 static void set_clientwin_state(WClientWin *cwin, unsigned int state);
 static bool send_clientmsg(Window win, Atom a, Time stmp);
+static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon);
 
 
 WHook *clientwin_do_manage_alt=NULL;
@@ -109,6 +110,7 @@ static void clientwin_get_winprops(WClientWin *cwin)
     ExtlTab tab, tab2;
     char *s;
     int i1, i2;
+    char *icon_path=NULL;
 
     tab=ioncore_get_winprop(cwin);
 
@@ -116,6 +118,16 @@ static void clientwin_get_winprops(WClientWin *cwin)
 
     if(tab==extl_table_none())
         return;
+
+    if(extl_table_gets_s(tab, "icon", &icon_path)){
+        cairo_surface_t *icon=cairo_image_surface_create_from_png(icon_path);
+        if(cairo_surface_status(icon)==CAIRO_STATUS_FILE_NOT_FOUND){
+            warn("Could not open icon specified in winprop: %s", icon_path);
+        }else{
+            clientwin_set_icon(cwin, icon);
+        }
+        free(icon_path);
+    }
 
     if(extl_table_is_bool_set(tab, "transparent"))
         cwin->flags|=CLIENTWIN_PROP_TRANSPARENT;
@@ -238,14 +250,22 @@ static cairo_surface_t *scale_cairo_image_surface(cairo_surface_t *source, int t
     return result;
 }
 
-static void clientwin_get_icon(WClientWin *cwin)
+static void clientwin_get_icon_from_hint(WClientWin *cwin)
+{
+    cairo_surface_t *icon=netwm_window_icon(cwin, 16);
+    clientwin_set_icon(cwin, icon);
+}
+
+/* Set cwin's icon, possibly rescaling it to fit.
+ * NB: takes ownership of icon
+ */
+static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon)
 {
     if(cwin->icon){
         cairo_surface_destroy(cwin->icon);
         cwin->icon=NULL;
     }
 
-    cairo_surface_t *icon = netwm_window_icon(cwin, 16);
     if(icon!=NULL && cairo_image_surface_get_width(icon)!=16){
         /* TODO: Are all icons square? */
         /* rescale */
@@ -259,7 +279,8 @@ static void clientwin_get_icon(WClientWin *cwin)
 
 void clientwin_refresh_icon(WClientWin *cwin)
 {
-    clientwin_get_icon(cwin);
+    /* IMPROVEMENT: Don't update icon if set by winprop? */
+    clientwin_get_icon_from_hint(cwin);
     region_notify_change(cwin, ioncore_g.notifies.icon);
 }
 
@@ -401,7 +422,10 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     clientwin_get_winprops(cwin);
     clientwin_get_size_hints(cwin);
     clientwin_get_input_wm_hint(cwin);
-    clientwin_get_icon(cwin);
+    if(cwin->icon==NULL){
+        /* Icon could've already been set by a winprop */
+        clientwin_get_icon_from_hint(cwin);
+    }
 
     netwm_update_allowed_actions(cwin);
 
