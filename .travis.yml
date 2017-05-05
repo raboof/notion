@@ -10,7 +10,7 @@ matrix:
   exclude:
     - compiler: clang
       env: C99_SOURCE=""
-before_install: sudo apt-get install lua5.2 liblua5.2-dev
+before_install: sudo apt-get install lua5.2 liblua5.2-dev gettext
 script:
   - make
   - make test
