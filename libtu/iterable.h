@@ -23,7 +23,7 @@ typedef bool BoolFilter(void *p, void *param);
 
 extern void *iterable_nth(uint n, VoidIterator *iter, void *st);
 extern bool iterable_is_on(void *p, VoidIterator *iter, void *st);
-extern void *iterable_find(BoolFilter *f, void *fparam, 
+extern void *iterable_find(BoolFilter *f, void *fparam,
                            VoidIterator *iter, void *st);
-    
+
 #endif /* LIBTU_ITERABLE_H */

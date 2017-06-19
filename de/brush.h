@@ -1,7 +1,7 @@
 /*
  * ion/de/brush.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -25,8 +25,8 @@ INTRCLASS(DEBrush);
 #include "colour.h"
 
 
-typedef void DEBrushExtrasFn(DEBrush *brush, 
-                             const WRectangle *g, 
+typedef void DEBrushExtrasFn(DEBrush *brush,
+                             const WRectangle *g,
                              DEColourGroup *cg,
                              const GrBorderWidths *bdw,
                              const GrFontExtents *fnte,
@@ -44,30 +44,30 @@ DECLCLASS(DEBrush){
     int indicator_w;
     Window win;
     bool clip_set;
-    
+
     GrStyleSpec current_attr;
 };
 
 extern DEBrush *de_get_brush(Window win, WRootWin *rootwin,
                              const char *style);
 
-extern DEBrush *create_debrush(Window win, 
+extern DEBrush *create_debrush(Window win,
                                const GrStyleSpec *spec, DEStyle *style);
 extern bool debrush_init(DEBrush *brush, Window win,
                          const GrStyleSpec *spec, DEStyle *style);
 extern void debrush_deinit(DEBrush *brush);
 
-extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin, 
+extern DEBrush *debrush_get_slave(DEBrush *brush, WRootWin *rootwin,
                                   const char *style);
 
 extern void debrush_release(DEBrush *brush);
 
 
-extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush, 
+extern DEColourGroup *debrush_get_colour_group2(DEBrush *brush,
                                                 const GrStyleSpec *a1,
                                                 const GrStyleSpec *a2);
 
-extern DEColourGroup *debrush_get_colour_group(DEBrush *brush, 
+extern DEColourGroup *debrush_get_colour_group(DEBrush *brush,
                                                const GrStyleSpec *attr);
 
 extern DEColourGroup *debrush_get_current_colour_group(DEBrush *brush);
@@ -85,12 +85,12 @@ extern GrStyleSpec *debrush_get_current_attr(DEBrush *brush);
 /* Information */
 
 extern void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw);
-extern bool debrush_get_extra(DEBrush *brush, const char *key, char type, 
+extern bool debrush_get_extra(DEBrush *brush, const char *key, char type,
                               void *data);
 
 /* Borders & boxes */
 
-extern void debrush_draw_border(DEBrush *brush, 
+extern void debrush_draw_border(DEBrush *brush,
                                 const WRectangle *geom);
 extern void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
                                     GrBorderLine line);
@@ -98,8 +98,8 @@ extern void debrush_draw_borderline(DEBrush *brush, const WRectangle *geom,
 extern void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
                                  const char *text, bool needfill);
 
-extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom, 
-                                   int n, const GrTextElem *elem, 
+extern void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
+                                   int n, const GrTextElem *elem,
                                    bool needfill);
 
 extern DEBrushExtrasFn debrush_tab_extras;

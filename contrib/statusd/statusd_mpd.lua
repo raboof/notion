@@ -10,11 +10,11 @@
 local defaults={
     -- 500 or less makes seconds increment relatively smoothly while playing
     update_interval=500,
-    
+
     -- mpd server info (localhost:6600 are mpd defaults)
     address="localhost",
     port=6600,
-    
+
     -- mpd password (if any)
     password=nil,
 
@@ -24,7 +24,7 @@ local defaults={
     --   track metadata: %artist, %title, %num, %album, %year, %len
     --   current track position: %pos
     --   escape for the percent character: %%
-    
+
     -- a default template
     template = "%artist - %num - %title (%pos / %len)"
 }
@@ -43,7 +43,7 @@ local function saferead(file)
 end
 
 local function get_mpd_status()
-    
+
     -- The first version of cmd_string is the original, however, some versions
     -- of MPD close the socket too quickly if close is included. If you see the
     -- message: error querying mpd status
@@ -56,10 +56,10 @@ local function get_mpd_status()
     end
     cmd_string = string.format('echo -n "%s" | netcat %s %d',
                                cmd_string, settings.address, settings.port)
-    
+
     last_success = success
     success = false
-                               
+
     local mpd = io.popen(cmd_string, "r")
 
     -- welcome msg
@@ -79,7 +79,7 @@ local function get_mpd_status()
             return "bad mpd password"
         end
     end
-    
+
     local info = {}
 
     -- 'status' response

@@ -1,7 +1,7 @@
 /*
  * ion/de/brush.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -45,9 +45,9 @@ bool debrush_init(DEBrush *brush, Window win,
     brush->indicator_w=0;
     brush->win=win;
     brush->clip_set=FALSE;
-    
+
     gr_stylespec_init(&brush->current_attr);
-    
+
 #ifdef HAVE_X11_XFT
     brush->draw=NULL;
 #endif /* HAVE_X11_XFT */
@@ -57,22 +57,22 @@ bool debrush_init(DEBrush *brush, Window win,
         style->usecount--;
         return FALSE;
     }
-    
+
     ENSURE_INITSPEC(tabframe_spec, "tab-frame");
     ENSURE_INITSPEC(tabinfo_spec, "tab-info");
     ENSURE_INITSPEC(tabmenuentry_spec, "tab-menuentry");
-    
+
     if(MATCHES(tabframe_spec, spec) || MATCHES(tabinfo_spec, spec)){
         brush->extras_fn=debrush_tab_extras;
         if(!style->tabbrush_data_ok)
             destyle_create_tab_gcs(style);
     }else if(MATCHES(tabmenuentry_spec, spec)){
         brush->extras_fn=debrush_menuentry_extras;
-        brush->indicator_w=grbrush_get_text_width((GrBrush*)brush, 
-                                                  DE_SUB_IND, 
+        brush->indicator_w=grbrush_get_text_width((GrBrush*)brush,
+                                                  DE_SUB_IND,
                                                   DE_SUB_IND_LEN);
     }
-    
+
     return TRUE;
 }
 
@@ -83,33 +83,33 @@ DEBrush *create_debrush(Window win, const GrStyleSpec *spec, DEStyle *style)
 }
 
 
-static DEBrush *do_get_brush(Window win, WRootWin *rootwin, 
+static DEBrush *do_get_brush(Window win, WRootWin *rootwin,
                              const char *stylename, bool slave)
 {
     DEStyle *style;
     DEBrush *brush;
     GrStyleSpec spec;
-    
+
     if(!gr_stylespec_load(&spec, stylename))
         return NULL;
-    
+
     style=de_get_style(rootwin, &spec);
-    
+
     if(style==NULL){
         gr_stylespec_unalloc(&spec);
         return NULL;
     }
-    
+
     brush=create_debrush(win, &spec, style);
 
     gr_stylespec_unalloc(&spec);
-    
+
     /* Set background colour */
     if(brush!=NULL && !slave){
-        grbrush_enable_transparency(&(brush->grbrush), 
+        grbrush_enable_transparency(&(brush->grbrush),
                                     GR_TRANSPARENCY_DEFAULT);
     }
-    
+
     return brush;
 }
 
@@ -120,7 +120,7 @@ DEBrush *de_get_brush(Window win, WRootWin *rootwin, const char *stylename)
 }
 
 
-DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin, 
+DEBrush *debrush_get_slave(DEBrush *master, WRootWin *rootwin,
                            const char *stylename)
 {
     return do_get_brush(master->win, rootwin, stylename, TRUE);
@@ -175,7 +175,7 @@ void debrush_init_attr(DEBrush *brush, const GrStyleSpec *spec)
         gr_stylespec_append(&brush->current_attr, spec);
 }
 
-    
+
 void debrush_set_attr(DEBrush *brush, GrAttr attr)
 {
     gr_stylespec_set(&brush->current_attr, attr);
@@ -209,7 +209,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
     uint tbf=1, lrf=1;
     uint pad=bd->pad;
     uint spc=style->spacing;
-    
+
     switch(bd->sides){
     case DEBORDER_TB:
         lrf=0;
@@ -218,7 +218,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
         tbf=0;
         break;
     }
-    
+
     /* Ridge/groove styles use 'padding' for the spacing between the
      * 'highlight' and 'shadow' portions of the border, and 'spacing'
      * between the border and contents. Inlaid style also uses 'spacing'
@@ -229,7 +229,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
     case DEBORDER_RIDGE:
     case DEBORDER_GROOVE:
         tmp=bd->sh+bd->hl+pad;
-        bdw->top=tbf*tmp+spc; bdw->bottom=tbf*tmp+spc; 
+        bdw->top=tbf*tmp+spc; bdw->bottom=tbf*tmp+spc;
         bdw->left=lrf*tmp+spc; bdw->right=lrf*tmp+spc;
         break;
     case DEBORDER_INLAID:
@@ -242,7 +242,7 @@ void debrush_get_border_widths(DEBrush *brush, GrBorderWidths *bdw)
         tmp=bd->sh; bdw->bottom=tbf*tmp+pad; bdw->right=lrf*tmp+pad;
         break;
     }
-    
+
     bdw->right+=brush->indicator_w;
 
     bdw->tb_ileft=bdw->left;

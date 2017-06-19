@@ -32,7 +32,7 @@ local settings = {
         hint = "important",
         interval = 1 * 1000,
     },
-    scroll = { 
+    scroll = {
         hint = "normal",
         interval = 0.375 * 1000,
     },
@@ -87,7 +87,7 @@ local function ticker_update()
     if message.fd == nil then
         message.fd = io.popen(settings.commands.get(), 'r')
         message.s = message.fd:read()
-        if message.s then --XXX this is a bug workaround! 
+        if message.s then --XXX this is a bug workaround!
             ticker_line_init()
         end
         ticker_timer('new')
@@ -109,7 +109,7 @@ local function ticker_update()
     end
 
     if message.s ~= nil then
-        statusd.inform("ticker", 
+        statusd.inform("ticker",
             string.sub(message.s, message.pos, message.pos + settings.line_len))
     end
 end
@@ -125,7 +125,7 @@ if statusd ~= nil then
     elseif settings.random then
         settings.commands.pos = 1
         settings.commands.get = ticker_random
-    else 
+    else
         settings.commands.pos = 1
         settings.commands.get = ticker_rotate
     end

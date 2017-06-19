@@ -4,9 +4,9 @@
 --
 -- cfg_dock2.lua (pinko version)
 --
--- An improved dock module configuration.  
--- Remove the "2" and save to ~/.ion3, replacing any current 
--- cfg_dock.lua. The script couldn't be put in a separate file 
+-- An improved dock module configuration.
+-- Remove the "2" and save to ~/.ion3, replacing any current
+-- cfg_dock.lua. The script couldn't be put in a separate file
 -- because it affects how the dock is created.
 --
 -- Features:
@@ -35,9 +35,9 @@
 -- ___________
 -- |7   8   9|  META+K D (number) to move a floating dock.
 -- |         |  Same for embedded dock, limited to 1,3,7,9.
--- |4   5   6|   
--- |         |  
--- |1   2   3|  
+-- |4   5   6|
+-- |         |
+-- |1   2   3|
 -- -----------
 --
 -- 2005-11-09:
@@ -54,8 +54,8 @@ local use_these_screens={0}
 
 docktable=ioncore.read_savefile("dock_settings")
 
-if docktable==nil then 
-    docktable={} 
+if docktable==nil then
+    docktable={}
 end
 
 function get_dock(scr)
@@ -83,16 +83,16 @@ for i in pairs(use_these_screens) do
     io.stdout:write(i)
     io.stdout:write(scr)
     if docktable[scr]==nil then
-        docktable[scr] = { 
+        docktable[scr] = {
 	    screen=0,
-	    mode="floating", 
-	    pos="tl", 
-	    grow="down", 
+	    mode="floating",
+	    pos="tl",
+	    grow="down",
 	    floating_hidden=false,
 	    x=0, y=0
         }
     end
-    
+
     -- Create a dock based on a saved settings file.
     curdock=mod_dock.create{
         -- Dock mode: embedded|floating
@@ -124,7 +124,7 @@ defbindings("WScreen", {
 })
 
 defbindings("WMPlex", {
-    submap(META.."K", { 
+    submap(META.."K", {
 	submap("D", {
 	    kpress("A", "get_dock(_:screen_of()):attach(_sub)", "_sub:WClientWin"),
 	}),
@@ -152,7 +152,7 @@ defbindings("WScreen", {
 	    kpress("1", "get_dock(_):set{pos='bl'}"),
 	    kpress("2", "get_dock(_):set{pos='bc'}"),
 	    kpress("3", "get_dock(_):set{pos='br'}"),
-	    
+	
 	    kpress("R", "get_dock(_):begin_kbresize()"),
 	    kpress("F", "flip_dock_direction(get_dock(_))"),
 	    kpress("T", "cycle_dock_direction(get_dock(_))"),
@@ -165,7 +165,7 @@ defbindings("WScreen", {
 })
 
 
--- Dock settings menu. For this to work, mod_menu must have been loaded 
+-- Dock settings menu. For this to work, mod_menu must have been loaded
 -- previously.
 if mod_menu then
     function dock_settings_menu(dock)
@@ -182,7 +182,7 @@ if mod_menu then
                 menuentry("Pos-BL", "_:set{pos='bl'}"),
                 menuentry("Pos-BC", "_:set{pos='bc'}"),
                 menuentry("Pos-BR", "_:set{pos='br'}"),
-        
+
                 menuentry("Grow-L", "_:set{grow='left'}"),
                 menuentry("Grow-R", "_:set{grow='right'}"),
                 menuentry("Grow-U", "_:set{grow='up'}"),
@@ -195,7 +195,7 @@ if mod_menu then
                 menuentry("Pos-TR", "_:set{pos='tr'}"),
                 menuentry("Pos-BL", "_:set{pos='bl'}"),
                 menuentry("Pos-BR", "_:set{pos='br'}"),
-        
+
                 menuentry("Grow-L", "_:set{grow='left'}"),
                 menuentry("Grow-R", "_:set{grow='right'}"),
                 menuentry("Grow-U", "_:set{grow='up'}"),
@@ -208,7 +208,7 @@ defbindings("WDock", {
     mpress("Button3", "mod_menu.pmenu(_, _sub, dock_settings_menu(_))"),
 })
 end
-    
+
 
 -- To use any of the dock's mouse bindings,
 -- you'll have to find a bit of dead space for clicking in.
@@ -217,7 +217,7 @@ end
 defbindings("WDock", {
     mpress("Button2", "cycle_dock_direction(_)"),
     mclick("Button1", "flip_dock_direction(_)"),
-    
+
     -- You can actually drag a floating dock anywhere.
     -- Position will be lost when ion restarts.
     mdrag("Button1", "_:p_move()"),
@@ -312,7 +312,7 @@ end
 
 --
 -- This makes sure dock settings are saved any time ion restarts.
--- 
+--
 ioncore.get_hook("ioncore_deinit_hook"):add(
     function() save_dock_settings() end
 )

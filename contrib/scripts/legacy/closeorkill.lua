@@ -2,10 +2,10 @@
 -- License: Unknown
 -- Last Changed: Unknown
 --
--- closeorkill.lua 
--- 
+-- closeorkill.lua
+--
 -- This script will first attempt to close a region and, if that fails on
--- a client window and this script is called again within MAX_DIFFTIME 
+-- a client window and this script is called again within MAX_DIFFTIME
 -- (5 secs) time, kill the application.
 --
 -- To use, change (when using the default bindings)
@@ -27,7 +27,7 @@ function close_or_kill(reg)
             return
         end
     end
-    
+
     last_tried=reg
     last_tried_time=time
     reg:close()

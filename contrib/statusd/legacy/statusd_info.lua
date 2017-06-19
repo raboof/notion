@@ -10,8 +10,8 @@
 --
 -- This script is based on parsing 'top' output.
 --
--- Unfortunately top output is inconsistent among versions. Some versions 
--- (such as 3.2.8) are known not to work, as they do not support the 'b' 
+-- Unfortunately top output is inconsistent among versions. Some versions
+-- (such as 3.2.8) are known not to work, as they do not support the 'b'
 -- mode. Other versions do not work correctly with '-n 1', so we pass '-n 2'
 -- just to be sure.
 --
@@ -22,7 +22,7 @@
 -- %Cpu(s):  4.5 us,  1.0 sy,  0.0 ni, 93.5 id,  1.0 wa,  0.0 hi,  0.0 si,  0.0 st
 --
 -- Let us know when you encounter another variation, perhaps we can support it, too.
--- 
+--
 -- Available monitors:
 -- 	%info_CPU_user		Percentage of CPU used by user programs
 -- 	%info_CPU_system	Percentage of CPU used by services
@@ -40,7 +40,7 @@
 -- 	%info_swap_total	Total amount of swap
 -- 	%info_swap_used		Amount of swap currently used
 -- 	%info_swap_free		Amount of swap currently free
--- 
+--
 -- Update Interval:
 -- (Note that the units are milliseconds)
 
@@ -75,7 +75,7 @@ local function get_CPU_info()
 		info_CPU_idle,
 		info_CPU_wa,
 		info_CPU_hi,
-		info_CPU_si = string.find(s, "Cpu%(s%):%s*(%d+%.%d+%%?)%s*us,%s*(%d+%.%d+%%?)%s*sy,%s*(%d+%.%d+%%?)%s*ni,%s*(%d+%.%d+%%?)%s*id,%s*(%d+%.%d+%%?)%s*wa,%s*(%d+%.%d+%%?)%s*hi,%s*(%d+%.%d+%%?)%s*si") 
+		info_CPU_si = string.find(s, "Cpu%(s%):%s*(%d+%.%d+%%?)%s*us,%s*(%d+%.%d+%%?)%s*sy,%s*(%d+%.%d+%%?)%s*ni,%s*(%d+%.%d+%%?)%s*id,%s*(%d+%.%d+%%?)%s*wa,%s*(%d+%.%d+%%?)%s*hi,%s*(%d+%.%d+%%?)%s*si")
 	return info_CPU_user.."", info_CPU_system.."", info_CPU_ni.."", info_CPU_idle.."", info_CPU_wa.."", info_CPU_hi.."", info_CPU_si..""
 end
 
@@ -96,7 +96,7 @@ local function get_RAM_info()
 		info_RAM_free,
 		info_RAM_shared,
 		info_RAM_buffers,
-		info_RAM_cached = string.find(s, "Mem:%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)") 
+		info_RAM_cached = string.find(s, "Mem:%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)%s+(%d+)")
 	info_RAM_total = process_memory(info_RAM_total)
 	info_RAM_used = process_memory(info_RAM_used)
 	info_RAM_free = process_memory(info_RAM_free)

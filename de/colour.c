@@ -1,7 +1,7 @@
 /*
  * ion/de/colour.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -33,7 +33,7 @@ bool de_alloc_colour(WRootWin *rootwin, DEColour *ret, const char *name)
         if(ok)
             *ret=c.pixel;
     }
-    
+
     return ok;
 #endif /* HAVE_X11_XFT */
 }
@@ -71,15 +71,15 @@ void de_free_colour_group(WRootWin *rootwin, DEColourGroup *cg)
     de_free_colour(rootwin, cg->pad);
 #else /* HAVE_X11_XFT */
     DEColour pixels[5];
-    
+
     pixels[0]=cg->bg;
     pixels[1]=cg->fg;
     pixels[2]=cg->hl;
     pixels[3]=cg->sh;
     pixels[4]=cg->pad;
-    
+
     XFreeColors(ioncore_g.dpy, rootwin->default_cmap, pixels, 5, 0);
-    
+
     gr_stylespec_unalloc(&cg->spec);
 #endif /* HAVE_X11_XFT */
 }
@@ -91,9 +91,9 @@ void de_free_colour(WRootWin *rootwin, DEColour col)
     XftColorFree(ioncore_g.dpy, XftDEDefaultVisual(), rootwin->default_cmap, &col);
 #else /* HAVE_X11_XFT */
     DEColour pixels[1];
-    
+
     pixels[0]=col;
-    
+
     XFreeColors(ioncore_g.dpy, rootwin->default_cmap, pixels, 1, 0);
 #endif /* HAVE_X11_XFT */
 }

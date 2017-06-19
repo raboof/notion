@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/xic.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -17,5 +17,6 @@ extern XIC xwindow_create_xic(Window win);
 extern bool window_create_xic(WWindow *wwin);
 
 extern void ioncore_init_xim(void);
+extern void ioncore_deinit_xim(void);
 
 #endif /* ION_IONCORE_XIC_H */

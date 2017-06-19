@@ -1,7 +1,7 @@
 -- Authors: Unknown
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- Move all windows on a WTiling to a single frame and destroy the rest.
 -- (like C-x 1 in Emacs)
 -- This is the ion3 version.
@@ -20,7 +20,7 @@ function collapse.take_frame_to_here (region, current)
                        region:rqclose()
                     end)
    end
-   return true                   
+   return true
 end
 
 function collapse.collapse(ws)

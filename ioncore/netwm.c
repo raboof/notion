@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/netwm.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -81,7 +81,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[6]=atom_net_active_window;
     atoms[7]=atom_net_wm_allowed_actions;
     atoms[8]=atom_net_wm_moveresize;
-    
+
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
                     32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
@@ -93,7 +93,7 @@ void netwm_init_rootwin(WRootWin *rw)
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
 
     p[0]=libtu_progbasename();
-    /** 
+    /**
      * Unfortunately we cannot determine the charset of libtu_progbasename()
      * so we'll just have to guess it makes sense in the current locale charset
      */
@@ -112,18 +112,18 @@ bool netwm_check_initial_fullscreen(WClientWin *cwin)
 
     int i, n;
     long *data;
-    
+
     n=xwindow_get_property(cwin->win, atom_net_wm_state, XA_ATOM,
                    1, TRUE, (uchar**)&data);
-    
+
     if(n<0)
         return FALSE;
-    
+
     for(i=0; i<n; i++){
         if(data[i]==(long)atom_net_wm_state_fullscreen)
             return TRUE;
     }
-    
+
     XFree((void*)data);
 
     return FALSE;
@@ -143,13 +143,13 @@ void netwm_update_state(WClientWin *cwin)
 {
     CARD32 data[2];
     int n=0;
-    
+
     if(REGION_IS_FULLSCREEN(cwin))
         data[n++]=atom_net_wm_state_fullscreen;
     if(region_is_activity_r(&(cwin->region)))
         data[n++]=atom_net_wm_state_demands_attention;
 
-    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state, 
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state,
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 
@@ -157,7 +157,7 @@ void netwm_update_allowed_actions(WClientWin *cwin)
 {
     CARD32 data[1];
     int n=0;
-    
+
     /* TODO add support for 'resize' and list it here */
     /* TODO add support for 'minimize' and list it here */
     /* TODO add support for 'maximize_horz' and list it here */
@@ -168,7 +168,7 @@ void netwm_update_allowed_actions(WClientWin *cwin)
     /* TODO add support for 'above' and list it here */
     /* TODO add support for 'below' and list it here */
 
-    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_allowed_actions, 
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_allowed_actions,
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 
@@ -180,7 +180,7 @@ void netwm_delete_state(WClientWin *cwin)
 
 
 
-static void netwm_state_change_rq(WClientWin *cwin, 
+static void netwm_state_change_rq(WClientWin *cwin,
                                   const XClientMessageEvent *ev)
 {
     if((ev->data.l[1]==0 ||
@@ -189,10 +189,10 @@ static void netwm_state_change_rq(WClientWin *cwin,
         ev->data.l[2]!=(long)atom_net_wm_state_fullscreen)){
         return;
     }
-    
+
     /* Ok, full screen add/remove/toggle */
     if(!REGION_IS_FULLSCREEN(cwin)){
-        if(ev->data.l[0]==_NET_WM_STATE_ADD || 
+        if(ev->data.l[0]==_NET_WM_STATE_ADD ||
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             WRegion *grp=region_groupleader_of((WRegion*)cwin);
             bool sw=clientwin_fullscreen_may_switchto(cwin);
@@ -204,7 +204,7 @@ static void netwm_state_change_rq(WClientWin *cwin,
             cwin->flags&=~CLIENTWIN_FS_RQ;
         }
     }else{
-        if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
+        if(ev->data.l[0]==_NET_WM_STATE_REMOVE ||
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             WRegion *grp=region_groupleader_of((WRegion*)cwin);
             bool sw=clientwin_fullscreen_may_switchto(cwin);
@@ -227,31 +227,31 @@ static void netwm_state_change_rq(WClientWin *cwin,
 void netwm_set_active(WRegion *reg)
 {
     CARD32 data[1]={None};
-    
+
     if(OBJ_IS(reg, WClientWin))
         data[0]=region_xwindow(reg);
 
     /* The spec doesn't say how multihead should be handled, so
      * we just update the root window the window is on.
      */
-    XChangeProperty(ioncore_g.dpy, region_root_of(reg), 
-                    atom_net_active_window, XA_WINDOW, 
+    XChangeProperty(ioncore_g.dpy, region_root_of(reg),
+                    atom_net_active_window, XA_WINDOW,
                     32, PropModeReplace, (uchar*)data, 1);
 }
 
 
-static void netwm_active_window_rq(WClientWin *cwin, 
+static void netwm_active_window_rq(WClientWin *cwin,
                                    const XClientMessageEvent *ev)
 {
     long source=ev->data.l[0];
     /**
-     * By default we ignore non-pager activity requests, as they're known to 
+     * By default we ignore non-pager activity requests, as they're known to
      * steal focus from newly-created windows :(
      */
     bool ignore=source!=SOURCE_PAGER;
-    
+
     extl_table_gets_b(cwin->proptab, "ignore_net_active_window", &ignore);
-    
+
     if(!ignore)
         region_goto((WRegion*)cwin);
     else
@@ -304,7 +304,7 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 {
     if(ev->atom!=atom_net_wm_name)
         return FALSE;
-    
+
     clientwin_get_set_name(cwin);
     return TRUE;
 }
@@ -315,12 +315,12 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 /*{{{ user time */
 
-/** When a new window is mapped, look at the netwm user time to find out 
+/** When a new window is mapped, look at the netwm user time to find out
  * whether the new window should be switched to and get the focus.
  *
  * It is unclear what the desired behavior would be, and how we should takee
  * into consideration ioncore_g.usertime_diff_new and IONCORE_CLOCK_SKEW_MS,
- * so for now we deny raising the new window only in the special case where 
+ * so for now we deny raising the new window only in the special case where
  * its user time is set to 0, specifically preventing it from being raised.
  */
 void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
@@ -331,11 +331,11 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
     Window win=region_xwindow((WRegion*)cwin);
     /* user time */
     CARD32 ut=0;
-    /* whether the new (got) and current (gotcut) windows had their usertime 
+    /* whether the new (got) and current (gotcut) windows had their usertime
      * set */
     bool got=FALSE, gotcut=FALSE;
     bool nofocus=FALSE;
-    
+
     if(cur!=NULL){
         Window curwin;
         /* current window user time */
@@ -345,21 +345,21 @@ void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
         curwin=region_xwindow((WRegion*)cur);
         gotcut=xwindow_get_cardinal_property(curwin, atom_net_wm_user_time, &cut);
     }
-    
+
     got=xwindow_get_cardinal_property(win, atom_net_wm_user_time, &ut);
-   
-    /* The special value of zero on a newly mapped window can be used to 
+
+    /* The special value of zero on a newly mapped window can be used to
      * request that the window not be initially focused when it is mapped */
     if (got && ut == 0)
         nofocus = TRUE;
-    
-    /* there was some other logic here, but it was not clear how it was meant 
+
+    /* there was some other logic here, but it was not clear how it was meant
      * to work and prevented newly created windows from receiving the focus
      * in some cases
-     * (https://sourceforge.net/tracker/?func=detail&aid=3109576&group_id=314802&atid=1324528) 
+     * (https://sourceforge.net/tracker/?func=detail&aid=3109576&group_id=314802&atid=1324528)
      * Stripped until we decide how this is supposed to behave.
      */
-  
+
     if(nofocus){
         param->switchto=FALSE;
         param->jumpto=FALSE;
@@ -384,7 +384,7 @@ int count_screens()
 }
 
 /*EXTL_DOC
- * refresh \_NET\_WM\_VIRTUAL\_ROOTS 
+ * refresh \_NET\_WM\_VIRTUAL\_ROOTS
  */
 EXTL_SAFE
 EXTL_EXPORT
@@ -405,7 +405,7 @@ void ioncore_screens_updated(WRootWin *rw)
     }
 
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
-                    atom_net_virtual_roots, XA_WINDOW, 
+                    atom_net_virtual_roots, XA_WINDOW,
                     32, PropModeReplace, (uchar*)virtualroots, n_screens);
 
     free(virtualroots);

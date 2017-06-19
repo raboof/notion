@@ -40,7 +40,7 @@ extern int extl_try_config(const char *fname, const char *cfdir,
 
 extern char *extl_lookup_script(const char *file, const char *sp);
 
-extern bool extl_read_config(const char *file, const char *sp, 
+extern bool extl_read_config(const char *file, const char *sp,
                              bool warn_nx);
 
 extern char *extl_get_savefile(const char *module);

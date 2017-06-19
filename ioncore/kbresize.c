@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/kbresize.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -50,7 +50,7 @@ void ioncore_set_moveres_accel(ExtlTab tab)
 {
     int t_max, t_min, rd, er;
     double step, maxacc;
-    
+
     if(extl_table_gets_i(tab, "kbresize_t_max", &t_max))
        actmax=(t_max>0 ? t_max : INT_MAX);
     if(extl_table_gets_i(tab, "kbresize_t_min", &t_min))
@@ -87,7 +87,7 @@ static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
 {
     double t1=1000*(double)tv1->tv_sec+(double)tv1->tv_usec/1000;
     double t2=1000*(double)tv2->tv_sec+(double)tv2->tv_usec/1000;
-    
+
     return (int)(t1-t2);
 }
 
@@ -95,13 +95,13 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
 {
     struct timeval tv;
     long adiff, udiff;
-    
+
     if(mainloop_gettime(&tv)!=0)
         return;
-    
+
     adiff=tvdiffmsec(&tv, &last_action_tv);
     udiff=tvdiffmsec(&tv, &last_update_tv);
-    
+
     if(last_accel_mode==accel_mode && adiff<actmax){
         if(udiff>uptmin){
             accel+=accelinc;
@@ -113,10 +113,10 @@ void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
         accel=1.0;
         last_update_tv=tv;
     }
-    
+
     last_accel_mode=accel_mode;
     last_action_tv=tv;
-    
+
     if(*wu!=0)
         *wu=(*wu)*ceil(sqrt(accel)/abs(*wu));
     if(*hu!=0)
@@ -148,31 +148,31 @@ static bool resize_handler(WRegion *reg, XEvent *xev)
     XKeyEvent *ev=&xev->xkey;
     WBinding *binding=NULL;
     WMoveresMode *mode;
-    
+
     if(ev->type==KeyRelease)
         return FALSE;
-    
+
     if(reg==NULL)
         return FALSE;
-    
+
     mode=moveres_mode(reg);
-    
+
     if(mode==NULL)
         return FALSE;
-    
-    binding=bindmap_lookup_binding(ioncore_moveres_bindmap, 
+
+    binding=bindmap_lookup_binding(ioncore_moveres_bindmap,
                                    BINDING_KEYPRESS,
                                    ev->state, ev->keycode);
-    
+
     if(!binding)
         return FALSE;
-    
+
     if(binding!=NULL){
         extl_protect(&moveres_safelist);
         extl_call(binding->func, "oo", NULL, mode, reg);
         extl_unprotect(&moveres_safelist);
     }
-    
+
     return (moveres_mode(reg)==NULL);
 }
 
@@ -200,10 +200,10 @@ static bool setup_resize_timer(WMoveresMode *mode)
         if(resize_timer==NULL)
             return FALSE;
     }
-    
-    timer_set(resize_timer, resize_delay, 
+
+    timer_set(resize_timer, resize_delay,
               (WTimerHandler*)tmr_end_resize, (Obj*)mode);
-    
+
     return TRUE;
 }
 
@@ -224,7 +224,7 @@ static void reset_resize_timer()
 /*{{{ Misc. */
 
 
-static int limit_and_encode_mode(int *left, int *right, 
+static int limit_and_encode_mode(int *left, int *right,
                                  int *top, int *bottom)
 {
     *left=sign(*left);
@@ -261,20 +261,20 @@ static void resize_units(WMoveresMode *mode, int *wret, int *hret)
  * 0: do not change, 1: grow along corresponding border.
  */
 EXTL_EXPORT_MEMBER
-void moveresmode_resize(WMoveresMode *mode, 
+void moveresmode_resize(WMoveresMode *mode,
                         int left, int right, int top, int bottom)
 {
     int wu=0, hu=0;
     int accel_mode=0;
-    
+
     if(!setup_resize_timer(mode))
         return;
-    
+
     accel_mode=3*limit_and_encode_mode(&left, &right, &top, &bottom);
     resize_units(mode, &wu, &hu);
     moveresmode_accel(mode, &wu, &hu, accel_mode);
 
-    moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu, 
+    moveresmode_delta_resize(mode, -left*wu, right*wu, -top*hu, bottom*hu,
                              NULL);
 }
 
@@ -297,11 +297,11 @@ void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 
     if(!setup_resize_timer(mode))
         return;
-    
+
     accel_mode=1+3*limit_and_encode_mode(&horizmul, &vertmul, &dummy, &dummy);
     moveresmode_accel(mode, &horizmul, &vertmul, accel_mode);
 
-    moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul, 
+    moveresmode_delta_resize(mode, horizmul, horizmul, vertmul, vertmul,
                              NULL);
 }
 
@@ -315,11 +315,11 @@ ExtlTab moveresmode_rqgeom_extl(WMoveresMode *mode, ExtlTab g)
 {
     WRQGeomParams rq=RQGEOMPARAMS_INIT;
     WRectangle res;
-    
+
     rqgeomparams_from_table(&rq, &mode->geom, g);
-    
+
     moveresmode_rqgeom(mode, &rq, &res);
-    
+
     return extl_table_from_rectangle(&res);
 }
 
@@ -372,12 +372,12 @@ static void cancel_moveres(WRegion *reg)
         moveresmode_cancel(mode);
 }
 
-    
+
 /*EXTL_DOC
  * Enter move/resize mode for \var{reg}. The bindings set with
- * \fnref{ioncore.set_bindings} for \type{WMoveresMode} are used in 
+ * \fnref{ioncore.set_bindings} for \type{WMoveresMode} are used in
  * this mode. Of the functions exported by the Ion C core, only
- * \fnref{WMoveresMode.resize}, \fnref{WMoveresMode.move}, 
+ * \fnref{WMoveresMode.resize}, \fnref{WMoveresMode.move},
  * \fnref{WMoveresMode.cancel} and \fnref{WMoveresMode.end} are
  * allowed to be called while in this mode.
  */
@@ -388,15 +388,15 @@ WMoveresMode *region_begin_kbresize(WRegion *reg)
 
     if(mode==NULL)
         return NULL;
-    
+
     if(!setup_resize_timer(mode))
         return NULL;
 
     accel_reset();
-    
+
     ioncore_grab_establish(reg, resize_handler,
                            (GrabKilledHandler*)cancel_moveres, 0);
-    
+
     return mode;
 }
 

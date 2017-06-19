@@ -1,7 +1,7 @@
 /*
  * libtu/errorlog.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2004. 
+ * Copyright (c) Tuomo Valkonen 1999-2004.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -23,13 +23,13 @@ static void add_to_log(ErrorLog *el, const char *message, int l)
 {
     if(message==NULL)
         return;
-    
+
     /* Also write to stderr */
     fwrite(message, sizeof(char), l, stderr);
 
     if(el==NULL)
         return;
-    
+
     if(el->file!=NULL){
         el->errors=TRUE;
         fwrite(message, sizeof(char), l, el->file);
@@ -45,9 +45,9 @@ static void add_to_log(ErrorLog *el, const char *message, int l)
         el->msgs[0]=0;
         el->msgs_len=0;
     }
-            
+
     el->errors=TRUE;
-    
+
     if(l+el->msgs_len>ERRORLOG_MAX_SIZE-1){
         int n=0;
         if(l<ERRORLOG_MAX_SIZE-1){
@@ -70,9 +70,9 @@ static void log_warn_handler(const char *message)
 {
     const char *p=strchr(message, '\n');
     static int lineno=0;
-    
+
     add_to_log(current_log, lineno==0 ? ">> " : "   ", 3);
-    
+
     if(p!=NULL){
         add_to_log(current_log, message, p-message+1);
         lineno++;
@@ -80,12 +80,12 @@ static void log_warn_handler(const char *message)
         lineno--;
         return;
     }
-    
+
     add_to_log(current_log, message, strlen(message));
     add_to_log(current_log, "\n", 1);
 }
 
-           
+
 void errorlog_begin_file(ErrorLog *el, FILE *file)
 {
     el->msgs=NULL;

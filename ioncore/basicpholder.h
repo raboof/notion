@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/basicpholder.h
  *
- * Copyright (c) Tuomo Valkonen 2005-2009. 
+ * Copyright (c) Tuomo Valkonen 2005-2009.
  *
  * See the included file LICENSE for details.
  */

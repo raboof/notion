@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_luaext.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- See the included file LICENSE for details.

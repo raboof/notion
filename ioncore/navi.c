@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/navi.c
  *
- * Copyright (c) Tuomo Valkonen 2006-2009. 
+ * Copyright (c) Tuomo Valkonen 2006-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -20,7 +20,7 @@ WRegion *region_navi_first(WRegion *reg, WRegionNavi nh,
                            WRegionNaviData *data)
 {
     WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, region_navi_first, reg, 
+    CALL_DYN_RET(ret, WRegion*, region_navi_first, reg,
                  (reg, nh, data));
     return ret;
 }
@@ -30,7 +30,7 @@ WRegion *region_navi_next(WRegion *reg, WRegion *mgd, WRegionNavi nh,
                           WRegionNaviData *data)
 {
     WRegion *ret=NULL;
-    CALL_DYN_RET(ret, WRegion*, region_navi_next, reg, 
+    CALL_DYN_RET(ret, WRegion*, region_navi_next, reg,
                  (reg, mgd, nh, data));
     return ret;
 }
@@ -42,14 +42,14 @@ bool ioncore_string_to_navi(const char *str, WRegionNavi *nh)
         warn(TR("Invalid parameter."));
         return FALSE;
     }
-    
+
     if(!strcmp(str, "any")){
         *nh=REGION_NAVI_ANY;
-    }else if (!strcmp(str, "end") || 
-              !strcmp(str, "last") || 
+    }else if (!strcmp(str, "end") ||
+              !strcmp(str, "last") ||
               !strcmp(str, "next")){
         *nh=REGION_NAVI_END;
-    }else if (!strcmp(str, "beg") || 
+    }else if (!strcmp(str, "beg") ||
               !strcmp(str, "first") ||
               !strcmp(str, "prev")){
         *nh=REGION_NAVI_BEG;
@@ -57,11 +57,11 @@ bool ioncore_string_to_navi(const char *str, WRegionNavi *nh)
         *nh=REGION_NAVI_LEFT;
     }else if(!strcmp(str, "right")){
         *nh=REGION_NAVI_RIGHT;
-    }else if(!strcmp(str, "top") || 
-             !strcmp(str, "above") || 
+    }else if(!strcmp(str, "top") ||
+             !strcmp(str, "above") ||
              !strcmp(str, "up")){
         *nh=REGION_NAVI_TOP;
-    }else if(!strcmp(str, "bottom") || 
+    }else if(!strcmp(str, "bottom") ||
              !strcmp(str, "below") ||
              !strcmp(str, "down")){
         *nh=REGION_NAVI_BOTTOM;
@@ -69,7 +69,7 @@ bool ioncore_string_to_navi(const char *str, WRegionNavi *nh)
         warn(TR("Invalid direction parameter."));
         return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -146,19 +146,19 @@ static WRegion *region_navi_descend(WRegion *reg, WRegionNaviData *data)
         return region_navi_first(reg, data->nh, data);
     }else{
         WRegion *nxt;
-        
+
         data->descend=TRUE;
         data->nh=ioncore_navi_reverse(data->nh);
 
         nxt=region_navi_first(reg, data->nh, data);
-        
+
         data->descend=FALSE;
         data->nh=ioncore_navi_reverse(data->nh);
-        
+
         return nxt;
     }
 }
-    
+
 
 WRegion *region_navi_cont(WRegion *reg, WRegion *res, WRegionNaviData *data)
 {
@@ -177,12 +177,12 @@ WRegion *region_navi_cont(WRegion *reg, WRegion *res, WRegionNaviData *data)
                     nxt=region_navi_next(mgr, reg, data->nh, data);
                 }
             }
-            
+
             if(nxt==NULL && !data->nowrap){
                 /* wrap */
                 nxt=region_navi_descend(reg, data);
             }
-            
+
             return nxt;
         }
     }else{
@@ -199,19 +199,19 @@ static bool get_param(WRegionNaviData *data, const char *dirstr, ExtlTab param)
 {
     if(!ioncore_string_to_navi(dirstr, &data->nh))
         return FALSE;
-    
+
     data->ascend_filter=extl_fn_none();
     data->descend_filter=extl_fn_none();
     data->no_ascend=NULL;
     data->no_descend=NULL;
-    
+
     extl_table_gets_o(param, "no_ascend", &data->no_ascend);
     extl_table_gets_o(param, "no_descend", &data->no_descend);
     extl_table_gets_f(param, "ascend_filter", &data->ascend_filter);
     extl_table_gets_f(param, "descend_filter", &data->descend_filter);
     data->nowrap=extl_table_is_bool_set(param, "nowrap");
     data->nofront=extl_table_is_bool_set(param, "nofront");
-    
+
     return TRUE;
 }
 
@@ -220,18 +220,18 @@ static WRegion *release(WRegionNaviData *data, WRegion *res)
 {
     extl_unref_fn(data->ascend_filter);
     extl_unref_fn(data->descend_filter);
-    
+
     return res;
 }
 
 
 /*EXTL_DOC
  * Find region next from \var{reg} in direction \var{dirstr}
- * (\codestr{up}, \codestr{down}, \codestr{left}, \codestr{right}, 
+ * (\codestr{up}, \codestr{down}, \codestr{left}, \codestr{right},
  * \codestr{next}, \codestr{prev}, or \codestr{any}). The table \var{param}
- * may contain the boolean field \var{nowrap}, instructing not to wrap 
+ * may contain the boolean field \var{nowrap}, instructing not to wrap
  * around, and the \type{WRegion}s \var{no_ascend} and \var{no_descend},
- * and boolean functions \var{ascend_filter} and \var{descend_filter} 
+ * and boolean functions \var{ascend_filter} and \var{descend_filter}
  * on \var{WRegion} pairs (\var{to}, \var{from}), are used to decide when
  * to descend or ascend into another region.
  */
@@ -240,23 +240,23 @@ WRegion *ioncore_navi_next(WRegion *reg, const char *dirstr, ExtlTab param)
 {
     WRegionNaviData data;
     WRegion *mgr;
-    
+
     if(reg==NULL){
         /* ??? */
         return NULL;
     }
-    
+
     if(!get_param(&data, dirstr, param))
         return NULL;
-    
+
     mgr=REGION_MANAGER(reg);
-    
+
     if(mgr==NULL)
         return FALSE;
-    
+
     data.startpoint=reg;
     data.descend=FALSE;
-    
+
     return release(&data, region_navi_next(mgr, reg, data.nh, &data));
 }
 
@@ -269,16 +269,16 @@ EXTL_EXPORT
 WRegion *ioncore_navi_first(WRegion *reg, const char *dirstr, ExtlTab param)
 {
     WRegionNaviData data;
-    
+
     if(reg==NULL)
         return NULL;
-    
+
     if(!get_param(&data, dirstr, param))
         return NULL;
-    
+
     data.startpoint=reg;
     data.descend=TRUE;
-    
+
     return release(&data, region_navi_first(reg, data.nh, &data));
 }
 
@@ -287,7 +287,7 @@ static WRegion *do_goto(WRegion *res)
 {
     if(res!=NULL)
         region_goto(res);
-    
+
     return res;
 }
 
@@ -307,7 +307,7 @@ WRegion *ioncore_goto_next(WRegion *reg, const char *dirstr, ExtlTab param)
 
 /*EXTL_DOC
  * Go to first region within \var{reg} in direction \var{dirstr}.
- * For information on \var{param}, see \fnref{ioncore.navi_next}. 
+ * For information on \var{param}, see \fnref{ioncore.navi_next}.
  * Additionally this function supports the boolean \var{nofront} field,
  * for not bringing the object to front.
  */

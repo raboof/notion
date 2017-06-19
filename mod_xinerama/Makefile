@@ -9,14 +9,14 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR)
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR) $(shell $(PKG_CONFIG) --cflags-only-I xinerama)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(shell $(PKG_CONFIG) --cflags-only-other xinerama)
 DOCS=LICENSE README
 
 SOURCES=mod_xinerama.c
 
 MAKE_EXPORTS=mod_xinerama
-LIBS = -L/usr/lib/x86_64-linux-gnu $(X11_LIBS) -lXinerama
+LIBS = $(X11_LIBS) $(shell $(PKG_CONFIG) --libs xinerama)
 MODULE=mod_xinerama
 MODULE_STUB=mod_xinerama.lua
 
@@ -44,7 +44,7 @@ tarball: $(SOURCES) $(ETC) $(DOCS) $(MODULE_STUB) Makefile
 
 .PHONY: test
 test: $(SOURCES)
-	lua test_xinerama.lua
+	$(LUA) test_xinerama.lua
 
 ######################################
 
@@ -57,4 +57,4 @@ mod_xinerama.o: exports.h
 ################ ls_xinerama utility ###############
 
 ls_xinerama: ls_xinerama.c
-	$(CC) ls_xinerama.c -o ls_xinerama -Wl,--as-needed -lX11 -lXinerama
+	$(CC) $(CFLAGS) ls_xinerama.c -o ls_xinerama $(LDFLAGS) $(LIBS)

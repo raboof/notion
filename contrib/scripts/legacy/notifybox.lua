@@ -14,13 +14,13 @@ function notifybox.show(message, name, location, style, scr)
     if not name then
         name=default
     end
-    
+
     if not scr then
         scr=ioncore.find_screen_id(0)
     end
-    
+
     local box=get_box(name)
-    
+
     if not box then
         box=scr:attach_new{
             type="WInfoWin",
@@ -34,7 +34,7 @@ function notifybox.show(message, name, location, style, scr)
         }
     end
 
-    -- Hack: attach_new doesn't get geometries right if we pass msg 
+    -- Hack: attach_new doesn't get geometries right if we pass msg
     -- directly to it.
     box:set_text(message, scr:geom().w)
 end
@@ -42,7 +42,7 @@ end
 
 function notifybox.hide(name)
     local box=get_box(name or default)
-    
+
     if box then
         box:rqclose()
     end

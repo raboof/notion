@@ -18,7 +18,7 @@
 -- the provided programs (wether a placeholder exists in
 -- template or not) and updates the statusbar every time
 -- one of them prints (and flushes) a line.
--- 
+--
 -- -- How to use it?
 --
 -- 1 ) update statusbar template to include %exec_something
@@ -31,13 +31,13 @@
 --     exec = {
 --
 --         -- show date each second in %exec_date with.. date!
--- 
+--
 --         date = {
 --             program = 'date',
 --             retry_delay = 1 * 1000,
 --         },
---                  
---         -- show percentage of hda1 every 30 seconds in 
+--
+--         -- show percentage of hda1 every 30 seconds in
 --         -- %exec_hda1u with df, grep and sed.
 --         -- also highlights entry if usage is high.
 --
@@ -53,11 +53,11 @@
 --                 },
 --             },
 --         },
--- 
+--
 --         -- keep continous track of a remote machine in
 --         -- %exec_remote with ssh, bash and uptime.
 --         -- if the connection breaks, wait 60 seconds and retry
---         
+--
 --         remote = {
 --             program = 'ssh -tt myhost.com "while (uptime);' ..
 --                       'do sleep 1; done"',
@@ -67,7 +67,7 @@
 -- }
 --
 -- -- Description of variables:
--- 
+--
 -- * program
 --  The program to execute. The last line of each
 --  flushed output this program writes to stdout is
@@ -99,8 +99,8 @@
 --  doesn't have an 'or'). By default the themes define
 --  a color for 'important' and 'critical' hints.
 --
--- 
-                
+--
+
 local settings = table.join( statusd.get_config("exec"), {} )
 local start_execution = nil
 local timers = {}
@@ -115,14 +115,14 @@ start_execution = function ( key )
     local process_input = function ( new_data )
 
         local received_data = ""
-        
+
         -- When we get new data, output the last complete line
-           
+
         while new_data do
             received_data = received_data .. new_data
-          
+
             -- Erase old data which we do not need anymore
-            
+
             received_data = string.gsub( received_data,
                                          ".*\n(.*\n.*)", "%1" )
 
@@ -130,7 +130,7 @@ start_execution = function ( key )
 
             local current_line = string.gsub( received_data,
                                               "(.*)\n.*", "%1" )
-                                                    
+
             local t_key = "exec_" .. key
             local t_length = settings[key].meter_length
             local h_regexp = settings[key].hint_regexp
@@ -150,23 +150,23 @@ start_execution = function ( key )
                 if ( type( re ) == 'string' ) then
                     re = { re }
                 end
-        
+
                 for _, r in ipairs( re ) do
                     if ( string.find( current_line, r ) ) then
                        statusd.inform(t_key .. "_hint", hint)
                     end
                 end
             end
-            
+
             -- Wait for bgread to signal that more data
             -- is available or the program has exited
-            
+
             new_data = coroutine.yield()
         end
 
         -- Program has exited.
         -- Start a timer for a new execution if set.
-        
+
         if settings[key].retry_delay then
             timers[key]:set( settings[key].retry_delay,
                              function()
@@ -188,7 +188,7 @@ start_execution = function ( key )
 
     -- Execute the program in the background and create
     -- coroutine functions to handle input and error data
-    
+
     statusd.popen_bgread( settings[key].program,
                           coroutine.wrap( process_input ),
                           coroutine.wrap( process_error ) )

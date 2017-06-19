@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/exec.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -31,9 +31,9 @@ void ioncore_setup_display(int xscr)
     char *display;
 
     /* Set up $DISPLAY */
-    
+
     display=XDisplayName(ioncore_g.display);
-    
+
     /* %ui, UINT_MAX is used to ensure there is enough space for the screen
      * number
      */
@@ -51,9 +51,9 @@ void ioncore_setup_display(int xscr)
 
     if(xscr>=0)
         snprintf(tmp+strlen(tmp), 11, ".%u", (unsigned)xscr);
-    
+
     putenv(tmp);
-        
+
     /* No need to free it, we'll execve soon */
     /*free(tmp);*/
 
@@ -64,13 +64,13 @@ void ioncore_setup_display(int xscr)
 void ioncore_setup_environ(const WExecP *p)
 {
     /* Set up $DISPLAY */
-    
-    ioncore_setup_display(p->target!=NULL 
+
+    ioncore_setup_display(p->target!=NULL
                           ? region_rootwin_of(p->target)->xscr
                           : -1);
-    
+
     /* Set up working directory */
-    
+
     if(p->wd!=NULL){
         if(chdir(p->wd)!=0)
             warn_err_obj(p->wd);
@@ -84,11 +84,11 @@ WHook *ioncore_exec_environ_hook=NULL;
 static void setup_exec(void *execp)
 {
     hook_call_p(ioncore_exec_environ_hook, execp, NULL);
-    
+
 #ifndef CF_NO_SETPGID
     setpgid(0, 0);
 #endif
-    
+
     ioncore_g.dpy=NULL;
 }
 
@@ -98,12 +98,12 @@ int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
                        ExtlFn errh)
 {
     WExecP p;
-    
+
     p.target=reg;
     p.cmd=cmd;
     p.wd=wd;
-    
-    return mainloop_popen_bgread(cmd, setup_exec, (void*)&p, 
+
+    return mainloop_popen_bgread(cmd, setup_exec, (void*)&p,
                                  extl_fn_none(), errh);
 }
 
@@ -111,7 +111,7 @@ int ioncore_do_exec_on(WRegion *reg, const char *cmd, const char *wd,
 /*EXTL_DOC
  * Run \var{cmd} with the environment variable DISPLAY set to point to the
  * X display the WM is running on. No specific screen is set unlike with
- * \fnref{WRootWin.exec_on}. The PID of the (shell executing the) new 
+ * \fnref{WRootWin.exec_on}. The PID of the (shell executing the) new
  * process is returned.
  */
 EXTL_SAFE
@@ -125,7 +125,7 @@ int ioncore_exec(const char *cmd)
 /*EXTL_DOC
  * Run \var{cmd} in directory \var{wd} with a read pipe connected to its
  * stdout and stderr.
- * When data is received through one of these pipes, \var{h} or \var{errh} 
+ * When data is received through one of these pipes, \var{h} or \var{errh}
  * is called with that data. When the pipe is closed, the handler is called
  * with \code{nil} argument. The PID of the new process is returned, or
  * -1 on error.
@@ -136,11 +136,11 @@ int ioncore_popen_bgread(const char *cmd, ExtlFn h, ExtlFn errh,
                          const char *wd)
 {
     WExecP p;
-    
+
     p.target=NULL;
     p.wd=wd;
     p.cmd=cmd;
-    
+
     return mainloop_popen_bgread(cmd, setup_exec, (void*)&p, h, errh);
 }
 
@@ -176,7 +176,7 @@ bool ioncore_do_snapshot(bool save_layout)
     extl_protect(NULL);
     hook_call_v(ioncore_snapshot_hook);
     extl_unprotect(NULL);
-    
+
     return TRUE;
 }
 
@@ -252,7 +252,7 @@ EXTL_EXPORT
 void ioncore_restart()
 {
     set_other(NULL);
-    
+
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESTART);
     }else{
@@ -269,7 +269,7 @@ EXTL_EXPORT
 void ioncore_restart_other(const char *cmd)
 {
     set_other(cmd);
-    
+
     if(smhook!=NULL){
         smhook(IONCORE_SM_RESTART_OTHER);
     }else{

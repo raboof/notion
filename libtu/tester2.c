@@ -1,7 +1,7 @@
 /*
  * libtu/tester2.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -17,8 +17,8 @@
 
 static bool test_fn(Tokenizer *tokz, int n, Token *toks)
 {
-    printf("test_fn() %d %s\n", n, TOK_IDENT_VAL(toks)); 
-    
+    printf("test_fn() %d %s\n", n, TOK_IDENT_VAL(toks));
+
     return TRUE;
 }
 
@@ -27,7 +27,7 @@ static bool test_fn(Tokenizer *tokz, int n, Token *toks)
 static bool sect_fn(Tokenizer *tokz, int n, Token *toks)
 {
     printf("sect_fn() %d %s\n", n, TOK_IDENT_VAL(toks+1));
-    
+
     return TRUE;
 }
 
@@ -48,8 +48,8 @@ static bool test3_fn(Tokenizer *tokz, int n, Token *toks)
 
     return TRUE;
 }
-    
-    
+
+
 static ConfOpt opts[]={
     {"test", NULL, test_fn, NULL},
     {"t2", "bd", test2_fn, NULL},
@@ -58,12 +58,12 @@ static ConfOpt opts[]={
     {NULL, NULL, NULL, NULL}
 };
 
-             
+
 int main(int argc, char *argv[])
 {
     libtu_init(argv[0]);
     parse_config_file(stdin, opts, TOKZ_ERROR_TOLERANT);
-    
+
     return EXIT_SUCCESS;
 }
 

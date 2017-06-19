@@ -1,8 +1,8 @@
 /*
  * ion/ioncore/ioncore.c
  *
- * Copyright (c) The Notion Team 2011. 
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) The Notion Team 2011.
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -89,7 +89,7 @@ static const char ioncore_license[]=DUMMY_TR(
     "\n"
     "This program is distributed in the hope that it will be useful,\n"
     "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"); 
+    "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
 
 static const char *ioncore_about=NULL;
 
@@ -107,9 +107,9 @@ WHook *ioncore_deinit_hook=NULL;
 void ioncore_warn_nolog(const char *str, ...)
 {
     va_list args;
-    
+
     va_start(args, str);
-    
+
     if(ioncore_g.opmode==IONCORE_OPMODE_INIT){
         fprintf(stderr, "%s: ", libtu_progname());
         vfprintf(stderr, str, args);
@@ -117,7 +117,7 @@ void ioncore_warn_nolog(const char *str, ...)
     }else{
         warn_v(str, args);
     }
-    
+
     va_end(args);
 }
 
@@ -140,15 +140,15 @@ static bool check_encoding()
 
     langi=nl_langinfo(CODESET);
     ctype=setlocale(LC_CTYPE, NULL);
-    
+
     if(langi==NULL || ctype==NULL)
         goto integr_err;
 
     if(strcmp(ctype, "C")==0 || strcmp(ctype, "POSIX")==0)
         return TRUE;
-    
+
     /* Compare encodings case-insensitively, ignoring dashes (-) */
-    a=langi; 
+    a=langi;
     b=strchr(ctype, '.');
     if(b!=NULL){
         b=b+1;
@@ -175,23 +175,23 @@ static bool check_encoding()
     }else{
         ioncore_warn_nolog(TR("No encoding given in LC_CTYPE."));
     }
-        
+
     if(strcasecmp(langi, "UTF-8")==0 || strcasecmp(langi, "UTF8")==0){
         ioncore_g.enc_sb=FALSE;
         ioncore_g.enc_utf8=TRUE;
         ioncore_g.use_mb=TRUE;
         return TRUE;
     }
-    
+
     for(i=0; i<256; i++){
         chs[0]=i;
         if(mbtowc(&wc, chs, 8)==-1){
             /* Doesn't look like a single-byte encoding. */
             break;
         }
-        
+
     }
-    
+
     if(i==256){
         /* Seems like a single-byte encoding... */
         ioncore_g.use_mb=TRUE;
@@ -202,12 +202,12 @@ static bool check_encoding()
         warn(TR("Statefull encodings are unsupported."));
         return FALSE;
     }
-    
+
     ioncore_g.enc_sb=FALSE;
     ioncore_g.use_mb=TRUE;
 
     return TRUE;
-    
+
 integr_err:
     warn(TR("Cannot verify locale encoding setting integrity "
             "(LC_CTYPE=%s, nl_langinfo(CODESET)=%s). "
@@ -221,9 +221,9 @@ integr_err:
 static bool init_locale()
 {
     const char *p;
-    
+
     p=setlocale(LC_ALL, "");
-    
+
     if(p==NULL){
         warn("setlocale() call failed.");
         return FALSE;
@@ -238,12 +238,12 @@ static bool init_locale()
         if(check_encoding())
             return TRUE;
     }
-    
+
     warn("Reverting locale settings to \"C\".");
-    
+
     if(setlocale(LC_ALL, "C")==NULL)
         warn("setlocale() call failed.");
-        
+
     return FALSE;
 }
 
@@ -295,21 +295,21 @@ static bool init_hooks()
     INIT_HOOK_(clientwin_unmapped_hook);
     INIT_HOOK_(clientwin_property_change_hook);
     INIT_HOOK_(ioncore_submap_ungrab_hook);
-    
+
     INIT_HOOK_(region_notify_hook);
     ADD_HOOK_(region_notify_hook, ioncore_screen_activity_notify);
     ADD_HOOK_(region_notify_hook, ioncore_region_notify);
-    
+
     INIT_HOOK(clientwin_do_manage_alt, clientwin_do_manage_default);
     INIT_HOOK(ioncore_handle_event_alt, ioncore_handle_event);
     INIT_HOOK(region_do_warp_alt, region_do_warp_default);
     INIT_HOOK(ioncore_exec_environ_hook, ioncore_setup_environ);
-    
+
     mainloop_sigchld_hook=mainloop_register_hook("ioncore_sigchld_hook",
                                                  create_hook());
     mainloop_sigusr2_hook=mainloop_register_hook("ioncore_sigusr2_hook",
                                                  create_hook());
-    
+
     return TRUE;
 }
 
@@ -317,20 +317,20 @@ static bool init_hooks()
 static bool register_classes()
 {
     int fail=0;
-    
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WClientWin), 
+
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WClientWin),
                                      (WRegionLoadCreateFn*)clientwin_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WMPlex), 
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WMPlex),
                                      (WRegionLoadCreateFn*)mplex_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame), 
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WFrame),
                                      (WRegionLoadCreateFn*)frame_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WInfoWin), 
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WInfoWin),
                                      (WRegionLoadCreateFn*)infowin_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupCW), 
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupCW),
                                      (WRegionLoadCreateFn*)groupcw_load);
-    fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupWS), 
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupWS),
                                      (WRegionLoadCreateFn*)groupws_load);
-    
+
     return !fail;
 }
 
@@ -338,7 +338,7 @@ static bool register_classes()
 #define INITSTR(NM)                             \
     ioncore_g.notifies.NM=stringstore_alloc(#NM); \
     if(ioncore_g.notifies.NM==STRINGID_NONE) return FALSE;
-    
+
 static bool init_global()
 {
     /* argc, argv must be set be the program */
@@ -351,7 +351,7 @@ static bool init_global()
     ioncore_g.focus_next=NULL;
     ioncore_g.warp_next=FALSE;
     ioncore_g.focus_next_source=IONCORE_FOCUSNEXT_OTHER;
-    
+
     ioncore_g.focuslist=NULL;
     ioncore_g.focus_current=NULL;
 
@@ -362,6 +362,9 @@ static bool init_global()
     ioncore_g.usertime_diff_new=CF_USERTIME_DIFF_NEW;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
+    ioncore_g.warp_margin=5;
+    ioncore_g.warp_factor[0]=0.0;
+    ioncore_g.warp_factor[1]=0.0;
     ioncore_g.switchto_new=TRUE;
     ioncore_g.no_mousefocus=FALSE;
     ioncore_g.unsqueeze_enabled=TRUE;
@@ -375,13 +378,13 @@ static bool init_global()
     ioncore_g.enc_utf8=FALSE;
     ioncore_g.enc_sb=TRUE;
     ioncore_g.use_mb=FALSE;
-    
+
     ioncore_g.screen_notify=TRUE;
-    
+
     ioncore_g.frame_default_index=LLIST_INDEX_AFTER_CURRENT_ACT;
-    
+
     ioncore_g.framed_transients=TRUE;
-    
+
     ioncore_g.shape_extension=FALSE;
     ioncore_g.shape_event_basep=0;
     ioncore_g.shape_error_basep=0;
@@ -401,7 +404,7 @@ static bool init_global()
     INITSTR(deinit);
     INITSTR(map);
     INITSTR(unmap);
-    
+
     return TRUE;
 }
 
@@ -411,12 +414,12 @@ bool ioncore_init(const char *prog, int argc, char *argv[],
 {
     if(!init_global())
         return FALSE;
-    
+
     progname=prog;
     ioncore_g.argc=argc;
     ioncore_g.argv=argv;
 
-#ifndef CF_NO_LOCALE    
+#ifndef CF_NO_LOCALE
     init_locale();
 #endif
 #ifndef CF_NO_GETTEXT
@@ -424,10 +427,10 @@ bool ioncore_init(const char *prog, int argc, char *argv[],
 #endif
 
     ioncore_about=scat3(ioncore_copy, "\n\n", TR(ioncore_license));
-    
+
     if(!ioncore_init_bindmaps())
         return FALSE;
-    
+
     if(!register_classes())
         return FALSE;
 
@@ -452,27 +455,27 @@ static void ioncore_init_session(const char *display)
     const char *dpyend=NULL;
     char *tmp=NULL, *colon=NULL;
     const char *sm=getenv("SESSION_MANAGER");
-    
+
     if(sm!=NULL)
         ioncore_load_module("mod_sm");
 
     if(extl_sessiondir()!=NULL)
         return;
-    
+
     /* Not running under SM; use display-specific directory */
     dpyend=strchr(display, ':');
     if(dpyend!=NULL)
         dpyend=strchr(dpyend, '.');
-    if(dpyend==NULL){    
+    if(dpyend==NULL){
         libtu_asprintf(&tmp, "default-session-%s", display);
     }else{
         libtu_asprintf(&tmp, "default-session-%.*s",
                        (int)(dpyend-display), display);
     }
-    
+
     if(tmp==NULL)
         return;
-    
+
     colon=tmp;
     while(1){
         colon=strchr(colon, ':');
@@ -480,11 +483,11 @@ static void ioncore_init_session(const char *display)
             break;
         *colon='-';
     }
-    
+
     extl_set_sessiondir(tmp);
     free(tmp);
 }
-    
+
 
 static bool ioncore_init_x(const char *display, int stflags)
 {
@@ -501,9 +504,9 @@ static bool ioncore_init_x(const char *display, int stflags)
 
     /* Open the display. */
     dpy=XOpenDisplay(display);
-    
+
     if(dpy==NULL){
-        warn(TR("Could not connect to X display '%s'"), 
+        warn(TR("Could not connect to X display '%s'"),
              XDisplayName(display));
         return FALSE;
     }
@@ -515,7 +518,7 @@ static bool ioncore_init_x(const char *display, int stflags)
         drw=0;
         nrw=ScreenCount(dpy);
     }
-    
+
     /* Initialize */
     if(display!=NULL){
         ioncore_g.display=scopy(display);
@@ -524,11 +527,11 @@ static bool ioncore_init_x(const char *display, int stflags)
             return FALSE;
         }
     }
-    
+
     ioncore_g.dpy=dpy;
     ioncore_g.win_context=XUniqueContext();
     ioncore_g.conn=ConnectionNumber(dpy);
-    
+
     if(XShapeQueryExtension(ioncore_g.dpy, &ioncore_g.shape_event_basep,
                             &ioncore_g.shape_error_basep))
         ioncore_g.shape_extension=TRUE;
@@ -536,7 +539,7 @@ static bool ioncore_init_x(const char *display, int stflags)
         XMissingExtension(ioncore_g.dpy, "SHAPE");
 
     cloexec_braindamage_fix(ioncore_g.conn);
-    
+
     ioncore_g.atom_wm_state=XInternAtom(dpy, "WM_STATE", False);
     ioncore_g.atom_wm_change_state=XInternAtom(dpy, "WM_CHANGE_STATE", False);
     ioncore_g.atom_wm_protocols=XInternAtom(dpy, "WM_PROTOCOLS", False);
@@ -554,7 +557,7 @@ static bool ioncore_init_x(const char *display, int stflags)
     ioncore_init_cursors();
 
     netwm_init();
-    
+
     ioncore_init_session(XDisplayName(display));
 
     for(i=drw; i<nrw; i++)
@@ -570,7 +573,7 @@ static bool ioncore_init_x(const char *display, int stflags)
                                    ioncore_x_connection_handler)){
         return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -581,20 +584,20 @@ static void set_initial_focus()
     int x, y, wx, wy;
     uint mask;
     WScreen *scr;
-    
+
     XQueryPointer(ioncore_g.dpy, None, &root, &win,
                   &x, &y, &wx, &wy, &mask);
-    
+
     FOR_ALL_SCREENS(scr){
         Window scrroot=region_root_of((WRegion*)scr);
         if(scrroot==root && rectangle_contains(&REGION_GEOM(scr), x, y)){
             break;
         }
     }
-    
+
     if(scr==NULL)
         scr=ioncore_g.screens;
-    
+
     region_focuslist_push((WRegion*)scr);
     region_do_set_focus((WRegion*)scr, FALSE);
 }
@@ -620,7 +623,7 @@ bool ioncore_startup(const char *display, const char *cfgfile,
         return FALSE;
 
     ioncore_register_exports();
-    
+
     if(!ioncore_init_x(display, stflags))
         return FALSE;
 
@@ -628,19 +631,19 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 
     if(!extl_read_config("ioncore_ext", NULL, TRUE))
         return FALSE;
-    
+
     ioncore_read_main_config(cfgfile);
-    
+
     if(!ioncore_init_layout())
         return FALSE;
-    
+
     hook_call_v(ioncore_post_layout_setup_hook);
-    
+
     FOR_ALL_ROOTWINS(rootwin)
         rootwin_manage_initial_windows(rootwin);
-    
+
     set_initial_focus();
-    
+
     return TRUE;
 }
 
@@ -654,9 +657,9 @@ bool ioncore_startup(const char *display, const char *cfgfile,
 void ioncore_deinit()
 {
     Display *dpy;
-    
+
     ioncore_g.opmode=IONCORE_OPMODE_DEINIT;
-    
+
     if(ioncore_g.dpy==NULL)
         return;
 
@@ -672,14 +675,18 @@ void ioncore_deinit()
 
     ioncore_deinit_bindmaps();
 
+    ioncore_deinit_xim();
+
+    stringstore_deinit();
+
     mainloop_unregister_input_fd(ioncore_g.conn);
-    
+
     dpy=ioncore_g.dpy;
     ioncore_g.dpy=NULL;
-    
+
     XSync(dpy, True);
     XCloseDisplay(dpy);
-    
+
     extl_deinit();
 }
 

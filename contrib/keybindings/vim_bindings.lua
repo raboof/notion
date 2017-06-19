@@ -5,12 +5,12 @@
 -- vim-bindings.lua
 --
 -- This only affects queries.
--- 
+--
 -- Features:
 --	Vi-keys for normal and insert modes.
---	Vim-style highlighting.  
+--	Vim-style highlighting.
 --	Numbered prefixes work for most maneuvers.
--- 
+--
 -- Limitations:
 --	All WEdln objects share the same mode and undo history.
 --	No r replace
@@ -102,16 +102,16 @@ function vim.normal_mode()
 
 	kpress("Shift+f", "vim.cleardigit()"),
 	kpress("Shift+g", "vim.cleardigit()"), kpress("Shift+h", "vim.cleardigit()"),
-	kpress("Shift+j", "vim.cleardigit()"), kpress("Shift+k", "vim.cleardigit()"), 
+	kpress("Shift+j", "vim.cleardigit()"), kpress("Shift+k", "vim.cleardigit()"),
 	kpress("Shift+l", "vim.cleardigit()"), kpress("Shift+m", "vim.cleardigit()"),
 	kpress("Shift+n", "vim.cleardigit()"), kpress("Shift+o", "vim.cleardigit()"),
 	kpress("Shift+q", "vim.cleardigit()"), kpress("Shift+r", "vim.cleardigit()"),
 	kpress("Shift+t", "vim.cleardigit()"), kpress("Shift+u", "vim.cleardigit()"),
 	kpress("Shift+v", "vim.cleardigit()"),
 	kpress("Shift+z", "vim.cleardigit()"), kpress("Shift+0", "vim.cleardigit()"),
-	kpress("Shift+1", "vim.cleardigit()"), kpress("Shift+2", "vim.cleardigit()"), 
+	kpress("Shift+1", "vim.cleardigit()"), kpress("Shift+2", "vim.cleardigit()"),
 	kpress("Shift+3", "vim.cleardigit()"), kpress("Shift+5", "vim.cleardigit()"),
-	kpress("Shift+7", "vim.cleardigit()"), kpress("Shift+8", "vim.cleardigit()"), 
+	kpress("Shift+7", "vim.cleardigit()"), kpress("Shift+8", "vim.cleardigit()"),
 	kpress("Shift+9", "vim.cleardigit()"),
     })
 end
@@ -301,7 +301,7 @@ function vim.dodigit(digit)
 end
 
 function vim.cleardigit()
-    -- This function needs to go almost everywhere. Doing the wrong thing 
+    -- This function needs to go almost everywhere. Doing the wrong thing
     -- 10 times because a number was pressed ages ago, would be bad.
     vim.digit1=nil
     vim.digit10=nil

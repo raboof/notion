@@ -1,7 +1,7 @@
 -- Authors: Andrea Rossato <arossato@istitutocolli.org>
 -- License: GPL, version 2 or later
 -- Last Changed: 2006-07-10
--- 
+--
 -- stock.lua
 
 -- ABOUT
@@ -14,7 +14,7 @@
 -- 1. In template of you cfg_statusbar.lua insert: "%stock" (without quotes)
 -- 2. Insert, in you cfg_ion.lua or run: dopath("stock")
 -- 3. press META+F10 to get the menu
--- 4. Add a ticket: e.g. "^N225" (without quotes) to monitor the Nikkei index.  
+-- 4. Add a ticket: e.g. "^N225" (without quotes) to monitor the Nikkei index.
 
 
 -- COMMANDS
@@ -30,7 +30,7 @@
 --    - update: force monitor to update data.
 
 -- CONFIGURATION AND SETUP
--- You may configure this applet in cfg_statusbar.cfg 
+-- You may configure this applet in cfg_statusbar.cfg
 -- In mod_statusbar.launch_statusd{) insert something like this:
 
 -- -- stock configuration options
@@ -42,7 +42,7 @@
 --                                    -- retrieval is suspended
 --    susp_msg_hint = "critical",     -- hint for suspended mode
 --    unit = {
---       delta = "%",                 
+--       delta = "%",
 --    },
 --    important = {
 --       delta = 0,
@@ -55,7 +55,7 @@
 -- You can set "important" and "critical" thresholds for each meter.
 
 -- PORTFOLIO
--- If you want to monitor a portfolio you can set it up in the configuration with 
+-- If you want to monitor a portfolio you can set it up in the configuration with
 -- something like this:
 -- stock = {
 --    off_msg = "*MyStock",	
@@ -78,7 +78,7 @@
 
 -- LEGAL
 -- Copyright (C) 2006  Andrea Rossato
- 
+
 -- This program is free software; you can redistribute it and/or
 -- modify it under the terms of the GNU General Public License
 -- as published by the Free Software Foundation; either version 2
@@ -147,7 +147,7 @@ local function new_stock()
       backup = { },
       paths = ioncore.get_paths(),
    }
-   
+
    -- some needed global functions
    function table.merge(t1, t2)
       local t=table.copy(t1, false)
@@ -175,16 +175,16 @@ local function new_stock()
    function this.process_config()
       this.get_sb()
       local c = ioncore.read_savefile("cfg_statusd")
-      if c.stock then 
+      if c.stock then
 	 this.config = table.merge(this.config, c.stock)
       end
       c = ioncore.read_savefile("cfg_stock")
-      if c then 
+      if c then
 	 this.config.portfolio = table.merge(this.config.portfolio, c)
       end
       this.process_portfolio()
    end
-   
+
    -- gets tickets from portfolio
    function this.process_portfolio()
       for t,q in pairs(this.config.portfolio) do
@@ -194,19 +194,19 @@ local function new_stock()
 
    -- gets the statusbar obj and makes a backup of the sb table (just in case)
    function this.get_sb()
-      for _, sb in pairs(mod_statusbar.statusbars()) do  
+      for _, sb in pairs(mod_statusbar.statusbars()) do
 	 this.StatusBar = sb
       end
       ioncore.write_savefile("stock_sb", this.StatusBar:get_template_table())
    end
-   
+
    -- removes a meter from the statusbar and inserts a new template chunk
    function this.sb_insert_tmpl_chunk(chunk, meter)
       local pos, old_sb_chunk
       this.restore_sb(meter)
       local old_sb = this.StatusBar:get_template_table()
       for a, item in pairs(old_sb) do
-	 if item.meter == meter then 
+	 if item.meter == meter then
 	    pos = a
 	    old_sb_chunk = item
 	    break
@@ -231,17 +231,17 @@ local function new_stock()
       local st, en
       local old_sb = this.StatusBar:get_template_table()
       for a, item in pairs(old_sb) do
-	 if item.meter == "start_insert_by_"..meter then 
+	 if item.meter == "start_insert_by_"..meter then
 	    st = a
 	 end
-	 if item.meter == "end_insert_by_"..meter then 
+	 if item.meter == "end_insert_by_"..meter then
 	    en = a
 	    break
 	 end
       end
       local new_sb = old_sb
       if en then	
-	 for a=st, en, 1 do 
+	 for a=st, en, 1 do
 	    table.remove(new_sb, st)
 	 end
 	 table.insert(new_sb, st, this.backup[meter])
@@ -267,10 +267,10 @@ local function new_stock()
 
    -- parses ticket's data and store them in this.data.ticketname
    function this.process_record(s)
-      local _,_,t = string.find(s, '"%^?(.-)".*' ) 
+      local _,_,t = string.find(s, '"%^?(.-)".*' )
       t = string.gsub(t , "%.", "")
       this.data[t] = { raw_data = s, }
-      _, _, 
+      _, _,
       this.data[t].ticket,
       this.data[t].quote,
       this.data[t].date,
@@ -365,7 +365,7 @@ local function new_stock()
 	 this.status_timer:set(this.config.interval, this.loop)
       end
    end
-   
+
    -- public methods
 
    function this.update()
@@ -377,7 +377,7 @@ local function new_stock()
 			 local _,_,t,_,q = string.find(str, "(.*)(,)(%d*)")
 			 ioncore.write_savefile("debug", { ["q"] = q, ["t"] = t})
 			 if q then this.config.portfolio[t] = tonumber(q)
-			 else this.config.portfolio[str] = 1 end 
+			 else this.config.portfolio[str] = 1 end
 			 ioncore.write_savefile("cfg_stock", this.config.portfolio)
 			 this.process_portfolio()
 			 this.restart()
@@ -389,7 +389,7 @@ local function new_stock()
    function this.del_ticket(mplex)
       local handler = function(mplex, str)
 			 for i,v in pairs(this.config.tickets) do
-			    if this.config.tickets[i] == str then 
+			    if this.config.tickets[i] == str then
 			       this.config.tickets[i] = nil
 			       break
 			    end
@@ -399,7 +399,7 @@ local function new_stock()
 			 this.data[string.gsub(str,"[%^%.]" ,"")] = nil
 			 this.restart()
 		      end
-      mod_query.query(mplex, TR("Delete a ticket (format: tickename e.g. ^N225):"), nil, handler, 
+      mod_query.query(mplex, TR("Delete a ticket (format: tickename e.g. ^N225):"), nil, handler,
 		      nil, "stock")
    end
 
@@ -426,16 +426,16 @@ local function new_stock()
       end
       this.restart()
    end
-   
+
    -- constructor
    function this.init()
       this.process_config()
       this.loop()
    end
-   
+
    this.init()
    -- return this
-   return { 
+   return {
       update = this.update,
       add_ticket = this.add_ticket,
       del_ticket = this.del_ticket,

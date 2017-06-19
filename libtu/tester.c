@@ -1,7 +1,7 @@
 /*
  * libtu/tester.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
 {
     Tokenizer*tokz;
     Token tok=TOK_INIT;
-    
+
     libtu_init(argv[0]);
-    
+
     if(!(tokz=tokz_open_file(stdin, "stdin")))
         return EXIT_FAILURE;
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
-       
+
     return EXIT_SUCCESS;
 }
 

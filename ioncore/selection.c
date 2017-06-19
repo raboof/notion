@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/selection.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -26,10 +26,10 @@ static ExtlFn continuation;
 static Atom XA_COMPOUND_TEXT(Display *unused)
 {
     static Atom a=None;
-    
+
     if(a==None)
         a=XInternAtom(ioncore_g.dpy, "COMPOUND_TEXT", False);
-        
+
     return a;
 }
 
@@ -40,20 +40,20 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
     XTextProperty prop;
     const char *p[1];
     bool ok=FALSE;
-    
+
     sev.property=None;
-    
+
     if(selection_data==NULL || ev->property==None)
         goto refuse;
-    
+
     p[0]=selection_data;
-    
+
     if(!ioncore_g.use_mb && ev->target==XA_STRING){
         Status st=XStringListToTextProperty((char **)p, 1, &prop);
         ok=(st!=0);
     }else if(ioncore_g.use_mb){
         XICCEncodingStyle style;
-        
+
         if(ev->target==XA_STRING){
             style=XStringStyle;
             ok=TRUE;
@@ -61,21 +61,21 @@ void ioncore_handle_selection_request(XSelectionRequestEvent *ev)
             style=XCompoundTextStyle;
             ok=TRUE;
         }
-        
+
         if(ok){
             int st=XmbTextListToTextProperty(ioncore_g.dpy, (char **)p, 1,
                                              style, &prop);
             ok=(st>=0);
         }
     }
-    
+
     if(ok){
         XSetTextProperty(ioncore_g.dpy, ev->requestor, &prop, ev->property);
         sev.property=ev->property;
         XFree(prop.value);
     }
 
-refuse:    
+refuse:
     sev.type=SelectionNotify;
     sev.requestor=ev->requestor;
     sev.selection=ev->selection;
@@ -100,7 +100,7 @@ static void ins(Window win, const char *str, int n)
     }
 }
 
-    
+
 static void insert_selection(Window win, Atom prop)
 {
     char **p=xwindow_get_text_property(win, prop, NULL);
@@ -115,12 +115,12 @@ void ioncore_handle_selection(XSelectionEvent *ev)
 {
     Atom prop=ev->property;
     Window win=ev->requestor;
-    
+
     if(prop!=None){
         insert_selection(win, prop);
         XDeleteProperty(ioncore_g.dpy, win, prop);
     }
-    
+
     if(continuation_set){
         extl_unref_fn(continuation);
         continuation_set=FALSE;
@@ -141,16 +141,16 @@ void ioncore_set_selection_n(const char *p, int n)
 {
     if(selection_data!=NULL)
         free(selection_data);
-    
+
     selection_data=ALLOC_N(char, n+1);
-    
+
     if(selection_data==NULL)
         return;
-    
+
     memcpy(selection_data, p, n);
     selection_data[n]='\0';
     selection_length=n;
-    
+
     XSetSelectionOwner(ioncore_g.dpy, CLIPATOM(ioncore_g.dpy),
                        DefaultRootWindow(ioncore_g.dpy),
                        CurrentTime);
@@ -173,22 +173,22 @@ void ioncore_set_selection(const char *p)
 void ioncore_request_selection_for(Window win)
 {
     Atom a=XA_STRING;
-    
+
     if(continuation_set){
         extl_unref_fn(continuation);
         continuation_set=FALSE;
     }
-    
+
     if(ioncore_g.use_mb)
         a=XA_COMPOUND_TEXT(ioncore_g.dpy);
-    
+
     XConvertSelection(ioncore_g.dpy, CLIPATOM(ioncore_g.dpy), a,
                       ioncore_g.atom_selection, win, CurrentTime);
 }
 
 
 /*EXTL_DOC
- * Request (string) selection. The function \var{fn} will be called 
+ * Request (string) selection. The function \var{fn} will be called
  * with the selection when and if it is received.
  */
 EXTL_EXPORT

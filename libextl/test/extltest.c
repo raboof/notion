@@ -36,7 +36,7 @@ fprintf(stderr, "Calling extl_call...\n");
 
     if (retstr == NULL)
         return 4;
- 
+
     if(strcmp("\"test\"", retstr) != 0){
         fprintf(stderr, "Result was '%s' instead of 'test'", retstr);
         return 5;
@@ -48,7 +48,7 @@ fprintf(stderr, "Calling extl_call...\n");
 
 int main()
 {
-    int result = 0;   
+    int result = 0;
 
     extl_init();
 

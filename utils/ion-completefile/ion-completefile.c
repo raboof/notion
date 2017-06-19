@@ -183,7 +183,7 @@ static int FindMatches(char *dir,char *file,char ***avp)
 
 /*
  ** Slight modification on FindMatches, to search through current PATH
- ** 
+ **
  */
 static int FindFullPathMatches(char *file,char ***avp)
 {
@@ -395,7 +395,7 @@ static int complete_homedir(const char *username, char ***cp_ret, char **beg)
     return n;
 }
 
-/* 
+/*
  * ret: 0 not a home directory,
  * 		1 home directory (repath set)
  *		2 someone's home directory
@@ -447,7 +447,7 @@ int do_complete_file(char *pathname, char ***avp, char **beg)
     char	*dir;
     char	*file, *path=NULL, *tt;
     int		ac=0, i;
-    
+
     switch(tilde_complete(pathname, &path)){
     case 0:
         i=SplitPath(pathname, &dir, &file);
@@ -457,14 +457,14 @@ int do_complete_file(char *pathname, char ***avp, char **beg)
     default:
         i=SplitPath(path, &dir, &file);
     }
-    
+
     if(i<0)
         return 0;
-    
+
     ac=FindMatches(dir, file, avp);
-    
+
     DISPOSE(file);
-    
+
     if(ac==0 && path!=NULL){
         *avp=ALLOC(char*);
         if(*avp==NULL)
@@ -474,7 +474,7 @@ int do_complete_file(char *pathname, char ***avp, char **beg)
     }else if(path!=NULL){
         free(path);
     }
-    
+
     /* Identify directories with trailing / */
     for(i=0; i<ac; i++){
         path = NEW(char,strlen(dir)+strlen((*avp)[i])+3);
@@ -487,9 +487,9 @@ int do_complete_file(char *pathname, char ***avp, char **beg)
         }
         DISPOSE(path);
     }
-    
+
     *beg=dir;
-    
+
     return ac;
 }
 
@@ -502,7 +502,7 @@ int do_complete_file_with_path(char *pathname, char ***avp, char **beg)
     char	*dir;
     char	*file, *path=NULL, *tt;
     int		ac=0, i, dcomp=FALSE;
-    
+
     switch(tilde_complete(pathname, &path)){
     case 0:
         i=SplitRelativePath(pathname, &dir, &file);
@@ -512,10 +512,10 @@ int do_complete_file_with_path(char *pathname, char ***avp, char **beg)
     default:
         i=SplitPath(path, &dir, &file);
     }
-    
+
     if(i<0)
         return 0;
-    
+
     if(*dir=='\0')
         ac=FindFullPathMatches(file, avp); /* No slashes in path so far. */
 
@@ -530,9 +530,9 @@ int do_complete_file_with_path(char *pathname, char ***avp, char **beg)
         ac=FindMatches(dir, file, avp);
         dcomp=TRUE;
     }
-    
+
     DISPOSE(file);
-    
+
     if(ac==0 && path!=NULL){
         *avp=ALLOC(char*);
         if(*avp==NULL)
@@ -542,7 +542,7 @@ int do_complete_file_with_path(char *pathname, char ***avp, char **beg)
     }else if(path!=NULL){
         free(path);
     }
-    
+
     /* Identify directories with trailing / */
     if(dcomp){
         for (i = 0; i < ac; i++) {
@@ -557,9 +557,9 @@ int do_complete_file_with_path(char *pathname, char ***avp, char **beg)
             DISPOSE(path);
         }
     }
-    
+
     *beg=dir;
-    
+
     return ac;
 }
 

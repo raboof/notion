@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/focus.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -28,6 +28,7 @@ extern void region_finalise_focusing(WRegion* reg, Window win, bool warp, Time t
 DYNFUN void region_do_set_focus(WRegion *reg, bool warp);
 extern void region_do_warp(WRegion *reg);
 extern bool region_do_warp_default(WRegion *reg);
+extern bool region_is_cursor_inside(WRegion *reg);
 
 /* Awaiting focus state */
 extern void region_set_await_focus(WRegion *reg);

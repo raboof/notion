@@ -33,7 +33,7 @@ typedef struct rb_status {
   unsigned root : 1 ;
   unsigned head : 1 ;
 } Rb_status;
- 
+
 /* Main rb_node.  You only ever use the fields
 
    c.list.flink
@@ -85,7 +85,7 @@ extern Rb_node make_rb();   /* Creates a new rb-tree */
 extern Rb_node rb_insert(Rb_node tree, const char *key, void *val);
 extern Rb_node rb_inserti(Rb_node tree, int ikey, void *val);
 extern Rb_node rb_insertp(Rb_node tree, const void *key, void *val);
-extern Rb_node rb_insertg(Rb_node tree, const void *key, void *val, 
+extern Rb_node rb_insertg(Rb_node tree, const void *key, void *val,
                           Rb_compfn *func);
 
 
@@ -104,19 +104,19 @@ extern Rb_node rb_find_gkey(Rb_node root, const void *key, Rb_compfn *func);
 extern Rb_node rb_find_key_n(Rb_node root, const char *key, int *found);
 extern Rb_node rb_find_ikey_n(Rb_node root, int ikey, int *found);
 extern Rb_node rb_find_pkey_n(Rb_node root, const void *key, int *found);
-extern Rb_node rb_find_gkey_n(Rb_node root, const void *key, 
+extern Rb_node rb_find_gkey_n(Rb_node root, const void *key,
                               Rb_compfn *func, int *found);
 
 
-/* Creates a node with key key and val val and inserts it into the 
-   tree before/after node nd.  Does not check to ensure that you are 
+/* Creates a node with key key and val val and inserts it into the
+   tree before/after node nd.  Does not check to ensure that you are
    keeping the correct order */
 
 extern Rb_node rb_insert_b(Rb_node nd, const void *key, void *val);
 extern Rb_node rb_insert_a(Rb_node nd, const void *key, void *val);
 
 
-extern void rb_delete_node(Rb_node node);  /* Deletes and frees a node (but 
+extern void rb_delete_node(Rb_node node);  /* Deletes and frees a node (but
                                               not the key or val) */
 extern void rb_free_tree(Rb_node root);  /* Deletes and frees an entire tree */
 
@@ -127,7 +127,7 @@ extern int rb_nblack(Rb_node n); /* returns # of black nodes in path from
                                     n to the root */
 int rb_plength(Rb_node n);       /* returns the # of nodes in path from
 				    n to the root */
- 
+
 #define rb_first(n) (n->c.list.flink)
 #define rb_last(n) (n->c.list.blink)
 #define rb_next(n) (n->c.list.flink)
@@ -136,8 +136,8 @@ int rb_plength(Rb_node n);       /* returns the # of nodes in path from
 #ifndef rb_nil
 #define rb_nil(t) (t)
 #endif
- 
+
 #define rb_traverse(ptr, lst) \
   for(ptr = rb_first(lst); ptr != rb_nil(lst); ptr = rb_next(ptr))
- 
+
 #endif /* LIBTU_RB_H */

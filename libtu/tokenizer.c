@@ -1,7 +1,7 @@
 /*
  * libtu/tokenizer.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -60,7 +60,7 @@ static const char *errors[]={
 static bool _string_append(char **p, char *tmp, int *tmplen, char c)
 {
     char *tmp2;
-    
+
     if(*tmplen==STRBLEN-1){
         tmp[STRBLEN-1]='\0';
         if(*p!=NULL){
@@ -83,7 +83,7 @@ static bool _string_append(char **p, char *tmp, int *tmplen, char c)
 static bool _string_finish(char **p, char *tmp, int tmplen)
 {
     char *tmp2;
-    
+
     if(tmplen==0){
         if(*p==NULL)
             *p=scopy("");
@@ -111,7 +111,7 @@ static bool _string_finish(char **p, char *tmp, int tmplen)
 static int _getch(Tokenizer *tokz)
 {
     int c;
-    
+
     if(tokz->ungetc!=-1){
         c=tokz->ungetc;
         tokz->ungetc=-1;
@@ -144,7 +144,7 @@ static int scan_line_comment(Token *tok, Tokenizer *tokz)
     int c;
 
     c=GETCH();
-                
+
     while(c!='\n' && c!=EOF){
         STRING_APPEND(s, c);
         c=GETCH();
@@ -153,9 +153,9 @@ static int scan_line_comment(Token *tok, Tokenizer *tokz)
     UNGETCH(c);
 
     STRING_FINISH(s);
-    
+
     TOK_SET_COMMENT(tok, s);
-    
+
     return 0;
 }
 
@@ -163,13 +163,13 @@ static int scan_line_comment(Token *tok, Tokenizer *tokz)
 static int skip_line_comment(Tokenizer *tokz)
 {
     int c;
-    
+
     do{
         c=GETCH();
     }while(c!='\n' && c!=EOF);
 
     UNGETCH(c);
-        
+
     return 0;
 }
 
@@ -182,17 +182,17 @@ static int scan_c_comment(Token *tok, Tokenizer *tokz)
     STRING_DECL_P(s, "/*");
     int c;
     int st=0;
-    
+
     while(1){
         c=GETCH();
-        
+
         if(c==EOF){
             STRING_FREE(s);
             return E_TOKZ_UNEXPECTED_EOF;
         }
-        
+
         STRING_APPEND(s, c);
-        
+
         if(c=='\n'){
             INC_LINE();
         }else if(st==0 && c=='*'){
@@ -216,13 +216,13 @@ static int skip_c_comment(Tokenizer *tokz)
 {
     int c;
     int st=0;
-    
+
     while(1){
         c=GETCH();
-        
+
         if(c==EOF)
             return E_TOKZ_UNEXPECTED_EOF;
-        
+
         if(c=='\n')
             INC_LINE();
         else if(st==0 && c=='*')
@@ -233,7 +233,7 @@ static int skip_c_comment(Tokenizer *tokz)
             st=0;
         }
     }
-    
+
     return 0;
 }
 
@@ -247,14 +247,14 @@ static int scan_char_escape(Tokenizer *tokz)
     static char* specials="\n\r\t\b\a\033";
     int base, max;
     int i ,c;
-    
+
     c=GETCH();
-    
+
     for(i=0;special_chars[i];i++){
         if(special_chars[i]==c)
             return specials[c];
     }
-    
+
     if(c=='x' || c=='X'){
         base=16;max=2;i=0;
     }else if(c=='d' || c=='D'){
@@ -269,32 +269,32 @@ static int scan_char_escape(Tokenizer *tokz)
     }else{
         return c;
     }
-    
-        
+
+
     while(--max>=0){
         c=GETCH();
-        
+
         if(c==EOF)
             return EOF;
-        
+
         if(c=='\n'){
             UNGETCH(c);
             return -2;
         }
-        
+
         if(base==16){
             if(!isxdigit(c))
                 break;
-            
+
             i<<=4;
-            
+
             if(isdigit(c))
                 i+=c-'0';
             else if(i>='a')
                 i+=0xa+c-'a';
             else
                 i+=0xa+c-'a';
-            
+
         }else if(base==10){
             if(!isdigit(c))
                 break;
@@ -307,7 +307,7 @@ static int scan_char_escape(Tokenizer *tokz)
             i+=c-'0';
         }
     }
-    
+
     if(max>=0)
         UNGETCH(c);
 
@@ -323,18 +323,18 @@ static int scan_string(Token *tok, Tokenizer *tokz, bool escapes)
     STRING_DECL(s);
     int c;
 
-    while(1){    
+    while(1){
         c=GETCH();
-        
+
         if(c=='"')
             break;
-        
+
         if(c=='\n'){
             UNGETCH(c);
             STRING_FREE(s);
             return E_TOKZ_UNEXPECTED_EOL;
         }
-        
+
         if(c=='\\' && escapes){
             c=scan_char_escape(tokz);
             if(c==-2){
@@ -342,17 +342,17 @@ static int scan_string(Token *tok, Tokenizer *tokz, bool escapes)
                 return E_TOKZ_UNEXPECTED_EOL;
             }
         }
-        
+
         if(c==EOF){
             STRING_FREE(s);
             return E_TOKZ_UNEXPECTED_EOF;
         }
-        
+
         STRING_APPEND(s, c);
     }
-    
+
     STRING_FINISH(s);
-    
+
     TOK_SET_STRING(tok, s);
 
     return 0;
@@ -365,32 +365,32 @@ static int scan_string(Token *tok, Tokenizer *tokz, bool escapes)
 static int scan_char(Token *tok, Tokenizer *tokz)
 {
     int c, c2;
-    
+
     c=GETCH();
-    
+
     if(c==EOF)
         return E_TOKZ_UNEXPECTED_EOF;
-    
+
     if(c=='\n')
         return E_TOKZ_UNEXPECTED_EOL;
 
     if(c=='\\'){
-        c=scan_char_escape(tokz);    
-        
+        c=scan_char_escape(tokz);
+
         if(c==EOF)
             return E_TOKZ_UNEXPECTED_EOF;
-        
+
         if(c==-2)
             return E_TOKZ_UNEXPECTED_EOL;
     }
-    
+
     c2=GETCH();
-    
+
     if(c2!='\'')
         return E_TOKZ_MULTICHAR;
-    
+
     TOK_SET_CHAR(tok, c);
-    
+
     return 0;
 }
 
@@ -404,16 +404,16 @@ static int scan_char(Token *tok, Tokenizer *tokz)
 static int scan_identifier(Token *tok, Tokenizer *tokz, int c)
 {
     STRING_DECL(s);
-    
+
     do{
         STRING_APPEND(s, c);
         c=GETCH();
     }while(isalnum(c) || c=='_' || c=='$');
-    
+
     UNGETCH(c);
-    
+
     STRING_FINISH(s);
-    
+
     TOK_SET_IDENT(tok, s);
 
     return 0;
@@ -428,21 +428,21 @@ static int scan_number(Token *tok, Tokenizer *tokz, int c)
 {
     NPNum num=NUM_INIT;
     int e;
-    
+
     if((e=parse_number(&num, tokz, c)))
         return e;
-    
+
     if(num.type==NPNUM_INT){
         long l;
         if((e=num_to_long(&l, &num, TRUE)))
             return e;
-    
+
         TOK_SET_LONG(tok, l);
     }else if(num.type==NPNUM_FLOAT){
           double d;
           if((e=num_to_double(&d, &num)))
               return e;
-            
+
         TOK_SET_DOUBLE(tok, d);
     }else{
         return E_TOKZ_NUMFMT;
@@ -494,7 +494,7 @@ static int scan_op(Token *tok, Tokenizer *tokz,  int c)
 {
     int c2;
     int op=-1;
-    
+
     /* Quickly check it is an operator character */
     if(!is_opch(c))
         return E_TOKZ_INVALID_CHAR;
@@ -530,7 +530,7 @@ static int scan_op(Token *tok, Tokenizer *tokz,  int c)
             op=c;
         }
         break;
-        
+
     /* It is already known that it is a operator so these are not needed
     case ':':
     case '~':
@@ -539,14 +539,14 @@ static int scan_op(Token *tok, Tokenizer *tokz,  int c)
     case ';';
     case '{':
     case '}':
-    case '@':        
+    case '@':
     case '|':
     case '&':
     */
     default:
         op=c;
     }
-    
+
     TOK_SET_OP(tok, op);
 
     return 0;
@@ -559,14 +559,14 @@ static int scan_op(Token *tok, Tokenizer *tokz,  int c)
 void tokz_warn(const Tokenizer *tokz, int line, const char *fmt, ...)
 {
     va_list args;
-    
+
     va_start(args, fmt);
-    
+
     if(tokz!=NULL)
         warn_obj_line_v(tokz->name, line, fmt, args);
     else
         warn(fmt, args);
-    
+
     va_end(args);
 }
 
@@ -575,7 +575,7 @@ void tokz_warn_error(const Tokenizer *tokz, int line, int e)
 {
     if(e==E_TOKZ_UNEXPECTED_EOF)
         line=0;
-    
+
     if(e<0)
         tokz_warn(tokz, line, "%s", strerror(-e));
     else
@@ -586,12 +586,12 @@ void tokz_warn_error(const Tokenizer *tokz, int line, int e)
 bool tokz_get_token(Tokenizer *tokz, Token *tok)
 {
     int c, c2, e;
-    
+
     if (!(tokz->flags&TOKZ_READ_FROM_BUFFER))
     assert(tokz->file!=NULL);
-    
+
     tok_free(tok);
-    
+
     if(!TOK_IS_INVALID(&(tokz->ungettok))){
         *tok=tokz->ungettok;
         tokz->ungettok.type=TOK_INVALID;
@@ -599,30 +599,30 @@ bool tokz_get_token(Tokenizer *tokz, Token *tok)
     }
 
     while(1){
-    
+
         e=0;
-        
+
         do{
             c=GETCH();
         }while(c!='\n' && c!=EOF && isspace(c));
-    
+
         tok->line=tokz->line;
-    
+
         switch(c){
         case EOF:
             TOK_SET_OP(tok, OP_EOF);
             return TRUE;
-            
+
         case '\n':
             INC_LINE();
-            
+
             if(tokz->flags&TOKZ_IGNORE_NEXTLINE)
                 continue;
-            
+
             TOK_SET_OP(tok, OP_NEXTLINE);
-            
+
             return TRUE;
-            
+
         case '\\':
             do{
                 c=GETCH();
@@ -637,7 +637,7 @@ bool tokz_get_token(Tokenizer *tokz, Token *tok)
                         return FALSE;
                 }
             }while(c!='\n');
-            
+
             INC_LINE();
             continue;
 
@@ -648,32 +648,32 @@ bool tokz_get_token(Tokenizer *tokz, Token *tok)
             }else if((e=skip_line_comment(tokz))){
                 break;
             }
-            
+
             continue;
-            
+
         case '/':
             c2=GETCH();
-            
+
             if(c2=='='){
                 TOK_SET_OP(tok, OP_AS_DIV);
                 return TRUE;
             }
-            
+
             if(c2!='*'){
                 UNGETCH(c2);
                 TOK_SET_OP(tok, OP_DIV);
                 return TRUE;
             }
-            
+
             if(tokz->flags&TOKZ_READ_COMMENTS){
                 e=scan_c_comment(tok, tokz);
                 break;
             }else if((e=skip_c_comment(tokz))){
                 break;
             }
-            
+
             continue;
-            
+
         case '\"':
             e=scan_string(tok, tokz, TRUE);
             break;
@@ -682,7 +682,7 @@ bool tokz_get_token(Tokenizer *tokz, Token *tok)
             e=scan_char(tok, tokz);
             break;
 
-        default: 
+        default:
             if(('0'<=c && c<='9') || c=='-' || c=='+'){
                 e=scan_number(tok, tokz, c);
                 break;
@@ -693,10 +693,10 @@ bool tokz_get_token(Tokenizer *tokz, Token *tok)
             else
                 e=scan_op(tok, tokz, c);
         }
-        
+
         if(!e)
             return TRUE;
-        
+
         tokz_warn_error(tokz, tokz->line, e);
         return FALSE;
     }
@@ -705,7 +705,7 @@ bool tokz_get_token(Tokenizer *tokz, Token *tok)
 
 void tokz_unget_token(Tokenizer *tokz, Token *tok)
 {
-    tok_free(&(tokz->ungettok));    
+    tok_free(&(tokz->ungettok));
     tokz->ungettok=*tok;
     tok->type=TOK_INVALID;
 }
@@ -718,22 +718,22 @@ void tokz_unget_token(Tokenizer *tokz, Token *tok)
 static bool do_tokz_pushf(Tokenizer *tokz)
 {
     Tokenizer_FInfo *finfo;
-    
+
     finfo=REALLOC_N(tokz->filestack, Tokenizer_FInfo,
                     tokz->filestack_n, tokz->filestack_n+1);
-    
+
     if(finfo==NULL)
         return FALSE;
 
     tokz->filestack=finfo;
     finfo=&(finfo[tokz->filestack_n++]);
-    
+
     finfo->file=tokz->file;
     finfo->name=tokz->name;
     finfo->line=tokz->line;
     finfo->ungetc=tokz->ungetc;
     finfo->ungettok=tokz->ungettok;
-    
+
     return TRUE;
 }
 
@@ -741,7 +741,7 @@ static bool do_tokz_pushf(Tokenizer *tokz)
 bool tokz_pushf_file(Tokenizer *tokz, FILE *file, const char *fname)
 {
     char *fname_copy=NULL;
-    
+
     if(file==NULL)
         return FALSE;
 
@@ -752,7 +752,7 @@ bool tokz_pushf_file(Tokenizer *tokz, FILE *file, const char *fname)
             return FALSE;
         }
     }
-    
+
     if(tokz->file!=NULL){
         if(!do_tokz_pushf(tokz)){
             warn_err();
@@ -761,13 +761,13 @@ bool tokz_pushf_file(Tokenizer *tokz, FILE *file, const char *fname)
             return FALSE;
         }
     }
-    
+
     tokz->file=file;
     tokz->name=fname_copy;
     tokz->line=1;
-    tokz->ungetc=-1;    
+    tokz->ungetc=-1;
     tokz->ungettok.type=TOK_INVALID;
-    
+
     return TRUE;
 }
 
@@ -775,14 +775,14 @@ bool tokz_pushf_file(Tokenizer *tokz, FILE *file, const char *fname)
 bool tokz_pushf(Tokenizer *tokz, const char *fname)
 {
     FILE *file;
-    
+
     file=fopen(fname, "r");
-    
+
     if(file==NULL){
         warn_err_obj(fname);
         return FALSE;
     }
-    
+
     if(!tokz_pushf_file(tokz, file, fname)){
         fclose(file);
         return FALSE;
@@ -792,22 +792,22 @@ bool tokz_pushf(Tokenizer *tokz, const char *fname)
 }
 
 
-               
+
 static Tokenizer *tokz_create()
 {
     Tokenizer*tokz;
-    
+
     tokz=ALLOC(Tokenizer);
-    
+
     if(tokz==NULL){
         warn_err();
         return NULL;
     }
-    
+
     tokz->file=NULL;
     tokz->name=NULL;
     tokz->line=1;
-    tokz->ungetc=-1;    
+    tokz->ungetc=-1;
     tokz->ungettok.type=TOK_INVALID;
     tokz->flags=0;
     tokz->optstack=NULL;
@@ -817,22 +817,22 @@ static Tokenizer *tokz_create()
     tokz->buffer.data=0;
     tokz->buffer.len=0;
     tokz->buffer.pos=0;
-    
+
     return tokz;
 }
 
-    
+
 Tokenizer *tokz_open(const char *fname)
-{ 
+{
     Tokenizer *tokz;
-    
+
     tokz=tokz_create();
-    
+
     if(!tokz_pushf(tokz, fname)){
         free(tokz);
         return NULL;
     }
-    
+
     return tokz;
 }
 
@@ -840,14 +840,14 @@ Tokenizer *tokz_open(const char *fname)
 Tokenizer *tokz_open_file(FILE *file, const char *fname)
 {
     Tokenizer *tokz;
-    
+
     tokz=tokz_create();
-    
+
     if(!tokz_pushf_file(tokz, file, fname)){
         free(tokz);
         return NULL;
     }
-    
+
     return tokz;
 }
 
@@ -880,7 +880,7 @@ Tokenizer *tokz_prepare_buffer(char *buffer, int len)
 static bool do_tokz_popf(Tokenizer *tokz, bool shrink)
 {
     Tokenizer_FInfo *finfo;
-    
+
     if(tokz->filestack_n<=0)
         return FALSE;
 
@@ -888,15 +888,15 @@ static bool do_tokz_popf(Tokenizer *tokz, bool shrink)
         fclose(tokz->file);
     if(tokz->name!=NULL)
         free(tokz->name);
-    
+
     finfo=&(tokz->filestack[--tokz->filestack_n]);
-    
+
     tokz->file=finfo->file;
     tokz->name=finfo->name;
     tokz->line=finfo->line;
     tokz->ungetc=finfo->ungetc;
     tokz->ungettok=finfo->ungettok;
-    
+
     if(tokz->filestack_n==0){
         free(tokz->filestack);
         tokz->filestack=NULL;
@@ -908,7 +908,7 @@ static bool do_tokz_popf(Tokenizer *tokz, bool shrink)
         else
             tokz->filestack=finfo;
     }
-    
+
     return TRUE;
 }
 
@@ -917,19 +917,19 @@ bool tokz_popf(Tokenizer *tokz)
 {
     return do_tokz_popf(tokz, TRUE);
 }
-    
+
 
 void tokz_close(Tokenizer *tokz)
 {
     while(tokz->filestack_n>0)
         do_tokz_popf(tokz, FALSE);
-          
+
     if(tokz->file!=NULL)
         fclose(tokz->file);
     if(tokz->name!=NULL)
         free(tokz->name);
     tok_free(&(tokz->ungettok));
-    
+
     free(tokz);
 }
 
@@ -944,7 +944,7 @@ void tok_free(Token *tok)
         if(TOK_STRING_VAL(tok)!=NULL)
             free(TOK_STRING_VAL(tok));
     }
-    
+
     tok->type=TOK_INVALID;
 }
 
@@ -952,7 +952,7 @@ void tok_free(Token *tok)
 void tok_init(Token *tok)
 {
     static Token dummy=TOK_INIT;
-    
+
     memcpy(tok, &dummy, sizeof(*tok));
 }
 

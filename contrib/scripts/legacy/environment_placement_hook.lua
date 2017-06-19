@@ -1,18 +1,18 @@
 -- Authors: Unknown
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- environment_placement_hook.lua
 --
--- Linux-only placement hook which detects the presence of an ION_USE_WS 
--- environment variable in the processes of new windows, and uses that to 
--- determine where to place them. 
--- 
--- ION_USE_WS should be exported in the same terminal the app is started 
+-- Linux-only placement hook which detects the presence of an ION_USE_WS
+-- environment variable in the processes of new windows, and uses that to
+-- determine where to place them.
+--
+-- ION_USE_WS should be exported in the same terminal the app is started
 -- from, or something like this could be typed at the "Run:" prompt:
 --
 --     export ION_USE_WS="framename" && firefox
--- 
+--
 -- Or simply use the run_here query provided to "Run (in current frame):"
 --
 -- Note: there are a lot of apps that this will not work with.
@@ -28,9 +28,9 @@ local function pidof(w)
 end
 
 local function get_environment_of(pid)
-    local file = io.open("/proc/"..tostring(pid).."/environ") 
+    local file = io.open("/proc/"..tostring(pid).."/environ")
     local envstr = string.format("%q", file:read("*a"))
-    
+
     file:close()
 
     local rv = {}
@@ -46,7 +46,7 @@ local function environ_placement_hook(w, t)
     local pid = tostring(pidof(w))
     local env = get_environment_of(pid)
     local ws = env.ION_USE_WS
-    
+
     if not ws then return false end
     ws = ioncore.lookup_region(ws)
     if not ws then return false end

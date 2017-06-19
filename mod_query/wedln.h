@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/wedln.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -40,18 +40,18 @@ DECLCLASS(WEdln){
     char *prompt;
     int prompt_len;
     int prompt_w;
-    
+
     char *info;
     int info_len;
     int info_w;
-    
+
     int vstart;
-    
+
     ExtlFn handler;
     ExtlFn completor;
-    
+
     WTimer *autoshowcompl_timer;
-    
+
     WListing compl_list;
     char *compl_beg;
     char *compl_end;
@@ -60,7 +60,7 @@ DECLCLASS(WEdln){
     int compl_timed_id;
     uint compl_tab:1;
     uint compl_history_mode:1;
-    
+
     WBindmap *cycle_bindmap;
 };
 

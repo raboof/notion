@@ -3,13 +3,13 @@
 --
 -- This file only includes some settings that are rather frequently altered.
 -- The rest of the settings are in cfg_notioncore.lua and individual modules'
--- configuration files (cfg_modulename.lua). 
+-- configuration files (cfg_modulename.lua).
 --
--- When any binding and other customisations that you want are minor, it is 
+-- When any binding and other customisations that you want are minor, it is
 -- recommended that you include them in a copy of this file in ~/.notion/.
 -- Simply create or copy the relevant settings at the end of this file (from
--- the other files), recalling that a key can be unbound by passing 'nil' 
--- (without the quotes) as the callback. For more information, please see 
+-- the other files), recalling that a key can be unbound by passing 'nil'
+-- (without the quotes) as the callback. For more information, please see
 -- the Notion configuration manual available from the Notion Web page.
 --
 
@@ -39,21 +39,21 @@ ioncore.set{
     -- Movement commands warp the pointer to frames instead of just
     -- changing focus. Enabled by default.
     --warp=true,
-    
+
     -- Switch frames to display newly mapped windows
     --switchto=true,
-    
+
     -- Default index for windows in frames: one of 'last', 'next' (for
     -- after current), or 'next-act' (for after current and anything with
     -- activity right after it).
     --frame_default_index='next',
-    
+
     -- Auto-unsqueeze transients/menus/queries.
     --unsqueeze=true,
-    
+
     -- Display notification tooltips for activity on hidden workspace.
     --screen_notify=true,
-    
+
     -- Automatically save layout on restart and exit.
     --autosave_layout=true,
 }
@@ -63,7 +63,7 @@ ioncore.set{
 -- commented out below, except mod_dock. If you do not want to load
 -- something, comment out this line, and uncomment the lines corresponding
 -- the the modules or configuration files that you want, below.
--- The modules' configuration files correspond to the names of the 
+-- The modules' configuration files correspond to the names of the
 -- modules with 'mod' replaced by 'cfg'.
 dopath("cfg_defaults")
 
@@ -73,7 +73,7 @@ dopath("cfg_defaults")
 -- Load some kludges to make apps behave better.
 --dopath("cfg_kludges")
 
--- Define some layouts. 
+-- Define some layouts.
 --dopath("cfg_layouts")
 
 -- Load some modules. Bindings and other configuration specific to modules

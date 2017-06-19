@@ -38,4 +38,4 @@ function mod_xrandr_mock.set_number_of_screens(n)
     else
         os.execute("cp xrandr/fakexinerama-2monitors xrandr/.fakexinerama")
     end
-end 
+end

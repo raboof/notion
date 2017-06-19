@@ -1,7 +1,7 @@
 /*
  * libtu/numparser2.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -30,16 +30,16 @@ typedef struct _NPNum{
 static int npnum_mulbase_add(NPNum *num, long base, long v)
 {
     double iold=num->ival;
-    
+
     num->fval=num->fval*base+(double)v;
-    
+
     num->ival*=base;
-    
+
     if(num->ival<iold)
         num->type=NPNUM_FLOAT;
-    
+
     num->ival+=v;
-    
+
     return 0;
 }
 
@@ -69,7 +69,7 @@ static int npnum_mulbase_add(NPNum *num, long base, long v)
 #ifndef NP_I386_ASM
     ulong val;
 #endif
-    
+
     for(i=num->nmantissa;i>=0;i--){
 #ifdef NP_I386_ASM
         __asm__("mul %4\n"
@@ -79,7 +79,7 @@ static int npnum_mulbase_add(NPNum *num, long base, long v)
 #else
         overflow=0;
         val=num->mantissa[i];
-        
+
         if(val<ULONG_MAX/base){
             val*=base;
         }else if(val){
@@ -104,7 +104,7 @@ static int npnum_mulbase_add(NPNum *num, long base, long v)
         }
     }
     num->mantissa[0]+=v;
-    
+
     return 0;
 }
 
@@ -131,15 +131,15 @@ static int parse_exponent(NPNum *num, Tokenizer *tokz, int c)
     long exp=0;
     bool neg=FALSE;
     int err=0;
-    
+
     c=GETCH();
-    
+
     if(c=='-' || c=='+'){
         if(c=='-')
             neg=TRUE;
         c=GETCH();
     }
-    
+
     for(; 1; c=GETCH()){
         if(isdigit(c)){
             exp*=10;
@@ -159,7 +159,7 @@ static int parse_exponent(NPNum *num, Tokenizer *tokz, int c)
     ADD_EXP(num, exp);
 #else
     num->fval*=pow(num->base, exp);
-#endif    
+#endif
     return err;
 }
 
@@ -172,8 +172,8 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
     int tmp;
 #ifdef NP_SIMPLE_IMPL
     double divisor=base;
-#endif    
-    
+#endif
+
     if(c=='-' || c=='+'){
         if(c=='-')
             num->negative=TRUE;
@@ -181,7 +181,7 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
         if(!isdigit(c))
             err=E_TOKZ_NUMFMT;
     }
-    
+
     if(c=='0'){
         dm=0;
         c=GETCH();
@@ -197,9 +197,9 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
             dm=2;
         }
     }
-    
+
     num->base=base;
-    
+
     for(; 1; c=GETCH()){
         if((c=='e' || c=='E') && dm!=0){
             if(dm<2){
@@ -211,7 +211,7 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
                 err=tmp;
             break;
         }
-        
+
         if(isxdigit(c)){
             if('0'<=c && c<='9')
                 c-='0';
@@ -219,7 +219,7 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
                 c-='A'-10;
             else
                 c-='a'-10;
-            
+
             if(c>=base)
                 err=E_TOKZ_NUMFMT;
 
@@ -234,16 +234,16 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
                 if(err==0)
                     err=tmp;
             }
-            
+
             if(dm==1)
                 dm=2;
-#ifndef NP_SIMPLE_IMPL            
+#ifndef NP_SIMPLE_IMPL
             else if(dm==3)
                 ADD_EXP(num, -1);
-#endif            
+#endif
             continue;
         }
-        
+
         if(c=='.'){
             if(dm!=2){
                 err=E_TOKZ_NUMFMT;
@@ -255,16 +255,16 @@ static int parse_number(NPNum *num, Tokenizer *tokz, int c)
 #endif
             continue;
         }
-        
+
         if(is_end(c)){
             UNGETCH(c);
             break;
         }
-        
+
         err=E_TOKZ_NUMFMT;
     }
-    
-#ifndef NP_SIMPLE_IMPL            
+
+#ifndef NP_SIMPLE_IMPL
     num->type=(num->exponent==0 ? NPNUM_INT : NPNUM_FLOAT);
 #endif
 

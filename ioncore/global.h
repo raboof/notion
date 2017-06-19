@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/global.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -53,11 +53,11 @@ INTRSTRUCT(WGlobal);
 DECLSTRUCT(WGlobal){
     int argc;
     char **argv;
-    
+
     Display *dpy;
     const char *display;
     int conn;
-    
+
     XContext win_context;
     Atom atom_wm_state;
     Atom atom_wm_change_state;
@@ -70,13 +70,13 @@ DECLSTRUCT(WGlobal){
     Atom atom_selection;
     Atom atom_mwm_hints;
     Atom atom_dockapp_hack;
-    
+
     WRootWin *rootwins;
     WScreen *screens;
     WRegion *focus_next;
     bool warp_next;
     int focus_next_source;
-    
+
     /* We could have a display WRegion but the screen-link could impose
      * some problems so these are handled as a special case.
      *
@@ -94,13 +94,15 @@ DECLSTRUCT(WGlobal){
      * focuslist_insert_delay is enabled, and the corresponding timer is active */
     WRegion* focus_current;
 
-    
+
     int input_mode;
     int opmode;
-    
+
     Time dblclick_delay;
     int opaque_resize;
     bool warp_enabled;
+    int warp_margin;
+    double warp_factor[2];
     bool switchto_new;
     bool screen_notify;
     int frame_default_index;
@@ -119,9 +121,9 @@ DECLSTRUCT(WGlobal){
     bool use_mb; /* use mb routines? */
     bool enc_sb; /* 8-bit charset? If unset, use_mb must be set. */
     bool enc_utf8; /* mb encoding is utf8? */
-    
+
     const char *sm_client_id;
-    
+
     struct{
         StringId activated,
                  inactivated,

@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/split.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -56,8 +56,8 @@ int split_other_pos(WSplit *split, int dir)
 }
 
 
-/* No, these are not even supposed to be proper/consistent 
- * Z \cup {\infty, -\infty} calculation rules. 
+/* No, these are not even supposed to be proper/consistent
+ * Z \cup {\infty, -\infty} calculation rules.
  */
 
 static int infadd(int x, int y)
@@ -102,15 +102,15 @@ WSplitRegion *splittree_node_of(WRegion *reg)
 {
     Rb_node node=NULL;
     int found=0;
-    
+
     /*assert(REGION_MANAGER_CHK(reg, WTiling)!=NULL);*/
-    
+
     if(split_of_map!=NULL){
         node=rb_find_pkey_n(split_of_map, reg, &found);
         if(found)
             return (WSplitRegion*)(node->v.val);
     }
-    
+
     return NULL;
 }
 
@@ -122,9 +122,9 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
 {
     Rb_node node=NULL;
     int found;
-    
+
     /*assert(REGION_MANAGER_CHK(reg, WTiling)!=NULL);*/
-    
+
     if(split_of_map==NULL){
         if(split==NULL)
             return TRUE;
@@ -132,11 +132,11 @@ bool splittree_set_node_of(WRegion *reg, WSplitRegion *split)
         if(split_of_map==NULL)
             return FALSE;
     }
-    
+
     node=rb_find_pkey_n(split_of_map, reg, &found);
     if(found)
         rb_delete_node(node);
-    
+
     return (rb_insertp(split_of_map, reg, split)!=NULL);
 }
 
@@ -200,7 +200,7 @@ bool splitsplit_init(WSplitSplit *split, const WRectangle *geom, int dir)
 }
 
 
-bool splitregion_init(WSplitRegion *split, const WRectangle *geom, 
+bool splitregion_init(WSplitRegion *split, const WRectangle *geom,
                       WRegion *reg)
 {
     split_init(&(split->split), geom);
@@ -266,10 +266,10 @@ void splitsplit_deinit(WSplitSplit *split)
         split->br->parent=NULL;
         destroy_obj((Obj*)(split->br));
     }
-    
+
     splitinner_deinit(&(split->isplit));
 }
-    
+
 
 void splitregion_deinit(WSplitRegion *split)
 {
@@ -277,7 +277,7 @@ void splitregion_deinit(WSplitRegion *split)
         set_node_of_reg(split->reg, NULL);
         split->reg=NULL;
     }
-    
+
     split_deinit(&(split->split));
 }
 
@@ -298,11 +298,11 @@ static void splitregion_update_bounds(WSplitRegion *node, bool UNUSED(recursive)
 {
     WSizeHints hints;
     WSplit *snode=(WSplit*)node;
-    
+
     assert(node->reg!=NULL);
-    
+
     region_size_hints(node->reg, &hints);
-    
+
     snode->min_w=MAXOF(1, hints.min_set ? hints.min_width : 1);
     snode->max_w=INT_MAX;
     snode->unused_w=-1;
@@ -333,7 +333,7 @@ static void splitst_update_bounds(WSplitST *node, bool UNUSED(rec))
 
     snode->unused_w=-1;
     snode->unused_h=-1;
-    
+
     if(node->orientation==REGION_ORIENTATION_HORIZONTAL){
         snode->min_w=CF_STDISP_MIN_SZ;
         snode->max_w=INT_MAX;
@@ -350,15 +350,15 @@ static void splitsplit_update_bounds(WSplitSplit *split, bool recursive)
     WSplit *node=(WSplit*)split;
 
     assert(split->tl!=NULL && split->br!=NULL);
-    
+
     tl=split->tl;
     br=split->br;
-    
+
     if(recursive){
         split_update_bounds(tl, TRUE);
         split_update_bounds(br, TRUE);
     }
-    
+
     if(split->dir==SPLIT_HORIZONTAL){
         node->max_w=infadd(tl->max_w, br->max_w);
         node->min_w=infadd(tl->min_w, br->min_w);
@@ -422,7 +422,7 @@ void splittree_end_resize()
 static void splittree_scan_stdisp_rootward_(WSplitInner *node_)
 {
     WSplitSplit *node=OBJ_CAST(node_, WSplitSplit);
-    
+
     if(node!=NULL){
         if(OBJ_IS(node->tl, WSplitST)){
             saw_stdisp=(WSplitST*)(node->tl);
@@ -432,7 +432,7 @@ static void splittree_scan_stdisp_rootward_(WSplitInner *node_)
             return;
         }
     }
-    
+
     if(node_->split.parent!=NULL)
         splittree_scan_stdisp_rootward_(node_->split.parent);
 }
@@ -449,24 +449,24 @@ static WSplitST *splittree_scan_stdisp(WSplit *node_, bool set_saw)
 {
     WSplitST *r=NULL;
     WSplitSplit *node=OBJ_CAST(node_, WSplitSplit);
-    
+
     if(node==NULL)
         return NULL;
-    
+
     r=OBJ_CAST(node->tl, WSplitST);
     if(r==NULL)
         r=OBJ_CAST(node->br, WSplitST);
-    
+
     if(r!=NULL){
         if(set_saw)
             saw_stdisp=r;
         return r;
     }
-    
+
     r=splittree_scan_stdisp(node->tl, set_saw);
     if(r==NULL)
         r=splittree_scan_stdisp(node->br, set_saw);
-    
+
     return r;
 }
 
@@ -482,17 +482,17 @@ static WSplit *dodge_stdisp(WSplit *node, bool keep_within)
 {
     WSplitST *stdisp;
     WSplitSplit *stdispp;
-    
+
     stdisp=splittree_scan_stdisp(node, TRUE);
-    
+
     if(stdisp==NULL)
         return node;
-    
+
     stdispp=OBJ_CAST(((WSplit*)stdisp)->parent, WSplitSplit);
-    
+
     if(stdispp==NULL)
         return node;
-    
+
     if((WSplit*)stdispp==node){
         /* Node itself immediately contains stdisp. Due to the way
          * try_unsink works, stdisp this will not change, so another
@@ -500,18 +500,18 @@ static WSplit *dodge_stdisp(WSplit *node, bool keep_within)
          */
         return (keep_within
                 ? node
-                : (stdispp->tl==(WSplit*)stdisp 
-                   ? stdispp->br 
+                : (stdispp->tl==(WSplit*)stdisp
+                   ? stdispp->br
                    : stdispp->tl));
     }
-    
+
     do{
         if(!split_try_unsink_stdisp(stdispp, FALSE, TRUE)){
             warn(TR("Unable to move the status display out of way."));
             return NULL;
         }
     }while(stdispp->tl!=node && stdispp->br!=node);
-    
+
     return node;
 }
 
@@ -522,16 +522,16 @@ static WSplit *dodge_stdisp(WSplit *node, bool keep_within)
 /*{{{ Low-level resize code; from root to leaf */
 
 
-static void split_do_resize_default(WSplit *node, const WRectangle *ng, 
-                                    WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn), 
+static void split_do_resize_default(WSplit *node, const WRectangle *ng,
+                                    WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
                                     bool UNUSED(transpose))
 {
     node->geom=*ng;
 }
 
 
-static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng, 
-                                  WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn), 
+static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng,
+                                  WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
                                   bool UNUSED(transpose))
 {
     assert(node->reg!=NULL);
@@ -541,8 +541,8 @@ static void splitregion_do_resize(WSplitRegion *node, const WRectangle *ng,
 }
 
 
-static void splitst_do_resize(WSplitST *node, const WRectangle *ng, 
-                              WPrimn hprimn, WPrimn vprimn, 
+static void splitst_do_resize(WSplitST *node, const WRectangle *ng,
+                              WPrimn hprimn, WPrimn vprimn,
                               bool transpose)
 {
     saw_stdisp=node;
@@ -550,7 +550,7 @@ static void splitst_do_resize(WSplitST *node, const WRectangle *ng,
     if(node->regnode.reg==NULL){
         ((WSplit*)node)->geom=*ng;
     }else{
-        splitregion_do_resize(&(node->regnode), ng, hprimn, vprimn, 
+        splitregion_do_resize(&(node->regnode), ng, hprimn, vprimn,
                                transpose);
     }
 }
@@ -562,13 +562,13 @@ static int other_dir(int dir)
 }
 
 
-static void adjust_sizes(int *tls_, int *brs_, int nsize, int sz, 
+static void adjust_sizes(int *tls_, int *brs_, int nsize, int sz,
                          int tlmin, int brmin, int tlmax, int brmax,
                          int primn)
 {
     int tls=*tls_;
     int brs=*brs_;
-    
+
     if(primn==PRIMN_TL){
         tls=tls+nsize-sz;
         bound(&tls, tlmin, tlmax);
@@ -591,13 +591,13 @@ static void adjust_sizes(int *tls_, int *brs_, int nsize, int sz,
         tls=nsize-brs;
         bound(&tls, tlmin, tlmax);
     }
-    
+
     *tls_=tls;
     *brs_=brs;
 }
 
 
-static void get_minmaxunused(WSplit *node, int dir, 
+static void get_minmaxunused(WSplit *node, int dir,
                              int *min, int *max, int *unused)
 {
     if(dir==SPLIT_VERTICAL){
@@ -612,13 +612,13 @@ static void get_minmaxunused(WSplit *node, int dir,
 }
 
 
-void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
+void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
                           WPrimn hprimn, WPrimn vprimn, bool transpose)
 {
     assert(ng->w>=0 && ng->h>=0);
     assert(node->tl!=NULL && node->br!=NULL);
     assert(!transpose || (hprimn==PRIMN_ANY && vprimn==PRIMN_ANY));
-    
+
     {
         WSplit *tl=node->tl, *br=node->br;
         int tls=split_size((WSplit*)tl, node->dir);
@@ -633,14 +633,14 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
         int tlmin, tlmax, tlunused, tlused;
         int brmin, brmax, brunused, brused;
         WRectangle tlg=*ng, brg=*ng;
-        
+
         get_minmaxunused(tl, dir, &tlmin, &tlmax, &tlunused);
         get_minmaxunused(br, dir, &brmin, &brmax, &brunused);
-        
+
         tlused=MAXOF(0, tls-MAXOF(0, tlunused));
         brused=MAXOF(0, brs-MAXOF(0, brunused));
         /* tlmin,  brmin >= 1 => (tls>=tlmin, brs>=brmin => sz>0) */
-        
+
         if(sz>2){
             if(primn==PRIMN_ANY && (tlunused>=0 || brunused>=0)){
                 if(nsize<=tlused+brused){
@@ -650,17 +650,17 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
                 }else{
                     /* Just expand or shrink unused space */
                     adjust_sizes(&tls, &brs, nsize, sz,
-                                 tlused, brused, 
+                                 tlused, brused,
                                  (tlunused<0 ? tlused : tlmax),
                                  (brunused<0 ? brused : brmax), primn);
                 }
-                
+
             }else{
-                adjust_sizes(&tls, &brs, nsize, sz, 
+                adjust_sizes(&tls, &brs, nsize, sz,
                              tlmin, brmin, tlmax, brmax, primn);
             }
         }
-        
+
         if(tls+brs!=nsize){
             /* Bad fit; just size proportionally. */
             if(sz<=2){
@@ -671,7 +671,7 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
                 brs=nsize-tls;
             }
         }
-        
+
         if(dir==SPLIT_VERTICAL){
             tlg.h=tls;
             brg.y+=tls;
@@ -681,10 +681,10 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
             brg.x+=tls;
             brg.w=brs;
         }
-        
+
         split_do_resize(tl, &tlg, hprimn, vprimn, transpose);
         split_do_resize(br, &brg, hprimn, vprimn, transpose);
-        
+
         node->dir=dir;
         ((WSplit*)node)->geom=*ng;
         split_update_bounds((WSplit*)node, FALSE);
@@ -692,14 +692,14 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
 }
 
 
-void split_do_resize(WSplit *node, const WRectangle *ng, 
+void split_do_resize(WSplit *node, const WRectangle *ng,
                      WPrimn hprimn, WPrimn vprimn, bool transpose)
 {
     CALL_DYN(split_do_resize, node, (node, ng, hprimn, vprimn, transpose));
 }
 
 
-void split_resize(WSplit *node, const WRectangle *ng, 
+void split_resize(WSplit *node, const WRectangle *ng,
                   WPrimn hprimn, WPrimn vprimn)
 {
     split_update_bounds(node, TRUE);
@@ -720,8 +720,8 @@ bool splits_are_related(WSplit *p, WSplit *node)
     if(p==node)
         return TRUE;
 
-    return 
-        node->parent!=NULL 
+    return
+        node->parent!=NULL
         ? splits_are_related(p, (WSplit*)node->parent)
         : FALSE;
 }
@@ -729,12 +729,12 @@ bool splits_are_related(WSplit *p, WSplit *node)
 
 WSplit *maxparentdir_rel(WSplit *p, WSplit *node, int dir)
 {
-    /* Descending from p, try to determine the first split of type dir between 
+    /* Descending from p, try to determine the first split of type dir between
      * p and node, while ignoring a potential stdisp. */
     if(OBJ_IS(p, WSplitSplit)){
         WSplitSplit *sp=(WSplitSplit*)p;
         assert(sp->tl!=NULL && sp->br!=NULL);
-        assert(splits_are_related(sp->tl, node) || 
+        assert(splits_are_related(sp->tl, node) ||
                splits_are_related(sp->br, node));
 
         if(OBJ_IS(sp->tl, WSplitST))
@@ -743,8 +743,8 @@ WSplit *maxparentdir_rel(WSplit *p, WSplit *node, int dir)
             return maxparentdir_rel(sp->tl, node, dir);
 
         if(sp->dir!=dir){
-            return 
-                splits_are_related(sp->tl, node) 
+            return
+                splits_are_related(sp->tl, node)
                 ? maxparentdir_rel(sp->tl, node, dir)
                 : maxparentdir_rel(sp->br, node, dir);
         }
@@ -779,7 +779,7 @@ int *xy(WRectangle *geom, int orientation)
 bool is_lt(int orientation, int corner)
 {
     /* Read as "is_left" or "is_top", depending on the orientation. */
-    return 
+    return
         orientation==REGION_ORIENTATION_HORIZONTAL
         ? corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_BL
         : corner==MPLEX_STDISP_TL || corner==MPLEX_STDISP_TR;
@@ -787,7 +787,7 @@ bool is_lt(int orientation, int corner)
 
 int flip_orientation(int orientation)
 {
-    return 
+    return
         orientation==REGION_ORIENTATION_HORIZONTAL
         ? REGION_ORIENTATION_VERTICAL
         : REGION_ORIENTATION_HORIZONTAL;
@@ -809,15 +809,15 @@ WRectangle stdisp_recommended_geom(WSplitST *st, WRectangle wsg)
 
 bool geom_overlaps_stgeom_xy(WRectangle geom, WSplitST *st, WRectangle stg)
 {
-    /*    TRUE                         FALSE      
-     *                                            
-     *     ------                           ------ 
-     *     |geom|                           |geom| 
-     *     ------                           ------ 
-     *  -----                        -----        
-     *  |stg|                        |stg|        
-     *  -----                        -----        
-     */                                           
+    /*    TRUE                         FALSE
+     *
+     *     ------                           ------
+     *     |geom|                           |geom|
+     *     ------                           ------
+     *  -----                        -----
+     *  |stg|                        |stg|
+     *  -----                        -----
+     */
     int ori=st->orientation;
 
     return
@@ -828,21 +828,21 @@ bool geom_overlaps_stgeom_xy(WRectangle geom, WSplitST *st, WRectangle stg)
 
 bool geom_aligned_stdisp(WRectangle geom, WSplitST *st)
 {
-    /*        TRUE               FALSE              FALSE    
-     *                                                  
+    /*        TRUE               FALSE              FALSE
+     *
      *                                                  ------
      *                                                  |geom|
      *           ------                                 ------
-     *           |geom|              ------                 
-     *    -----  ------       -----  |geom|      -----            
-     *    |stg|               |stg|  ------      |stg|            
-     *    -----               -----              -----            
+     *           |geom|              ------
+     *    -----  ------       -----  |geom|      -----
+     *    |stg|               |stg|  ------      |stg|
+     *    -----               -----              -----
      *
-     */                                                                                                   
+     */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
     int ori=flip_orientation(st->orientation);
 
-    return 
+    return
         is_lt(ori, st->corner)
         ? *xy(&geom, ori)==*wh(&stg, ori)
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori);
@@ -850,14 +850,14 @@ bool geom_aligned_stdisp(WRectangle geom, WSplitST *st)
 
 void grow_by_stdisp_wh(WRectangle *geom, WSplitST *st)
 {
-    /*          BEFORE                      AFTER       
-     *                                               
-     *                                               
+    /*          BEFORE                      AFTER
+     *
+     *
      *              ------                     ------
      *              |geom|                     |    |
      *      -----  ------               -----  |geom|
      *      |stg|                       |stg|  |    |
-     *      -----                       -----  ------     
+     *      -----                       -----  ------
      *
      */
     WRectangle stg=REGION_GEOM(st->regnode.reg);
@@ -879,7 +879,7 @@ bool geom_clashes_stdisp(WRectangle geom, WSplitST *st)
 {
     WRectangle stg=REGION_GEOM(st->regnode.reg);
     int ori=flip_orientation(st->orientation);
-    return 
+    return
         is_lt(ori, st->corner)
         ? *xy(&geom, ori)==0
         : *xy(&geom, ori)+*wh(&geom, ori)==*xy(&stg, ori)+*wh(&stg, ori);
@@ -887,8 +887,8 @@ bool geom_clashes_stdisp(WRectangle geom, WSplitST *st)
 
 bool is_same_dir(int dir, int ori)
 {
-    return 
-        (dir==SPLIT_HORIZONTAL && ori==REGION_ORIENTATION_HORIZONTAL) || 
+    return
+        (dir==SPLIT_HORIZONTAL && ori==REGION_ORIENTATION_HORIZONTAL) ||
         (dir==SPLIT_VERTICAL && ori==REGION_ORIENTATION_VERTICAL);
 }
 
@@ -929,7 +929,7 @@ bool update_geom_from_stdisp(WFrame *frame, WRectangle *ng, int dir)
         }
         return TRUE;
     }
-    
+
     if(!is_same_dir(dir, st->orientation) &&
        geom_clashes_stdisp(frame->saved_geom, st))
     {
@@ -972,19 +972,19 @@ bool splitregion_do_restore(WSplitRegion *node, int dir)
     fakegeom=geom;
     ret=update_geom_from_stdisp(frame, &geom, dir);
 
-    /* Tell the region the correct geometry to avoid redrawing it again when 
-     * the stdisp is resized by split_regularise_stdisp. Some clients (notably 
-     * ncurses based ones) don't seem to react well to being resized multiple 
-     * times within a short amount of time and don't refresh themselves 
+    /* Tell the region the correct geometry to avoid redrawing it again when
+     * the stdisp is resized by split_regularise_stdisp. Some clients (notably
+     * ncurses based ones) don't seem to react well to being resized multiple
+     * times within a short amount of time and don't refresh themselves
      * correctly. */
     region_fit(node->reg, &geom, REGION_FIT_EXACT);
 
     split_update_bounds(&(node->split), FALSE);
 
-    /* Keep the old geometry for the WSplit. Otherwise the tiling would be 
-     * inconsistent, by for example having horizontal WSplitSplit's whose 
-     * children have different heights. The call to split_regularise_stdisp 
-     * below will take care of correcting the geometry of the WSplit and it 
+    /* Keep the old geometry for the WSplit. Otherwise the tiling would be
+     * inconsistent, by for example having horizontal WSplitSplit's whose
+     * children have different heights. The call to split_regularise_stdisp
+     * below will take care of correcting the geometry of the WSplit and it
      * behaves badly when the tiling is inconsistent. */
     node->split.geom=ret ? fakegeom : geom;
 
@@ -1116,8 +1116,8 @@ bool savedgeom_clashes_stdisp(WFrame *frame, int dir)
     ori=flip_orientation(st->orientation);
 
     return
-        !is_same_dir(dir, st->orientation) && 
-        frame_neighbors_stdisp(frame, st) && 
+        !is_same_dir(dir, st->orientation) &&
+        frame_neighbors_stdisp(frame, st) &&
         geom_clashes_stdisp(frame->saved_geom, st)
         ? *wh(&frame->saved_geom, ori)<*wh(&REGION_GEOM(st), ori)
         : FALSE;
@@ -1210,7 +1210,7 @@ static void flexibility(WSplit *node, int dir, int *shrink, int *stretch)
 static void calc_amount(int *amount, int rs, WSplit *other, int dir)
 {
     int shrink, stretch;
-    
+
     flexibility(other, dir, &shrink, &stretch);
 
     if(rs>0)
@@ -1223,8 +1223,8 @@ static void calc_amount(int *amount, int rs, WSplit *other, int dir)
 
 
 
-static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node, 
-                                 RootwardAmount *ha, RootwardAmount *va, 
+static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
+                                 RootwardAmount *ha, RootwardAmount *va,
                                  WRectangle *rg, bool tryonly)
 {
     WPrimn hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
@@ -1233,11 +1233,11 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
     WSplit *other;
     WPrimn thisnode;
     int amount;
-    
+
     assert(!ha->any || ha->tl==0);
     assert(!va->any || va->tl==0);
     assert(p->tl==node || p->br==node);
-    
+
     if(p->tl==node){
         other=p->br;
         thisnode=PRIMN_TL;
@@ -1255,8 +1255,8 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         calc_amount(&amount, ca->tl, other, p->dir);
         ca->tl-=amount;
     }
-    
-    if(((WSplit*)p)->parent==NULL /*|| 
+
+    if(((WSplit*)p)->parent==NULL /*||
        (ha->tl==0 && ha->br==0 && va->tl==0 && va->br==0)*/){
         if(((WSplit*)p)->ws_if_root!=NULL)
             pg=REGION_GEOM((WTiling*)(((WSplit*)p)->ws_if_root));
@@ -1266,7 +1266,7 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         splitinner_do_rqsize(((WSplit*)p)->parent, (WSplit*)p, ha, va,
                              &pg, tryonly);
     }
-    
+
     assert(pg.w>=0 && pg.h>=0);
 
     og=pg;
@@ -1276,7 +1276,7 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         ng.h=MAXOF(0, node->geom.h+amount);
         og.h=MAXOF(0, other->geom.h-amount);
         adjust_sizes(&(ng.h), &(og.h), pg.h, ng.h+og.h,
-                     node->min_h, other->min_h, node->max_h, other->max_h, 
+                     node->min_h, other->min_h, node->max_h, other->max_h,
                      PRIMN_TL /* node is passed as tl param */);
         if(thisnode==PRIMN_TL)
             og.y=pg.y+pg.h-og.h;
@@ -1287,7 +1287,7 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
         ng.w=MAXOF(0, node->geom.w+amount);
         og.w=MAXOF(0, other->geom.w-amount);
         adjust_sizes(&(ng.w), &(og.w), pg.w, ng.w+og.w,
-                     node->min_w, other->min_w, node->max_w, other->max_w, 
+                     node->min_w, other->min_w, node->max_w, other->max_w,
                      PRIMN_TL /* node is passed as tl param */);
         if(thisnode==PRIMN_TL)
             og.x=pg.x+pg.w-og.w;
@@ -1295,27 +1295,27 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
             ng.x=pg.x+pg.w-ng.w;
         hprimn=thisnode;
     }
-    
+
     if(!tryonly){
         /* Entä jos 'other' on stdisp? */
         split_do_resize(other, &og, hprimn, vprimn, FALSE);
-        
+
         ((WSplit*)p)->geom=pg;
     }
-    
+
     *rg=ng;
 }
 
 
-void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
-                          RootwardAmount *ha, RootwardAmount *va, 
+void splitinner_do_rqsize(WSplitInner *p, WSplit *node,
+                          RootwardAmount *ha, RootwardAmount *va,
                           WRectangle *rg, bool tryonly)
 {
     CALL_DYN(splitinner_do_rqsize, p, (p, node, ha, va, rg, tryonly));
 }
 
 
-static void initra(RootwardAmount *ra, int p, int s, int op, int os, 
+static void initra(RootwardAmount *ra, int p, int s, int op, int os,
                    bool any)
 {
     ra->any=any;
@@ -1328,8 +1328,8 @@ static void initra(RootwardAmount *ra, int p, int s, int op, int os,
 }
 
 
-void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
-                      bool hany, bool vany, WRectangle *rg, 
+void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
+                      bool hany, bool vany, WRectangle *rg,
                       bool tryonly)
 {
     RootwardAmount ha, va;
@@ -1342,7 +1342,7 @@ void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
     }else{
         initra(&ha, ng->x, ng->w, node->geom.x, node->geom.w, hany);
         initra(&va, ng->y, ng->h, node->geom.y, node->geom.h, vany);
-    
+
         splitinner_do_rqsize(node->parent, node, &ha, &va, rg, tryonly);
     }
 }
@@ -1359,7 +1359,7 @@ static void bnd(int *pos, int *sz, int opos, int osz, int minsz, int maxsz)
     int ud=abs(*pos-opos);
     int dd=abs((*pos+*sz)-(opos+osz));
     int szrq=*sz;
-    
+
     if(ud+dd!=0){
         bound(sz, minsz, maxsz);
         *pos+=(szrq-*sz)*ud/(ud+dd);
@@ -1375,7 +1375,7 @@ WSplit *split_find_root(WSplit *split)
 }
 
 
-void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_, 
+void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
                       WRectangle *geomret)
 {
     bool hany=flags&REGION_RQGEOM_WEAK_X;
@@ -1384,15 +1384,15 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
     WRectangle geom=*geom_;
     WRectangle retg;
     WSplit *root=split_find_root(sub);
-    
+
     if(geomret==NULL)
         geomret=&retg;
 
     split_update_bounds(root, TRUE);
-    
+
     if(OBJ_IS(sub, WSplitST)){
         WSplitST *sub_as_stdisp=(WSplitST*)sub;
-        
+
         if(flags&REGION_RQGEOM_TRYONLY){
             warn(TR("REGION_RQGEOM_TRYONLY unsupported for status display."));
             *geomret=sub->geom;
@@ -1413,13 +1413,13 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
     }
 
     /* Handle internal size bounds */
-    bnd(&(geom.x), &(geom.w), sub->geom.x, sub->geom.w, 
+    bnd(&(geom.x), &(geom.w), sub->geom.x, sub->geom.w,
         sub->min_w, sub->max_w);
-    bnd(&(geom.y), &(geom.h), sub->geom.y, sub->geom.h, 
+    bnd(&(geom.y), &(geom.h), sub->geom.y, sub->geom.h,
         sub->min_h, sub->max_h);
 
     /* Check if we should resize to both tl and br */
-    
+
     if(hany){
         geom.w+=sub->geom.x-geom.x;
         geom.x=sub->geom.x;
@@ -1429,11 +1429,11 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
         geom.h+=sub->geom.y-geom.y;
         geom.y=sub->geom.y;
     }
-    
+
     splittree_begin_resize();
-    
+
     split_do_rqgeom_(sub, &geom, hany, vany, geomret, tryonly);
-    
+
     if(!tryonly){
         split_do_resize(sub, geomret, hany, vany, FALSE);
         splittree_end_resize();
@@ -1446,7 +1446,7 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
 
 /*EXTL_DOC
  * Attempt to resize and/or move the split tree starting at \var{node}.
- * Behaviour and the \var{g} parameter are as for \fnref{WRegion.rqgeom} 
+ * Behaviour and the \var{g} parameter are as for \fnref{WRegion.rqgeom}
  * operating on \var{node} (if it were a \type{WRegion}).
  */
 EXTL_EXPORT_MEMBER
@@ -1454,7 +1454,7 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
 {
     WRectangle geom, ogeom;
     int flags=REGION_RQGEOM_WEAK_ALL;
-        
+
     geom=node->geom;
     ogeom=geom;
 
@@ -1466,12 +1466,12 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
         flags&=~REGION_RQGEOM_WEAK_W;
     if(extl_table_gets_i(g, "h", &(geom.h)))
         flags&=~REGION_RQGEOM_WEAK_H;
-    
+
     geom.w=MAXOF(1, geom.w);
     geom.h=MAXOF(1, geom.h);
 
     splittree_rqgeom(node, flags, &geom, &ogeom);
-    
+
     return extl_table_from_rectangle(&ogeom);
 }
 
@@ -1485,7 +1485,7 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
 void splittree_changeroot(WSplit *root, WSplit *node)
 {
     WTiling *ws=(WTiling*)(root->ws_if_root);
-    
+
     assert(ws!=NULL);
     assert(ws->split_tree==root);
     root->ws_if_root=NULL;
@@ -1501,14 +1501,14 @@ static void splitsplit_replace(WSplitSplit *split, WSplit *child,
                                WSplit *what)
 {
     assert(split->tl==child || split->br==child);
-    
+
     if(split->tl==child)
         split->tl=what;
     else
         split->br=what;
 
     child->parent=NULL;
-    
+
     what->parent=(WSplitInner*)split;
     what->ws_if_root=NULL; /* May not be needed. */
 }
@@ -1521,7 +1521,7 @@ void splitinner_replace(WSplitInner *split, WSplit *child, WSplit *what)
 
 
 WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
-                              int minsize, WRegionSimpleCreateFn *fn, 
+                              int minsize, WRegionSimpleCreateFn *fn,
                               WWindow *parent)
 {
     int objmin;
@@ -1532,16 +1532,16 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
     WRegion *nreg;
     WFitParams fp;
     WRectangle ng, rg;
-    
+
     assert(node!=NULL && parent!=NULL);
-    
+
     splittree_begin_resize();
-    
+
     node=dodge_stdisp(node, FALSE);
-    
+
     if(node==NULL)
         return NULL;
-    
+
     if(OBJ_IS(node, WSplitST)){
         warn(TR("Splitting the status display is not allowed."));
         return NULL;
@@ -1590,9 +1590,9 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
      */
     fp.mode=REGION_FIT_EXACT;
     fp.g=rg;
-    
+
     nsplit=create_splitsplit(&(fp.g), dir);
-    
+
     if(nsplit==NULL)
         return NULL;
 
@@ -1605,9 +1605,9 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
             fp.g.x+=so;
         fp.g.w=sn;
     }
-    
+
     nreg=fn(parent, &fp);
-    
+
     if(nreg==NULL){
         destroy_obj((Obj*)nsplit);
         return NULL;
@@ -1619,9 +1619,9 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
         destroy_obj((Obj*)nsplit);
         return NULL;
     }
-    
+
     /* Now that everything's ok, resize and move original node.
-     */    
+     */
     ng=rg;
     if(dir==SPLIT_VERTICAL){
         ng.h=so;
@@ -1633,7 +1633,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
             ng.x+=sn;
     }
 
-    split_do_resize(node, &ng, 
+    split_do_resize(node, &ng,
                     (dir==SPLIT_HORIZONTAL ? primn : PRIMN_ANY),
                     (dir==SPLIT_VERTICAL ? primn : PRIMN_ANY),
                     FALSE);
@@ -1641,15 +1641,15 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
     /* Set up split structure
      */
     psplit=node->parent;
-    
+
     if(psplit!=NULL)
         splitinner_replace(psplit, node, (WSplit*)nsplit);
     else
         splittree_changeroot(node, (WSplit*)nsplit);
-        
+
     node->parent=(WSplitInner*)nsplit;
     ((WSplit*)nnode)->parent=(WSplitInner*)nsplit;
-    
+
     if(primn==PRIMN_BR){
         nsplit->tl=node;
         nsplit->br=(WSplit*)nnode;
@@ -1659,9 +1659,9 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
         nsplit->br=node;
         nsplit->current=SPLIT_CURRENT_BR;
     }
-    
+
     splittree_end_resize();
-    
+
     return nnode;
 }
 
@@ -1672,16 +1672,16 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
 /*{{{ Remove */
 
 
-static void splitsplit_remove(WSplitSplit *node, WSplit *child, 
+static void splitsplit_remove(WSplitSplit *node, WSplit *child,
                               bool reclaim_space)
 {
     static int nstdisp=0;
     WSplitInner *parent;
     WSplit *other;
     int hprimn=PRIMN_ANY, vprimn=PRIMN_ANY;
-    
+
     assert(node->tl==child || node->br==child);
-    
+
     if(node->tl==child){
         other=node->br;
         if(node->dir==SPLIT_VERTICAL)
@@ -1695,7 +1695,7 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child,
         else
             hprimn=PRIMN_BR;
     }
-    
+
     assert(other!=NULL);
 
     if(nstdisp==0 && reclaim_space && OBJ_IS(other, WSplitST)){
@@ -1709,17 +1709,17 @@ static void splitsplit_remove(WSplitSplit *node, WSplit *child,
     }
 
     parent=((WSplit*)node)->parent;
-    
+
     if(parent!=NULL)
         splitinner_replace(parent, (WSplit*)node, other);
     else
         splittree_changeroot((WSplit*)node, other);
-    
+
     if(reclaim_space)
         split_resize(other, &(((WSplit*)node)->geom), hprimn, vprimn);
-    
+
     child->parent=NULL;
-    
+
     node->tl=NULL;
     node->br=NULL;
     ((WSplit*)node)->parent=NULL;
@@ -1739,7 +1739,7 @@ void splittree_remove(WSplit *node, bool reclaim_space)
         splitinner_remove(node->parent, node, reclaim_space);
     else if(node->ws_if_root!=NULL)
         splittree_changeroot(node, NULL);
-    
+
     destroy_obj((Obj*)node);
 }
 
@@ -1752,12 +1752,12 @@ void splittree_remove(WSplit *node, bool reclaim_space)
 
 static bool defaultfilter(WSplit *node)
 {
-    return (OBJ_IS(node, WSplitRegion) && 
+    return (OBJ_IS(node, WSplitRegion) &&
             ((WSplitRegion*)node)->reg!=NULL);
 }
 
 
-static WSplit *split_current_todir_default(WSplit *node, 
+static WSplit *split_current_todir_default(WSplit *node,
                                            WPrimn UNUSED(hprimn), WPrimn UNUSED(vprimn),
                                            WSplitFilter *filter)
 {
@@ -1768,13 +1768,13 @@ static WSplit *split_current_todir_default(WSplit *node,
 }
 
 
-static WSplit *splitsplit_current_todir(WSplitSplit *node, 
+static WSplit *splitsplit_current_todir(WSplitSplit *node,
                                         WPrimn hprimn, WPrimn vprimn,
                                         WSplitFilter *filter)
 {
     WPrimn primn=(node->dir==SPLIT_HORIZONTAL ? hprimn : vprimn);
     WSplit *first, *second, *ret;
-    
+
     if(primn==PRIMN_TL ||
        (primn==PRIMN_ANY && node->current==SPLIT_CURRENT_TL)){
         first=node->tl;
@@ -1786,7 +1786,7 @@ static WSplit *splitsplit_current_todir(WSplitSplit *node,
     }else{
         return NULL;
     }
-        
+
     ret=split_current_todir(first, hprimn, vprimn, filter);
     if(ret==NULL)
         ret=split_current_todir(second, hprimn, vprimn, filter);
@@ -1794,7 +1794,7 @@ static WSplit *splitsplit_current_todir(WSplitSplit *node,
         if(filter((WSplit*)node))
             ret=(WSplit*)node;
     }
-        
+
     return ret;
 }
 
@@ -1803,59 +1803,59 @@ WSplit *split_current_todir(WSplit *node, WPrimn hprimn, WPrimn vprimn,
                             WSplitFilter *filter)
 {
     WSplit *ret=NULL;
-    CALL_DYN_RET(ret, WSplit*, split_current_todir, node, 
+    CALL_DYN_RET(ret, WSplit*, split_current_todir, node,
                  (node, hprimn, vprimn, filter));
     return ret;
 }
 
 
 /* Note: both hprimn and vprimn are inverted when descending.  Therefore
- * one should be either PRIMN_NONE or PRIMN_ANY for sensible geometric 
- * navigation. (Both are PRIMN_TL or PRIMN_BR for pseudo-linear 
+ * one should be either PRIMN_NONE or PRIMN_ANY for sensible geometric
+ * navigation. (Both are PRIMN_TL or PRIMN_BR for pseudo-linear
  * next/previous navigation.)
  */
 WSplit *splitsplit_nextto(WSplitSplit *node, WSplit *child,
-                          WPrimn hprimn, WPrimn vprimn, 
+                          WPrimn hprimn, WPrimn vprimn,
                           WSplitFilter *filter)
 {
     WPrimn primn=(node->dir==SPLIT_HORIZONTAL ? hprimn : vprimn);
     WSplit *split=NULL, *nnode=NULL;
-    
+
     if(node->tl==child && (primn==PRIMN_BR || primn==PRIMN_ANY))
         split=node->br;
     else if(node->br==child && (primn==PRIMN_TL || primn==PRIMN_ANY))
         split=node->tl;
-    
+
     if(split!=NULL){
-        nnode=split_current_todir(split, 
+        nnode=split_current_todir(split,
                                   primn_none2any(primn_invert(hprimn)),
                                   primn_none2any(primn_invert(vprimn)),
                                   filter);
     }
-    
+
     if(nnode==NULL)
         nnode=split_nextto((WSplit*)node, hprimn, vprimn, filter);
-        
+
     return nnode;
 }
 
 
 WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
-                          WPrimn hprimn, WPrimn vprimn, 
+                          WPrimn hprimn, WPrimn vprimn,
                           WSplitFilter *filter)
 {
     WSplit *ret=NULL;
-    CALL_DYN_RET(ret, WSplit*, splitinner_nextto, node, 
+    CALL_DYN_RET(ret, WSplit*, splitinner_nextto, node,
                  (node, child, hprimn, vprimn, filter));
     return ret;
 }
 
 
-WSplit *split_nextto(WSplit *node, WPrimn hprimn, WPrimn vprimn, 
+WSplit *split_nextto(WSplit *node, WPrimn hprimn, WPrimn vprimn,
                      WSplitFilter *filter)
 {
     while(node->parent!=NULL){
-        WSplit *ret=splitinner_nextto(node->parent, node, 
+        WSplit *ret=splitinner_nextto(node->parent, node,
                                       hprimn, vprimn, filter);
         if(ret!=NULL)
             return ret;
@@ -1875,9 +1875,9 @@ void splitinner_mark_current_default(WSplitInner *split, WSplit *UNUSED(child))
 void splitsplit_mark_current(WSplitSplit *split, WSplit *child)
 {
     assert(child==split->tl || child==split->br);
-    
+
     split->current=(split->tl==child ? SPLIT_CURRENT_TL : SPLIT_CURRENT_BR);
-    
+
     splitinner_mark_current_default(&(split->isplit), child);
 }
 
@@ -1918,7 +1918,7 @@ WSplit *splitinner_current(WSplitInner *node)
     CALL_DYN_RET(ret, WSplit*, splitinner_current, node, (node));
     return ret;
 }
-    
+
 
 /*}}}*/
 
@@ -1926,7 +1926,7 @@ WSplit *splitinner_current(WSplitInner *node)
 /*{{{ X window handling */
 
 
-static void splitregion_stacking(WSplitRegion *split, 
+static void splitregion_stacking(WSplitRegion *split,
                                  Window *bottomret, Window *topret)
 {
     *bottomret=None;
@@ -1936,15 +1936,15 @@ static void splitregion_stacking(WSplitRegion *split,
 }
 
 
-void splitsplit_stacking(WSplitSplit *split, 
+void splitsplit_stacking(WSplitSplit *split,
                          Window *bottomret, Window *topret)
 {
     Window tlb=None, tlt=None;
     Window brb=None, brt=None;
-    
+
     split_stacking(split->tl, &tlb, &tlt);
     split_stacking(split->br, &brb, &brt);
-    
+
     /* To make sure that this condition holds is left to the workspace
      * code to do after a split tree has been loaded or modified.
      */
@@ -1977,7 +1977,7 @@ void splitsplit_restack(WSplitSplit *split, Window other, int mode)
 {
     Window bottom=None, top=None;
     WSplit *first, *second;
-    
+
     if(split->current==SPLIT_CURRENT_TL){
         first=split->br;
         second=split->tl;
@@ -1985,7 +1985,7 @@ void splitsplit_restack(WSplitSplit *split, Window other, int mode)
         first=split->tl;
         second=split->br;
     }
-    
+
     split_restack(first, other, mode);
     split_stacking(first, &bottom, &top);
     if(top!=None){
@@ -2073,14 +2073,14 @@ void splitsplit_flip_default(WSplitSplit *split)
     WRectangle tlng, brng;
     WRectangle *sg=&((WSplit*)split)->geom;
     WSplit *tmp;
-    
+
     assert(split->tl!=NULL && split->br!=NULL);
-    
+
     split_update_bounds((WSplit*)split, TRUE);
 
     tlng=split->tl->geom;
     brng=split->br->geom;
-    
+
     if(split->dir==SPLIT_HORIZONTAL){
         brng.x=sg->x;
         tlng.x=sg->x+sg->w-tlng.w;
@@ -2088,7 +2088,7 @@ void splitsplit_flip_default(WSplitSplit *split)
         brng.y=sg->y;
         tlng.y=sg->y+sg->h-tlng.h;
     }
-    
+
     tmp=split->tl;
     split->tl=split->br;
     split->br=tmp;
@@ -2116,12 +2116,12 @@ void splitsplit_flip(WSplitSplit *split)
     splittree_begin_resize();
 
     split=OBJ_CAST(dodge_stdisp((WSplit*)split, FALSE), WSplitSplit);
-    
+
     if(split==NULL)
         return;
-    
+
     splitsplit_flip_(split);
-    
+
     splittree_end_resize();
 }
 
@@ -2139,22 +2139,22 @@ static FlipDir flipdir=FLIP_VERTICAL;
 static void do_flip(WSplit *split)
 {
     WSplitSplit *ss=OBJ_CAST(split, WSplitSplit);
-    
+
     if(ss!=NULL){
         if((flipdir==FLIP_ANY
             || (ss->dir==SPLIT_VERTICAL && flipdir==FLIP_VERTICAL)
-            || (ss->dir==SPLIT_HORIZONTAL && flipdir==FLIP_HORIZONTAL)) 
-           && !OBJ_IS(ss->tl, WSplitST) 
+            || (ss->dir==SPLIT_HORIZONTAL && flipdir==FLIP_HORIZONTAL))
+           && !OBJ_IS(ss->tl, WSplitST)
            && !OBJ_IS(ss->br, WSplitST)){
             splitsplit_flip_(ss);
         }
     }
-    
+
     if(OBJ_IS(ss, WSplitInner))
         splitinner_forall((WSplitInner*)ss, do_flip);
 }
 
-    
+
 static void splittree_flip_dir(WSplit *splittree, FlipDir dir)
 {
     /* todo stdisp outta way */
@@ -2165,15 +2165,15 @@ static void splittree_flip_dir(WSplit *splittree, FlipDir dir)
 }
 
 
-static bool split_fliptrans_to(WSplit *node, const WRectangle *geom, 
+static bool split_fliptrans_to(WSplit *node, const WRectangle *geom,
                               bool trans, FlipDir flip)
 {
     WRectangle rg;
     WSplit *node2;
-    
+
     splittree_begin_resize();
-    
-    /* split_do_resize can do things right if 'node' has stdisp as child, 
+
+    /* split_do_resize can do things right if 'node' has stdisp as child,
      * but otherwise transpose will put the stdisp in a bad split
      * configuration if it is contained within 'node', so we must
      * first move it and its fixed parent split below node. For correct
@@ -2181,21 +2181,21 @@ static bool split_fliptrans_to(WSplit *node, const WRectangle *geom,
      * resize stdisp's fixed parent node instead.
      */
     node2=dodge_stdisp(node, TRUE);
-    
+
     if(node==NULL || node2!=node)
         return FALSE;
-    
+
     split_update_bounds(node, TRUE);
-    
+
     split_do_rqgeom_(node, geom, PRIMN_ANY, PRIMN_ANY, &rg, FALSE);
-    
+
     split_do_resize(node, &rg, PRIMN_ANY, PRIMN_ANY, trans);
-    
+
     if(flip!=FLIP_NONE)
         splittree_flip_dir(node, flip);
 
     splittree_end_resize();
-    
+
     return TRUE;
 }
 
@@ -2207,13 +2207,13 @@ bool split_transpose_to(WSplit *node, const WRectangle *geom)
 
 
 /*EXTL_DOC
- * Transpose contents of \var{node}. 
+ * Transpose contents of \var{node}.
  */
 EXTL_EXPORT_MEMBER
 void split_transpose(WSplit *node)
 {
     WRectangle g=node->geom;
-    
+
     split_transpose_to(node, &g);
 }
 
@@ -2222,7 +2222,7 @@ bool split_rotate_to(WSplit *node, const WRectangle *geom, int rotation)
 {
     FlipDir flip=FLIP_NONE;
     bool trans=FALSE;
-    
+
     if(rotation==SCREEN_ROTATION_90){
         flip=FLIP_HORIZONTAL;
         trans=TRUE;
@@ -2308,7 +2308,7 @@ WRegion *splitregion_reg(WSplitRegion *node)
 {
     return node->reg;
 }
-    
+
 
 /*}}}*/
 
@@ -2327,22 +2327,22 @@ ExtlTab split_base_config(WSplit *node)
 static bool splitregion_get_config(WSplitRegion *node, ExtlTab *ret)
 {
     ExtlTab rt, t;
-    
+
     if(node->reg==NULL)
         return FALSE;
-    
+
     if(!region_supports_save(node->reg)){
-        warn(TR("Unable to get configuration for %s."), 
+        warn(TR("Unable to get configuration for %s."),
              region_name(node->reg));
         return FALSE;
     }
-    
+
     rt=region_get_configuration(node->reg);
     t=split_base_config(&(node->split));
     extl_table_sets_t(t, "regparams", rt);
     extl_unref_table(rt);
     *ret=t;
-    
+
     return TRUE;
 }
 
@@ -2358,10 +2358,10 @@ static bool splitsplit_get_config(WSplitSplit *node, ExtlTab *ret)
 {
     ExtlTab tab, tltab, brtab;
     int tls, brs;
-    
+
     if(!split_get_config(node->tl, &tltab))
         return split_get_config(node->br, ret);
-    
+
     if(!split_get_config(node->br, &brtab)){
         *ret=tltab;
         return TRUE;
@@ -2371,7 +2371,7 @@ static bool splitsplit_get_config(WSplitSplit *node, ExtlTab *ret)
 
     tls=split_size(node->tl, node->dir);
     brs=split_size(node->br, node->dir);
-        
+
     extl_table_sets_s(tab, "dir", (node->dir==SPLIT_VERTICAL
                                    ? "vertical" : "horizontal"));
 
@@ -2382,9 +2382,9 @@ static bool splitsplit_get_config(WSplitSplit *node, ExtlTab *ret)
     extl_table_sets_i(tab, "brs", brs);
     extl_table_sets_t(tab, "br", brtab);
     extl_unref_table(brtab);
-        
+
     *ret=tab;
-    
+
     return TRUE;
 }
 

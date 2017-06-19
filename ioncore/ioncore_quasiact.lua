@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_quasiact.lua -- Frame quasiactivation support
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2007-2009.
 --
 -- See the included file LICENSE for details.

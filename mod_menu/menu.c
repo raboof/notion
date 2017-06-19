@@ -1,7 +1,7 @@
 /*
  * ion/mod_menu/menu.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2009. 
+ * Copyright (c) Tuomo Valkonen 1999-2009.
  *
  * See the included file LICENSE for details.
  */
@@ -44,7 +44,7 @@ static bool extl_table_getis(ExtlTab tab, int i, const char *s, char c,
 {
     ExtlTab sub;
     bool ret;
-    
+
     if(!extl_table_geti_t(tab, i, &sub))
         return FALSE;
     ret=extl_table_get(sub, 's', c, s, p);
@@ -71,9 +71,9 @@ static void get_outer_geom(WMenu *menu, WRectangle *geom)
 static void get_inner_geom(WMenu *menu, WRectangle *geom)
 {
     GrBorderWidths bdw;
-    
+
     get_outer_geom(menu, geom);
-    
+
     if(menu->brush!=NULL){
         grbrush_get_border_widths(menu->brush, &bdw);
         geom->x+=bdw.left;
@@ -115,41 +115,41 @@ static void menu_draw_entry(WMenu *menu, int i, const WRectangle *igeom,
 
     aa=(REGION_IS_ACTIVE(menu) ? GR_ATTR(active) : GR_ATTR(inactive));
     sa=(menu->selected_entry==i ? GR_ATTR(selected) : GR_ATTR(unselected));
-    
+
     if(menu->entry_brush==NULL)
         return;
-    
+
     geom=*igeom;
     geom.h=menu->entry_h;
     geom.y+=(i-menu->first_entry)*(menu->entry_h+menu->entry_spacing);
-    
+
     grbrush_begin(menu->entry_brush, &geom, GRBRUSH_AMEND|GRBRUSH_KEEP_ATTR);
-    
+
     grbrush_init_attr(menu->entry_brush, &menu->entries[i].attr);
-    
+
     grbrush_set_attr(menu->entry_brush, aa);
     grbrush_set_attr(menu->entry_brush, sa);
 
-    grbrush_draw_textbox(menu->entry_brush, &geom, menu->entries[i].title, 
+    grbrush_draw_textbox(menu->entry_brush, &geom, menu->entries[i].title,
                          complete);
-    
+
     grbrush_end(menu->entry_brush);
 }
 
-    
+
 void menu_draw_entries(WMenu *menu, bool complete)
 {
     WRectangle igeom;
     int i, mx;
-    
+
     if(menu->entry_brush==NULL)
         return;
-        
+
     get_inner_geom(menu, &igeom);
-    
+
     mx=menu->first_entry+menu->vis_entries;
     mx=(mx < menu->n_entries ? mx : menu->n_entries);
-    
+
     for(i=menu->first_entry; i<mx; i++)
         menu_draw_entry(menu, i, &igeom, complete);
 }
@@ -159,21 +159,21 @@ void menu_draw(WMenu *menu, bool complete)
 {
     GrAttr aa=(REGION_IS_ACTIVE(menu) ? GR_ATTR(active) : GR_ATTR(inactive));
     WRectangle geom;
-    
+
     if(menu->brush==NULL)
         return;
-    
+
     get_outer_geom(menu, &geom);
-    
-    grbrush_begin(menu->brush, &geom, 
+
+    grbrush_begin(menu->brush, &geom,
                   (complete ? 0 : GRBRUSH_NO_CLEAR_OK));
-    
+
     grbrush_set_attr(menu->brush, aa);
-    
+
     grbrush_draw_border(menu->brush, &geom);
-    
+
     menu_draw_entries(menu, FALSE);
-    
+
     grbrush_end(menu->brush);
 }
 
@@ -184,27 +184,27 @@ void menu_draw(WMenu *menu, bool complete)
 /*{{{ Resize */
 
 
-static void menu_calc_size(WMenu *menu, bool maxexact, 
-                           int maxw, int maxh, 
+static void menu_calc_size(WMenu *menu, bool maxexact,
+                           int maxw, int maxh,
                            int *w_ret, int *h_ret)
 {
     GrBorderWidths bdw, e_bdw;
     char *str;
     int i;
     int bdh, maxew=menu->max_entry_w;
-    
+
     grbrush_get_border_widths(menu->brush, &bdw);
     grbrush_get_border_widths(menu->entry_brush, &e_bdw);
-    
+
     if(maxexact || maxew>maxw-(int)bdw.left-(int)bdw.right){
         maxew=maxw-bdw.left-bdw.right;
         *w_ret=maxw;
     }else{
         *w_ret=maxew+bdw.left+bdw.right;
     }
-    
+
     bdh=bdw.top+bdw.bottom;
-    
+
     if(menu->n_entries==0){
         *h_ret=(maxexact ? maxh : bdh);
         menu->first_entry=0;
@@ -231,7 +231,7 @@ static void menu_calc_size(WMenu *menu, bool maxexact,
 
     /* Calculate new shortened entry names */
     maxew-=e_bdw.left+e_bdw.right;
-    
+
     for(i=0; i<menu->n_entries; i++){
         if(menu->entries[i].title){
             free(menu->entries[i].title);
@@ -239,9 +239,9 @@ static void menu_calc_size(WMenu *menu, bool maxexact,
         }
         if(maxew<=0)
             continue;
-        
+
         if(extl_table_getis(menu->tab, i+1, "name", 's', &str)){
-            menu->entries[i].title=grbrush_make_label(menu->entry_brush, 
+            menu->entries[i].title=grbrush_make_label(menu->entry_brush,
                                                       str, maxew);
             free(str);
         }
@@ -258,7 +258,7 @@ void calc_size(WMenu *menu, int *w, int *h)
                        menu->last_fp.g.w, menu->last_fp.g.h, w, h);
     }
 }
-    
+
 
 /* Return offset from bottom-left corner of containing mplex or top-right
  * corner of  parent menu for the respective corner of menu.
@@ -266,44 +266,44 @@ void calc_size(WMenu *menu, int *w, int *h)
 static void get_placement_offs(WMenu *menu, int *xoff, int *yoff)
 {
     GrBorderWidths bdw;
-    
-    *xoff=0; 
+
+    *xoff=0;
     *yoff=0;
-    
+
     if(menu->brush!=NULL){
         grbrush_get_border_widths(menu->brush, &bdw);
         *xoff+=bdw.right;
         *yoff+=bdw.top;
     }
-    
+
     if(menu->entry_brush!=NULL){
         grbrush_get_border_widths(menu->entry_brush, &bdw);
         *xoff+=bdw.right;
         *yoff+=bdw.top;
     }
 }
-    
-    
+
+
 #define MINIMUM_Y_VISIBILITY 20
 #define POINTER_OFFSET 5
 
 static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
 {
     WRectangle geom;
-    
+
     calc_size(menu, &(geom.w), &(geom.h));
-    
+
     if(!(menu->last_fp.mode&REGION_FIT_BOUNDS)){
         geom.x=menu->last_fp.g.x;
         geom.y=menu->last_fp.g.y;
     }else if(menu->pmenu_mode){
         geom.x=refg->x;
         geom.y=refg->y;
-        
+
         if(!submenu){
-            const WRectangle *maxg = 
+            const WRectangle *maxg =
                 &REGION_GEOM(REGION_PARENT((WRegion*)menu));
-            
+
             geom.x-=geom.w/2;
             geom.y+=POINTER_OFFSET;
 
@@ -323,13 +323,13 @@ static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
         const WRectangle *maxg=&(menu->last_fp.g);
         if(submenu){
             int l, r, t, b, xoff, yoff;
-            
+
             get_placement_offs(menu, &xoff, &yoff);
             l=refg->x+xoff;
             r=refg->x+refg->w+xoff;
             t=refg->y-yoff;
             b=refg->y+refg->h-yoff;
-            
+
             geom.x=MAXOF(l, r-geom.w);
             if(geom.x+geom.w>maxg->x+maxg->w)
                 geom.x=maxg->x;
@@ -342,7 +342,7 @@ static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
             geom.y=maxg->y+maxg->h-geom.h;
         }
     }
-    
+
     window_do_fitrep(&menu->win, NULL, &geom);
 }
 
@@ -350,9 +350,9 @@ static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
 static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
 {
     WRectangle geom;
-    
+
     calc_size(menu, &(geom.w), &(geom.h));
-    
+
     if(!(menu->last_fp.mode&REGION_FIT_BOUNDS)){
         geom.x=menu->last_fp.g.x;
         geom.y=menu->last_fp.g.y;
@@ -367,7 +367,7 @@ static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
         geom.x=MAXOF(0, MINOF(maxg->x+xdiff, maxg->x+maxg->w-geom.w));
         geom.y=MAXOF(0, MINOF(maxg->y+maxg->h+ydiff, maxg->y+maxg->h)-geom.h);
     }
-    
+
     window_do_fitrep(&menu->win, par, &geom);
 }
 
@@ -375,17 +375,17 @@ static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
 bool menu_fitrep(WMenu *menu, WWindow *par, const WFitParams *fp)
 {
     WFitParams oldfp;
-    
+
     if(par!=NULL && !region_same_rootwin((WRegion*)par, (WRegion*)menu))
         return FALSE;
-    
+
     oldfp=menu->last_fp;
     menu->last_fp=*fp;
     menu_do_refit(menu, par, &oldfp);
-    
+
     if(menu->submenu!=NULL && !menu->pmenu_mode)
         region_fitrep((WRegion*)(menu->submenu), par, fp);
-    
+
     return TRUE;
 }
 
@@ -399,11 +399,11 @@ void menu_size_hints(WMenu *menu, WSizeHints *hints_ret)
     if(menu->brush!=NULL){
         GrBorderWidths bdw;
         grbrush_get_border_widths(menu->brush, &bdw);
-        
+
         w+=bdw.left+bdw.right;
         h+=bdw.top+bdw.bottom;
     }
-    
+
     hints_ret->min_set=TRUE;
     hints_ret->min_width=w;
     hints_ret->min_height=h;
@@ -423,27 +423,27 @@ static void calc_entry_dimens(WMenu *menu)
     GrBorderWidths bdw;
     int maxw=0;
     char *str;
-    
-#if 0    
+
+#if 0
     if(extl_table_gets_s(menu->tab, title, &str)){
         maxw=grbrush_get_text_width(title_brush, str, strlen(str));
         free(str);
     }
 #endif
-    
+
     for(i=1; i<=n; i++){
         if(extl_table_getis(menu->tab, i, "name", 's', &str)){
-            int w=grbrush_get_text_width(menu->entry_brush, 
+            int w=grbrush_get_text_width(menu->entry_brush,
                                          str, strlen(str));
             if(w>maxw)
                 maxw=w;
             free(str);
         }
     }
-    
+
     grbrush_get_border_widths(menu->entry_brush, &bdw);
     grbrush_get_font_extents(menu->entry_brush, &fnte);
-    
+
     menu->max_entry_w=maxw+bdw.left+bdw.right;
     menu->entry_h=fnte.max_height+bdw.top+bdw.bottom;
     menu->entry_spacing=bdw.spacing;
@@ -453,7 +453,7 @@ static void calc_entry_dimens(WMenu *menu)
 static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 {
     GrBrush *brush, *entry_brush;
-    const char *style=(menu->big_mode 
+    const char *style=(menu->big_mode
                        ? "input-menu-big"
                        : (menu->pmenu_mode
                           ? "input-menu-pmenu"
@@ -464,19 +464,19 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
                                    : (menu->pmenu_mode
                                       ? "tab-menuentry-pmenu"
                                       : "tab-menuentry-normal"));
-    
+
     brush=gr_get_brush(win, rootwin, style);
-    
+
     if(brush==NULL)
         return FALSE;
 
     entry_brush=grbrush_get_slave(brush, rootwin, entry_style);
-    
+
     if(entry_brush==NULL){
         grbrush_release(brush);
         return FALSE;
     }
-    
+
     if(menu->entry_brush!=NULL)
         grbrush_release(menu->entry_brush);
     if(menu->brush!=NULL)
@@ -484,9 +484,9 @@ static bool menu_init_gr(WMenu *menu, WRootWin *rootwin, Window win)
 
     menu->brush=brush;
     menu->entry_brush=entry_brush;
-    
+
     calc_entry_dimens(menu);
-    
+
     return TRUE;
 }
 
@@ -497,11 +497,11 @@ void menu_updategr(WMenu *menu)
                      MENU_WIN(menu))){
         return;
     }
-    
+
     menu_do_refit(menu, NULL, &(menu->last_fp));
-    
+
     region_updategr_default((WRegion*)menu);
-    
+
     window_draw((WWindow*)menu, TRUE);
 }
 
@@ -530,39 +530,39 @@ static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
     WMenuEntry *entries;
     ExtlTab entry;
     int i, n;
-    
+
     n=extl_table_get_n(tab);
     *n_entries=n;
-    
+
     if(n<=0)
         return NULL;
 
-    entries=ALLOC_N(WMenuEntry, n);  
-    
+    entries=ALLOC_N(WMenuEntry, n);
+
     if(entries==NULL)
         return NULL;
-        
+
     init_attr();
-    
+
     /* Initialise entries and check submenus */
     for(i=1; i<=n; i++){
         WMenuEntry *ent=&entries[i-1];
-        
+
         ent->title=NULL;
         ent->flags=0;
-        
+
         gr_stylespec_init(&ent->attr);
-        
+
         if(extl_table_geti_t(tab, i, &entry)){
             char *attr;
             ExtlTab sub;
             ExtlFn fn;
-            
+
             if(extl_table_gets_s(entry, "attr", &attr)){
                 gr_stylespec_load_(&ent->attr, attr, TRUE);
                 free(attr);
             }
-            
+
             if(extl_table_gets_f(entry, "submenu_fn", &fn)){
                 ent->flags|=WMENUENTRY_SUBMENU;
                 extl_unref_fn(fn);
@@ -570,14 +570,14 @@ static WMenuEntry *preprocess_menu(ExtlTab tab, int *n_entries)
                 ent->flags|=WMENUENTRY_SUBMENU;
                 extl_unref_table(sub);
             }
-            
+
             if(ent->flags&WMENUENTRY_SUBMENU)
                 gr_stylespec_set(&ent->attr, GR_ATTR(submenu));
-            
+
             extl_unref_table(entry);
         }
     }
-    
+
     return entries;
 }
 
@@ -591,7 +591,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     Window win;
 
     menu->entries=preprocess_menu(params->tab, &(menu->n_entries));
-    
+
     if(menu->entries==NULL){
         warn(TR("Empty menu."));
         return FALSE;
@@ -602,9 +602,9 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->pmenu_mode=params->pmenu_mode;
     menu->big_mode=params->big_mode;
     /*menu->cycle_bindmap=NULL;*/
-    
+
     menu->last_fp=*fp;
-    
+
     if(params->pmenu_mode){
         menu->selected_entry=-1;
     }else{
@@ -614,7 +614,7 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
         if(params->initial > menu->n_entries)
            menu->selected_entry=0;
     }
-    
+
     menu->max_entry_w=0;
     menu->entry_h=0;
     menu->brush=NULL;
@@ -624,28 +624,28 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->first_entry=0;
     menu->submenu=NULL;
     menu->typeahead=NULL;
-    
+
     menu->gm_kcb=0;
     menu->gm_state=0;
-    
+
     if(!window_init((WWindow*)menu, par, fp, "WMenu"))
         goto fail;
 
     win=menu->win.win;
-    
+
     if(!menu_init_gr(menu, region_rootwin_of((WRegion*)par), win))
         goto fail2;
-        
+
     init_attr();
-    
+
     menu_firstfit(menu, params->submenu_mode, &(params->refg));
-    
+
     window_select_input(&(menu->win), IONCORE_EVENTMASK_NORMAL);
-    
+
     region_add_bindmap((WRegion*)menu, mod_menu_menu_bindmap);
-    
+
     region_register((WRegion*)menu);
-    
+
     return TRUE;
 
 fail2:
@@ -658,7 +658,7 @@ fail:
 }
 
 
-WMenu *create_menu(WWindow *par, const WFitParams *fp, 
+WMenu *create_menu(WWindow *par, const WFitParams *fp,
                    const WMenuCreateParams *params)
 {
     CREATEOBJ_IMPL(WMenu, menu, (p, par, fp, params));
@@ -668,13 +668,13 @@ WMenu *create_menu(WWindow *par, const WFitParams *fp,
 static void deinit_entries(WMenu *menu)
 {
     int i;
-    
+
     for(i=0; i<menu->n_entries; i++){
         gr_stylespec_unalloc(&menu->entries[i].attr);
         if(menu->entries[i].title!=NULL)
             free(menu->entries[i].title);
     }
-    
+
     free(menu->entries);
 }
 
@@ -682,20 +682,20 @@ static void deinit_entries(WMenu *menu)
 void menu_deinit(WMenu *menu)
 {
     menu_typeahead_clear(menu);
-    
+
     if(menu->submenu!=NULL)
         destroy_obj((Obj*)menu->submenu);
-    
+
     /*if(menu->cycle_bindmap!=NULL)
         bindmap_destroy(menu->cycle_bindmap);*/
 
     extl_unref_table(menu->tab);
     extl_unref_fn(menu->handler);
-    
+
     deinit_entries(menu);
-    
+
     menu_release_gr(menu);
-    
+
     window_deinit((WWindow*)menu);
 }
 
@@ -740,14 +740,14 @@ static WMenu *menu_tail(WMenu *menu)
 static void menu_managed_remove(WMenu *menu, WRegion *sub)
 {
     bool mcf=region_may_control_focus((WRegion*)menu);
-    
+
     if(sub!=(WRegion*)menu->submenu)
         return;
-    
+
     menu->submenu=NULL;
 
     region_unset_manager(sub, (WRegion*)menu);
-    
+
     if(mcf)
         region_do_set_focus((WRegion*)menu, FALSE);
 }
@@ -766,18 +766,18 @@ static void show_sub(WMenu *menu, int n)
     WMenuCreateParams fnp;
     WMenu *submenu;
     WWindow *par;
-    
+
     par=REGION_PARENT(menu);
-    
+
     if(par==NULL)
         return;
-    
+
     fp=menu->last_fp;
 
     fnp.pmenu_mode=menu->pmenu_mode;
     fnp.big_mode=menu->big_mode;
     fnp.submenu_mode=TRUE;
-    
+
     if(menu->pmenu_mode){
         fnp.refg.x=REGION_GEOM(menu).x+REGION_GEOM(menu).w;
         fnp.refg.y=REGION_GEOM(menu).y+get_sub_y_off(menu, n);
@@ -801,9 +801,9 @@ static void show_sub(WMenu *menu, int n)
         if(fnp.tab==extl_table_none())
             return;
     }
-    
+
     fnp.handler=extl_ref_fn(menu->handler);
-    
+
     fnp.initial=0;
     {
         ExtlFn fn;
@@ -818,16 +818,16 @@ static void show_sub(WMenu *menu, int n)
     }
 
     submenu=create_menu(par, &fp, &fnp);
-    
+
     if(submenu==NULL)
         return;
-    
+
     menu->submenu=submenu;
     region_set_manager((WRegion*)submenu, (WRegion*)menu);
-        
+
     region_restack((WRegion*)submenu, MENU_WIN(menu), Above);
     region_map((WRegion*)submenu);
-    
+
     if(!menu->pmenu_mode && region_may_control_focus((WRegion*)menu))
         region_do_set_focus((WRegion*)submenu, FALSE);
 }
@@ -853,17 +853,17 @@ void menu_restack(WMenu *menu, Window other, int mode)
 void menu_stacking(WMenu *menu, Window *bottomret, Window *topret)
 {
     *topret=None;
-    
+
     if(menu->submenu!=NULL)
         region_stacking((WRegion*)(menu->submenu), bottomret, topret);
-    
+
     *bottomret=MENU_WIN(menu);
     if(*topret==None)
         *topret=MENU_WIN(menu);
 
 }
 
-    
+
 /*}}}*/
 
 
@@ -874,13 +874,13 @@ static void menu_do_select_nth(WMenu *menu, int n)
 {
     int oldn=menu->selected_entry;
     bool drawfull=FALSE;
-    
+
     if(oldn==n)
         return;
-    
+
     if(menu->submenu!=NULL)
         destroy_obj((Obj*)menu->submenu);
-    
+
     assert(menu->submenu==NULL);
 
     menu->selected_entry=n;
@@ -893,17 +893,17 @@ static void menu_do_select_nth(WMenu *menu, int n)
             menu->first_entry=n-menu->vis_entries+1;
             drawfull=TRUE;
         }
-        
+
         if(menu->entries[n].flags&WMENUENTRY_SUBMENU &&
            menu->pmenu_mode){
             show_sub(menu, n);
         }
     }
-    
+
     if(drawfull){
         menu_draw_entries(menu, TRUE);
     }else{
-        /* redraw new and old selected entry */ 
+        /* redraw new and old selected entry */
         WRectangle igeom;
         get_inner_geom(menu, &igeom);
 
@@ -938,7 +938,7 @@ void menu_select_nth(WMenu *menu, int n)
 EXTL_EXPORT_MEMBER
 void menu_select_prev(WMenu *menu)
 {
-    menu_select_nth(menu, (menu->selected_entry<=0 
+    menu_select_nth(menu, (menu->selected_entry<=0
                            ? menu->n_entries-1
                            : menu->selected_entry-1));
 }
@@ -960,17 +960,17 @@ static void menu_do_finish(WMenu *menu)
     ExtlTab tab;
     bool ok;
     WMenu *head=menu_head(menu);
-    
+
     handler=menu->handler;
     menu->handler=extl_fn_none();
-    
+
     ok=extl_table_geti_t(menu->tab, menu->selected_entry+1, &tab);
-    
+
     if(!region_rqdispose((WRegion*)head)){
         if(head->submenu!=NULL)
             destroy_obj((Obj*)head->submenu);
     }
-    
+
     if(ok)
         extl_call(handler, "t", NULL, tab);
 
@@ -993,7 +993,7 @@ void menu_finish(WMenu *menu)
         show_sub(menu, menu->selected_entry);
         return;
     }
-    
+
     mainloop_defer_action((Obj*)menu, (WDeferredAction*)menu_do_finish);
 }
 
@@ -1031,14 +1031,14 @@ static void reset_scroll_timer()
 /*EXTL_DOC
  * Set module basic settings. The parameter table may contain the
  * following fields:
- * 
+ *
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
  *  \var{scroll_amount} & Number of pixels to scroll at a time in
  *                        pointer-controlled menus when one extends
  *                        beyond a border of the screen and the pointer
  *                        touches that border. \\
- *  \var{scroll_delay}  & Time between such scrolling events in 
+ *  \var{scroll_delay}  & Time between such scrolling events in
  *                        milliseconds.
  * \end{tabularx}
  */
@@ -1046,7 +1046,7 @@ EXTL_EXPORT
 void mod_menu_set(ExtlTab tab)
 {
     int a, t;
-    
+
     if(extl_table_gets_i(tab, "scroll_amount", &a))
         scroll_amount=MAXOF(0, a);
     if(extl_table_gets_i(tab, "scroll_delay", &t))
@@ -1097,18 +1097,18 @@ static int scrolld_subs(WMenu *menu, int d)
     int diff=0;
     WRegion *p=REGION_PARENT_REG(menu);
     const WRectangle *pg;
-    
+
     if(p==NULL)
         return 0;
 
     pg=&REGION_GEOM(p);
-    
+
     while(menu!=NULL){
         int new_diff = calc_diff(&REGION_GEOM(menu), pg, d);
         diff=MAXOF(diff, new_diff);
         menu=menu->submenu;
     }
-    
+
     return MINOF(MAXOF(0, diff), scroll_amount);
 }
 
@@ -1120,16 +1120,16 @@ static void do_scroll(WMenu *menu, int xd, int yd)
 {
     WRectangle g;
     int px=-1, py=-1;
-    
+
     xwindow_pointer_pos(region_root_of((WRegion*)menu), &px, &py);
 
     while(menu!=NULL){
         g=REGION_GEOM(menu);
         g.x+=xd;
         g.y+=yd;
-        
+
         window_do_fitrep((WWindow*)menu, NULL, &g);
-        
+
         menu_select_entry_at(menu, px, py);
 
         menu=menu->submenu;
@@ -1205,7 +1205,7 @@ static void check_scroll(WMenu *menu, int x, int y)
 
     if(!menu->pmenu_mode)
         return;
-    
+
     if(parent==NULL){
         end_scroll(menu);
         return;
@@ -1214,7 +1214,7 @@ static void check_scroll(WMenu *menu, int x, int y)
     region_rootpos(parent, &rx, &ry);
     x-=rx;
     y-=ry;
-    
+
     if(x<=SCROLL_OFFSET){
         fn=(WTimerHandler*)scroll_right;
     }else if(y<=SCROLL_OFFSET){
@@ -1227,9 +1227,9 @@ static void check_scroll(WMenu *menu, int x, int y)
         end_scroll(menu);
         return;
     }
-    
+
     assert(fn!=NULL);
-    
+
     if(scroll_timer!=NULL){
         if(scroll_timer->handler==(WTimerHandler*)fn &&
            timer_is_set(scroll_timer)){
@@ -1240,7 +1240,7 @@ static void check_scroll(WMenu *menu, int x, int y)
         if(scroll_timer==NULL)
             return;
     }
-    
+
     fn(scroll_timer, (Obj*)menu_head(menu));
 }
 
@@ -1256,15 +1256,15 @@ int menu_entry_at_root(WMenu *menu, int root_x, int root_y)
     int rx, ry, x, y, entry;
     WRectangle ig;
     region_rootpos((WRegion*)menu, &rx, &ry);
-    
+
     get_inner_geom(menu, &ig);
-    
+
     x=root_x-rx-ig.x;
     y=root_y-ry-ig.y;
-    
+
     if(x<0 || x>=ig.w || y<0  || y>=ig.h)
         return -1;
-    
+
     entry=y/(menu->entry_h+menu->entry_spacing);
     if(entry<0 || entry>=menu->vis_entries)
         return -1;
@@ -1272,18 +1272,18 @@ int menu_entry_at_root(WMenu *menu, int root_x, int root_y)
 }
 
 
-int menu_entry_at_root_tree(WMenu *menu, int root_x, int root_y, 
+int menu_entry_at_root_tree(WMenu *menu, int root_x, int root_y,
                             WMenu **realmenu)
 {
     int entry=-1;
-    
+
     menu=menu_tail(menu);
-    
+
     *realmenu=menu;
-    
+
     if(!menu->pmenu_mode)
         return menu_entry_at_root(menu, root_x, root_y);
-    
+
     while(menu!=NULL){
         entry=menu_entry_at_root(menu, root_x, root_y);
         if(entry>=0){
@@ -1292,7 +1292,7 @@ int menu_entry_at_root_tree(WMenu *menu, int root_x, int root_y,
         }
         menu=REGION_MANAGER_CHK(menu, WMenu);
     }
-    
+
     return entry;
 }
 
@@ -1341,7 +1341,7 @@ int menu_press(WMenu *menu, XButtonEvent *ev, WRegion **UNUSED(reg_ret))
                         NULL,
                         (WMotionHandler*)menu_motion,
                         (WButtonHandler*)menu_release,
-                        NULL, 
+                        NULL,
                         NULL);
     return 0;
 }
@@ -1359,17 +1359,17 @@ static void menu_insstr(WMenu *menu, const char *buf, size_t n)
     char *newta=(char*)malloc(oldlen+n+1);
     char *newta_orig;
     int entry;
-    
+
     if(newta==NULL)
         return;
-    
+
     if(oldlen!=0)
         memcpy(newta, menu->typeahead, oldlen);
     if(n!=0)
         memcpy(newta+oldlen, buf, n);
     newta[oldlen+n]='\0';
     newta_orig=newta;
-    
+
     while(*newta!='\0'){
         bool found=FALSE;
         entry=menu->selected_entry;
@@ -1388,7 +1388,7 @@ static void menu_insstr(WMenu *menu, const char *buf, size_t n)
         }
         newta++;
     }
-    
+
     if(newta_orig!=newta){
         if(*newta=='\0'){
             free(newta_orig);
@@ -1444,7 +1444,7 @@ static DynFunTab menu_dynfuntab[]={
 EXTL_EXPORT
 IMPLCLASS(WMenu, WWindow, menu_deinit, menu_dynfuntab);
 
-    
+
 /*}}}*/
 
 

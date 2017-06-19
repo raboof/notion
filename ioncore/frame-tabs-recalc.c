@@ -152,7 +152,8 @@ static bool tab_sizes_equal(WFrame * frame, bool complete)
  */
 #define PROPOR_MAX_TABS 30
 
-static int intcompare (const void *a, const void *b) {
+static int intcompare (const void *a, const void *b)
+{
     return *(int *)a-*(int *)b;
 }
 
@@ -295,7 +296,7 @@ equal_tab:
             if (frame->titles[i].iw<min_w)
                 frame->titles[i].iw=min_w;
     }
-        
+
 
     /* Calculate remaining space */
     titles_total=0;
@@ -357,7 +358,7 @@ void frame_tabs_calc_brushes_updated(WFrame *frame)
     TabCalcParams *pars=&(frame->tabs_params);
 
     param_init(pars);
-    
+
     if(grbrush_get_extra(frame->brush, "floatframe_tab_min_w",
                          'i', &(pars->tab_min_w)) ||
        grbrush_get_extra(frame->brush, "frame_tab_min_w",
@@ -365,26 +366,26 @@ void frame_tabs_calc_brushes_updated(WFrame *frame)
         if(pars->tab_min_w<=0)
             pars->tab_min_w=1;
     }
-    
+
     if(grbrush_get_extra(frame->brush, "frame_propor_tab_min_w",
                          'i', &(pars->propor_tab_min_w))){
         if(pars->propor_tab_min_w<=0)
             pars->propor_tab_min_w=1;
     }
-    
-    if(grbrush_get_extra(frame->brush, "floatframe_bar_max_w_q", 
+
+    if(grbrush_get_extra(frame->brush, "floatframe_bar_max_w_q",
                          'd', &(pars->bar_max_width_q))){
         if(pars->bar_max_width_q<=0.0 || pars->bar_max_width_q>1.0)
             pars->bar_max_width_q=1.0;
     }
 
-    if(grbrush_get_extra(frame->brush, "frame_tab_padding", 
+    if(grbrush_get_extra(frame->brush, "frame_tab_padding",
                          'i', &(pars->requested_pad))){
         if(pars->requested_pad<=0)
             pars->requested_pad=1;
     }
 
-    if(grbrush_get_extra(frame->brush, "frame_tab_width_alg", 
+    if(grbrush_get_extra(frame->brush, "frame_tab_width_alg",
                          's', &str)){
         alg=STRINGFUNPTRMAP_VALUE(TabCalcPtr,
                                   frame_tabs_width_algorithms,

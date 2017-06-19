@@ -47,7 +47,7 @@
     ({fprintf(stderr, FMT, __VA_ARGS__); fputc('\n', stderr);})*/
 /*#define extl_warn_obj_err(O) perror(O) */
 
-/* 
+/*
  * Level2 type checking
  */
 
@@ -102,7 +102,7 @@ static void obj_dest_handler(Watch *watch, Obj *obj)
 }
 */
 
-/* 
+/*
  * Miscellaneous.
  */
 

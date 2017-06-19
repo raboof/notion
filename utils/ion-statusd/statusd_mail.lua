@@ -1,6 +1,6 @@
 --
 -- ion/mod_statusbar/ion-statusd/statusd_mail.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- See the included file LICENSE for details.
@@ -45,7 +45,7 @@ local function calcmail(fname)
     local had_blank=true
     local in_headers=false
     local had_status=false
-    
+
     if not f then
         statusd.warn(err)
         return
@@ -78,9 +78,9 @@ local function calcmail(fname)
             end
         end
     end
-    
+
     f:close()
-    
+
     return total, total-read, total-old
 end
 
@@ -100,10 +100,10 @@ local function update_mail()
         if not mbox then
             error(TR(key.." not set"))
         end
-    
+
         local old_tm=mail_timestamps[key]
         mail_timestamps[key]=statusd.last_modified(mbox)
-    
+
         if mail_timestamps[key]>old_tm then
 	    local mail_total, mail_unread, mail_new=calcmail(mbox)
 	    if failed == nil then
@@ -111,7 +111,7 @@ local function update_mail()
 	    else
 	        failed = failed and (not mail_total)
 	    end
-        
+
 	    if key == "spool" then
 	        meter=mon
 	    else
@@ -127,7 +127,7 @@ local function update_mail()
 	        else
 		    statusd.inform(meter.."_new_hint", "normal")
 	        end
-        
+
 	        if mail_unread>0 then
 		    statusd.inform(meter.."_unread_hint", "important")
 	        else
@@ -144,7 +144,7 @@ local function update_mail()
 	mail_timer:set(settings.retry_interval, update_mail)
 	return
     end
-   
+
     mail_timer:set(settings.update_interval, update_mail)
 end
 

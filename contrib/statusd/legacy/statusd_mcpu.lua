@@ -6,9 +6,9 @@
 --
 -- version 0.1 by Jakub Ružička <yac@email.cz>, 2008-08-14
 --
--- 
+--
 -- Small and hopefully efficient monitor for multiple CPU using Linux
--- /proc/stat. 
+-- /proc/stat.
 --
 -- in cfg_statusbar.lua you can
 --
@@ -21,7 +21,7 @@
 --     prc_char - percent character (may be '')
 --     important_threshold - important hint above this % ( >100 to disable )
 --     critical_threshold - critical hint above this % ( >100 to disable )
--- 
+--
 -- for example you can put the following in your template for dual core system:
 --     template = ' cpu: %mcpu [ %mcpu_0, %mcpu_1 ] '
 --
@@ -55,11 +55,11 @@ local cpus = tonumber( f:read('*a') ) - 1
 f:close()
 
 -- ugly global init :o]
-user, nice, system, idle, iowait, irq, softirq = {}, {}, {}, {}, {}, {}, {} 
-a_user, a_nice, a_system, a_idle, a_iowait, a_irq, a_softirq = {}, {}, {}, {}, {}, {}, {} 
+user, nice, system, idle, iowait, irq, softirq = {}, {}, {}, {}, {}, {}, {}
+a_user, a_nice, a_system, a_idle, a_iowait, a_irq, a_softirq = {}, {}, {}, {}, {}, {}, {}
 for i = 0,cpus do
-  user[i], nice[i], system[i], idle[i], iowait[i], irq[i], softirq[i] = 0, 0, 0, 0, 0, 0, 0 
-  a_user[i], a_nice[i], a_system[i], a_idle[i], a_iowait[i], a_irq[i], a_softirq[i] = 0, 0, 0, 0, 0, 0, 0 
+  user[i], nice[i], system[i], idle[i], iowait[i], irq[i], softirq[i] = 0, 0, 0, 0, 0, 0, 0
+  a_user[i], a_nice[i], a_system[i], a_idle[i], a_iowait[i], a_irq[i], a_softirq[i] = 0, 0, 0, 0, 0, 0, 0
 end
 
 -- refresh values
@@ -73,9 +73,9 @@ function mcpu_refresh()
 
     if suc then
       -- current values --
-      a_user[i], a_nice[i], a_system[i], a_idle[i], a_iowait[i], a_irq[i], a_softirq[i] = 
+      a_user[i], a_nice[i], a_system[i], a_idle[i], a_iowait[i], a_irq[i], a_softirq[i] =
         n_user - user[i], n_nice - nice[i], n_system - system[i], n_idle - idle[i], n_iowait - iowait[i], n_irq - irq[i], n_softirq - softirq[i]
-  
+
       -- last --
       user[i], nice[i], system[i], idle[i], iowait[i], irq[i], softirq[i] = n_user, n_nice, n_system, n_idle, n_iowait, n_irq, n_softirq
     else
@@ -102,7 +102,7 @@ local function update_mcpu()
 
   for i = 0,cpus do
     all = a_user[i] + a_nice[i] + a_system[i] + a_idle[i] + a_iowait[i] + a_irq[i] + a_softirq[i]
-    prc[i] = math.floor( (1.0 - a_idle[i]/all ) * 100 + 0.5 ) 
+    prc[i] = math.floor( (1.0 - a_idle[i]/all ) * 100 + 0.5 )
   end
 
   -- summary for all CPUs
@@ -110,7 +110,7 @@ local function update_mcpu()
   statusd.inform('mcpu', lprc..settings.prc_char )
   -- you can put here something like:
   -- statusd.inform('mcpu_user', a_user[0]..settings.prc_char )
-  
+
   -- hint
   if lprc >= settings.critical_threshold then
     statusd.inform( "mcpu_hint", "critical" )

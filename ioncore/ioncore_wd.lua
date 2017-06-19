@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_wd.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2009.
 --
 -- See the included file LICENSE for details.
@@ -47,7 +47,7 @@ function ioncore.chdir_for(reg, dir)
     if dir=="" or dir==nil then
         dirs[reg]=nil
         return true
-    else 
+    else
         local ok, err=checkdir(dir)
         if ok then
             dirs[reg]=dir
@@ -98,12 +98,12 @@ end
 -- Run \var{cmd} with the environment variable DISPLAY set to point to the
 -- root window of the X screen \var{reg} is on. If \var{cmd} is prefixed
 -- by a colon (\code{:}), the following command is executed in an xterm
--- (or other terminal emulator) with the help of the \command{ion-runinxterm} 
+-- (or other terminal emulator) with the help of the \command{ion-runinxterm}
 -- script. If the command is prefixed by two colons, \command{ion-runinxterm}
 -- will ask you to press enter after the command is finished, even if it
 -- returns succesfully.
--- 
--- For GUI commands, you might prefer to use mod\_query.exec\_on\_merr(), which 
+--
+-- For GUI commands, you might prefer to use mod\_query.exec\_on\_merr(), which
 -- monitors the process's \code{stderr} and shows any output as warnings on
 -- the screen instead of in notions own output.
 function ioncore.exec_on(reg, cmd, merr_internal)
@@ -117,7 +117,7 @@ function ioncore.exec_on(reg, cmd, merr_internal)
             cmd='XTERMCMD='..string.shell_safe(XTERM)..' '..cmd
         end
     end
-    return ioncore.do_exec_on(reg, cmd, ioncore.get_dir_for(reg), 
+    return ioncore.do_exec_on(reg, cmd, ioncore.get_dir_for(reg),
                               merr_internal)
 end
 

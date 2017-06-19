@@ -3,7 +3,7 @@
 -- Last Changed: 2004-09-16
 --
 -- look-bb.lua for use with the bb background.
--- Bas Kok 20040916 
+-- Bas Kok 20040916
 
 if not gr.select_engine("de") then return end
 

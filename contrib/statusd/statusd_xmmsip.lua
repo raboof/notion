@@ -6,9 +6,9 @@
 --
 -- Interface to the XMMS InfoPipe-Plugin
 -- Inspired by the high cpu attention statusd_xmms.lua + python demand...
--- ( no offense, just observation... :-) 
+-- ( no offense, just observation... :-)
 --   (using statusd_xmms while writing this... ;-) )
--- 
+--
 -- Written by Hendrik Iben < hiben at tzi dot de >
 --
 -- How to use :
@@ -37,7 +37,7 @@
 --  xmmsip_channels  : Current channels (1,2,?)
 --  xmmsip_xmmsproto : Protocol version of XMMS
 --  xmmsip_infover   : Version of InfoPipe-Plugin
---  
+--
 --  xmmsip_user		: String resulting from 'user_format'-string
 --  			  or 'not_running'-string
 --
@@ -47,7 +47,7 @@
 --
 --  Setting up the 'user_format'-string is done by forming a string where each
 --  xmmsip_x-monitor is referenced to by '%x%'
---  
+--
 --  example :
 --  	"...%xmmsip_status %xmmsip_title ..blub..." in cfg_statusbar template
 --  	
@@ -66,7 +66,7 @@
 --
 --  speaking of configuration you might want a description of what the settings
 --  do and what the defaults are :
---  
+--
 --  interval     : delay between checking the pipe (5 seconds)
 --  user         : user name (for xmms-session) (current user)
 --  xmms_session : the xmms-session to use (0)
@@ -74,18 +74,18 @@
 --  user_format  : template for xmmsip_user (see in code)
 --  not_running  : replacement for xmmsip_user when no pipe is found
 --                 (see in code)
---  
+--
 --  Requirements :
 --  ion3 (tested with 20060305 gentoo ebuild)
 --  lua (tested with 5.0.2)
 --  xmms-infopipe v1.3 or compatible
 --    I have not tested pipes from/for other players...
---  
+--
 --  Serving suggestions :
 --  I use the rotate_statusbar replacement for the standard statusbar as I
 --  want to display a lot of things but not always...
 --  XMMS-status information takes quite a bit of space so you might consider
---  doing it a bit like me .. but of course in your own special and 
+--  doing it a bit like me .. but of course in your own special and
 --  unique way. ;-)
 --
 --  This is my current setup :
@@ -113,17 +113,17 @@
 --       "[ %fortune ]%filler%systray",
 --     ...
 --     ...
---     
+--
 --  This setup updates the information every second showing the status of
---  xmms, the current title, the time that is left and the total time 
+--  xmms, the current title, the time that is left and the total time
 --  of the current song.
 --  Additionally when xmms is not running a get a reminder to turn it on,
 --  and as I do not need the other monitors they are disabled.
 --
 --  Happy listening!
---  
---  Feel free to contact me if you discover bugs or want to comment on this.  
---  
+--
+--  Feel free to contact me if you discover bugs or want to comment on this.
+--
 --
 -- You are free to distribute this software under the terms of the GNU
 -- General Public License Version 2.
@@ -260,10 +260,10 @@ local function fetch_data(partial_data)
       pipedata = pipedata .. partial_data
       partial_data = coroutine.yield()
     end
-    
+
   local running = true -- assume the best
-  
-  if pipedata and pipedata ~= "" 
+
+  if pipedata and pipedata ~= ""
     then
       for attribute, value in string.gmatch(pipedata, "([^:]*):%s*([^\n]*)\n")
         do
@@ -274,12 +274,12 @@ local function fetch_data(partial_data)
       running = false
       infotable[valueassoc["xmmsip_status"]]="Not running"
   end
-   
+
   -- compute things like time left or divide things by 1000...
   infotable = addSpecialValues(infotable)
   -- scan for nil-values and fix them with '?'
   infotable = fixTable(infotable)
-  
+
   -- if we are to update the monitors...
   if settings.do_monitors
     then
@@ -289,7 +289,7 @@ local function fetch_data(partial_data)
           statusd.inform(k, ""..infotable[v])
         end
   end
- 
+
   -- create appropriate user-string
   if running
     then
@@ -297,7 +297,7 @@ local function fetch_data(partial_data)
     else
       statusd.inform("xmmsip_user", settings.not_running)
   end
-  
+
   xmmsip_timer:set(settings.interval, update_xmmsip)
 end
 

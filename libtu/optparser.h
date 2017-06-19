@@ -1,7 +1,7 @@
 /*
  * libtu/optparser.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2004. 
+ * Copyright (c) Tuomo Valkonen 1999-2004.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -37,7 +37,7 @@ enum{
     OPTP_IMMEDIATE=2,
     OPTP_NO_DASH=3
 };
-    
+
 enum{
     OPT_ARG=1,                    /* option has an argument                    */
     OPT_OPT_ARG=3                /* option may have an argument                */
@@ -66,7 +66,7 @@ enum{
 };
 
 
-extern void optparser_init(int argc, char *const argv[], int mode, 
+extern void optparser_init(int argc, char *const argv[], int mode,
                            const OptParserOpt *opts);
 
 extern void optparser_printhelp(int mode, const OptParserOpt *opts);

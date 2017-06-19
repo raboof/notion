@@ -1,16 +1,16 @@
 -- Authors: Philipp Hartwig <ph@phhart.de>
 -- License: MIT, see http://opensource.org/licenses/mit-license.php
 -- Last Changed: 2012-09-29
--- 
+--
 --[[
 
-Description: This function sets focus to the first client with the given 
+Description: This function sets focus to the first client with the given
 tag.
 
-Usage: 
+Usage:
 
 1) Define a tag for a client, using a winprop.
-    For example: 
+    For example:
     defwinprop{
        class = "Firefox-bin",
        instance = "Navigator",
@@ -48,7 +48,7 @@ Usage:
         kpress("Z", "goto_by_tag('z')"),
     }),
 
-3) In the example above, you can directly jump to the first instance of Firefox 
+3) In the example above, you can directly jump to the first instance of Firefox
 by hitting META+U B.
 
 --]]

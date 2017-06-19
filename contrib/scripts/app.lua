@@ -118,7 +118,7 @@ function app.emacs_eval(expr)
    end
 end
 
-function app.query_editfile(mplex, dir) 
+function app.query_editfile(mplex, dir)
    local function handler(file)
       app.emacs_eval("(find-file \""..file.."\")")
    end

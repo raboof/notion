@@ -6,7 +6,7 @@
     look_awesome_yaarg.lua (based on look awesome )
 
     To completely yaargify Ion, the terminal emulator background is recommended to
-    be set to gray25 as does the root window. Transparent frames by default 
+    be set to gray25 as does the root window. Transparent frames by default
     wallpaper can be good sometimes... Also note this theme uses terminus font.
 
     Setup: Drop into ~/.ion3/ or install in the relevant system-wide directory
@@ -170,7 +170,7 @@ de.defstyle("tab-menuentry-bigmenu", {
 
     padding_pixels = 7,
 })
-    
+
 de.defstyle("tab-menuentry-pmenu", {
     based_on = "tab-menuentry",
     de.substyle("inactive-selected", {

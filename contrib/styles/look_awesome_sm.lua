@@ -21,7 +21,7 @@ de.defstyle("*", {
     shadow_pixels = 0,
     padding_pixels = 0,
     spacing = 0,
-    
+
     font = "7x13",
     text_align = "center",
 })
@@ -123,7 +123,7 @@ de.defstyle("tab-menuentry-bigmenu", {
 
     padding_pixels = 7,
 })
-    
+
 de.defstyle("tab-menuentry-pmenu", {
     based_on = "tab-menuentry",
     de.substyle("inactive-selected", {
@@ -142,7 +142,7 @@ de.defstyle("tab-menuentry-pmenu", {
 
 de.defstyle("input", {
     based_on = "*",
-    
+
     foreground_colour = "#FFF",
     background_colour = "#667",
     padding_colour = "#667",
