@@ -26,6 +26,11 @@ typedef XftColor DEColour;
 typedef unsigned long DEColour;
 #endif /* HAVE_X11_XFT */
 
+#ifdef HAVE_X11_XFT
+#  define PIXEL(x) (x).pixel
+#else /* HAVE_X11_XFT */
+#  define PIXEL(x) x
+#endif /* HAVE_X11_XFT */
 
 DECLSTRUCT(DEColourGroup){
     GrStyleSpec spec;

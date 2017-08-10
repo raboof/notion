@@ -70,12 +70,12 @@ void destyle_create_tab_gcs(DEStyle *style)
     /*gcv.function=GXclear;*/
     gcv.stipple=stipple_pixmap;
     gcvmask=GCFillStyle|GCStipple/*|GCFunction*/;
-#ifndef HAVE_X11_XFT
+#ifdef HAVE_X11_BMF
     if(style->font!=NULL && style->font->fontstruct!=NULL){
         gcv.font=style->font->fontstruct->fid;
         gcvmask|=GCFont;
     }
-#endif /* HAVE_X11_XFT */
+#endif /* HAVE_X11_BMF */
 
     style->stipple_gc=XCreateGC(dpy, root, gcvmask, &gcv);
     XCopyGC(dpy, style->normal_gc,
