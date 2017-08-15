@@ -28,8 +28,10 @@ INTRSTRUCT(DEFont);
 DECLSTRUCT(DEFont){
     char *pattern;
     int refcount;
+#ifdef HAVE_X11_BMF
     XFontSet fontset;
     XFontStruct *fontstruct;
+#endif /* HAVE_X11_BMF */
 #ifdef HAVE_X11_XFT /* HAVE_X11_XFT */
     XftFont *font;
 #endif /* HAVE_X11_XFT */

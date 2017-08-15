@@ -112,6 +112,9 @@ ifeq ($(USE_XFT),1)
     X11_INCLUDES += `pkg-config xft --cflags`
     X11_LIBS += `pkg-config xft --libs`
     DEFINES += -DHAVE_X11_XFT
+    DEFINES += -DHAVE_X11_BMF
+else
+    DEFINES += -DHAVE_X11_BMF
 endif
 
 

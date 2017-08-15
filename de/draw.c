@@ -19,14 +19,6 @@
 
 #include <X11/extensions/shape.h>
 
-
-#ifdef HAVE_X11_XFT
-#  define PIXEL(x) (x).pixel
-#else /* HAVE_X11_XFT */
-#  define PIXEL(x) x
-#endif /* HAVE_X11_XFT */
-
-
 /*{{{ Colour group lookup */
 
 
