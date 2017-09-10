@@ -216,9 +216,17 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     if(b!=NULL && !HAS_DYN(b, region_prepare_manage))
         b=NULL;
 
-    use_bottom=(act_b
-                ? !extl_table_is_bool_set(cwin->proptab, "float")
-                : act_b);
+    if(act_b){
+        bool do_float=FALSE;
+        if(!extl_table_gets_b(cwin->proptab, "float", &do_float)){
+            if(cwin->region.flags&REGION_PLEASE_FLOAT){
+                do_float=TRUE;
+            }
+        }
+        use_bottom=!do_float;
+    }else{
+        use_bottom=FALSE;
+    }
 
     if(b!=NULL && use_bottom)
         ph=region_prepare_manage(b, cwin, param, bpriority);

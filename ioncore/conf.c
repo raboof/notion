@@ -92,6 +92,7 @@ static ExtlFn get_layout_fn;
  *  \var{mousefocus} & (string) Mouse focus mode:
  *                     \codestr{disabled} or \codestr{sloppy}. \\
  *  \var{unsqueeze} & (boolean) Auto-unsqueeze transients/menus/queries/etc. \\
+ *  \var{window_dialog_float} & (boolean) Float dialog type windows. \\
  *  \var{autoraise} & (boolean) Autoraise regions in groups on goto. \\
  *  \var{usertime_diff_current} & (integer) Controls switchto timeout. \\
  *  \var{usertime_diff_new} & (integer) Controls switchto timeout. \\
@@ -141,6 +142,7 @@ void ioncore_set(ExtlTab tab)
     extl_table_gets_b(tab, "screen_notify", &(ioncore_g.screen_notify));
     extl_table_gets_b(tab, "framed_transients", &(ioncore_g.framed_transients));
     extl_table_gets_b(tab, "unsqueeze", &(ioncore_g.unsqueeze_enabled));
+    extl_table_gets_b(tab, "window_dialog_float", &(ioncore_g.window_dialog_float));
     extl_table_gets_b(tab, "autoraise", &(ioncore_g.autoraise));
     extl_table_gets_b(tab, "autosave_layout", &(ioncore_g.autosave_layout));
 
@@ -222,6 +224,7 @@ ExtlTab ioncore_get()
     extl_table_sets_b(tab, "screen_notify", ioncore_g.screen_notify);
     extl_table_sets_b(tab, "framed_transients", ioncore_g.framed_transients);
     extl_table_sets_b(tab, "unsqueeze", ioncore_g.unsqueeze_enabled);
+    extl_table_sets_b(tab, "window_dialog_float", ioncore_g.window_dialog_float);
     extl_table_sets_b(tab, "autoraise", ioncore_g.autoraise);
     extl_table_sets_b(tab, "autosave_layout", ioncore_g.autosave_layout);
     extl_table_sets_i(tab, "focuslist_insert_delay", ioncore_g.focuslist_insert_delay);

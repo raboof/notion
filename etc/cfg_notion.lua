@@ -66,6 +66,10 @@ ioncore.set{
     -- Auto-unsqueeze transients/menus/queries.
     --unsqueeze=true,
 
+    -- Float non-transient dialog type windows.
+    -- Can be useful for applications that try to place their own dialog windows.
+    --window_dialog_float=true,
+
     -- Display notification tooltips for activity on hidden workspace.
     --screen_notify=true,
 

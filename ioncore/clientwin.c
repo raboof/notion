@@ -361,6 +361,10 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
     netwm_update_allowed_actions(cwin);
 
+    if(netwm_window_type(cwin)==netwm_window_type_get_atom_dialog()){
+        cwin->region.flags|=REGION_PLEASE_FLOAT;
+    }
+
     XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, (XPointer)cwin);
     XAddToSaveSet(ioncore_g.dpy, win);
 
