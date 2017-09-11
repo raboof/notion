@@ -109,6 +109,7 @@ DECLSTRUCT(WGlobal){
     bool framed_transients;
     bool no_mousefocus;
     bool unsqueeze_enabled;
+    bool window_dialog_float;
     bool autoraise;
     bool autosave_layout;
     int  window_stacking_request;

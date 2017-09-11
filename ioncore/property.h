@@ -38,6 +38,8 @@ extern char **xwindow_get_text_property(Window win, Atom a, int *nret);
 extern void xwindow_set_text_property(Window win, Atom a,
                                       const char **p, int n);
 extern bool xwindow_get_cardinal_property(Window win, Atom a, CARD32 *vret);
+extern bool xwindow_get_atom_property(Window win, Atom a, Atom *vret);
+
 /**
  * Set a property as UTF8_STRING. To read UTF8_STRING properties, the normal
  * xwindow_get_text_property can be used.

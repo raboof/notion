@@ -34,4 +34,9 @@ extern void netwm_check_manage_user_time(WClientWin *cwin, WManageParams *param)
 
 extern void ioncore_screens_updated(WRootWin *rw);
 
+Atom netwm_window_type(WClientWin *cwin);
+
+/* could be constants */
+Atom netwm_window_type_get_atom_dialog();
+
 #endif /* ION_IONCORE_NETWM_H */
