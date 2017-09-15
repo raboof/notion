@@ -84,7 +84,8 @@ static ExtlFn get_layout_fn;
  *  \var{framed_transients} & (boolean) Put transients in nested frames. \\
  *  \var{float_placement_method} & (string) How to place floating frames.
  *                          One of \codestr{udlr} (up-down, then left-right),
- *                          \codestr{lrud} (left-right, then up-down), or
+ *                          \codestr{lrud} (left-right, then up-down),
+ *                          \codestr{pointer} to place under the pointer or
  *                          \codestr{random}. \\
  *  \var{float_placement_padding} & (integer) Pixels between frames when
  *                          \var{float_placement_method} is \codestr{udlr} or
