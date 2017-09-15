@@ -43,6 +43,8 @@ void ioncore_groupws_set(ExtlTab tab)
             ioncore_placement_method=PLACEMENT_UDLR;
         else if(strcmp(method, "lrud")==0)
             ioncore_placement_method=PLACEMENT_LRUD;
+        else if(strcmp(method, "pointer")==0)
+            ioncore_placement_method=PLACEMENT_POINTER;
         else if(strcmp(method, "random")==0)
             ioncore_placement_method=PLACEMENT_RANDOM;
         else
@@ -56,12 +58,20 @@ void ioncore_groupws_set(ExtlTab tab)
 
 void ioncore_groupws_get(ExtlTab t)
 {
-    extl_table_sets_s(t, "float_placement_method",
-                      (ioncore_placement_method==PLACEMENT_UDLR
-                       ? "udlr"
-                       : (ioncore_placement_method==PLACEMENT_LRUD
-                          ? "lrud"
-                          : "random")));
+    const char *method;
+    if(ioncore_placement_method==PLACEMENT_UDLR){
+        method="udlr";
+    }else if(ioncore_placement_method==PLACEMENT_LRUD){
+        method="lrud";
+    }else if(ioncore_placement_method==PLACEMENT_POINTER){
+        method="pointer";
+    }else if(ioncore_placement_method==PLACEMENT_RANDOM){
+        method="random";
+    }else{
+        warn(TR("Unknown placement constant %d."), ioncore_placement_method);
+        method="random";
+    }
+    extl_table_sets_s(t, "float_placement_method", method);
     extl_table_sets_i(t, "float_placement_padding", ioncore_placement_padding);
 }
 

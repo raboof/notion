@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include "common.h"
+#include "rootwin.h"
+#include "xwindow.h"
 #include "group.h"
 #include "float-placement.h"
 
@@ -167,10 +169,28 @@ static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
 
 }
 
+static bool pointer_placement(WGroup *ws, WRectangle *g)
+{
+    WRootWin *rootwin=region_rootwin_of((WRegion*)ws);
+    int px=0, py=0;
+
+    if(xwindow_pointer_pos(WROOTWIN_ROOT(rootwin), &px, &py)){
+        const WRectangle r=REGION_GEOM(ws);
+        g->x=px-(g->w/2);
+        g->y=py-(g->h/2);
+        rectangle_clamp_or_center(g, &r);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 
 void group_calc_placement(WGroup *ws, uint level, WRectangle *geom)
 {
-    if(ioncore_placement_method!=PLACEMENT_RANDOM){
+    if(ioncore_placement_method==PLACEMENT_POINTER){
+        if(pointer_placement(ws, geom))
+            return;
+    }else if(ioncore_placement_method!=PLACEMENT_RANDOM){
         if(tiling_placement(ws, level, geom))
             return;
     }

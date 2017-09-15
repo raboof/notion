@@ -12,9 +12,11 @@
 #include "common.h"
 #include "group.h"
 
-
 typedef enum{
-    PLACEMENT_LRUD, PLACEMENT_UDLR, PLACEMENT_RANDOM
+    PLACEMENT_LRUD,
+    PLACEMENT_UDLR,
+    PLACEMENT_POINTER,
+    PLACEMENT_RANDOM,
 } WFloatPlacement;
 
 extern WFloatPlacement ioncore_placement_method;
