@@ -9,14 +9,18 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR) $(shell $(PKG_CONFIG) --cflags-only-I xinerama)
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(shell $(PKG_CONFIG) --cflags-only-other xinerama)
+XINERAMA_CFLAGS_ONLYI     := $(shell $(PKG_CONFIG) --cflags-only-I xinerama)
+XINERAMA_CFLAGS_ONLYOTHER := $(shell $(PKG_CONFIG) --cflags-only-other xinerama)
+XINERAMA_LDLIBS           := $(shell $(PKG_CONFIG) --libs xinerama)
+
+INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR) $(XINERAMA_CFLAGS_ONLYI)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(XINERAMA_CFLAGS_ONLYOTHER)
 DOCS=LICENSE README
 
 SOURCES=mod_xinerama.c
 
 MAKE_EXPORTS=mod_xinerama
-LIBS = $(X11_LIBS) $(shell $(PKG_CONFIG) --libs xinerama)
+LIBS = $(X11_LIBS) $(XINERAMA_LDLIBS)
 MODULE=mod_xinerama
 MODULE_STUB=mod_xinerama.lua
 

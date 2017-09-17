@@ -23,7 +23,9 @@ ifeq ($(LUA_PKG),)
     $(error Could not find $(or $(LUA_VERSION),any) lua version. (Did you install the -dev package?))
 endif
 
-LUA_VERSION ?= $(or $(shell $(PKG_CONFIG) --variable=V $(LUA_PKG)),5.0)
+ifeq ($(LUA_VERSION),)
+LUA_VERSION := $(or $(shell $(PKG_CONFIG) --variable=V $(LUA_PKG)),5.0)
+endif
 
 # prior to 5.1 the lib didn't include version in name.
 LUA_SUFFIX := $(if $(findstring $(LUA_VERSION),5.0),,$(LUA_VERSION))
