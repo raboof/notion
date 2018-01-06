@@ -501,7 +501,7 @@ void debrush_do_draw_string_default(
         }
 #endif
 #ifdef HAVE_X11_BMF
-        if (brush->d->font->fontset) {
+        {
             debrush_do_draw_string_default_bmf(brush, x, y, str, len, needfill, colours);
             return;
         }
