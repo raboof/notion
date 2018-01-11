@@ -53,7 +53,7 @@ local function get_inetaddr_ifcfg(iface)
             inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)")
             if inet4_addr == nil then inet4_addr = "none" end
         elseif (string.match(line, inet6_match)) then
-	    inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+)/")
+            inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+)/")
             if inet6_addr == nil then inet6_addr = "none" end
         end
     end
@@ -85,4 +85,8 @@ local function update_inetaddr()
     inetaddr2_timer:set(settings.interval, update_inetaddr)
 end
 
-update_inetaddr()
+inetaddr2_timer:set(100, update_inetaddr)
+
+statusd_inetaddr2_export = {
+    get_inetaddr_ifcfg = get_inetaddr_ifcfg,
+}
