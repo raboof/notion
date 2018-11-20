@@ -37,6 +37,7 @@
 #include "saveload.h"
 #include "netwm.h"
 #include "xwindow.h"
+#include "log.h"
 
 
 /*{{{ Error handling */
@@ -99,14 +100,14 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
         int modifiers = ioncore_modifiers(ev->serial);
 
         if (ksb == -1)
-            warn("Failed to grab some key. Moving on without it.");
+            LOG(WARN, GENERAL, "Failed to grab some key. Moving on without it.");
         else{
             char* key = XKeysymToString(ksb);
             if(key == NULL)
-                warn("Failed to grab key with keysym %d. Moving on without it.", ksb);
+                LOG(WARN, GENERAL, "Failed to grab key with keysym %d. Moving on without it.", ksb);
             else{
                 modifiers_to_string(mod_str, modifiers);
-                warn("Failed to grab key %s%s. Moving on without it.", mod_str, key);
+                LOG(WARN, GENERAL, "Failed to grab key %s%s. Moving on without it.", mod_str, key);
             }
         }
         // Can we find out *which* key we failed to bind?
