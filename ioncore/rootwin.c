@@ -56,6 +56,12 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 {
     static char msg[128], request[64], num[32];
 
+    if (ev->error_code==BadAccess && ev->request_code==X_GrabKey) {
+        // Can we find out *which* key we failed to bind?
+        warn("Failed to grab some key. Moving on without it.");
+        return 0;
+    }
+
     /* Just ignore bad window and similar errors; makes the rest of
      * the code simpler.
      *
