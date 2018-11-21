@@ -602,7 +602,8 @@ int ioncore_modstate()
 
 int ioncore_ksb(unsigned long serial)
 {
-    for(int i = 0; i < N_GRAB_CALL_HISTORY; i++) {
+    int i;
+    for(i = 0; i < N_GRAB_CALL_HISTORY; i++) {
         if (grabCalls[i] != NULL && serial == grabCalls[i]->serial)
             return grabCalls[i]->ksb;
     }
@@ -611,7 +612,8 @@ int ioncore_ksb(unsigned long serial)
 
 extern uint ioncore_modifiers(unsigned long serial)
 {
-    for(int i = 0; i < N_GRAB_CALL_HISTORY; i++) {
+    int i;
+    for(i = 0; i < N_GRAB_CALL_HISTORY; i++) {
         if (grabCalls[i] != NULL && serial == grabCalls[i]->serial)
             return grabCalls[i]->modifiers;
     }
@@ -659,9 +661,7 @@ static void evil_grab_key(Display *display, uint keycode, uint ksb, uint modifie
 {
     uint mods;
     int i, j;
-    unsigned long request_serial;
 
-    request_serial = NextRequest(display);
     grab_key(display, keycode, ksb, modifiers, grab_window);
 
     if(modifiers==AnyModifier)
@@ -679,7 +679,6 @@ static void evil_grab_key(Display *display, uint keycode, uint ksb, uint modifie
                      grab_window);
             if(i==j)
                 continue;
-            request_serial = NextRequest(display);
             grab_key(display, keycode, ksb,
                      modifiers|evillockmasks[i]|evillockmasks[j],
                      grab_window);
