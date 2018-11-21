@@ -110,7 +110,6 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
                 LOG(WARN, GENERAL, "Failed to grab key %s%s. Moving on without it.", mod_str, key);
             }
         }
-        // Can we find out *which* key we failed to bind?
         return 0;
     }
 
