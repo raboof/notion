@@ -56,11 +56,23 @@ static const KeySym evillocks[N_LOOKUPEVIL]={
 
 static uint evilignoremask=LockMask;
 
+#define N_GRAB_CALL_HISTORY 400
+
+static uint grabCallHistoryIndex = 0;
+
+struct GrabCall {
+    unsigned long serial;
+    uint ksb; /* keysym or button */
+    uint modifiers;
+};
+
+struct GrabCall* grabCalls[N_GRAB_CALL_HISTORY] = { NULL };
+
 static void lookup_evil_locks();
 
-static void evil_grab_key(Display *display, uint keycode, uint modifiers,
-                          Window grab_window, bool owner_events,
-                          int pointer_mode, int keyboard_mode);
+static void evil_grab_key(Display *display,
+                          uint keycode, uint ksb, uint modifiers,
+                          Window grab_window);
 
 static void evil_grab_button(Display *display, uint button, uint modifiers,
                              Window grab_window, bool owner_events,
@@ -357,16 +369,30 @@ void ioncore_update_modmap()
 
 /* */
 
+static void grab_key(Display *display, uint keycode, uint ksb,
+                     uint modifiers, const Window grab_window)
+{
+    unsigned long request_serial = NextRequest(display);
+    if (grabCalls[grabCallHistoryIndex] == NULL)
+        grabCalls[grabCallHistoryIndex] = malloc(sizeof(struct GrabCall));
+    XGrabKey(display, keycode, modifiers, grab_window, True, GrabModeAsync,
+             GrabModeAsync);
+    grabCalls[grabCallHistoryIndex]->serial = request_serial;
+    grabCalls[grabCallHistoryIndex]->ksb = ksb;
+    grabCalls[grabCallHistoryIndex]->modifiers = modifiers;
+    grabCallHistoryIndex = (grabCallHistoryIndex + 1) % N_GRAB_CALL_HISTORY;
+}
 
 void binding_grab_on(const WBinding *binding, Window win)
 {
     if(binding->act==BINDING_KEYPRESS && binding->kcb!=0){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
-        XGrabKey(ioncore_g.dpy, binding->kcb, binding->state, win,
-                 True, GrabModeAsync, GrabModeAsync);
+        grab_key(ioncore_g.dpy, binding->kcb, binding->ksb, binding->state,
+                 win, True, GrabModeAsync, GrabModeAsync);
 #else
-        evil_grab_key(ioncore_g.dpy, binding->kcb, binding->state, win,
-                      True, GrabModeAsync, GrabModeAsync);
+        evil_grab_key(ioncore_g.dpy,
+                      binding->kcb, binding->ksb, binding->state,
+                      win);
 #endif
     }
 
@@ -574,6 +600,25 @@ int ioncore_modstate()
     return state;
 }
 
+int ioncore_ksb(unsigned long serial)
+{
+    int i;
+    for(i = 0; i < N_GRAB_CALL_HISTORY; i++) {
+        if (grabCalls[i] != NULL && serial == grabCalls[i]->serial)
+            return grabCalls[i]->ksb;
+    }
+    return -1;
+}
+
+extern uint ioncore_modifiers(unsigned long serial)
+{
+    int i;
+    for(i = 0; i < N_GRAB_CALL_HISTORY; i++) {
+        if (grabCalls[i] != NULL && serial == grabCalls[i]->serial)
+            return grabCalls[i]->modifiers;
+    }
+    return -1;
+}
 
 bool ioncore_ismod(int keycode)
 {
@@ -611,15 +656,13 @@ static void lookup_evil_locks()
 }
 
 
-static void evil_grab_key(Display *display, uint keycode, uint modifiers,
-                          Window grab_window, bool owner_events,
-                          int pointer_mode, int keyboard_mode)
+static void evil_grab_key(Display *display, uint keycode, uint ksb, uint modifiers,
+                          const Window grab_window)
 {
     uint mods;
     int i, j;
 
-    XGrabKey(display, keycode, modifiers, grab_window, owner_events,
-             pointer_mode, keyboard_mode);
+    grab_key(display, keycode, ksb, modifiers, grab_window);
 
     if(modifiers==AnyModifier)
         return;
@@ -632,13 +675,13 @@ static void evil_grab_key(Display *display, uint keycode, uint modifiers,
             if(evillockmasks[j]==0)
                 continue;
             mods|=evillockmasks[j];
-            XGrabKey(display, keycode, mods,
-                     grab_window, owner_events, pointer_mode, keyboard_mode);
+            grab_key(display, keycode, ksb, mods,
+                     grab_window);
             if(i==j)
                 continue;
-            XGrabKey(display, keycode,
+            grab_key(display, keycode, ksb,
                      modifiers|evillockmasks[i]|evillockmasks[j],
-                     grab_window, owner_events, pointer_mode, keyboard_mode);
+                     grab_window);
         }
     }
 }

@@ -21,6 +21,7 @@
 #include <libtu/objp.h>
 #include "common.h"
 #include "rootwin.h"
+#include "binding.h"
 #include "cursor.h"
 #include "global.h"
 #include "event.h"
@@ -36,6 +37,7 @@
 #include "saveload.h"
 #include "netwm.h"
 #include "xwindow.h"
+#include "log.h"
 
 
 /*{{{ Error handling */
@@ -51,10 +53,65 @@ static int my_redirect_error_handler(Display *UNUSED(dpy), XErrorEvent *UNUSED(e
     return 0;
 }
 
+static void modifiers_to_string(char* target, const uint modifiers)
+{
+    if ((modifiers & ShiftMask) != 0) {
+      strcpy(target, "Shift-");
+      target += strlen("Shift-");
+    }
+    if ((modifiers & LockMask) != 0) {
+      strcpy(target, "Lock-");
+      target += strlen("Lock-");
+    }
+    if ((modifiers & ControlMask) != 0) {
+      strcpy(target, "Control-");
+      target += strlen("Control-");
+    }
+    if ((modifiers & Mod1Mask) != 0) {
+      strcpy(target, "Mod1-");
+      target += strlen("Mod1-");
+    }
+    if ((modifiers & Mod2Mask) != 0) {
+      strcpy(target, "Mod2-");
+      target += strlen("Mod2-");
+    }
+    if ((modifiers & Mod3Mask) != 0) {
+      strcpy(target, "Mod3-");
+      target += strlen("Mod3-");
+    }
+    if ((modifiers & Mod4Mask) != 0) {
+      strcpy(target, "Mod4-");
+      target += strlen("Mod4-");
+    }
+    if ((modifiers & Mod5Mask) != 0) {
+      strcpy(target, "Mod5-");
+      target += strlen("Mod5-");
+    }
+    *target = '\0';
+}
+
 
 static int my_error_handler(Display *dpy, XErrorEvent *ev)
 {
-    static char msg[128], request[64], num[32];
+    static char msg[128], request[64], num[32], mod_str[255];
+
+    if (ev->error_code==BadAccess && ev->request_code==X_GrabKey) {
+        int ksb = ioncore_ksb(ev->serial);
+        int modifiers = ioncore_modifiers(ev->serial);
+
+        if (ksb == -1)
+            LOG(WARN, GENERAL, "Failed to grab some key. Moving on without it.");
+        else{
+            char* key = XKeysymToString(ksb);
+            if(key == NULL)
+                LOG(WARN, GENERAL, "Failed to grab key with keysym %d. Moving on without it.", ksb);
+            else{
+                modifiers_to_string(mod_str, modifiers);
+                LOG(WARN, GENERAL, "Failed to grab key %s%s. Moving on without it.", mod_str, key);
+            }
+        }
+        return 0;
+    }
 
     /* Just ignore bad window and similar errors; makes the rest of
      * the code simpler.
