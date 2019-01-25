@@ -60,7 +60,7 @@ static ExtlFn get_layout_fn;
  *                        pointer to the object to be focused? \\
  *  \var{warp_margin} &   (integer) Border offset in pixels to apply
  *                        to the cursor when warping. \\
- *  \var{warp_factor} &   (double[2]) X & Y factor to offset the cursor.
+ *  \var{warp_factor} &   (double[2]) X and Y factor to offset the cursor.
  *                        between 0 and 1, where 0.5 is the center. \\
  *  \var{switchto} &      (boolean) Should a managing \type{WMPlex} switch
  *                        to a newly mapped client window? \\
