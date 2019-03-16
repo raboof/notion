@@ -349,7 +349,7 @@ void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 
 bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp, const char *name)
 {
-    const char *p[1];
+    const char *p[2];
 
     ws->current_managed=NULL;
     ws->managed_stdisp=NULL;
@@ -365,6 +365,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp, const char *name
         return FALSE;
 
     p[0] = name;
+    p[1] = NULL;
     xwindow_set_text_property(ws->dummywin, XA_WM_NAME, p, 1);
 
     region_init(&ws->reg, par, fp);
