@@ -17,10 +17,9 @@ if not ioncore.load_module("mod_query") then
 end
 
 local mod_query=_G["mod_query"]
-local loadstring = loadstring or load
-
 assert(mod_query)
 
+local loadstring = loadstring or load
 
 local DIE_TIMEOUT_ERRORCODE=10 -- 10 seconds
 local DIE_TIMEOUT_NO_ERRORCODE=2 -- 2 seconds
