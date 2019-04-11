@@ -31,7 +31,7 @@ local mod_xinerama=_G["mod_xinerama"]
 assert(mod_xinerama)
 
 
-local function table_maxn(tbl)
+local table_maxn = table.maxn or function(tbl)
    local c=0
    for k in pairs(tbl) do c=c+1 end
    return c
