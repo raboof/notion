@@ -55,7 +55,7 @@ LIBTU_INCLUDES =
 
 # Default to paths and names that should work for a build installed from the
 # official Lua 5.1 source tarball.
-LUA_DIR=$(shell dirname `which lua` | xargs dirname)
+LUA_DIR:=$(shell dirname `which lua` | xargs dirname)
 LUA_LIBS=-L$(LUA_DIR)/lib -llua
 LUA_INCLUDES = -I$(LUA_DIR)/include
 LUA=$(LUA_DIR)/bin/lua

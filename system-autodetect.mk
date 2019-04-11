@@ -84,8 +84,8 @@ X11_PREFIX ?= /usr/X11R6
 # SunOS/Solaris
 #X11_PREFIX ?= /usr/openwin
 
-X11_LIBS=$(shell $(PKG_CONFIG) --libs x11 xext)
-X11_INCLUDES=$(shell $(PKG_CONFIG) --cflags-only-I x11 xext)
+X11_LIBS:=$(shell $(PKG_CONFIG) --libs x11 xext)
+X11_INCLUDES:=$(shell $(PKG_CONFIG) --cflags-only-I x11 xext)
 
 # XFree86 libraries up to 4.3.0 have a bug that can cause a segfault.
 # The following setting  should  work around that situation.
@@ -106,7 +106,9 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 ## Xft support
 ##
 
-USE_XFT?=$(shell (pkg-config --exists xft && echo 1))
+ifeq ($(USE_XFT),)
+USE_XFT:=$(shell (pkg-config --exists xft && echo 1))
+endif
 
 ifeq ($(USE_XFT),1)
     X11_INCLUDES += `pkg-config xft --cflags`
