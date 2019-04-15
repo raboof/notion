@@ -73,11 +73,9 @@ local function get_ip_address_using__ifconfig(iface, lines)
     lines = lines or get_ifconfig_output(iface)
     for line in lines:gmatch("([^\n]*)\n?") do
         if (string.match(line, inet4_match)) then
-            inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)")
-            if inet4_addr == nil then inet4_addr = "none" end
+            inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)") or "none"
         elseif (string.match(line, inet6_match)) then
-            inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+) ")
-            if inet6_addr == nil then inet6_addr = "none" end
+            inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+) ") or "none"
         end
     end
     r_table["iface"] = iface
@@ -95,11 +93,9 @@ local function get_ip_address_using__ip_addr(iface, lines)
     lines = lines or get_ip_addr_show_output(iface)
     for line in lines:gmatch("([^\n]*)\n?") do
         if (string.match(line, inet4_match)) then
-            inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)")
-            if inet4_addr == nil then inet4_addr = "none" end
+            inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)") or "none"
         elseif (string.match(line, inet6_match)) then
-            inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+)/")
-            if inet6_addr == nil then inet6_addr = "none" end
+            inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+)/") or "none"
         end
     end
     r_table["iface"] = iface
