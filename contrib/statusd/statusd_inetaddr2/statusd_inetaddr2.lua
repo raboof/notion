@@ -5,7 +5,7 @@
 
 -- Shows assigned IP address for each configured interface.
 
--- Uses `/sbin/ip addr show` to fetch current iface's data
+-- Uses `ip addr show` or `ifconfig` to fetch current iface's data
 
 -- Configuration:
 
@@ -21,6 +21,7 @@
 -- `interfaces' table contains the interfaces to be monitored.
 -- `separator' is placed between the entries in the output.
 -- `interval' is the refresh timer (in milliseconds).
+-- `mode` use `ip` for `ip addr show` or `ifconfig` for `ifconfig`
 
 -- This software is in the public domain.
 
@@ -31,24 +32,68 @@ local defaults = {
     interfaces = { "eth0", "wlan0" },
     separator = "  ",
     interval = 10*1000,
+    mode = "ip",
 }
                             
 local settings = table.join(statusd.get_config("inetaddr2"), defaults)
 local inetaddr2_timer = statusd.create_timer()
+local mode_path = ""
 
-local function get_inetaddr_ifcfg(iface)
+local function file_exists(name)
+    local f=io.open(name,"r")
+    if f~=nil then io.close(f) return true else return false end
+ end
+
+local function get_ifconfig_output(iface)
+    local f = io.popen("/sbin/ifconfig " .. iface .. " 2>/dev/null")
+    if not f then
+        return nil
+    end
+    lines = f:read("a")
+    f:close()
+    return lines
+end
+
+local function get_ip_addr_show_output(iface)
+    local f = io.popen("/sbin/ip addr show  " .. iface .. " 2>/dev/null")
+    if not f then
+        return nil
+    end
+    lines = f:read("a")
+    f:close()
+    return lines
+end
+
+local function get_ip_address_using__ifconfig(iface, lines)
     local r_table = {}
     local inet4_match = "inet "
     local inet6_match = "inet6 "
     local inet4_addr = "none"
     local inet6_addr = "none"
-    local f = io.popen("/sbin/ip addr show  " .. iface .. " 2>/dev/null")
-    if not f then
-        return nil
+    lines = lines or get_ifconfig_output(iface)
+    for line in lines:gmatch("([^\n]*)\n?") do
+        if (string.match(line, inet4_match)) then
+            inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)")
+            if inet4_addr == nil then inet4_addr = "none" end
+        elseif (string.match(line, inet6_match)) then
+            inet6_addr = line:match("inet6 ([a-fA-F0-9%:]+) ")
+            if inet6_addr == nil then inet6_addr = "none" end
+        end
     end
-    while true do
-        local line = f:read("*l")
-        if line == nil then break end
+    r_table["iface"] = iface
+    r_table["ipv4"] = inet4_addr
+    r_table["ipv6"] = inet6_addr
+    return r_table
+end
+
+local function get_ip_address_using__ip_addr(iface, lines)
+    local r_table = {}
+    local inet4_match = "inet "
+    local inet6_match = "inet6 "
+    local inet4_addr = "none"
+    local inet6_addr = "none"
+    lines = lines or get_ip_addr_show_output(iface)
+    for line in lines:gmatch("([^\n]*)\n?") do
         if (string.match(line, inet4_match)) then
             inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)")
             if inet4_addr == nil then inet4_addr = "none" end
@@ -57,18 +102,25 @@ local function get_inetaddr_ifcfg(iface)
             if inet6_addr == nil then inet6_addr = "none" end
         end
     end
-    f:close()
     r_table["iface"] = iface
     r_table["ipv4"] = inet4_addr
     r_table["ipv6"] = inet6_addr
     return r_table
 end
 
+local function get_inetaddr_ifcfg(mode, iface)
+    if mode == "ifconfig" then
+        return get_ip_address_using__ifconfig(iface)
+    elseif mode == "ip" then
+        return get_ip_address_using__ip_addr(iface)
+    end
+end
+
 local function update_inetaddr()
     local ifaces_info = {}
     for i=1, #settings.interfaces do
         local iface = settings.interfaces[i]
-        local parsed_ifcfg = get_inetaddr_ifcfg(iface)
+        local parsed_ifcfg = get_inetaddr_ifcfg(settings.mode, iface)
         if (parsed_ifcfg == nil) then
         else
             local s = string.gsub(settings.template, "%%(%w+)",
@@ -87,6 +139,20 @@ end
 
 inetaddr2_timer:set(100, update_inetaddr)
 
+if settings.mode == "ip" then
+    ip_paths = {"/sbin/ip", "/usr/sbin/ip", "/bin/ip", "/usr/bin/ip"}
+elseif settings.mode == "ifconfig" then
+    ip_paths = {"/sbin/ifconfig", "/usr/sbin/ifconfig", "/bin/ifconfig", "/usr/bin/ifconfig"}
+end
+for i = 1, #ip_paths do
+    if file_exists(ip_paths[i]) then
+        mode_path = ip_paths[i]
+        break
+    end
+end
+assert(mode_path ~= "", "Could not find a suitable binary for " .. settings.mode)
+
 statusd_inetaddr2_export = {
-    get_inetaddr_ifcfg = get_inetaddr_ifcfg,
+    get_ip_address_using__ifconfig = get_ip_address_using__ifconfig,
+    get_ip_address_using__ip_addr = get_ip_address_using__ip_addr,
 }
