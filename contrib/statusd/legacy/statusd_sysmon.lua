@@ -17,6 +17,8 @@
 -- If it works as a Ion statusd monitor, it reads user settings from statusd.
 
 if not statusd_sysmon then
+local loadstring = loadstring or load
+
 statusd_sysmon = {
     -- UPDATE INTERVAL
     --

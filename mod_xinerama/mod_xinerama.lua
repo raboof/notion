@@ -31,6 +31,11 @@ local mod_xinerama=_G["mod_xinerama"]
 assert(mod_xinerama)
 
 
+local table_maxn = table.maxn or function(tbl)
+   local c=0
+   for k in pairs(tbl) do c=c+1 end
+   return c
+end
 -- Helper functions {{{
 
 local function max(one, other)
@@ -176,7 +181,7 @@ function mod_xinerama.merge_overlapping_screens(screens)
 		end
 	    end
 	end
-	if not pos then pos = table.maxn(ret)+1 end
+	if not pos then pos = table_maxn(ret)+1 end
 	table.insert(ret, pos, newscreen)
     end
     fix_representations(ret)
@@ -276,7 +281,7 @@ function mod_xinerama.merge_overlapping_screens_alternative(screens)
 
 	-- pos keeps index of first set that we merged in this loop,
 	-- we want to insert the product of this merge to pos.
-	if not pos then pos = table.maxn(screensets)+1 end
+	if not pos then pos = table_maxn(screensets)+1 end
 	table.insert(screensets, pos, mergedset)
     end
 
