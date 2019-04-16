@@ -61,7 +61,9 @@ dofile('../../../ioncore/ioncore_luaext.lua')
 _G["statusd"] = {
   get_config = function(config_section)
     if config_section == 'inetaddr2' then
-      return { }
+      return { 
+          mode_path_check = false,
+      }
     end
   end,
   create_timer = function()
