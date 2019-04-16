@@ -33,6 +33,7 @@ local defaults = {
     separator = "  ",
     interval = 10*1000,
     mode = "ip",
+    mode_path_check = true,
 }
                             
 local settings = table.join(statusd.get_config("inetaddr2"), defaults)
@@ -44,18 +45,8 @@ local function file_exists(name)
     if f~=nil then io.close(f) return true else return false end
  end
 
-local function get_ifconfig_output(iface)
-    local f = io.popen("/sbin/ifconfig " .. iface .. " 2>/dev/null")
-    if not f then
-        return nil
-    end
-    lines = f:read("a")
-    f:close()
-    return lines
-end
-
-local function get_ip_addr_show_output(iface)
-    local f = io.popen("/sbin/ip addr show  " .. iface .. " 2>/dev/null")
+local function get_tool_output(command)
+    local f = io.popen(command)
     if not f then
         return nil
     end
@@ -70,7 +61,7 @@ local function get_ip_address_using__ifconfig(iface, lines)
     local inet6_match = "inet6 "
     local inet4_addr = "none"
     local inet6_addr = "none"
-    lines = lines or get_ifconfig_output(iface)
+    lines = lines or get_tool_output("LC_ALL=C " .. mode_path .. " " .. iface .. " 2>/dev/null")
     for line in lines:gmatch("([^\n]*)\n?") do
         if (string.match(line, inet4_match)) then
             inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)") or "none"
@@ -90,7 +81,7 @@ local function get_ip_address_using__ip_addr(iface, lines)
     local inet6_match = "inet6 "
     local inet4_addr = "none"
     local inet6_addr = "none"
-    lines = lines or get_ip_addr_show_output(iface)
+    lines = lines or get_tool_output("LC_ALL=C " .. mode_path .. " addr show " .. iface .. " 2>/dev/null")
     for line in lines:gmatch("([^\n]*)\n?") do
         if (string.match(line, inet4_match)) then
             inet4_addr = line:match("inet (%d+%.%d+%.%d+%.%d+)") or "none"
@@ -146,7 +137,9 @@ for i = 1, #ip_paths do
         break
     end
 end
-assert(mode_path ~= "", "Could not find a suitable binary for " .. settings.mode)
+if (settings.mode_path_check == true) then
+    assert(mode_path ~= "", "Could not find a suitable binary for " .. settings.mode)
+end
 
 statusd_inetaddr2_export = {
     get_ip_address_using__ifconfig = get_ip_address_using__ifconfig,
