@@ -336,7 +336,7 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
     }
 
     p->natural_w=bdw.left+totw+bdw.right;
-    p->natural_h=MAXOF(stmh, fnte.max_height)+bdw.top+bdw.bottom;
+    p->natural_h=MAXOF((unsigned int)stmh, fnte.max_height)+bdw.top+bdw.bottom;
 }
 
 

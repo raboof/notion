@@ -1456,7 +1456,7 @@ static void get_params(WMPlex *UNUSED(mplex), ExtlTab tab, int mask,
         }
 
         if(extl_table_is_bool_set(tab, "modal"))
-            par->level=MAXOF(par->level, STACKING_LEVEL_MODAL1);
+            par->level=MAXOF(par->level, (unsigned int)STACKING_LEVEL_MODAL1);
     }
 
     if(extl_table_is_bool_set(tab, "unnumbered"))

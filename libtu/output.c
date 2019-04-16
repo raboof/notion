@@ -121,6 +121,9 @@ static void fallback_warn()
 #define CALL_V(NAME, ARGS) \
     do { va_list args; va_start(args, p); NAME ARGS; va_end(args); } while(0)
 
+#define CALL_V_IGNORE(NAME, ARGS) \
+    do { va_list args; va_start(args, p); ignore_value(NAME ARGS); va_end(args); } while(0)
+
 #define DO_DISPATCH(NAME, ARGS) \
     do{ \
         char *msg; \
@@ -136,7 +139,7 @@ static void fallback_warn()
 void libtu_asprintf(char **ret, const char *p, ...)
 {
     *ret=NULL;
-    CALL_V(vasprintf, (ret, p, args));
+    CALL_V_IGNORE(vasprintf, (ret, p, args));
     if(*ret==NULL)
         warn_err();
 }
@@ -145,7 +148,7 @@ void libtu_asprintf(char **ret, const char *p, ...)
 void libtu_vasprintf(char **ret, const char *p, va_list args)
 {
     *ret=NULL;
-    vasprintf(ret, p, args);
+    ignore_value(vasprintf(ret, p, args));
     if(*ret==NULL)
         warn_err();
 }

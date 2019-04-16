@@ -173,6 +173,7 @@ void debrush_do_draw_borderline(DEBrush *brush, WRectangle geom,
     switch(bd->style){
     case DEBORDER_RIDGE:
         draw_borderline(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh, line);
+        // fall through
     case DEBORDER_INLAID:
         draw_borderline(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad, line);
         draw_borderline(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl, line);
@@ -221,6 +222,7 @@ static void debrush_do_do_draw_border(DEBrush *brush, WRectangle geom,
     switch(bd->style){
     case DEBORDER_RIDGE:
         draw_border(win, gc, &geom, bd->hl, bd->sh, cg->hl, cg->sh);
+        // fall through
     case DEBORDER_INLAID:
         draw_border(win, gc, &geom, bd->pad, bd->pad, cg->pad, cg->pad);
         draw_border(win, gc, &geom, bd->sh, bd->hl, cg->sh, cg->hl);
