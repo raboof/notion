@@ -184,14 +184,6 @@ static void sm_set_other_properties()
     restart_val[nvals++].length=strlen(cid);
     restart_prop.num_vals=nvals;
     restart_prop.vals=restart_val;
-    /*
-    discard_val[0].length=strlen(rmprog);
-    discard_val[0].value=rmprog;
-    discard_val[1].length=strlen(rmarg);
-    discard_val[1].value=rmarg;
-    discard_val[2].length=strlen(sdir);
-    discard_val[2].value=(char*)sdir;
-    */
 
     SmcSetProperties(sm_conn,
                      sizeof(props)/sizeof(props[0]),
