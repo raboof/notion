@@ -139,8 +139,6 @@ static void sm_set_other_properties()
 {
     char *restore="-session";
     char *clientid="-smclientid";
-    char *rmprog="/bin/rm";
-    char *rmarg="-rf";
     int nvals=0, i;
     const char *sdir=NULL, *cid=NULL;
 
