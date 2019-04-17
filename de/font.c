@@ -221,13 +221,12 @@ bool de_set_font_for_style(DEStyle *style, DEFont *font)
     style->font=font;
     font->refcount++;
 
-#ifndef HAVE_X11_XFT
+#ifdef HAVE_X11_BMF
     if(style->font->fontstruct!=NULL){
         XSetFont(ioncore_g.dpy, style->normal_gc,
                  style->font->fontstruct->fid);
     }
-
-#endif /* ! HAVE_X11_XFT */
+#endif /* HAVE_X11_BMF */
     return TRUE;
 }
 
@@ -261,12 +260,13 @@ void de_free_font(DEFont *font)
 #ifdef HAVE_X11_XFT
     if(font->font!=NULL)
         XftFontClose(ioncore_g.dpy, font->font);
-#else /* HAVE_X11_XFT */
+#endif /* HAVE_X11_XFT */
+#if HAVE_X11_BMF
     if(font->fontset!=NULL)
         XFreeFontSet(ioncore_g.dpy, font->fontset);
     if(font->fontstruct!=NULL)
         XFreeFont(ioncore_g.dpy, font->fontstruct);
-#endif /* HAVE_X11_XFT */
+#endif /* HAVE_X11_BMF */
     if(font->pattern!=NULL)
         free(font->pattern);
 
@@ -373,9 +373,7 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
         }
     }
 #endif /* HAVE_X11_BMF */
-    else{
-        return 0;
-    }
+    return 0;
 }
 
 
@@ -507,7 +505,6 @@ void debrush_do_draw_string_default(
         }
 #endif
     }
-
 }
 
 
