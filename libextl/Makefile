@@ -19,6 +19,8 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=readconfig.c luaextl.c misc.c
 
+LIBS += $(LIBTU_LIBS) $(LUA_LIBS) $(DL_LIBS) -lm
+
 HEADERS=readconfig.h extl.h luaextl.h private.h types.h
 
 TARGETS=libextl.a libextl-mkexports
@@ -62,10 +64,8 @@ install:
 		$(INSTALL) -m $(DATA_MODE) $$h $(DESTDIR)$(INCDIR); \
 	done
 
-test:
-	rm test/extltest
-	gcc -g -o test/extltest test/extltest.c `pkg-config --libs lua5.1` `pkg-config --cflags lua5.1` -ltu
+test: $(SOURCES)
+	$(CC) $(CFLAGS) -o test/extltest test/extltest.c $(INCLUDES) $(LIBS)
 	test/extltest
-	rm test/extltest
-	gcc -g -o test/extltest test/extltest.c `pkg-config --libs lua5.2` `pkg-config --cflags lua5.2` -ltu
-	test/extltest
+	$(RM) test/extltest
+
