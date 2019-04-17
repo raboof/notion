@@ -50,7 +50,7 @@ local function get_tool_output(command)
     if not f then
         return nil
     end
-    lines = f:read("a")
+    lines = f:read("*a")
     f:close()
     return lines
 end
@@ -124,8 +124,6 @@ local function update_inetaddr()
     inetaddr2_timer:set(settings.interval, update_inetaddr)
 end
 
-inetaddr2_timer:set(100, update_inetaddr)
-
 if settings.mode == "ip" then
     ip_paths = {"/sbin/ip", "/usr/sbin/ip", "/bin/ip", "/usr/bin/ip"}
 elseif settings.mode == "ifconfig" then
@@ -140,6 +138,8 @@ end
 if (settings.mode_path_check == true) then
     assert(mode_path ~= "", "Could not find a suitable binary for " .. settings.mode)
 end
+
+inetaddr2_timer:set(100, update_inetaddr)
 
 statusd_inetaddr2_export = {
     get_ip_address_using__ifconfig = get_ip_address_using__ifconfig,
