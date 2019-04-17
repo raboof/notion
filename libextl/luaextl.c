@@ -1917,7 +1917,7 @@ static int extl_l1_call_handler(lua_State *st)
 #ifdef EXTL_LOG_ERRORS
     WarnChain ch;
 #endif
-    L1Param param={{NULL, }, {NULL, }, NULL, 0, 0, 0};
+    L1Param param={{{NULL, }}, {{NULL, }}, NULL, 0, 0, 0};
     L1Param *old_param;
     int ret;
     int n=lua_gettop(st);
