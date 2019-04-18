@@ -669,22 +669,18 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
         }
         return TRUE;
     case LUA_TBOOLEAN:
-        if(type!='b' && type!='a')
+        // type=='b' case is handled above before the switch
+        if(type!='a')
             return FALSE;
-
-        b=lua_toboolean(st, pos);
-
-        if(type=='b'){
-            if(valret)
-                *((bool*)valret)=b;
-        }else if(type=='a'){
+        
+        if(type=='a'){
+            b=lua_toboolean(st, pos);
             if(valret){
                 ((ExtlAny*)valret)->type='b';
                 ((ExtlAny*)valret)->value.b=b;
             }
         }
         return TRUE;
-
     case LUA_TNIL:
     case LUA_TNONE:
         if(type=='a'){
@@ -1032,7 +1028,7 @@ bool extl_table_eq(ExtlTab t1, ExtlTab t2)
 /*}}}*/
 
 
-/*{{{ Table/get */
+/*{{{ Table/get */
 
 
 typedef struct{
@@ -1208,7 +1204,7 @@ int extl_table_get_n(ExtlTab ref)
 /*}}}*/
 
 
-/*{{{ Table/set */
+/*{{{ Table/set */
 
 
 static bool extl_table_dodo_set2(lua_State *st, TableParams2 *params)
@@ -1331,7 +1327,7 @@ bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val)
 /*}}}*/
 
 
-/*{{{ Table/clear entry */
+/*{{{ Table/clear entry */
 
 
 static bool extl_table_dodo_clear2(lua_State *st, TableParams2 *params)
