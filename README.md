@@ -22,7 +22,7 @@ See also:
 2. In addition to the standard C library headers and the GNU toolchain, you 
    will need the following tools and libraries for building Notion.
 
-    * Lua 5.1 interpreter and header files <http://www.lua.org/>
+    * Lua interpreter and header files, 5.1 or later <http://www.lua.org/>
     * Xlib header files <http://cgit.freedesktop.org/xorg/lib/libX11/>
     * libXext header files <http://cgit.freedesktop.org/xorg/lib/libXext/>
     * libSM header files <http://cgit.freedesktop.org/xorg/lib/libSM/>
@@ -34,10 +34,14 @@ See also:
     * Xinerama header files <https://sourceforge.net/projects/xinerama/>
     * XRandR header files <http://www.x.org/wiki/Projects/XRandR/> 
 
+   If you want to enable support for Xft fonts, you need libxft:
+
+    * libxft <https://gitlab.freedesktop.org/xorg/lib/libxft>
+
    On a Debian based system, these dependencies are provided by the following
    packages.
      build-essential lua5.1 liblua5.1-0-dev libx11-dev libxext-dev libsm-dev gettext
-     libxinerama-dev libxrandr-dev
+     libxinerama-dev libxrandr-dev libxft-dev
 
 3. If the default build settings don't suit you, review system-autodetect.mk
    and either override values from the environment or in a newly added
