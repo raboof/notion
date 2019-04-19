@@ -25,6 +25,8 @@ HEADERS=readconfig.h extl.h luaextl.h private.h types.h
 
 TARGETS=libextl.a libextl-mkexports
 
+SUBDIRS = test
+
 .PHONY : libextl-mkexports test
 
 ######################################
@@ -64,8 +66,5 @@ install:
 		$(INSTALL) -m $(DATA_MODE) $$h $(DESTDIR)$(INCDIR); \
 	done
 
-test: $(SOURCES)
-	$(CC) $(CFLAGS) -o test/extltest test/extltest.c $(INCLUDES) $(LIBS)
-	test/extltest
-	$(RM) test/extltest
-
+test:
+	$(MAKE) -C test test

@@ -17,7 +17,7 @@ int test_get_token() {
     Tokenizer*tokz;
     Token tok=TOK_INIT;
 
-    if(!(tokz=tokz_open("test/data_gettoken")))
+    if(!(tokz=tokz_open("data_gettoken")))
         return 1;
 
     // 1
@@ -91,12 +91,13 @@ int test_get_token() {
 
 int main(int argc, char *argv[])
 {
+    fprintf(stdout, "[TESTING] libtu ====\n");
     libtu_init(argv[0]);
 
     int result = 0;
     int err = 0;
 
-    fprintf(stdout, "test_get_token: ");
+    fprintf(stdout, "[TEST] test_get_token: ");
     result = test_get_token();
     if (result != 0) {
         fprintf(stdout, "[ERROR]: %d\n", result);

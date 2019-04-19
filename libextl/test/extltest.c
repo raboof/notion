@@ -1,5 +1,6 @@
 #include "../luaextl.c"
-#include "../readconfig.c"
+#include "../readconfig.h"
+#include "libtu/errorlog.h"
 
 static const char tostringstr[]=
     "local arg = {...}\n"
@@ -92,12 +93,14 @@ int test_stack_get_bool()
 
 int main()
 {
+    fprintf(stdout, "[TESTING] libextl ====\n");
+
     int result = 0;
     int err = 0;
 
     extl_init();
 
-    fprintf(stdout, "test_tostring: ");
+    fprintf(stdout, "[TEST] test_tostring: ");
     result = test_tostring();
     if (result != 0) {
         fprintf(stdout, "[ERROR]: %d\n", result);
@@ -106,7 +109,7 @@ int main()
         fprintf(stdout, "[OK]\n");
     }
 
-    fprintf(stdout, "test_stack_get_bool: ");
+    fprintf(stdout, "[TEST] test_stack_get_bool: ");
     result = test_stack_get_bool();
     if (result != 0) {
         fprintf(stdout, "[ERROR]: %d\n", result);
@@ -114,6 +117,8 @@ int main()
     } else {
         fprintf(stdout, "[OK]\n");
     }
+
+    extl_deinit();
 
     return err;
 }
