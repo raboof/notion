@@ -341,7 +341,7 @@ STATIC int SplitRelativePath(const char *path,char **dirpart,char **filepart)
     return 0;
 }
 
-static int complete_homedir(const char *username, char ***cp_ret, char **beg)
+static int complete_homedir(const char *username, char ***cp_ret, char **UNUSED(beg))
 {
     struct passwd *pw;
     char *name;

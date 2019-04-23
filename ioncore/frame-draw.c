@@ -132,8 +132,8 @@ void frame_border_inner_geom(const WFrame *frame, WRectangle *geom)
 
         geom->x+=bdw.left;
         geom->y+=bdw.top;
-        geom->w=MAXOF(0, geom->w-(bdw.left+bdw.right));
-        geom->h=MAXOF(0, geom->h-(bdw.top+bdw.bottom));
+        geom->w=MAXOF((unsigned int)0, geom->w-(bdw.left+bdw.right));
+        geom->h=MAXOF((unsigned int)0, geom->h-(bdw.top+bdw.bottom));
     }
 }
 
@@ -155,7 +155,7 @@ void frame_bar_geom(const WFrame *frame, WRectangle *geom)
     }
     geom->x+=off;
     geom->y+=off;
-    geom->w=MAXOF(0, geom->w-2*off);
+    geom->w=MAXOF((unsigned int)0, geom->w-2*off);
     geom->h=BAR_H(frame);
 }
 

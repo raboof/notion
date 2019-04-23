@@ -608,7 +608,7 @@ static void dock_set_minmax(WDock *dock, int grow, const WRectangle *g)
 }
 
 
-static void dockapp_calc_preferred_size(WDock *dock, int grow,
+static void dockapp_calc_preferred_size(WDock *UNUSED(dock), int grow,
                                         const WRectangle *tile_size,
                                         WDockApp *da)
 {
@@ -1513,7 +1513,7 @@ static bool dock_clientwin_is_dockapp(WClientWin *cwin,
 
 
 static WDock *dock_find_suitable_dock(WClientWin *cwin,
-                                      const WManageParams *param)
+                                      const WManageParams *UNUSED(param))
 {
     WDock *dock;
 

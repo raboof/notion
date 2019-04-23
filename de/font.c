@@ -159,8 +159,9 @@ DEFont *de_load_font(const char *fontname)
 #endif /* HAVE_X11_XFT */
 
 #ifdef HAVE_X11_BMF
+#ifdef HAVE_X11_XFT
 bitmap_font:
-
+#endif
     if(ioncore_g.use_mb && !(ioncore_g.enc_utf8 && iso10646_font(fontname))){
         LOG(DEBUG, FONT, "Loading fontset %s", fontname);
         fontset=de_create_font_set(fontname);
@@ -188,7 +189,7 @@ bitmap_font:
         }
         return NULL;
     }
-#endif
+#endif /* HAVE_X11_BMF */
 
     fnt=ALLOC(DEFont);
 

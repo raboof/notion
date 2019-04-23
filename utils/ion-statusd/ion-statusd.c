@@ -288,6 +288,10 @@ double statusd_last_modified(const char *fname)
 }
 
 
+#ifndef CF_NO_GETLOADAVG
+extern int getloadavg(double loadavg[], int nelem);
+#endif
+
 EXTL_EXPORT
 ExtlTab statusd_getloadavg()
 {

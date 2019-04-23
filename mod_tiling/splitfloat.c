@@ -273,9 +273,9 @@ static void splitfloat_reparent(WSplitFloat *split, WWindow *target)
 void splitfloat_tl_pwin_to_cnt(WSplitFloat *split, WRectangle *g)
 {
     if(split->ssplit.dir==SPLIT_HORIZONTAL)
-        g->w=MAXOF(1, g->w-split->tlpwin->bdw.right);
+        g->w=MAXOF((unsigned int)1, g->w-split->tlpwin->bdw.right);
     else
-        g->h=MAXOF(1, g->h-split->tlpwin->bdw.bottom);
+        g->h=MAXOF((unsigned int)1, g->h-split->tlpwin->bdw.bottom);
 }
 
 
@@ -296,9 +296,9 @@ void splitfloat_br_pwin_to_cnt(WSplitFloat *split, WRectangle *g)
 void splitfloat_tl_cnt_to_pwin(WSplitFloat *split, WRectangle *g)
 {
     if(split->ssplit.dir==SPLIT_HORIZONTAL)
-        g->w=MAXOF(1, g->w+split->tlpwin->bdw.right);
+        g->w=MAXOF((unsigned int)1, g->w+split->tlpwin->bdw.right);
     else
-        g->h=MAXOF(1, g->h+split->tlpwin->bdw.bottom);
+        g->h=MAXOF((unsigned int)1, g->h+split->tlpwin->bdw.bottom);
 }
 
 

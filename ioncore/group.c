@@ -1047,7 +1047,7 @@ static WStacking *prv(WGroup *ws, WStacking *st, bool wrap)
 typedef WStacking *NxtFn(WGroup *ws, WStacking *st, bool wrap);
 
 
-static bool focusable(WGroup *ws, WStacking *st, uint min_level)
+static bool focusable(WGroup *UNUSED(ws), WStacking *st, uint min_level)
 {
     return (st->reg!=NULL
             && REGION_IS_MAPPED(st->reg)
