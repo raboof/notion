@@ -27,7 +27,7 @@ Other than the above-linked packages, the _**Not**ion_ project does not publish 
 
 Check out this [quick reference to the keyboard commands](notionkeys.html)
 
-The manual page is a good reference. For an introduction, you may follow the [tour](tour/)
+The manual page is a good reference. For an introduction, you may follow the [tour](tour.html)
 
 For advanced configuration documentation, see [Configuring and extending Notion with Lua](http://notion.sourceforge.net/notionconf/)
 
