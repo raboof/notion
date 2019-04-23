@@ -21,3 +21,4 @@ utils/ion-statusd/ion-statusd
 utils/ion-completefile/ion-completefile
 cscope.*
 test/integration/libXinerama.so.1.0
+libextl/test/extltest

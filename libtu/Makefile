@@ -24,11 +24,15 @@ HEADERS=debug.h  errorlog.h  locale.h  minmax.h  obj.h      objp.h       output.
 
 TARGETS=libtu.a 
 
+SUBDIRS = test
+
 ######################################
 
 include $(TOPDIR)/build/rules.mk
 
 ######################################
+
+.PHONY: test
 
 libtu.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
@@ -41,3 +45,6 @@ install:
 	for h in $(HEADERS); do \
 		$(INSTALL) -m $(DATA_MODE) $$h $(DESTDIR)$(INCDIR)/libtu; \
 	done
+
+test:
+	$(MAKE) -C test test
