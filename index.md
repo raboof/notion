@@ -2,8 +2,9 @@
 layout: default
 ---
 
-Welcome to the Notion docs! 
+__*Not*ion__ is a tiling, tabbed window manager for the X window system:
 
-The main Notion website can be found at [http://notion.sf.net](http://notion.sf.net). 
+* Tiling: you divide the screen into non-overlapping 'tiles'. Every window occupies one tile, and is maximized to it
+* Tabbing: a tile may contain multiple windows - they will be 'tabbed'
+* Static: most tiled window managers are 'dynamic', meaning they automatically resize and move around tiles as windows appear and disappear. __*Not*ion__, by contrast, does not automatically change the tiling. You're in control.
 
-* New (prospective) user? Take the [tour](tour)!
