@@ -1,0 +1,181 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />  
+  
+    <title>Notion keyboard reference</title>  
+    <link rel="stylesheet" type="text/css" href="assets/css/kbd.css" />  
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>  
+  <!--script type="text/javascript" src="js/keyboard.js"></script-->
+<script>
+$().ready(function(){
+  $('.shortcut').mouseenter(function() { 
+      $(this).css({'background-color': 'lightblue'});
+      $($(this).attr('ref')).css({'background-color': 'lightblue'});
+  });
+  $('.shortcut').mouseleave(function() { 
+      $(this).css({'background-color': '#eee'});
+      $($(this).attr('ref')).css({'background-color': 'white'});
+  });
+  $('.shortcut').each(function() {
+      var shortcut = this;
+      $($(this).attr('ref')).mouseenter(function() {
+          $(shortcut).css({'background-color': 'lightblue'});
+          $(this).css({'background-color': 'lightblue'});
+      });
+      $($(this).attr('ref')).mouseleave(function() {
+          $(shortcut).css({'background-color': '#eee'});
+          $(this).css({'background-color': 'white'});
+      });
+  });
+});
+</script>
+</head>
+<body>
+<h1>Notion keyboard reference:</h1>
+
+<!-- CSS keyboard from http://net.tutsplus.com/tutorials/javascript-ajax/creating-a-keyboard-with-css-and-jquery/ -->
+<div id="container">  
+    <ul id="keyboard">  
+        <li id="grave">`<br>&rarr;scr</li>  
+        <li class="ws client number">1<br>ws 1<br><span class="modk">tab 1</span></li>  
+        <li class="ws client number">2<br>ws 2<br><span class="modk">tab 2</span></li>  
+        <li class="ws client number">3<br>ws 3<br><span class="modk">tab 3</span></li>  
+        <li class="ws client number">4<br>ws 4<br><span class="modk">tab 4</span></li>  
+        <li class="ws client number">5<br>ws 5<br><span class="modk">tab 5</span></li>  
+        <li class="ws client number">6<br>ws 6<br><span class="modk">tab 6</span></li>  
+        <li class="ws client number">7<br>ws 7<br><span class="modk">tab 7</span></li>  
+        <li class="ws client number">8<br>ws 8<br><span class="modk">tab 8</span></li>  
+        <li class="ws client number">9<br>ws 9<br><span class="modk">tab 9</span></li>  
+        <li class="ws client number">0<br>ws 0<br><span class="modk">tab 0</span></li>  
+        <li>-</li>  
+        <li>=</li>  
+        <li class="delete lastitem">delete</li>  
+        <li id="tab" class="tab frame">tab<br>&rarr; frame<br><span class="modk">&larr; frame</span></li>  
+        <li id="q" class="letter mh client scr">q<br>scr 0<br><span class="modk">esc</span></li>  
+        <li id="w" class="letter mh scr">w<br>scr 1</li>  
+        <li id="e" class="letter mh scr">e<br>scr 2</li>  
+        <li id="r" class="letter frame">r<br>resize</li>  
+        <li id="t" class="letter client">t<br>tag<br><span class="modk">clear</span></li>  
+        <li id="y" class="letter">y</li>  
+        <li class="letter">u</li>  
+        <li id="i" class="letter mh">i<br>&larr;scr</li>  
+        <li id="o" class="letter mh">o<br>&rarr;scr</li>  
+        <li id="p" class="letter frame client grow shrink">p<br>&uarr;frame<br><span class="modk">&larr;tab</li>  
+        <li>[</li>  
+        <li>]</li>  
+        <li class="symbol lastitem">\</li>  
+        <li id="capslock" class="capslock">caps lock</li>  
+        <li id="a" class="letter client">a<br>attach<br><span class="modk">attach</span></li>  
+        <li id="s" class="letter frame">s<br>&varr;split<br><span class="modk">&harr;split</span></li>  
+        <li id="d" class="letter client">d<br><span class="modk">detach</span></li>  
+        <li id="f" class="letter grow shrink">f</li>  
+        <li id="g" class="letter client">g<br>go</li>  
+        <li id="h" class="letter frame">h<br><span class="modk">&harr;max</span></li>  
+        <li id="j" class="letter">j</li>  
+        <li id="k" class="letter client">k<br><span class="modk">list</span></li>  
+        <li id="l" class="letter client">l<br>nudge</li>  
+        <li>;</li>  
+        <li>'</li>  
+        <li id="return" class="return lastitem client">return<br>fullscreen</li>  
+        <li class="left-shift shrink">shift</li>  
+        <li class="letter">z</li>  
+        <li id="x" class="letter frame">x<br><span class="modk">merge<span></li>  
+        <li id="c" class="letter client">c<br>close<br><span class="modk">kill</span></li>  
+        <li id="v" class="letter frame">v<br><span class="modk">&varr;max</span></li>  
+        <li id="k" class="letter grow shrink">b</li>  
+        <li id="n" class="letter frame client grow shrink">n<br>&darr;frame<br><span class="modk">&rarr;tab</span></li>  
+        <li id="m" class="letter">m</li>  
+        <li id="comma" class="ws client">,<br>&larr;ws<br><span class="modk">tab&larr;</li>  
+        <li id="period" class="ws client">.<br>&rarr;ws<br><span class="modk">tab&rarr;</li>  
+        <li>/</li>  
+        <li class="right-shift shrink lastitem">shift</li>  
+    </ul>  
+</div>  
+
+<table class="keytable">
+<tr>
+<td valign="top">
+<div>
+<h2>Frames</h2>
+<table>
+<tr class="shortcut" ref="#tab"><td>Mod1+Tab</td><td>go right</td></tr></tr>
+<tr class="shortcut" ref="#tab"><td>Mod1+k Tab</td><td>go left</td></tr></tr>
+<tr class="shortcut" ref="#p"><td>Mod1+p</td><td>go up</td></tr>
+<tr class="shortcut" ref="#n"><td>Mod1+n</td><td>go down</td></tr>
+<tr><td></td></tr>
+<tr class="shortcut" ref="#s"><td>Mod1+s</td><td>split vertically</td></tr>
+<tr class="shortcut" ref="#s"><td>Mod1+k s</td><td>split horizontally</td></tr>
+<tr><td></td></tr>
+<tr class="shortcut" ref="#x"><td>Mod1+k x</td><td>merge with sibling</td></tr>
+<tr class="shortcut" ref="#c"><td>Mod1+c</td><td>close current object</td></tr>
+<tr><td colspan="2"><b>Resizing</b></td></tr>
+<tr class="shortcut" ref="#r"><td>Mod1+r</td><td>enter resize mode</td></tr>
+<tr><td>&larr;, &rarr;, &uarr;, &darr;</td><td>grow in specified direction (add shift to shrink)</td></tr>
+<tr class="shortcut" ref=".grow"><td>f, b, p, n</td><td>grow in specified direction</td></tr>
+<tr class="shortcut" ref=".shrink"><td>F, B, P, N</td><td>shrink from specified direction</td></tr>
+<tr><td>Escape</td><td>exit resize mode</td></tr>
+<tr class="shortcut" ref="#h"><td>Mod1+k h</td><td>maximize horizontally</td></tr>
+<tr class="shortcut" ref="#v"><td>Mod1+k v</td><td>maximize vertically</td></tr>
+</table>
+</div>
+
+<h2>Workspaces</h2>
+<table>
+<tr class="shortcut" ref=".number"><td>Mod1+1 - Mod1+0</td><td>to numbered workspace</td></tr>
+<tr class="shortcut" ref="#comma"><td>Mod1+,</td><td>to prev workspace</td></tr>
+<tr class="shortcut" ref="#period"><td>Mod1+.</td><td>to next workspace</td></tr>
+<tr><td></td></tr>
+<tr><td>Mod1+F9</td><td>create new workspace of default type</td></tr>
+<tr><td>F9</td><td>create new workspace (prompt for type)</td></tr>
+</table>
+
+<h2>Multihead</h2>
+<table>
+<tr class="shortcut" ref=".scr"><td>Mod1+q - Mod1+e</td><td>to screen 1-3</td></tr>
+<tr class="shortcut" ref="#i"><td>Mod1+i</td><td>to prev screen</td></tr>
+<tr class="shortcut" ref="#o"><td>Mod1+o</td><td>to next screen</td></tr>
+<tr class="shortcut" ref="#grave"><td>Mod1+`</td><td>to next screen</td></tr>
+</table>
+
+</td>
+<td>
+
+<h2>Clients</h2>
+<table>
+<tr class="shortcut" ref=".number"><td>Mod1+k 1 - Mod1+k 0</td><td>to numbered tab</td></tr>
+<tr class="shortcut" ref="#p"><td>Mod1+k p</td><td>to prev tab</td></tr>
+<tr class="shortcut" ref="#n"><td>Mod1+k n</td><td>to next tab</td></tr>
+<tr class="shortcut" ref="#comma"><td>Mod1+k ,</td><td>move tab left</td></tr>
+<tr class="shortcut" ref="#dot"><td>Mod1+k .</td><td>move tab right</td></tr>
+<tr><td></td></tr>
+<tr class="shortcut" ref="#k"><td>Mod1+k k</td><td>list clients in order of attention or activity</td></tr>
+<tr class="shortcut" ref="#g"><td>Mod1+g</td><td>query for client window title to switch (go) to</td></tr>
+<tr class="shortcut" ref="#a"><td>Mod1+a</td><td>query for client window title to attach here</td></tr>
+<tr><td></td></tr>
+<tr class="shortcut" ref="#d"><td>Mod1+k d</td><td>detach (float) or reattach</td></tr>
+<tr><td></td></tr>
+<tr class="shortcut" ref="#l"><td>Mod1+k l</td><td>nudge the client window, might help with resize problems</td></tr>
+<tr class="shortcut" ref="#c"><td>Mod1+c</td><td>close current object (client or frame)</td></tr>
+<tr class="shortcut" ref="#c"><td>Mod1+k c</td><td>kill client owning the client window</td></tr>
+<tr class="shortcut" ref="#q"><td>Mod1+k q</td><td>send next key to client. Not supported by all clients.</td></tr>
+<tr><td></td></tr>
+<tr class="shortcut" ref="#return"><td>Mod1+Return</td><td>toggle fullscreen</td></tr>
+<tr><td colspan="2"><b>Tagging</b></td></tr>
+<tr class="shortcut" ref="#t"><td>Mod1+t</td><td>tag current window</td></tr>
+<tr class="shortcut" ref="#t"><td>Mod1+k t</td><td>clear tags</td></tr>
+<tr class="shortcut" ref="#a"><td>Mod1+k a</td><td>attach tagged windows to current frame</td></tr>
+<tr class="shortcut" ref="#l"><td>Mod1+l</td><td>lock screen</td></tr>
+</table>
+<h2>Function keys</h2>
+<table>
+<tr><td>F1</td><td>query for manpage</td></tr>
+<tr><td>F2</td><td>open X terminal</td></tr>
+<tr><td>F3</td><td>query for shell command</td></tr>
+<tr><td>Mod1+F3</td><td>query for LUA command</td></tr>
+<tr><td>F4</td><td>query for SSH</td></tr>
+<tr><td>F5</td><td>query for 'edit file'</td></tr>
+<tr><td>F6</td><td>query for 'view file'</td></tr>
+<tr><td>Mod1+m</td><td>context menu</td></tr>
+</table>
+</td></tr></table>
+</body></html>
