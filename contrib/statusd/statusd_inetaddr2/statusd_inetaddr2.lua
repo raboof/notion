@@ -38,6 +38,7 @@ local defaults = {
                             
 local settings = table.join(statusd.get_config("inetaddr2"), defaults)
 local inetaddr2_timer = statusd.create_timer()
+local mode_paths = {}
 local mode_path = ""
 
 local function file_exists(name)
@@ -125,13 +126,13 @@ local function update_inetaddr()
 end
 
 if settings.mode == "ip" then
-    ip_paths = {"/sbin/ip", "/usr/sbin/ip", "/bin/ip", "/usr/bin/ip"}
+    mode_paths = {"/sbin/ip", "/usr/sbin/ip", "/bin/ip", "/usr/bin/ip"}
 elseif settings.mode == "ifconfig" then
-    ip_paths = {"/sbin/ifconfig", "/usr/sbin/ifconfig", "/bin/ifconfig", "/usr/bin/ifconfig"}
+    mode_paths = {"/sbin/ifconfig", "/usr/sbin/ifconfig", "/bin/ifconfig", "/usr/bin/ifconfig"}
 end
-for i = 1, #ip_paths do
-    if file_exists(ip_paths[i]) then
-        mode_path = ip_paths[i]
+for i = 1, #mode_paths do
+    if file_exists(mode_paths[i]) then
+        mode_path = mode_paths[i]
         break
     end
 end
