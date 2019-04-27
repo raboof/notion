@@ -1,5 +1,5 @@
 # on Debian in lua-posix
-require "posix"
+local posix = require "posix"
 
 function sleep(sec)
     os.execute("sleep " .. tonumber(sec))
