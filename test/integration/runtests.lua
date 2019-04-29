@@ -1,4 +1,5 @@
-# on Debian in lua-posix
+--# on Debian in lua-posix
+local basedir = "../../"
 local posix = require "posix"
 
 function sleep(sec)
@@ -9,19 +10,19 @@ function getTests(testset)
   return (io.popen("ls " .. testset .. "/*.lua"):lines())
 end
 
-print 'Running tests against ../../notion/notion'
-print 'Starting Xdummy...'
+print('Running tests against ' .. basedir .. 'notion/notion')
+print 'Starting Xorg dummy...'
 
 local xpid = posix.fork()
 if (xpid == 0) then
-    local result,errstr,errno = posix.exec("/bin/sh", "./Xdummy", ":7")
-    print ('Error replacing current process with Xdummy: ' .. errstr);
+    local result,errstr,errno = posix.exec("/usr/bin/Xorg", "-noreset", "+extension", "GLX", "+extension", "RANDR", "+extension", "RENDER", "-logfile", "./10.log", "-config", "./xorg.conf", ":7")
+    print('Error replacing current process with Xorg dummy: ' .. errstr);
     os.exit(1)
 end
 
 sleep(1)
 
-print '(Hopefully) started Xdummy.'
+print '(Hopefully) started Xorg dummy.'
 
 local testsets = { 'basic_test', 'xinerama', 'xrandr' }
 local errors = 0
@@ -32,12 +33,12 @@ for i,testset in ipairs(testsets) do
 
   os.execute("rm -r " .. testset .. "/.notion/default-session--7")
 
-  print ('Starting notion in ./' .. testset .. '...')
+  print('Starting notion in ./' .. testset .. '...')
 
   local notionpid = posix.fork()
   if (notionpid == 0) then
-    local result,errstr,errno = posix.exec("../../notion/notion", "-noerrorlog", "-display", ":7")
-    print ('Error replacing current process with notion: ' .. errstr)
+    local result,errstr,errno = posix.exec(basedir .. "notion/notion", "-noerrorlog", "-display", ":7")
+    print('Error replacing current process with notion: ' .. errstr)
     os.exit(1)
   end
 
@@ -46,8 +47,8 @@ for i,testset in ipairs(testsets) do
   print 'Running tests...'
 
   for test in getTests(testset) do
-    print ('Running test ' .. test)
-    local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:7 notionflux")
+    print('Running test ' .. test)
+    local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:7 " .. basedir .. "mod_notionflux/notionflux/notionflux")
     local testoutput = testoutputpipe:read("*a")
     print 'Evaluating result...'
     if(testoutput ~= "\"ok\"\n") then
@@ -70,5 +71,5 @@ posix.kill(xpid)
 if errors == 0 then
   print 'OK!'
 else
-  print (errors .. " errors.")
+  print(errors .. " errors.")
 end
