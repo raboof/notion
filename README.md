@@ -124,9 +124,13 @@ Questions, comments, problems?
 ------------------------------
 
 If the available documentation does not answer your question, please
-post it to the mailing list. Details can be found on the Notion web page
-listed at the top of this file.
+join our IRC channel, [#notion on freenode](https://webchat.freenode.net/?channels=#notion).
 
+Contributing
+------------
+
+Contributions to Notion are very welcome! Please join us on [GitHub](https://github.com/raboof/notion/).
+The [Notes for the module and patch writer](http://notion.sourceforge.net/notionnotes/) might be helpful.
 
 Credits
 -------
