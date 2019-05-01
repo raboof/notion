@@ -4,6 +4,8 @@ LIBMAINLOOP_DIR = $(TOPDIR)/libmainloop
 LIBMAINLOOP_INCLUDES = -I$(TOPDIR)
 LIBMAINLOOP_LIBS = -L$(LIBMAINLOOP_DIR) -lmainloop
 
+CFLAGS += -DNOTION_RELEASE='"$(NOTION_RELEASE)"'
+
 ifeq ($(wildcard $(TOPDIR)/libtu/obj.h),)
 
 #External libtu, feel free to edit
