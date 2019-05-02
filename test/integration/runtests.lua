@@ -1,6 +1,13 @@
 --# on Debian in lua-posix
 local basedir = "../../"
-local posix = require "posix"
+
+print("[TESTING] Integration")
+
+local success, posix = pcall(require, "posix")
+if not success then
+    print("[SKIP] posix module not found")
+    os.exit(0)
+end
 
 function sleep(sec)
     os.execute("sleep " .. tonumber(sec))
@@ -22,16 +29,13 @@ end
 
 sleep(1)
 
-print '(Hopefully) started Xorg dummy.'
-
 local testsets = { 'basic_test', 'xinerama', 'xrandr' }
 local errors = 0
 
 for i,testset in ipairs(testsets) do
-
   posix.setenv('HOME', testset);
 
-  os.execute("rm -r " .. testset .. "/.notion/default-session--7")
+  os.execute("rm -rf " .. testset .. "/.notion/default-session--7")
 
   print('Starting notion in ./' .. testset .. '...')
 
@@ -44,18 +48,15 @@ for i,testset in ipairs(testsets) do
 
   sleep(2)
 
-  print 'Running tests...'
-
   for test in getTests(testset) do
-    print('Running test ' .. test)
+    print('[TEST] ' .. test)
     local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:7 " .. basedir .. "mod_notionflux/notionflux/notionflux")
     local testoutput = testoutputpipe:read("*a")
-    print 'Evaluating result...'
     if(testoutput ~= "\"ok\"\n") then
-      print('** ERROR ** ' .. testoutput)
+      print('[ERROR] ' .. testoutput)
       errors = errors + 1
     else
-      print '** OK **'
+      print '[OK]'
     end
   end
 
@@ -69,7 +70,8 @@ print 'Killing X process...'
 posix.kill(xpid)
 
 if errors == 0 then
-  print 'OK!'
+  print '[OK]'
 else
-  print(errors .. " errors.")
+  print('[ERROR] ' .. errors .. " tests failed.")
 end
+os.exit(errors)
