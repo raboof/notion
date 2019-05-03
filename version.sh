@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Determines the currently checked-out version of Notion.
 
@@ -20,10 +20,12 @@
 
 set -e
 
-if [ -e ".git" ]; then
+if [ ! -z "$NOTION_RELEASE" ]; then
+    echo "$NOTION_RELEASE"
+elif [ -e ".git" ]; then
   # Git:
   echo -n `git describe`
-  if [[ -n $(git status -s) ]]; then
+  if [ ! -z "$(echo -n `git status -s`)" ]; then
     echo -n `date +"+%Y%m%d-%H%M"`
   fi
 else
