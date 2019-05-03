@@ -13,6 +13,7 @@ Building and installing
 -----------------------
 
 1. Get the source code.
+
     git clone https://github.com/raboof/notion
 
 2. In addition to the standard C library headers and the GNU toolchain, you 
