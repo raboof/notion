@@ -21,7 +21,6 @@
 
 
 #define WMSG_BRUSH(WMSG) ((WMSG)->input.brush)
-#define WMSG_WIN(WMSG) ((WMSG)->input.win.win)
 
 
 /*{{{ Sizecalc */
@@ -235,7 +234,7 @@ static void wmsg_deinit(WMessage *wmsg)
 }
 
 
-static const char *wmsg_style(WMessage *wmsg)
+static const char *wmsg_style(WMessage *UNUSED(wmsg))
 {
     return "input-message";
 }

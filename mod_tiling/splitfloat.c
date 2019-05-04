@@ -475,7 +475,6 @@ static void splitfloat_do_resize(WSplitFloat *split, const WRectangle *ng,
     WRectangle tlg=GEOM(split->ssplit.tl);
     WRectangle brg=GEOM(split->ssplit.br);
     WRectangle ntlg=*ng, nbrg=*ng;
-    WRectangle *og=&((WSplit*)split)->geom;
     int dir=split->ssplit.dir;
     bool adjust=TRUE;
     

@@ -63,14 +63,14 @@ static WDeferred *alloc_defer()
 static void free_defer(WDeferred *d)
 {
     if(d>=dbuf && d<dbuf+N_DBUF){
-        dbuf_used&=~1<<((d-dbuf)/sizeof(WDeferred));
+        dbuf_used&=~(1<<(d-dbuf));
         return;
     }
     FREE(d);
 }
 
 
-static void defer_watch_handler(Watch *w, Obj *obj)
+static void defer_watch_handler(Watch *w, Obj *UNUSED(obj))
 {
     WDeferred *d=(WDeferred*)w;
     
@@ -194,9 +194,6 @@ static void do_execute(WDeferred *d)
 
 void mainloop_execute_deferred_on_list(WDeferred **list)
 {
-    Obj *obj;
-    void (*action)(Obj*);
-    
     while(*list!=NULL){
         WDeferred *d=*list;
         UNLINK_ITEM(*list, d, next, prev);

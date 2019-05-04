@@ -27,8 +27,6 @@
 
 bool region_fullscreen_scr(WRegion *reg, WScreen *scr, bool switchto)
 {
-    int rootx, rooty;
-    bool wasfs=TRUE;
     int swf=(switchto ? MPLEX_ATTACH_SWITCHTO : 0);
     WPHolder *ph=NULL;
     bool newph=FALSE, ret;
@@ -126,7 +124,6 @@ WScreen *clientwin_fullscreen_chkrq(WClientWin *cwin, int w, int h)
 {
     WScreen *scr;
     WMwmHints *mwm;
-    WRectangle *rwgeom;
     
     mwm=xwindow_get_mwmhints(cwin->win);
     if(mwm==NULL || !(mwm->flags&MWM_HINTS_DECORATIONS) ||

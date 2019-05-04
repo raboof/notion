@@ -201,7 +201,7 @@ void ioncore_flushfocus()
 /*{{{ X connection FD handler */
 
 
-void ioncore_x_connection_handler(int conn, void *unused)
+void ioncore_x_connection_handler(int UNUSED(conn), void *UNUSED(unused))
 {
     XEvent ev;
 

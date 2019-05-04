@@ -29,7 +29,6 @@ static Rb_node named_hooks=NULL;
 /* If hk==NULL to register, new is attempted to be created. */
 WHook *mainloop_register_hook(const char *name, WHook *hk)
 {
-    bool created=FALSE;
     char *nnm;
     
     if(hk==NULL)
@@ -270,14 +269,14 @@ bool hook_remove_extl(WHook *hk, ExtlFn efn)
 /*{{{ Basic marshallers */
 
 
-static bool marshall_v(WHookDummy *fn, void *param)
+static bool marshall_v(WHookDummy *fn, void *UNUSED(param))
 {
     fn();
     return TRUE;
 }
     
 
-static bool marshall_extl_v(ExtlFn fn, void *param)
+static bool marshall_extl_v(ExtlFn fn, void *UNUSED(param))
 {
     extl_call(fn, NULL, NULL);
     return TRUE;
@@ -304,13 +303,13 @@ static bool marshall_p(WHookDummy *fn, void *param)
 }
 
 
-static bool marshall_alt_v(bool (*fn)(), void *param)
+static bool marshall_alt_v(bool (*fn)(), void *UNUSED(param))
 {
     return fn();
 }
     
 
-static bool marshall_extl_alt_v(ExtlFn fn, void *param)
+static bool marshall_extl_alt_v(ExtlFn fn, void *UNUSED(param))
 {
     bool ret=FALSE;
     extl_call(fn, NULL, "b", &ret);

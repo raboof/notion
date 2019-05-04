@@ -138,12 +138,6 @@ extern bool statusd_register_exports();
 extern void statusd_unregister_exports();
 
 
-static void stdout_closed(int fd, void *data)
-{
-    exit(EXIT_SUCCESS);
-}
-
-
 int main(int argc, char*argv[])
 {
     const char *mod=NULL;

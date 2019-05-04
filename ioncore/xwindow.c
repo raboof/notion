@@ -130,15 +130,17 @@ bool xwindow_pointer_pos(Window rel, int *px, int *py)
 /*{{{ Size hints */
 
 
-void xwindow_get_sizehints(Window win, XSizeHints *hints)
+int xwindow_get_sizehints(Window win, XSizeHints *hints)
 {
-    int minh, minw;
     long supplied=0;
     
-    memset(hints, 0, sizeof(*hints));
-    XGetWMNormalHints(ioncore_g.dpy, win, hints, &supplied);
-    
-    xsizehints_sanity_adjust(hints);
+    if (XGetWMNormalHints(ioncore_g.dpy, win, hints, &supplied)!=0){
+        xsizehints_sanity_adjust(hints);
+        return 0;
+    }else{
+        memset(hints, 0, sizeof(*hints));
+        return -1;
+    }
 }
 
 

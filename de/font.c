@@ -16,7 +16,6 @@
 #include "fontset.h"
 #include "brush.h"
 
-
 /*{{{ Load/free */
 
 

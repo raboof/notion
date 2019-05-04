@@ -131,18 +131,18 @@ static void frame_add_mode_bindmaps(WFrame *frame)
     WFrameMode mode=frame->mode;
     
     if(mode==FRAME_MODE_FLOATING){
-	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else if(mode==FRAME_MODE_TRANSIENT){
         region_add_bindmap((WRegion*)frame, ioncore_frame_transient_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_floating_bindmap);
     }else{
         /* mode==FRAME_MODE_TILED || mode==FRAME_MODE_TILED_ALT || mode==FRAME_MODE_UNKNOWN */
-	region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
-	region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_mplex_toplevel_bindmap);
+        region_add_bindmap((WRegion*)frame, ioncore_frame_toplevel_bindmap);
         region_add_bindmap((WRegion*)frame, ioncore_frame_tiled_bindmap);
-    } 
+    }
 }
 
 
@@ -206,12 +206,11 @@ const char *frame_mode_extl(WFrame *frame)
 EXTL_EXPORT_AS(WFrame, set_mode)
 bool frame_set_mode_extl(WFrame *frame, const char *modestr)
 {
-    WFrameMode mode;
     int idx;
     
     idx=stringintmap_ndx(frame_modes, modestr);
     if(idx<0)
-	return FALSE;
+        return FALSE;
     
     frame_set_mode(frame, frame_modes[idx].value);
     
@@ -281,8 +280,6 @@ int frame_nth_tab_w(WFrame *frame, int n)
 
 void frame_update_attr_nth(WFrame *frame, int i)
 {
-    WRegion *reg;
-    
     if(i<0 || i>=frame->titles_n)
         return;
 
@@ -457,10 +454,14 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     
     hints_ret->base_width+=woff;
     hints_ret->base_height+=hoff;
-    if(hints_ret->max_width!=INT_MAX)
-        hints_ret->max_width+=woff;
-    if(hints_ret->max_height!=INT_MAX)
-        hints_ret->max_height+=hoff;
+
+    if(hints_ret->max_set) {
+        if(hints_ret->max_width!=INT_MAX)
+            hints_ret->max_width+=woff;
+        if(hints_ret->max_height!=INT_MAX)
+            hints_ret->max_height+=hoff;
+    }
+
     hints_ret->min_width+=woff;
     hints_ret->min_height+=hoff;
     
@@ -571,7 +572,6 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
         WRQGeomParams rq2=RQGEOMPARAMS_INIT;
         int gravity=ForgetGravity;
         WRectangle off;
-        WRegion *par;
         
         rq2.geom=rq->geom;
         rq2.flags=rq->flags&(REGION_RQGEOM_WEAK_ALL
@@ -602,7 +602,7 @@ static void frame_managed_rqgeom_absolute(WFrame *frame, WRegion *sub,
             rq2.geom.x+=off.x;
         else
             rq2.geom.x+=xgravity_deltax(gravity, -off.x, off.x+off.w);
-	
+
         if(rq->flags&REGION_RQGEOM_WEAK_Y)
             rq2.geom.y+=off.y;
         else
@@ -706,8 +706,6 @@ bool frame_set_shaded(WFrame *frame, int sp)
     bool set=(frame->flags&FRAME_SHADED);
     bool nset=libtu_do_setparam(sp, set);
     WRQGeomParams rq=RQGEOMPARAMS_INIT;
-    GrBorderWidths bdw;
-    int h;
 
     if(!XOR(nset, set))
         return nset;
@@ -848,7 +846,7 @@ bool frame_set_grattr_extl(WFrame *frame, const char *attr, const char *how)
 }
 
 
-void frame_managed_notify(WFrame *frame, WRegion *sub, WRegionNotify how)
+void frame_managed_notify(WFrame *frame, WRegion *UNUSED(sub), WRegionNotify how)
 {
     bool complete;
 
@@ -919,7 +917,7 @@ WRegion *frame_managed_disposeroot(WFrame *frame, WRegion *reg)
 }
 
 
-int frame_default_index(WFrame *frame)
+int frame_default_index(WFrame *UNUSED(frame))
 {
     return ioncore_g.frame_default_index;
 }
@@ -980,7 +978,6 @@ ExtlTab frame_get_configuration(WFrame *frame)
 
 void frame_do_load(WFrame *frame, ExtlTab tab)
 {
-    int flags=0;
     int p=0, s=0;
     
     if(extl_table_gets_i(tab, "saved_x", &p) &&

@@ -53,7 +53,7 @@ WBindmap *mod_query_wedln_bindmap=NULL;
 ModQueryConfig mod_query_config={
     250,
     TRUE,
-    FALSE
+    TRUE
 };
 
 
@@ -67,7 +67,7 @@ ModQueryConfig mod_query_config={
  *  \var{autoshowcompl_delay} & (integer) auto-show-completions delay
  *      in milliseconds (default: 250). \\
  *  \var{caseicompl} & (boolean) Turn some completions case-insensitive
- *      (default: false). \\
+ *      (default: true). \\
  * \end{tabularx}
  */
 EXTL_EXPORT

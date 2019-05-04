@@ -79,7 +79,6 @@ void check_new_user_help()
     const char *userdir=extl_userdir();
     char *oldbeard=NULL;
     char *tmp=NULL, *cmd=NULL;
-    pid_t pid;
     bool ret;
 
     if(userdir==NULL){
@@ -229,7 +228,6 @@ int main(int argc, char*argv[])
     if(ioncore_startup(display, cfgfile, stflags))
         may_continue=TRUE;
 
-fail:
     if(!may_continue)
         warn(TR("Refusing to start due to encountered errors."));
     else

@@ -28,6 +28,7 @@
 #include "activity.h"
 #include "netwm.h"
 #include "xwindow.h"
+#include "log.h"
 
 
 /*{{{ ioncore_handle_event */
@@ -235,7 +236,11 @@ void ioncore_handle_property(const XPropertyEvent *ev)
         }
         XFree(hints);
     }else if(ev->atom==XA_WM_NORMAL_HINTS){
-        clientwin_get_size_hints(cwin);
+        if(ev->state==PropertyNewValue){
+            if(clientwin_get_size_hints(cwin)<0)
+                LOG(WARN, GENERAL, "Retrieving sizehints failed for cwin '%s'", cwin->region.ni.name);
+        }else if(ev->state==PropertyDelete)
+            clientwin_reset_size_hints(cwin);
     }else if(ev->atom==XA_WM_NAME){
         if(!(cwin->flags&CLIENTWIN_USE_NET_WM_NAME))
             clientwin_get_set_name(cwin);
@@ -284,7 +289,6 @@ void ioncore_handle_mapping_notify(XEvent *ev)
 void ioncore_handle_expose(const XExposeEvent *ev)
 {
     WWindow *wwin;
-    WRootWin *rootwin;
     XEvent tmp;
     
     while(XCheckWindowEvent(ioncore_g.dpy, ev->window, ExposureMask, &tmp))
@@ -458,14 +462,11 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
 void ioncore_handle_buttonpress(XEvent *ev)
 {
     XEvent tmp;
-    Window win_pressed;
     bool finished=FALSE;
 
     if(ioncore_grab_held())
         return;
 
-    win_pressed=ev->xbutton.window;
-    
     if(!ioncore_do_handle_buttonpress(&(ev->xbutton)))
         return;
 

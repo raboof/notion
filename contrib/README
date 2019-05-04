@@ -1,0 +1,23 @@
+This directory contains a collection of user-contributed scripts for Notion.
+
+Installing and using a script
+-----------------------------
+
+To use a script put them into your ~/.notion or your global notion directory and 
+make sure you load the script with
+
+dopath("scriptname")
+
+in your cfg_notion.lua.
+
+
+Statusbar scripts
+-----------------
+
+Add the monitor(s) provided by the script into the template in cfg_statusbar.lua. Omit any "statusd_" prefixes of the monitor names.
+
+Styles
+------
+
+After adding them to your notion directory, do F12->styles/refresh-list. After that the new
+styles will be available in your F12 menu.

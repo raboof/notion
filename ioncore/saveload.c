@@ -78,8 +78,6 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     WRegionLoadCreateFn* fn=NULL;
     WRegClassInfo *info=NULL;
     WRegion *reg=NULL;
-    bool grouped=FALSE;
-    char *grouped_name=NULL;
     
     if(!extl_table_gets_s(tab, "type", &objclass))
         return NULL;
@@ -256,7 +254,7 @@ bool ioncore_init_layout()
             return FALSE;
         }
         warn(TR(backup_msg), backup);
-        if(!extl_serialise(backup, tab))
+        if(!extl_serialize(backup, tab))
             warn(TR("Failed backup."));
         free(backup);
     }

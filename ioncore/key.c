@@ -30,7 +30,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
     static XComposeStatus cs={NULL, 0};
     char buf[32]={0,};
     Status stat;
-    int n, i;
+    int n;
     KeySym ksym;
     
     if(wwin->xic!=NULL){
@@ -92,7 +92,7 @@ void clientwin_quote_next(WClientWin *cwin)
 }
 
 
-static bool waitrelease_handler(WRegion *reg, XEvent *ev)
+static bool waitrelease_handler(WRegion *UNUSED(reg), XEvent *ev)
 {
     if(!ioncore_unmod(ev->xkey.state, ev->xkey.keycode))
         return TRUE;
@@ -104,7 +104,7 @@ static void waitrelease(WRegion *reg)
 {
     if(ioncore_modstate()==0)
         return;
-	
+
     /* We need to grab on the root window as <reg> might have been
      * ioncore_defer_destroy:ed by the binding handler (the most common case
      * for using this kpress_wait!). In such a case the grab may
@@ -168,7 +168,6 @@ static bool add_sub(WRegion *reg, uint key, uint state)
 }
 
 
-static XKeyEvent *current_key_event=NULL;
 static uint current_kcb, current_state;
 static bool current_submap;
 

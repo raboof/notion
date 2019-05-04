@@ -44,6 +44,7 @@ DECLCLASS(WScreen){
     WScreen *next_scr, *prev_scr;
     Watch notifywin_watch;
     Watch infowin_watch;
+    Watch workspace_indicatorwin_watch;
 };
 
 extern bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, 

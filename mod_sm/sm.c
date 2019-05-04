@@ -44,7 +44,6 @@ char mod_sm_ion_api_version[]=NOTION_API_VERSION;
 
 static bool sm_do_manage(WClientWin *cwin, const WManageParams *param)
 {
-    int transient_mode=TRANSIENT_MODE_OFF;
     WPHolder *ph;
     bool ret;
     

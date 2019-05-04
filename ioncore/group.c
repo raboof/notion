@@ -44,9 +44,6 @@
 #include "return.h"
 
 
-static void group_place_stdisp(WGroup *ws, WWindow *parent,
-                                 int pos, WRegion *stdisp);
-
 static void group_remanage_stdisp(WGroup *ws);
 
 
@@ -116,12 +113,6 @@ WGroupIterTmp group_iter_default_tmp;
 
 
 /*{{{ region dynfun implementations */
-
-
-static void group_fit(WGroup *ws, const WRectangle *geom)
-{
-    REGION_GEOM(ws)=*geom;
-}
 
 
 bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
@@ -387,7 +378,7 @@ void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 /*{{{ Create/destroy */
 
 
-bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
+bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp, const char *name)
 {
     const char *p[1];
 
@@ -403,7 +394,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
     if(ws->dummywin==None)
         return FALSE;
 
-    p[0] = "WGroup";
+    p[0] = name;
     xwindow_set_text_property(ws->dummywin, XA_WM_NAME, p, 1);
 
     region_init(&ws->reg, par, fp);
@@ -423,9 +414,9 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp)
 }
 
 
-WGroup *create_group(WWindow *par, const WFitParams *fp)
+WGroup *create_group(WWindow *par, const WFitParams *fp, const char *name)
 {
-    CREATEOBJ_IMPL(WGroup, group, (p, par, fp));
+    CREATEOBJ_IMPL(WGroup, group, (p, par, fp, name));
 }
 
 
@@ -564,7 +555,6 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
                                         WSizePolicy szplcy)
 {
     WStacking *st=NULL, *tmp=NULL;
-    Window bottom=None, top=None;
     WStacking **stackingp=group_get_stackingp(ws);
     WFrame *frame;
     
@@ -1161,24 +1151,6 @@ WStacking *group_find_stacking(WGroup *ws, WRegion *r)
 }
 
 
-static WStacking *find_stacking_if_not_on_ws(WGroup *ws, Window w)
-{
-    WRegion *r=xwindow_region_of(w);
-    WStacking *st=NULL;
-    
-    while(r!=NULL){
-        if(REGION_MANAGER(r)==(WRegion*)ws)
-            break;
-        st=group_find_stacking(ws, r);
-        if(st!=NULL)
-            break;
-        r=REGION_MANAGER(r);
-    }
-    
-    return st;
-}
-
-
 bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order)
 {
     WStacking **stackingp=group_get_stackingp(grp);
@@ -1284,7 +1256,6 @@ ExtlTab group_get_configuration(WGroup *ws)
     ExtlTab tab, mgds, subtab, g;
     WStacking *st;
     WGroupIterTmp tmp;
-    WMPlex *par;
     int n=0;
     WRectangle tmpg;
     
@@ -1348,11 +1319,12 @@ void group_do_load(WGroup *ws, ExtlTab tab)
 }
 
 
-WRegion *group_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
+WRegion *group_loaj(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     WGroup *ws;
-    
-    ws=create_group(par, fp);
+
+    /* Generic initial name - to be overwritten later. */
+    ws=create_group(par, fp, "Notion GroupCW or GroupWS");
     
     if(ws==NULL)
         return NULL;

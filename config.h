@@ -26,6 +26,12 @@
 
 #define CF_STATUSBAR_SYSTRAY_HEIGHT 24
 
+/* disable this by default */
+#define CF_FOCUSLIST_INSERT_DELAY 0
+
+/* disable this by default */
+#define CF_WORKSPACE_INDICATOR_TIMEOUT 0
+
 /* Cursors
  */
 

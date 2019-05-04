@@ -28,6 +28,7 @@
 #include "resize.h"
 #include "conf.h"
 #include "saveload.h"
+#include "screen-notify.h"
 
 
 /*{{{ Settings */
@@ -251,7 +252,7 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
 
 WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
                                            const WManageParams *param,
-                                           int unused)
+                                           int UNUSED(unused))
 {
     WGroupAttachParams ap=GROUPATTACHPARAMS_INIT;
     WFramedParam fp=FRAMEDPARAM_INIT;
@@ -304,7 +305,7 @@ WPHolder *groupws_get_rescue_pholder_for(WGroupWS *ws,
 
 bool groupws_init(WGroupWS *ws, WWindow *parent, const WFitParams *fp)
 {
-    if(!group_init(&(ws->grp), parent, fp))
+    if(!group_init(&(ws->grp), parent, fp, "Notion GroupWS"))
         return FALSE;
 
     ws->initial_outputs=extl_create_table();
@@ -326,6 +327,9 @@ WGroupWS *create_groupws(WWindow *parent, const WFitParams *fp)
 void groupws_deinit(WGroupWS *ws)
 {    
     extl_unref_table(ws->initial_outputs);
+
+    screen_unnotify_if_workspace(ws);
+
     group_deinit(&(ws->grp));
 }
 

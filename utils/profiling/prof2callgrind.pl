@@ -17,7 +17,7 @@ $callframe{"file"} = "toplevel";
 $callframe{"line"} = 0;
 push(@callstack, \%callframe);
 
-while (<STDIN> =~ /^(\w)\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{6})\d*/) {
+while (<STDIN> =~ /^([ex])\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{6})\d*/) {
   my ($action, $calledfunction, $calledfile, $calledline, 
 	$callerfunction, $callerfile, $callerline, $sec, $msec) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
   my $callkey = "$calledfile$calledline $callerfile$callerline";
@@ -47,7 +47,7 @@ while (<STDIN> =~ /^(\w)\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{6
       my $timespentinclusive  = "$sec$msec" - $entry; 
       my $timespentself = $timespentinclusive - $timespentinchildren;
       if ($timespentself < 0) {
-          print STDERR "Spent negative amount of time in $calledfunction ($entry-$sec$msec minus $timespentinchildren) !?\n";
+          print STDERR "Spent negative amount of time in $calledfunction ($entry-$sec$msec=$timespentinclusive minus $timespentinchildren is $timespentself) !?\n";
           exit 1;
       }
       #print "Time spent in $calledfunction (inclusive): $timespentinclusive\n";

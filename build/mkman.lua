@@ -70,7 +70,7 @@ local function dobindings(f, bindings)
     local p={}
     local dummy = function() end
     
-    p.META="Mod1+"
+    p.META="Mod4+"
     p.ALTMETA=""
     
     p.dopath=dummy

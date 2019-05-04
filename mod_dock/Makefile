@@ -29,6 +29,8 @@ _install: module_install
 
 ######################################
 
+dock.o: exports.h
+
 .PHONY: tags
 tags:
 	exuberant-ctags -R . $(TOPDIR)

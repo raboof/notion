@@ -12,8 +12,8 @@
 if package.loaded["ioncore"] then return end
 
 -- Default modifiers
---MOD1="Mod1+"
---MOD2=""
+--META="Mod4+"
+--ALTMETA=""
 
 -- Maximum number of bytes to read from pipes
 ioncore.RESULT_DATA_LIMIT=1024^2
@@ -29,11 +29,17 @@ dopath('ioncore_menudb')
 -- Modifier setup compatibility kludge
 local oldindex
 
+-- Historically, the options now called 'META' and 'ALTMETA' were called 'MOD1' and 'MOD2'.
+-- The code below makes sure:
+-- * the default values for those settings are 'Mod4+' (the 'windows key') and ''
+-- * that setting either META/ALTMETA or MOD1/MOD2 will specify the primary and secondary meta keys
+-- * that getting either META/ALTMETA or MOD1/MOD2 will return the (default or configured) primary and secondary meta keys
+
 local function getmod(t, s)
     if s=="META" then
-        return rawget(t, "MOD1") or "Mod1+"
+        return rawget(t, "MOD1") or "Mod4+"
     elseif s=="MOD1" then
-        return rawget(t, "META") or "Mod1+"
+        return rawget(t, "META") or "Mod4+"
     elseif s=="ALTMETA" then
         return rawget(t, "MOD2") or ""
     elseif s=="MOD2" then

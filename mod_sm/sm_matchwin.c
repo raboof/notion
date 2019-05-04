@@ -60,9 +60,9 @@ Window mod_sm_get_client_leader(Window window)
     atom=XInternAtom(ioncore_g.dpy, "WM_CLIENT_LEADER", False);
     
     if(XGetWindowProperty(ioncore_g.dpy, window, atom,
-			  0L, 1L, False, AnyPropertyType, &actual_type,
-			  &actual_format, &nitems, &bytes_after,
-			  &prop) == Success)
+                          0L, 1L, False, AnyPropertyType, &actual_type,
+                          &actual_format, &nitems, &bytes_after,
+                          &prop) == Success)
     {
         if(actual_type == XA_WINDOW && actual_format == 32
            && nitems == 1	&& bytes_after == 0)
@@ -80,7 +80,7 @@ char *mod_sm_get_client_id(Window window)
     Atom atom;
     
     if((client_leader=mod_sm_get_client_leader(window))!=0){
-        atom=XInternAtom(ioncore_g.dpy, "SM_CLIENT_ID", False);  	
+        atom=XInternAtom(ioncore_g.dpy, "SM_CLIENT_ID", False);
         if (XGetTextProperty (ioncore_g.dpy, client_leader, &tp, atom))
             if (tp.encoding == XA_STRING && tp.format == 8 && tp.nitems != 0)
                 client_id = (char *) tp.value;
@@ -130,7 +130,7 @@ static void free_win_match(WWinMatch *match)
     if(match->wm_name)
         free(match->wm_name);
     if(match->wm_cmd)
-        free(match->wm_cmd);		
+        free(match->wm_cmd);
     free(match);
 }
 
@@ -216,7 +216,7 @@ static WWinMatch *match_cwin(WClientWin *cwin)
             }
         }
         if(win_match>2)
-            break;		
+            break;
     }
     XFree(client_id);
     XFree(window_role);

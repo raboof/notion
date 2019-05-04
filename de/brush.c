@@ -27,7 +27,6 @@
 
 
 #define MATCHES(S, A) (gr_stylespec_score(&(S), A)>0)
-#define MATCHES2(S, A1, A2) (gr_stylespec_score2(&(S), A1, A2)>0)
 
 #define ENSURE_INITSPEC(S, NM) \
     if((S).attrs==NULL) gr_stylespec_load(&(S), NM);
@@ -41,8 +40,6 @@ static GrStyleSpec tabmenuentry_spec=GR_STYLESPEC_INIT;
 bool debrush_init(DEBrush *brush, Window win,
                   const GrStyleSpec *spec, DEStyle *style)
 {
-    GrStyleSpec tmp;
-    
     brush->d=style;
     brush->extras_fn=NULL;
     brush->indicator_w=0;

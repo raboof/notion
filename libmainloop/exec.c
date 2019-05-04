@@ -108,7 +108,7 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
         goto err3;
     
     if(pid!=0){
-        // We're the parent
+        /* We're the parent */
 
         if(outfd!=NULL){
             if(!unblock(outfds[0]))
@@ -131,7 +131,7 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
         
         return pid;
     } else {
-        // We're the child
+        /* We're the child */
         
         if(infd!=NULL)
             duppipe(0, 0, infds);

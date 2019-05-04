@@ -337,7 +337,6 @@ bool region_rescue_child_clientwins(WRegion *reg, WRescueInfo *info)
 bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                                    WRegionIterator *iter, void *st)
 {
-    bool res=FALSE;
     int fails=0;
 
     if(info->failed_get)

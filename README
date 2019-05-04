@@ -2,7 +2,7 @@
 Notion
 ===
 
-Copyright (c) the Notion team 2010-2011.
+Copyright (c) the Notion team 2010-2014.
 Copyright (c) Tuomo Valkonen 1999-2009.
 
 http://notion.sf.net
@@ -15,11 +15,8 @@ See also:
 
   https://sourceforge.net/apps/mediawiki/notion/index.php?title=Development
 
-1. Get the source code.  Make sure all submodules are present and up to date.
+1. Get the source code.
     git clone git://notion.git.sourceforge.net/gitroot/notion/notion
-    cd notion
-    git submodule init
-    git submodule update
 
 2. In addition to the standard C library headers and the GNU toolchain, you 
    will need the following tools and libraries for building Notion.
@@ -69,9 +66,6 @@ See also:
    use `locate`) may be what you need to do. Note that unlike `.xsession`, 
    a `.xinitrc` should usually do much more setup than simply start a few
    programs of your choice.
-
-Please see the file `RELNOTES` for additional release-specific installation
-and configuration notes.
 
 
 Some optional installation steps

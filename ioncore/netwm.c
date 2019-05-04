@@ -107,7 +107,6 @@ bool netwm_check_initial_fullscreen(WClientWin *cwin)
 {
 
     int i, n;
-    int ret=0;
     long *data;
     
     n=xwindow_get_property(cwin->win, atom_net_wm_state, XA_ATOM,

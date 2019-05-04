@@ -108,7 +108,7 @@ void infowin_deinit(WInfoWin *p)
 /*{{{ Drawing and geometry */
 
 
-void infowin_draw(WInfoWin *p, bool complete)
+void infowin_draw(WInfoWin *p, bool UNUSED(complete))
 {
     WRectangle g;
     

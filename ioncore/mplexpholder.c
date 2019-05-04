@@ -23,7 +23,7 @@ static void mplex_watch_handler(Watch *watch, Obj *mplex);
 /*{{{ Primitives */
 
 
-static bool on_ph_list(WMPlexPHolder *ll, WMPlexPHolder *ph)
+static bool on_ph_list(WMPlexPHolder *UNUSED(ll), WMPlexPHolder *ph)
 {
     return ph->prev!=NULL;
 }
@@ -263,7 +263,6 @@ static WRegion *mplexpholder_attach_recreate(WMPlexPHolder *ph, int flags,
 {
     WRegionAttachData data2;
     WFramedPHolder *fph;
-    WPHolder *root;
     WRegion *reg;
     RP rp;
     

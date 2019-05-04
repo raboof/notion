@@ -60,6 +60,7 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     
     watch_init(&(scr->notifywin_watch));
     watch_init(&(scr->infowin_watch));
+    watch_init(&(scr->workspace_indicatorwin_watch));
 
     attr.background_pixmap=ParentRelative;
     attrflags=CWBackPixmap;
@@ -121,8 +122,9 @@ void screen_deinit(WScreen *scr)
 {
     UNLINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
 
-    screen_unnotify(scr);
-    screen_nowindowinfo(scr);
+    screen_unnotify_notifywin(scr);
+    screen_unnotify_infowin(scr);
+    screen_unnotify_if_screen(scr);
     
     mplex_deinit((WMPlex*)scr);
 }
@@ -356,7 +358,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
 }
 
 
-static bool screen_may_dispose(WScreen *scr)
+static bool screen_may_dispose(WScreen *UNUSED(scr))
 {
     return TRUE;
 }
@@ -410,13 +412,6 @@ ExtlTab screen_get_configuration(WScreen *scr)
 }
 
 
-static WRegion *do_create_initial(WWindow *parent, const WFitParams *fp, 
-                                  WRegionLoadCreateFn *fn)
-{
-    return fn(parent, fp, extl_table_none());
-}
-
-
 static bool create_initial_ws(WScreen *scr)
 {
     WRegion *reg=NULL;
@@ -442,10 +437,6 @@ static bool create_initial_ws(WScreen *scr)
 
 bool screen_init_layout(WScreen *scr, ExtlTab tab)
 {
-    char *name;
-    ExtlTab substab, subtab;
-    int n, i;
-
     if(tab==extl_table_none())
         return create_initial_ws(scr);
     

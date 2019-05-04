@@ -906,7 +906,7 @@ msgstr "Profondeur de sérialisation maximale atteinte."
 
 #: ../libextl/luaextl.c:2368
 #, c-format
-msgid "Unable to serialise type %s."
+msgid "Unable to serialize type %s."
 msgstr "Incapable de sérialiser le type %s."
 
 #: ../libextl/luaextl.c:2399
