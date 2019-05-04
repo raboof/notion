@@ -1,6 +1,7 @@
 /*
- * ion/de/font.c
+ * notion/de/font.c
  *
+ * Copyright (c) the Notion team 2013.
  * Copyright (c) Tuomo Valkonen 1999-2007. 
  *
  * See the included file LICENSE for details.
@@ -22,11 +23,20 @@
 static DEFont *fonts=NULL;
 
 
+const char *de_default_fontname()
+{
+    if(ioncore_g.use_mb)
+        return "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*";
+    else
+        return "fixed";
+}
+
 DEFont *de_load_font(const char *fontname)
 {
     DEFont *fnt;
     XFontSet fontset=NULL;
     XFontStruct *fontstruct=NULL;
+    const char *default_fontname=de_default_fontname();
     
     assert(fontname!=NULL);
     
@@ -54,11 +64,11 @@ DEFont *de_load_font(const char *fontname)
     }
     
     if(fontstruct==NULL && fontset==NULL){
-        if(strcmp(fontname, CF_FALLBACK_FONT_NAME)!=0){
+        if(strcmp(fontname, default_fontname)!=0){
             DEFont *fnt;
             LOG(WARN, FONT, TR("Could not load font \"%s\", trying \"%s\""),
-                 fontname, CF_FALLBACK_FONT_NAME);
-            fnt=de_load_font(CF_FALLBACK_FONT_NAME);
+                 fontname, default_fontname);
+            fnt=de_load_font(default_fontname);
             if(fnt==NULL)
                 LOG(WARN, FONT, TR("Failed to load fallback font."));
             return fnt;
