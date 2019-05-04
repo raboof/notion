@@ -1,21 +1,21 @@
 [submodule "mod_xinerama"]
 	path = mod_xinerama
-	url = ../mod_xinerama
+	url = git://git.code.sf.net/p/notion/mod_xinerama
 [submodule "mod_xrandr"]
 	path = mod_xrandr
-	url = ../mod_xrandr
+	url = git://git.code.sf.net/p/notion/mod_xrandr
 [submodule "mod_xkbevents"]
 	path = mod_xkbevents
-	url = ../mod_xkbevents
+	url = git://git.code.sf.net/p/notion/mod_xkbevents
 [submodule "libextl"]
 	path = libextl
-	url = ../libextl
+	url = git://git.code.sf.net/p/notion/libextl
 [submodule "libtu"]
 	path = libtu
-	url = ../libtu
+	url = git://git.code.sf.net/p/notion/libtu
 [submodule "contrib"]
 	path = contrib
-	url = ../contrib
+	url = git://git.code.sf.net/p/notion/contrib
 [submodule "mod_notionflux"]
 	path = mod_notionflux
-	url = ../mod_notionflux
+	url = git://git.code.sf.net/p/notion/mod_notionflux
