@@ -61,7 +61,7 @@ WHook *frame_managed_changed_hook=NULL;
 
 
 bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                WFrameMode mode)
+                WFrameMode mode, char *name)
 {
     WRectangle mg;
 
@@ -83,7 +83,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     
     gr_stylespec_init(&frame->baseattr);
     
-    if(!mplex_init((WMPlex*)frame, parent, fp, "Notion WFrame"))
+    if(!mplex_init((WMPlex*)frame, parent, fp, name))
         return FALSE;
     
     frame_initialise_gr(frame);
@@ -105,9 +105,9 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
 }
 
 
-WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode)
+WFrame *create_frame(WWindow *parent, const WFitParams *fp, WFrameMode mode, char *name)
 {
-    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode));
+    CREATEOBJ_IMPL(WFrame, frame, (p, parent, fp, mode, name));
 }
 
 
@@ -457,8 +457,10 @@ void frame_size_hints(WFrame *frame, WSizeHints *hints_ret)
     
     hints_ret->base_width+=woff;
     hints_ret->base_height+=hoff;
-    hints_ret->max_width+=woff;
-    hints_ret->max_height+=hoff;
+    if(hints_ret->max_width!=INT_MAX)
+        hints_ret->max_width+=woff;
+    if(hints_ret->max_height!=INT_MAX)
+        hints_ret->max_height+=hoff;
     hints_ret->min_width+=woff;
     hints_ret->min_height+=hoff;
     
@@ -1006,7 +1008,7 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     
     extl_table_gets_i(tab, "mode", &mode);
     
-    frame=create_frame(par, fp, mode);
+    frame=create_frame(par, fp, mode, "WFrame");
     
     if(frame!=NULL)
         frame_do_load(frame, tab);

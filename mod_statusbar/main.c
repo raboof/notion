@@ -8,6 +8,7 @@
 
 #include <sys/time.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -303,6 +304,29 @@ bool mod_statusbar_init()
     return TRUE;
 }
 
+/* It looks like child processes generated via fork() on Linux do not
+ * get a signal when the parent process dies. Specifically, the
+ * PR_SET_PDEATHSIG is cleared, therefore the ion-statusd process must
+ * be explicitly terminated on deinit. This function should be called
+ * from Lua on deinit with the ion-statusd process id generated above.
+ * 
+ * For more information, refer to the following man pages:
+ * - fork(2)
+ * - prctl(2), specifically section on PR_SET_PDEATHSIG
+ */
+EXTL_EXPORT
+int mod_statusbar__terminate_statusd(int pid)
+{
+    if(pid==0) {
+        return -1;
+    }
+
+    // Send SIGHUP to the specified statusd process to indicate
+    // that we're done.
+    kill( (pid_t)pid, SIGHUP);
+
+    return 0;
+}
 
 /*}}}*/
 

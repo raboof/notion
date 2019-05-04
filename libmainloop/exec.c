@@ -1,6 +1,7 @@
 /*
- * ion/mainloop/exec.c
+ * notion/mainloop/exec.c
  *
+ * Copyright (c) the Notion team 2013. 
  * Copyright (c) Tuomo Valkonen 1999-2007. 
  *
  * See the included file LICENSE for details.
@@ -107,6 +108,8 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
         goto err3;
     
     if(pid!=0){
+        // We're the parent
+
         if(outfd!=NULL){
             if(!unblock(outfds[0]))
                 goto err3;
@@ -127,18 +130,20 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
         }
         
         return pid;
+    } else {
+        // We're the child
+        
+        if(infd!=NULL)
+            duppipe(0, 0, infds);
+        if(outfd!=NULL)
+            duppipe(1, 1, outfds);
+        if(errfd!=NULL)
+            duppipe(2, 1, errfds);
+        
+        fn(fnp);
+        
+        abort();
     }
-
-    if(infd!=NULL)
-        duppipe(0, 0, infds);
-    if(outfd!=NULL)
-        duppipe(1, 1, outfds);
-    if(errfd!=NULL)
-        duppipe(2, 1, errfds);
-    
-    fn(fnp);
-
-    abort();
 
 err3:
     warn_err();

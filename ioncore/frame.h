@@ -81,9 +81,9 @@ DECLCLASS(WFrame){
 
 /* Create/destroy */
 extern WFrame *create_frame(WWindow *parent, const WFitParams *fp,
-                            WFrameMode mode);
+                            WFrameMode mode, char *name);
 extern bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
-                       WFrameMode mode);
+                       WFrameMode mode, char *name);
 extern void frame_deinit(WFrame *frame);
 extern bool frame_rqclose(WFrame *frame);
 

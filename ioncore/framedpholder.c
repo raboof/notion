@@ -1,6 +1,7 @@
 /*
- * ion/ioncore/framedpholder.c
+ * notion/ioncore/framedpholder.c
  *
+ * Copyright (c) the Notion team 2013. 
  * Copyright (c) Tuomo Valkonen 2005-2007. 
  *
  * See the included file LICENSE for details.
@@ -109,8 +110,8 @@ WRegion *framed_handler(WWindow *par,
     WFrame *frame;
     WRegion *reg;
     
-    frame=create_frame(par, fp, param->mode);
-    
+    frame=create_frame(par, fp, param->mode, "Framed PHolder Frame");
+
     if(frame==NULL)
         return NULL;
     
