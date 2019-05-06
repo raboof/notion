@@ -8,6 +8,10 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
+SOURCES=notionflux.c
+
+TARGETS=notionflux
+
 CFLAGS += $(XOPEN_SOURCE)
 
 INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
@@ -16,12 +20,15 @@ LIBS += $(X11_LIBS)
 
 EXTRA_EXECUTABLE = notionflux
 
-SOURCES=notionflux.c
-
 ######################################
 
 include $(TOPDIR)/build/rules.mk
 
 ######################################
 
-_install: executable_install
+notionflux: $(OBJS) $(EXT_OBJS)
+	$(CC) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
+
+_install: notionflux
+	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) notionflux $(DESTDIR)$(BINDIR)
