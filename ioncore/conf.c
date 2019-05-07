@@ -150,13 +150,13 @@ void ioncore_set(ExtlTab tab)
     }
     
     if(extl_table_gets_i(tab, "dblclick_delay", &dd))
-        ioncore_g.dblclick_delay=maxof(0, dd);
+        ioncore_g.dblclick_delay=MAXOF(0, dd);
 
     if(extl_table_gets_i(tab, "focuslist_insert_delay", &dd))
-        ioncore_g.focuslist_insert_delay=maxof(0, dd);
+        ioncore_g.focuslist_insert_delay=MAXOF(0, dd);
 
     if(extl_table_gets_i(tab, "workspace_indicator_timeout", &dd))
-        ioncore_g.workspace_indicator_timeout=maxof(0, dd);
+        ioncore_g.workspace_indicator_timeout=MAXOF(0, dd);
 
     extl_table_gets_b(tab, "activity_notification_on_all_screens",
                       &(ioncore_g.activity_notification_on_all_screens));

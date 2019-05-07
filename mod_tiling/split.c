@@ -77,7 +77,7 @@ static int unusedadd(int x, int y)
 {
     if(x<0 && y<0)
         return -1;
-    return maxof(x, 0)+maxof(y, 0);
+    return MAXOF(x, 0)+MAXOF(y, 0);
 }
 
 
@@ -303,11 +303,11 @@ static void splitregion_update_bounds(WSplitRegion *node, bool UNUSED(recursive)
     
     region_size_hints(node->reg, &hints);
     
-    snode->min_w=maxof(1, hints.min_set ? hints.min_width : 1);
+    snode->min_w=MAXOF(1, hints.min_set ? hints.min_width : 1);
     snode->max_w=INT_MAX;
     snode->unused_w=-1;
 
-    snode->min_h=maxof(1, hints.min_set ? hints.min_height : 1);
+    snode->min_h=MAXOF(1, hints.min_set ? hints.min_height : 1);
     snode->max_h=INT_MAX;
     snode->unused_h=-1;
 }
@@ -325,10 +325,10 @@ static void splitst_update_bounds(WSplitST *node, bool UNUSED(rec))
     }else{
         WSizeHints hints;
         region_size_hints(node->regnode.reg, &hints);
-        snode->min_w=maxof(1, hints.min_set ? hints.min_width : 1);
-        snode->max_w=maxof(snode->min_w, hints.min_width);
-        snode->min_h=maxof(1, hints.min_set ? hints.min_height : 1);
-        snode->max_h=maxof(snode->min_h, hints.min_height);
+        snode->min_w=MAXOF(1, hints.min_set ? hints.min_width : 1);
+        snode->max_w=MAXOF(snode->min_w, hints.min_width);
+        snode->min_h=MAXOF(1, hints.min_set ? hints.min_height : 1);
+        snode->max_h=MAXOF(snode->min_h, hints.min_height);
     }
 
     snode->unused_w=-1;
@@ -363,16 +363,16 @@ static void splitsplit_update_bounds(WSplitSplit *split, bool recursive)
         node->max_w=infadd(tl->max_w, br->max_w);
         node->min_w=infadd(tl->min_w, br->min_w);
         node->unused_w=unusedadd(tl->unused_w, br->unused_w);
-        node->min_h=maxof(tl->min_h, br->min_h);
-        node->max_h=maxof(minof(tl->max_h, br->max_h), node->min_h);
-        node->unused_h=minof(tl->unused_h, br->unused_h);
+        node->min_h=MAXOF(tl->min_h, br->min_h);
+        node->max_h=MAXOF(MINOF(tl->max_h, br->max_h), node->min_h);
+        node->unused_h=MINOF(tl->unused_h, br->unused_h);
     }else{
         node->max_h=infadd(tl->max_h, br->max_h);
         node->min_h=infadd(tl->min_h, br->min_h);
         node->unused_h=unusedadd(tl->unused_h, br->unused_h);
-        node->min_w=maxof(tl->min_w, br->min_w);
-        node->max_w=maxof(minof(tl->max_w, br->max_w), node->min_w);
-        node->unused_w=minof(tl->unused_w, br->unused_w);
+        node->min_w=MAXOF(tl->min_w, br->min_w);
+        node->max_w=MAXOF(MINOF(tl->max_w, br->max_w), node->min_w);
+        node->unused_w=MINOF(tl->unused_w, br->unused_w);
     }
 }
 
@@ -587,12 +587,12 @@ static void get_minmaxunused(WSplit *node, int dir,
 {
     if(dir==SPLIT_VERTICAL){
         *min=node->min_h;
-        *max=maxof(*min, node->max_h);
-        *unused=minof(node->unused_h, node->geom.h);
+        *max=MAXOF(*min, node->max_h);
+        *unused=MINOF(node->unused_h, node->geom.h);
     }else{
         *min=node->min_w;
-        *max=maxof(*min, node->max_w);
-        *unused=minof(node->unused_w, node->geom.w);
+        *max=MAXOF(*min, node->max_w);
+        *unused=MINOF(node->unused_w, node->geom.w);
     }
 }
 
@@ -622,8 +622,8 @@ void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
         get_minmaxunused(tl, dir, &tlmin, &tlmax, &tlunused);
         get_minmaxunused(br, dir, &brmin, &brmax, &brunused);
         
-        tlused=maxof(0, tls-maxof(0, tlunused));
-        brused=maxof(0, brs-maxof(0, brunused));
+        tlused=MAXOF(0, tls-MAXOF(0, tlunused));
+        brused=MAXOF(0, brs-MAXOF(0, brunused));
         /* tlmin,  brmin >= 1 => (tls>=tlmin, brs>=brmin => sz>0) */
         
         if(sz>2){
@@ -1177,15 +1177,15 @@ bool split_maximize(WSplit *node, int dir, int action)
 static void flexibility(WSplit *node, int dir, int *shrink, int *stretch)
 {
     if(dir==SPLIT_VERTICAL){
-        *shrink=maxof(0, node->geom.h-node->min_h);
+        *shrink=MAXOF(0, node->geom.h-node->min_h);
         if(OBJ_IS(node, WSplitST))
-            *stretch=maxof(0, node->max_h-node->geom.h);
+            *stretch=MAXOF(0, node->max_h-node->geom.h);
         else
             *stretch=INT_MAX;
     }else{
-        *shrink=maxof(0, node->geom.w-node->min_w);
+        *shrink=MAXOF(0, node->geom.w-node->min_w);
         if(OBJ_IS(node, WSplitST))
-            *stretch=maxof(0, node->max_w-node->geom.w);
+            *stretch=MAXOF(0, node->max_w-node->geom.w);
         else
             *stretch=INT_MAX;
     }
@@ -1199,9 +1199,9 @@ static void calc_amount(int *amount, int rs, WSplit *other, int dir)
     flexibility(other, dir, &shrink, &stretch);
 
     if(rs>0)
-        *amount=minof(rs, shrink);
+        *amount=MINOF(rs, shrink);
     else if(rs<0)
-        *amount=-minof(-rs, stretch);
+        *amount=-MINOF(-rs, stretch);
     else
         *amount=0;
 }
@@ -1258,8 +1258,8 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
     ng=pg;
 
     if(p->dir==SPLIT_VERTICAL){
-        ng.h=maxof(0, node->geom.h+amount);
-        og.h=maxof(0, other->geom.h-amount);
+        ng.h=MAXOF(0, node->geom.h+amount);
+        og.h=MAXOF(0, other->geom.h-amount);
         adjust_sizes(&(ng.h), &(og.h), pg.h, ng.h+og.h,
                      node->min_h, other->min_h, node->max_h, other->max_h, 
                      PRIMN_TL /* node is passed as tl param */);
@@ -1269,8 +1269,8 @@ static void splitsplit_do_rqsize(WSplitSplit *p, WSplit *node,
             ng.y=pg.y+pg.h-ng.h;
         vprimn=thisnode;
     }else{
-        ng.w=maxof(0, node->geom.w+amount);
-        og.w=maxof(0, other->geom.w-amount);
+        ng.w=MAXOF(0, node->geom.w+amount);
+        og.w=MAXOF(0, other->geom.w-amount);
         adjust_sizes(&(ng.w), &(og.w), pg.w, ng.w+og.w,
                      node->min_w, other->min_w, node->max_w, other->max_w, 
                      PRIMN_TL /* node is passed as tl param */);
@@ -1452,8 +1452,8 @@ ExtlTab split_rqgeom(WSplit *node, ExtlTab g)
     if(extl_table_gets_i(g, "h", &(geom.h)))
         flags&=~REGION_RQGEOM_WEAK_H;
     
-    geom.w=maxof(1, geom.w);
-    geom.h=maxof(1, geom.h);
+    geom.w=MAXOF(1, geom.w);
+    geom.h=MAXOF(1, geom.h);
 
     splittree_rqgeom(node, flags, &geom, &ogeom);
     
@@ -1539,8 +1539,8 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
     objmin=(dir==SPLIT_VERTICAL ? node->min_h : node->min_w);
 
     s=split_size(node, dir);
-    sn=maxof(minsize, s/2);
-    so=maxof(objmin, s-sn);
+    sn=MAXOF(minsize, s/2);
+    so=MAXOF(objmin, s-sn);
 
     if(sn+so!=s){
         int rs;
@@ -1561,7 +1561,7 @@ WSplitRegion *splittree_split(WSplit *node, int dir, WPrimn primn,
             sn=minsize;
             so=rs-sn;
         }else{
-            so=maxof(rs/2, objmin);
+            so=MAXOF(rs/2, objmin);
             sn=rs-so;
         }
     }else{

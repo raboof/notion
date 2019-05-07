@@ -77,8 +77,8 @@ void frame_adjust_to_initial(WFrame *frame, const WFitParams *fp,
     if(!param->inner_geom_gravity_set){
         rqg.x=REGION_GEOM(frame).x;
         rqg.y=REGION_GEOM(frame).y;
-        rqg.w=maxof(1, REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w));
-        rqg.h=maxof(1, REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h));
+        rqg.w=MAXOF(1, REGION_GEOM(reg).w+(REGION_GEOM(frame).w-mg.w));
+        rqg.h=MAXOF(1, REGION_GEOM(reg).h+(REGION_GEOM(frame).h-mg.h));
     }else{
         int bl=mg.x;
         int br=REGION_GEOM(frame).w-(mg.x+mg.w);
@@ -89,8 +89,8 @@ void frame_adjust_to_initial(WFrame *frame, const WFitParams *fp,
                xgravity_deltax(param->gravity, bl, br));
         rqg.y=(/*fp->g.y+*/param->inner_geom.y+
                xgravity_deltay(param->gravity, bt, bb));
-        rqg.w=maxof(1, param->inner_geom.w+(REGION_GEOM(frame).w-mg.w));
-        rqg.h=maxof(1, param->inner_geom.h+(REGION_GEOM(frame).h-mg.h));
+        rqg.w=MAXOF(1, param->inner_geom.w+(REGION_GEOM(frame).w-mg.w));
+        rqg.h=MAXOF(1, param->inner_geom.h+(REGION_GEOM(frame).h-mg.h));
     }
 
     if(!(fp->mode&REGION_FIT_WHATEVER))

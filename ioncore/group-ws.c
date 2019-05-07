@@ -151,8 +151,8 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
         if(extl_table_gets_i(gt, "h", &(ap.geom.h)))
             size++;
         
-        fp.inner_geom.w=maxof(fp.inner_geom.w, 1);
-        fp.inner_geom.h=maxof(fp.inner_geom.h, 1);
+        fp.inner_geom.w=MAXOF(fp.inner_geom.w, 1);
+        fp.inner_geom.h=MAXOF(fp.inner_geom.h, 1);
         
         fp.inner_geom_gravity_set=(size==2 && pos==2);
         

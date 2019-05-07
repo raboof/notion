@@ -282,8 +282,8 @@ static void get_inner_geom(WEdln *wedln, int mode, WRectangle *geom)
     geom->w-=bdw.left+bdw.right;
     geom->y+=bdw.top;
     geom->h-=bdw.top+bdw.bottom;
-    geom->w=maxof(0, geom->w);
-    geom->h=maxof(0, geom->h);
+    geom->w=MAXOF(0, geom->w);
+    geom->h=MAXOF(0, geom->h);
 }
 
 
@@ -291,7 +291,7 @@ static void get_textarea_geom(WEdln *wedln, int mode, WRectangle *geom)
 {
     get_inner_geom(wedln, mode, geom);
     geom->x+=wedln->prompt_w;
-    geom->w=maxof(0, geom->w - wedln->prompt_w - wedln->info_w);
+    geom->w=MAXOF(0, geom->w - wedln->prompt_w - wedln->info_w);
 }
 
 
@@ -660,7 +660,7 @@ static ExtlSafelist sc_safelist=EXTL_SAFELIST_INIT(sc_safe_fns);
 static int wedln_alloc_compl_id(WEdln *wedln)
 {
     int id=wedln->compl_waiting_id+1;
-    wedln->compl_waiting_id=maxof(0, wedln->compl_waiting_id+1);
+    wedln->compl_waiting_id=MAXOF(0, wedln->compl_waiting_id+1);
     return id;
 }
 
@@ -869,7 +869,7 @@ static void wedln_update_handler(WEdln *wedln, int from, int flags)
             from=wedln->vstart;
     }
     
-    from=maxof(0, from-wedln->vstart);
+    from=MAXOF(0, from-wedln->vstart);
 
     wedln_draw_str_box(wedln, &geom, wedln->vstart, wedln->edln.p, from,
                        wedln->edln.point, wedln->edln.mark);

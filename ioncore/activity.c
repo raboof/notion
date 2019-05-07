@@ -40,7 +40,7 @@ void region_clear_mgd_activity(WRegion *mgr)
     if(mgr==NULL)
         return;
     
-    mgr->mgd_activity=maxof(0, mgr->mgd_activity-1);
+    mgr->mgd_activity=MAXOF(0, mgr->mgd_activity-1);
     
     if(!region_is_activity_r(mgr)){
         region_notify_change(mgr, ioncore_g.notifies.sub_activity);

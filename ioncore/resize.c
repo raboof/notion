@@ -550,8 +550,8 @@ void rqgeomparams_from_table(WRQGeomParams *rq,
     if(extl_table_gets_i(g, "h", &(rq->geom.h)))
        rq->flags&=~REGION_RQGEOM_WEAK_H;
 
-    rq->geom.w=maxof(1, rq->geom.w);
-    rq->geom.h=maxof(1, rq->geom.h);
+    rq->geom.w=MAXOF(1, rq->geom.w);
+    rq->geom.h=MAXOF(1, rq->geom.h);
 }
 
 

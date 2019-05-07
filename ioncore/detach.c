@@ -86,7 +86,7 @@ static bool ioncore_do_detach(WRegion *reg, WGroup *grp, WFrameMode framemode,
             ap.szplcy_set=TRUE;
             
             ap.level_set=TRUE;
-            ap.level=maxof(st->level, STACKING_LEVEL_NORMAL);
+            ap.level=MAXOF(st->level, STACKING_LEVEL_NORMAL);
         }
         
         ap.geom_set=TRUE;

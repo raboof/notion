@@ -71,8 +71,8 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
     int h=*hp, th, bh=(hints->base_set ? hints->base_height : 0);
     
     if(min && hints->min_set){
-        w=maxof(w, hints->min_width);
-        h=maxof(h, hints->min_height);
+        w=MAXOF(w, hints->min_width);
+        h=MAXOF(h, hints->min_height);
     }
     
     if(hints->no_constrain && !override_no_constrain){
@@ -98,8 +98,8 @@ void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
     h=th+bh;
     
     if(hints->max_set){
-        w=minof(w, hints->max_width);
-        h=minof(h, hints->max_height);
+        w=MINOF(w, hints->max_width);
+        h=MINOF(h, hints->max_height);
     }
     
     *wp=w;
@@ -125,8 +125,8 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
         }
     }
 
-    hints->min_width=maxof(hints->min_width, 0);
-    hints->min_height=maxof(hints->min_height, 0);
+    hints->min_width=MAXOF(hints->min_width, 0);
+    hints->min_height=MAXOF(hints->min_height, 0);
 
     if(!(hints->flags&PBaseSize) || hints->base_width<0)
         hints->base_width=hints->min_width;
@@ -134,8 +134,8 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
         hints->base_height=hints->min_height;
     
     if(hints->flags&PMaxSize){
-        hints->max_width=maxof(hints->max_width, hints->min_width);
-        hints->max_height=maxof(hints->max_height, hints->min_height);
+        hints->max_width=MAXOF(hints->max_width, hints->min_width);
+        hints->max_height=MAXOF(hints->max_height, hints->min_height);
     }
     
     hints->flags|=(PBaseSize|PMinSize);
@@ -178,17 +178,17 @@ void sizehints_adjust_for(WSizeHints *hints, WRegion *reg)
             hints->min_width=tmp_hints.min_width;
             hints->min_height=tmp_hints.min_height;
         }else{
-            hints->min_width=maxof(hints->min_width,
+            hints->min_width=MAXOF(hints->min_width,
                                    tmp_hints.min_width);
-            hints->min_height=maxof(hints->min_height,
+            hints->min_height=MAXOF(hints->min_height,
                                     tmp_hints.min_height);
         }
     }
     
     if(tmp_hints.max_set && hints->max_set){
-        hints->max_width=maxof(hints->max_width,
+        hints->max_width=MAXOF(hints->max_width,
                                tmp_hints.max_width);
-        hints->max_height=maxof(hints->max_height,
+        hints->max_height=MAXOF(hints->max_height,
                                 tmp_hints.max_height);
     }else{
         hints->max_set=FALSE;

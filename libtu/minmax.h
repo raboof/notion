@@ -10,18 +10,8 @@
 #ifndef LIBTU_MINMAX_H
 #define LIBTU_MINMAX_H
 
-
-inline int minof(int x, int y)
-{
-    return (x<y ? x : y);
-}
-
-
-inline int maxof(int x, int y)
-{
-    return (x>y ? x : y);
-}
-
+#define MINOF(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAXOF(X,Y) ((X) > (Y) ? (X) : (Y))
 
 #endif /* LIBTU_MINMAX_H */
 

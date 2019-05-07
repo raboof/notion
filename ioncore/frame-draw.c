@@ -120,7 +120,7 @@ void frame_border_geom(const WFrame *frame, WRectangle *geom)
     
     if(!BAR_INSIDE_BORDER(frame) && frame->brush!=NULL){
         geom->y+=frame->bar_h;
-        geom->h=maxof(0, geom->h-frame->bar_h);
+        geom->h=MAXOF(0, geom->h-frame->bar_h);
     }
 }
 
@@ -136,8 +136,8 @@ void frame_border_inner_geom(const WFrame *frame, WRectangle *geom)
 
         geom->x+=bdw.left;
         geom->y+=bdw.top;
-        geom->w=maxof(0, geom->w-(bdw.left+bdw.right));
-        geom->h=maxof(0, geom->h-(bdw.top+bdw.bottom));
+        geom->w=MAXOF(0, geom->w-(bdw.left+bdw.right));
+        geom->h=MAXOF(0, geom->h-(bdw.top+bdw.bottom));
     }
 }
 
@@ -159,7 +159,7 @@ void frame_bar_geom(const WFrame *frame, WRectangle *geom)
     }
     geom->x+=off;
     geom->y+=off;
-    geom->w=maxof(0, geom->w-2*off);
+    geom->w=MAXOF(0, geom->w-2*off);
     geom->h=BAR_H(frame);
 }
 
@@ -182,8 +182,8 @@ void frame_managed_geom(const WFrame *frame, WRectangle *geom)
         geom->h-=frame->bar_h+spacing;
     }
     
-    geom->w=maxof(geom->w, 0);
-    geom->h=maxof(geom->h, 0);
+    geom->w=MAXOF(geom->w, 0);
+    geom->h=MAXOF(geom->h, 0);
 }
 
 

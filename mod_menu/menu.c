@@ -80,8 +80,8 @@ static void get_inner_geom(WMenu *menu, WRectangle *geom)
         geom->y+=bdw.top;
         geom->w-=bdw.left+bdw.right;
         geom->h-=bdw.top+bdw.bottom;
-        geom->w=maxof(0, geom->w);
-        geom->h=maxof(0, geom->h);
+        geom->w=MAXOF(0, geom->w);
+        geom->h=MAXOF(0, geom->h);
     }
 }
 
@@ -330,11 +330,11 @@ static void menu_firstfit(WMenu *menu, bool submenu, const WRectangle *refg)
             t=refg->y-yoff;
             b=refg->y+refg->h-yoff;
             
-            geom.x=maxof(l, r-geom.w);
+            geom.x=MAXOF(l, r-geom.w);
             if(geom.x+geom.w>maxg->x+maxg->w)
                 geom.x=maxg->x;
 
-            geom.y=minof(b-geom.h, t);
+            geom.y=MINOF(b-geom.h, t);
             if(geom.y<maxg->y)
                 geom.y=maxg->y;
         }else{
@@ -364,8 +364,8 @@ static void menu_do_refit(WMenu *menu, WWindow *par, const WFitParams *oldfp)
         int xdiff=REGION_GEOM(menu).x-oldfp->g.x;
         int ydiff=(REGION_GEOM(menu).y+REGION_GEOM(menu).h
                    -(oldfp->g.y+oldfp->g.h));
-        geom.x=maxof(0, minof(maxg->x+xdiff, maxg->x+maxg->w-geom.w));
-        geom.y=maxof(0, minof(maxg->y+maxg->h+ydiff, maxg->y+maxg->h)-geom.h);
+        geom.x=MAXOF(0, MINOF(maxg->x+xdiff, maxg->x+maxg->w-geom.w));
+        geom.y=MAXOF(0, MINOF(maxg->y+maxg->h+ydiff, maxg->y+maxg->h)-geom.h);
     }
     
     window_do_fitrep(&menu->win, par, &geom);
@@ -394,7 +394,7 @@ void menu_size_hints(WMenu *menu, WSizeHints *hints_ret)
 {
     int n=menu->n_entries;
     int w=menu->max_entry_w;
-    int h=menu->entry_h*n + menu->entry_spacing*maxof(0, n-1);
+    int h=menu->entry_h*n + menu->entry_spacing*MAXOF(0, n-1);
 
     if(menu->brush!=NULL){
         GrBorderWidths bdw;
@@ -1048,9 +1048,9 @@ void mod_menu_set(ExtlTab tab)
     int a, t;
     
     if(extl_table_gets_i(tab, "scroll_amount", &a))
-        scroll_amount=maxof(0, a);
+        scroll_amount=MAXOF(0, a);
     if(extl_table_gets_i(tab, "scroll_delay", &t))
-        scroll_time=maxof(0, t);
+        scroll_time=MAXOF(0, t);
 }
 
 
@@ -1104,11 +1104,12 @@ static int scrolld_subs(WMenu *menu, int d)
     pg=&REGION_GEOM(p);
     
     while(menu!=NULL){
-        diff=maxof(diff, calc_diff(&REGION_GEOM(menu), pg, d));
+        int new_diff = calc_diff(&REGION_GEOM(menu), pg, d);
+        diff=MAXOF(diff, new_diff);
         menu=menu->submenu;
     }
     
-    return minof(maxof(0, diff), scroll_amount);
+    return MINOF(MAXOF(0, diff), scroll_amount);
 }
 
 

@@ -19,17 +19,17 @@
 
 static int fit_x(int x, int w, const WRectangle *max_geom)
 {
-    int mw=maxof(max_geom->w, 1);
-    w=minof(mw, w);
-    return minof(maxof(x, max_geom->x), max_geom->x+mw-w);
+    int mw=MAXOF(max_geom->w, 1);
+    w=MINOF(mw, w);
+    return MINOF(MAXOF(x, max_geom->x), max_geom->x+mw-w);
 }
 
 
 static int fit_y(int y, int h, const WRectangle *max_geom)
 {
-    int mh=maxof(max_geom->h, 1);
-    h=minof(mh, h);
-    return minof(maxof(y, max_geom->y), max_geom->y+mh-h);
+    int mh=MAXOF(max_geom->h, 1);
+    h=MINOF(mh, h);
+    return MINOF(MAXOF(y, max_geom->y), max_geom->y+mh-h);
 }
 
 
@@ -87,8 +87,8 @@ static void gravity_stretch_policy(int szplcy, WRegion *reg,
 
     fp->g=*rq_geom;
     
-    w=(ws ? max_geom.w : minof(rq_geom->w, max_geom.w));
-    h=(hs ? max_geom.h : minof(rq_geom->h, max_geom.h));
+    w=(ws ? max_geom.w : MINOF(rq_geom->w, max_geom.w));
+    h=(hs ? max_geom.h : MINOF(rq_geom->h, max_geom.h));
     
     if(reg!=NULL)
         region_size_hints_correct(reg,  &w, &h, FALSE);
@@ -110,8 +110,8 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
     bool fullh=((rq_flags&REGION_RQGEOM_WEAK_H) &&
                 (*szplcy&SIZEPOLICY_VERT_MASK)==SIZEPOLICY_VERT_CENTER);
 
-    int w=(fullw ? max_geom.w : minof(rq_geom->w, max_geom.w));
-    int h=(fullh ? max_geom.h : minof(rq_geom->h, max_geom.h));
+    int w=(fullw ? max_geom.w : MINOF(rq_geom->w, max_geom.w));
+    int h=(fullh ? max_geom.h : MINOF(rq_geom->h, max_geom.h));
     int x_=0, y_=0;
 
     /* ignore out-of-bound values for 'x' entirely */
@@ -132,7 +132,7 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
         if(((*szplcy)&SIZEPOLICY_HORIZ_MASK)==SIZEPOLICY_HORIZ_RIGHT)
             w=max_geom.x+max_geom.w-x_;
         else
-            w=minof(w, max_geom.x+max_geom.w-x_);
+            w=MINOF(w, max_geom.x+max_geom.w-x_);
     }
     
     if(!(rq_flags&REGION_RQGEOM_WEAK_Y)
@@ -141,7 +141,7 @@ static void sizepolicy_free_snap(WSizePolicy *szplcy, WRegion *reg,
         if(((*szplcy)&SIZEPOLICY_VERT_MASK)==SIZEPOLICY_VERT_BOTTOM)
             h=max_geom.y+max_geom.h-y_;
         else
-            h=minof(h, max_geom.y+max_geom.h-y_);
+            h=MINOF(h, max_geom.y+max_geom.h-y_);
     }
        
     if(reg!=NULL)

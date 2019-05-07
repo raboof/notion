@@ -17,10 +17,10 @@ void rectangle_constrain(WRectangle *g, const WRectangle *bounds)
 {
     const WRectangle tmpg=*g;
     
-    g->x=minof(maxof(tmpg.x, bounds->x), tmpg.x+tmpg.w-1);
-    g->y=minof(maxof(tmpg.y, bounds->y), tmpg.y+tmpg.h-1);
-    g->w=maxof(1, minof(bounds->x+bounds->w, tmpg.x+tmpg.w)-g->x);
-    g->h=maxof(1, minof(bounds->y+bounds->h, tmpg.y+tmpg.h)-g->y);
+    g->x=MINOF(MAXOF(tmpg.x, bounds->x), tmpg.x+tmpg.w-1);
+    g->y=MINOF(MAXOF(tmpg.y, bounds->y), tmpg.y+tmpg.h-1);
+    g->w=MAXOF(1, MINOF(bounds->x+bounds->w, tmpg.x+tmpg.w)-g->x);
+    g->h=MAXOF(1, MINOF(bounds->y+bounds->h, tmpg.y+tmpg.h)-g->y);
 }
 
 

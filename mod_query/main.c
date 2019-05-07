@@ -80,7 +80,7 @@ void mod_query_set(ExtlTab tab)
     
     if(extl_table_gets_i(tab, "autoshowcompl_delay",
                          &c->autoshowcompl_delay)){
-        c->autoshowcompl_delay=maxof(c->autoshowcompl_delay, 0);
+        c->autoshowcompl_delay=MAXOF(c->autoshowcompl_delay, 0);
     }
 }
 

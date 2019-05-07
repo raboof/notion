@@ -137,8 +137,8 @@ void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom)
 {
     bool move=(REGION_GEOM(wwin).x!=geom->x ||
                REGION_GEOM(wwin).y!=geom->y);
-    int w=maxof(1, geom->w);
-    int h=maxof(1, geom->h);
+    int w=MAXOF(1, geom->w);
+    int h=MAXOF(1, geom->h);
 
     if(par!=NULL){
         region_unset_parent((WRegion*)wwin);
