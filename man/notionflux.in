@@ -6,17 +6,17 @@ Notionflux - lua remote control for Notion.
 .I "[-e code]"
 .SH "DESCRIPTION"
 
-.B notionflux 
-allows you to access the notion lua scripting interface from the 
-command\-line. It either takes a script from stdin or through the \'\-e\' 
+.B notionflux
+allows you to access the notion lua scripting interface from the
+command\-line. It either takes a script from stdin or through the \'\-e\'
 parameter.
 
-The lua script will be executed by the Lua engine running in Notion, which 
-means it has access to the Notion lua api (notioncore.* et al). Calls to 
-\'print\' will print values to Notion\'s stdout (e.g. ~/.xsession\-errors). 
-The scripts\' return value will be printed by 
+The lua script will be executed by the Lua engine running in Notion, which
+means it has access to the Notion lua api (notioncore.* et al). Calls to
+\'print\' will print values to Notion\'s stdout (e.g. ~/.xsession\-errors).
+The scripts\' return value will be printed by
 .B notionflux
-. 
+.
 
 .SH "OPTIONS"
 .TP
@@ -25,34 +25,34 @@ Lua code to execute.
 
 .SH "ENVIRONMENT"
 
-.B notionflux 
-talks to 
+.B notionflux
+talks to
 .BR notion (1)
-through a socket, which is determined by the 
-.B _NOTION_MOD_NOTIONFLUX_SOCKET 
-property on the root of the display on which 
+through a socket, which is determined by the
+.B _NOTION_MOD_NOTIONFLUX_SOCKET
+property on the root of the display on which
 .BR notion (1)
-is running. 
+is running.
 
 .SH "SECURITY"
 
-The 
-.B notionflux 
-socket is created with read/write permissions only for the user who started 
+The
+.B notionflux
+socket is created with read/write permissions only for the user who started
 .BR notion (1).
-Neither 
+Neither
 .BR notion (1)
-nor 
-.B notionflux 
-are 
-.BR setuid (2), 
+nor
+.B notionflux
+are
+.BR setuid (2),
 so
-.B notionflux 
+.B notionflux
 should not pose any security threat.
 
 .SH "EXAMPLES"
-Write \'foo\' to 
-.BR notion (1)\'s 
+Write \'foo\' to
+.BR notion (1)\'s
 stdout and \'bar\' to the terminal, specifying the script on the commandline:
 .PP
 .nf

@@ -1,8 +1,8 @@
 /*
  * ion/ioncore/mplex.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
- * 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
+ *
  * See the included file LICENSE for details.
  */
 
@@ -86,14 +86,14 @@ DECLSTRUCT(WMPlexAttachParams){
 DECLCLASS(WMPlex){
     WWindow win;
     int flags;
-    
+
     WStacking *mgd;
-    
+
     int mx_count;
     WLListNode *mx_current;
     WLListNode *mx_list;
     WMPlexPHolder *mx_phs;
-    
+
     Watch stdispwatch;
     WMPlexSTDispInfo stdispinfo;
 };
@@ -104,7 +104,7 @@ DECLCLASS(WMPlex){
 extern WMPlex *create_mplex(WWindow *parent, const WFitParams *fp, const char *name);
 extern bool mplex_init(WMPlex *mplex, WWindow *parent,
                        const WFitParams *fp, const char *name);
-extern bool mplex_do_init(WMPlex *mplex, WWindow *parent, 
+extern bool mplex_do_init(WMPlex *mplex, WWindow *parent,
                           const WFitParams *fp, Window win, const char *name);
 extern void mplex_deinit(WMPlex *mplex);
 
@@ -121,7 +121,7 @@ extern void mplex_unmap(WMPlex *mplex);
 
 /* Attach */
 
-extern WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, 
+extern WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg,
                                     int flags);
 
 extern WRegion *mplex_attach(WMPlex *mplex, WRegion *reg, ExtlTab param);
@@ -146,10 +146,10 @@ extern WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
 
 /* Switch */
 
-extern bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub, 
+extern bool mplex_managed_prepare_focus(WMPlex *mplex, WRegion *sub,
                                         int flags, WPrepareFocusResult *res);
-extern bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *disp, 
-                                   WStacking *sub, int flags, 
+extern bool mplex_do_prepare_focus(WMPlex *mplex, WStacking *disp,
+                                   WStacking *sub, int flags,
                                    WPrepareFocusResult *res);
 
 extern void mplex_switch_nth(WMPlex *mplex, uint n);
@@ -165,7 +165,7 @@ extern void mplex_do_set_focus(WMPlex *mplex, bool warp);
 
 /* Stacking */
 
-extern bool mplex_managed_rqorder(WMPlex *mplex, WRegion *sub, 
+extern bool mplex_managed_rqorder(WMPlex *mplex, WRegion *sub,
                                   WRegionOrder order);
 
 /* Misc */
@@ -179,7 +179,7 @@ extern WRegion *mplex_mx_nth(WMPlex *mplex, uint n);
 extern bool mplex_mx_i(WMPlex *mplex, ExtlFn iterfn);
 extern WRegion *mplex_mx_current(WMPlex *mplex);
 
-extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook, 
+extern void mplex_call_changed_hook(WMPlex *mplex, WHook *hook,
                                     int mode, bool sw, WRegion *reg);
 
 extern void mplex_remanage_stdisp(WMPlex *mplex);
@@ -195,22 +195,22 @@ DYNFUN int mplex_default_index(WMPlex *mplex);
 /* Save/load */
 
 extern ExtlTab mplex_get_configuration(WMPlex *mplex);
-extern WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab, 
+extern WRegion *mplex_load(WWindow *par, const WFitParams *fp, ExtlTab tab,
                            const char *name);
 extern void mplex_load_contents(WMPlex *frame, ExtlTab tab);
 
 
 /* Sticky status display support */
 
-extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp, 
+extern bool mplex_set_stdisp(WMPlex *mplex, WRegion *stdisp,
                              const WMPlexSTDispInfo *info);
-extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp, 
+extern void mplex_get_stdisp(WMPlex *mplex, WRegion **stdisp,
                              WMPlexSTDispInfo *info);
 
 extern WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t);
 extern ExtlTab mplex_get_stdisp_extl(WMPlex *mplex);
 
-DYNFUN void region_manage_stdisp(WRegion *reg, WRegion *stdisp, 
+DYNFUN void region_manage_stdisp(WRegion *reg, WRegion *stdisp,
                                  const WMPlexSTDispInfo *info);
 DYNFUN void region_unmanage_stdisp(WRegion *reg, bool permanent, bool nofocus);
 

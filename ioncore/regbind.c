@@ -1,7 +1,7 @@
 /*
  * ion/regbind.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -18,13 +18,13 @@
 /*{{{ Grab/ungrab */
 
 
-static void do_binding_grab_on_ungrab_on(const WRegion *reg, 
+static void do_binding_grab_on_ungrab_on(const WRegion *reg,
                                          const WBinding *binding,
                                          const WBindmap *bindmap, bool grab)
 {
     Window win=region_xwindow(reg);
     WRegBindingInfo *r;
-    
+
     for(r=reg->bindings; r!=NULL; r=r->next){
         if(r->bindmap==bindmap)
             continue;
@@ -41,18 +41,18 @@ static void do_binding_grab_on_ungrab_on(const WRegion *reg,
 }
 
 
-static void do_binding_grab_on_ungrab_ons(const WRegion *reg, 
+static void do_binding_grab_on_ungrab_ons(const WRegion *reg,
                                           const WBindmap *bindmap,
                                           bool grab)
 {
     Rb_node node=NULL;
     WBinding *binding=NULL;
-    
+
     if(!(reg->flags&REGION_BINDINGS_ARE_GRABBED) ||
        bindmap->bindings==NULL){
         return;
     }
-    
+
     FOR_ALL_BINDINGS(binding, node, bindmap->bindings){
         do_binding_grab_on_ungrab_on(reg, binding, bindmap, grab);
     }
@@ -71,7 +71,7 @@ static void ungrab_freed_bindings(const WRegion *reg, const WBindmap *bindmap)
 }
 
 
-void rbind_binding_added(const WRegBindingInfo *rbind, 
+void rbind_binding_added(const WRegBindingInfo *rbind,
                          const WBinding *binding,
                          const WBindmap *UNUSED(bindmap))
 {
@@ -80,7 +80,7 @@ void rbind_binding_added(const WRegBindingInfo *rbind,
 }
 
 
-void rbind_binding_removed(const WRegBindingInfo *rbind, 
+void rbind_binding_removed(const WRegBindingInfo *rbind,
                            const WBinding *binding,
                            const WBindmap *UNUSED(bindmap))
 {
@@ -99,12 +99,12 @@ static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap,
                                    WRegion *owner)
 {
     WRegBindingInfo *rbind;
-    
+
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
         if(rbind->bindmap==bindmap && rbind->owner==owner)
             return rbind;
     }
-    
+
     return NULL;
 }
 
@@ -115,31 +115,31 @@ static WRegBindingInfo *find_rbind(WRegion *reg, WBindmap *bindmap,
 /*{{{ Interface */
 
 
-static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg, 
-                                                    WBindmap *bindmap, 
+static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg,
+                                                    WBindmap *bindmap,
                                                     WRegion *owner,
                                                     bool first)
 {
     WRegBindingInfo *rbind;
-    
+
     if(bindmap==NULL)
         return NULL;
-    
+
     rbind=ALLOC(WRegBindingInfo);
-    
+
     if(rbind==NULL)
         return NULL;
-    
+
     rbind->bindmap=bindmap;
     rbind->owner=owner;
     rbind->reg=reg;
     rbind->tmp=0;
-    
+
     LINK_ITEM(bindmap->rbind_list, rbind, bm_next, bm_prev);
 
     if(region_xwindow(reg)!=None && !(reg->flags&REGION_GRAB_ON_PARENT))
         grab_ungrabbed_bindings(reg, bindmap);
-    
+
     /* Link to reg's rbind list*/ {
         WRegBindingInfo *b=reg->bindings;
         if(first){
@@ -149,7 +149,7 @@ static WRegBindingInfo *region_do_add_bindmap_owned(WRegion *reg,
         }
         reg->bindings=b;
     }
-    
+
     return rbind;
 }
 
@@ -165,13 +165,13 @@ bool region_add_bindmap(WRegion *reg, WBindmap *bindmap)
 static void remove_rbind(WRegion *reg, WRegBindingInfo *rbind)
 {
     UNLINK_ITEM(rbind->bindmap->rbind_list, rbind, bm_next, bm_prev);
-    
+
     /* Unlink from reg's rbind list*/ {
         WRegBindingInfo *b=reg->bindings;
         UNLINK_ITEM(b, rbind, next, prev);
         reg->bindings=b;
     }
-    
+
     if(region_xwindow(reg)!=None && !(reg->flags&REGION_GRAB_ON_PARENT))
         ungrab_freed_bindings(reg, rbind->bindmap);
 
@@ -190,7 +190,7 @@ void region_remove_bindmap(WRegion *reg, WBindmap *bindmap)
 void region_remove_bindings(WRegion *reg)
 {
     WRegBindingInfo *rbind;
-    
+
     while((rbind=(WRegBindingInfo*)reg->bindings)!=NULL)
         remove_rbind(reg, rbind);
 }
@@ -209,7 +209,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
         bindmap=rbind->bindmap;
-        
+
         for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
             binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, s->state, s->key);
 
@@ -217,10 +217,10 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
                 bindmap=NULL;
                 break;
             }
-            
+
             bindmap=binding->submap;
         }
-        
+
         if(bindmap==NULL){
             /* There may be no next iteration so we must reset binding here
              * because we have not found a proper binding.
@@ -230,14 +230,14 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
         }
 
         binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, ev->state, ev->keycode);
-        
+
         if(binding!=NULL)
             break;
     }
-    
+
     if(binding!=NULL && rbind->owner!=NULL)
         *binding_owner_ret=rbind->owner;
-    
+
     return binding;
 }
 
@@ -247,7 +247,7 @@ WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
 {
     WRegBindingInfo *rbind;
     WBinding *binding=NULL;
-    
+
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
         if(rbind->owner!=NULL)
             continue;
@@ -255,7 +255,7 @@ WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
         if(binding!=NULL)
             break;
     }
-    
+
     return binding;
 }
 
@@ -270,17 +270,17 @@ static void add_bindings(WRegion *reg, WRegion *r2)
 {
     WRegion *rx=REGION_MANAGER(r2);
     WRegBindingInfo *rbind, *rb2;
-    
+
     if(rx!=NULL && REGION_PARENT_REG(rx)==reg){
         /* The recursion is here to get the bindmaps correctly ordered. */
         add_bindings(reg, rx);
     }
-    
+
     if(r2->flags&REGION_GRAB_ON_PARENT){
         for(rb2=(WRegBindingInfo*)r2->bindings; rb2!=NULL; rb2=rb2->next){
             rbind=find_rbind(reg, rb2->bindmap, r2);
             if(rbind==NULL){
-                rbind=region_do_add_bindmap_owned(reg, rb2->bindmap, 
+                rbind=region_do_add_bindmap_owned(reg, rb2->bindmap,
                                                   r2, TRUE);
             }
             if(rbind!=NULL)
@@ -295,15 +295,15 @@ void region_do_update_owned_grabs(WRegion *reg)
     WRegBindingInfo *rbind, *rb2;
 
     reg->flags&=~REGION_BINDING_UPDATE_SCHEDULED;
-    
+
     /* clear flags */
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next)
         rbind->tmp=0;
-    
+
     /* make new grabs */
     if(reg->active_sub!=NULL)
         add_bindings(reg, reg->active_sub);
-    
+
     /* remove old grabs */
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rb2){
         rb2=rbind->next;
@@ -314,13 +314,13 @@ void region_do_update_owned_grabs(WRegion *reg)
 
 void region_update_owned_grabs(WRegion *reg)
 {
-    if(reg->flags&REGION_BINDING_UPDATE_SCHEDULED 
+    if(reg->flags&REGION_BINDING_UPDATE_SCHEDULED
        || OBJ_IS_BEING_DESTROYED(reg)
        || ioncore_g.opmode==IONCORE_OPMODE_DEINIT){
         return;
     }
-    
-    if(mainloop_defer_action((Obj*)reg, 
+
+    if(mainloop_defer_action((Obj*)reg,
                              (WDeferredAction*)region_do_update_owned_grabs)){
         reg->flags|=REGION_BINDING_UPDATE_SCHEDULED;
     }else{

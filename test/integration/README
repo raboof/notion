@@ -1,8 +1,8 @@
-Each subdirectory here is an integration test. 
+Each subdirectory here is an integration test.
 
 == Requirements ==
 
-- xserver-xorg-video-dummy 
+- xserver-xorg-video-dummy
 - lposix (aka lua-posix in Debian)
 
 == Running the tests ==
@@ -23,7 +23,7 @@ Each integration test basically looks like this:
     - it has access to the notion internals
     - I'm not sure whether it can 'require' stuff etc
   - scripts return "ok" upon success, an error message otherwise
-  
+
 == Limitations ==
 
 - the x.org dummy driver does not appear to support RandR

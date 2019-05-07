@@ -1,7 +1,7 @@
 /*
  * ion/libmainloop/signal.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -53,7 +53,7 @@ static WTimer *queue=NULL;
 static void do_timer_set()
 {
     struct itimerval val={{0, 0}, {0, 0}};
-    
+
     if(queue==NULL){
         setitimer(ITIMER_REAL, &val, NULL);
         return;
@@ -70,9 +70,9 @@ static void do_timer_set()
         val.it_value.tv_sec=queue->when.tv_sec-val.it_value.tv_sec;
         if(val.it_value.tv_usec<0)
             val.it_value.tv_usec=0;
-        /* POSIX and some kernels have been designed by absolute morons and 
-         * contain idiotic artificial restrictions on the value of tv_usec, 
-         * that will only cause more code being run and clock cycles being 
+        /* POSIX and some kernels have been designed by absolute morons and
+         * contain idiotic artificial restrictions on the value of tv_usec,
+         * that will only cause more code being run and clock cycles being
          * spent to do the same thing, as the kernel will in any case convert
          * the seconds to some other units.
          */
@@ -85,7 +85,7 @@ static void do_timer_set()
 
     val.it_interval.tv_usec=val.it_value.tv_usec;
     val.it_interval.tv_sec=val.it_value.tv_sec;
-    
+
     if((setitimer(ITIMER_REAL, &val, NULL))){
         had_tmr=TRUE;
     }
@@ -111,7 +111,7 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     bool ret;
 
     extl_table_sets_i(t, "pid", (int)p->pid);
-    
+
     if(WIFEXITED(p->code)){
         extl_table_sets_b(t, "exited", TRUE);
         extl_table_sets_i(t, "exitstatus", WEXITSTATUS(p->code));
@@ -119,7 +119,7 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     if(WIFSIGNALED(p->code)){
         extl_table_sets_b(t, "signaled", TRUE);
         extl_table_sets_i(t, "termsig", WTERMSIG(p->code));
-#ifdef WCOREDUMP 
+#ifdef WCOREDUMP
         extl_table_sets_i(t, "coredump", WCOREDUMP(p->code));
 #endif
     }
@@ -130,11 +130,11 @@ static bool mrsh_chld_extl(ExtlFn fn, ChldParams *p)
     /*if(WIFCONTINUED(p->code)){
         extl_table_sets_b(t, "continued", TRUE);
     }*/
-    
+
     ret=extl_call(fn, "t", NULL, t);
-    
+
     extl_unref_table(t);
-    
+
     return ret;
 }
 
@@ -169,21 +169,21 @@ bool mainloop_check_signals()
         }
     }
 
-#if 1    
+#if 1
     if(wait_sig!=0){
         ChldParams p;
         wait_sig=0;
         while((p.pid=waitpid(-1, &p.code, WNOHANG|WUNTRACED))>0){
             if(mainloop_sigchld_hook!=NULL &&
                (WIFEXITED(p.code) || WIFSIGNALED(p.code))){
-                hook_call(mainloop_sigchld_hook, &p, 
+                hook_call(mainloop_sigchld_hook, &p,
                           (WHookMarshall*)mrsh_chld,
                           (WHookMarshallExtl*)mrsh_chld_extl);
             }
         }
     }
 #endif
-    
+
     if(kill_sig!=0)
         return kill_sig;
 
@@ -216,7 +216,7 @@ bool mainloop_check_signals()
         }
         do_timer_set();
     }
-    
+
     return ret;
 }
 
@@ -251,7 +251,7 @@ void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
                   Obj *obj, ExtlFn fn)
 {
     WTimer *q, **qptr;
-    
+
     timer_reset(timer);
 
     /* Initialize the new queue timer event */
@@ -267,14 +267,14 @@ void timer_do_set(WTimer *timer, uint msecs, WTimerHandler *handler,
     /* Add timerevent in place to queue */
     q=queue;
     qptr=&queue;
-    
+
     while(q!=NULL){
         if(TIMEVAL_LATER(q->when, timer->when))
             break;
         qptr=&(q->next);
         q=q->next;
     }
-    
+
     timer->next=q;
     *qptr=timer;
 
@@ -298,7 +298,7 @@ void timer_set_extl(WTimer *timer, uint msecs, ExtlFn fn)
     timer_do_set(timer, msecs, NULL, NULL, extl_ref_fn(fn));
 }
 
-    
+
 /*EXTL_DOC
  * Reset timer.
  */
@@ -306,7 +306,7 @@ EXTL_EXPORT_MEMBER
 void timer_reset(WTimer *timer)
 {
     WTimer *q=queue, **qptr=&queue;
-    
+
     while(q!=NULL){
         if(q==timer){
             *qptr=timer->next;
@@ -315,9 +315,9 @@ void timer_reset(WTimer *timer)
         }
         qptr=&(q->next);
         q=q->next;
-        
+
     }
-    
+
     timer->handler=NULL;
     extl_unref_fn(timer->extl_handler);
     timer->extl_handler=extl_fn_none();
@@ -418,7 +418,7 @@ static void timer_handler(int UNUSED(signal_num))
 
 static void ignore_handler(int UNUSED(signal_num))
 {
-    
+
 }
 
 
@@ -444,7 +444,7 @@ void mainloop_trap_signals(const sigset_t *which)
         sigfillset(&dummy);
         which=&dummy;
     }
-    
+
     sigemptyset(&set);
     sigemptyset(&oldset);
     sigprocmask(SIG_SETMASK, &set, &oldset);
@@ -456,7 +456,7 @@ void mainloop_trap_signals(const sigset_t *which)
     DEADLY(SIGQUIT);
     DEADLY(SIGINT);
     DEADLY(SIGABRT);
-    
+
     IGNORE(SIGTRAP);
     /*IGNORE(SIGWINCH);*/
 
@@ -485,13 +485,13 @@ void mainloop_trap_signals(const sigset_t *which)
         sa.sa_flags=SA_RESTART;
         sigaction(SIGTERM, &sa, NULL);
     }
-    
+
     IFTRAP(SIGUSR1){
         sa.sa_handler=exit_handler;
         sa.sa_flags=SA_RESTART;
         sigaction(SIGUSR1, &sa, NULL);
     }
-    
+
     /* SIG_IGN is preserved over execve and since the the default action
      * for SIGPIPE is not to ignore it, some programs may get upset if
      * the behaviour is not the default.

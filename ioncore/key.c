@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/key.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -32,7 +32,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
     Status stat;
     int n;
     KeySym ksym;
-    
+
     if(wwin->xic!=NULL){
         if(XFilterEvent((XEvent*)ev, ev->window))
            return;
@@ -42,10 +42,10 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
     }else{
         n=XLookupString(ev, buf, 32, &ksym, &cs);
     }
-    
+
     if(n<=0)
         return;
-    
+
     /* Won't catch bad strings, but should filter out most crap. */
     if(ioncore_g.use_mb){
         if(!iswprint(str_wchar_at(buf, 32)))
@@ -54,7 +54,7 @@ static void insstr(WWindow *wwin, XKeyEvent *ev)
         if(iscntrl(*buf))
             return;
     }
-    
+
     window_insstr(wwin, buf, n);
 }
 
@@ -110,8 +110,8 @@ static void waitrelease(WRegion *reg)
      * for using this kpress_wait!). In such a case the grab may
      * be removed before the modifiers are released.
      */
-    ioncore_grab_establish((WRegion*)region_rootwin_of(reg), 
-                           waitrelease_handler, 
+    ioncore_grab_establish((WRegion*)region_rootwin_of(reg),
+                           waitrelease_handler,
                            NULL, 0);
     ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
@@ -120,7 +120,7 @@ static void waitrelease(WRegion *reg)
 static void free_subs(WSubmapState *p)
 {
     WSubmapState *next;
-    
+
     while(p!=NULL){
         next=p->next;
         free(p);
@@ -143,7 +143,7 @@ static bool add_sub(WRegion *reg, uint key, uint state)
 {
     WSubmapState **p;
     WSubmapState *s;
-    
+
     if(reg->submapstat==NULL){
         p=&(reg->submapstat);
     }else{
@@ -152,17 +152,17 @@ static bool add_sub(WRegion *reg, uint key, uint state)
             s=s->next;
         p=&(s->next);
     }
-    
+
     s=ALLOC(WSubmapState);
-    
+
     if(s==NULL)
         return FALSE;
-    
+
     s->key=key;
     s->state=state;
-    
+
     *p=s;
-    
+
     return TRUE;
 
 }
@@ -176,11 +176,11 @@ bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
 {
     if(current_kcb==0)
         return FALSE;
-        
+
     *kcb=current_kcb;
     *state=current_state;
     *sub=current_submap;
-    
+
     return TRUE;
 }
 
@@ -191,32 +191,32 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
     WBinding *binding=NULL;
     WRegion *oreg=NULL, *binding_owner=NULL, *subreg=NULL;
     bool grabbed;
-    
+
     oreg=reg;
     grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
-    
+
     if(grabbed){
         /* Find the deepest nested active window grabbing this key. */
         while(reg->active_sub!=NULL)
             reg=reg->active_sub;
-        
+
         do{
-            binding=region_lookup_keybinding(reg, ev, oreg->submapstat, 
+            binding=region_lookup_keybinding(reg, ev, oreg->submapstat,
                                              &binding_owner);
-            
+
             if(binding!=NULL)
                 break;
             if(OBJ_IS(reg, WRootWin))
                 break;
-            
+
             subreg=reg;
             reg=REGION_PARENT_REG(reg);
         }while(reg!=NULL);
     }else{
-        binding=region_lookup_keybinding(oreg, ev, oreg->submapstat, 
+        binding=region_lookup_keybinding(oreg, ev, oreg->submapstat,
                                          &binding_owner);
     }
-    
+
     if(binding!=NULL){
         if(binding->submap!=NULL){
             if(add_sub(oreg, ev->keycode, ev->state))
@@ -226,23 +226,23 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
         }else if(binding_owner!=NULL){
             WRegion *mgd=region_managed_within(binding_owner, subreg);
             bool subs=(oreg->submapstat!=NULL);
-            
+
             clear_subs(oreg);
-            
+
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
-            
+
             current_kcb=ev->keycode;
             current_state=ev->state;
             current_submap=subs;
-            
+
             /* TODO: having to pass both mgd and subreg for some handlers
              * to work is ugly and complex.
              */
             extl_call(binding->func, "ooo", NULL, binding_owner, mgd, subreg);
-            
+
             current_kcb=0;
-            
+
             if(ev->state!=0 && !subs && binding->wait)
                 waitrelease(oreg);
         }
@@ -251,7 +251,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
     }else if(OBJ_IS(oreg, WWindow)){
         insstr((WWindow*)oreg, ev);
     }
-    
+
     return FALSE;
 }
 
@@ -277,7 +277,7 @@ static void submapgrab(WRegion *reg)
 void ioncore_do_handle_keypress(XKeyEvent *ev)
 {
     WRegion *reg=(WRegion*)XWINDOW_REGION_OF(ev->window);
-    
+
     if(reg!=NULL){
         if(do_key(reg, ev))
             submapgrab(reg);

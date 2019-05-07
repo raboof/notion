@@ -1,7 +1,7 @@
 /*
  * ion/mainloop/hooks.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -30,26 +30,26 @@ static Rb_node named_hooks=NULL;
 WHook *mainloop_register_hook(const char *name, WHook *hk)
 {
     char *nnm;
-    
+
     if(hk==NULL)
         return NULL;
-    
+
     if(named_hooks==NULL){
         named_hooks=make_rb();
         if(named_hooks==NULL)
             return NULL;
     }
-    
+
     nnm=scopy(name);
-    
+
     if(nnm==NULL)
         return NULL;
-    
+
     if(!rb_insert(named_hooks, nnm, hk)){
         free(nnm);
         destroy_obj((Obj*)hk);
     }
-    
+
     return hk;
 }
 
@@ -61,7 +61,7 @@ WHook *mainloop_unregister_hook(const char *name, WHook *hk)
 
     if(named_hooks==NULL)
         return NULL;
-    
+
     if(hk==NULL){
         assert(name!=NULL);
         node=rb_find_key_n(named_hooks, name, &found);
@@ -79,7 +79,7 @@ WHook *mainloop_unregister_hook(const char *name, WHook *hk)
         free((char*)node->k.key);
         rb_delete_node(node);
     }
-    
+
     return hk;
 }
 
@@ -93,14 +93,14 @@ WHook *mainloop_get_hook(const char *name)
 {
     if(name==NULL)
         return NULL;
-    
+
     if(named_hooks!=NULL){
         bool found=FALSE;
         Rb_node node=rb_find_key_n(named_hooks, name, &found);
         if(found)
             return (WHook*)rb_val(node);
     }
-    
+
     return NULL;
 }
 
@@ -128,7 +128,7 @@ static WHookItem *create_item(WHook *hk)
         item->fn=NULL;
         item->efn=extl_fn_none();
     }
-    
+
     return item;
 }
 
@@ -163,12 +163,12 @@ void hook_deinit(WHook *hk)
 WHookItem *hook_find(WHook *hk, WHookDummy *fn)
 {
     WHookItem *hi;
-    
+
     for(hi=hk->items; hi!=NULL; hi=hi->next){
         if(hi->fn==fn)
             return hi;
     }
-    
+
     return NULL;
 }
 
@@ -176,12 +176,12 @@ WHookItem *hook_find(WHook *hk, WHookDummy *fn)
 WHookItem *hook_find_extl(WHook *hk, ExtlFn efn)
 {
     WHookItem *hi;
-    
+
     for(hi=hk->items; hi!=NULL; hi=hi->next){
         if(extl_fn_eq(hi->efn, efn))
             return hi;
     }
-    
+
     return NULL;
 }
 
@@ -200,10 +200,10 @@ bool hook_listed(WHook *hk, ExtlFn efn)
 bool hook_add(WHook *hk, WHookDummy *fn)
 {
     WHookItem *item;
-    
+
     if(hook_find(hk, fn))
         return FALSE;
-    
+
     item=create_item(hk);
     if(item==NULL)
         return FALSE;
@@ -220,7 +220,7 @@ EXTL_EXPORT_AS(WHook, add)
 bool hook_add_extl(WHook *hk, ExtlFn efn)
 {
     WHookItem *item;
-    
+
     if(efn==extl_fn_none()){
         warn(TR("No function given."));
         return FALSE;
@@ -228,14 +228,14 @@ bool hook_add_extl(WHook *hk, ExtlFn efn)
 
     if(hook_find_extl(hk, efn))
         return FALSE;
-    
+
     item=create_item(hk);
-    
+
     if(item==NULL)
         return FALSE;
-    
+
     item->efn=extl_ref_fn(efn);
-    
+
     return TRUE;
 }
 
@@ -250,7 +250,7 @@ bool hook_remove(WHook *hk, WHookDummy *fn)
 
 
 /*EXTL_DOC
- * Remove \var{efn} from the list of functions to be called when the 
+ * Remove \var{efn} from the list of functions to be called when the
  * hook \var{hk} is triggered.
  */
 EXTL_EXPORT_AS(WHook, remove)
@@ -274,7 +274,7 @@ static bool marshall_v(WHookDummy *fn, void *UNUSED(param))
     fn();
     return TRUE;
 }
-    
+
 
 static bool marshall_extl_v(ExtlFn fn, void *UNUSED(param))
 {
@@ -288,7 +288,7 @@ static bool marshall_o(WHookDummy *fn, void *param)
     fn((Obj*)param);
     return TRUE;
 }
-    
+
 
 static bool marshall_extl_o(ExtlFn fn, void *param)
 {
@@ -307,7 +307,7 @@ static bool marshall_alt_v(bool (*fn)(), void *UNUSED(param))
 {
     return fn();
 }
-    
+
 
 static bool marshall_extl_alt_v(ExtlFn fn, void *UNUSED(param))
 {
@@ -321,7 +321,7 @@ static bool marshall_alt_o(bool (*fn)(), void *param)
 {
     return fn((Obj*)param);
 }
-    
+
 
 static bool marshall_extl_alt_o(ExtlFn fn, void *param)
 {
@@ -347,7 +347,7 @@ void hook_call(const WHook *hk, void *p,
                WHookMarshall *m, WHookMarshallExtl *em)
 {
     WHookItem *hi, *next;
-    
+
     for(hi=hk->items; hi!=NULL; hi=next){
         next=hi->next;
         if(hi->fn!=NULL)
@@ -363,7 +363,7 @@ bool hook_call_alt(const WHook *hk, void *p,
 {
     WHookItem *hi, *next;
     bool ret=FALSE;
-    
+
     for(hi=hk->items; hi!=NULL; hi=next){
         next=hi->next;
         if(hi->fn!=NULL)
@@ -373,7 +373,7 @@ bool hook_call_alt(const WHook *hk, void *p,
         if(ret)
             break;
     }
-    
+
     return ret;
 }
 
@@ -398,14 +398,14 @@ void hook_call_p(const WHook *hk, void *p, WHookMarshallExtl *em)
 
 bool hook_call_alt_v(const WHook *hk)
 {
-    return hook_call_alt(hk, NULL, (WHookMarshall*)marshall_alt_v, 
+    return hook_call_alt(hk, NULL, (WHookMarshall*)marshall_alt_v,
                          (WHookMarshallExtl*)marshall_extl_alt_v);
 }
 
 
 bool hook_call_alt_o(const WHook *hk, Obj *o)
 {
-    return hook_call_alt(hk, o, (WHookMarshall*)marshall_alt_o, 
+    return hook_call_alt(hk, o, (WHookMarshall*)marshall_alt_o,
                          (WHookMarshallExtl*)marshall_extl_alt_o);
 }
 

@@ -1,7 +1,7 @@
 /*
  * ion/mod_statusbar/ion-statusd/exec.c
  *
- * Copyright (c) Tuomo Valkonen 2005-2006. 
+ * Copyright (c) Tuomo Valkonen 2005-2006.
  *
  * Ion is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -15,7 +15,7 @@
 
 
 /*EXTL_DOC
- * Run \var{cmd} in the background. 
+ * Run \var{cmd} in the background.
  */
 EXTL_SAFE
 EXTL_EXPORT

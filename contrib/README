@@ -3,7 +3,7 @@ This directory contains a collection of user-contributed scripts for Notion.
 Installing and using a script
 -----------------------------
 
-To use a script put them into your ~/.notion or your global notion directory and 
+To use a script put them into your ~/.notion or your global notion directory and
 make sure you load the script with
 
 dopath("scriptname")

@@ -8,7 +8,7 @@ ifeq ($(wildcard $(TOPDIR)/libtu/obj.h),)
 
 #External libtu, feel free to edit
 LIBTU_DIR = $(TOPDIR)/../libtu
-LIBTU_INCLUDES = 
+LIBTU_INCLUDES =
 LIBTU_LIBS = -ltu
 
 else

@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/complete.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -33,7 +33,7 @@ extern bool complproxy_set_completions(WComplProxy *proxy, ExtlTab compls);
 extern int edln_do_completions(Edln *edln, char **completions, int ncomp,
                                const char *beg, const char *end,
                                bool setcommon, bool nosort);
-extern void edln_set_completion(Edln *edln, const char *comp, 
+extern void edln_set_completion(Edln *edln, const char *comp,
                                 const char *beg, const char *end);
 
 #endif /* ION_MOD_QUERY_COMPLETE_H */

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/mplexpholder.h
  *
- * Copyright (c) Tuomo Valkonen 2005-2007. 
+ * Copyright (c) Tuomo Valkonen 2005-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -26,15 +26,15 @@ DECLCLASS(WMPlexPHolder){
 };
 
 
-/* If 'after' is set, it is used, otherwise 'or_after', 
+/* If 'after' is set, it is used, otherwise 'or_after',
  * and finally 'or_layer' if this is also unset
  */
 
-extern WMPlexPHolder *create_mplexpholder(WMPlex *mplex, 
+extern WMPlexPHolder *create_mplexpholder(WMPlex *mplex,
                                           WStacking *either_st,
                                           WMPlexAttachParams *or_param);
-extern bool mplexpholder_init(WMPlexPHolder *ph, 
-                              WMPlex *mplex, 
+extern bool mplexpholder_init(WMPlexPHolder *ph,
+                              WMPlex *mplex,
                               WStacking *either_st,
                               WMPlexAttachParams *or_param);
 extern void mplexpholder_deinit(WMPlexPHolder *ph);
@@ -50,7 +50,7 @@ extern WPHolder *mplexpholder_do_root(WMPlexPHolder *ph);
 
 extern WRegion *mplexpholder_do_target(WMPlexPHolder *ph);
 
-extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex, 
+extern bool mplexpholder_move(WMPlexPHolder *ph, WMPlex *mplex,
                               WMPlexPHolder *after,
                               WLListNode *or_after);
 
@@ -61,9 +61,9 @@ extern void mplex_move_phs(WMPlex *mplex, WLListNode *node,
                            WLListNode *or_after);
 extern void mplex_move_phs_before(WMPlex *mplex, WLListNode *node);
 
-extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex, 
+extern WMPlexPHolder *mplex_managed_get_pholder(WMPlex *mplex,
                                                 WRegion *mgd);
-extern WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex, 
+extern WMPlexPHolder *mplex_get_rescue_pholder_for(WMPlex *mplex,
                                                        WRegion *mgd);
 
 #endif /* ION_IONCORE_MPLEXPHOLDER_H */

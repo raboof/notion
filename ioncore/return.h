@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/return.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -13,7 +13,7 @@
 #include "pholder.h"
 
 /* Note: 'ph' is under the control of this 'return' module after succesfully
- * (true return value) having been passed to this function and must no 
+ * (true return value) having been passed to this function and must no
  * longer be destroyed by other code unless removed with unset_get.
  */
 extern bool region_do_set_return(WRegion *reg, WPHolder *ph);

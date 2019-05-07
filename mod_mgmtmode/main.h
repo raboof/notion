@@ -1,7 +1,7 @@
 /*
  * ion/mod_mgmtmode/main.h
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
+ * Copyright (c) Tuomo Valkonen 2004-2007.
  *
  * See the included file LICENSE for details.
  */

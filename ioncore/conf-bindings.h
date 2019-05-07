@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/conf-bindings.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -17,7 +17,7 @@
 extern bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap);
 extern ExtlTab bindmap_getbindings(WBindmap *bindmap);
 
-extern bool ioncore_parse_keybut(const char *str, 
+extern bool ioncore_parse_keybut(const char *str,
                                  uint *mod_ret, uint *ksb_ret,
                                  bool button, bool init_any);
 

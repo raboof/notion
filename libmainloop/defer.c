@@ -1,7 +1,7 @@
 /*
  * ion/libmainloop/defer.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -46,7 +46,7 @@ static int dbuf_used=0;
 static WDeferred *alloc_defer()
 {
     int i;
-    
+
     /* Keeping it simple -- this naive loop should do it
      * as N_DBUF is small.
      */
@@ -73,53 +73,53 @@ static void free_defer(WDeferred *d)
 static void defer_watch_handler(Watch *w, Obj *UNUSED(obj))
 {
     WDeferred *d=(WDeferred*)w;
-    
+
     UNLINK_ITEM(*(WDeferred**)(d->list), d, next, prev);
-    
+
     free_defer(d);
-    
+
     warn(TR("Object destroyed while deferred actions are still pending."));
 }
 
 
-static bool already_deferred(Obj *obj, WDeferredAction *action, 
+static bool already_deferred(Obj *obj, WDeferredAction *action,
                              WDeferred *list)
 {
     WDeferred *d;
-    
+
     for(d=list; d!=NULL; d=d->next){
         if(d->action==action && d->watch.obj==obj)
             return TRUE;
     }
-    
+
     return FALSE;
 }
 
 
-bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action, 
+bool mainloop_defer_action_on_list(Obj *obj, WDeferredAction *action,
                                    WDeferred **list)
 {
     WDeferred *d;
-    
+
     if(already_deferred(obj, action, *list))
         return TRUE;
-    
+
     d=alloc_defer();
-    
+
     if(d==NULL){
         warn_err();
         return FALSE;
     }
-    
+
     d->action=action;
     d->list=list;
     d->fn=extl_fn_none();
-    
+
     if(obj!=NULL)
         watch_setup(&(d->watch), obj, defer_watch_handler);
-    
+
     LINK_ITEM(*list, d, next, prev);
-    
+
     return TRUE;
 }
 
@@ -134,30 +134,30 @@ bool mainloop_defer_destroy(Obj *obj)
 {
     if(OBJ_IS_BEING_DESTROYED(obj))
         return FALSE;
-    
+
     return mainloop_defer_action(obj, destroy_obj);
 }
-    
+
 
 bool mainloop_defer_extl_on_list(ExtlFn fn, WDeferred **list)
 {
     WDeferred *d;
-    
+
     d=alloc_defer();
-    
+
     if(d==NULL){
         warn_err();
         return FALSE;
     }
-    
+
     d->action=NULL;
     d->list=list;
     d->fn=extl_ref_fn(fn);
-    
+
     watch_init(&(d->watch));
-    
+
     LINK_ITEM(*list, d, next, prev);
-    
+
     return TRUE;
 }
 
@@ -178,10 +178,10 @@ static void do_execute(WDeferred *d)
     Obj *obj=d->watch.obj;
     WDeferredAction *a=d->action;
     ExtlFn fn=d->fn;
-    
+
     watch_reset(&(d->watch));
     free_defer(d);
-    
+
     if(a!=NULL){
         if(obj!=NULL)
             a(obj);

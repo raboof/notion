@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/resize.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -83,7 +83,7 @@ DECLCLASS(WMoveresMode){
 };
 
 
-extern WMoveresMode *region_begin_resize(WRegion *reg, 
+extern WMoveresMode *region_begin_resize(WRegion *reg,
                                          WDrawRubberbandFn *rubfn,
                                          bool cumulative);
 
@@ -91,15 +91,15 @@ extern WMoveresMode *region_begin_move(WRegion *reg,
                                        WDrawRubberbandFn *rubfn,
                                        bool cumulative);
 
-/* dx1/dx2/dy1/dy2: left/right/top/bottom difference to previous values. 
+/* dx1/dx2/dy1/dy2: left/right/top/bottom difference to previous values.
  * left/top negative, bottom/right positive increases size.
  */
-extern void moveresmode_delta_resize(WMoveresMode *mode, 
+extern void moveresmode_delta_resize(WMoveresMode *mode,
                                      int dx1, int dx2, int dy1, int dy2,
                                      WRectangle *rret);
-extern void moveresmode_delta_move(WMoveresMode *mode, 
+extern void moveresmode_delta_move(WMoveresMode *mode,
                                    int dx, int dy, WRectangle *rret);
-extern void moveresmode_rqgeom(WMoveresMode *mode, WRQGeomParams *rq, 
+extern void moveresmode_rqgeom(WMoveresMode *mode, WRQGeomParams *rq,
                                WRectangle *rret);
 extern bool moveresmode_do_end(WMoveresMode *mode, bool apply);
 extern WRegion *moveresmode_target(WMoveresMode *mode);
@@ -111,10 +111,10 @@ extern WMoveresMode *moveres_mode(WRegion *reg);
 /* Note: even if REGION_RQGEOM_(X|Y|W|H) are not all specified, the
  * geom parameter should contain a proper geometry!
  */
-DYNFUN void region_managed_rqgeom(WRegion *reg, WRegion *sub, 
+DYNFUN void region_managed_rqgeom(WRegion *reg, WRegion *sub,
                                   const WRQGeomParams *rqgp,
                                   WRectangle *geomret);
-DYNFUN void region_managed_rqgeom_absolute(WRegion *reg, WRegion *sub, 
+DYNFUN void region_managed_rqgeom_absolute(WRegion *reg, WRegion *sub,
                                            const WRQGeomParams *rqgp,
                                            WRectangle *geomret);
 
@@ -142,7 +142,7 @@ DYNFUN bool region_managed_maximize(WRegion *reg, WRegion *sub, int dir, int act
 DYNFUN void region_size_hints(WRegion *reg, WSizeHints *hints_ret);
 DYNFUN int region_orientation(WRegion *reg);
 
-extern void region_size_hints_correct(WRegion *reg, 
+extern void region_size_hints_correct(WRegion *reg,
                                       int *wp, int *hp, bool min);
 
 extern uint region_min_h(WRegion *reg);
@@ -153,11 +153,11 @@ extern void frame_maximize_horiz(WFrame *frame);
 
 extern void region_convert_root_geom(WRegion *reg, WRectangle *geom);
 
-extern void region_absolute_geom_to_parent(WRegion *reg, 
+extern void region_absolute_geom_to_parent(WRegion *reg,
                                            const WRectangle *rgeom,
                                            WRectangle *pgeom);
 
-extern void rqgeomparams_from_table(WRQGeomParams *rq, 
+extern void rqgeomparams_from_table(WRQGeomParams *rq,
                                     const WRectangle *origg, ExtlTab g);
 
 #endif /* ION_IONCORE_RESIZE_H */

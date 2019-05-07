@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/eventh.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -40,7 +40,7 @@
 
 bool ioncore_handle_event(XEvent *ev)
 {
-    
+
     switch(ev->type){
     CASE_EVENT(MapRequest)
         ioncore_handle_map_request(&(ev->xmaprequest));
@@ -69,7 +69,7 @@ bool ioncore_handle_event(XEvent *ev)
     CASE_EVENT(EnterNotify)
         ioncore_handle_enter_window(ev);
         break;
-    CASE_EVENT(Expose)        
+    CASE_EVENT(Expose)
         ioncore_handle_expose(&(ev->xexpose));
         break;
     CASE_EVENT(KeyPress)
@@ -99,7 +99,7 @@ bool ioncore_handle_event(XEvent *ev)
     default:
         return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -113,12 +113,12 @@ bool ioncore_handle_event(XEvent *ev)
 void ioncore_handle_map_request(const XMapRequestEvent *ev)
 {
     WRegion *reg;
-    
+
     reg=XWINDOW_REGION_OF(ev->window);
-    
+
     if(reg!=NULL)
         return;
-    
+
     ioncore_manage_clientwin(ev->window, TRUE);
 }
 
@@ -132,7 +132,7 @@ void ioncore_handle_unmap_notify(const XUnmapEvent *ev)
         return;
 
     cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
-    
+
     if(cwin!=NULL)
         clientwin_unmapped(cwin);
 }
@@ -143,7 +143,7 @@ void ioncore_handle_destroy_notify(const XDestroyWindowEvent *ev)
     WClientWin *cwin;
 
     cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
-    
+
     if(cwin!=NULL)
         clientwin_destroyed(cwin);
 }
@@ -160,7 +160,7 @@ void ioncore_handle_configure_request(XConfigureRequestEvent *ev)
     XWindowChanges wc;
 
     cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
-    
+
     if(cwin==NULL){
         wc.border_width=ev->border_width;
         wc.sibling=ev->above;
@@ -172,7 +172,7 @@ void ioncore_handle_configure_request(XConfigureRequestEvent *ev)
         XConfigureWindow(ioncore_g.dpy, ev->window, ev->value_mask, &wc);
         return;
     }
-    
+
     clientwin_handle_configure_request(cwin, ev);
 }
 
@@ -186,12 +186,12 @@ void ioncore_handle_client_message(const XClientMessageEvent *ev)
 
     if(ev->message_type!=ioncore_g.atom_wm_change_state)
         return;
-    
+
     cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
 
     if(cwin==NULL)
         return;
-    
+
     if(ev->format==32 && ev->data.l[0]==IconicState){
         if(cwin->state==NormalState)
             iconify_clientwin(cwin);
@@ -211,17 +211,17 @@ static bool pchg_mrsh(void (*fn)(void *p1, void *p2), void **p)
     fn(p[0], p[1]);
     return TRUE;
 }
-                             
+
 
 void ioncore_handle_property(const XPropertyEvent *ev)
 {
     WClientWin *cwin;
-    
+
     cwin=XWINDOW_REGION_OF_T(ev->window, WClientWin);
-    
+
     if(cwin==NULL)
         return;
-    
+
     if(ev->atom==XA_WM_HINTS){
         XWMHints *hints;
         hints=XGetWMHints(ioncore_g.dpy, ev->window);
@@ -251,7 +251,7 @@ void ioncore_handle_property(const XPropertyEvent *ev)
     }else{
         netwm_handle_property(cwin, ev);
     }
-    
+
     /* Call property hook */
     {
         void *p[2];
@@ -275,7 +275,7 @@ void ioncore_handle_mapping_notify(XEvent *ev)
     do{
         XRefreshKeyboardMapping(&(ev->xmapping));
     }while(XCheckTypedEvent(ioncore_g.dpy, MappingNotify, ev));
-    
+
     ioncore_refresh_bindmaps();
 }
 
@@ -290,7 +290,7 @@ void ioncore_handle_expose(const XExposeEvent *ev)
 {
     WWindow *wwin;
     XEvent tmp;
-    
+
     while(XCheckWindowEvent(ioncore_g.dpy, ev->window, ExposureMask, &tmp))
         /* nothing */;
 
@@ -311,29 +311,29 @@ void ioncore_handle_enter_window(XEvent *ev)
 {
     XEnterWindowEvent *eev=&(ev->xcrossing);
     WRegion *reg=NULL;
-    
+
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
-        
+
     if(eev->mode!=NotifyNormal && !ioncore_g.warp_enabled)
         return;
-                
+
     reg=XWINDOW_REGION_OF_T(eev->window, WRegion);
-    
+
     if(reg==NULL)
         return;
-        
+
     if(REGION_IS_ACTIVE(reg))
         return;
-        
+
     if(region_skip_focus(reg))
         return;
-    
+
     if(ioncore_g.focus_next!=NULL &&
        ioncore_g.focus_next_source<IONCORE_FOCUSNEXT_ENTERWINDOW){
         return;
     }
-    
+
     /* If a child of 'reg' is to be focused, do not process this
      * event. (ioncore_g.focus_next should only be set here by
      * another call to use from ioncore_handle_enter_window below.)
@@ -346,7 +346,7 @@ void ioncore_handle_enter_window(XEvent *ev)
             r2=REGION_PARENT_REG(r2);
         }
     }
-    
+
     if(region_goto_flags(reg, (REGION_GOTO_FOCUS|
                                REGION_GOTO_NOWARP|
                                REGION_GOTO_ENTERWINDOW))){
@@ -360,10 +360,10 @@ static bool pointer_in_root(Window root1)
     Window root2=None, win;
     int x, y, wx, wy;
     uint mask;
-    
+
     XQueryPointer(ioncore_g.dpy, root1, &root2, &win,
                   &x, &y, &wx, &wy, &mask);
-    
+
     return (root1==root2);
 }
 
@@ -372,9 +372,9 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
 {
     WRegion *reg;
     WWindow *wwin;
-    
+
     reg=XWINDOW_REGION_OF_T(ev->window, WRegion);
-    
+
     if(reg==NULL)
         return;
 
@@ -385,7 +385,7 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
 
     if(ev->detail==NotifyPointer)
         return;
-    
+
     /* Input contexts */
     if(OBJ_IS(reg, WWindow)){
         wwin=(WWindow*)reg;
@@ -395,15 +395,15 @@ void ioncore_handle_focus_in(const XFocusChangeEvent *ev)
 
     if(ev->detail!=NotifyInferior)
         netwm_set_active(reg);
-    
+
     region_got_focus(reg);
-    
-    if(ioncore_g.focus_next!=NULL && 
+
+    if(ioncore_g.focus_next!=NULL &&
        ioncore_g.focus_next_source<IONCORE_FOCUSNEXT_FALLBACK){
         return;
     }
-    
-    if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone) 
+
+    if((ev->detail==NotifyPointerRoot || ev->detail==NotifyDetailNone)
        && ev->window==region_root_of(reg) /* OBJ_IS(reg, WRootWin) */){
         /* Restore focus if it was returned to a root window and we don't
          * know of a pending focus change.
@@ -423,9 +423,9 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
 {
     WRegion *reg;
     WWindow *wwin;
-    
+
     reg=XWINDOW_REGION_OF_T(ev->window, WRegion);
-    
+
     if(reg==NULL)
         return;
 
@@ -445,7 +445,7 @@ void ioncore_handle_focus_out(const XFocusChangeEvent *ev)
         if(wwin->xic!=NULL)
             XUnsetICFocus(wwin->xic);
     }
-    
+
     if(ev->detail!=NotifyInferior)
         region_lost_focus(reg);
     else
@@ -473,7 +473,7 @@ void ioncore_handle_buttonpress(XEvent *ev)
     while(!finished && ioncore_grab_held()){
         XFlush(ioncore_g.dpy);
         ioncore_get_event(ev, IONCORE_EVENTMASK_PTRLOOP);
-        
+
         if(ev->type==MotionNotify){
             /* Handle sequences of MotionNotify (possibly followed by button
              * release) as one.
@@ -483,7 +483,7 @@ void ioncore_handle_buttonpress(XEvent *ev)
                     XNextEvent(ioncore_g.dpy, ev);
             }
         }
-        
+
         switch(ev->type){
         CASE_EVENT(ButtonRelease)
             if(ioncore_do_handle_buttonrelease(&ev->xbutton))
@@ -514,7 +514,7 @@ void ioncore_handle_keyboard(XEvent *ev)
 {
     if(ioncore_handle_grabs(ev))
         return;
-    
+
     if(ev->type==KeyPress)
         ioncore_do_handle_keypress(&(ev->xkey));
 }

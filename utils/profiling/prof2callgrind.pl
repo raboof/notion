@@ -18,13 +18,13 @@ $callframe{"line"} = 0;
 push(@callstack, \%callframe);
 
 while (<STDIN> =~ /^([ex])\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d{6})\d*/) {
-  my ($action, $calledfunction, $calledfile, $calledline, 
+  my ($action, $calledfunction, $calledfile, $calledline,
 	$callerfunction, $callerfile, $callerline, $sec, $msec) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
   my $callkey = "$calledfile$calledline $callerfile$callerline";
   my $entryArrayRef = $entries{$callkey};
   if ($action eq "e") {
     push(@msAlreadyAccountedFor, 0);
-    
+
     my %callframe = ();
     $callframe{"function"} = $calledfunction;
     $callframe{"file"} = $calledfile;
@@ -40,18 +40,18 @@ while (<STDIN> =~ /^([ex])\t(\S+) ([^:]+):(\d+)\t(\S+) ([^:]+):(\d+)\t(\d+)\.(\d
   if ($action eq "x") {
     if(defined($entryArrayRef) && (scalar(@$entryArrayRef) > 0)) {
       my $entry = pop(@$entryArrayRef);
-      
+
       # Record the 'own time' spent inside the function we're exiting
       print "fl=$calledfile\nfn=$calledfunction\n";
       my $timespentinchildren = pop(@msAlreadyAccountedFor);
-      my $timespentinclusive  = "$sec$msec" - $entry; 
+      my $timespentinclusive  = "$sec$msec" - $entry;
       my $timespentself = $timespentinclusive - $timespentinchildren;
       if ($timespentself < 0) {
           print STDERR "Spent negative amount of time in $calledfunction ($entry-$sec$msec=$timespentinclusive minus $timespentinchildren is $timespentself) !?\n";
           exit 1;
       }
       #print "Time spent in $calledfunction (inclusive): $timespentinclusive\n";
-      my $accountedForSoFar = $msAlreadyAccountedFor[-1]; 
+      my $accountedForSoFar = $msAlreadyAccountedFor[-1];
       my $accountedFor = $accountedForSoFar + $timespentinclusive;
       $msAlreadyAccountedFor[-1] = $accountedFor;
       print "$calledline $timespentself\n";

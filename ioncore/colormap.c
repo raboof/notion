@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/colormap.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -39,10 +39,10 @@ void clientwin_install_colormap(WClientWin *cwin)
         if(cwin->cmapwins[i]==cwin->win)
             found=TRUE;
     }
-    
+
     if(found)
         return;
-    
+
     rootwin_install_colormap(rw, cwin->cmap);
 }
 
@@ -59,7 +59,7 @@ static XContext ctx=None;
 void xwindow_unmanaged_selectinput(Window win, long mask)
 {
     int *p=NULL;
-    
+
     /* We may be monitoring for colourmap changes */
     if(ctx!=None){
         if(XFindContext(ioncore_g.dpy, win, ctx, (XPointer*)&p)==0){
@@ -67,27 +67,27 @@ void xwindow_unmanaged_selectinput(Window win, long mask)
                 mask|=ColormapChangeMask;
         }
     }
-    
+
     XSelectInput(ioncore_g.dpy, win, mask);
 }
 
-                
-        
+
+
 static void xwindow_selcmap(Window win)
 {
     int *p=NULL;
     XWindowAttributes attr;
-    
+
     if(ctx==None)
         ctx=XUniqueContext();
-    
+
     if(XFindContext(ioncore_g.dpy, win, ctx, (XPointer*)&p)==0){
         (*p)++;
     }else{
         p=ALLOC(int);
         if(p==NULL)
             return;
-        
+
         *p=1;
         if(XSaveContext(ioncore_g.dpy, win, ctx, (XPointer)p)!=0){
             warn(TR("Unable to store colourmap watch info."));
@@ -96,7 +96,7 @@ static void xwindow_selcmap(Window win)
 
         if(XWINDOW_REGION_OF(win)==NULL){
             XGetWindowAttributes(ioncore_g.dpy, win, &attr);
-            XSelectInput(ioncore_g.dpy, win, 
+            XSelectInput(ioncore_g.dpy, win,
                          attr.your_event_mask|ColormapChangeMask);
         }
     }
@@ -107,7 +107,7 @@ static void xwindow_unselcmap(Window win)
 {
     int *p=NULL;
     XWindowAttributes attr;
-    
+
     if(ctx==None)
         return;
 
@@ -118,7 +118,7 @@ static void xwindow_unselcmap(Window win)
             free(p);
             if(XWINDOW_REGION_OF(win)==NULL){
                 XGetWindowAttributes(ioncore_g.dpy, win, &attr);
-                XSelectInput(ioncore_g.dpy, win, 
+                XSelectInput(ioncore_g.dpy, win,
                              attr.your_event_mask&~ColormapChangeMask);
             }
         }
@@ -133,21 +133,21 @@ void clientwin_get_colormaps(WClientWin *cwin)
     int i, n;
 
     clientwin_clear_colormaps(cwin);
-    
+
     n=xwindow_get_property(cwin->win, ioncore_g.atom_wm_colormaps,
                            XA_WINDOW, 100L, TRUE, (uchar**)&wins);
-    
+
     if(n<=0)
         return;
-    
+
     cwin->cmaps=ALLOC_N(Colormap, n);
-    
+
     if(cwin->cmaps==NULL)
         return;
-    
+
     cwin->cmapwins=wins;
     cwin->n_cmapwins=n;
-    
+
     for(i=0; i<n; i++){
         if(wins[i]==cwin->win){
             cwin->cmaps[i]=cwin->cmap;
@@ -171,7 +171,7 @@ void clientwin_clear_colormaps(WClientWin *cwin)
         if(cwin->cmapwins[i]!=cwin->win)
             xwindow_unselcmap(cwin->cmapwins[i]);
     }
-    
+
     free(cwin->cmapwins);
     free(cwin->cmaps);
     cwin->n_cmapwins=0;
@@ -189,7 +189,7 @@ void clientwin_clear_colormaps(WClientWin *cwin)
 static void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev)
 {
     int i;
-    
+
     if(ev->window==cwin->win){
         cwin->cmap=ev->colormap;
         if(REGION_IS_ACTIVE(cwin))
@@ -210,10 +210,10 @@ static void handle_cwin_cmap(WClientWin *cwin, const XColormapEvent *ev)
 static void handle_all_cmaps(const XColormapEvent *ev)
 {
     Rb_node node;
-    
+
     if(!ioncore_clientwin_ns.initialised)
         return;
-    
+
     rb_traverse(node, ioncore_clientwin_ns.rb){
         WClientWin *cwin=(WClientWin*)rb_val(node);
         if(cwin!=NULL)
@@ -226,7 +226,7 @@ static void handle_all_cmaps(const XColormapEvent *ev)
 void ioncore_handle_colormap_notify(const XColormapEvent *ev)
 {
     WClientWin *cwin;
-    
+
     if(!ev->new)
         return;
 

@@ -1,6 +1,6 @@
 --
 -- ion/mod_statusbar/ion-statusd/statusd_load.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2006.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
@@ -12,7 +12,7 @@
 --
 -- We should really use getloadavg(3) instead and move the meter to
 -- Ion side to get properly up-to-date loads. But until such an export
--- is made, and we use potentially blocking files and external programs, 
+-- is made, and we use potentially blocking files and external programs,
 -- this meter must be in ion-statusd.
 --
 
@@ -35,7 +35,7 @@ local function get_load_proc()
     local s=f:read('*l')
     f:close()
     local st, en, load=string.find(s, '^(%d+%.%d+ %d+%.%d+ %d+%.%d+)')
-    
+
     return string.gsub((load or ""), " ", ", ")
 end
 
@@ -76,7 +76,7 @@ end
 local l1min, l5min, l15min=2+1, 2+2, 2+3
 
 local function update_load()
-    local l = get_load()    
+    local l = get_load()
     local lds={string.find(l, loadpat)}
     statusd.inform("load", l)
     statusd.inform("load_hint", get_hint(lds[settings.load_hint+2]))

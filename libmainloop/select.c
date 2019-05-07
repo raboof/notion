@@ -1,6 +1,6 @@
 /*
  * ion/libmainloop/mainloop.c
- * 
+ *
  * Partly based on a contributed code.
  *
  * See the included file LICENSE for details.
@@ -21,7 +21,7 @@ static WInputFd *input_fds=NULL;
 static WInputFd *find_input_fd(int fd)
 {
     WInputFd *tmp=input_fds;
-    
+
     while(tmp){
         if(tmp->fd==fd)
             break;
@@ -34,27 +34,27 @@ bool mainloop_register_input_fd(int fd, void *data,
                                 void (*callback)(int fd, void *d))
 {
     WInputFd *tmp;
-    
+
     if(find_input_fd(fd)!=NULL)
         return FALSE;
-    
+
     tmp=ALLOC(WInputFd);
     if(tmp==NULL)
         return FALSE;
-    
+
     tmp->fd=fd;
     tmp->data=data;
     tmp->process_input_fn=callback;
-    
+
     LINK_ITEM(input_fds, tmp, next, prev);
-    
+
     return TRUE;
 }
 
 void mainloop_unregister_input_fd(int fd)
 {
     WInputFd *tmp=find_input_fd(fd);
-    
+
     if(tmp!=NULL){
         UNLINK_ITEM(input_fds, tmp, next, prev);
         free(tmp);
@@ -64,7 +64,7 @@ void mainloop_unregister_input_fd(int fd)
 static void set_input_fds(fd_set *rfds, int *nfds)
 {
     WInputFd *tmp=input_fds;
-    
+
     while(tmp){
         FD_SET(tmp->fd, rfds);
         if(tmp->fd>*nfds)
@@ -76,7 +76,7 @@ static void set_input_fds(fd_set *rfds, int *nfds)
 static void check_input_fds(fd_set *rfds)
 {
     WInputFd *tmp=input_fds, *next=NULL;
-    
+
     while(tmp){
         next=tmp->next;
         if(FD_ISSET(tmp->fd, rfds))
@@ -94,11 +94,11 @@ void mainloop_select()
 {
     fd_set rfds;
     int nfds=0;
-            
+
     FD_ZERO(&rfds);
-    
+
     set_input_fds(&rfds, &nfds);
-    
+
     if(select(nfds+1, &rfds, NULL, NULL, NULL)>0)
         check_input_fds(&rfds);
 }

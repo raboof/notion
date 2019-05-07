@@ -1,7 +1,7 @@
 /*
  * libtu/obj.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2004. 
+ * Copyright (c) Tuomo Valkonen 1999-2004.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -28,16 +28,16 @@ static void do_watches(Obj *obj, bool call);
 void destroy_obj(Obj *obj)
 {
     ClassDescr *d;
-    
+
     if(OBJ_IS_BEING_DESTROYED(obj))
         return;
-    
+
     obj->flags|=OBJ_DEST;
-    
+
     do_watches(obj, TRUE);
-    
+
     d=obj->obj_type;
-    
+
     while(d!=NULL){
         if(d->destroy_fn!=NULL){
             d->destroy_fn(obj);
@@ -45,7 +45,7 @@ void destroy_obj(Obj *obj)
         }
         d=d->ancestor;
     }
-    
+
     do_watches(obj, FALSE);
 
     free(obj);
@@ -61,12 +61,12 @@ void destroy_obj(Obj *obj)
 bool obj_is(const Obj *obj, const ClassDescr *descr)
 {
     ClassDescr *d;
-    
+
     if(obj==NULL)
         return FALSE;
-    
+
     d=obj->obj_type;
-    
+
     while(d!=NULL){
         if(d==descr)
             return TRUE;
@@ -79,12 +79,12 @@ bool obj_is(const Obj *obj, const ClassDescr *descr)
 bool obj_is_str(const Obj *obj, const char *str)
 {
     ClassDescr *d;
-    
+
     if(obj==NULL || str==NULL)
         return FALSE;
-    
+
     d=obj->obj_type;
-    
+
     while(d!=NULL){
         if(strcmp(d->name, str)==0)
             return TRUE;
@@ -97,12 +97,12 @@ bool obj_is_str(const Obj *obj, const char *str)
 const void *obj_cast(const Obj *obj, const ClassDescr *descr)
 {
     ClassDescr *d;
-    
+
     if(obj==NULL)
         return NULL;
-    
+
     d=obj->obj_type;
-    
+
     while(d!=NULL){
         if(d==descr)
             return (void*)obj;
@@ -129,11 +129,11 @@ static int comp_fun(const void *a, const void *b)
 {
     void *af=(void*)((DynFunTab*)a)->func;
     void *bf=(void*)((DynFunTab*)b)->func;
-    
+
     return (af<bf ? -1 : (af==bf ? 0 : 1));
 }
 
-            
+
 DynFun *lookup_dynfun(const Obj *obj, DynFun *func,
                       bool *funnotfound)
 {
@@ -141,16 +141,16 @@ DynFun *lookup_dynfun(const Obj *obj, DynFun *func,
     DynFunTab *df;
     /*DynFunTab dummy={NULL, NULL};*/
     /*dummy.func=func;*/
-    
+
     if(obj==NULL)
         return NULL;
-    
+
     descr=obj->obj_type;
-    
+
     for(; descr!=&Obj_classdescr; descr=descr->ancestor){
         if(descr->funtab==NULL)
             continue;
-        
+
         if(descr->funtab_n==-1){
             /* Need to sort the table. */
             descr->funtab_n=0;
@@ -159,17 +159,17 @@ DynFun *lookup_dynfun(const Obj *obj, DynFun *func,
                 descr->funtab_n++;
                 df++;
             }
-            
+
             if(descr->funtab_n>0){
                 qsort(descr->funtab, descr->funtab_n, sizeof(DynFunTab),
                       comp_fun);
             }
         }
-        
+
         /*
         if(descr->funtab_n==0)
             continue;
-        
+
         df=(DynFunTab*)bsearch(&dummy, descr->funtab, descr->funtab_n,
                                sizeof(DynFunTab), comp_fun);
         if(df!=NULL){
@@ -177,10 +177,10 @@ DynFun *lookup_dynfun(const Obj *obj, DynFun *func,
             return df->handler;
         }
         */
-        
-        /* Using custom bsearch instead of the one in libc is probably 
+
+        /* Using custom bsearch instead of the one in libc is probably
          * faster as the overhead of calling a comparison function would
-         * be significant given that the comparisons are simple and 
+         * be significant given that the comparisons are simple and
          * funtab_n not that big.
          */
         {
@@ -200,7 +200,7 @@ DynFun *lookup_dynfun(const Obj *obj, DynFun *func,
             }
         }
     }
-    
+
     *funnotfound=TRUE;
     return dummy_dyn;
 }
@@ -224,13 +224,13 @@ bool watch_setup(Watch *watch, Obj *obj, WatchHandler *handler)
 {
     if(OBJ_IS_BEING_DESTROYED(obj))
         return FALSE;
-    
+
     watch_reset(watch);
-    
+
     watch->handler=handler;
     LINK_ITEM(obj->obj_watches, watch, next, prev);
     watch->obj=obj;
-    
+
     return TRUE;
 }
 
@@ -238,15 +238,15 @@ void do_watch_reset(Watch *watch, bool call)
 {
     WatchHandler *handler=watch->handler;
     Obj *obj=watch->obj;
-    
+
     watch->handler=NULL;
-    
+
     if(obj==NULL)
         return;
-    
+
     UNLINK_ITEM(obj->obj_watches, watch, next, prev);
     watch->obj=NULL;
-    
+
     if(call && handler!=NULL)
         handler(watch, obj);
 }
@@ -269,7 +269,7 @@ static void do_watches(Obj *obj, bool call)
     Watch *watch, *next;
 
     watch=obj->obj_watches;
-    
+
     while(watch!=NULL){
         next=watch->next;
         do_watch_reset(watch, call);

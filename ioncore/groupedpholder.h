@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/groupedpholder.h
  *
- * Copyright (c) Tuomo Valkonen 2005-2007. 
+ * Copyright (c) Tuomo Valkonen 2005-2007.
  *
  * See the included file LICENSE for details.
  */

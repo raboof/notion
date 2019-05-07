@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/sizehint.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -38,7 +38,7 @@ static void do_correct_aspect(int max_w, int max_h, int ax, int ay,
             h=(w*ay)/ax;
         }
     }
-    
+
     *wret=w;
     *hret=h;
 }
@@ -49,7 +49,7 @@ static void correct_aspect(int max_w, int max_h, const WSizeHints *hints,
 {
     if(!hints->aspect_set)
         return;
-    
+
     if(*wret*hints->max_aspect.y>*hret*hints->max_aspect.x){
         do_correct_aspect(max_w, max_h,
                           hints->min_aspect.x, hints->min_aspect.y,
@@ -64,44 +64,44 @@ static void correct_aspect(int max_w, int max_h, const WSizeHints *hints,
 }
 
 
-void sizehints_correct(const WSizeHints *hints, int *wp, int *hp, 
+void sizehints_correct(const WSizeHints *hints, int *wp, int *hp,
                        bool min, bool override_no_constrain)
 {
     int w=*wp, tw, bw=(hints->base_set ? hints->base_width : 0);
     int h=*hp, th, bh=(hints->base_set ? hints->base_height : 0);
-    
+
     if(min && hints->min_set){
         w=MAXOF(w, hints->min_width);
         h=MAXOF(h, hints->min_height);
     }
-    
+
     if(hints->no_constrain && !override_no_constrain){
         *wp=w;
         *hp=h;
         return;
     }
-    
+
     tw=w-bw;
     th=h-bh;
-    
+
     if(tw>=0 && th>=0)
         correct_aspect(tw, th, hints, &tw, &th);
-    
+
     if(hints->inc_set){
         if(tw>0)
             tw=(tw/hints->width_inc)*hints->width_inc;
         if(th>0)
             th=(th/hints->height_inc)*hints->height_inc;
     }
-    
+
     w=tw+bw;
     h=th+bh;
-    
+
     if(hints->max_set){
         w=MINOF(w, hints->max_width);
         h=MINOF(h, hints->max_height);
     }
-    
+
     *wp=w;
     *hp=h;
 }
@@ -132,12 +132,12 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
         hints->base_width=hints->min_width;
     if(!(hints->flags&PBaseSize) || hints->base_height<0)
         hints->base_height=hints->min_height;
-    
+
     if(hints->flags&PMaxSize){
         hints->max_width=MAXOF(hints->max_width, hints->min_width);
         hints->max_height=MAXOF(hints->max_height, hints->min_height);
     }
-    
+
     hints->flags|=(PBaseSize|PMinSize);
 
     if(hints->flags&PResizeInc){
@@ -146,7 +146,7 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
             hints->flags&=~PResizeInc;
         }
     }
-    
+
     if(hints->flags&PAspect){
         if(hints->min_aspect.x<=0 || hints->min_aspect.y<=0 ||
            hints->min_aspect.x<=0 || hints->min_aspect.y<=0){
@@ -154,7 +154,7 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
             hints->flags&=~PAspect;
         }
     }
-    
+
     if(!(hints->flags&PWinGravity))
         hints->win_gravity=ForgetGravity;
 }
@@ -169,9 +169,9 @@ void xsizehints_sanity_adjust(XSizeHints *hints)
 void sizehints_adjust_for(WSizeHints *hints, WRegion *reg)
 {
     WSizeHints tmp_hints;
-    
+
     region_size_hints(reg, &tmp_hints);
-    
+
     if(tmp_hints.min_set){
         if(!hints->min_set){
             hints->min_set=TRUE;
@@ -184,7 +184,7 @@ void sizehints_adjust_for(WSizeHints *hints, WRegion *reg)
                                     tmp_hints.min_height);
         }
     }
-    
+
     if(tmp_hints.max_set && hints->max_set){
         hints->max_width=MAXOF(hints->max_width,
                                tmp_hints.max_width);
@@ -227,7 +227,7 @@ int xgravity_deltax(int gravity, int left, int right)
 int xgravity_deltay(int gravity, int top, int bottom)
 {
     int hoff=top+bottom;
-    
+
     if(gravity==StaticGravity || gravity==ForgetGravity){
         return -top;
     }else if(gravity==NorthWestGravity || gravity==NorthGravity ||
@@ -281,7 +281,7 @@ void xsizehints_to_sizehints(const XSizeHints *xh, WSizeHints *hints)
     hints->min_aspect.y=xh->min_aspect.y;
     hints->max_aspect.x=xh->max_aspect.x;
     hints->max_aspect.y=xh->max_aspect.y;
-    
+
     hints->max_set=((xh->flags&PMaxSize)!=0);
     hints->min_set=((xh->flags&PMinSize)!=0);
     hints->base_set=((xh->flags&PBaseSize)!=0);

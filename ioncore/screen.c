@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/screen.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -48,7 +48,7 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     Window win;
     XSetWindowAttributes attr;
     ulong attrflags=0;
-    
+
     scr->id=id;
     scr->atom_workspace=None;
     scr->managed_off.x=0;
@@ -57,16 +57,16 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     scr->managed_off.h=0;
     scr->next_scr=NULL;
     scr->prev_scr=NULL;
-    
+
     watch_init(&(scr->notifywin_watch));
     watch_init(&(scr->infowin_watch));
     watch_init(&(scr->workspace_indicatorwin_watch));
 
     attr.background_pixmap=ParentRelative;
     attrflags=CWBackPixmap;
-        
+
     win=XCreateWindow(ioncore_g.dpy, WROOTWIN_ROOT(parent),
-        fp->g.x, fp->g.y, fp->g.w, fp->g.h, 0, 
+        fp->g.x, fp->g.y, fp->g.w, fp->g.h, 0,
         DefaultDepth(ioncore_g.dpy, parent->xscr),
         InputOutput,
         DefaultVisual(ioncore_g.dpy, parent->xscr),
@@ -83,12 +83,12 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     region_set_parent((WRegion*)scr, (WRegion*)rootwin);*/
     scr->mplex.flags|=MPLEX_ADD_TO_END;
     scr->mplex.win.region.flags|=REGION_BINDINGS_ARE_GRABBED;
-    
+
     scr->mplex.win.region.flags|=REGION_MAPPED;
     window_select_input((WWindow*)scr, IONCORE_EVENTMASK_SCREEN);
-    
+
     if(id==0){
-        scr->atom_workspace=XInternAtom(ioncore_g.dpy, 
+        scr->atom_workspace=XInternAtom(ioncore_g.dpy,
                                         "_ION_WORKSPACE", False);
     }else if(id>=0){
         char *str;
@@ -107,7 +107,7 @@ bool screen_init(WScreen *scr, WRootWin *parent, const WFitParams *fp, int id)
     region_add_bindmap((WRegion*)scr, ioncore_mplex_toplevel_bindmap);
 
     LINK_ITEM(ioncore_g.screens, scr, next_scr, prev_scr);
-    
+
     return TRUE;
 }
 
@@ -125,7 +125,7 @@ void screen_deinit(WScreen *scr)
     screen_unnotify_notifywin(scr);
     screen_unnotify_infowin(scr);
     screen_unnotify_if_screen(scr);
-    
+
     mplex_deinit((WMPlex*)scr);
 }
 
@@ -160,7 +160,7 @@ static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
                 return TRUE;
         }
     }
-    
+
     /* Do not attach to ourselves unlike generic WMPlex. */
     return FALSE;
 }
@@ -172,29 +172,29 @@ static bool screen_handle_drop(WScreen *scr, int x, int y, WRegion *dropped)
 /*{{{ Region dynfun implementations */
 
 
-static void screen_managed_changed(WScreen *scr, int mode, bool sw, 
+static void screen_managed_changed(WScreen *scr, int mode, bool sw,
                                    WRegion *reg_)
 {
     if(ioncore_g.opmode==IONCORE_OPMODE_DEINIT)
         return;
-    
+
     if(sw && scr->atom_workspace!=None){
         WRegion *reg=mplex_mx_current(&(scr->mplex));
         const char *n=NULL;
-        
+
         if(reg!=NULL)
             n=region_displayname(reg);
-        
+
         xwindow_set_string_property(region_root_of((WRegion*)scr),
-                                    scr->atom_workspace, 
+                                    scr->atom_workspace,
                                     n==NULL ? "" : n);
     }
-    
+
     if(region_is_activity_r((WRegion*)scr))
         screen_update_notifywin(scr);
-    
+
     screen_update_infowin(scr);
-    
+
     mplex_call_changed_hook((WMPlex*)scr,
                             screen_managed_changed_hook,
                             mode, sw, reg_);
@@ -231,26 +231,26 @@ void screen_activated(WScreen *scr)
 
 
 /*EXTL_DOC
- * Find the screen with numerical id \var{id}. 
+ * Find the screen with numerical id \var{id}.
  */
 EXTL_SAFE
 EXTL_EXPORT
 WScreen *ioncore_find_screen_id(int id)
 {
     WScreen *scr=NULL;
-    
+
     FOR_ALL_SCREENS(scr){
         if(scr->id==id)
             return scr;
     }
-    
+
     return NULL;
 }
 
 
 /*EXTL_DOC
  * Switch focus to the screen with id \var{id} and return it.
- * 
+ *
  * Note that this function is asynchronous; the screen will not
  * actually have received the focus when this function returns.
  */
@@ -274,10 +274,10 @@ static WScreen *current_screen()
         return region_screen_of(ioncore_g.focus_current);
 }
 
-       
+
 /*EXTL_DOC
  * Switch focus to the next screen and return it.
- * 
+ *
  * Note that this function is asynchronous; the screen will not
  * actually have received the focus when this function returns.
  */
@@ -285,7 +285,7 @@ EXTL_EXPORT
 WScreen *ioncore_goto_next_screen()
 {
     WScreen *scr=current_screen();
-    
+
     if(scr!=NULL)
         scr=scr->next_scr;
     if(scr==NULL)
@@ -300,7 +300,7 @@ WScreen *ioncore_goto_next_screen()
 
 /*EXTL_DOC
  * Switch focus to the previous screen and return it.
- * 
+ *
  * Note that this function is asynchronous; the screen will not
  * actually have received the focus when this function returns.
  */
@@ -337,7 +337,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
     bool onmxlist=FALSE, others=FALSE;
     WLListNode *lnode;
     WLListIterTmp tmp;
-    
+
     if(scr==scr->prev_scr && OBJ_IS(reg, WGroupWS)){
         FOR_ALL_NODES_ON_LLIST(lnode, scr->mplex.mx_list, tmp){
             if(lnode->st->reg==reg){
@@ -353,7 +353,7 @@ static WRegion *screen_managed_disposeroot(WScreen *scr, WRegion *reg)
             return NULL;
         }
     }
-    
+
     return reg;
 }
 
@@ -374,25 +374,25 @@ void screen_set_managed_offset(WScreen *scr, const WRectangle *off)
 
 /*EXTL_DOC
  * Set offset of objects managed by the screen from actual screen geometry.
- * The table \var{offset} should contain the entries \code{x}, \code{y}, 
- * \code{w} and \code{h} indicating offsets of that component of screen 
+ * The table \var{offset} should contain the entries \code{x}, \code{y},
+ * \code{w} and \code{h} indicating offsets of that component of screen
  * geometry.
  */
 EXTL_EXPORT_AS(WScreen, set_managed_offset)
 bool screen_set_managed_offset_extl(WScreen *scr, ExtlTab offset)
 {
     WRectangle g;
-    
+
     if(!extl_table_to_rectangle(offset, &g))
         goto err;
-    
+
     if(-g.w>=REGION_GEOM(scr).w)
         goto err;
     if(-g.h>=REGION_GEOM(scr).h)
         goto err;
-    
+
     screen_set_managed_offset(scr, &g);
-    
+
     return TRUE;
 err:
     warn(TR("Invalid offset."));
@@ -417,7 +417,7 @@ static bool create_initial_ws(WScreen *scr)
     WRegion *reg=NULL;
     WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
     ExtlTab lo=ioncore_get_layout("default");
-    
+
     if(lo==extl_table_none()){
         reg=mplex_do_attach_new(&scr->mplex, &par,
                                 (WRegionCreateFn*)create_groupws, NULL);
@@ -425,12 +425,12 @@ static bool create_initial_ws(WScreen *scr)
         reg=mplex_attach_new_(&scr->mplex, &par, 0, lo);
         extl_unref_table(lo);
     }
-    
+
     if(reg==NULL){
         warn(TR("Unable to create a workspace on screen %d."), scr->id);
         return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -439,9 +439,9 @@ bool screen_init_layout(WScreen *scr, ExtlTab tab)
 {
     if(tab==extl_table_none())
         return create_initial_ws(scr);
-    
+
     mplex_load_contents(&scr->mplex, tab);
-    
+
     return TRUE;
 }
 
@@ -452,37 +452,37 @@ bool screen_init_layout(WScreen *scr, ExtlTab tab)
 
 
 static DynFunTab screen_dynfuntab[]={
-    {region_map, 
+    {region_map,
      screen_map},
-    
-    {region_unmap, 
+
+    {region_unmap,
      screen_unmap},
-     
-    {region_activated, 
+
+    {region_activated,
      screen_activated},
-     
-    {region_inactivated, 
+
+    {region_inactivated,
      screen_inactivated},
-    
+
     {(DynFun*)region_managed_disposeroot,
      (DynFun*)screen_managed_disposeroot},
 
     {(DynFun*)region_may_dispose,
      (DynFun*)screen_may_dispose},
 
-    {mplex_managed_changed, 
+    {mplex_managed_changed,
      screen_managed_changed},
-    
-    {region_managed_notify, 
+
+    {region_managed_notify,
      screen_managed_notify},
-    
-    {mplex_managed_geom, 
+
+    {mplex_managed_geom,
      screen_managed_geom},
 
     {(DynFun*)region_get_configuration,
      (DynFun*)screen_get_configuration},
 
-    {(DynFun*)region_handle_drop, 
+    {(DynFun*)region_handle_drop,
      (DynFun*)screen_handle_drop},
 
     END_DYNFUNTAB

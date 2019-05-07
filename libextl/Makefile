@@ -50,7 +50,7 @@ libextl-mkexports: libextl-mkexports.in
 	echo "Error: LUA interpreter and libraries not found (or inconsistent versions)"
 	return -1
 
-endif 
+endif
 
 install:
 	$(INSTALLDIR) $(DESTDIR)$(BINDIR)

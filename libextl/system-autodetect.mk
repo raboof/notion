@@ -110,7 +110,7 @@ LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
 # to check that the code seems to conform to some standards. Depending
 # on the version and vendor of you libc, the options may or may not have
 # expected results. If you define one of C99_SOURCE or XOPEN_SOURCE, you
-# may also have to define the other. 
+# may also have to define the other.
 
 #C89_SOURCE=-ansi
 
@@ -123,7 +123,7 @@ LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
 
 #C99_SOURCE=-std=c99 -DCF_HAS_VA_COPY
 
-# The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
+# The -DCF_HAS_VA_COPY option should allow for some optimisations, and
 # in some cases simply defining
 #C99_SOURCE=-DCF_HAS_VA_COPY
 # might allow for those optimisations to be taken without any  special

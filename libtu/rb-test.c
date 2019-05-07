@@ -22,25 +22,25 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "rb.h"
 #include <stdio.h>
 
-/* an example -- this allocates a red-black tree for integers.  For a 
+/* an example -- this allocates a red-black tree for integers.  For a
  * user-specified number of iterations, it does the following:
 
  * delete a random element in the tree.
  * make two new random elements, and insert them into the tree
- 
+
  * At the end, it prints the sorted list of elements, and then prints
- * stats of the number of black nodes in any path in the tree, and 
+ * stats of the number of black nodes in any path in the tree, and
  * the minimum and maximum path lengths.
-  
+
  * Rb_find_ikey and rb_inserti could have been used, but instead
  * rb_find_gkey and rb_insertg were used to show how they work.
-  
+
  */
 
 int icomp(char *i, char *j)
 {
   int I, J;
-  
+
   I = (int) i;
   J = (int) j;
   if (I == J) return 0;
@@ -66,7 +66,7 @@ main(int argc, char **argv)
   for (i = 0; i < atoi(argv[1]); i++) {
     if (i > 0) {
       j = random()%i;
-      
+
       rb_delete_node(rb_find_gkey(argt, (char *) (a[j]), icomp));
       a[j] = random() % 1000;
       rb_insertg(argt, (char *) (a[j]), NULL, icomp);
@@ -90,7 +90,7 @@ main(int argc, char **argv)
     mxp = (mxp == 0 || mxp < p) ? p : mxp;
     mnp = (mnp == 0 || mxp > p) ? p : mnp;
   }
-  printf("\n");  
+  printf("\n");
 
   printf("Nblack = %d\n", tb);
   printf("Max    = %d\n", mxp);

@@ -1,7 +1,7 @@
 /*
  * ion/mod_mgmtmode/main.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
+ * Copyright (c) Tuomo Valkonen 2004-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -49,7 +49,7 @@ void mod_mgmtmode_deinit()
 bool mod_mgmtmode_init()
 {
     mod_mgmtmode_bindmap=ioncore_alloc_bindmap("WMgmtMode", NULL);
-    
+
     if(mod_mgmtmode_bindmap==NULL)
         return FALSE;
 
@@ -59,7 +59,7 @@ bool mod_mgmtmode_init()
     }
 
     extl_read_config("cfg_mgmtmode", NULL, TRUE);
-    
+
     return TRUE;
 }
 

@@ -87,8 +87,8 @@ X11_INCLUDES=$(shell $(PKG_CONFIG) --cflags-only-I x11 xext)
 DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 # Use the Xutf8 routines (XFree86 extension) instead of the Xmb routines
-# in an UTF-8 locale. (No, you don't need this in UTF-8 locales, and 
-# most likely don't even want. It's only there because both Xmb and 
+# in an UTF-8 locale. (No, you don't need this in UTF-8 locales, and
+# most likely don't even want. It's only there because both Xmb and
 # Xutf8 routines are broken, in different ways.)
 #DEFINES += -DCF_DE_USE_XUTF8
 
@@ -108,7 +108,7 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 HAS_SYSTEM_ASPRINTF=1
 
 # If you're on an archaic system (such as relatively recent *BSD releases)
-# without even dummy multibyte/widechar and localisation support, you may 
+# without even dummy multibyte/widechar and localisation support, you may
 # have to uncomment the following line:
 #DEFINES += -DCF_NO_LOCALE
 
@@ -123,7 +123,7 @@ HAS_SYSTEM_ASPRINTF=1
 
 # You may uncomment this if you know that your system C libary provides
 # asprintf and  vasprintf. (GNU libc does.) If HAS_SYSTEM_ASPRINTF is not
-# defined, an implementation provided in libtu/sprintf_2.2/ is used. 
+# defined, an implementation provided in libtu/sprintf_2.2/ is used.
 HAS_SYSTEM_ASPRINTF ?= 1
 
 # The following setting is needed with GNU libc for clock_gettime and the
@@ -143,12 +143,12 @@ EXTRA_LIBS += -lrt
 
 
 ##
-## C compiler. 
+## C compiler.
 ##
 
 CC ?= gcc
 
-WARN=-W -Wall -pedantic 
+WARN=-W -Wall -pedantic
 
 CFLAGS += -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
@@ -160,7 +160,7 @@ EXPORT_DYNAMIC=-Xlinker --export-dynamic
 # to check that the code seems to conform to some standards. Depending
 # on the version and vendor of you libc, the options may or may not have
 # expected results. If you define one of C99_SOURCE or XOPEN_SOURCE, you
-# may also have to define the other. 
+# may also have to define the other.
 
 #C89_SOURCE=-ansi
 
@@ -174,7 +174,7 @@ XOPEN_SOURCE=-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 
 C99_SOURCE?=-std=c99 -DCF_HAS_VA_COPY
 
-# The -DCF_HAS_VA_COPY option should allow for some optimisations, and 
+# The -DCF_HAS_VA_COPY option should allow for some optimisations, and
 # in some cases simply defining
 #C99_SOURCE=-DCF_HAS_VA_COPY
 # might allow for those optimisations to be taken without any  special

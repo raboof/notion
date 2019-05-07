@@ -66,8 +66,8 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     end
 
     -- Check that no other queries are open in the mplex.
-    local ok=mplex:managed_i(function(r) 
-                                 return not obj_is(r, "WEdln") 
+    local ok=mplex:managed_i(function(r)
+                                 return not obj_is(r, "WEdln")
                              end)
     if not ok then
         return
@@ -238,14 +238,14 @@ mod_query.COLLECT_THRESHOLD=2000
 --DOC
 -- This function can be used to read completions from an external source.
 -- The parameter \var{cp} is the completion proxy to be used,
--- and the string \var{cmd} the shell command to be executed. To its stdout, 
--- the command should on the first line write the \var{common_beg} 
+-- and the string \var{cmd} the shell command to be executed. To its stdout,
+-- the command should on the first line write the \var{common_beg}
 -- parameter of \fnref{WComplProxy.set_completions} (which \var{fn} maybe used
 -- to override) and a single actual completion on each of the successive lines.
 -- The function \var{reshnd} may be used to override a result table
 -- building routine.
 function mod_query.popen_completions(cp, cmd, fn, reshnd)
-    
+
     local pst={cp=cp, maybe_stalled=0}
 
     if not reshnd then
@@ -824,7 +824,7 @@ end
 -- \file{ion-runinxterm}. Two colons ('::') will ask you to press
 -- enter after the command has finished.
 function mod_query.query_exec(mplex)
-    mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler, 
+    mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler,
                     mod_query.exec_completor,
                     "run")
 end

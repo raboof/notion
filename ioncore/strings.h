@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/strings.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -24,7 +24,7 @@ extern bool ioncore_defshortening(const char *rx, const char *rule,
                                   bool always);
 
 extern char *grbrush_make_label(GrBrush *brush, const char *str, uint maxw);
-                                       
+
 extern int str_nextoff(const char *p, int pos);
 extern int str_prevoff(const char *p, int pos);
 extern int str_len(const char *p);

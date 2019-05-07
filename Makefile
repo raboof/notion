@@ -2,7 +2,7 @@
 ## Notion Makefile
 ##
 
-# Include system-specific configuration: auto-generated and optionally local 
+# Include system-specific configuration: auto-generated and optionally local
 include build/system-inc.mk
 
 # List of modules
@@ -55,7 +55,7 @@ dist:
 	git archive --prefix notion-$$RELEASE/ --format=tar.gz $$RELEASE > ../notion-$$RELEASE-src.tar.gz ;\
 	git archive --prefix notion-$$RELEASE/ --format=tar $$RELEASE | bzip2 > ../notion-$$RELEASE-src.tar.bz2 ;\
 	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"snapshot\"/" version.h ;\
-	git add version.h; git commit -m "Released version $$RELEASE" ; git push 
+	git add version.h; git commit -m "Released version $$RELEASE" ; git push
 
 .PHONY: test
 

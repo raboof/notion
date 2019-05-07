@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/panehandle.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -24,7 +24,7 @@ DECLCLASS(WPaneHandle){
     WSplitFloat *splitfloat;
 };
 
-extern bool panehandle_init(WPaneHandle *pwin, 
+extern bool panehandle_init(WPaneHandle *pwin,
                             WWindow *parent, const WFitParams *fp);
 extern WPaneHandle *create_panehandle(WWindow *parent, const WFitParams *fp);
 

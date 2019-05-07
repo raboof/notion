@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/float-placement.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -34,9 +34,9 @@ static void ggeom(WRegion *reg, WRectangle *geom)
 static bool st_filt(WStacking *st, void *lvl)
 {
     uint level=*(uint*)lvl;
-    
-    return (st->reg!=NULL && 
-            REGION_IS_MAPPED(st->reg) && 
+
+    return (st->reg!=NULL &&
+            REGION_IS_MAPPED(st->reg) &&
             st->level==level);
 }
 
@@ -57,10 +57,10 @@ static WRegion* is_occupied(WGroup *ws, uint level, const WRectangle *r)
     WStackingIterTmp tmp;
     WStacking *st;
     WRectangle p;
-    
+
     FOR_ALL_STACKING_NODES(st, ws, level, tmp){
         ggeom(st->reg, &p);
-        
+
         if(r->x>=p.x+p.w)
             continue;
         if(r->y>=p.y+p.h)
@@ -71,7 +71,7 @@ static WRegion* is_occupied(WGroup *ws, uint level, const WRectangle *r)
             continue;
         return st->reg;
     }
-    
+
     return NULL;
 }
 
@@ -82,14 +82,14 @@ static int next_least_x(WGroup *ws, uint level, int x)
     int retx=REGION_GEOM(ws).x+REGION_GEOM(ws).w;
     WStackingIterTmp tmp;
     WStacking *st;
-    
+
     FOR_ALL_STACKING_NODES(st, ws, level, tmp){
         ggeom(st->reg, &p);
-        
+
         if(p.x+p.w>x && p.x+p.w<retx)
             retx=p.x+p.w;
     }
-    
+
     return retx+1;
 }
 
@@ -101,14 +101,14 @@ static int next_lowest_y(WGroup *ws, uint level, int y)
     int rety=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
     WStackingIterTmp tmp;
     WStacking *st;
-    
+
     FOR_ALL_STACKING_NODES(st, ws, level, tmp){
         ggeom(st->reg, &p);
-        
+
         if(p.y+p.h>y && p.y+p.h<rety)
             rety=p.y+p.h;
     }
-    
+
     return rety+1;
 }
 
@@ -118,14 +118,14 @@ static bool tiling_placement(WGroup *ws, uint level, WRectangle *g)
     WRegion *p;
     WRectangle r, r2;
     int maxx, maxy;
-    
+
     r=REGION_GEOM(ws);
     r.w=g->w;
     r.h=g->h;
 
     maxx=REGION_GEOM(ws).x+REGION_GEOM(ws).w;
     maxy=REGION_GEOM(ws).y+REGION_GEOM(ws).h;
-    
+
     if(ioncore_placement_method==PLACEMENT_UDLR){
         while(r.x<maxx){
             p=is_occupied(ws, level, &r);

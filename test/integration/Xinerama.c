@@ -65,7 +65,7 @@ static void initFakeXinerama()
     char buf[ 4096 ];
     FILE* f;
     int i;
-    // re-init every time we're invoked, because we want to be able to test 
+    // re-init every time we're invoked, because we want to be able to test
     // adding/removing screens
     //if( num_screens != -1 )
     //    return;
@@ -133,7 +133,7 @@ Bool XineramaIsActive(Display *dpy)
     return num_screens != 0;
 }
 
-XineramaScreenInfo * 
+XineramaScreenInfo *
 XineramaQueryScreens(
    Display *dpy,
    int     *number

@@ -298,9 +298,9 @@ end
 --   Variable & Type & Description \\
 --   \var{template} & string & The template; see
 --                             Section \ref{sec:statusbar}. \\
---   \var{pos} & string & Position: \code{"tl"}, \code{"tr"}, 
+--   \var{pos} & string & Position: \code{"tl"}, \code{"tr"},
 --                        \code{"bl"} or \code{"br"}
---                        (for the obvious combinations of 
+--                        (for the obvious combinations of
 --                        top/left/bottom/right). \\
 --   \var{screen} & integer & Screen number to create the statusbar on. \\
 --   \var{fullsize} & boolean & If set, the statusbar will waste

@@ -38,7 +38,7 @@ it.
 Mark exported functions as follows in your source files:
 
   * Global or module functions:
-  
+
       EXTL_EXPORT
       int foobar(const char *s)
       {
@@ -46,9 +46,9 @@ Mark exported functions as follows in your source files:
       }
 
   * Classes and methods:
-   
+
       EXTL_CLASS(Foo, Obj)
-   
+
       EXTL_EXPORT_MEMBER
       void foo_set_callback(Foo *cls, ExtlFn fn)
 
@@ -57,10 +57,10 @@ Mark exported functions as follows in your source files:
      be the name of parent class of the first parameter.
 
   * Export in given module (plain table) or class:
-  
+
       EXTL_EXPORT_AS(baz, somefun)
       ExtlTab just_some_name_we_dont_use_on_the_lua_side()
-  
+
 
 If you pass libextl-mkexport the option '-module modname', then all
 EXTL_EXPORTed functions must be prefixed with 'modname_' and will be put in

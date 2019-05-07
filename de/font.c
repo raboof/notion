@@ -2,7 +2,7 @@
  * notion/de/font.c
  *
  * Copyright (c) the Notion team 2013.
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -36,9 +36,9 @@ DEFont *de_load_font(const char *fontname)
     XFontSet fontset=NULL;
     XFontStruct *fontstruct=NULL;
     const char *default_fontname=de_default_fontname();
-    
+
     assert(fontname!=NULL);
-    
+
     /* There shouldn't be that many fonts... */
     for(fnt=fonts; fnt!=NULL; fnt=fnt->next){
         if(strcmp(fnt->pattern, fontname)==0){
@@ -46,9 +46,9 @@ DEFont *de_load_font(const char *fontname)
             return fnt;
         }
     }
-    
+
     if(ioncore_g.use_mb){
-        LOG(DEBUG, FONT, "Loading fontset %s", fontname); 
+        LOG(DEBUG, FONT, "Loading fontset %s", fontname);
         fontset=de_create_font_set(fontname);
         if(fontset!=NULL){
             if(XContextDependentDrawing(fontset)){
@@ -58,10 +58,10 @@ DEFont *de_load_font(const char *fontname)
             }
         }
     }else{
-        LOG(DEBUG, FONT, "Loading fontstruct %s", fontname); 
+        LOG(DEBUG, FONT, "Loading fontstruct %s", fontname);
         fontstruct=XLoadQueryFont(ioncore_g.dpy, fontname);
     }
-    
+
     if(fontstruct==NULL && fontset==NULL){
         if(strcmp(fontname, default_fontname)!=0){
             DEFont *fnt;
@@ -74,21 +74,21 @@ DEFont *de_load_font(const char *fontname)
         }
         return NULL;
     }
-    
+
     fnt=ALLOC(DEFont);
-    
+
     if(fnt==NULL)
         return NULL;
-    
+
     fnt->fontset=fontset;
     fnt->fontstruct=fontstruct;
     fnt->pattern=scopy(fontname);
     fnt->next=NULL;
     fnt->prev=NULL;
     fnt->refcount=1;
-    
+
     LINK_ITEM(fonts, fnt, next, prev);
-    
+
     return fnt;
 }
 
@@ -97,12 +97,12 @@ bool de_set_font_for_style(DEStyle *style, DEFont *font)
 {
     if(style->font!=NULL)
         de_free_font(style->font);
-    
+
     style->font=font;
     font->refcount++;
-    
+
     if(style->font->fontstruct!=NULL){
-        XSetFont(ioncore_g.dpy, style->normal_gc, 
+        XSetFont(ioncore_g.dpy, style->normal_gc,
                  style->font->fontstruct->fid);
     }
 
@@ -114,17 +114,17 @@ bool de_load_font_for_style(DEStyle *style, const char *fontname)
 {
     if(style->font!=NULL)
         de_free_font(style->font);
-    
+
     style->font=de_load_font(fontname);
 
     if(style->font==NULL)
         return FALSE;
-    
+
     if(style->font->fontstruct!=NULL){
-        XSetFont(ioncore_g.dpy, style->normal_gc, 
+        XSetFont(ioncore_g.dpy, style->normal_gc,
                  style->font->fontstruct->fid);
     }
-    
+
     return TRUE;
 }
 
@@ -133,14 +133,14 @@ void de_free_font(DEFont *font)
 {
     if(--font->refcount!=0)
         return;
-    
+
     if(font->fontset!=NULL)
         XFreeFontSet(ioncore_g.dpy, font->fontset);
     if(font->fontstruct!=NULL)
         XFreeFont(ioncore_g.dpy, font->fontstruct);
     if(font->pattern!=NULL)
         free(font->pattern);
-    
+
     UNLINK_ITEM(fonts, font, next, prev);
     free(font);
 }
@@ -158,7 +158,7 @@ void debrush_get_font_extents(DEBrush *brush, GrFontExtents *fnte)
         DE_RESET_FONT_EXTENTS(fnte);
         return;
     }
-    
+
     defont_get_font_extents(brush->d->font, fnte);
 }
 
@@ -180,7 +180,7 @@ void defont_get_font_extents(DEFont *font, GrFontExtents *fnte)
         fnte->baseline=fnt->ascent;
         return;
     }
-    
+
 fail:
     DE_RESET_FONT_EXTENTS(fnte);
 }
@@ -190,7 +190,7 @@ uint debrush_get_text_width(DEBrush *brush, const char *text, uint len)
 {
     if(brush->d->font==NULL || text==NULL || len==0)
         return 0;
-    
+
     return defont_get_text_width(brush->d->font, text, len);
 }
 
@@ -221,26 +221,26 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
 
 
 void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
-                                    const char *str, int len, bool needfill, 
+                                    const char *str, int len, bool needfill,
                                     DEColourGroup *colours)
 {
     GC gc=brush->d->normal_gc;
 
     if(brush->d->font==NULL)
         return;
-    
+
     XSetForeground(ioncore_g.dpy, gc, colours->fg);
-    
+
     if(!needfill){
         if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
             if(ioncore_g.enc_utf8)
-                Xutf8DrawString(ioncore_g.dpy, brush->win, 
+                Xutf8DrawString(ioncore_g.dpy, brush->win,
                                 brush->d->font->fontset,
                                 gc, x, y, str, len);
             else
 #endif
-                XmbDrawString(ioncore_g.dpy, brush->win, 
+                XmbDrawString(ioncore_g.dpy, brush->win,
                               brush->d->font->fontset,
                               gc, x, y, str, len);
         }else if(brush->d->font->fontstruct!=NULL){
@@ -251,12 +251,12 @@ void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
         if(brush->d->font->fontset!=NULL){
 #ifdef CF_DE_USE_XUTF8
             if(ioncore_g.enc_utf8)
-                Xutf8DrawImageString(ioncore_g.dpy, brush->win, 
+                Xutf8DrawImageString(ioncore_g.dpy, brush->win,
                                      brush->d->font->fontset,
                                      gc, x, y, str, len);
             else
 #endif
-                XmbDrawImageString(ioncore_g.dpy, brush->win, 
+                XmbDrawImageString(ioncore_g.dpy, brush->win,
                                    brush->d->font->fontset,
                                    gc, x, y, str, len);
         }else if(brush->d->font->fontstruct!=NULL){
@@ -267,7 +267,7 @@ void debrush_do_draw_string_default(DEBrush *brush, int x, int y,
 
 
 void debrush_do_draw_string(DEBrush *brush, int x, int y,
-                            const char *str, int len, bool needfill, 
+                            const char *str, int len, bool needfill,
                             DEColourGroup *colours)
 {
     CALL_DYN(debrush_do_draw_string, brush, (brush, x, y, str, len,

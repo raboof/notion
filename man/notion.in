@@ -7,7 +7,7 @@ Notion - an X11 window manager
 .SH "DESCRIPTION"
 
 Notion is a tiling tabbed window manager designed with keyboard users in mind.
- 
+
 .SH "OPTIONS"
 .TP
 .B \-display host:display.screen
@@ -42,7 +42,7 @@ Show about text (version, author, license)
 This section is an overview of the types objects that appear on an X
 display managed by Notion and their relationships in a standard setup. This
 information is necessary to understand the operations and availability
-of the different key bindings explained below. For a more detailed 
+of the different key bindings explained below. For a more detailed
 explanation, needed for writing custom bindings configuration files,
 see the additional documentation available from the Notion Web page.
 
@@ -54,14 +54,14 @@ one can be displayed at a time.
 
 Workspaces themselves may contain \fBtilings\fP and detached/floating
 \fBframes\fP. A workspace containing no tilings and only detached/floating
-windows is also called a \fBfloating workspace\fP. Tilings themselves contain 
-\fBframes\fP tiled to fill the screen, and possibly a statusbar or dock. Akin 
-to screens, frames multiplex other objects, but in this case mostly client 
-window \fBgroups\fP. Most of the time, frames are the only trace of Notion 
-you see on the screen. Frames may have border decorations, and they have a 
+windows is also called a \fBfloating workspace\fP. Tilings themselves contain
+\fBframes\fP tiled to fill the screen, and possibly a statusbar or dock. Akin
+to screens, frames multiplex other objects, but in this case mostly client
+window \fBgroups\fP. Most of the time, frames are the only trace of Notion
+you see on the screen. Frames may have border decorations, and they have a
 \fBtab\fP for each multiplexed object.
 
-\fBQueries\fP are boxes that appear at the bottoms of frames or screens 
+\fBQueries\fP are boxes that appear at the bottoms of frames or screens
 to ask you for textual input to execute an action that depends on it.
 Most queries support tab-completion.
 

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/manage.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -80,18 +80,18 @@ extern bool region_manage_clientwin(WRegion *reg, WClientWin *cwin,
 DYNFUN WPHolder *region_prepare_manage(WRegion *reg, const WClientWin *cwin,
                                        const WManageParams *par, int redir);
 
-extern WPHolder *region_prepare_manage_default(WRegion *reg, 
+extern WPHolder *region_prepare_manage_default(WRegion *reg,
                                                const WClientWin *cwin,
-                                               const WManageParams *par, 
+                                               const WManageParams *par,
                                                int redir);
 
 
-extern WPHolder *region_prepare_manage_transient(WRegion *reg, 
+extern WPHolder *region_prepare_manage_transient(WRegion *reg,
                                                  const WClientWin *cwin,
                                                  const WManageParams *param,
                                                  int unused);
 
-extern WPHolder *region_prepare_manage_transient_default(WRegion *reg, 
+extern WPHolder *region_prepare_manage_transient_default(WRegion *reg,
                                                          const WClientWin *cwin,
                                                          const WManageParams *param,
                                                          int unused);

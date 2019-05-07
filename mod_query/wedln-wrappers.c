@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/wedln-wrappers.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -230,7 +230,7 @@ const char *wedln_contents(WEdln *wedln)
 }
 
 /*EXTL_DOC
- * Get current editing point. 
+ * Get current editing point.
  * Beginning of the edited line is point 0.
  */
 EXTL_SAFE

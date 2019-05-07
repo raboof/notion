@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/groupedpholder.c
  *
- * Copyright (c) Tuomo Valkonen 2005-2007. 
+ * Copyright (c) Tuomo Valkonen 2005-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -20,14 +20,14 @@
 bool groupedpholder_init(WGroupedPHolder *ph, WPHolder *cont)
 {
     assert(cont!=NULL);
-    
+
     pholder_init(&(ph->ph));
 
     ph->cont=cont;
-    
+
     return TRUE;
 }
- 
+
 
 WGroupedPHolder *create_groupedpholder(WPHolder *cont)
 {
@@ -41,7 +41,7 @@ void groupedpholder_deinit(WGroupedPHolder *ph)
         destroy_obj((Obj*)ph->cont);
         ph->cont=NULL;
     }
-    
+
     pholder_deinit(&(ph->ph));
 }
 
@@ -52,7 +52,7 @@ void groupedpholder_deinit(WGroupedPHolder *ph)
 /*{{{ Attach */
 
 
-static bool grouped_do_attach_final(WGroupCW *cwg, 
+static bool grouped_do_attach_final(WGroupCW *cwg,
                                     WRegion *reg,
                                     WGroupAttachParams *param)
 {
@@ -68,13 +68,13 @@ static bool grouped_do_attach_final(WGroupCW *cwg,
     param->geom.h=REGION_GEOM(reg).h;
     param->szplcy=SIZEPOLICY_FULL_EXACT;
     param->szplcy_set=TRUE;
-    
+
     return group_do_attach_final(&cwg->grp, reg, param);
 }
 
 
-WRegion *grouped_handler(WWindow *par, 
-                         const WFitParams *fp, 
+WRegion *grouped_handler(WWindow *par,
+                         const WFitParams *fp,
                          void *frp_)
 {
     WRegionAttachData *data=(WRegionAttachData*)frp_;
@@ -82,27 +82,27 @@ WRegion *grouped_handler(WWindow *par,
     WGroupCW *cwg;
     WRegion *reg;
     WStacking *st;
-    
+
     cwg=create_groupcw(par, fp);
-    
+
     if(cwg==NULL)
         return NULL;
-    
+
     param.level_set=1;
     param.level=STACKING_LEVEL_BOTTOM;
     param.switchto_set=1;
     param.switchto=1;
     param.bottom=1;
-    
+
     if(!(fp->mode&REGION_FIT_WHATEVER)){
         /* Comm. hack */
         param.geom_set=TRUE;
     }
-    
-    reg=region_attach_helper((WRegion*)cwg, par, fp, 
+
+    reg=region_attach_helper((WRegion*)cwg, par, fp,
                              (WRegionDoAttachFn*)grouped_do_attach_final,
                              &param, data);
-    
+
     if(reg==NULL){
         destroy_obj((Obj*)cwg);
         return NULL;
@@ -116,14 +116,14 @@ WRegion *groupedpholder_do_attach(WGroupedPHolder *ph, int flags,
                                   WRegionAttachData *data)
 {
     WRegionAttachData data2;
-    
+
     if(ph->cont==NULL)
         return FALSE;
 
     data2.type=REGION_ATTACH_NEW;
     data2.u.n.fn=grouped_handler;
     data2.u.n.param=data;
-        
+
     return pholder_do_attach(ph->cont, flags, &data2);
 }
 
@@ -153,13 +153,13 @@ WRegion *groupedpholder_do_target(WGroupedPHolder *ph)
 WPHolder *groupedpholder_do_root(WGroupedPHolder *ph)
 {
     WPHolder *root;
-    
+
     if(ph->cont==NULL)
         return NULL;
-    
+
     root=pholder_root(ph->cont);
-    
-    return (root!=ph->cont 
+
+    return (root!=ph->cont
             ? root
             : &ph->ph);
 }
@@ -172,22 +172,22 @@ WPHolder *groupedpholder_do_root(WGroupedPHolder *ph)
 
 
 static DynFunTab groupedpholder_dynfuntab[]={
-    {(DynFun*)pholder_do_attach, 
+    {(DynFun*)pholder_do_attach,
      (DynFun*)groupedpholder_do_attach},
 
-    {(DynFun*)pholder_do_goto, 
+    {(DynFun*)pholder_do_goto,
      (DynFun*)groupedpholder_do_goto},
 
-    {(DynFun*)pholder_do_target, 
+    {(DynFun*)pholder_do_target,
      (DynFun*)groupedpholder_do_target},
-     
-    {(DynFun*)pholder_do_root, 
+
+    {(DynFun*)pholder_do_root,
      (DynFun*)groupedpholder_do_root},
-    
+
     END_DYNFUNTAB
 };
 
-IMPLCLASS(WGroupedPHolder, WPHolder, groupedpholder_deinit, 
+IMPLCLASS(WGroupedPHolder, WPHolder, groupedpholder_deinit,
           groupedpholder_dynfuntab);
 
 

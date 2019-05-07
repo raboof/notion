@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/attach.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -31,15 +31,15 @@ static WRegion *doit_new(WRegion *mgr,
                          WRegionCreateFn *fn, void *fn_param)
 {
     WRegion *reg=fn(par, fp, fn_param);
-    
+
     if(reg==NULL)
         return NULL;
-        
+
     if(!cont(mgr, reg, cont_param)){
         destroy_obj((Obj*)reg);
         return NULL;
     }
-    
+
     return reg;
 }
 
@@ -52,23 +52,23 @@ static WRegion *doit_reparent(WRegion *mgr,
     WFitParams fp2;
     WRegion *disposeroot;
     WScreen *old_scr=region_screen_of(reg);
-    
+
     if(!region_ancestor_check(mgr, reg)){
         warn(TR("Attempt to make region %s manage its ancestor %s."),
              region_name(mgr), region_name(reg));
         return NULL;
     }
-    
+
     disposeroot=region_disposeroot(reg);
-    
+
     if(disposeroot==NULL){
         /* Region may not be reparented */
         return NULL;
     }
-    
+
     if(fp->mode&REGION_FIT_WHATEVER){
         /* fp->g is not final; substitute size with current to avoid
-         * useless resizing. 
+         * useless resizing.
          */
         fp2.mode=fp->mode;
         fp2.g.x=fp->g.x;
@@ -77,53 +77,53 @@ static WRegion *doit_reparent(WRegion *mgr,
         fp2.g.h=REGION_GEOM(reg).h;
         fp=&fp2;
     }
-    
+
     if(!region_fitrep(reg, par, fp)){
         warn(TR("Unable to reparent."));
         return NULL;
     }
-    
+
     region_detach_manager(reg);
-    
+
     if(old_scr!=NULL)
         screen_update_notifywin(old_scr);
-    
+
     ioncore_screen_activity_notify(reg, ioncore_g.notifies.activity);
-    
+
     if(!cont(mgr, reg, cont_param)){
         WScreen *scr=region_screen_of(reg);
-        
+
         warn(TR("Unexpected attach error: "
                 "trying to recover by attaching to screen."));
-        
+
         if(scr!=NULL){
             /* Try to attach to screen, to have `reg` attached at least
              * somewhere. For better recovery, we could try to get
              * a placeholder for `reg` before we detach it, but this
              * would add unnecessary overhead in the usual succesfull
              * case. (This failure is supposed to be _very_ rare!)
-             * We intentionally also do not region_postdetach_dispose 
+             * We intentionally also do not region_postdetach_dispose
              * on recovery.
              */
-            int flags=(region_may_control_focus(reg) 
-                       ? MPLEX_ATTACH_SWITCHTO 
+            int flags=(region_may_control_focus(reg)
+                       ? MPLEX_ATTACH_SWITCHTO
                        : 0);
             if(mplex_attach_simple(&scr->mplex, reg, flags)!=NULL)
                 return NULL;
         }
-        
+
         warn(TR("Failed recovery."));
-        
+
         return NULL;
     }
-    
+
     region_postdetach_dispose(reg, disposeroot);
-    
+
     return reg;
 }
 
 
-static WRegion *wrap_load(WWindow *par, const WFitParams *fp, 
+static WRegion *wrap_load(WWindow *par, const WFitParams *fp,
                           ExtlTab *tab)
 {
     return create_region_load(par, fp, *tab);
@@ -139,7 +139,7 @@ static WRegion *doit_load(WRegion *mgr,
                           ExtlTab tab)
 {
     WRegion *reg=NULL;
-    
+
     if(extl_table_gets_o(tab, "reg", (Obj**)&reg)){
         if(!OBJ_IS(reg, WRegion))
             return FALSE;
@@ -148,7 +148,7 @@ static WRegion *doit_load(WRegion *mgr,
         if(reg==NULL)
             return NULL;
     }*/
-    
+
     if(reg!=NULL){
         return doit_reparent(mgr, par, fp, cont, cont_param, reg);
     }else{
@@ -163,7 +163,7 @@ WRegion *region_attach_helper(WRegion *mgr,
                               const WRegionAttachData *data)
 {
     if(data->type==REGION_ATTACH_NEW){
-        return doit_new(mgr, par, fp, fn, fn_param, 
+        return doit_new(mgr, par, fp, fn, fn_param,
                         data->u.n.fn, data->u.n.param);
     }else if(data->type==REGION_ATTACH_LOAD){
         return doit_load(mgr, par, fp, fn, fn_param, data->u.tab);
@@ -184,13 +184,13 @@ WRegion *region_attach_helper(WRegion *mgr,
 bool region_ancestor_check(WRegion *dst, WRegion *reg)
 {
     WRegion *reg2;
-    
+
     /* Check that reg is not a parent or manager of mgr */
     for(reg2=dst; reg2!=NULL; reg2=REGION_MANAGER(reg2)){
         if(reg2==reg)
             return FALSE;
     }
-    
+
     for(reg2=REGION_PARENT_REG(dst); reg2!=NULL; reg2=REGION_PARENT_REG(reg2)){
         if(reg2==reg)
             return FALSE;
@@ -202,7 +202,7 @@ bool region_ancestor_check(WRegion *dst, WRegion *reg)
 
 void region_postdetach_dispose(WRegion *reg, WRegion *disposeroot)
 {
-    /* disposeroot should be destroyed (as empty and useless) unless it 
+    /* disposeroot should be destroyed (as empty and useless) unless it
      * still, in fact, is an ancestor of reg.
      */
     if(disposeroot!=reg && region_ancestor_check(reg, disposeroot))

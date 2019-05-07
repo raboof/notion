@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/history.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -28,7 +28,7 @@ int get_index(int i)
         return -1;
     return (hist_head+i)%HISTORY_SIZE;
 }
-    
+
 
 /*EXTL_DOC
  * Push an entry into line editor history.
@@ -37,12 +37,12 @@ EXTL_EXPORT
 bool mod_query_history_push(const char *str)
 {
     char *s=scopy(str);
-    
+
     if(s==NULL)
         return FALSE;
-    
+
     mod_query_history_push_(s);
-    
+
     return TRUE;
 }
 
@@ -50,7 +50,7 @@ bool mod_query_history_push(const char *str)
 void mod_query_history_push_(char *str)
 {
     int ndx=mod_query_history_search(str, 0, FALSE, TRUE);
-    
+
     if(ndx==0){
         free(str);
         return; /* First entry already */
@@ -65,16 +65,16 @@ void mod_query_history_push_(char *str)
         }
         hist_count--;
     }
-    
+
     hist_head--;
     if(hist_head<0)
         hist_head=HISTORY_SIZE-1;
-    
+
     if(hist_count==HISTORY_SIZE)
         free(hist[hist_head]);
     else
         hist_count++;
-    
+
     hist[hist_head]=str;
 }
 
@@ -111,10 +111,10 @@ void mod_query_history_clear()
 static bool match(const char *h, const char *b, bool exact)
 {
     const char *h_;
-    
+
     if(b==NULL)
         return TRUE;
-    
+
     /* Special case: search in any context. */
     if(*b=='*' && *(b+1)==':'){
         b=b+2;
@@ -122,7 +122,7 @@ static bool match(const char *h, const char *b, bool exact)
         if(h_!=NULL)
             h=h_+1;
     }
-    
+
     return (exact
             ? strcmp(h, b)==0
             : strncmp(h, b, strlen(b))==0);
@@ -138,7 +138,7 @@ static const char *skip_colon(const char *s)
 
 /*EXTL_DOC
  * Try to find matching history entry. Returns -1 if none was
- * found. The parameter \var{from} specifies where to start 
+ * found. The parameter \var{from} specifies where to start
  * searching from, and \var{bwd} causes backward search from
  * that point. If \var{exact} is not set, \var{s} only required
  * to be a prefix of the match.
@@ -165,10 +165,10 @@ uint mod_query_history_complete(const char *s, char ***h_ret)
 {
     char **h=ALLOC_N(char *, hist_count);
     int i, n=0;
-    
+
     if(h==NULL)
         return 0;
-    
+
     for(i=0; i<hist_count; i++){
         int j=get_index(i);
         if(j<0)
@@ -179,12 +179,12 @@ uint mod_query_history_complete(const char *s, char ***h_ret)
                 n++;
         }
     }
-    
+
     if(n==0)
         free(h);
     else
         *h_ret=h;
-    
+
     return n;
 }
 
@@ -203,6 +203,6 @@ ExtlTab mod_query_history_table()
         int j=get_index(i);
         extl_table_seti_s(tab, i+1, hist[j]);
     }
-    
+
     return tab;
 }

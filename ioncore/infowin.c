@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/infowin.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -26,37 +26,37 @@ bool infowin_init(WInfoWin *p, WWindow *parent, const WFitParams *fp,
                   const char *style)
 {
     XSetWindowAttributes attr;
-    
+
     if(!window_init(&(p->wwin), parent, fp, "WInfoWin"))
         return FALSE;
-    
+
     p->buffer=ALLOC_N(char, INFOWIN_BUFFER_LEN);
     if(p->buffer==NULL)
         goto fail;
     p->buffer[0]='\0';
-    
+
     if(style==NULL)
         p->style=scopy("*");
     else
         p->style=scopy(style);
     if(p->style==NULL)
         goto fail2;
-    
+
     p->brush=NULL;
-    
+
     gr_stylespec_init(&p->attr);
-    
+
     infowin_updategr(p);
-    
+
     if(p->brush==NULL)
         goto fail3;
-    
+
     p->wwin.region.flags|=REGION_SKIP_FOCUS;
-    
+
     /* Enable save unders */
     attr.save_under=True;
     XChangeWindowAttributes(ioncore_g.dpy, p->wwin.win, CWSaveUnder, &attr);
-    
+
     window_select_input(&(p->wwin), IONCORE_EVENTMASK_NORMAL);
 
     return TRUE;
@@ -66,7 +66,7 @@ fail3:
     free(p->style);
 fail2:
     free(p->buffer);
-fail:    
+fail:
     window_deinit(&(p->wwin));
     return FALSE;
 }
@@ -90,14 +90,14 @@ void infowin_deinit(WInfoWin *p)
         free(p->style);
         p->style=NULL;
     }
-    
+
     if(p->brush!=NULL){
         grbrush_release(p->brush);
         p->brush=NULL;
     }
-    
+
     gr_stylespec_unalloc(&p->attr);
-    
+
     window_deinit(&(p->wwin));
 }
 
@@ -111,10 +111,10 @@ void infowin_deinit(WInfoWin *p)
 void infowin_draw(WInfoWin *p, bool UNUSED(complete))
 {
     WRectangle g;
-    
+
     if(p->brush==NULL)
         return;
-    
+
     g.x=0;
     g.y=0;
     g.w=REGION_GEOM(p).w;
@@ -130,20 +130,20 @@ void infowin_draw(WInfoWin *p, bool UNUSED(complete))
 void infowin_updategr(WInfoWin *p)
 {
     GrBrush *nbrush;
-    
+
     assert(p->style!=NULL);
-    
-    nbrush=gr_get_brush(p->wwin.win, 
+
+    nbrush=gr_get_brush(p->wwin.win,
                         region_rootwin_of((WRegion*)p),
                         p->style);
     if(nbrush==NULL)
         return;
-    
+
     if(p->brush!=NULL)
         grbrush_release(p->brush);
-    
+
     p->brush=nbrush;
-    
+
     window_draw(&(p->wwin), TRUE);
 }
 
@@ -174,15 +174,15 @@ static void infowin_resize(WInfoWin *p)
     const char *str=INFOWIN_BUFFER(p);
     GrBorderWidths bdw;
     GrFontExtents fnte;
-    
+
     rq.flags=REGION_RQGEOM_WEAK_X|REGION_RQGEOM_WEAK_Y;
-    
+
     rq.geom.x=REGION_GEOM(p).x;
     rq.geom.y=REGION_GEOM(p).y;
-    
+
     grbrush_get_border_widths(p->brush, &bdw);
     grbrush_get_font_extents(p->brush, &fnte);
-        
+
     rq.geom.w=bdw.left+bdw.right;
     rq.geom.w+=grbrush_get_text_width(p->brush, str, strlen(str));
     rq.geom.h=fnte.max_height+bdw.top+bdw.bottom;
@@ -199,7 +199,7 @@ EXTL_EXPORT_MEMBER
 void infowin_set_text(WInfoWin *p, const char *str, int maxw)
 {
     bool set=FALSE;
-    
+
     if(maxw>0 && p->brush!=NULL){
         char *tmp=grbrush_make_label(p->brush, str, maxw);
         if(tmp!=NULL){
@@ -208,12 +208,12 @@ void infowin_set_text(WInfoWin *p, const char *str, int maxw)
             set=TRUE;
         }
     }
-    
+
     if(!set)
         infowin_do_set_text(p, str);
 
     infowin_resize(p);
-    
+
     /* sometimes unnecessary */
     window_draw((WWindow*)p, TRUE);
 }
@@ -229,13 +229,13 @@ WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 {
     char *style=NULL, *text=NULL;
     WInfoWin *p;
-    
+
     extl_table_gets_s(tab, "style", &style);
-    
+
     p=create_infowin(par, fp, style);
-    
+
     free(style);
-    
+
     if(p==NULL)
         return NULL;
 
@@ -243,7 +243,7 @@ WRegion *infowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         infowin_do_set_text(p, text);
         free(text);
     }
-    
+
     return (WRegion*)p;
 }
 
@@ -264,6 +264,6 @@ static DynFunTab infowin_dynfuntab[]={
 EXTL_EXPORT
 IMPLCLASS(WInfoWin, WWindow, infowin_deinit, infowin_dynfuntab);
 
-    
+
 /*}}}*/
 

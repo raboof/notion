@@ -10,10 +10,10 @@ syscache=""
 linebeg="^"
 icase=""
 
-translate_grepsafe() { 
+translate_grepsafe() {
     # The regexp below is supposed to be [\[\].*$^\\], but sed sucks
     # and doesn't support simple and intuitive escaping and we have to
-    # do it the hard way with the collations [.[.] and [.].] standing 
+    # do it the hard way with the collations [.[.] and [.].] standing
     # for [ and ], respectively.
     sed 's:^[ \t]*\(.*\)[ \t]*$:\1:; s:[[.[.][.].].*$^\\]:\\&:g'
 }
@@ -60,7 +60,7 @@ if test "x$action" = x; then
     echo 2>&1 "Usage: $prog [-icase] [-mid] (-complete what|-mkusercache|-mksyscache)"
     exit 1
 fi
-        
+
 
 filterpath() {
     sed 's:^.*/\([^/]*\.[0-9].*\)$:\1:p; d'
@@ -94,10 +94,10 @@ scan() {
         fi
         mpath=`$mpprog`
     fi
-    
+
     for p in `echo "$mpath"|tr : '\n'`; do
         find  "$p" -type f -o -type l | filterpath
-    done 
+    done
 }
 
 
@@ -114,14 +114,14 @@ case "$action" in
         if test "x$usercache" != x -a -f "$usercache"; then
             cachefile="$usercache"
         fi
-        
+
         if test -f "$syscache"; then
             cachefile="$syscache"
         fi
-        
+
         # Empty "common part" of completions.
         echo "$beg"
-        
+
         if test "x$cachefile" != x; then
             grepper < "$cachefile" | filtersect
         else

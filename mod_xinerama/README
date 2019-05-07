@@ -1,4 +1,4 @@
-Notion Xinerama module 
+Notion Xinerama module
 
 * By Tomáš Ebenlendr and Arnout Engelen
 * Based on work by Thomas Themel <themel0r@wannabehacker.com>
@@ -7,10 +7,10 @@ Notion Xinerama module
 INTRODUCTION
 
 This module provides multi-head support to Notion. It uses the Xinerama API,
-and thus can be used with any X Server that exposes functionality through this 
+and thus can be used with any X Server that exposes functionality through this
 API, notably RandR (used by both ATI and nVidia) and TwinView (used by nVidia).
 
-(it is based on the module that gave ion3 its Xinerama support back that was 
+(it is based on the module that gave ion3 its Xinerama support back that was
 killed on 20070117)
 
 INSTALLATION
@@ -50,9 +50,9 @@ end
 REFRESHING
 
 When the screen topology changes, the locations, sizes and mergings of windows
-may be recalculated. The Xinerama API does not support notifications of 
-topology changes, but these might be received through other means, such as 
-mod_xrandr. 
+may be recalculated. The Xinerama API does not support notifications of
+topology changes, but these might be received through other means, such as
+mod_xrandr.
 
 If you're satisfied with the default merge algorithm, you may simply call
 mod_xinerama.refresh(). If you want to use your own merging algorithm, you
@@ -81,13 +81,13 @@ function next_wrap()
         end
 end
 
-function prev_wrap() 
+function prev_wrap()
         scr = ioncore.goto_prev_screen()
         if obj_is(scr, "WRootWin") then
                 ioncore.goto_nth_screen(-1)
         end
 end
-                       
+
 defbindings("WScreen", {
     bdoc("Go to next/previous screen on multihead setup."),
     kpress(META.."Shift+comma", "prev_wrap()"),

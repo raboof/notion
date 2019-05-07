@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/pholder.c
  *
- * Copyright (c) Tuomo Valkonen 2005-2007. 
+ * Copyright (c) Tuomo Valkonen 2005-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -40,11 +40,11 @@ WRegion *pholder_do_attach(WPHolder *ph, int flags,
 WRegion *pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
 {
     WPHolder *root=pholder_root(ph);
-    
+
     /* Use the root, so that extra containers are not added from
      * stale chains.
      */
-    
+
     return (root==NULL
             ? NULL
             : pholder_do_attach(root, flags, data));
@@ -54,10 +54,10 @@ WRegion *pholder_attach_(WPHolder *ph, int flags, WRegionAttachData *data)
 bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
 {
     WRegionAttachData data;
-        
+
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
-    
+
     return (pholder_attach_(ph, flags, &data)!=NULL);
 }
 
@@ -65,13 +65,13 @@ bool pholder_attach(WPHolder *ph, int flags, WRegion *reg)
 bool pholder_attach_mcfgoto(WPHolder *ph, int flags, WRegion *reg)
 {
     bool cf=region_may_control_focus(reg);
-    
+
     if(!pholder_attach(ph, flags, reg))
         return FALSE;
-        
+
     if(cf)
         region_goto(reg);
-    
+
     return TRUE;
 }
 
@@ -95,8 +95,8 @@ WRegion *pholder_target(WPHolder *ph)
 static bool pholder_do_check_reparent_default(WPHolder *ph, WRegion *reg)
 {
     WRegion *target=pholder_do_target(ph);
-    
-    return (target==NULL 
+
+    return (target==NULL
             ? FALSE
             : region_ancestor_check(target, reg));
 }
@@ -117,7 +117,7 @@ bool pholder_check_reparent(WPHolder *ph, WRegion *reg)
     else
         return pholder_do_check_reparent(ph, reg);
 }
-    
+
 
 bool pholder_do_goto(WPHolder *ph)
 {
@@ -166,15 +166,15 @@ bool pholder_stale(WPHolder *ph)
 bool pholder_redirect(WPHolder *ph, WRegion *old_target)
 {
     WPHolder *ph2=region_get_rescue_pholder(old_target);
-    
+
     if(ph2==NULL)
         return FALSE;
-    
+
     if(ph->redirect!=NULL)
         destroy_obj((Obj*)ph->redirect);
 
     ph->redirect=ph2;
-    
+
     return TRUE;
 }
 
@@ -182,7 +182,7 @@ bool pholder_redirect(WPHolder *ph, WRegion *old_target)
 WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd)
 {
     WPHolder *ret=NULL;
-    CALL_DYN_RET(ret, WPHolder*, region_managed_get_pholder, 
+    CALL_DYN_RET(ret, WPHolder*, region_managed_get_pholder,
                  reg, (reg, mgd));
     return ret;
 }
@@ -194,7 +194,7 @@ WPHolder *region_get_rescue_pholder_for(WRegion *reg, WRegion *mgd)
         return FALSE;
     }else{
         WPHolder *ret=NULL;
-    
+
         CALL_DYN_RET(ret, WPHolder*, region_get_rescue_pholder_for,
                      reg, (reg, mgd));
         return ret;
@@ -216,7 +216,7 @@ WPHolder *region_get_rescue_pholder(WRegion *reg)
             break;
         reg=mgr;
     }
-    
+
     return ph;
 }
 
@@ -228,10 +228,10 @@ WPHolder *pholder_either(WPHolder *a, WPHolder *b)
 
 
 static DynFunTab pholder_dynfuntab[]={
-    {(DynFun*)pholder_do_check_reparent, 
+    {(DynFun*)pholder_do_check_reparent,
      (DynFun*)pholder_do_check_reparent_default},
-     
-    {(DynFun*)pholder_do_root, 
+
+    {(DynFun*)pholder_do_root,
      (DynFun*)pholder_do_root_default},
 
     END_DYNFUNTAB

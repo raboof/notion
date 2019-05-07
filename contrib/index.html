@@ -52,7 +52,7 @@ otherwise mentioned in the source file.
 
     <dt> <a href="scripts/cfg_dock2.lua">cfg_dock2.lua</a>
     <dd> A dock configuration with lots of added control.
-    
+
     <dt> <a href="scripts/collapse.lua">collapse.lua</a>
     <dd> Collapse frames on a WTiling into a single frame
 
@@ -63,12 +63,12 @@ otherwise mentioned in the source file.
     <dd> Example of a floating toggleable statusbar.
 
     <dt> <a href="scripts/goto_by_tag.lua">goto_by_tag.lua</a>
-    <dd> Sets focus to the first client with a given tag. This tag is defined 
-    using a winprop. For example you might give the tag "B" to your browser and 
+    <dd> Sets focus to the first client with a given tag. This tag is defined
+    using a winprop. For example you might give the tag "B" to your browser and
     then use the binding META+U B to directly jump to your browser.
 
     <dt> <a href="scripts/lock_frame.lua">lock_frame.lua</a>
-    <dd> 'Lock' selected frames so they don't close via the keyboard. 
+    <dd> 'Lock' selected frames so they don't close via the keyboard.
 
     <dt> <a href="scripts/min_tabs.lua">min_tabs.lua</a>
     <dd> Show tabs precisely when two or more windows in an notion frame
@@ -76,12 +76,12 @@ otherwise mentioned in the source file.
     <dt> <a href="scripts/move_current.lua">move_current.lua</a>
     <dd> Move current window in a frame to another frame in specified
          direction
-    
+
     <dt> <a href="scripts/mp.lua">mp.lua</a>
     <dd> Mark next mapped window to be attached to a specified object
 
     <dt> <a href="scripts/mpd.lua">mpd.lua</a>
-    <dd> Control a MusicPD server 
+    <dd> Control a MusicPD server
 
     <dt> <a href="scripts/named_scratchpad.lua">named_scratchpad.lua</a>
     <dd> Toggle (and create) scratchpads by name.
@@ -122,13 +122,13 @@ otherwise mentioned in the source file.
 
     <dt> <a href="scripts/stock.lua">stock.lua</a></dt>
     <dd> An applet for retrieving and displaying stock market information
-      from <a href="http://finance.yahoo.com">http://finance.yahoo.com.</a> 
+      from <a href="http://finance.yahoo.com">http://finance.yahoo.com.</a>
       You can set up a portfolio and monitor its intraday performance.</dd>
 
     <dt> <a href="scripts/switch_bindings.lua">switch_bindings.lua</a>
     <dd> Switch between key-bindings. You can temporarily disable keybindings and
     restore them later when necessary.
-    
+
     <dt> <a href="scripts/tabmenu.lua">tabmenu.lua</a>
     <dd> A grabmenu-based alternative to tabs.
 
@@ -137,7 +137,7 @@ otherwise mentioned in the source file.
     weather observation stations and display it in the statusbar.</dd>
 
     <dt> <a href="scripts/wrap_workspace_or_screen.lua">wrap_workspace_or_screen.lua</a></dt>
-    <dd> When switching focus over the border of a workspace, wrap to the next 
+    <dd> When switching focus over the border of a workspace, wrap to the next
     workspace or screen.</dd>
 
     <dt> <a href="scripts/xkbion.lua">xkbion.lua</a></dt>
@@ -179,7 +179,7 @@ otherwise mentioned in the source file.
 
     <dt> <a href="styles/look_asm.lua">look_asm.lua</a></dt>
     <dd> A clean grey-blue theme with not too big tabs.</dd>
-    
+
     <dt> <a href="styles/look_atme.lua">look_atme.lua</a>
     <dd> A style which just looks nice.
 
@@ -283,7 +283,7 @@ otherwise mentioned in the source file.
 <h2>Statusbar</h2>
 <a name="statusbar"></a>
 
-All statusbar monitors are loaded automatically based on the statusbar 
+All statusbar monitors are loaded automatically based on the statusbar
 template. <strong>Do not attempt to load them manually</strong> (especially
 not the statusd scripts). Please see <a href="#instructions">instructions</a>
 below for more information.
@@ -294,7 +294,7 @@ below for more information.
 <dl>
     <!-- New scripts in alphabetical order, please -->
     <dt> <a href="statusbar/statusbar_act.lua">statusbar_act.lua</a>
-    <dd> Activity (urgency flag, new unacted-upon transients, etc.) 
+    <dd> Activity (urgency flag, new unacted-upon transients, etc.)
          display for the statusbar.
 
     <dt> <a href="statusbar/statusbar_external.lua">statusbar_external.lua</a>
@@ -302,7 +302,7 @@ below for more information.
 
     <dt> <a href="statusbar/statusbar_fname.lua">statusbar_fname.lua</a>
     <dd> Show the focused frame name in the statusbar.
-    
+
     <dt> <a href="statusbar/statusbar_wsname.lua">statusbar_wsname.lua</a>
     <dd> Shows the current workspace name in the statusbar, can also show a list of workspaces and indicate the current one. The current workspace indicator is customizable. This script also allows for per-head workspace information.
 
@@ -357,7 +357,7 @@ thus will not work on other systems.
 
     <dt> <a href="statusd/statusd_fortune.lua">statusd_fortune.lua</a>
     <dd> Notion-statusd monitor displaying fortunes.
-    
+
     <dt> <a href="statusd/statusd_inetaddr.lua">statusd_inetaddr.lua</a>
     <dd> Notion-statusd monitor reporting current IP address from ifconfig.
 
@@ -456,7 +456,7 @@ To use any of the scripts, follow these directions.
 <li>Copy the script in this directory.
 <li>Depending on the type of script, do the following.
     <dl>
-    
+
     <!-- Extra space in tag to not confuse verify_index.pl hack -->
     <dt >Proper scripts
     <dd>Copy <tt>cfg_notion.lua</tt> in <tt>~/.notion/</tt>, if it does not
@@ -469,19 +469,19 @@ dopath("name of script without extension")
         at the end of the file (in <tt>~/.notion/</tt>).
 
     <dt >Statusbar
-    <dd>Make sure you have <tt>cfg_statusbar.lua</tt> in <tt>~/.notion/</tt>, 
+    <dd>Make sure you have <tt>cfg_statusbar.lua</tt> in <tt>~/.notion/</tt>,
         and add one of the monitors provided by the script in the template
         <em>without</em> the <tt>statusd_</tt> or such prefix.
-        
+
     <dt >Styles
     <dd>That's it. You can choose <tt>styles/refresh-list</tt> from
         the <b>F12</b> main menu to have a running instance of Ion
         find it, and then choose the style from the same menu.
-        
+
     </dl>
 </ol>
 
-Some scripts may need further setup. For more information, see 
+Some scripts may need further setup. For more information, see
 the scripts themselves, and the
 <a href="http://notion.sourceforge.net/notionconf"
 >documentation</a>.
@@ -497,19 +497,19 @@ If you really need the latest version get it from git:
 git clone git://notion.git.sourceforge.net/gitroot/notion/contrib
 </pre>
 This will get you a fully functional copy of the repository in the
-directory <tt>contrib</tt>. 
+directory <tt>contrib</tt>.
 <p>
 To update a previously downloaded repository, use <tt>git pull</tt>.
 The command <tt>git log </tt> can be used to view the list of
-changes, and there is also an 
+changes, and there is also an
 <a href="http://notion.git.sourceforge.net/git/gitweb.cgi?p=notion/contrib;a=atom">RSS feed</a>
-of the most 
+of the most
 <a href="http://notion.git.sourceforge.net/git/gitweb.cgi?p=notion/contrib;a=summary">recent changes</a>.
 
 <h3>Contributing</h3>
 <a name="contrib"></a>
 
-This section needs to be improved. For now, create a patch and submit it to the <a href="http://sourceforge.net/tracker/?group_id=314802&atid=1324530">sf.net patches tracker</a>, publish it on the <a href="http://sourceforge.net/mail/?group_id=314802">mailinglists</a>, or both. 
+This section needs to be improved. For now, create a patch and submit it to the <a href="http://sourceforge.net/tracker/?group_id=314802&atid=1324530">sf.net patches tracker</a>, publish it on the <a href="http://sourceforge.net/mail/?group_id=314802">mailinglists</a>, or both.
 
 <h2>Legacy</h2>
 <a name="legacy"></a>
@@ -521,7 +521,7 @@ The scripts below are known to be broken and are only included for curiosity's s
     <dd> Functions for creating a hierarchy of menus for various clients
              available. Key features are an attempt to organise by type hints (from
              the window titles) and collapse submenus when they contain only a few items.
-             
+
     <dt> <a href="scripts/legacy/alt_resize.lua">alt_resize.lua</a>
     <dd> Possibly more intuitive resizing bindings.
 
@@ -561,7 +561,7 @@ The scripts below are known to be broken and are only included for curiosity's s
     <dt> <a href="scripts/legacy/goto_multihead.lua">goto_multihead.lua</a>
     <dd> A version of <tt>goto_dir</tt> that may be useful on
          multihead setups.
-    
+
     <dt> <a href="scripts/legacy/heuristics.lua">heuristics.lua</a>
     <dd> Window placement heuristics for tiled workspaces
 
@@ -577,7 +577,7 @@ The scripts below are known to be broken and are only included for curiosity's s
 
     <dt> <a href="scripts/legacy/nextact.lua">nextact.lua</a>
     <dd> Go to first found region with activity flag set.
-    
+
     <dt> <a href="scripts/legacy/notifybox.lua">notifybox.lua</a>
     <dd> Show notification boxes, similar to the activity notification.
 
@@ -616,7 +616,7 @@ The scripts below are known to be broken and are only included for curiosity's s
 
     <dt> <a href="statusd/legacy/statusd_batt.lua">statusd_batt.lua</a>
     <dd> Notion-statusd monitor reporting battery status; works with apm.
-    
+
     <dt> <a href="statusd/legacy/statusd_iface.lua">statusd_iface.lua</a>
     <dd> Notion-statusd monitor reporting currently used network
     interface.

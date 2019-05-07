@@ -1,8 +1,8 @@
 /*
  * notion/mainloop/exec.c
  *
- * Copyright (c) the Notion team 2013. 
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) the Notion team 2013.
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -85,7 +85,7 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
     int infds[2];
     int outfds[2];
     int errfds[2];
-    
+
     if(infd!=NULL){
         if(mypipe(infds)!=0)
             return -1;
@@ -100,13 +100,13 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
         if(mypipe(errfds)!=0)
             goto err2;
     }
-    
+
 
     pid=fork();
-    
+
     if(pid<0)
         goto err3;
-    
+
     if(pid!=0){
         /* We're the parent */
 
@@ -123,25 +123,25 @@ pid_t mainloop_fork(void (*fn)(void *p), void *fnp,
             *errfd=errfds[0];
             close(errfds[1]);
         }
-        
+
         if(infd!=NULL){
             *infd=infds[1];
             close(infds[0]);
         }
-        
+
         return pid;
     } else {
         /* We're the child */
-        
+
         if(infd!=NULL)
             duppipe(0, 0, infds);
         if(outfd!=NULL)
             duppipe(1, 1, outfds);
         if(errfd!=NULL)
             duppipe(2, 1, errfds);
-        
+
         fn(fnp);
-        
+
         abort();
     }
 
@@ -156,7 +156,7 @@ err2:
         close(outfds[0]);
         close(outfds[1]);
     }
-err1:    
+err1:
     if(infd!=NULL){
         close(infds[0]);
         close(infds[1]);
@@ -175,23 +175,23 @@ typedef struct{
 static void do_spawn(void *spawnp)
 {
     SpawnP *p=(SpawnP*)spawnp;
-    
+
     if(p->initenv)
         p->initenv(p->initenvp);
     mainloop_do_exec(p->cmd);
 }
 
 
-pid_t mainloop_do_spawn(const char *cmd, 
+pid_t mainloop_do_spawn(const char *cmd,
                         void (*initenv)(void *p), void *p,
                         int *infd, int *outfd, int *errfd)
 {
     SpawnP spawnp;
-    
+
     spawnp.cmd=cmd;
     spawnp.initenv=initenv;
     spawnp.initenvp=p;
-    
+
     return mainloop_fork(do_spawn, (void*)&spawnp, infd, outfd, errfd);
 }
 
@@ -214,7 +214,7 @@ bool mainloop_process_pipe_extlfn(int fd, ExtlFn fn)
 {
     char buf[BL];
     int n;
-    
+
     n=read(fd, buf, BL-1);
     if(n<0){
         if(errno==EAGAIN || errno==EINTR)
@@ -260,18 +260,18 @@ bool mainloop_register_input_fd_extlfn(int fd, ExtlFn fn)
 }
 
 
-pid_t mainloop_popen_bgread(const char *cmd, 
+pid_t mainloop_popen_bgread(const char *cmd,
                             void (*initenv)(void *p), void *p,
                             ExtlFn handler, ExtlFn errhandler)
 {
     pid_t pid=-1;
     int fd=-1, errfd=-1;
     ExtlFn none=extl_fn_none();
-    
-    pid=mainloop_do_spawn(cmd, initenv, p, NULL, 
+
+    pid=mainloop_do_spawn(cmd, initenv, p, NULL,
                           (handler!=none ? &fd : NULL),
                           (errhandler!=none ? &errfd : NULL));
-    
+
     if(pid>0){
         if(handler!=none){
             if(!mainloop_register_input_fd_extlfn(fd, handler))
@@ -282,7 +282,7 @@ pid_t mainloop_popen_bgread(const char *cmd,
                 goto err;
         }
     }
-    
+
     return pid;
 
 err:

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/llist.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -44,7 +44,7 @@ WLListNode *llist_nth_node(WLListNode *list, uint n)
 }
 
 
-void llist_link_after(WLListNode **list, 
+void llist_link_after(WLListNode **list,
                       WLListNode *after, WLListNode *node)
 {
     if(after!=NULL){
@@ -61,7 +61,7 @@ void llist_link_last(WLListNode **list, WLListNode *node)
 }
 
 
-WLListNode *llist_index_to_after(WLListNode *list, 
+WLListNode *llist_index_to_after(WLListNode *list,
                                  WLListNode *current,
                                  int index)
 {

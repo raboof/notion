@@ -56,8 +56,8 @@ _exports: $(EXPORTS_C)
 
 else # !MAKE_EXPORTS
 
-EXPORTS_C = 
-EXPORTS_H = 
+EXPORTS_C =
+EXPORTS_H =
 
 endif # !MAKE_EXPORTS
 

@@ -21,7 +21,7 @@ int libtu_string_to_setparam(const char *str)
         else if(strcmp(str, "toggle")==0)
             return SETPARAM_TOGGLE;
     }
-    
+
     return SETPARAM_UNKNOWN;
 }
 
@@ -57,4 +57,4 @@ int libtu_setparam_invert(int sp)
         return sp;
     }
 }
-    
+

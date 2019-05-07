@@ -1,8 +1,8 @@
 /*
  * ion/mod_sm/sm_session.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
- * 
+ * Copyright (c) Tuomo Valkonen 2004-2007.
+ *
  * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
  *
  * Ion is free software; you can redistribute it and/or modify it under
@@ -47,7 +47,7 @@ void mod_sm_set_ion_id(const char *client_id)
 {
     if(sm_client_id)
         free(sm_client_id);
-    
+
     if(client_id==NULL)
         sm_client_id=NULL;
     else
@@ -60,14 +60,14 @@ char *mod_sm_get_ion_id()
 }
 
 /* Called when there's data to be read.
- IcePcocessMessages determines message protocol, 
+ IcePcocessMessages determines message protocol,
  unpacks the message and sends it to the client via
  registered callbacks. */
 
 static void sm_process_messages(int UNUSED(fd), void *UNUSED(data))
 {
     Bool ret;
-    
+
     if(IceProcessMessages(ice_sm_conn, NULL, &ret)==IceProcessMessagesIOError){
         mod_sm_close();
     }
@@ -106,30 +106,30 @@ static void sm_set_some_properties()
     SmPropValue program_val, userid_val;
     SmProp program_prop, userid_prop, clone_prop;
     SmProp *props[3];
-    
+
     props[0]=&program_prop;
     props[1]=&userid_prop;
     props[2]=&clone_prop;
-    
+
     program_val.value=ioncore_g.argv[0];
     program_val.length=strlen(program_val.value);
     program_prop.name=SmProgram;	
     program_prop.type=SmARRAY8;
     program_prop.num_vals=1;
     program_prop.vals=&program_val;
-    
+
     userid_val.value=getenv("USER");
     userid_val.length=strlen(userid_val.value);
     userid_prop.name=SmUserID;
     userid_prop.type=SmARRAY8;
     userid_prop.num_vals=1;
     userid_prop.vals=&userid_val;
-    
+
     clone_prop.name=SmCloneCommand;	
     clone_prop.type=SmLISTofARRAY8;
     clone_prop.num_vals=1;
     clone_prop.vals=&program_val;
-    
+
     SmcSetProperties(sm_conn,
                      sizeof(props)/sizeof(props[0]),
                      (SmProp **)&props);
@@ -143,31 +143,31 @@ static void sm_set_other_properties()
     char *rmarg="-rf";
     int nvals=0, i;
     const char *sdir=NULL, *cid=NULL;
-    
+
     SmPropValue discard_val[3];
     SmProp discard_prop={ SmDiscardCommand, SmLISTofARRAY8, 3, NULL };
     SmPropValue restart_hint_val, *restart_val=NULL;
     SmProp restart_hint_prop={ SmRestartStyleHint, SmCARD8, 1, NULL};
     SmProp restart_prop={ SmRestartCommand, SmLISTofARRAY8, 0, NULL};
-    
+
     SmProp *props[2];
-    
+
     discard_prop.vals=discard_val;
     restart_hint_prop.vals=&restart_hint_val;
-    
+
     props[0]=&restart_prop;
     props[1]=&restart_hint_prop;
     /*props[2]=&discard_prop;*/
-    
+
     sdir=extl_sessiondir();
     cid=mod_sm_get_ion_id();
-    
+
     if(sdir==NULL || cid==NULL)
         return;
-    
+
     restart_hint_val.value=&restart_hint;
     restart_hint_val.length=1;
-    
+
     restart_val=(SmPropValue *)malloc((ioncore_g.argc+4)*sizeof(SmPropValue));
     for(i=0; i<ioncore_g.argc; i++){
         if(strcmp(ioncore_g.argv[i], restore)==0 ||
@@ -198,19 +198,19 @@ static void sm_set_other_properties()
     SmcSetProperties(sm_conn,
                      sizeof(props)/sizeof(props[0]),
                      (SmProp **)&props);
-    
+
     free(restart_val);
 }
 
 static void sm_set_properties()
 {
     static bool init=TRUE;
-    
+
     if(init){
         sm_set_some_properties();
         init=FALSE;
     }
-    
+
     sm_set_other_properties();
 }
 
@@ -228,9 +228,9 @@ static void sm_save_yourself_phase2(SmcConn conn, SmPointer UNUSED(client_data))
         warn(TR("Failed to save session state"));
     else
         sm_set_properties();
-    
+
     SmcSaveYourselfDone(conn, success);
-    sent_save_done=TRUE;    
+    sent_save_done=TRUE;
 }
 
 /* Callback. Called when the client recieves a save yourself
@@ -291,17 +291,17 @@ bool mod_sm_init_session()
     char error_str[256];
     char *new_client_id=NULL;
     SmcCallbacks smcall;
-    
+
     if(getenv("SESSION_MANAGER")==0){
         warn(TR("SESSION_MANAGER environment variable not set."));
         return FALSE;
     }
-    
+
     if(IceAddConnectionWatch(&sm_ice_watch_fd, NULL) == 0){
         warn(TR("Session Manager: IceAddConnectionWatch failed."));
         return FALSE;
     }
-    
+
     memset(&smcall, 0, sizeof(smcall));
     smcall.save_yourself.callback=&sm_save_yourself;
     smcall.save_yourself.client_data=NULL;
@@ -311,7 +311,7 @@ bool mod_sm_init_session()
     smcall.save_complete.client_data=NULL;
     smcall.shutdown_cancelled.callback=&sm_shutdown_cancelled;
     smcall.shutdown_cancelled.client_data=NULL;
-    
+
     if((sm_conn=SmcOpenConnection(NULL, /* network ids */
                                   NULL, /* context */
                                   1, 0, /* protocol major, minor */
@@ -326,12 +326,12 @@ bool mod_sm_init_session()
         warn(TR("Unable to connect to the session manager."));
         return FALSE;
     }
-    
+
     mod_sm_set_ion_id(new_client_id);
     free(new_client_id);
-    
+
     ice_sm_conn=SmcGetIceConnection(sm_conn);
-    
+
     return TRUE;
 }
 
@@ -342,9 +342,9 @@ void mod_sm_close()
         SmcCloseConnection(sm_conn, 0, NULL);
         sm_conn=NULL;
     }
-    
+
     ice_sm_conn=NULL;
-    
+
     if(sm_fd>=0){
         mainloop_unregister_input_fd(sm_fd);
         close(sm_fd);
@@ -373,9 +373,9 @@ static void sm_restart()
 void mod_sm_smhook(int what)
 {
     save_complete_fn=NULL;
-    
+
     /* pending check? */
-    
+
     switch(what){
     case IONCORE_SM_RESIGN:
         restart_hint=SmRestartIfRunning;

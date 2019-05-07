@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/rootwin.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -55,7 +55,7 @@ static int my_redirect_error_handler(Display *UNUSED(dpy), XErrorEvent *UNUSED(e
 static int my_error_handler(Display *dpy, XErrorEvent *ev)
 {
     static char msg[128], request[64], num[32];
-    
+
     /* Just ignore bad window and similar errors; makes the rest of
      * the code simpler.
      */
@@ -85,7 +85,7 @@ static int my_error_handler(Display *dpy, XErrorEvent *ev)
 #endif
 
     kill(getpid(), SIGTRAP);
-    
+
     return 0;
 }
 
@@ -101,10 +101,10 @@ static void scan_initial_windows(WRootWin *rootwin)
     Window dummy_root, dummy_parent, *wins=NULL;
     uint nwins=0, i, j;
     XWMHints *hints;
-    
+
     XQueryTree(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), &dummy_root, &dummy_parent,
                &wins, &nwins);
-    
+
     for(i=0; i<nwins; i++){
         if(wins[i]==None)
             continue;
@@ -120,7 +120,7 @@ static void scan_initial_windows(WRootWin *rootwin)
         if(hints!=NULL)
             XFree((void*)hints);
     }
-    
+
     rootwin->tmpwins=wins;
     rootwin->tmpnwins=nwins;
 }
@@ -134,7 +134,7 @@ void rootwin_manage_initial_windows(WRootWin *rootwin)
 
     rootwin->tmpwins=NULL;
     rootwin->tmpnwins=0;
-    
+
     for(i=0; i<nwins; i++){
         if(XWINDOW_REGION_OF(wins[i])!=NULL)
             wins[i]=None;
@@ -151,7 +151,7 @@ void rootwin_manage_initial_windows(WRootWin *rootwin)
             continue;
         ioncore_manage_clientwin(wins[i], FALSE);
     }
-    
+
     XFree((void*)wins);
 }
 
@@ -186,12 +186,12 @@ static void preinit_gr(WRootWin *rootwin)
     gcv.subwindow_mode=IncludeInferiors;
     gcv.function=GXxor;
     gcv.foreground=~0L;
-    
+
     gcvmask=(GCLineStyle|GCLineWidth|GCFillStyle|
              GCJoinStyle|GCCapStyle|GCFunction|
              GCSubwindowMode|GCForeground);
 
-    rootwin->xor_gc=XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin), 
+    rootwin->xor_gc=XCreateGC(ioncore_g.dpy, WROOTWIN_ROOT(rootwin),
                               gcvmask, &gcv);
 }
 
@@ -202,10 +202,10 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     WFitParams fp;
     Window root;
     WScreen *scr;
-    
+
     /* Try to select input on the root window */
     root=RootWindow(dpy, xscr);
-    
+
     redirect_error=FALSE;
 
     XSetErrorHandler(my_redirect_error_handler);
@@ -218,7 +218,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
              xscr);
         return FALSE;
     }
-    
+
     rootwin->xscr=xscr;
     rootwin->default_cmap=DefaultColormap(dpy, xscr);
     rootwin->tmpwins=NULL;
@@ -230,7 +230,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     fp.g.x=0; fp.g.y=0;
     fp.g.w=DisplayWidth(dpy, xscr);
     fp.g.h=DisplayHeight(dpy, xscr);
-    
+
     if(!window_do_init((WWindow*)rootwin, NULL, &fp, root, "WRootWin")){
         return FALSE;
     }
@@ -238,9 +238,9 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     ((WWindow*)rootwin)->event_mask=IONCORE_EVENTMASK_ROOT;
     ((WRegion*)rootwin)->flags|=REGION_BINDINGS_ARE_GRABBED|REGION_PLEASE_WARP;
     ((WRegion*)rootwin)->rootwin=rootwin;
-    
+
     REGION_MARK_MAPPED(rootwin);
-    
+
     scan_initial_windows(rootwin);
 
     create_wm_windows(rootwin);
@@ -248,7 +248,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     netwm_init_rootwin(rootwin);
 
     region_add_bindmap((WRegion*)rootwin, ioncore_screen_bindmap);
-    
+
     scr=create_screen(rootwin, &fp, xscr);
     if(scr==NULL){
         return FALSE;
@@ -261,7 +261,7 @@ static bool rootwin_init(WRootWin *rootwin, int xscr)
     ioncore_screens_updated(rootwin);
 
     xwindow_set_cursor(root, IONCORE_CURSOR_DEFAULT);
-    
+
     return TRUE;
 }
 
@@ -280,13 +280,13 @@ void rootwin_deinit(WRootWin *rw)
         if(REGION_MANAGER(scr)==(WRegion*)rw)
             destroy_obj((Obj*)scr);
     }
-    
+
     UNLINK_ITEM(*(WRegion**)&ioncore_g.rootwins, (WRegion*)rw, p_next, p_prev);
-    
+
     XSelectInput(ioncore_g.dpy, WROOTWIN_ROOT(rw), 0);
-    
+
     XFreeGC(ioncore_g.dpy, rw->xor_gc);
-    
+
     window_deinit((WWindow*)rw);
 }
 
@@ -300,9 +300,9 @@ void rootwin_deinit(WRootWin *rw)
 static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 {
     WRegion *sub;
-    
+
     sub=REGION_ACTIVE_SUB(rootwin);
-    
+
     if(sub==NULL || !REGION_IS_MAPPED(sub)){
         WScreen *scr;
         FOR_ALL_SCREENS(scr){
@@ -320,7 +320,7 @@ static void rootwin_do_set_focus(WRootWin *rootwin, bool warp)
 }
 
 
-static bool rootwin_fitrep(WRootWin *UNUSED(rootwin), WWindow *UNUSED(par), 
+static bool rootwin_fitrep(WRootWin *UNUSED(rootwin), WWindow *UNUSED(par),
                            const WFitParams *UNUSED(fp))
 {
     D(warn("Don't know how to reparent or fit root windows."));
@@ -385,19 +385,19 @@ WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
     WRegion *r=REGION_ACTIVE_SUB(rootwin);
     WScreen *scr;
-    
+
     /* There should be no non-WScreen as children or managed by us, but... */
-    
+
     if(r!=NULL && scr_ok(r))
         return (WScreen*)r;
-    
+
     FOR_ALL_SCREENS(scr){
         if(REGION_MANAGER(scr)==(WRegion*)rootwin
            && REGION_IS_MAPPED(scr)){
             break;
         }
     }
-    
+
     return scr;
 }
 
@@ -448,5 +448,5 @@ static DynFunTab rootwin_dynfuntab[]={
 EXTL_EXPORT
 IMPLCLASS(WRootWin, WWindow, rootwin_deinit, rootwin_dynfuntab);
 
-    
+
 /*}}}*/

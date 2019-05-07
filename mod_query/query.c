@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/query.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -29,7 +29,7 @@
  */
 EXTL_EXPORT
 WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
-                          ExtlFn handler, ExtlFn completor, 
+                          ExtlFn handler, ExtlFn completor,
                           ExtlFn cycle, ExtlFn bcycle)
 {
     WEdlnCreateParams fnp;
@@ -40,7 +40,7 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
     fnp.dflt=dflt;
     fnp.handler=handler;
     fnp.completor=completor;
-    
+
     par.flags=(MPLEX_ATTACH_SWITCHTO|
                MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
@@ -50,19 +50,19 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
 
     wedln=(WEdln*)mplex_do_attach_new(mplex, &par,
                                       (WRegionCreateFn*)create_wedln,
-                                      (void*)&fnp); 
-                                      
+                                      (void*)&fnp);
+
     if(wedln!=NULL && cycle!=extl_fn_none()){
-        uint kcb, state; 
+        uint kcb, state;
         bool sub;
-        
+
         if(ioncore_current_key(&kcb, &state, &sub) && !sub){
             wedln->cycle_bindmap=region_add_cycle_bindmap((WRegion*)wedln,
                                                           kcb, state, cycle,
                                                           bcycle);
         }
     }
-    
+
     return wedln;
 }
 

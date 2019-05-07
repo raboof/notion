@@ -70,8 +70,8 @@ $(EXPORTS_DOC): $(SOURCES) $(LUA_SOURCES) $(MKEXPORTS_EXTRA_DEPS)
 
 else # !MAKE_EXPORTS
 
-EXPORTS_C = 
-EXPORTS_H = 
+EXPORTS_C =
+EXPORTS_H =
 EXPORTS_DOC =
 
 endif # !MAKE_EXPORTS
@@ -93,7 +93,7 @@ CFLAGS += -fPIC -DPIC
 LD_SHAREDFLAGS=-shared
 
 # notion might not link to Xext, so modules will have to link to it themselves
-# if they need it: 
+# if they need it:
 LIBS += $(X11_LIBS)
 
 $(MODULE).so: $(OBJS) $(EXT_OBJS)

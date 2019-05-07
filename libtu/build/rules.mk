@@ -2,7 +2,7 @@
 ## Some make rules
 ##
 
-# Beware: in releases, the Notion rules.mk is used to build both libtu, 
+# Beware: in releases, the Notion rules.mk is used to build both libtu,
 # libextl and notion - so structural changes to this file should also be
 # carried out on the Notion rules.mk
 
@@ -60,8 +60,8 @@ _exports: $(EXPORTS_C)
 
 else # !MAKE_EXPORTS
 
-EXPORTS_C = 
-EXPORTS_H = 
+EXPORTS_C =
+EXPORTS_H =
 
 endif # !MAKE_EXPORTS
 

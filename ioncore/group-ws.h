@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/groupws.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -21,12 +21,12 @@ DECLCLASS(WGroupWS){
 };
 
 
-extern WPHolder *groupws_prepare_manage(WGroupWS *ws, 
+extern WPHolder *groupws_prepare_manage(WGroupWS *ws,
                                         const WClientWin *cwin,
-                                        const WManageParams *param, 
+                                        const WManageParams *param,
                                         int redir);
 
-extern WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, 
+extern WPHolder *groupws_prepare_manage_transient(WGroupWS *ws,
                                                   const WClientWin *cwin,
                                                   const WManageParams *param,
                                                   int unused);

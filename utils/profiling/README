@@ -1,11 +1,11 @@
 Profiling Notion:
 
-Because Notion is not CPU-bound, and we want to optimize for low latencies, 
+Because Notion is not CPU-bound, and we want to optimize for low latencies,
 if we do any profiling/tracing we'll want to perform those in 'real', 'wall
 clock' time, not CPU time.
 
-All linux profiling tools I've found either measure CPU time rather than real 
-time, or work based on SIGALRM (google perftools) which does not appear to 
+All linux profiling tools I've found either measure CPU time rather than real
+time, or work based on SIGALRM (google perftools) which does not appear to
 work for us. There's generally 2 ways to do real time profiling: stack sampling
 and tracing. I'm not sure how we could implement sampling. Tracing can be
 accomplished with the GCC '-finstrument-functions' feature.
@@ -16,7 +16,7 @@ part of the code (yet).
 == Enabling (compile-time) ==
 
 To enable tracing, add to your system-local.mk:
- 
+
   CFLAGS += -finstrument-functions -g -DPROFILING_ENABLED
   LDFLAGS += -g
 
@@ -55,26 +55,26 @@ use the 'addr2line.pl' script:
 
 $ utils/profiling/addr2line.pl `which notion` < trace > trace-humanreadable
 
-The result will contain some 'noise' caused by libextl which can be removed 
+The result will contain some 'noise' caused by libextl which can be removed
 with:
 
 $ ./utils/profiling/filterinternal.pl < trace-humanreadable > trace-humanreadable-filtered
 
-This will be better, but you'll miss some 'exit' tracepoints because lua 
+This will be better, but you'll miss some 'exit' tracepoints because lua
 doesn't emit events for tail calls. To add them back:
 
 $ ./utils/profiling/addtailcalls.pl < trace-humanreadable-filtered > trace-humanreadable-filtered-balanced
 
 To view this trace in kcachegrind, use the prof2callgrind tool. This tool
 can basically convert any file format consisting of entry/exit records with
-filenames, line numbers and timestamps. 
+filenames, line numbers and timestamps.
 
-It currently ignores the source address of the call, making it a bit less 
-exact and a bit more flexible to use.  
+It currently ignores the source address of the call, making it a bit less
+exact and a bit more flexible to use.
 
 $ utils/profiling/prof2callgrind.pl < trace-filtered-balanced > trace-callgrind
 
-Or all in two lines: 
+Or all in two lines:
 
 $ ./utils/profiling/addr2line.pl `which notion` < trace | ./utils/profiling/filterinternal.pl  | ./utils/profiling/addtailcalls.pl | ./utils/profiling/prof2callgrind.pl > kcg
 $ kcachegrind kcg

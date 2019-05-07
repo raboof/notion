@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use strict; 
+use strict;
 use warnings;
 
 my @stack = ();

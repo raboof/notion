@@ -10,7 +10,7 @@ de.defstyle("actnotify", {
 
 de.defstyle("tab-frame", {
     based_on = "tab",
-    -- TODO: some kind of amend option. It should not be necessary to 
+    -- TODO: some kind of amend option. It should not be necessary to
     -- duplicate this definition for both tab-frame and tab-menuentry,
     -- or for each style, nor use more complex hacks to communicate
     -- this stuff otherwise.
@@ -20,14 +20,14 @@ de.defstyle("tab-frame", {
         background_colour = "#901010",
         foreground_colour = "#eeeeee",
     }),
-    
+
     de.substyle("*-*-*-selected-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",
         background_colour = "#b03030",
         foreground_colour = "#ffffff",
     }),
-    
+
     de.substyle("*-*-*-tabnumber", {
         background_colour = "black",
         foreground_colour = "green",
@@ -42,14 +42,14 @@ de.defstyle("tab-frame-tiled", {
 de.defstyle("tab-menuentry", {
     based_on = "tab",
     text_align = "left",
-    
+
     de.substyle("*-*-*-unselected-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",
         background_colour = "#901010",
         foreground_colour = "#eeeeee",
     }),
-    
+
     de.substyle("*-*-*-selected-activity", {
         shadow_colour = "#c04040",
         highlight_colour = "#c04040",

@@ -1,7 +1,7 @@
 /*
  * ion/mod_mgmtmode/mgmtmode.c
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
+ * Copyright (c) Tuomo Valkonen 2004-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -49,7 +49,7 @@ static void mgmtmode_deinit(WMgmtMode *mode)
 {
     if(mgmt_mode==mode)
        mgmt_mode=NULL;
-    
+
     watch_reset(&(mode->selw));
 }
 
@@ -84,7 +84,7 @@ void mgmtmode_finish(WMgmtMode *mode)
     if(mgmt_mode==mode)
         cancel_mgmt(NULL);
 }
-    
+
 
 EXTL_EXPORT
 IMPLCLASS(WMgmtMode, Obj, mgmtmode_deinit, NULL);
@@ -99,7 +99,7 @@ IMPLCLASS(WMgmtMode, Obj, mgmtmode_deinit, NULL);
 static void draw_rubberbox(WRootWin *rw, const WRectangle *rect)
 {
     XPoint fpts[5];
-    
+
     fpts[0].x=rect->x;
     fpts[0].y=rect->y;
     fpts[1].x=rect->x+rect->w;
@@ -110,8 +110,8 @@ static void draw_rubberbox(WRootWin *rw, const WRectangle *rect)
     fpts[3].y=rect->y+rect->h;
     fpts[4].x=rect->x;
     fpts[4].y=rect->y;
-    
-    XDrawLines(ioncore_g.dpy, WROOTWIN_ROOT(rw), rw->xor_gc, fpts, 5, 
+
+    XDrawLines(ioncore_g.dpy, WROOTWIN_ROOT(rw), rw->xor_gc, fpts, 5,
                CoordModeOrigin);
 }
 
@@ -119,17 +119,17 @@ static void draw_rubberbox(WRootWin *rw, const WRectangle *rect)
 static void mgmtmode_draw(WMgmtMode *mode)
 {
     WRegion *reg=mgmtmode_selected(mode);
-    
+
     if(reg!=NULL){
         WRootWin *rw=region_rootwin_of(reg);
         WRectangle g=REGION_GEOM(reg);
         int rx=0, ry=0;
-        
+
         region_rootpos(reg, &rx, &ry);
-        
+
         g.x=rx;
         g.y=ry;
-        
+
         draw_rubberbox(rw, &g);
     }
 }
@@ -152,32 +152,32 @@ static bool mgmt_handler(WRegion *reg, XEvent *xev)
     XKeyEvent *ev=&xev->xkey;
     WBinding *binding=NULL;
     WMgmtMode *mode;
-    
+
     if(ev->type==KeyRelease)
         return FALSE;
-    
+
     if(reg==NULL)
         return FALSE;
-    
+
     mode=mgmt_mode;
-    
+
     if(mode==NULL)
         return FALSE;
-    
-    binding=bindmap_lookup_binding(mod_mgmtmode_bindmap, 
+
+    binding=bindmap_lookup_binding(mod_mgmtmode_bindmap,
                                    BINDING_KEYPRESS,
                                    ev->state, ev->keycode);
-    
+
     if(!binding)
         return FALSE;
-    
+
     if(binding!=NULL){
         mgmtmode_erase(mode);
         extl_call(binding->func, "o", NULL, mode);
         if(mgmt_mode!=NULL)
             mgmtmode_draw(mgmt_mode);
     }
-    
+
     return (mgmt_mode==NULL);
 }
 
@@ -200,18 +200,18 @@ WMgmtMode *mod_mgmtmode_begin(WRegion *reg)
 {
     if(mgmt_mode!=NULL)
         return NULL;
-    
+
     mgmt_mode=create_mgmtmode(reg);
 
     if(mgmt_mode==NULL)
         return NULL;
-    
-    ioncore_grab_establish((WRegion*)region_rootwin_of(reg), 
+
+    ioncore_grab_establish((WRegion*)region_rootwin_of(reg),
                            mgmt_handler,
                            (GrabKilledHandler*)cancel_mgmt, 0);
-    
+
     mgmtmode_draw(mgmt_mode);
-    
+
     return mgmt_mode;
 }
 

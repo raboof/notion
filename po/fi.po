@@ -1,5 +1,5 @@
 # -*- encoding: iso-8859-1 -*-
-# 
+#
 # Finnish language translations for Ion3.
 #
 # Copyright (c) Tuomo Valkonen 2004.

@@ -114,6 +114,6 @@ de.defstyle("frame-transient", {
 
 dopath("lookcommon_clean_stdisp")
 dopath("lookcommon_clean_tab")
-    
+
 -- Refresh objects' brushes.
 gr.refresh()

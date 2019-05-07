@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-while (<STDIN> =~ /(\w)\t([^\t]*)\t(.*)/) 
+while (<STDIN> =~ /(\w)\t([^\t]*)\t(.*)/)
 {
     my ($action, $called, $rest) = ($1, $2, $3);
     if ($called !~ /extl/ && $called !~ /exports.c/) {

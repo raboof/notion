@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/activity.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -21,13 +21,13 @@ static ObjList *actlist=NULL;
 void region_mark_mgd_activity(WRegion *mgr)
 {
     bool mgr_marked;
-    
+
     if(mgr==NULL)
         return;
-    
+
     mgr_marked=region_is_activity_r(mgr);
     mgr->mgd_activity++;
-    
+
     if(!mgr_marked){
         region_notify_change(mgr, ioncore_g.notifies.sub_activity);
         region_mark_mgd_activity(REGION_MANAGER(mgr));
@@ -39,16 +39,16 @@ void region_clear_mgd_activity(WRegion *mgr)
 {
     if(mgr==NULL)
         return;
-    
+
     mgr->mgd_activity=MAXOF(0, mgr->mgd_activity-1);
-    
+
     if(!region_is_activity_r(mgr)){
         region_notify_change(mgr, ioncore_g.notifies.sub_activity);
         region_clear_mgd_activity(REGION_MANAGER(mgr));
     }
 }
-    
-    
+
+
 static void propagate_activity(WRegion *reg)
 {
     region_mark_mgd_activity(REGION_MANAGER(reg));
@@ -65,29 +65,29 @@ bool region_set_activity(WRegion *reg, int sp)
 {
     bool set=(reg->flags&REGION_ACTIVITY);
     bool nset=libtu_do_setparam(sp, set);
-    
+
     if(!XOR(set, nset))
         return nset;
 
     if(nset){
         if(REGION_IS_ACTIVE(reg))
             return FALSE;
-    
+
         reg->flags|=REGION_ACTIVITY;
         objlist_insert_last(&actlist, (Obj*)reg);
-        
+
         if(reg->mgd_activity==0)
             propagate_activity(reg);
     }else{
         reg->flags&=~REGION_ACTIVITY;
         objlist_remove(&actlist, (Obj*)reg);
-        
+
         if(reg->mgd_activity==0)
             propagate_clear(reg);
     }
-    
+
     region_notify_change(reg, ioncore_g.notifies.activity);
-    
+
     return nset;
 }
 
@@ -159,7 +159,7 @@ EXTL_EXPORT
 bool ioncore_goto_activity()
 {
     WRegion *reg=ioncore_activity_first();
-    
+
     if(reg!=NULL)
         return region_goto(reg);
     else

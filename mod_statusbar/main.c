@@ -1,7 +1,7 @@
 /*
  * ion/mod_statusbar/main.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -54,17 +54,17 @@ WBindmap *mod_statusbar_statusbar_bindmap=NULL;
 #define BL 1024
 
 
-static bool process_pipe(int fd, ExtlFn fn, 
+static bool process_pipe(int fd, ExtlFn fn,
                          bool *doneseen, bool *eagain)
 {
     char buf[BL];
     int n;
     bool fnret;
-    
+
     *eagain=FALSE;
-    
+
     n=read(fd, buf, BL-1);
-    
+
     if(n<0){
         if(errno==EAGAIN || errno==EINTR){
             *eagain=(errno==EAGAIN);
@@ -77,7 +77,7 @@ static bool process_pipe(int fd, ExtlFn fn,
         *doneseen=FALSE;
         return extl_call(fn, "s", "b", &buf, doneseen);
     }
-    
+
     return FALSE;
 }
 
@@ -92,15 +92,15 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
     int nfds=MAXOF(outfd, errfd);
     int retval;
     bool dummy, doneseen, eagain=FALSE;
-    
+
     if(gettimeofday(&endtime, NULL)!=0){
         warn_err();
         return FALSE;
     }
-    
+
     now=endtime;
     endtime.tv_sec+=CF_STATUSD_TIMEOUT_SEC;
-    
+
     while(1){
         FD_ZERO(&rfds);
 
@@ -119,10 +119,10 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
             tv.tv_sec+=tv.tv_usec/USEC;
             tv.tv_usec%=USEC;
         }
-        
+
         FD_SET(outfd, &rfds);
         FD_SET(errfd, &rfds);
-    
+
         retval=select(nfds+1, &rfds, NULL, NULL, &tv);
         if(retval>0){
             if(FD_ISSET(errfd, &rfds)){
@@ -144,15 +144,15 @@ static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)
         }else if(retval==0){
             goto timeout;
         }
-        
+
         if(gettimeofday(&now, NULL)!=0){
             warn_err();
             return FALSE;
         }
     }
-    
+
     return TRUE;
-    
+
 timeout:
     warn(TR("ion-statusd timed out."));
     return FALSE;
@@ -168,30 +168,30 @@ int mod_statusbar__launch_statusd(const char *cmd,
 {
     pid_t pid;
     int outfd=-1, errfd=-1;
-    
+
     if(cmd==NULL)
         return -1;
-    
+
     pid=mainloop_do_spawn(cmd, NULL, NULL,
                           NULL, &outfd, &errfd);
-    
+
     if(pid<0)
         return -1;
-    
+
     if(!wait_statusd_init(outfd, errfd, initdatahandler, initerrhandler))
         goto err;
-    
+
     if(!mainloop_register_input_fd_extlfn(outfd, datahandler))
         goto err;
-    
+
     if(!mainloop_register_input_fd_extlfn(errfd, errhandler))
         goto err2;
 
     return pid;
-    
-err2:    
+
+err2:
     mainloop_unregister_input_fd(outfd);
-err:    
+err:
     close(outfd);
     close(errfd);
     return -1;
@@ -219,7 +219,7 @@ static bool is_systray(WClientWin *cwin)
         free(dummy);
         return TRUE;
     }
-    
+
     if(atom__kde_net_wm_system_tray_window_for==None){
         atom__kde_net_wm_system_tray_window_for=XInternAtom(ioncore_g.dpy,
                                                             "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR",
@@ -227,7 +227,7 @@ static bool is_systray(WClientWin *cwin)
     }
     if(XGetWindowProperty(ioncore_g.dpy, cwin->win,
                           atom__kde_net_wm_system_tray_window_for, 0,
-                          sizeof(Atom), False, AnyPropertyType, 
+                          sizeof(Atom), False, AnyPropertyType,
                           &actual_type, &actual_format, &nitems,
                           &bytes_after, &prop)==Success){
         if(actual_type!=None){
@@ -235,7 +235,7 @@ static bool is_systray(WClientWin *cwin)
         }
         XFree(prop);
     }
-    
+
     return is;
 }
 
@@ -243,10 +243,10 @@ static bool is_systray(WClientWin *cwin)
 static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *param)
 {
     WStatusBar *sb=NULL;
-    
+
     if(!is_systray(cwin))
         return FALSE;
-    
+
     sb=mod_statusbar_find_suitable(cwin, param);
     if(sb==NULL)
         return FALSE;
@@ -255,7 +255,7 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
                                    MANAGE_PRIORITY_NONE);
 }
 
-    
+
 /*}}}*/
 
 
@@ -264,7 +264,7 @@ static bool clientwin_do_manage_hook(WClientWin *cwin, const WManageParams *para
 
 void mod_statusbar_deinit()
 {
-    hook_remove(clientwin_do_manage_alt, 
+    hook_remove(clientwin_do_manage_alt,
                 (WHookDummy*)clientwin_do_manage_hook);
 
     if(mod_statusbar_statusbar_bindmap!=NULL){
@@ -281,7 +281,7 @@ void mod_statusbar_deinit()
 bool mod_statusbar_init()
 {
     mod_statusbar_statusbar_bindmap=ioncore_alloc_bindmap("WStatusBar", NULL);
-    
+
     if(mod_statusbar_statusbar_bindmap==NULL)
         return FALSE;
 
@@ -295,12 +295,12 @@ bool mod_statusbar_init()
         mod_statusbar_deinit();
         return FALSE;
     }
-    
-    hook_add(clientwin_do_manage_alt, 
+
+    hook_add(clientwin_do_manage_alt,
              (WHookDummy*)clientwin_do_manage_hook);
 
     /*ioncore_read_config("cfg_statusbar", NULL, TRUE);*/
-    
+
     return TRUE;
 }
 
@@ -309,7 +309,7 @@ bool mod_statusbar_init()
  * PR_SET_PDEATHSIG is cleared, therefore the ion-statusd process must
  * be explicitly terminated on deinit. This function should be called
  * from Lua on deinit with the ion-statusd process id generated above.
- * 
+ *
  * For more information, refer to the following man pages:
  * - fork(2)
  * - prctl(2), specifically section on PR_SET_PDEATHSIG

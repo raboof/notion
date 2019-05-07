@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/presize.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -33,33 +33,33 @@ void window_p_resize_prepare(WWindow *wwin, XButtonEvent *ev)
     p_dx2mul=0;
     p_dy1mul=0;
     p_dy2mul=0;
-    
+
     tmpx=ev->x-ww;
     tmpy=hh-ev->y;
     xdiv=ww/2;
     ydiv=hh/2;
     atmpx=abs(tmpx);
     atmpy=abs(tmpy);
-    
+
     if(xdiv<MINCORNER && xdiv>1){
         xdiv=ww-MINCORNER;
         if(xdiv<1)
             xdiv=1;
     }
-    
+
     if(ydiv<MINCORNER && ydiv>1){
         ydiv=hh-MINCORNER;
         if(ydiv<1)
             ydiv=1;
     }
-    
+
     if(xdiv==0){
         p_dx2mul=1;
     }else if(hh*atmpx/xdiv>=tmpy && -hh*atmpx/xdiv<=tmpy){
         p_dx1mul=(tmpx<0);
         p_dx2mul=(tmpx>=0);
     }
-    
+
     if(ydiv==0){
         p_dy2mul=1;
     }else if(ww*atmpy/ydiv>=tmpx && -ww*atmpy/ydiv<=tmpx){
@@ -122,10 +122,10 @@ void window_p_resize(WWindow *wwin)
                                   (WMotionHandler*)p_resize_begin,
                                   (WMotionHandler*)p_resize_motion,
                                   (WButtonHandler*)p_moveres_end,
-                                  NULL, 
+                                  NULL,
                                   (GrabKilledHandler*)p_moveres_cancel))
         return;
-    
+
     confine_to_parent(wwin);
 }
 
@@ -163,10 +163,10 @@ void window_p_move(WWindow *wwin)
                                   (WMotionHandler*)p_move_begin,
                                   (WMotionHandler*)p_move_motion,
                                   (WButtonHandler*)p_moveres_end,
-                                  NULL, 
+                                  NULL,
                                   (GrabKilledHandler*)p_moveres_cancel))
         return;
-    
+
     confine_to_parent(wwin);
 }
 

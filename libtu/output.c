@@ -1,7 +1,7 @@
 /*
  * libtu/output.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -45,23 +45,23 @@ static void do_dispatch_message(const char *message);
 void verbose(const char *p, ...)
 {
     va_list args;
-    
+
     va_start(args, p);
-    
+
     verbose_v(p, args);
-    
+
     va_end(args);
 }
-           
+
 
 void verbose_v(const char *p, va_list args)
 {
     int i;
-    
+
     if(verbose_mode){
         for(i=0; i<verbose_indent_lvl; i++)
             writef(stdout, indentator, INDENTATOR_LENGTH);
-        
+
         vprintf(p, args);
         fflush(stdout);
     }
@@ -77,13 +77,13 @@ void verbose_enable(bool enable)
 int verbose_indent(int depth)
 {
     int old=verbose_indent_lvl;
-    
+
     if(depth>=0)
         verbose_indent_lvl=depth;
-    
+
     return old;
 }
-        
+
 
 void warn_progname_enable(bool enable)
 {
@@ -94,15 +94,15 @@ void warn_progname_enable(bool enable)
 static void put_prog_name()
 {
     const char*progname;
-    
+
     if(!progname_enable)
         return;
-    
+
     progname=libtu_progname();
-    
+
     if(progname==NULL)
         return;
-    
+
     fprintf(stderr, "%s: ", (char*)progname);
 }
 
@@ -116,8 +116,8 @@ static void fallback_warn()
     fprintf(stderr, TR("Oops. Error string compilation failed: %s"),
             strerror(errno));
 }
-    
-    
+
+
 #define CALL_V(NAME, ARGS) \
     do { va_list args; va_start(args, p); NAME ARGS; va_end(args); } while(0)
 
@@ -247,11 +247,11 @@ char *errmsg_v(const char *p, va_list args)
 char *errmsg_obj_line_v(const char *obj, int line, const char *p, va_list args)
 {
     char *res1=NULL, *res2, *res3;
-    
+
     if(obj!=NULL){
         if(line>0)
             libtu_asprintf(&res1, "%s:%d: ", obj, line);
-        else        
+        else
             libtu_asprintf(&res1, "%s: ", obj);
     }else{
         if(line>0)

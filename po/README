@@ -1,13 +1,13 @@
 
-To generate the `ion3.pot` file needed for new translations, you 
+To generate the `ion3.pot` file needed for new translations, you
 will need `lua-xgettext`, which you can download by executing
 
    darcs get http://modeemi.fi/~tuomov/repos/lua-xgettext/
 
-Build and install it as instructed in its README. Then, `make pot` 
-in this directory, copy `ion3.pot` over as `$LANG.po`, and start 
-translating. To update/merge new strings to an existing translation, 
-run `make update_$LANG`, after you have first copy-pasted this 
+Build and install it as instructed in its README. Then, `make pot`
+in this directory, copy `ion3.pot` over as `$LANG.po`, and start
+translating. To update/merge new strings to an existing translation,
+run `make update_$LANG`, after you have first copy-pasted this
 Makefile target, when it does not already exist.
 
 Translations for the manual page and welcome message live in

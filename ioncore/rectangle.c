@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/rectangle.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -16,7 +16,7 @@
 void rectangle_constrain(WRectangle *g, const WRectangle *bounds)
 {
     const WRectangle tmpg=*g;
-    
+
     g->x=MINOF(MAXOF(tmpg.x, bounds->x), tmpg.x+tmpg.w-1);
     g->y=MINOF(MAXOF(tmpg.y, bounds->y), tmpg.y+tmpg.h-1);
     g->w=MAXOF(1, MINOF(bounds->x+bounds->w, tmpg.x+tmpg.w)-g->x);

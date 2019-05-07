@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/saveload.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -15,7 +15,7 @@
 #include "screen.h"
 #include "pholder.h"
 
-extern WRegion *create_region_load(WWindow *par, const WFitParams *fp, 
+extern WRegion *create_region_load(WWindow *par, const WFitParams *fp,
                                    ExtlTab tab);
 
 extern bool region_supports_save(WRegion *reg);
@@ -30,7 +30,7 @@ extern bool ioncore_save_layout();
 typedef bool SMAddCallback(WPHolder *ph, ExtlTab tab);
 typedef void SMCfgCallback(WClientWin *cwin, ExtlTab tab);
 typedef WPHolder *SMPHolderCallback();
-    
+
 extern void ioncore_set_sm_callbacks(SMAddCallback *add, SMCfgCallback *cfg);
 extern void ioncore_get_sm_callbacks(SMAddCallback **add, SMCfgCallback **cfg);
 extern void ioncore_set_sm_pholder_callback(SMPHolderCallback *phcb);

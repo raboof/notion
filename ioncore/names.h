@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/names.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -44,10 +44,10 @@ extern char *region_make_label(WRegion *reg, int maxw, GrBrush *brush);
 
 extern bool ioncore_region_i(ExtlFn fn, const char *typenam);
 extern bool ioncore_clientwin_i(ExtlFn fn);
-/** 
- * Look up a region (internal windows, not client windows) by name and type 
- * name. 
- * 
+/**
+ * Look up a region (internal windows, not client windows) by name and type
+ * name.
+ *
  * As region names are unique, the 'typename' parameter is only used to filter
  * out regions that do not have the expected type.
  */

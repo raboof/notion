@@ -121,7 +121,7 @@ function ioncore.submap(kcb_, list)
 end
 
 --DOC
--- Creates a binding description table for the action of pressing a key given 
+-- Creates a binding description table for the action of pressing a key given
 -- by \var{keyspec} (with possible modifiers) to the function \var{func}.
 -- For more information on bindings, see section \ref{sec:bindings}.
 function ioncore.kpress(keyspec, cmd, guard)
@@ -129,7 +129,7 @@ function ioncore.kpress(keyspec, cmd, guard)
 end
 
 --DOC
--- This is similar to \fnref{kpress} but after calling \var{cmd}, 
+-- This is similar to \fnref{kpress} but after calling \var{cmd},
 -- Ioncore waits for all modifiers to be released before processing
 -- any further actions.
 -- For more information on bindings, see section \ref{sec:bindings}.
@@ -181,7 +181,7 @@ end
 
 --DOC
 -- Define bindings for context \var{context}. Here \var{binding} is
--- a table composed of entries created with \fnref{ioncore.kpress}, 
+-- a table composed of entries created with \fnref{ioncore.kpress},
 -- etc.; see section \ref{sec:bindings} for details.
 function ioncore.defbindings(context, bindings)
     local function filterdoc(b)

@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/group.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -53,8 +53,8 @@ static void group_remanage_stdisp(WGroup *ws);
 WStacking *group_get_stacking(WGroup *ws)
 {
     WWindow *par=REGION_PARENT(ws);
-    
-    return (par==NULL 
+
+    return (par==NULL
             ? NULL
             : window_get_stacking(par));
 }
@@ -63,8 +63,8 @@ WStacking *group_get_stacking(WGroup *ws)
 WStacking **group_get_stackingp(WGroup *ws)
 {
     WWindow *par=REGION_PARENT(ws);
-    
-    return (par==NULL 
+
+    return (par==NULL
             ? NULL
             : window_get_stackingp(par));
 }
@@ -123,9 +123,9 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
     WStacking *st;
     WWindow *oldpar;
     WRectangle g;
-    
+
     oldpar=REGION_PARENT(ws);
-    
+
     if(par==NULL){
         if(fp->mode&REGION_FIT_WHATEVER)
             return TRUE;
@@ -133,7 +133,7 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
     }else{
         if(!region_same_rootwin((WRegion*)ws, (WRegion*)par))
             return FALSE;
-        
+
         if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg!=NULL)
             region_detach_manager(ws->managed_stdisp->reg);
         else if(ws->bottom!=NULL && ws->bottom->reg!=NULL &&
@@ -143,12 +143,12 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
              * group_manage_stdisp. */
             region_unmanage_stdisp(ws->bottom->reg, TRUE, TRUE);
         }
-        
+
         assert(ws->managed_stdisp==NULL);
-        
+
         xdiff=fp->g.x-REGION_GEOM(ws).x;
         ydiff=fp->g.y-REGION_GEOM(ws).y;
-    
+
         region_unset_parent((WRegion*)ws);
         XReparentWindow(ioncore_g.dpy, ws->dummywin, par->win, -1, -1);
         region_set_parent((WRegion*)ws, par);
@@ -159,17 +159,17 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
             REGION_GEOM(ws).w=fp->g.w;
             REGION_GEOM(ws).h=fp->g.h;
         }
-        
+
         if(oldpar!=NULL)
             unweaved=stacking_unweave(&oldpar->stacking, wsfilt, (void*)ws);
     }
 
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
         WFitParams fp2=*fp;
-        
+
         if(st->reg==NULL)
             continue;
-        
+
         g=REGION_GEOM(st->reg);
         g.x+=xdiff;
         g.y+=ydiff;
@@ -180,13 +180,13 @@ bool group_fitrep(WGroup *ws, WWindow *par, const WFitParams *fp)
             fp2.g=REGION_GEOM(ws);
             sizepolicy(&st->szplcy, st->reg, &g, REGION_RQGEOM_WEAK_ALL, &fp2);
         }
-        
+
         if(!region_fitrep(st->reg, par, &fp2)){
             warn(TR("Error reparenting %s."), region_name(st->reg));
             region_detach_manager(st->reg);
         }
     }
-    
+
     if(unweaved!=NULL)
         stacking_weave(&par->stacking, &unweaved, FALSE);
 
@@ -201,7 +201,7 @@ static void group_map(WGroup *ws)
 
     REGION_MARK_MAPPED(ws);
     XMapWindow(ioncore_g.dpy, ws->dummywin);
-    
+
     FOR_ALL_MANAGED_BY_GROUP(ws, reg, tmp){
         region_map(reg);
     }
@@ -225,11 +225,11 @@ static void group_unmap(WGroup *ws)
 static WStacking *find_to_focus(WGroup *ws, WStacking *st, bool group_only)
 {
     WStacking *stacking=group_get_stacking(ws);
-    
+
     if(stacking==NULL)
         return st;
-                                
-    return stacking_find_to_focus_mapped(stacking, st, 
+
+    return stacking_find_to_focus_mapped(stacking, st,
                                          (group_only ? (WRegion*)ws : NULL));
 }
 
@@ -243,7 +243,7 @@ static bool group_refocus_(WGroup *ws, WStacking *st)
             ws->current_managed=st;
         return TRUE;
     }
-    
+
     return FALSE;
 }
 
@@ -251,10 +251,10 @@ static bool group_refocus_(WGroup *ws, WStacking *st)
 static void group_do_set_focus(WGroup *ws, bool warp)
 {
     WStacking *st=ws->current_managed;
-    
+
     if(st==NULL || st->reg==NULL)
         st=find_to_focus(ws, NULL, TRUE);
-    
+
     if(st!=NULL && st->reg!=NULL)
         region_do_set_focus(st->reg, warp);
     else
@@ -262,21 +262,21 @@ static void group_do_set_focus(WGroup *ws, bool warp)
 }
 
 
-static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg, 
+static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
                                         int flags, WPrepareFocusResult *res)
 {
     WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
-    WStacking *st=group_find_stacking(ws, reg);    
-    
+    WStacking *st=group_find_stacking(ws, reg);
+
     if(st==NULL)
         return FALSE;
 
     if(mplex!=NULL){
         WStacking *node=mplex_find_stacking(mplex, (WRegion*)ws);
-        
+
         if(node==NULL)
             return FALSE;
-        
+
         return mplex_do_prepare_focus(mplex, node, st,
                                       flags, res);
     }else{
@@ -284,20 +284,20 @@ static bool group_managed_prepare_focus(WGroup *ws, WRegion *reg,
             return FALSE;
 
         st=find_to_focus(ws, st, FALSE);
-        
+
         if(st==NULL)
             return FALSE;
-        
-        if(ioncore_g.autoraise && 
+
+        if(ioncore_g.autoraise &&
            !(flags&REGION_GOTO_ENTERWINDOW) &&
            st->level>STACKING_LEVEL_BOTTOM){
             WStacking **stackingp=group_get_stackingp(ws);
             stacking_restack(stackingp, st, None, NULL, NULL, FALSE);
         }
-        
+
         res->reg=st->reg;
         res->flags=flags;
-        
+
         return (res->reg==reg);
     }
 }
@@ -309,47 +309,47 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
     WStacking *st, *next_st=NULL;
     bool was_stdisp=FALSE, was_bottom=FALSE;
     bool was_current=FALSE;
-    
+
     st=group_find_stacking(ws, reg);
 
     if(st!=NULL){
         next_st=stacking_unstack(REGION_PARENT(ws), st);
-        
+
         UNLINK_ITEM(ws->managed_list, st, mgr_next, mgr_prev);
-        
+
         if(st==ws->managed_stdisp){
             ws->managed_stdisp=NULL;
             was_stdisp=TRUE;
         }
-        
+
         if(st==ws->bottom){
             ws->bottom=NULL;
             was_bottom=TRUE;
         }
-            
+
         if(st==ws->current_managed){
             ws->current_managed=NULL;
             was_current=TRUE;
         }
-        
+
         stacking_unassoc(st);
         stacking_free(st);
     }
-    
+
     region_unset_manager(reg, (WRegion*)ws);
-    
+
     if(!OBJ_IS_BEING_DESTROYED(ws)){
         if(was_bottom && !was_stdisp && ws->managed_stdisp==NULL){
-            /* We should probably be managing any stdisp, that 'bottom' 
+            /* We should probably be managing any stdisp, that 'bottom'
              * was managing.
              */
             group_remanage_stdisp(ws);
         }
-        
+
         if(was_current){
             /* This may still potentially cause problems when focus
              * change is pending. Perhaps we should use region_await_focus,
-             * if it is pointing to our child (and region_may_control_focus 
+             * if it is pointing to our child (and region_may_control_focus
              * fail if it is pointing somewhere else).
              */
             WStacking *stf=find_to_focus(ws, next_st, TRUE);
@@ -365,7 +365,7 @@ void group_managed_remove(WGroup *ws, WRegion *reg)
 
 void group_managed_notify(WGroup *ws, WRegion *reg, WRegionNotify how)
 {
-    if(how==ioncore_g.notifies.activated || 
+    if(how==ioncore_g.notifies.activated ||
        how==ioncore_g.notifies.pseudoactivated){
         ws->current_managed=group_find_stacking(ws, reg);
     }
@@ -386,7 +386,7 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp, const char *name
     ws->managed_stdisp=NULL;
     ws->bottom=NULL;
     ws->managed_list=NULL;
-    
+
     ws->dummywin=XCreateWindow(ioncore_g.dpy, par->win,
                                 fp->g.x, fp->g.y, 1, 1, 0,
                                 CopyFromParent, InputOnly,
@@ -405,11 +405,11 @@ bool group_init(WGroup *ws, WWindow *par, const WFitParams *fp, const char *name
                  ButtonPressMask|ButtonReleaseMask);
     XSaveContext(ioncore_g.dpy, ws->dummywin, ioncore_g.win_context,
                  (XPointer)ws);
-    
+
     ((WRegion*)ws)->flags|=REGION_GRAB_ON_PARENT;
-    
+
     region_add_bindmap((WRegion*)ws, ioncore_group_bindmap);
-    
+
     return TRUE;
 }
 
@@ -444,13 +444,13 @@ void group_deinit(WGroup *ws)
 }
 
 
-    
+
 bool group_rescue_clientwins(WGroup *ws, WRescueInfo *info)
 {
     WGroupIterTmp tmp;
-    
+
     group_iter_init_nostdisp(&tmp, ws);
-    
+
     return region_rescue_some_clientwins((WRegion*)ws, info,
                                          (WRegionIterator*)group_iter,
                                          &tmp);
@@ -461,12 +461,12 @@ static bool group_empty_for_bottom_stdisp(WGroup *ws)
 {
     WGroupIterTmp tmp;
     WStacking *st;
-    
+
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
         if(st!=ws->bottom && st!=ws->managed_stdisp)
             return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -477,7 +477,7 @@ static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
         if(group_empty_for_bottom_stdisp(ws))
             return region_disposeroot((WRegion*)ws);
     }
-    
+
     return reg;
 }
 
@@ -491,13 +491,13 @@ static WRegion *group_managed_disposeroot(WGroup *ws, WRegion *reg)
 static void group_do_set_bottom(WGroup *grp, WStacking *st)
 {
     WStacking *was=grp->bottom;
-    
+
     grp->bottom=st;
-    
+
     if(st!=was){
         if(st==NULL || HAS_DYN(st->reg, region_manage_stdisp))
             group_remanage_stdisp(grp);
-        
+
     }
 }
 
@@ -510,16 +510,16 @@ EXTL_EXPORT_MEMBER
 bool group_set_bottom(WGroup *ws, WRegion *reg)
 {
     WStacking *st=NULL;
-    
+
     if(reg!=NULL){
         st=group_find_stacking(ws, reg);
-        
+
         if(st==NULL)
             return FALSE;
     }
-        
+
     group_do_set_bottom(ws, st);
-    
+
     return TRUE;
 }
 
@@ -545,11 +545,11 @@ WStacking *group_do_add_managed(WGroup *ws, WRegion *reg, int level,
                                 WSizePolicy szplcy)
 {
     WStacking *st=NULL;
-    CALL_DYN_RET(st, WStacking*, group_do_add_managed, ws, 
+    CALL_DYN_RET(st, WStacking*, group_do_add_managed, ws,
                  (ws, reg, level, szplcy));
     return st;
 }
-    
+
 
 WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
                                         WSizePolicy szplcy)
@@ -557,20 +557,20 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
     WStacking *st=NULL, *tmp=NULL;
     WStacking **stackingp=group_get_stackingp(ws);
     WFrame *frame;
-    
+
     if(stackingp==NULL)
         return NULL;
-    
+
     st=create_stacking();
-    
+
     if(st==NULL)
         return NULL;
-    
+
     if(!stacking_assoc(st, reg)){
         stacking_free(st);
         return  NULL;
     }
-    
+
     frame=OBJ_CAST(reg, WFrame);
     if(frame!=NULL){
         WFrameMode m=frame_mode(frame);
@@ -595,7 +595,7 @@ WStacking *group_do_add_managed_default(WGroup *ws, WRegion *reg, int level,
 }
 
 
-static void geom_group_to_parent(WGroup *ws, const WRectangle *g, 
+static void geom_group_to_parent(WGroup *ws, const WRectangle *g,
                                  WRectangle *wg)
 {
     wg->x=g->x+REGION_GEOM(ws).x;
@@ -605,7 +605,7 @@ static void geom_group_to_parent(WGroup *ws, const WRectangle *g,
 }
 
 
-bool group_do_attach_final(WGroup *ws, 
+bool group_do_attach_final(WGroup *ws,
                            WRegion *reg,
                            const WGroupAttachParams *param)
 {
@@ -616,43 +616,43 @@ bool group_do_attach_final(WGroup *ws,
     uint level;
     int weak;
     bool sw;
-    
+
     /* Stacking  */
     if(param->stack_above!=NULL)
         stabove=group_find_stacking(ws, param->stack_above);
 
     level=(stabove!=NULL
            ? stabove->level
-           : (param->level_set 
-              ? param->level 
+           : (param->level_set
+              ? param->level
               : STACKING_LEVEL_NORMAL));
-    
+
     /* Fit */
     szplcy=(param->szplcy_set
             ? param->szplcy
             : (param->bottom
                ? SIZEPOLICY_FULL_EXACT
                : SIZEPOLICY_UNCONSTRAINED));
-    
+
     weak=(param->geom_weak_set
           ? param->geom_weak
           : (param->geom_set
              ? 0
              : REGION_RQGEOM_WEAK_ALL));
-    
+
     if(param->geom_set)
         geom_group_to_parent(ws, &param->geom, &g);
     else
         g=REGION_GEOM(reg);
-    
-    /* If the requested geometry does not overlap the workspaces's geometry, 
+
+    /* If the requested geometry does not overlap the workspaces's geometry,
      * position request is never honoured.
      */
     if((g.x+g.w<=REGION_GEOM(ws).x) ||
        (g.x>=REGION_GEOM(ws).x+REGION_GEOM(ws).w)){
         weak|=REGION_RQGEOM_WEAK_X;
     }
-       
+
     if((g.y+g.h<=REGION_GEOM(ws).y) ||
        (g.y>=REGION_GEOM(ws).y+REGION_GEOM(ws).h)){
         weak|=REGION_RQGEOM_WEAK_Y;
@@ -673,48 +673,48 @@ bool group_do_attach_final(WGroup *ws,
 
     if(rectangle_compare(&fp.g, &REGION_GEOM(reg))!=RECTANGLE_SAME)
         region_fitrep(reg, NULL, &fp);
-    
+
     /* Add */
     st=group_do_add_managed(ws, reg, level, szplcy);
-    
+
     if(st==NULL)
         return FALSE;
-    
+
     if(stabove!=NULL)
         st->above=stabove;
 
     if(param->bottom)
         group_do_set_bottom(ws, st);
-    
+
     /* Focus */
     sw=(param->switchto_set ? param->switchto : ioncore_g.switchto_new);
-    
+
     if(sw || st->level>=STACKING_LEVEL_MODAL1){
         WStacking *stf=find_to_focus(ws, st, FALSE);
-        
+
         if(stf==st){
             /* Ok, the new region can be focused */
             group_refocus_(ws, stf);
         }
     }
-    
+
     return TRUE;
 }
 
 
-WRegion *group_do_attach(WGroup *ws, 
+WRegion *group_do_attach(WGroup *ws,
                          /*const*/ WGroupAttachParams *param,
                          WRegionAttachData *data)
 {
     WFitParams fp;
     WWindow *par;
     WRegion *reg;
-    
+
     if(ws->bottom!=NULL && param->bottom){
         warn(TR("'bottom' already set."));
         return NULL;
     }
-    
+
     par=REGION_PARENT(ws);
     assert(par!=NULL);
 
@@ -725,8 +725,8 @@ WRegion *group_do_attach(WGroup *ws,
         fp.g=REGION_GEOM(ws);
         fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
     }
-    
-    return region_attach_helper((WRegion*) ws, par, &fp, 
+
+    return region_attach_helper((WRegion*) ws, par, &fp,
                                 (WRegionDoAttachFn*)group_do_attach_final,
                                 /*(const WRegionAttachParams*)*/param, data);
     /*                            ^^^^ doesn't seem to work. */
@@ -738,31 +738,31 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     int tmp;
     char *tmps;
     ExtlTab g;
-    
+
     par->switchto_set=0;
     par->level_set=0;
     par->szplcy_set=0;
     par->geom_set=0;
     par->bottom=0;
-    
+
     if(extl_table_is_bool_set(tab, "bottom")){
         par->level=STACKING_LEVEL_BOTTOM;
         par->level_set=1;
         par->bottom=1;
     }
-    
+
     if(extl_table_gets_i(tab, "level", &tmp)){
         if(tmp>=0){
             par->level_set=STACKING_LEVEL_NORMAL;
             par->level=tmp;
         }
     }
-    
+
     if(!par->level_set && extl_table_is_bool_set(tab, "modal")){
         par->level=STACKING_LEVEL_MODAL1;
         par->level_set=1;
     }
-    
+
     if(extl_table_is_bool_set(tab, "switchto"))
         par->switchto=1;
 
@@ -774,10 +774,10 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
             par->szplcy_set=1;
         free(tmps);
     }
-    
+
     if(extl_table_gets_t(tab, "geom", &g)){
         int n=0;
-        
+
         if(extl_table_gets_i(g, "x", &(par->geom.x)))
             n++;
         if(extl_table_gets_i(g, "y", &(par->geom.y)))
@@ -786,10 +786,10 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
             n++;
         if(extl_table_gets_i(g, "h", &(par->geom.h)))
             n++;
-        
+
         if(n==4)
             par->geom_set=1;
-        
+
         extl_unref_table(g);
     }
 }
@@ -809,12 +809,12 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
 
     if(reg==NULL)
         return NULL;
-    
+
     get_params(ws, param, &par);
-    
+
     data.type=REGION_ATTACH_REPARENT;
     data.u.reg=reg;
-    
+
     return group_do_attach(ws, &par, &data);
 }
 
@@ -822,7 +822,7 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
 /*EXTL_DOC
  * Create a new region to be managed by \var{ws}. At least the following
  * fields in \var{param} are understood:
- * 
+ *
  * \begin{tabularx}{\linewidth}{lX}
  *  \tabhead{Field & Description}
  *  \var{type} & (string) Class of the object to be created. Mandatory. \\
@@ -832,8 +832,8 @@ WRegion *group_attach(WGroup *ws, WRegion *reg, ExtlTab param)
  *  \var{modal} & (boolean) Make object modal; ignored if level is set. \\
  *  \var{sizepolicy} & (string) Size policy; see Section \ref{sec:sizepolicies}. \\
  * \end{tabularx}
- * 
- * In addition parameters to the region to be created are passed in this 
+ *
+ * In addition parameters to the region to be created are passed in this
  * same table.
  */
 EXTL_EXPORT_MEMBER
@@ -843,10 +843,10 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
     WRegionAttachData data;
 
     get_params(ws, param, &par);
-    
+
     data.type=REGION_ATTACH_LOAD;
     data.u.tab=param;
-    
+
     return group_do_attach(ws, &par, &data);
 }
 
@@ -860,7 +860,7 @@ WRegion *group_attach_new(WGroup *ws, ExtlTab param)
 static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
 {
     int pos=di->pos;
-    
+
     if(di->fullsize){
         if(region_orientation(stdisp)==REGION_ORIENTATION_VERTICAL){
             if(pos==MPLEX_STDISP_TL || pos==MPLEX_STDISP_BL)
@@ -886,34 +886,34 @@ static int stdisp_szplcy(const WMPlexSTDispInfo *di, WRegion *stdisp)
 }
 
 
-void group_manage_stdisp(WGroup *ws, WRegion *stdisp, 
+void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
                          const WMPlexSTDispInfo *di)
 {
     WFitParams fp;
     uint szplcy;
     WRegion *b=(ws->bottom==NULL ? NULL : ws->bottom->reg);
-    
+
     /* Check if 'bottom' wants to manage the stdisp. */
-    if(b!=NULL 
+    if(b!=NULL
        && !OBJ_IS_BEING_DESTROYED(b)
        && HAS_DYN(b, region_manage_stdisp)){
         region_manage_stdisp(b, stdisp, di);
         if(REGION_MANAGER(stdisp)==b)
             return;
     }
-    
+
     /* No. */
-    
+
     szplcy=stdisp_szplcy(di, stdisp)|SIZEPOLICY_SHRUNK;
-    
+
     if(ws->managed_stdisp!=NULL && ws->managed_stdisp->reg==stdisp){
         if(ws->managed_stdisp->szplcy==szplcy)
             return;
         ws->managed_stdisp->szplcy=szplcy;
     }else{
         region_detach_manager(stdisp);
-        ws->managed_stdisp=group_do_add_managed(ws, stdisp, 
-                                                STACKING_LEVEL_ON_TOP, 
+        ws->managed_stdisp=group_do_add_managed(ws, stdisp,
+                                                STACKING_LEVEL_ON_TOP,
                                                 szplcy);
     }
 
@@ -927,9 +927,9 @@ void group_manage_stdisp(WGroup *ws, WRegion *stdisp,
 static void group_remanage_stdisp(WGroup *ws)
 {
     WMPlex *mplex=OBJ_CAST(REGION_MANAGER(ws), WMPlex);
-    
-    if(mplex!=NULL && 
-       mplex->mx_current!=NULL && 
+
+    if(mplex!=NULL &&
+       mplex->mx_current!=NULL &&
        mplex->mx_current->st->reg==(WRegion*)ws){
         mplex_remanage_stdisp(mplex);
     }
@@ -948,7 +948,7 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
 {
     WFitParams fp;
     WStacking *st;
-        
+
     st=group_find_stacking(ws, reg);
 
     if(st==NULL){
@@ -958,16 +958,16 @@ void group_managed_rqgeom(WGroup *ws, WRegion *reg,
         fp.g=REGION_GEOM(ws);
         sizepolicy(&st->szplcy, reg, &rq->geom, rq->flags, &fp);
     }
-    
+
     if(geomret!=NULL)
         *geomret=fp.g;
-    
+
     if(!(rq->flags&REGION_RQGEOM_TRYONLY))
         region_fitrep(reg, NULL, &fp);
 }
 
 
-void group_managed_rqgeom_absolute(WGroup *grp, WRegion *sub, 
+void group_managed_rqgeom_absolute(WGroup *grp, WRegion *sub,
                                    const WRQGeomParams *rq,
                                    WRectangle *geomret)
 {
@@ -992,15 +992,15 @@ void group_managed_rqgeom_absolute(WGroup *grp, WRegion *sub,
 
 static WStacking *nxt(WGroup *ws, WStacking *st, bool wrap)
 {
-    return (st->mgr_next!=NULL 
-            ? st->mgr_next 
+    return (st->mgr_next!=NULL
+            ? st->mgr_next
             : (wrap ? ws->managed_list : NULL));
 }
 
 
 static WStacking *prv(WGroup *ws, WStacking *st, bool wrap)
 {
-    return (st!=ws->managed_list 
+    return (st!=ws->managed_list
             ? st->mgr_prev
             : (wrap ? st->mgr_prev : NULL));
 }
@@ -1023,32 +1023,32 @@ static bool focusable(WGroup *ws, WStacking *st, uint min_level)
             && st->level>=min_level);
 }
 
-       
+
 static WStacking *do_get_next(WGroup *ws, WStacking *sti,
                               NxtFn *fn, bool wrap, bool sti_ok)
 {
     WStacking *st, *stacking;
     uint min_level=0;
-    
+
     stacking=group_get_stacking(ws);
-    
+
     if(stacking!=NULL)
         min_level=stacking_min_level(stacking, mapped_filt, NULL);
 
     st=sti;
     while(1){
-        st=fn(ws, st, wrap); 
-        
+        st=fn(ws, st, wrap);
+
         if(st==NULL || st==sti)
             break;
-        
+
         if(focusable(ws, st, min_level))
             return st;
     }
 
     if(sti_ok && focusable(ws, sti, min_level))
         return sti;
-    
+
     return NULL;
 }
 
@@ -1056,17 +1056,17 @@ static WStacking *do_get_next(WGroup *ws, WStacking *sti,
 static WStacking *group_do_navi_first(WGroup *ws, WRegionNavi nh)
 {
     WStacking *lst=ws->managed_list;
-    
+
     if(lst==NULL)
         return NULL;
 
-    if(nh==REGION_NAVI_ANY && 
+    if(nh==REGION_NAVI_ANY &&
        ws->current_managed!=NULL &&
        ws->current_managed->reg!=NULL){
         return ws->current_managed;
     }
-    
-    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
+
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END ||
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
         return do_get_next(ws, lst, prv, TRUE, TRUE);
     }else{
@@ -1079,18 +1079,18 @@ static WRegion *group_navi_first(WGroup *ws, WRegionNavi nh,
                                  WRegionNaviData *data)
 {
     WStacking *st=group_do_navi_first(ws, nh);
-    
+
     return region_navi_cont(&ws->reg, (st!=NULL ? st->reg : NULL), data);
 }
 
 
-static WStacking *group_do_navi_next(WGroup *ws, WStacking *st, 
+static WStacking *group_do_navi_next(WGroup *ws, WStacking *st,
                                      WRegionNavi nh, bool wrap)
 {
     if(st==NULL)
         return group_do_navi_first(ws, nh);
-    
-    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END || 
+
+    if(nh==REGION_NAVI_ANY || nh==REGION_NAVI_END ||
        nh==REGION_NAVI_BOTTOM || nh==REGION_NAVI_RIGHT){
         return do_get_next(ws, st, nxt, wrap, FALSE);
     }else{
@@ -1098,13 +1098,13 @@ static WStacking *group_do_navi_next(WGroup *ws, WStacking *st,
     }
 }
 
-static WRegion *group_navi_next(WGroup *ws, WRegion *reg, 
+static WRegion *group_navi_next(WGroup *ws, WRegion *reg,
                                 WRegionNavi nh, WRegionNaviData *data)
 {
     WStacking *st=group_find_stacking(ws, reg);
-    
+
     st=group_do_navi_next(ws, st, nh, FALSE);
-    
+
     return region_navi_cont(&ws->reg, (st!=NULL ? st->reg : NULL), data);
 }
 
@@ -1115,7 +1115,7 @@ static WRegion *group_navi_next(WGroup *ws, WRegion *reg,
 /*{{{ Stacking */
 
 
-/* 
+/*
  * Note: Managed objects are considered to be stacked separately from the
  * group, slightly violating expectations.
  */
@@ -1123,7 +1123,7 @@ static WRegion *group_navi_next(WGroup *ws, WRegion *reg,
 void group_stacking(WGroup *ws, Window *bottomret, Window *topret)
 {
     Window win=region_xwindow((WRegion*)ws);
-    
+
     *bottomret=win;
     *topret=win;
 }
@@ -1132,7 +1132,7 @@ void group_stacking(WGroup *ws, Window *bottomret, Window *topret)
 void group_restack(WGroup *ws, Window other, int mode)
 {
     Window win;
-    
+
     win=region_xwindow((WRegion*)ws);
     if(win!=None){
         xwindow_restack(win, other, mode);
@@ -1146,7 +1146,7 @@ WStacking *group_find_stacking(WGroup *ws, WRegion *r)
 {
     if(r==NULL || REGION_MANAGER(r)!=(WRegion*)ws)
         return NULL;
-    
+
     return ioncore_find_stacking(r);
 }
 
@@ -1160,13 +1160,13 @@ bool group_managed_rqorder(WGroup *grp, WRegion *reg, WRegionOrder order)
         return FALSE;
 
     st=group_find_stacking(grp, reg);
-    
+
     if(st==NULL)
         return FALSE;
-    
+
     stacking_restack(stackingp, st, None, NULL, NULL,
                      (order!=REGION_ORDER_FRONT));
-    
+
     return TRUE;
 }
 
@@ -1189,7 +1189,7 @@ bool group_managed_i(WGroup *ws, ExtlFn iterfn)
 {
     WGroupIterTmp tmp;
     group_iter_init(&tmp, ws);
-    
+
     return extl_iter_objlist_(iterfn, (ObjIterator*)group_iter, &tmp);
 }
 
@@ -1225,7 +1225,7 @@ Window group_xwindow(const WGroup *ws)
 WRegion *region_group_of(WRegion *reg)
 {
     WRegion *mgr=REGION_MANAGER(reg);
-    
+
     return (OBJ_IS(mgr, WGroup) ? mgr : reg);
 }*/
 
@@ -1238,7 +1238,7 @@ EXTL_EXPORT_MEMBER
 WRegion *region_groupleader_of(WRegion *reg)
 {
     WGroup *grp=REGION_MANAGER_CHK(reg, WGroup);
-    
+
     return ((grp!=NULL && group_bottom(grp)==reg)
             ? (WRegion*)grp
             : reg);
@@ -1258,44 +1258,44 @@ ExtlTab group_get_configuration(WGroup *ws)
     WGroupIterTmp tmp;
     int n=0;
     WRectangle tmpg;
-    
+
     tab=region_get_base_configuration((WRegion*)ws);
-    
+
     mgds=extl_create_table();
-    
+
     extl_table_sets_t(tab, "managed", mgds);
-    
+
     /* TODO: stacking order messed up */
-    
+
     FOR_ALL_NODES_IN_GROUP(ws, st, tmp){
         if(st->reg==NULL)
             continue;
-        
+
         subtab=region_get_configuration(st->reg);
 
         if(subtab!=extl_table_none()){
-            extl_table_sets_s(subtab, "sizepolicy", 
+            extl_table_sets_s(subtab, "sizepolicy",
                               sizepolicy2string(st->szplcy));
             extl_table_sets_i(subtab, "level", st->level);
-        
+
             tmpg=REGION_GEOM(st->reg);
             tmpg.x-=REGION_GEOM(ws).x;
             tmpg.y-=REGION_GEOM(ws).y;
-            
+
             g=extl_table_from_rectangle(&tmpg);
             extl_table_sets_t(subtab, "geom", g);
             extl_unref_table(g);
-            
+
             if(ws->bottom==st)
                 extl_table_sets_b(subtab, "bottom", TRUE);
-        
+
             extl_table_seti_t(mgds, ++n, subtab);
             extl_unref_table(subtab);
         }
     }
-    
+
     extl_unref_table(mgds);
-    
+
     return tab;
 }
 
@@ -1304,7 +1304,7 @@ void group_do_load(WGroup *ws, ExtlTab tab)
 {
     ExtlTab substab, subtab;
     int i, n;
-    
+
     if(extl_table_gets_t(tab, "managed", &substab)){
         n=extl_table_get_n(substab);
         for(i=1; i<=n; i++){
@@ -1313,7 +1313,7 @@ void group_do_load(WGroup *ws, ExtlTab tab)
                 extl_unref_table(subtab);
             }
         }
-        
+
         extl_unref_table(substab);
     }
 }
@@ -1325,12 +1325,12 @@ WRegion *group_loaj(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
     /* Generic initial name - to be overwritten later. */
     ws=create_group(par, fp, "Notion GroupCW or GroupWS");
-    
+
     if(ws==NULL)
         return NULL;
-        
+
     group_do_load(ws, tab);
-    
+
     return (WRegion*)ws;
 }
 
@@ -1345,25 +1345,25 @@ static DynFunTab group_dynfuntab[]={
     {(DynFun*)region_fitrep,
      (DynFun*)group_fitrep},
 
-    {region_map, 
+    {region_map,
      group_map},
-    
-    {region_unmap, 
+
+    {region_unmap,
      group_unmap},
-    
-    {(DynFun*)region_managed_prepare_focus, 
+
+    {(DynFun*)region_managed_prepare_focus,
      (DynFun*)group_managed_prepare_focus},
 
-    {region_do_set_focus, 
+    {region_do_set_focus,
      group_do_set_focus},
-    
-    {region_managed_notify, 
+
+    {region_managed_notify,
      group_managed_notify},
-    
+
     {region_managed_remove,
      group_managed_remove},
-    
-    {(DynFun*)region_get_configuration, 
+
+    {(DynFun*)region_get_configuration,
      (DynFun*)group_get_configuration},
 
     {(DynFun*)region_managed_disposeroot,
@@ -1371,10 +1371,10 @@ static DynFunTab group_dynfuntab[]={
 
     {(DynFun*)region_current,
      (DynFun*)group_current},
-    
+
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)group_rescue_clientwins},
-    
+
     {region_restack,
      group_restack},
 
@@ -1386,28 +1386,28 @@ static DynFunTab group_dynfuntab[]={
 
     {region_managed_rqgeom,
      group_managed_rqgeom},
-     
+
     {region_managed_rqgeom_absolute,
      group_managed_rqgeom_absolute},
-    
+
     {(DynFun*)group_do_add_managed,
      (DynFun*)group_do_add_managed_default},
-    
+
     {region_size_hints,
      group_size_hints},
-    
+
     {(DynFun*)region_xwindow,
      (DynFun*)group_xwindow},
-    
+
     {(DynFun*)region_navi_first,
      (DynFun*)group_navi_first},
-    
+
     {(DynFun*)region_navi_next,
      (DynFun*)group_navi_next},
-    
+
     {(DynFun*)region_managed_rqorder,
      (DynFun*)group_managed_rqorder},
-    
+
     END_DYNFUNTAB
 };
 

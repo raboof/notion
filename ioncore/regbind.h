@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/regbind.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -32,10 +32,10 @@ extern WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
 extern WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
                                             uint kcb, int area);
 
-extern void rbind_binding_added(const WRegBindingInfo *rbind, 
+extern void rbind_binding_added(const WRegBindingInfo *rbind,
                                 const WBinding *binding,
                                 const WBindmap *bindmap);
-extern void rbind_binding_removed(const WRegBindingInfo *rbind, 
+extern void rbind_binding_removed(const WRegBindingInfo *rbind,
                                   const WBinding *binding,
                                   const WBindmap *bindmap);
 

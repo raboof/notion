@@ -95,7 +95,7 @@ dopath("cfg_defaults")
 -- Define some layouts.
 --dopath("cfg_layouts")
 
--- Load some modules. 
+-- Load some modules.
 --dopath("mod_query")
 --dopath("mod_menu")
 --dopath("mod_tiling")

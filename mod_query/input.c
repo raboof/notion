@@ -1,7 +1,7 @@
 /*
  * ion/mod_query/input.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -86,21 +86,21 @@ void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp)
 void input_updategr(WInput *input)
 {
     GrBrush *brush;
-    
+
     brush=gr_get_brush(input->win.win,
                        region_rootwin_of((WRegion*)input),
                        input_style(input));
-    
+
     if(brush==NULL)
         return;
-    
+
     if(input->brush!=NULL)
         grbrush_release(input->brush);
     input->brush=brush;
     input_refit(input);
-    
+
     region_updategr_default((WRegion*)input);
-    
+
     window_draw((WWindow*)input, TRUE);
 }
 
@@ -121,22 +121,22 @@ bool input_init(WInput *input, WWindow *par, const WFitParams *fp)
         return FALSE;
 
     win=input->win.win;
-    
+
     input->brush=gr_get_brush(win, region_rootwin_of((WRegion*)par),
                               input_style(input));
-    
+
     if(input->brush==NULL)
         goto fail;
-    
+
     input_refit(input);
     window_select_input(&(input->win), IONCORE_EVENTMASK_NORMAL);
 
     region_add_bindmap((WRegion*)input, mod_query_input_bindmap);
-    
+
     region_register((WRegion*)input);
-    
+
     return TRUE;
-    
+
 fail:
     window_deinit((WWindow*)input);
     return FALSE;
@@ -147,7 +147,7 @@ void input_deinit(WInput *input)
 {
     if(input->brush!=NULL)
         grbrush_release(input->brush);
-    
+
     window_deinit((WWindow*)input);
 }
 
@@ -186,18 +186,18 @@ static void input_activated(WInput *input)
 /*{{{{ Misc */
 
 
-void mod_query_get_minimum_extents(GrBrush *brush, bool with_spacing, 
+void mod_query_get_minimum_extents(GrBrush *brush, bool with_spacing,
                                    int *w, int *h)
 {
     GrBorderWidths bdw;
     GrFontExtents fnte;
     int spc;
-    
+
     grbrush_get_border_widths(brush, &bdw);
     grbrush_get_font_extents(brush, &fnte);
-    
+
     spc=(with_spacing ? bdw.spacing : 0);
-    
+
     *h=(fnte.max_height+bdw.top+bdw.bottom+spc);
     *w=(bdw.left+bdw.right+spc);
 }
@@ -221,5 +221,5 @@ static DynFunTab input_dynfuntab[]={
 EXTL_EXPORT
 IMPLCLASS(WInput, WWindow, input_deinit, input_dynfuntab);
 
-    
+
 /*}}}*/

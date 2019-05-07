@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/split.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -49,7 +49,7 @@ DECLCLASS(WSplit){
     WRectangle geom;
     WSplitInner *parent;
     void *ws_if_root;
-    
+
     int min_w, min_h;
     int max_w, max_h;
     int unused_w, unused_h;
@@ -110,7 +110,7 @@ extern WPrimn primn_none2any(WPrimn primn);
 
 extern bool split_init(WSplit *split, const WRectangle *geom);
 extern bool splitinner_init(WSplitInner *split, const WRectangle *geom);
-extern bool splitsplit_init(WSplitSplit *split, const WRectangle *geom, 
+extern bool splitsplit_init(WSplitSplit *split, const WRectangle *geom,
                             int dir);
 extern bool splitregion_init(WSplitRegion *split, const WRectangle *geom,
                              WRegion *reg);
@@ -133,30 +133,30 @@ extern void splitst_deinit(WSplitST *split);
 
 DYNFUN void split_update_bounds(WSplit *node, bool recursive);
 extern void splitsplit_update_geom_from_children(WSplitSplit *node);
-DYNFUN void split_do_resize(WSplit *node, const WRectangle *ng, 
+DYNFUN void split_do_resize(WSplit *node, const WRectangle *ng,
                             WPrimn hprimn, WPrimn vprimn, bool transpose);
-extern void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng, 
+extern void splitsplit_do_resize(WSplitSplit *node, const WRectangle *ng,
                                  WPrimn hprimn, WPrimn vprimn, bool transpose);
-extern void split_resize(WSplit *node, const WRectangle *ng, 
+extern void split_resize(WSplit *node, const WRectangle *ng,
                          WPrimn hprimn, WPrimn vprimn);
 DYNFUN void split_do_maxhelper(WSplit *node, int dir, int action);
 DYNFUN bool split_do_restore(WSplit *node, int dir);
 DYNFUN bool split_do_verify(WSplit *node, int dir);
 extern bool split_maximize(WSplit *node, int dir, int action);
-DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node, 
-                                 RootwardAmount *ha, RootwardAmount *va, 
+DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node,
+                                 RootwardAmount *ha, RootwardAmount *va,
                                  WRectangle *rg, bool tryonly);
 extern ExtlTab split_rqgeom(WSplit *node, ExtlTab g);
 
 /* Split */
 
-extern void splittree_rqgeom(WSplit *node, int flags, 
+extern void splittree_rqgeom(WSplit *node, int flags,
                              const WRectangle *geom, WRectangle *geomret);
 
 
 DYNFUN void splitinner_replace(WSplitInner *node, WSplit *child, WSplit *what);
-extern WSplitRegion *splittree_split(WSplit *node, int dir, 
-                                     WPrimn primn, int minsize, 
+extern WSplitRegion *splittree_split(WSplit *node, int dir,
+                                     WPrimn primn, int minsize,
                                      WRegionSimpleCreateFn *fn,
                                      WWindow *parent);
 
@@ -164,18 +164,18 @@ extern void splittree_changeroot(WSplit *root, WSplit *node);
 
 /* Remove */
 
-DYNFUN void splitinner_remove(WSplitInner *node, WSplit *child, 
+DYNFUN void splitinner_remove(WSplitInner *node, WSplit *child,
                               bool reclaim_space);
 extern void splittree_remove(WSplit *node, bool reclaim_space);
 
 /* Tree traversal */
 
 extern WSplit *split_find_root(WSplit *split);
-DYNFUN WSplit *split_current_todir(WSplit *node, 
+DYNFUN WSplit *split_current_todir(WSplit *node,
                                    WPrimn hprimn, WPrimn vprimn,
                                    WSplitFilter *filter);
 DYNFUN WSplit *splitinner_nextto(WSplitInner *node, WSplit *child,
-                                 WPrimn hprimn, WPrimn vprimn, 
+                                 WPrimn hprimn, WPrimn vprimn,
                                  WSplitFilter *filter);
 DYNFUN WSplit *splitinner_current(WSplitInner *node);
 DYNFUN void splitinner_mark_current(WSplitInner *split, WSplit *child);
@@ -200,7 +200,7 @@ extern bool split_transpose_to(WSplit *split, const WRectangle *geom);
 extern void splitsplit_flip_default(WSplitSplit *split);
 DYNFUN void splitsplit_flip(WSplitSplit *split);
 
-extern bool split_rotate_to(WSplit *node, const WRectangle *geom, 
+extern bool split_rotate_to(WSplit *node, const WRectangle *geom,
                             int rotation);
 
 /* Save support */
@@ -214,8 +214,8 @@ extern void splittree_begin_resize();
 extern void splittree_end_resize();
 extern void splittree_scan_stdisp_rootward(WSplit *node);
 
-extern void split_do_rqgeom_(WSplit *node, const WRectangle *ng, 
-                             bool hany, bool vany, WRectangle *rg, 
+extern void split_do_rqgeom_(WSplit *node, const WRectangle *ng,
+                             bool hany, bool vany, WRectangle *rg,
                              bool tryonly);
 
 

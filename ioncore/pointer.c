@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/pointer.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -56,23 +56,23 @@ bool ioncore_set_drag_handlers(WRegion *reg,
 {
     if(ioncore_pointer_grab_region()==NULL || p_motion)
         return FALSE;
-    
+
     /* A motion handler set at this point may not set a begin handler */
     if(p_grabstate!=ST_HELD && begin!=NULL)
         return FALSE;
-    
+
     if(p_reg!=reg){
         watch_setup(&p_regwatch, (Obj*)reg, NULL);
         watch_reset(&p_subregwatch);
     }
-    
+
     p_motion_begin_handler=begin;
     p_motion_handler=motion;
     p_motion_end_handler=end;
     p_key_handler=keypress;
     p_killed_handler=killed;
     p_motion=TRUE;
-    
+
     return TRUE;
 }
 
@@ -86,12 +86,12 @@ bool ioncore_set_drag_handlers(WRegion *reg,
 static bool time_in_threshold(Time time)
 {
     Time t;
-    
+
     if(time<p_time)
         t=p_time-time;
     else
         t=time-p_time;
-    
+
     return t<ioncore_g.dblclick_delay;
 }
 
@@ -132,7 +132,7 @@ static void call_button(WBinding *binding, XButtonEvent *ev)
         return;
 
     p_curr_event=(XEvent*)ev;
-    extl_call(binding->func, "ooo", NULL, p_reg, p_subreg, 
+    extl_call(binding->func, "ooo", NULL, p_reg, p_subreg,
               (p_reg!=NULL ? p_reg->active_sub : NULL));
     p_curr_event=NULL;
 }
@@ -165,14 +165,14 @@ static void call_motion_begin(WBinding *binding, XMotionEvent *ev,
         return;
 
     p_curr_event=(XEvent*)ev;
-    
+
     extl_call(binding->func, "oo", NULL, p_reg, p_subreg);
-    
+
     if(p_motion_begin_handler!=NULL && p_reg!=NULL)
         p_motion_begin_handler(p_reg, ev, dx, dy);
-    
+
     p_motion_begin_handler=NULL;
-    
+
     p_curr_event=NULL;
 }
 
@@ -220,12 +220,12 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
     WRegion *subreg=NULL;
     uint button, state;
     bool dblclick;
-    
+
     state=ev->state;
     button=ev->button;
-    
+
     reg=(WRegion*)XWINDOW_REGION_OF_T(ev->window, WWindow);
-    
+
     if(reg==NULL)
         return FALSE;
 
@@ -240,9 +240,9 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
         }
     }
 
-    dblclick=(p_clickcnt==1 && time_in_threshold(ev->time) && 
+    dblclick=(p_clickcnt==1 && time_in_threshold(ev->time) &&
               p_button==button && p_state==state && reg==p_reg);
-    
+
     p_motion=FALSE;
     p_motion_begin_handler=NULL;
     p_motion_handler=NULL;
@@ -258,7 +258,7 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
     p_clickcnt=0;
 
     watch_setup(&p_regwatch, (Obj*)reg, NULL);
-    
+
     subreg=region_current(reg);
     p_area=window_press((WWindow*)reg, ev, &subreg);
     if(subreg!=NULL)
@@ -268,17 +268,17 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
         pressbind=region_lookup_binding(reg, BINDING_BUTTONDBLCLICK, state,
                                              button, p_area);
     }
-    
+
     if(pressbind==NULL){
         pressbind=region_lookup_binding(reg, BINDING_BUTTONPRESS, state,
                                              button, p_area);
     }
-    
+
     ioncore_grab_establish(reg, handle_key, pointer_grab_killed, 0);
     p_grabstate=ST_HELD;
-    
+
     call_button(pressbind, ev);
-    
+
     return TRUE;
 }
 
@@ -286,7 +286,7 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
 bool ioncore_do_handle_buttonrelease(XButtonEvent *ev)
 {
     WBinding *binding=NULL;
-    
+
     if(p_button!=ev->button)
            return FALSE;
 
@@ -299,12 +299,12 @@ bool ioncore_do_handle_buttonrelease(XButtonEvent *ev)
         }else{
             call_motion_end(ev);
         }
-        
+
     }
-    
+
     ioncore_grab_remove(handle_key);
     finish_pointer();
-    
+
     return TRUE;
 }
 
@@ -313,23 +313,23 @@ void ioncore_do_handle_motionnotify(XMotionEvent *ev)
 {
     int dx, dy;
     WBinding *binding=NULL;
-    
+
     if(p_reg==NULL)
         return;
-    
+
     if(!p_motion){
         if(motion_in_threshold(ev->x_root, ev->y_root))
             return;
         binding=region_lookup_binding(p_reg, BINDING_BUTTONMOTION,
                                            p_state, p_button, p_area);
     }
-    
+
     p_time=ev->time;
     dx=ev->x_root-p_x;
     dy=ev->y_root-p_y;
     p_x=ev->x_root;
-    p_y=ev->y_root;    
-    
+    p_y=ev->y_root;
+
     if(!p_motion){
         call_motion_begin(binding, ev, dx, dy);
         p_motion=TRUE;

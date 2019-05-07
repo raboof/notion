@@ -1,8 +1,8 @@
 /*
  * ion/mod_sm/sm_session.h
  *
- * Copyright (c) Tuomo Valkonen 2004-2007. 
- * 
+ * Copyright (c) Tuomo Valkonen 2004-2007.
+ *
  * Based on the code of the 'sm' module for Ion1 by an unknown contributor.
  *
  * Ion is free software; you can redistribute it and/or modify it under

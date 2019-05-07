@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/netwm.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -77,7 +77,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[6]=atom_net_active_window;
     atoms[7]=atom_net_wm_allowed_actions;
     atoms[8]=atom_net_wm_moveresize;
-    
+
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
                     32, PropModeReplace, (uchar*)&(rw->dummy_win), 1);
@@ -89,7 +89,7 @@ void netwm_init_rootwin(WRootWin *rw)
                     32, PropModeReplace, (uchar*)atoms, N_NETWM);
 
     p[0]=libtu_progbasename();
-    /** 
+    /**
      * Unfortunately we cannot determine the charset of libtu_progbasename()
      * so we'll just have to guess it makes sense in the current locale charset
      */
@@ -108,18 +108,18 @@ bool netwm_check_initial_fullscreen(WClientWin *cwin)
 
     int i, n;
     long *data;
-    
+
     n=xwindow_get_property(cwin->win, atom_net_wm_state, XA_ATOM,
                    1, TRUE, (uchar**)&data);
-    
+
     if(n<0)
         return FALSE;
-    
+
     for(i=0; i<n; i++){
         if(data[i]==(long)atom_net_wm_state_fullscreen)
             return TRUE;
     }
-    
+
     XFree((void*)data);
 
     return FALSE;
@@ -139,13 +139,13 @@ void netwm_update_state(WClientWin *cwin)
 {
     CARD32 data[2];
     int n=0;
-    
+
     if(REGION_IS_FULLSCREEN(cwin))
         data[n++]=atom_net_wm_state_fullscreen;
     if(region_is_activity_r(&(cwin->region)))
         data[n++]=atom_net_wm_state_demands_attention;
 
-    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state, 
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_state,
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 
@@ -153,7 +153,7 @@ void netwm_update_allowed_actions(WClientWin *cwin)
 {
     CARD32 data[1];
     int n=0;
-    
+
     /* TODO add support for 'resize' and list it here */
     /* TODO add support for 'minimize' and list it here */
     /* TODO add support for 'maximize_horz' and list it here */
@@ -164,7 +164,7 @@ void netwm_update_allowed_actions(WClientWin *cwin)
     /* TODO add support for 'above' and list it here */
     /* TODO add support for 'below' and list it here */
 
-    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_allowed_actions, 
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_wm_allowed_actions,
                     XA_ATOM, 32, PropModeReplace, (uchar*)data, n);
 }
 
@@ -176,7 +176,7 @@ void netwm_delete_state(WClientWin *cwin)
 
 
 
-static void netwm_state_change_rq(WClientWin *cwin, 
+static void netwm_state_change_rq(WClientWin *cwin,
                                   const XClientMessageEvent *ev)
 {
     if((ev->data.l[1]==0 ||
@@ -185,10 +185,10 @@ static void netwm_state_change_rq(WClientWin *cwin,
         ev->data.l[2]!=(long)atom_net_wm_state_fullscreen)){
         return;
     }
-    
+
     /* Ok, full screen add/remove/toggle */
     if(!REGION_IS_FULLSCREEN(cwin)){
-        if(ev->data.l[0]==_NET_WM_STATE_ADD || 
+        if(ev->data.l[0]==_NET_WM_STATE_ADD ||
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             WRegion *grp=region_groupleader_of((WRegion*)cwin);
             bool sw=clientwin_fullscreen_may_switchto(cwin);
@@ -200,7 +200,7 @@ static void netwm_state_change_rq(WClientWin *cwin,
             cwin->flags&=~CLIENTWIN_FS_RQ;
         }
     }else{
-        if(ev->data.l[0]==_NET_WM_STATE_REMOVE || 
+        if(ev->data.l[0]==_NET_WM_STATE_REMOVE ||
            ev->data.l[0]==_NET_WM_STATE_TOGGLE){
             WRegion *grp=region_groupleader_of((WRegion*)cwin);
             bool sw=clientwin_fullscreen_may_switchto(cwin);
@@ -223,31 +223,31 @@ static void netwm_state_change_rq(WClientWin *cwin,
 void netwm_set_active(WRegion *reg)
 {
     CARD32 data[1]={None};
-    
+
     if(OBJ_IS(reg, WClientWin))
         data[0]=region_xwindow(reg);
 
     /* The spec doesn't say how multihead should be handled, so
      * we just update the root window the window is on.
      */
-    XChangeProperty(ioncore_g.dpy, region_root_of(reg), 
-                    atom_net_active_window, XA_WINDOW, 
+    XChangeProperty(ioncore_g.dpy, region_root_of(reg),
+                    atom_net_active_window, XA_WINDOW,
                     32, PropModeReplace, (uchar*)data, 1);
 }
 
 
-static void netwm_active_window_rq(WClientWin *cwin, 
+static void netwm_active_window_rq(WClientWin *cwin,
                                    const XClientMessageEvent *ev)
 {
     long source=ev->data.l[0];
     /**
-     * By default we ignore non-pager activity requests, as they're known to 
+     * By default we ignore non-pager activity requests, as they're known to
      * steal focus from newly-created windows :(
      */
     bool ignore=source!=SOURCE_PAGER;
-    
+
     extl_table_gets_b(cwin->proptab, "ignore_net_active_window", &ignore);
-    
+
     if(!ignore)
         region_goto((WRegion*)cwin);
 }
@@ -298,7 +298,7 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 {
     if(ev->atom!=atom_net_wm_name)
         return FALSE;
-    
+
     clientwin_get_set_name(cwin);
     return TRUE;
 }
@@ -321,7 +321,7 @@ int count_screens()
 }
 
 /*EXTL_DOC
- * refresh \_NET\_WM\_VIRTUAL\_ROOTS 
+ * refresh \_NET\_WM\_VIRTUAL\_ROOTS
  */
 EXTL_SAFE
 EXTL_EXPORT
@@ -342,7 +342,7 @@ void ioncore_screens_updated(WRootWin *rw)
     }
 
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
-                    atom_net_virtual_roots, XA_WINDOW, 
+                    atom_net_virtual_roots, XA_WINDOW,
                     32, PropModeReplace, (uchar*)virtualroots, n_screens);
 
     free(virtualroots);

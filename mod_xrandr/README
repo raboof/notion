@@ -22,7 +22,7 @@ INSTALLATION
            or (as yourself),
                 $ mkdir -p ~/.ion3/lib
                 $ cp .libs/mod_xrandr.* ~/.ion3/lib
-        4. Add dopath("mod_xrandr") to ~/.ion3/cfg_ion.lua. 
+        4. Add dopath("mod_xrandr") to ~/.ion3/cfg_ion.lua.
         5. (Re)start Ion.
 		
 

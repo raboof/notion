@@ -33,28 +33,28 @@
 
 
 static OptParserOpt ion_opts[]={
-    /*{OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr", 
+    /*{OPT_ID('d'), "display",  OPT_ARG, "host:dpy.scr",
      DUMMY_TR("X display to use")},*/
-    
-    {'c', "conffile", OPT_ARG, "config_file", 
+
+    {'c', "conffile", OPT_ARG, "config_file",
      DUMMY_TR("Configuration file")},
-    
-    {'s', "searchdir", OPT_ARG, "dir", 
+
+    {'s', "searchdir", OPT_ARG, "dir",
      DUMMY_TR("Add directory to search path")},
 
-    /*{OPT_ID('s'), "session",  OPT_ARG, "session_name", 
+    /*{OPT_ID('s'), "session",  OPT_ARG, "session_name",
      DUMMY_TR("Name of session (affects savefiles)")},*/
-    
-    {'h', "help", 0, NULL, 
+
+    {'h', "help", 0, NULL,
      DUMMY_TR("Show this help")},
-    
+
     {'V', "version", 0, NULL,
      DUMMY_TR("Show program version")},
-    
+
     {OPT_ID('a'), "about", 0, NULL,
      DUMMY_TR("Show about text")},
 
-    {'q', "quiet", 0, NULL, 
+    {'q', "quiet", 0, NULL,
      DUMMY_TR("Quiet mode")},
 
     {'m', "meter", OPT_ARG, "meter_module",
@@ -80,8 +80,8 @@ static const char statusd_license[]=DUMMY_TR(
     "Lesser General Public License for more details.\n");
 
 
-/* new_informs=TRUE because we should always print period when 
- * initialisation is done. 
+/* new_informs=TRUE because we should always print period when
+ * initialisation is done.
  */
 static bool new_informs=TRUE;
 static ExtlTab configtab;
@@ -110,12 +110,12 @@ static void flush_informs()
 static void mainloop()
 {
     sigset_t trapset;
-    
+
     sigemptyset(&trapset);
     sigaddset(&trapset, SIGALRM);
     sigaddset(&trapset, SIGCHLD);
     mainloop_trap_signals(&trapset);
-    
+
     while(1){
         int kill_sig=mainloop_check_signals();
         if(kill_sig!=0 && kill_sig!=SIGUSR1){
@@ -146,13 +146,13 @@ int main(int argc, char*argv[])
     int opt;
     bool quiet=FALSE;
 
-#ifndef CF_NO_LOCALE    
+#ifndef CF_NO_LOCALE
     if(setlocale(LC_ALL, "")==NULL)
         warn("setlocale() call failed.");
 #endif
 
     configtab=extl_table_none();
-    
+
     libtu_init(argv[0]);
     extl_init();
 
@@ -167,9 +167,9 @@ int main(int argc, char*argv[])
     extl_set_userdirs("ion3");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
-    
+
     extl_read_config("ioncore_luaext", NULL, TRUE);
-    
+
     while((opt=optparser_get_opt())){
         switch(opt){
         /*case OPT_ID('d'):
@@ -224,14 +224,14 @@ int main(int argc, char*argv[])
             return EXIT_FAILURE;
         }
     }
-    
+
     if(loaded==0 && !quiet){
         warn(TR("No meters loaded."));
         return EXIT_FAILURE;
     }
-    
+
     mainloop();
-    
+
     return EXIT_SUCCESS;
 }
 
@@ -272,15 +272,15 @@ EXTL_EXPORT
 double statusd_last_modified(const char *fname)
 {
     struct stat st;
-    
+
     if(fname==NULL)
         return (double)(-1);
-    
+
     if(stat(fname, &st)!=0){
         /*warn_err_obj(fname);*/
         return (double)(-1);
     }
-    
+
     return (double)(st.st_mtime>st.st_ctime ? st.st_mtime : st.st_ctime);
 }
 

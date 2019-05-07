@@ -1,7 +1,7 @@
 /*
  * libtu/tokenizer.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2002. 
+ * Copyright (c) Tuomo Valkonen 1999-2002.
  *
  * You may distribute and modify this library under the terms of either
  * the Clarified Artistic License or the GNU LGPL, version 2.1 or later.
@@ -76,7 +76,7 @@ enum{
     OP_GT=        '>', OP_DOT=    '.', OP_COLON=    ':', OP_QMARK=    '?',
     OP_AT=        '@',
     OP_NEXTLINE='\n',OP_EOF=    -1,
-    
+
     OP_INC=        OP2('+','+'),         OP_DEC=    OP2('-','-'),
     OP_LSHIFT=    OP2('<','<'),          OP_RSHIFT=    OP2('>','>'),
     OP_AS_INC=    OP2('+','='),          OP_AS_DEC= OP2('-','='),
@@ -86,13 +86,13 @@ enum{
 /*    AS_OR=        OP2('|','='),         AS_AND=    OP2('&','='), */
     OP_EQ=        OP2('=','='),          OP_NE=        OP2('!','='),
     OP_LE=        OP2('<','='),          OP_GE=        OP2('>','=')
-    
+
 /*    L_AND=        OP2('&','&'), L_OR=        OP2('|','|'),
     L_XOR=        OP2('^','^'), */
 
 /*    AsLShift=    OP3('<','<','='),
     AsRShift=    OP3('>','>','='), */
-        
+
 #undef OP2
 #undef OP3
 };
@@ -142,7 +142,7 @@ enum{
     E_TOKZ_NOTINT,
     E_TOKZ_RANGE,
     E_TOKZ_MULTICHAR,
-    
+
     E_TOKZ_TOKEN_LIMIT,
     E_TOKZ_UNKNOWN_OPTION,
     E_TOKZ_SYNTAX,
@@ -152,7 +152,7 @@ enum{
     E_TOKZ_TOO_MANY_ARGS,
     E_TOKZ_MAX_NEST,
     E_TOKZ_IDENTIFIER_EXPECTED,
-    
+
     E_TOKZ_LBRACE_EXPECTED
 };
 
@@ -172,14 +172,14 @@ typedef struct _Tokenizer_Buffer{
         int len;
         int pos;
 } Tokenizer_Buffer;
-    
+
 typedef struct _Tokenizer{
     FILE *file;
     char *name;
     int line;
     int ungetc;
     Token ungettok;
-    
+
     Tokenizer_Buffer buffer;
 
     int flags;
@@ -189,7 +189,7 @@ typedef struct _Tokenizer{
 
     int filestack_n;
     Tokenizer_FInfo *filestack;
-    
+
     char **includepaths;
 } Tokenizer;
 

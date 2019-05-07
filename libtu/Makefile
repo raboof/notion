@@ -22,7 +22,7 @@ SOURCES=iterable.c  map.c  misc.c  obj.c  objlist.c  optparser.c  output.c  pars
 
 HEADERS=debug.h  errorlog.h  locale.h  minmax.h  obj.h      objp.h       output.h  pointer.h  private.h  rb.h        stringstore.h  types.h dlist.h  iterable.h  map.h     misc.h    objlist.h  optparser.h  parser.h  prefix.h   ptrlist.h  setparam.h  tokenizer.h    util.h
 
-TARGETS=libtu.a 
+TARGETS=libtu.a
 
 ######################################
 

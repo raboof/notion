@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/xwindow.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -27,9 +27,9 @@ extern void xwindow_do_set_focus(Window win);
 
 extern void xwindow_set_cursor(Window win, int cursor);
 
-/** 
+/**
  * On failure, clears winprops and returns -1.
- * On success, sets hints according to the window's WM_NORMAL_HINTS and 
+ * On success, sets hints according to the window's WM_NORMAL_HINTS and
  * returns a nonnegative value.
  */
 extern int xwindow_get_sizehints(Window win, XSizeHints *hints);

@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/placement.h
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -20,12 +20,12 @@ typedef struct{
     WTiling *ws;
     WRegion *reg;
     const WManageParams *mp;
-    
+
     WFrame *res_frame;
 } WTilingPlacementParams;
 
-/* Handlers of this hook should take (WClientWin*, WTiling*, WManageParams*) 
- * as parameter. 
+/* Handlers of this hook should take (WClientWin*, WTiling*, WManageParams*)
+ * as parameter.
  */
 extern WHook *tiling_placement_alt;
 

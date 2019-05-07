@@ -1,7 +1,7 @@
 /*
  * ion/ioncore/window.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -50,12 +50,12 @@ void window_release(WWindow *wwin)
 
 
 /*}}}*/
-    
+
 
 /*{{{ Init, create */
 
 
-bool window_do_init(WWindow *wwin, WWindow *par, 
+bool window_do_init(WWindow *wwin, WWindow *par,
                     const WFitParams *fp, Window win, const char *name)
 {
     if(win==None){
@@ -70,12 +70,12 @@ bool window_do_init(WWindow *wwin, WWindow *par,
     wwin->xic=NULL;
     wwin->event_mask=0;
     wwin->stacking=NULL;
-    
+
     region_init(&(wwin->region), par, fp);
-    
-    XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context, 
+
+    XSaveContext(ioncore_g.dpy, win, ioncore_g.win_context,
                  (XPointer)wwin);
-    
+
     return TRUE;
 }
 
@@ -89,18 +89,18 @@ bool window_init(WWindow *wwin, WWindow *par, const WFitParams *fp, const char *
 void window_deinit(WWindow *wwin)
 {
     region_deinit((WRegion*)wwin);
-    
+
     region_pointer_focus_hack(&wwin->region);
-    
+
     if(wwin->xic!=NULL)
         XDestroyIC(wwin->xic);
-        
+
     if(wwin->win!=None){
         XDeleteContext(ioncore_g.dpy, wwin->win, ioncore_g.win_context);
         /* Probably should not try destroy if root window... */
         XDestroyWindow(ioncore_g.dpy, wwin->win);
     }
-    
+
     /* There are no backlinks from WStacking to us, so it is not
      * necessary to do any deinitialisation there.
      */
@@ -116,10 +116,10 @@ void window_deinit(WWindow *wwin)
 static void window_notify_subs_rootpos(WWindow *wwin, int x, int y)
 {
     WRegion *sub;
-    
+
     FOR_ALL_CHILDREN(wwin, sub){
         region_notify_rootpos(sub,
-                              x+REGION_GEOM(sub).x, 
+                              x+REGION_GEOM(sub).x,
                               y+REGION_GEOM(sub).y);
     }
 }
@@ -148,7 +148,7 @@ void window_do_fitrep(WWindow *wwin, WWindow *par, const WRectangle *geom)
     }else{
         XMoveResizeWindow(ioncore_g.dpy, wwin->win, geom->x, geom->y, w, h);
     }
-    
+
     REGION_GEOM(wwin)=*geom;
 
     if(move)
@@ -244,6 +244,6 @@ static DynFunTab window_dynfuntab[]={
 EXTL_EXPORT
 IMPLCLASS(WWindow, WRegion, window_deinit, window_dynfuntab);
 
-    
+
 /*}}}*/
 

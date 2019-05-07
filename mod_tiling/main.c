@@ -1,7 +1,7 @@
 /*
  * ion/mod_tiling/main.c
  *
- * Copyright (c) Tuomo Valkonen 1999-2007. 
+ * Copyright (c) Tuomo Valkonen 1999-2007.
  *
  * See the included file LICENSE for details.
  */
@@ -69,9 +69,9 @@ EXTL_EXPORT
 ExtlTab mod_tiling_get()
 {
     ExtlTab tab=extl_create_table();
-    
+
     extl_table_sets_i(tab, "raise_delay", mod_tiling_raise_delay);
-    
+
     return tab;
 }
 
@@ -88,12 +88,12 @@ void mod_tiling_deinit()
 {
     mod_tiling_unregister_exports();
     ioncore_unregister_regclass(&CLASSDESCR(WTiling));
-    
+
     if(mod_tiling_tiling_bindmap!=NULL){
         ioncore_free_bindmap("WTiling", mod_tiling_tiling_bindmap);
         mod_tiling_tiling_bindmap=NULL;
     }
-    
+
     if(tiling_placement_alt!=NULL){
         destroy_obj((Obj*)tiling_placement_alt);
         tiling_placement_alt=NULL;
@@ -107,7 +107,7 @@ static bool register_regions()
                                   (WRegionLoadCreateFn*)tiling_load)){
         return FALSE;
     }
-    
+
     return TRUE;
 }
 
@@ -128,7 +128,7 @@ bool mod_tiling_init()
 {
     if(!init_hooks())
         goto err;
-            
+
     mod_tiling_tiling_bindmap=ioncore_alloc_bindmap("WTiling", NULL);
 
     if(mod_tiling_tiling_bindmap==NULL)
@@ -139,11 +139,11 @@ bool mod_tiling_init()
 
     if(!register_regions())
         goto err;
-    
+
     extl_read_config("cfg_tiling", NULL, TRUE);
 
     return TRUE;
-    
+
 err:
     mod_tiling_deinit();
     return FALSE;
