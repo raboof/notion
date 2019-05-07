@@ -68,7 +68,7 @@ bool statusbar_init(WStatusBar *p, WWindow *parent, const WFitParams *fp)
         return FALSE;
     }
     
-    window_select_input(&(p->wwin), IONCORE_EVENTMASK_NORMAL);
+    window_select_input(&(p->wwin), IONCORE_EVENTMASK_CWINMGR);
     
     region_register((WRegion*)p);
 
