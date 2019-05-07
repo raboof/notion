@@ -20,3 +20,4 @@ exports.[ch]
 /utils/ion-completeman
 /utils/ion-completefile/ion-completefile
 cscope.*
+test/integration/libXinerama.so.1.0

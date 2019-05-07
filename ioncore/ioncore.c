@@ -346,6 +346,9 @@ static bool init_global()
     ioncore_g.dblclick_delay=CF_DBLCLICK_DELAY;
     ioncore_g.opaque_resize=0;
     ioncore_g.warp_enabled=TRUE;
+    ioncore_g.warp_margin=5;
+    ioncore_g.warp_factor[0]=0.0;
+    ioncore_g.warp_factor[1]=0.0;
     ioncore_g.switchto_new=TRUE;
     ioncore_g.no_mousefocus=FALSE;
     ioncore_g.unsqueeze_enabled=TRUE;
@@ -654,8 +657,10 @@ void ioncore_deinit()
 
     ioncore_deinit_bindmaps();
 
+    stringstore_deinit();
+
     mainloop_unregister_input_fd(ioncore_g.conn);
-    
+
     dpy=ioncore_g.dpy;
     ioncore_g.dpy=NULL;
     

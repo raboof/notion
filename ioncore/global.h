@@ -101,6 +101,8 @@ DECLSTRUCT(WGlobal){
     Time dblclick_delay;
     int opaque_resize;
     bool warp_enabled;
+    int warp_margin;
+    double warp_factor[2];
     bool switchto_new;
     bool screen_notify;
     int frame_default_index;

@@ -138,7 +138,7 @@ endif# !MODULE
 ######################################
 
 _clean:
-	$(RM) -f $(TO_CLEAN) core *.d $(OBJS)
+	$(RM) -f $(TO_CLEAN) core *.d *.lc $(OBJS)
 
 _realclean:
 	$(RM) -f $(TO_REALCLEAN) $(TARGETS)

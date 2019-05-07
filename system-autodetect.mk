@@ -79,8 +79,8 @@ X11_PREFIX ?= /usr/X11R6
 # SunOS/Solaris
 #X11_PREFIX ?= /usr/openwin
 
-X11_LIBS=-L$(X11_PREFIX)/lib -lX11 -lXext
-X11_INCLUDES=-I$(X11_PREFIX)/include
+X11_LIBS=$(shell $(PKG_CONFIG) --libs x11 xext)
+X11_INCLUDES=$(shell $(PKG_CONFIG) --cflags-only-I x11 xext)
 
 # XFree86 libraries up to 4.3.0 have a bug that can cause a segfault.
 # The following setting  should  work around that situation.

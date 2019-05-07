@@ -142,3 +142,12 @@ void stringstore_ref(StringId id)
         node->v.ival++;
 }
 
+void stringstore_deinit(void) {
+    if(stringstore!=NULL){
+        Rb_node node;
+        while ((node=rb_first(stringstore))!=rb_nil(stringstore)) {
+            node->v.ival = 1;
+            stringstore_free((StringId)node);
+        }
+    }
+}

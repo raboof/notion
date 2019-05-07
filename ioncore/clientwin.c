@@ -771,7 +771,7 @@ void clientwin_destroyed(WClientWin *cwin)
 
 static bool send_clientmsg(Window win, Atom a, Time stmp)
 {
-    XClientMessageEvent ev;
+    XClientMessageEvent ev = {0};
     
     ev.type=ClientMessage;
     ev.window=win;

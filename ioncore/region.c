@@ -998,12 +998,12 @@ void ioncore_region_notify(WRegion *reg, WRegionNotify how)
 
 void region_debugprint_parents ( const WRegion* reg )
 {
-  REGION_DEBUGPRINT( "parent", reg->parent && reg->parent->region.ni.name ? &reg->parent->region : NULL );
+    REGION_DEBUGPRINT( "parent", reg->parent && reg->parent->region.ni.name ? &reg->parent->region : NULL );
 }
 
 void region_debugprint_managers( const WRegion* reg )
 {
-  REGION_DEBUGPRINT( "manager", reg->manager );
+    REGION_DEBUGPRINT( "manager", reg->manager );
 }
 
 #undef REGION_DEBUGPRINT

@@ -152,7 +152,8 @@ static bool tab_sizes_equal(WFrame * frame, bool complete)
  */
 #define PROPOR_MAX_TABS 30
 
-static int intcompare (const void *a, const void *b) {
+static int intcompare (const void *a, const void *b)
+{
     return *(int *)a-*(int *)b;
 }
 

@@ -254,16 +254,15 @@ static void _screen_do_update_notifywin(WScreen *scr)
 
 static void screen_do_update_notifywin(WScreen *scr)
 {
-  if( ioncore_g.activity_notification_on_all_screens )
-  {
-    WScreen* scr_iterated;
-    FOR_ALL_SCREENS(scr_iterated)
-    {
-      _screen_do_update_notifywin(scr_iterated);
+    if(ioncore_g.activity_notification_on_all_screens) {
+        WScreen* scr_iterated;
+        FOR_ALL_SCREENS(scr_iterated)
+        {
+            _screen_do_update_notifywin(scr_iterated);
+        }
+    }else{
+        _screen_do_update_notifywin(scr);
     }
-  }
-  else
-    _screen_do_update_notifywin(scr);
 }
 
 /*}}}*/

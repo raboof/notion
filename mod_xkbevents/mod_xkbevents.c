@@ -264,7 +264,7 @@ bool mod_xkbevents_init()
         warn(TR("X library built with XKB version %d.%02d but mod_xkbevents was built with XKB version %d.%02d. Going to try to work anyway."), major, minor, XkbMajorVersion, XkbMinorVersion);
     }
 
-    if(!XkbQueryExtension(ioncore_g.dpy,&opcode,&xkb_event_code,&xkb_error_code,&major,&minor)>0){
+    if(!XkbQueryExtension(ioncore_g.dpy,&opcode,&xkb_event_code,&xkb_error_code,&major,&minor)){
         if ((major!=0)||(minor!=0))
             warn(TR("Server supports incompatible XKB version %d.%02d. Going to try to work anyway."), major, minor);
         else

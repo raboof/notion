@@ -1,8 +1,9 @@
-
 Notion
-===
+======
 
-Copyright (c) the Notion team 2010-2014.
+[![Build Status](https://travis-ci.org/raboof/notion.svg?branch=master)](https://travis-ci.org/raboof/notion)
+
+Copyright (c) the Notion team 2010-2015.
 Copyright (c) Tuomo Valkonen 1999-2009.
 
 http://notion.sf.net
@@ -140,7 +141,7 @@ written by Tomohiro Kubota; see
 
 Various (minor) patches have been contributed by other individuals 
 unlisted  here. See the mailing list archives and the darcs source 
-repository history at <http://iki.fi/tuomov/repos/>. For translators
-see the individual `.po` files in `po/`.
+repository history (previously at <http://iki.fi/tuomov/repos/>).
+For translators see the individual `.po` files in `po/`.
 
 See `libtu/README` for code by others integrated into libtu.

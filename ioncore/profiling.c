@@ -31,7 +31,8 @@ __cyg_profile_func_exit (void *func, void *caller)
     }
 }
 
-void profileLuaCall(const enum ExtlHookEvent event, const char *name, const char *source, int currentline) {
+void profileLuaCall(const enum ExtlHookEvent event, const char *name, const char *source, int currentline)
+{
     if(fp_trace != NULL) {
         clock_gettime(CLOCK_REALTIME, current_time);
         if(event == EXTL_HOOK_ENTER)
@@ -49,7 +50,8 @@ void profileLuaCall(const enum ExtlHookEvent event, const char *name, const char
  */
 EXTL_SAFE
 EXTL_EXPORT
-void ioncore_profiling_start(char* filename) {
+void ioncore_profiling_start(char* filename)
+{
 #ifdef PROFILING_ENABLED
     current_time = malloc(sizeof(struct timespec));
     fp_trace = fopen(filename, "w");
@@ -62,7 +64,8 @@ void ioncore_profiling_start(char* filename) {
  */
 EXTL_SAFE
 EXTL_EXPORT
-void ioncore_profiling_stop() {
+void ioncore_profiling_stop()
+{
 #ifdef PROFILING_ENABLED
     FILE *fp_trace_to_close = fp_trace;
     fp_trace = NULL;
