@@ -44,6 +44,7 @@ end
 -- Define context menu for context \var{ctx}, \var{tab} being a table 
 -- of menu entries.
 function ioncore.defctxmenu(ctx, ...)
+    local arg = {...}
     local tab, add
     if #arg>1 and type(arg[1])=="string" then
         tab=arg[2]
