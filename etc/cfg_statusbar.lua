@@ -1,19 +1,20 @@
 --
 -- Notion statusbar module configuration file
--- 
+--
 
-
--- Create a statusbar
+-- Create a statusbar.
 mod_statusbar.create{
-    -- First screen, bottom left corner
+    -- First screen, bottom left corner.
     screen=0,
     pos='bl',
-    -- Set this to true if you want a full-width statusbar
+
+    -- Set this to true if you want a full-width statusbar.
     fullsize=false,
-    -- Swallow systray windows
+
+    -- Swallow systray windows.
     systray=true,
 
-    -- Template. Tokens %string are replaced with the value of the 
+    -- Template. Tokens %string are replaced with the value of the
     -- corresponding meter. Currently supported meters are:
     --   date          date
     --   load          load average (1min, 5min, 15min)
@@ -26,7 +27,7 @@ mod_statusbar.create{
     --   mail_*_total  mail count
     --
     -- Space preceded by % adds stretchable space for alignment of variable
-    -- meter value widths. > before meter name aligns right using this 
+    -- meter value widths. > before meter name aligns right using this
     -- stretchable space , < left, and | centers.
     -- Meter values may be zero-padded to a width preceding the meter name.
     -- These alignment and padding specifiers and the meter name may be
@@ -40,27 +41,26 @@ mod_statusbar.create{
     --template="[ %date || load: %05load_1min || mail: %02mail_new/%02mail_total ] %filler%systray",
 }
 
-
 -- Launch ion-statusd. This must be done after creating any statusbars
 -- for necessary statusd modules to be parsed from the templates.
 mod_statusbar.launch_statusd{
     -- Date meter
     date={
-        -- ISO-8601 date format with additional abbreviated day name
+        -- ISO-8601 date format with additional abbreviated day name.
         date_format='%a %Y-%m-%d %H:%M',
         -- Finnish etc. date format
         --date_format='%a %d.%m.%Y %H:%M',
         -- Locale date format (usually shows seconds, which would require
         -- updating rather often and can be distracting)
         --date_format='%c',
-        
-        -- Additional date formats. 
-        --[[ 
-        formats={ 
+
+        -- Additional date formats.
+        --[[
+        formats={
             time = '%H:%M', -- %date_time
         }
         --]]
-    },      
+    },
 
     -- Load meter
     load={
@@ -84,4 +84,3 @@ mod_statusbar.launch_statusd{
         --files={},
     },
 }
-

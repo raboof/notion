@@ -5,6 +5,9 @@
 -- The rest of the settings are in cfg_notioncore.lua and individual modules'
 -- configuration files (cfg_modulename.lua).
 --
+-- When any binding and other customisations that you want are minor, it is
+-- recommended that you include them in a copy of this file in ~/.notion/.
+--
 
 -- Set default modifiers. The default is the 'windows' key; it is usually mapped
 -- to Mod4 on Xorg-based systems. Any other modifier, such as Alt, can be used
@@ -14,10 +17,10 @@
 --META="Mod4+"
 --ALTMETA=""
 
--- Terminal emulator
+-- Terminal emulator.
 --XTERM="xterm"
 
--- Some basic settings
+-- Some basic settings.
 ioncore.set{
     -- Maximum delay between clicks in milliseconds to be considered a
     -- double click.
@@ -34,11 +37,11 @@ ioncore.set{
     -- Movement commands warp the pointer to frames instead of just
     -- changing focus. Enabled by default.
     --warp=true,
-    
+
     -- Automatically save layout on restart and exit.
     --autosave_layout=true,
-    
-    -- Mouse focus mode; set to "sloppy" if you want the focus to follow the 
+
+    -- Mouse focus mode; set to "sloppy" if you want the focus to follow the
     -- mouse, and to "disabled" otherwise.
     --mousefocus="sloppy",
 
@@ -49,26 +52,25 @@ ioncore.set{
 
     -- Time (in ms) that a window has to be focussed in order to be added to the
     -- focus list. Set this to <=0 (or comment it out) to disable the logic, and
-    -- update the focus list immediately
+    -- update the focus list immediately.
     --focuslist_insert_delay=1000,
 
     -- If enabled, activity notifiers are displayed on ALL the screens, not just
     -- the screen that contains the window producing the notification. This is
-    -- only relevant on multi-head setups. By default this is disabled
+    -- only relevant on multi-head setups. By default this is disabled.
     --activity_notification_on_all_screens=false,
 
     -- If enabled, a workspace indicator comes up at the bottom-left of the
     -- screen when a new workspace is selected. This indicator stays active for
     -- only as long as indicated by this variable (in ms). Timeout values <=0
-    -- disable the indicator altogether. This is disabled by default
+    -- disable the indicator altogether. This is disabled by default.
     --workspace_indicator_timeout=0,
 }
-
 
 -- Load default settings. The file cfg_defaults loads all the files
 -- commented out below, except mod_dock. If you do not want to load
 -- something, comment out this line, and uncomment the lines corresponding
--- the the modules or configuration files that you want, below.
+-- to the modules or configuration files that you want, below.
 dopath("cfg_defaults")
 
 -- Load configuration of the Notion 'core'. Most bindings are here.
@@ -77,7 +79,7 @@ dopath("cfg_defaults")
 -- Load some kludges to make apps behave better.
 --dopath("cfg_kludges")
 
--- Define some layouts. 
+-- Define some layouts.
 --dopath("cfg_layouts")
 
 -- Load some modules. 
@@ -89,7 +91,6 @@ dopath("cfg_defaults")
 --dopath("mod_sp")
 --dopath("mod_notionflux")
 --dopath("mod_xrandr")
-
 
 --
 -- Common customisations
@@ -105,4 +106,3 @@ dopath("cfg_defaults")
 --defbindings("WMPlex.toplevel", {
 --    kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
 --})
-
