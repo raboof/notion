@@ -3,7 +3,7 @@
 -- Last Changed: 2004-11-05
 --
 -- statusd_iface.lua
--- 
+--
 -- Copyright (c) Relu Patrascu 2004.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
@@ -53,7 +53,7 @@ local function get_iface_proc()
 		end
     	st, en, iface = string.find(s, '(%w+:)')
     	f:close()
-        return tostring(iface) 
+        return tostring(iface)
     end
     st, en, iface = string.find(s, '(%w+:)')
     f:close()

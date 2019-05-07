@@ -1,6 +1,6 @@
 --
 -- ion/mod_statusbar/ion-statusd/statusd_date.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2006.
 --
 -- Ion is free software; you can redistribute it and/or modify it under
@@ -30,10 +30,10 @@ end
 
 local function timer_handler(tmr)
     local tm=update()
-    
+
     local t=os.date('*t', tm)
     local d=(60-t.sec)*1000
-    
+
     timer:set(d, timer_handler)
 end
 

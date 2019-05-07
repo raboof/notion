@@ -4,7 +4,7 @@
 --
 -- Public domain, written by Greg Steuck
 -- Edited and updated by Gerald Young -- ion3script@gwy.org
--- This works on FreeBSD's apm (5.x) program added some color to indicate 
+-- This works on FreeBSD's apm (5.x) program added some color to indicate
 -- AC connection and status (Charging, low, critical)
 -- Allows displaying apm information in the statusbar.
 -- To install:
@@ -34,8 +34,8 @@ function get_apm()
     end
     local s=f:read('*all')
     f:close()
-    local _, _, ac, state, pct, estimate = 
-	string.find(s, 
+    local _, _, ac, state, pct, estimate =
+	string.find(s,
                       "AC Line status: (.*)\n"..
 		      "Battery Status: (.*)\n"..
 		      "Remaining battery life: (.*)\n"..
@@ -57,7 +57,7 @@ local function update_apm()
     local state, pct, estimate, ac = get_apm()
     local stateinf
     if state=="low" then
-	stateinf = "important" 
+	stateinf = "important"
     end
     if state == "critical" then
         stateinf = "critical"
@@ -69,10 +69,10 @@ local function update_apm()
     inform("state_hint", stateinf)
     inform("pct", pct)
     inform("estimate", estimate)
-    if ac == "off-line" then 
+    if ac == "off-line" then
 	stateinf="critical"
     end
-    if ac == "on-line" then 
+    if ac == "on-line" then
         stateinf="important"
     end
     inform("ac", ac)

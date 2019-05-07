@@ -1,5 +1,5 @@
 -- Notion xinerama module - lua setup
--- 
+--
 -- by Tomas Ebenlendr <ebik@ucw.cz>
 --
 -- This library is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@ assert(mod_xinerama)
 
 -- Helper functions {{{
 
-local function max(one, other) 
+local function max(one, other)
     if one == nil then return other end
     if other == nil then return one end
 
@@ -70,7 +70,7 @@ end
 
 -- Contained screens {{{
 
--- true if [from1, to1] contains [from2, to2] 
+-- true if [from1, to1] contains [from2, to2]
 local function contains(from1, to1, from2, to2)
     return (from1 <= from2) and (to1 >= to2)
 end
@@ -122,11 +122,11 @@ function mod_xinerama.merge_contained_screens(screens)
     return ret
 end
 
--- }}} 
+-- }}}
 
 --- {{{ Overlapping screens
 
--- true if [from1, to1] overlaps [from2, to2] 
+-- true if [from1, to1] overlaps [from2, to2]
 local function overlaps (from1, to1, from2, to2)
     return (from1 < to2) and (from2 < to1)
 end
@@ -166,7 +166,7 @@ function mod_xinerama.merge_overlapping_screens(screens)
 		    for _k, _v in ipairs(prevscreen.ids) do
 			table.insert(newscreen.ids, _v)
 		    end
-		    
+		
 		    -- delete the merged previous screen
 		    table.remove(ret, prevpos)
 
@@ -300,7 +300,7 @@ function mod_xinerama.merge_overlapping_screens_alternative(screens)
 	table.insert(ret, newscreen)
     end
     fix_representations(ret)
-    
+
     return ret
 end
 
@@ -354,7 +354,7 @@ function mod_xinerama.rearrange_workspaces(max_visible_screen_id)
    local screen_id = 0;
    local screen = notioncore.find_screen_id(screen_id)
    while (screen ~= nil) do
-       rearrange_workspaces_s(screen);      
+       rearrange_workspaces_s(screen);
 
        screen_id = screen_id + 1
        screen = notioncore.find_screen_id(screen_id)
@@ -367,7 +367,7 @@ function mod_xinerama.find_max_screen_id(screens)
 
     for screen_index, screen in ipairs(screens) do
         local screen_id = screen_index - 1
-        max_screen_id = max(max_screen_id, screen_id)        
+        max_screen_id = max(max_screen_id, screen_id)
     end
 
     return max_screen_id;
@@ -408,7 +408,7 @@ package.loaded["mod_xinerama"]=true
 dopath('cfg_xinerama', true)
 
 --DOC
--- Queries Xinerama for the screen dimensions and updates notion screens 
+-- Queries Xinerama for the screen dimensions and updates notion screens
 -- accordingly
 function mod_xinerama.refresh()
     local screens = mod_xinerama.query_screens()
@@ -416,10 +416,10 @@ function mod_xinerama.refresh()
         local merged_screens = mod_xinerama.merge_overlapping_screens(screens)
         mod_xinerama.setup_screens(merged_screens)
 
-        -- when the number of screens is lower than last time this function was 
+        -- when the number of screens is lower than last time this function was
         -- called, ask 'superfluous' to close
         mod_xinerama.close_invisible_screens(mod_xinerama.find_max_screen_id(screens))
-    end 
+    end
     notioncore.screens_updated(notioncore.rootwin());
 end
 

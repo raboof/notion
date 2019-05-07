@@ -1,7 +1,7 @@
 -- Authors: Unknown
 -- License: Unknown
 -- Last Changed: Unknown
--- 
+--
 -- Creates scratchpads on a per-frame/per-clientwin basis.
 
 -- I realized that sometimes it might be useful to have a scratchpad for

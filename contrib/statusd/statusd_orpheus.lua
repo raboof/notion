@@ -15,7 +15,7 @@ local function get_orpheus_status()
   local f=io.open(statusd_orpheus.infofile,'r')
   if not f then return "n/a" end
   local playing=f:read()
-  return playing 
+  return playing
 end
 
 local orpheus_timer

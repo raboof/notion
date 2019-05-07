@@ -5,7 +5,7 @@ if notioncore.find_screen_id(1) then
 end
 
 if notioncore.find_screen_id(0):mx_count() ~= 2 then
-  return "Remaining screen should have 2 workspaces instead of " .. notioncore.find_screen_id(0):mx_count() .. 
+  return "Remaining screen should have 2 workspaces instead of " .. notioncore.find_screen_id(0):mx_count() ..
     ': ' .. mx_names(notioncore.find_screen_id(0))
 end
 

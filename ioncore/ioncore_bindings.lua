@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore-bindings.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2007.
 --
 -- See the included file LICENSE for details.
@@ -14,19 +14,19 @@ local compiled2str=setmetatable({}, {__mode="k"})
 
 --DOC
 -- Compile string \var{cmd} into a bindable function. Within \var{cmd}, the
--- variable ''\var{_}'' (underscore) can be used to refer to the object 
+-- variable ''\var{_}'' (underscore) can be used to refer to the object
 -- that was selecting for the bound action and chosen to handle it.
--- The  variable ''\var{_sub}'' refers to a ''currently active'' sub-object 
--- of \var{_}, or a sub-object where the action loading to the binding 
+-- The  variable ''\var{_sub}'' refers to a ''currently active'' sub-object
+-- of \var{_}, or a sub-object where the action loading to the binding
 -- being called actually occured.
--- 
--- The string \var{guard}  maybe set to pose limits on \code{_sub}. Currently 
--- supported guards are \code{_sub:non-nil} and \code{_sub:WFoobar}, where 
+--
+-- The string \var{guard}  maybe set to pose limits on \code{_sub}. Currently
+-- supported guards are \code{_sub:non-nil} and \code{_sub:WFoobar}, where
 -- \type{WFoobar} is a class.
 function ioncore.compile_cmd(cmd, guard)
     local guardcode=""
     local gfn=nil
-    
+
     if guard then
         local st, en, condition=string.find(guard, "^_sub:([%w-_]+)$")
         local sub='_sub'
@@ -36,7 +36,7 @@ function ioncore.compile_cmd(cmd, guard)
                 sub='_chld'
             end
         end
-        
+
         if not condition then
             ioncore.warn_traced(TR("Invalid guard %s.", guard))
         elseif condition=="non-nil" then
@@ -44,7 +44,7 @@ function ioncore.compile_cmd(cmd, guard)
         else
             guardcode='if not obj_is('..sub..', "'..condition..'") then return end; '
         end
-        
+
         local gfncode="return function(_, _sub, _chld) "..guardcode.." return true end"
         local gfn, gerr=loadstring(gfncode, guardcode)
         if not gfn then
@@ -57,14 +57,14 @@ function ioncore.compile_cmd(cmd, guard)
         if not gfn then
             return fn
         else
-            return function(_, _sub, _chld) 
-                if gfn(_, _sub, _chld) then 
-                    cmd(_, _sub, _chld) 
+            return function(_, _sub, _chld)
+                if gfn(_, _sub, _chld) then
+                    fn(_, _sub, _chld)
                 end
             end
         end
     end
-    
+
     if type(cmd)=="string" then
         local fncode=("return function(_, _sub, _chld) local d = "
                        ..cmd.." end")
@@ -91,11 +91,11 @@ local function putcmd(cmd, guard, tab)
             return
         end
     end
-    
+
     tab.func=func
     tab.cmdstr=cmd
     tab.guard=guard
-    
+
     return tab
 end
 
@@ -147,7 +147,7 @@ local function mact(act_, kcb_, cmd, guard)
 end
 
 --DOC
--- Creates a binding description table for the action of clicking a mouse 
+-- Creates a binding description table for the action of clicking a mouse
 -- button while possible modifier keys are pressed,
 -- both given by \var{buttonspec}, to the function \var{func}.
 -- For more information, see section \ref{sec:bindings}.

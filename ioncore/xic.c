@@ -60,6 +60,13 @@ void ioncore_init_xim(void)
     input_method=xim;    
 }
 
+void ioncore_deinit_xim(void)
+{
+    if(input_method==NULL){
+        XCloseIM(input_method);
+        input_method=NULL;
+    }
+}
 
 XIC xwindow_create_xic(Window win)
 {

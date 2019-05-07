@@ -1,7 +1,7 @@
 -- Authors: Sergey Redin <sergey@redin.info>
 -- License: Public domain
 -- Last Changed: Unknown
--- 
+--
 -- xkbion.lua
 -- TODO: make xkbion_set understand some simple presets
 
@@ -114,7 +114,7 @@ function xkbion_set (groups) -- the only global created by xkbion.lua
             return gnum
         end
     end
-    
+
     local set_group
     do
         local current_gnum = 1
@@ -152,7 +152,7 @@ function xkbion_set (groups) -- the only global created by xkbion.lua
             end
         end
     end
-    
+
     ioncore.get_hook("region_notify_hook"):add(
         function(reg, action)
             if (obj_typename(reg) == "WClientWin") and (action == "activated") then

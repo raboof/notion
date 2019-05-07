@@ -44,7 +44,7 @@ if not statusd_dgs then
     --login = "",
     --password = "",
 
-    interval = 20*60*1000,  -- update every 20 minutes, 
+    interval = 20*60*1000,  -- update every 20 minutes,
     retry = 60 * 1000,      -- on error, retry in a minute
 
     -- These shouldn't need to be changed.
@@ -66,7 +66,7 @@ if not settings.login or not settings.password then
     return
 end
 
--- 
+--
 -- get the move count
 --
 local function get_moves()

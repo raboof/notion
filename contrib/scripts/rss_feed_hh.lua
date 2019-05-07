@@ -1,7 +1,7 @@
 -- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>, Henning Hasemann <hhasemann@web.de>
 -- License: Public domain
 -- Last Changed: Unknown
--- 
+--
 -- rss_feed.lua
 --
 -- Use:
@@ -54,7 +54,7 @@ local feeds = {}
 
 --
 -- remove html-entities
--- 
+--
 local function clean(s)
     s = string.gsub(s, "\r", "")
     s = string.gsub(s, "\n", "")
@@ -85,7 +85,7 @@ local function get_next(str)
     if str == nil then return t,d,r,l end
     __, _ = string.find(str, "<item[^s]")
     if not __ then return t,d,r,l end
-    
+
     r = string.sub(str, _)
     __, _ = string.find(r, "<title>")
     if not __ then return t,d,r,l end
@@ -101,14 +101,14 @@ local function get_next(str)
     if not e then return t,d,r,l end
     l = string.sub(r, _+1, e-1)
     r = string.sub(r, s+1)
-    
+
     __, _ = string.find(r, "<description>")
     if not __ then return t,d,r,l end
     e, s = string.find(r, "</description>")
     if not e then return t,d,r,l end
     d = string.sub(r, _+1, e-1)
     r = string.sub(r, s+1)
-    
+
     return t,d,r,l
 end
 
@@ -158,7 +158,7 @@ end
 
 --
 -- pull feed from each server
--- 
+--
 function retrieve()
     local str = ""
     for _, entry in pairs(rss_feed.url) do
@@ -204,7 +204,7 @@ function show_menu()
         for q, d in pairs(tbl) do
             local title = clean(d[1])
             local desc = clean(d[2])
-            table.insert(ret, menuentry(tostring(count)..". "..title, 
+            table.insert(ret, menuentry(tostring(count)..". "..title,
                     "mod_query.message(_, '" .. string.gsub(desc, "'", "\\'") .. "')"))
             count = count + 1
         end

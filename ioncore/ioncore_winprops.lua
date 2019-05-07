@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_winprops.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2007.
 --
 -- See the included file LICENSE for details.
@@ -26,7 +26,7 @@ local function ifnil(...)
             end
         end
     end
-            
+
     return nxt, nil, 0
 end
 
@@ -78,7 +78,7 @@ local function ensure_winproptab(class, role, instance)
     if not winprops[class][role][instance] then
         winprops[class][role][instance]={}
     end
-end    
+end
 
 local function do_add_winprop(class, role, instance, prop)
     ensure_winproptab(class, role, instance)
@@ -93,19 +93,19 @@ function ioncore.match_winprop_dflt(prop, cwin, id)
         if p==nil then
             return true
         else
-            return (p==(i and true)) 
+            return (p==(i and true or false))
                            -- hack for nil
         end
     end
-    
+
     if not chkf(prop.is_transient, id.is_transient) then
         return false
     end
-    
+
     if not chkf(prop.is_dockapp, id.is_dockapp) then
         return false
     end
-    
+
     if prop.name then
         local nm=cwin:name()
         if nm then
@@ -115,7 +115,7 @@ function ioncore.match_winprop_dflt(prop, cwin, id)
             return false
         end
     end
-    
+
     return true
 end
 
@@ -125,7 +125,7 @@ end
 function ioncore.defwinprop(list)
     local list2 = {}
     local class, role, instance = "*", "*", "*"
-    
+
     for k, v in pairs(list) do
         if k == "class" then
             class = v
@@ -136,11 +136,11 @@ function ioncore.defwinprop(list)
         end
         list2[k] = v
     end
-    
+
     if not list2.match then
         list2.match=ioncore.match_winprop_dflt
     end
-    
+
     do_add_winprop(class, role, instance, list2)
 end
 

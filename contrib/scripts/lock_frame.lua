@@ -1,7 +1,7 @@
 -- Authors: James Gray <james@solitaryfield.org>, Etan Reisner <deryni@gmail.com>
 -- License: Unknown
 -- Last Changed: 2007-06-22
--- 
+--
 --[[
 Author: James Gray, Etan Reisner
 Email: james at solitaryfield dot org, deryni@unreliablesource.net

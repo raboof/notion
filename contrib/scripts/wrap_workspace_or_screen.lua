@@ -1,16 +1,16 @@
 -- Authors: Philipp Hartwig <ph@phhart.de>
 -- License: MIT, see http://opensource.org/licenses/mit-license.php
 -- Last Changed: 2012-09-29
--- 
+--
 --[[
 
-Description: Switch focus in the specified direction, but with the following 
+Description: Switch focus in the specified direction, but with the following
 difference to the usual ioncore.goto_next function:
 
-* When switching focus down (resp. up) from the bottom (resp. upmost) client, 
+* When switching focus down (resp. up) from the bottom (resp. upmost) client,
 switch to the next (resp. previous) workspace.
 
-* When switching focus right (resp. left) from the rightmost (resp. leftmost) 
+* When switching focus right (resp. left) from the rightmost (resp. leftmost)
 client, switch to the next (resp. previous) screen.
 
 Usage: Add bindings for
@@ -60,8 +60,8 @@ function wrap_wsscr.goto_next(region, direction, param)
         elseif direction=='up' then
             local screen=workspace:screen_of()
             local ws=underlying_manager(prev_ws(screen))
-            --For floating workspaces, ioncore.navi_first only seems to work 
-            --when the workspace is already displayed. Can someone explain 
+            --For floating workspaces, ioncore.navi_first only seems to work
+            --when the workspace is already displayed. Can someone explain
             --this?
             ws:goto_focus()
             local reg=ioncore.navi_first(ws, 'down', {no_ascend=ws,})
@@ -69,8 +69,8 @@ function wrap_wsscr.goto_next(region, direction, param)
         elseif direction=='down' then
             local screen=workspace:screen_of()
             local ws=underlying_manager(next_ws(screen))
-            --For floating workspaces, ioncore.navi_first only seems to work 
-            --when the workspace is already displayed. Can someone explain 
+            --For floating workspaces, ioncore.navi_first only seems to work
+            --when the workspace is already displayed. Can someone explain
             --this?
             ws:goto_focus()
             local reg=ioncore.navi_first(ws, 'up', {no_ascend=ws,})

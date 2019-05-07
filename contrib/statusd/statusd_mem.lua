@@ -4,10 +4,10 @@
 --
 -------------------------------------------------------------------------------------------
 --
---	PURPOSE: 
+--	PURPOSE:
 --	Shows system available memory catching [free] command outputs.
---	It is intended to make it simpler than statusd_meminfo, plus user configurable 
---	measurement units and alarms for "all" available memory metters. 
+--	It is intended to make it simpler than statusd_meminfo, plus user configurable
+--	measurement units and alarms for "all" available memory metters.
 --
 --	USAGE:
 --	Just set any of the following labels on cfg_statusbar.lua: %mem_hused, %mem_shared
@@ -34,15 +34,15 @@
 --	(both defaults are 50). "units" means Gb "g", Mb "m" or Kb "k" (default = "m")
 ------------------------------------------------------------------------------------------
 --
---	NOTES: 
+--	NOTES:
 --    *	Alarms for used memory are inverse to alarms for free memory (think about it...)
 --	"mem_total" label is useless. If total memory varies, its time to open your
 --	hardware and check this script from barebone. Seriously, may be your video or wifi
---	devices were claiming some free R.A.M. on your machine start-up. 
+--	devices were claiming some free R.A.M. on your machine start-up.
 --	However, I included "mem_total" just in case.
 --   ** This script has non blocking I/O.
 --
---	LICENSE: 
+--	LICENSE:
 --	GPL2 Copyright(C)2006 Mario Garcia H.
 --	(Please see http://www.gnu.org/licenses/gpl.html to read complete license)
 --
@@ -50,7 +50,7 @@
 --	
 --	DEPENDS: "free" command. Probably, all GNU/Linux distros have one.
 --	
---	INSECTS: Not known. 
+--	INSECTS: Not known.
 --	
 --	CONTACT:
 --	G.H. <drosophila (at) nmental (dot) com>
@@ -124,16 +124,16 @@ end
 
 local function get_free_version()
 	local ok, _, version_info
-      
+
 	-- Run free with the -V option to get its version information
 	fh = io.popen("free -V", "r")
 	version_info = fh:read()
 	fh.close()
-      
+
 	ok, _, free_version_major, free_version_minor =--
 	string.find(version_info, "(%d+%.%d+)%.(%d+)")
 
-	if ok then 
+	if ok then
 		free_version_major = tonumber(free_version_major)
 		free_version_minor = tonumber(free_version_minor)
 	else

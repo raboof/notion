@@ -1,7 +1,7 @@
 -- Authors: Sadrul Habib Chowdhury <imadil@gmail.com>, René van Bevern <rvb@pro-linux.de>
 -- License: Public domain
 -- Last Changed: Unknown
--- 
+--
 -- enumerate.lua: prepends "X. " in front of the title of a client-window so
 --                that it's easier to quickly switch between windows using
 --                mod1+n
@@ -25,7 +25,7 @@ function enumerate.update_client(win)
     if s == 1 then
         name = n
     end
-        
+
     name = (frm:get_index(win) + 1) .. ". " .. name
     print("setting name: " .. name)
     win:set_name(name)

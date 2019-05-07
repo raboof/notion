@@ -1,6 +1,6 @@
 --
 -- ion/mod_statusbar/mod_statusbar.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2007.
 --
 -- See the included file LICENSE for details.
@@ -36,11 +36,11 @@ end
 
 local function process_template(template, meter_f, text_f, stretch_f)
     local st, en, b, c, r, p, tmp
-    
+
     while template~="" do
         -- Find '%something'
         st, en, b, r=string.find(template, '^(.-)%%(.*)')
-    
+
         if not b then
             -- Not found
             text_f(template)
@@ -62,7 +62,7 @@ local function process_template(template, meter_f, text_f, stretch_f)
                     text_f(c)
                 end
                 template=r
-            else 
+            else
                 -- Extract [alignment][zero padding]<meter name>
                 local pat='([<|>]?)(0*[0-9]*)([a-zA-Z0-9_]+)'
                 -- First within {...}
@@ -86,7 +86,7 @@ function mod_statusbar.template_to_table(template)
     local res={}
     local m=meters --set_date(stng, meters)
     local aligns={["<"]=0, ["|"]=1, [">"]=2}
-    
+
     process_template(template,
                      -- meter
                      function(s, c, p)
@@ -177,13 +177,13 @@ function mod_statusbar.rcv_statusd(str)
         end
         return ""
     end
-    
+
     while str do
         updated=false
         data=string.gsub(data..str, "([^\n]*)\n", doline)
         str=coroutine.yield(updated)
     end
-    
+
     ioncore.warn(TR("ion-statusd quit."))
     statusd_pid=0
     meters={}
@@ -194,7 +194,7 @@ end
 local function get_modules()
     local mods={}
     local specials={["filler"]=true, ["systray"]=true}
-    
+
     for _, sb in pairs(mod_statusbar.statusbars()) do
         for _, item in pairs(sb:get_template_table()) do
             if item.type==2 and not specials[item.meter] then
@@ -205,7 +205,7 @@ local function get_modules()
             end
         end
     end
-    
+
     return mods
 end
 
@@ -235,16 +235,16 @@ end
 
 
 --DOC
--- Load modules and launch \file{ion-statusd} with configuration 
+-- Load modules and launch \file{ion-statusd} with configuration
 -- table \var{cfg}. The options for each \file{ion-statusd} monitor
 -- script should be contained in the corresponding sub-table of \var{cfg}.
 function mod_statusbar.launch_statusd(cfg)
     if statusd_pid>0 then
         return
     end
-    
+
     local mods=get_modules()
-    
+
     -- Load modules
     for m in pairs(mods) do
         if dopath("statusbar_"..m, true) then
@@ -268,12 +268,12 @@ function mod_statusbar.launch_statusd(cfg)
     local params=""
     table.foreach(mods, function(k) params=params.." -m "..k end)
     local cmd=statusd.." -q -c "..cfg..params
-    
+
     local rcv=coroutine.wrap(mod_statusbar.rcv_statusd)
     local rcverr=mod_statusbar.rcv_statusd_err
-    
-    statusd_pid=mod_statusbar._launch_statusd(cmd, 
-                                              rcv, initrcverr, 
+
+    statusd_pid=mod_statusbar._launch_statusd(cmd,
+                                              rcv, initrcverr,
                                               rcv, rcverr)
 
     if statusd_errors then
@@ -282,7 +282,7 @@ function mod_statusbar.launch_statusd(cfg)
 
     if statusd_pid<=0 then
         warn(TR("Failed to start ion-statusd."))
-    end                                              
+    end
 end
 
 --}}}
@@ -313,7 +313,7 @@ function mod_statusbar.create(param)
     if not scr then
         error(TR("Screen not found."))
     end
-    
+
     if not param.force then
         local stdisp=scr:get_stdisp()
         if stdisp and stdisp.reg then
@@ -321,9 +321,9 @@ function mod_statusbar.create(param)
                      "statusbar."))
         end
     end
-    
+
     local sb=scr:set_stdisp({
-        type="WStatusBar", 
+        type="WStatusBar",
         pos=(param.pos or "bl"),
         fullsize=param.fullsize,
         name="*statusbar*",
@@ -331,11 +331,11 @@ function mod_statusbar.create(param)
         template_table=param.template_table,
         systray=param.systray,
     })
-    
+
     if not sb then
         error(TR("Failed to create statusbar."))
     end
-    
+
     return sb
 end
 

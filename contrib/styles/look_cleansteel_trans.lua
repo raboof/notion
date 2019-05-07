@@ -31,7 +31,7 @@ de.defstyle("frame", {
     --highlight_colour = "#707070",
     padding_colour = "#505050",
     background_colour = "#000000",
-    foreground_colour = "#ffffff",    
+    foreground_colour = "#ffffff",
     padding_pixels = 1,
     highlight_pixels = 1,
     shadow_pixels = 1,
@@ -163,7 +163,7 @@ de.defstyle("stdisp", {
     background_colour = "#000000",
     foreground_colour = "grey",
     text_align = "left",
-    
+
     de.substyle("important", {
         foreground_colour = "green",
     }),

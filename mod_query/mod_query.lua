@@ -1,8 +1,8 @@
 --
 -- ion/query/mod_query.lua -- Some common queries for Ion
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2007.
--- 
+--
 -- See the included file LICENSE for details.
 --
 
@@ -51,7 +51,7 @@ end
 -- routine which receives a (\var{cp}, \var{str}, \var{point}) as parameters.
 -- The parameter \var{str} is the string to be completed and \var{point}
 -- cursor's location within it. Completions should be eventually,
--- possibly asynchronously, set with \fnref{WComplProxy.set_completions} 
+-- possibly asynchronously, set with \fnref{WComplProxy.set_completions}
 -- on \var{cp}.
 function mod_query.query(mplex, prompt, initvalue, handler, completor,
                          context)
@@ -72,18 +72,18 @@ function mod_query.query(mplex, prompt, initvalue, handler, completor,
     if not ok then
         return
     end
-    
-    local wedln=mod_query.do_query(mplex, prompt, initvalue, 
+
+    local wedln=mod_query.do_query(mplex, prompt, initvalue,
                                    handle_it, completor, cycle, bcycle)
-                                   
+
     if wedln then
         ioncore.unsqueeze(wedln)
-        
+
         if context then
             wedln:set_context(context)
         end
     end
-    
+
     return wedln
 end
 
@@ -125,8 +125,8 @@ end
 
 local badsig_={4, 5, 6, 7, 8, 11}
 local badsig={}
-for _, v in pairs(badsig_) do 
-    badsig[v]=true 
+for _, v in pairs(badsig_) do
+    badsig[v]=true
 end
 
 local function chld_handler(p)
@@ -144,7 +144,7 @@ ioncore.get_hook("ioncore_sigchld_hook"):add(chld_handler)
 
 function mod_query.exec_on_merr(mplex, cmd)
     local pid
-    
+
     local function monitor(str)
         if pid then
             local t=errdata[pid]
@@ -158,22 +158,22 @@ function mod_query.exec_on_merr(mplex, cmd)
             end
         end
     end
-    
+
     local function timeout()
         errdata[pid]=nil
     end
-    
+
     pid=ioncore.exec_on(mplex, cmd, monitor)
-    
+
     if pid<=0 then
         return
     end
 
     local tmr=ioncore.create_timer();
     local tmd=math.max(DIE_TIMEOUT_NO_ERRORCODE, DIE_TIMEOUT_ERRORCODE)
-    local now=os.time()  
+    local now=os.time()
     tmr:set(tmd*1000, timeout)
-    
+
     errdata[pid]={tmr=tmr, mplex=mplex, starttime=now}
 end
 
@@ -247,7 +247,7 @@ mod_query.COLLECT_THRESHOLD=2000
 function mod_query.popen_completions(cp, cmd, fn, reshnd)
     
     local pst={cp=cp, maybe_stalled=0}
-    
+
     if not reshnd then
         reshnd = function(rs, a)
                      if not rs.common_beg then
@@ -263,49 +263,49 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
         local results={}
         local totallen=0
         local lines=0
-        
+
         while str do
             if pst.maybe_stalled>=2 then
                 pipes[rcv]=nil
                 return
             end
             pst.maybe_stalled=0
-            
+
             totallen=totallen+string.len(str)
             if totallen>ioncore.RESULT_DATA_LIMIT then
                 error(TR("Too much result data"))
             end
-            
 
-            data=string.gsub(data..str, "([^\n]*)\n", 
-                             function(s) 
-                                 reshnd(results, s) 
+
+            data=string.gsub(data..str, "([^\n]*)\n",
+                             function(s)
+                                 reshnd(results, s)
                                  lines=lines+1
                                  return ""
                              end)
-            
+
             if lines>mod_query.COLLECT_THRESHOLD then
                 collectgarbage()
                 lines=0
             end
-            
+
             str=coroutine.yield()
         end
-        
+
         if not results.common_beg then
             results.common_beg=beg
         end
-        
+
         (fn or WComplProxy.set_completions)(cp, results)
-        
+
         pipes[rcv]=nil
         results={}
-        
+
         collectgarbage()
     end
-    
+
     local found_clean=false
-    
+
     for k, v in pairs(pipes) do
         if v.cp==cp then
             if v.maybe_stalled<2 then
@@ -314,7 +314,7 @@ function mod_query.popen_completions(cp, cmd, fn, reshnd)
             end
         end
     end
-    
+
     if not found_clean then
         pipes[rcv]=pst
         ioncore.popen_bgread(cmd, coroutine.wrap(rcv))
@@ -323,21 +323,10 @@ end
 
 
 local function mk_completion_test(str, sub_ok, casei_ok)
-    if not str then
-        return function(s) return true end
-    end
-    
-    local function mk(str, sub_ok)
-        if sub_ok then
-            return function(s) return string.find(s, str, 1, true) end
-        else
-            local len=string.len(str)
-            return function(s) return string.sub(s, 1, len)==str end
-        end
-    end
-    
+    local settings=mod_query.get()
+
     local casei=(casei_ok and mod_query.get().caseicompl)
-    
+
     if not casei then
         return mk(str, sub_ok)
     else
@@ -349,8 +338,8 @@ end
 
 local function mk_completion_add(entries, str, sub_ok, casei_ok)
     local tst=mk_completion_test(str, sub_ok, casei_ok)
-    
-    return function(s) 
+
+    return function(s)
                if s and tst(s) then
                    table.insert(entries, s)
                end
@@ -361,13 +350,13 @@ end
 function mod_query.complete_keys(list, str, sub_ok, casei_ok)
     local results={}
     local test_add=mk_completion_add(results, str, sub_ok, casei_ok)
-    
+
     for m, _ in pairs(list) do
         test_add(m)
     end
 
     return results
-end    
+end
 
 
 function mod_query.complete_name(str, iter)
@@ -375,12 +364,12 @@ function mod_query.complete_name(str, iter)
     local casei_ok=true
     local entries={}
     local tst_add=mk_completion_add(entries, str, sub_ok_first, casei_ok)
-    
+
     iter(function(reg)
              tst_add(reg:name())
              return true
          end)
-    
+
     if #entries==0 and not sub_ok_first then
         local tst_add2=mk_completion_add(entries, str, true, casei_ok)
         iter(function(reg)
@@ -388,7 +377,7 @@ function mod_query.complete_name(str, iter)
                  return true
              end)
     end
-    
+
     return entries
 end
 
@@ -422,7 +411,7 @@ end
 
 
 function mod_query.complete_workspace(str)
-    local function iter(fn) 
+    local function iter(fn)
         return ioncore.region_i(function(obj)
                                     return (not obj_is(obj, "WGroupWS")
                                             or fn(obj))
@@ -439,7 +428,7 @@ end
 
 function mod_query.gotoclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
-    
+
     if cwin==nil then
         mod_query.warn(frame, TR("Could not find client window %s.", str))
     else
@@ -450,18 +439,18 @@ end
 
 function mod_query.attachclient_handler(frame, str)
     local cwin=ioncore.lookup_clientwin(str)
-    
+
     if not cwin then
         mod_query.warn(frame, TR("Could not find client window %s.", str))
         return
     end
-    
+
     local reg=cwin:groupleader_of()
-    
+
     local function attach()
         frame:attach(reg, { switchto = true })
     end
-    
+
     if frame:rootwin_of()~=reg:rootwin_of() then
         mod_query.warn(frame, TR("Cannot attach: different root windows."))
     elseif reg:manager()==frame then
@@ -481,12 +470,12 @@ function mod_query.workspace_handler(mplex, name)
             if not layout or layout=="" then
                 layout="default"
             end
-            
+
             if not ioncore.getlayout(layout) then
                 mod_query.warn(mplex_, TR("Unknown layout"))
             else
                 local scr=mplex:screen_of()
-                
+
                 local function mkws()
                     local tmpl={name=name, switchto=true}
                     if not ioncore.create_ws(scr, tmpl, layout) then
@@ -502,7 +491,7 @@ function mod_query.workspace_handler(mplex, name)
             local los=ioncore.getlayout(nil, true)
             return mod_query.complete_keys(los, str, true, true)
         end
-        
+
         mod_query.query(mplex, TR("New workspace layout (default):"), nil,
                         create_handler, mod_query.make_completor(compl_layout),
                         "workspacelayout")
@@ -527,7 +516,7 @@ end
 -- function \fnref{ioncore.complete_clientwin}.
 function mod_query.query_attachclient(mplex)
     mod_query.query(mplex, TR("Attach window:"), nil,
-                    mod_query.attachclient_handler, 
+                    mod_query.attachclient_handler,
                     mod_query.make_completor(mod_query.complete_clientwin),
                     "windowname")
 end
@@ -540,7 +529,7 @@ end
 -- entered name will be created and the user will be queried for
 -- the type of the workspace.
 function mod_query.query_workspace(mplex)
-    mod_query.query(mplex, TR("Go to or create workspace:"), nil, 
+    mod_query.query(mplex, TR("Go to or create workspace:"), nil,
                     mod_query.workspace_handler,
                     mod_query.make_completor(mod_query.complete_workspace),
                     "workspacename")
@@ -587,9 +576,9 @@ function mod_query.query_renameworkspace(mplex, ws)
         assert(mplex)
         ws=ioncore.find_manager(mplex, "WGroupWS")
     end
-    
+
     assert(mplex and ws)
-    
+
     mod_query.query(mplex, TR("Workspace name:"), ws:name(),
                     function(mplex, str) ws:set_name(str) end,
                     nil, "framename")
@@ -603,23 +592,23 @@ end
 
 
 --DOC
--- Asks for a file to be edited. This script uses 
+-- Asks for a file to be edited. This script uses
 -- \command{run-mailcap --mode=edit} by default, but you may provide an
 -- alternative script to use. The default prompt is "Edit file:" (translated).
 function mod_query.query_editfile(mplex, script, prompt)
-    mod_query.query_execfile(mplex, 
-                             prompt or TR("Edit file:"), 
+    mod_query.query_execfile(mplex,
+                             prompt or TR("Edit file:"),
                              script or "run-mailcap --action=edit")
 end
 
 
 --DOC
--- Asks for a file to be viewed. This script uses 
+-- Asks for a file to be viewed. This script uses
 -- \command{run-mailcap --action=view} by default, but you may provide an
 -- alternative script to use. The default prompt is "View file:" (translated).
 function mod_query.query_runfile(mplex, script, prompt)
-    mod_query.query_execfile(mplex, 
-                             prompt or TR("View file:"), 
+    mod_query.query_execfile(mplex,
+                             prompt or TR("View file:"),
                              script or "run-mailcap --action=view")
 
 end
@@ -678,14 +667,14 @@ local function break_cmdline(str, no_ws)
 
         ins(beg)
         str=rest
-        
+
         local sp=false
-        
+
         if ch=="\\" then
             st, en, beg, rest=string.find(str, "^(\\.)(.*)")
         elseif ch=='"' then
             st, en, beg, rest=string.find(str, "^(\".-[^\\]\")(.*)")
-            
+
             if not beg then
                 st, en, beg, rest=string.find(str, "^(\"\")(.*)")
             end
@@ -704,7 +693,7 @@ local function break_cmdline(str, no_ws)
             sp=true
             str=rest
         end
-        
+
         if not sp then
             if not beg then
                 beg=str
@@ -714,7 +703,7 @@ local function break_cmdline(str, no_ws)
             str=rest
         end
     end
-    
+
     return res
 end
 
@@ -746,25 +735,25 @@ end
 function mod_query.exec_completor(wedln, str, point)
     local parts=break_cmdline(str)
     local complidx=find_point(parts, point+1)
-    
+
     local s_compl, s_beg, s_end="", "", ""
-    
+
     if complidx==1 and string.find(parts[1], "^:+$") then
         complidx=complidx+1
     end
-    
+
     if string.find(parts[complidx], "[^%s]") then
         s_compl=unquote(parts[complidx])
     end
-    
+
     for i=1, complidx-1 do
         s_beg=s_beg..parts[i]
     end
-    
+
     for i=complidx+1, #parts do
         s_end=s_end..parts[i]
     end
-    
+
     local wp=" "
     if complidx==1 or (complidx==2 and isspace(parts[1])) then
         wp=" -wp "
@@ -796,7 +785,7 @@ function mod_query.exec_completor(wedln, str, point)
             table.insert(res, s)
         end
     end
-    
+
     local ic=ioncore.lookup_script("ion-completefile")
     if ic then
         mod_query.popen_completions(wedln,
@@ -819,7 +808,7 @@ end
 function mod_query.exec_handler(mplex, cmdline)
     local parts=break_cmdline(cmdline, true)
     local cmd=table.remove(parts, 1)
-    
+
     if cmd_overrides[cmd] then
         cmd_overrides[cmd](mplex, table.map(unquote, parts))
     elseif cmd~="" then
@@ -832,7 +821,7 @@ end
 -- This function asks for a command to execute with \file{/bin/sh}.
 -- If the command is prefixed with a colon (':'), the command will
 -- be run in an XTerm (or other terminal emulator) using the script
--- \file{ion-runinxterm}. Two colons ('::') will ask you to press 
+-- \file{ion-runinxterm}. Two colons ('::') will ask you to press
 -- enter after the command has finished.
 function mod_query.query_exec(mplex)
     mod_query.query(mplex, TR("Run:"), nil, mod_query.exec_handler, 
@@ -856,10 +845,10 @@ function mod_query.get_known_hosts(mplex)
     mod_query.known_hosts={}
     local f
     local h=os.getenv("HOME")
-    if h then 
+    if h then
         f=io.open(h.."/.ssh/known_hosts")
     end
-    if not f then 
+    if not f then
         warn(TR("Failed to open ~/.ssh/known_hosts"))
         return
     end
@@ -909,30 +898,30 @@ end
 
 function mod_query.complete_ssh(str)
     local st, en, user, at, host=string.find(str, "^([^@]*)(@?)(.*)$")
-    
+
     if string.len(at)==0 and string.len(host)==0 then
         host = user; user = ""
     end
-    
-    if at=="@" then 
-        user = user .. at 
+
+    if at=="@" then
+        user = user .. at
     end
-    
+
     local res = {}
     local tst = mk_completion_test(host, true, false)
-    
+
     for _, v in ipairs(mod_query.ssh_completions) do
         if tst(v) then
             table.insert(res, user .. v)
         end
     end
-    
+
     return res
 end
 
 
 --DOC
--- This query asks for a host to connect to with SSH. 
+-- This query asks for a host to connect to with SSH.
 -- Hosts to tab-complete are read from \file{\~{}/.ssh/known\_hosts}.
 function mod_query.query_ssh(mplex, ssh)
     mod_query.get_known_hosts(mplex)
@@ -951,10 +940,10 @@ function mod_query.query_ssh(mplex, ssh)
         if not (str and string.find(str, "[^%s]")) then
             return
         end
-        
+
         mod_query.exec_on_merr(mplex, ssh.." "..string.shell_safe(str))
     end
-    
+
     return mod_query.query(mplex, TR("SSH to:"), nil, handle_exec,
                            mod_query.make_completor(mod_query.complete_ssh),
                            "ssh")
@@ -983,8 +972,8 @@ end
 -- but it is possible to pass another program as the \var{prog} argument.
 function mod_query.query_man(mplex, prog)
     local dflt=ioncore.progname()
-    mod_query.query_execwith(mplex, TR("Manual page (%s):", dflt), 
-                             dflt, prog or ":man", 
+    mod_query.query_execwith(mplex, TR("Manual page (%s):", dflt),
+                             dflt, prog or ":man",
                              mod_query.man_completor, "man",
                              true --[[ no quoting ]])
 end
@@ -1001,7 +990,7 @@ function mod_query.create_run_env(mplex)
     if _ENV then origenv=_ENV else origenv=getfenv() end
     local meta={__index=origenv, __newindex=origenv}
     local env={
-        _=mplex, 
+        _=mplex,
         _sub=mplex:current(),
         print=my_print
     }
@@ -1060,7 +1049,7 @@ function mod_query.do_complete_lua(env, str)
     local comptab=env
     local metas=true
     local _, _, tocomp=string.find(str, "([%w_.:]*)$")
-    
+
     -- Descend into tables
     if tocomp and string.len(tocomp)>=1 then
         for t in string.gfind(tocomp, "([^.:]*)[.:]") do
@@ -1079,16 +1068,16 @@ function mod_query.do_complete_lua(env, str)
             end
         end
     end
-    
+
     if not comptab then return {} end
-    
+
     local compl={}
-    
+
     -- Get the actual variable to complete without containing tables
     _, _, compl.common_beg, tocomp=string.find(str, "(.-)([%w_]*)$")
-    
+
     local l=string.len(tocomp)
-    
+
     local tab=comptab
     local seen={}
     while true do
@@ -1102,15 +1091,15 @@ function mod_query.do_complete_lua(env, str)
             end
         end
 
-        -- We only want to display full list of functions for objects, not 
+        -- We only want to display full list of functions for objects, not
         -- the tables representing the classes.
         --if not metas then break end
-        
+
         seen[tab]=true
         tab=getindex(tab)
         if not tab or seen[tab] then break end
     end
-    
+
     -- If there was only one completion and it is a string or function,
     -- concatenate it with "." or "(", respectively.
     if #compl==1 then
@@ -1120,7 +1109,7 @@ function mod_query.do_complete_lua(env, str)
             compl[1]=compl[1] .. "("
         end
     end
-    
+
     return compl
 end
 
@@ -1132,15 +1121,15 @@ end
 -- environment to \code{\{_, _:current()\}}.
 function mod_query.query_lua(mplex)
     local env=mod_query.create_run_env(mplex)
-    
+
     local function complete(cp, code)
         cp:set_completions(mod_query.do_complete_lua(env, code))
     end
-    
+
     local function handler(mplex, code)
         return mod_query.do_handle_lua(mplex, env, code)
     end
-    
+
     mod_query.query(mplex, TR("Lua code:"), nil, handler, complete, "lua")
 end
 
@@ -1158,15 +1147,15 @@ function mod_query.query_menu(mplex, sub, themenu, prompt)
         themenu=sub
         sub=nil
     end
-    
+
     local menu=ioncore.evalmenu(themenu, mplex, sub)
     local menuname=(type(themenu)=="string" and themenu or "?")
-    
+
     if not menu then
         mod_query.warn(mplex, TR("Unknown menu %s.", tostring(themenu)))
         return
     end
-    
+
     if not prompt then
         prompt=menuname..":"
     else
@@ -1182,17 +1171,17 @@ function mod_query.query_menu(mplex, sub, themenu, prompt)
             if v.name then
                 local is_submenu=v.submenu_fn
                 local n=p..xform_name(v.name)
-                
+
                 while t[n] or t[n..'/'] do
                     n=n.."'"
                 end
-                
+
                 if is_submenu then
                     n=n..'/'
                 end
-                
+
                 t[n]=v
-                
+
                 if is_submenu and not v.noautoexpand then
                     local sm=v.submenu_fn()
                     if sm then
@@ -1206,20 +1195,20 @@ function mod_query.query_menu(mplex, sub, themenu, prompt)
         end
         return t
     end
-    
+
     local ntab=xform_menu({}, menu, "")
-    
+
     local function complete(str)
         -- casei_ok false, because everything is already in lower case
         return mod_query.complete_keys(ntab, str, true, false)
     end
-    
+
     local function handle(mplex, str)
         local e=ntab[str]
         if e then
             if e.func then
-                local err=collect_errors(function() 
-                                             e.func(mplex, _sub) 
+                local err=collect_errors(function()
+                                             e.func(mplex, _sub)
                                          end)
                 if err then
                     mod_query.warn(mplex, err)
@@ -1232,8 +1221,8 @@ function mod_query.query_menu(mplex, sub, themenu, prompt)
             mod_query.warn(mplex, TR("No entry '%s'", str))
         end
     end
-    
-    mod_query.query(mplex, prompt, nil, handle, 
+
+    mod_query.query(mplex, prompt, nil, handle,
                     mod_query.make_completor(complete), "menu."..menuname)
 end
 
@@ -1243,7 +1232,7 @@ end
 -- Miscellaneous {{{
 
 
---DOC 
+--DOC
 -- Display an "About Ion" message in \var{mplex}.
 function mod_query.show_about_ion(mplex)
     mod_query.message(mplex, ioncore.aboutmsg())
@@ -1251,18 +1240,18 @@ end
 
 
 --DOC
--- Show information about a region tree 
+-- Show information about a region tree
 function mod_query.show_tree(mplex, reg, max_depth)
     local function indent(s)
         local i="    "
         return i..string.gsub(s, "\n", "\n"..i)
     end
-    
+
     local function get_info(reg, indent, d)
         if not reg then
             return (indent .. "No region")
         end
-        
+
         local function n(s) return (s or "") end
 
         local s=string.format("%s%s \"%s\"", indent, obj_typename(reg),
@@ -1271,12 +1260,12 @@ function mod_query.show_tree(mplex, reg, max_depth)
         if obj_is(reg, "WClientWin") then
             local i=reg:get_ident()
             s=s .. TR("\n%sClass: %s\n%sRole: %s\n%sInstance: %s\n%sXID: 0x%x",
-                      indent, n(i.class), 
-                      indent, n(i.role), 
-                      indent, n(i.instance), 
+                      indent, n(i.class),
+                      indent, n(i.role),
+                      indent, n(i.instance),
                       indent, reg:xid())
         end
-        
+
         if (not max_depth or max_depth > d) and reg.managed_i then
             local first=true
             reg:managed_i(function(sub)
@@ -1288,10 +1277,10 @@ function mod_query.show_tree(mplex, reg, max_depth)
                               return true
                           end)
         end
-        
+
         return s
     end
-    
+
     mod_query.message(mplex, get_info(reg, "", 0))
 end
 

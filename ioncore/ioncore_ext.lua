@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_ext.lua -- Ioncore Lua library
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2007.
 --
 -- See the included file LICENSE for details.
@@ -60,7 +60,7 @@ setmetatable(_G, newmeta)
 notioncore = ioncore
 
 -- Export some important functions into global namespace.
-export(ioncore, 
+export(ioncore,
        notioncore,
        "submap",
        "kpress",
@@ -87,7 +87,7 @@ package.loaded["ioncore"]=true
 
 local function dummy_gettext_hack()
     -- Extra translations for context menus etc. I don't want extra
-    -- TR calls in the configuration files, or parsing the string 
+    -- TR calls in the configuration files, or parsing the string
     -- parameters to kpress etc. for translations.
     TR("Frame")
     TR("Screen")

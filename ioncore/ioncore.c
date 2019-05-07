@@ -657,6 +657,8 @@ void ioncore_deinit()
 
     ioncore_deinit_bindmaps();
 
+    ioncore_deinit_xim();
+
     stringstore_deinit();
 
     mainloop_unregister_input_fd(ioncore_g.conn);

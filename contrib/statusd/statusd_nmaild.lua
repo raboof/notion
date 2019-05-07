@@ -4,7 +4,7 @@
 --
 --------------------------------------------------------------------------------------------
 -- 	
--- 	PURPOSE: 
+-- 	PURPOSE:
 -- 	Flexible Maildir monitor with configurable alarms and optional launcher for external
 -- 	commands. The name "nmaild" stands for "aNy-mail-directories".
 --
@@ -20,7 +20,7 @@
 --	specified.
 --
 --	(Example: ~/Maildir/home, ~/Maildir/work, ~/Maildir/forum_lists, ~/Mail/FSCK,
---	spam, etc. where ~Maild/home is the main directory, others are counted as all*) 
+--	spam, etc. where ~Maild/home is the main directory, others are counted as all*)
 --
 --	USAGE:	
 --    * If the directory ~/.ion3 does not exist create it and copy cfg_statusbar.lua
@@ -64,7 +64,7 @@
 --	    	     					       the best way is to replace the quotes for
 --	    	     					       [[ at start and ]] at the end.
 --
---  	},				      -->  Take care, write correct config endings. 	   
+--  	},				      -->  Take care, write correct config endings. 	
 --  						
 --  						   Meanings:
 --  						   --------------------------
@@ -73,7 +73,7 @@
 --  						   (You must have a copy into ~/.ion3 directory)
 --  						   to change colors or to add more  (xcolors).
 --  						   If 'value' reaches (is >= than) the number
---		 				   you put here, alarms will be displayed !!. 
+--		 				   you put here, alarms will be displayed !!.
 --
 -------------------------------------------------------------------------------------------
 --
@@ -138,7 +138,7 @@ local get_count = function(nmaild, label)
 		exec_on_new()
 		return
 	end
-	if count == 0 and (label == "new" or label == "allnew") then 
+	if count == 0 and (label == "new" or label == "allnew") then
 		last_count[label] = 0
 		return
 	end

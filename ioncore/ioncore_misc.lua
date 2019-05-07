@@ -1,6 +1,6 @@
 --
 -- ion/share/ioncore_misc.lua
--- 
+--
 -- Copyright (c) Tuomo Valkonen 2004-2007.
 --
 -- See the included file LICENSE for details.
@@ -17,13 +17,13 @@ local layouts={
     default = empty,
 }
 
---DOC 
+--DOC
 -- Define a new workspace layout with name \var{name}, and
 -- attach/creation parameters given in \var{tab}. The layout
 -- "empty" may not be defined.
 function ioncore.deflayout(name, tab)
-    assert(layout ~= "empty")
-    
+    assert(name ~= "empty")
+
     if name=="default" and not tab then
         layouts[name] = empty
     else
@@ -50,9 +50,9 @@ ioncore.set{_get_layout=ioncore.getlayout}
 -- If no \var{layout} is given, "default" is used.
 function ioncore.create_ws(scr, tmpl, layout)
     local lo=ioncore.getlayout(layout or "default")
-    
+
     assert(lo, TR("Unknown layout"))
-    
+
     return scr:attach_new(table.join(tmpl or default_tmpl, lo))
 end
 
@@ -79,7 +79,7 @@ end
 
 --DOC
 -- Attach tagged regions to \var{reg}. The method of attach
--- depends on the types of attached regions and whether \var{reg} 
+-- depends on the types of attached regions and whether \var{reg}
 -- implements \code{attach_framed} and \code{attach}. If \var{param}
 -- is not set, the default of \verb!{switchto=true}! is used.
 function ioncore.tagged_attach(reg, param)
@@ -88,9 +88,9 @@ function ioncore.tagged_attach(reg, param)
     end
     local tagged=function() return ioncore.tagged_first(true) end
     for r in tagged do
-        local fn=((not obj_is(r, "WWindow") and reg.attach_framed) 
+        local fn=((not obj_is(r, "WWindow") and reg.attach_framed)
                   or reg.attach)
-        
+
         if not (fn and fn(reg, r, param)) then
             return false
         end
