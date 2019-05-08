@@ -98,7 +98,23 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 
 
 ##
-## libc
+## Xft support
+##
+
+USE_XFT?=$(shell (pkg-config --exists xft && echo 1))
+
+ifeq ($(USE_XFT),1)
+    X11_INCLUDES += `pkg-config xft --cflags`
+    X11_LIBS += `pkg-config xft --libs`
+    DEFINES += -DHAVE_X11_XFT
+    DEFINES += -DHAVE_X11_BMF
+else
+    DEFINES += -DHAVE_X11_BMF
+endif
+
+
+##
+## Localisation
 ##
 
 # You may uncomment this if you know your system has

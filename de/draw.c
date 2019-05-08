@@ -19,7 +19,6 @@
 
 #include <X11/extensions/shape.h>
 
-
 /*{{{ Colour group lookup */
 
 
@@ -84,7 +83,7 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
     w--;
     h--;
 
-    XSetForeground(ioncore_g.dpy, gc, tlc);
+    XSetForeground(ioncore_g.dpy, gc, PIXEL(tlc));
 
 
     a=(br!=0);
@@ -104,7 +103,7 @@ static void do_draw_border(Window win, GC gc, int x, int y, int w, int h,
     }
 
 
-    XSetForeground(ioncore_g.dpy, gc, brc);
+    XSetForeground(ioncore_g.dpy, gc, PIXEL(brc));
 
     a=(tl!=0);
     b=0;
@@ -141,23 +140,23 @@ static void draw_borderline(Window win, GC gc, WRectangle *geom,
                             GrBorderLine line)
 {
     if(line==GR_BORDERLINE_LEFT && geom->h>0 && tl>0){
-        XSetForeground(ioncore_g.dpy, gc, tlc);
-        XSetBackground(ioncore_g.dpy, gc, tlc);
+        XSetForeground(ioncore_g.dpy, gc, PIXEL(tlc));
+        XSetBackground(ioncore_g.dpy, gc, PIXEL(tlc));
         XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, tl, geom->h);
         geom->x+=tl;
     }else if(line==GR_BORDERLINE_TOP && geom->w>0 && tl>0){
-        XSetForeground(ioncore_g.dpy, gc, tlc);
-        XSetBackground(ioncore_g.dpy, gc, tlc);
+        XSetForeground(ioncore_g.dpy, gc, PIXEL(tlc));
+        XSetBackground(ioncore_g.dpy, gc, PIXEL(tlc));
         XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y, geom->w, tl);
         geom->y+=tl;
     }else if(line==GR_BORDERLINE_RIGHT && geom->h>0 && br>0){
-        XSetForeground(ioncore_g.dpy, gc, brc);
-        XSetBackground(ioncore_g.dpy, gc, brc);
+        XSetForeground(ioncore_g.dpy, gc, PIXEL(brc));
+        XSetBackground(ioncore_g.dpy, gc, PIXEL(brc));
         XFillRectangle(ioncore_g.dpy, win, gc, geom->x+geom->w-br, geom->y, br, geom->h);
         geom->w-=br;
     }else if(line==GR_BORDERLINE_BOTTOM && geom->w>0 && br>0){
-        XSetForeground(ioncore_g.dpy, gc, brc);
-        XSetBackground(ioncore_g.dpy, gc, brc);
+        XSetForeground(ioncore_g.dpy, gc, PIXEL(brc));
+        XSetBackground(ioncore_g.dpy, gc, PIXEL(brc));
         XFillRectangle(ioncore_g.dpy, win, gc, geom->x, geom->y+geom->h-br, geom->w, br);
         geom->h-=br;
     }
@@ -386,7 +385,7 @@ void debrush_tab_extras(DEBrush *brush, const WRectangle *g,
     }
 
     if(ISSET(a2, GR_ATTR(tagged)) || ISSET(a1, GR_ATTR(tagged))){
-        XSetForeground(ioncore_g.dpy, d->copy_gc, cg->fg);
+        XSetForeground(ioncore_g.dpy, d->copy_gc, PIXEL(cg->fg));
 
         copy_masked(brush, d->tag_pixmap, brush->win, 0, 0,
                     d->tag_pixmap_w, d->tag_pixmap_h,
@@ -435,7 +434,7 @@ void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom,
     GC gc=brush->d->normal_gc;
 
     if(TRUE/*needfill*/){
-        XSetForeground(ioncore_g.dpy, gc, cg->bg);
+        XSetForeground(ioncore_g.dpy, gc, PIXEL(cg->bg));
         XFillRectangle(ioncore_g.dpy, brush->win, gc, geom->x, geom->y,
                        geom->w, geom->h);
     }
@@ -603,7 +602,7 @@ void debrush_enable_transparency(DEBrush *brush, GrTransparency mode)
         attr.background_pixmap=ParentRelative;
     }else{
         attrflags=CWBackPixel;
-        attr.background_pixel=brush->d->cgrp.bg;
+        attr.background_pixel=PIXEL(brush->d->cgrp.bg);
     }
 
     XChangeWindowAttributes(ioncore_g.dpy, brush->win, attrflags, &attr);
@@ -619,7 +618,7 @@ void debrush_fill_area(DEBrush *brush, const WRectangle *geom)
     if(cg==NULL)
         return;
 
-    XSetForeground(ioncore_g.dpy, gc, cg->bg);
+    XSetForeground(ioncore_g.dpy, gc, PIXEL(cg->bg));
     XFillRectangle(ioncore_g.dpy, brush->win, gc,
                    geom->x, geom->y, geom->w, geom->h);
 }

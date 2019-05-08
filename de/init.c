@@ -156,14 +156,24 @@ bool de_get_colour(WRootWin *rootwin, DEColour *ret,
 void de_get_colour_group(WRootWin *rootwin, DEColourGroup *cg,
                          ExtlTab tab, DEStyle *based_on)
 {
+    DEColour black, white;
+
+#ifdef HAVE_X11_XFT
+    de_alloc_colour(rootwin, &black, "black");
+    de_alloc_colour(rootwin, &white, "white");
+#else
+    black=DE_BLACK(rootwin);
+    white=DE_WHITE(rootwin);
+#endif
+
     de_get_colour(rootwin, &(cg->hl), tab, based_on, "highlight_colour",
-                  DE_WHITE(rootwin));
+                  white);
     de_get_colour(rootwin, &(cg->sh), tab, based_on, "shadow_colour",
-                  DE_WHITE(rootwin));
+                  white);
     de_get_colour(rootwin, &(cg->bg), tab, based_on, "background_colour",
-                  DE_BLACK(rootwin));
+                  black);
     de_get_colour(rootwin, &(cg->fg), tab, based_on, "foreground_colour",
-                  DE_WHITE(rootwin));
+                  white);
     de_get_colour(rootwin, &(cg->pad), tab, based_on, "padding_colour",
                   cg->bg);
 }

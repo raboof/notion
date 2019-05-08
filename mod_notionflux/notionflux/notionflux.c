@@ -184,6 +184,7 @@ int main(int argc, char *argv[])
     int use_stdin=1;
     char res;
     int n;
+    int exit_status=0;
 
     if(argc>1){
         if(argc!=3 || strcmp(argv[1], "-e")!=0)
@@ -235,15 +236,18 @@ int main(int argc, char *argv[])
         if(n==0)
             break;
 
-        if(res=='S')
+        if(res=='S'){
             mywrite(1, buf, n);
-        else /* res=='E' */
+        }
+        else{ /* res=='E' */
             mywrite(2, buf, n);
+            exit_status=2;
+        }
 
         if(n<MAX_DATA)
             break;
     }
 
-    return 0;
+    return exit_status;
 }
 
