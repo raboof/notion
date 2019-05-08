@@ -262,7 +262,7 @@ local function receive_styles(str)
     local styles={}
     local stylemenu={}
     
-    for look in string.gfind(data, "(look[-_][^\n]*)%.lua\n") do
+    for look in string.gmatch(data, "(look[-_][^\n]*)%.lua\n") do
         if not found[look] then
             found[look]=true
             table.insert(styles, look)
