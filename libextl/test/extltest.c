@@ -1,5 +1,6 @@
 #include "../luaextl.c"
-#include "../readconfig.c"
+#include "../readconfig.h"
+#include "libtu/errorlog.h"
 
 static const char tostringstr[]=
     "local arg = {...}\n"
@@ -30,7 +31,8 @@ int test_tostring()
 
     if(!extl_loadstring("print('testing\\n'); return 'test'", &fn))
         return 2;
-fprintf(stderr, "Calling extl_call...\n");
+    
+    fprintf(stderr, "Calling extl_call...\n");
     if(!extl_call(tostringfn, "f", "s", fn, &retstr))
         return 3;
 
@@ -45,16 +47,78 @@ fprintf(stderr, "Calling extl_call...\n");
     return 0;
 }
 
+int test_stack_get_bool()
+{
+    ErrorLog el;
+    ExtlAny bool_any;
+    bool bool_test;
+    bool bool_push;
+
+    errorlog_begin(&el);
+
+    // true
+    bool_push=TRUE;
+    extl_stack_push(l_st, 'b', &bool_push);
+    bool_test=FALSE;
+    if(extl_stack_get(l_st, -1, 'b', FALSE, NULL, &bool_test) != TRUE)
+        return 1;
+    if (bool_test != TRUE)
+        return 2;
+
+    if(extl_stack_get(l_st, -1, 'a', FALSE, NULL, &bool_any) != TRUE)
+        return 3;
+    if (bool_any.type != 'b')
+        return 4;
+    if (bool_any.value.b != TRUE)
+        return 5;
+
+    // false
+    bool_push=FALSE;
+    extl_stack_push(l_st, 'b', &bool_push);
+    bool_test=TRUE;
+    if(extl_stack_get(l_st, -1, 'b', FALSE, NULL, &bool_test) != TRUE)
+        return 6;
+    if (bool_test != FALSE)
+        return 7;
+
+    if(extl_stack_get(l_st, -1, 'a', FALSE, NULL, &bool_any) != TRUE)
+        return 8;
+    if (bool_any.type != 'b')
+        return 9;
+    if (bool_any.value.b != FALSE)
+        return 10;
+
+    return 0;
+}
 
 int main()
 {
+    fprintf(stdout, "[TESTING] libextl ====\n");
+
     int result = 0;
+    int err = 0;
 
     extl_init();
 
-    result += test_tostring();
+    fprintf(stdout, "[TEST] test_tostring: ");
+    result = test_tostring();
+    if (result != 0) {
+        fprintf(stdout, "[ERROR]: %d\n", result);
+        err += 1;
+    } else {
+        fprintf(stdout, "[OK]\n");
+    }
 
-    fprintf(stderr, "Result: %d\n", result);
+    fprintf(stdout, "[TEST] test_stack_get_bool: ");
+    result = test_stack_get_bool();
+    if (result != 0) {
+        fprintf(stdout, "[ERROR]: %d\n", result);
+        err += 1;
+    } else {
+        fprintf(stdout, "[OK]\n");
+    }
 
-    return result;
+    extl_deinit();
+
+    return err;
 }

@@ -51,6 +51,14 @@ ioncore.set{
     --warp_factor_x=0.0,
     --warp_factor_y=0.0,
 
+    -- Float window placement method:
+    -- one of 'udlr' (up down left right), 'lrud' (left right up down), 'pointer' or 'random'.
+    --float_placement_method="udlr"
+
+    -- Float non-transient dialog type windows.
+    -- Can be useful for applications that try to place their own dialog windows.
+    --window_dialog_float=true,
+
     -- Automatically save layout on restart and exit.
     --autosave_layout=true,
 

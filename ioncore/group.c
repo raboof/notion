@@ -1015,7 +1015,7 @@ static bool mapped_filt(WStacking *st, void *unused)
 }
 
 
-static bool focusable(WGroup *ws, WStacking *st, uint min_level)
+static bool focusable(WGroup *UNUSED(ws), WStacking *st, uint min_level)
 {
     return (st->reg!=NULL
             && REGION_IS_MAPPED(st->reg)

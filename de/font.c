@@ -85,7 +85,9 @@ DEFont *de_load_font(const char *fontname)
 #endif /* HAVE_X11_XFT */
 
 #ifdef HAVE_X11_BMF
+#ifdef HAVE_X11_XFT
 bitmap_font:
+#endif
 
     if(ioncore_g.use_mb){
         LOG(DEBUG, FONT, "Loading fontset %s", fontname);
@@ -114,7 +116,7 @@ bitmap_font:
         }
         return NULL;
     }
-#endif
+#endif /* HAVE_X11_BMF */
 
     fnt=ALLOC(DEFont);
 
@@ -147,13 +149,12 @@ bool de_set_font_for_style(DEStyle *style, DEFont *font)
     style->font=font;
     font->refcount++;
 
-#ifndef HAVE_X11_XFT
+#ifdef HAVE_X11_BMF
     if(style->font->fontstruct!=NULL){
         XSetFont(ioncore_g.dpy, style->normal_gc,
                  style->font->fontstruct->fid);
     }
-
-#endif /* ! HAVE_X11_XFT */
+#endif /* HAVE_X11_BMF */
     return TRUE;
 }
 
@@ -187,12 +188,13 @@ void de_free_font(DEFont *font)
 #ifdef HAVE_X11_XFT
     if(font->font!=NULL)
         XftFontClose(ioncore_g.dpy, font->font);
-#else /* HAVE_X11_XFT */
+#endif /* HAVE_X11_XFT */
+#if HAVE_X11_BMF
     if(font->fontset!=NULL)
         XFreeFontSet(ioncore_g.dpy, font->fontset);
     if(font->fontstruct!=NULL)
         XFreeFont(ioncore_g.dpy, font->fontstruct);
-#endif /* HAVE_X11_XFT */
+#endif /* HAVE_X11_BMF */
     if(font->pattern!=NULL)
         free(font->pattern);
 
@@ -286,9 +288,7 @@ uint defont_get_text_width(DEFont *font, const char *text, uint len)
         return XTextWidth(font->fontstruct, text, len);
     }
 #endif /* HAVE_X11_BMF */
-    else{
-        return 0;
-    }
+    return 0;
 }
 
 
@@ -400,13 +400,12 @@ void debrush_do_draw_string_default(
         }
 #endif
 #ifdef HAVE_X11_BMF
-        if (brush->d->font->fontset) {
+        {
             debrush_do_draw_string_default_bmf(brush, x, y, str, len, needfill, colours);
             return;
         }
 #endif
     }
-
 }
 
 

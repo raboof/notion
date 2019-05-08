@@ -634,6 +634,7 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
                            void *valret)
 {
     double d=0;
+    bool b=FALSE;
     const char *str;
 
     if(wasdeadobject!=NULL)
@@ -667,7 +668,19 @@ static bool extl_stack_get(lua_State *st, int pos, char type,
                 *((double*)valret)=d;
         }
         return TRUE;
-
+    case LUA_TBOOLEAN:
+        // type=='b' case is handled above before the switch
+        if(type!='a')
+            return FALSE;
+        
+        if(type=='a'){
+            b=lua_toboolean(st, pos);
+            if(valret){
+                ((ExtlAny*)valret)->type='b';
+                ((ExtlAny*)valret)->value.b=b;
+            }
+        }
+        return TRUE;
     case LUA_TNIL:
     case LUA_TNONE:
         if(type=='a'){
@@ -1015,7 +1028,7 @@ bool extl_table_eq(ExtlTab t1, ExtlTab t2)
 /*}}}*/
 
 
-/*{{{ Table/get */
+/*{{{ Table/get */
 
 
 typedef struct{
@@ -1191,7 +1204,7 @@ int extl_table_get_n(ExtlTab ref)
 /*}}}*/
 
 
-/*{{{ Table/set */
+/*{{{ Table/set */
 
 
 static bool extl_table_dodo_set2(lua_State *st, TableParams2 *params)
@@ -1314,7 +1327,7 @@ bool extl_table_seti_t(ExtlTab ref, int entry, ExtlTab val)
 /*}}}*/
 
 
-/*{{{ Table/clear entry */
+/*{{{ Table/clear entry */
 
 
 static bool extl_table_dodo_clear2(lua_State *st, TableParams2 *params)
@@ -1917,7 +1930,7 @@ static int extl_l1_call_handler(lua_State *st)
 #ifdef EXTL_LOG_ERRORS
     WarnChain ch;
 #endif
-    L1Param param={{NULL, }, {NULL, }, NULL, 0, 0, 0};
+    L1Param param={{{NULL, }}, {{NULL, }}, NULL, 0, 0, 0};
     L1Param *old_param;
     int ret;
     int n=lua_gettop(st);

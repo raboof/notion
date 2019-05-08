@@ -338,7 +338,7 @@ static void statusbar_do_update_natural_size(WStatusBar *p)
     }
 
     p->natural_w=bdw.left+totw+bdw.right;
-    p->natural_h=MAXOF(stmh, fnte.max_height)+bdw.top+bdw.bottom;
+    p->natural_h=MAXOF((unsigned int)stmh, fnte.max_height)+bdw.top+bdw.bottom;
 }
 
 
@@ -419,7 +419,7 @@ static WSBElem *statusbar_unassociate_systray(WStatusBar *sb, WRegion *reg)
 
 
 
-static void do_calc_systray_w(WStatusBar *p, WSBElem *el)
+static void do_calc_systray_w(WStatusBar *UNUSED(p), WSBElem *el)
 {
     WRegion *reg;
     PtrListIterTmp tmp;
@@ -1002,7 +1002,7 @@ ExtlTab mod_statusbar_statusbars()
 
 
 WStatusBar *mod_statusbar_find_suitable(WClientWin *cwin,
-                                        const WManageParams *param)
+                                        const WManageParams *UNUSED(param))
 {
     WStatusBar *sb;
 

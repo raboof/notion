@@ -57,7 +57,7 @@ static const char tostringstr[]=
 static void writes(int fd, const char *s)
 {
     if(s!=NULL)
-        write(fd, s, strlen(s));
+        ignore_value(write(fd, s, strlen(s)));
 }
 
 

@@ -1454,7 +1454,7 @@ ExtlTab tiling_get_configuration(WTiling *ws)
 /*{{{ Load */
 
 
-WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab tab)
+WSplit *load_splitst(WTiling *ws, const WRectangle *geom, ExtlTab UNUSED(tab))
 {
     WSplitST *st;
 

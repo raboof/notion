@@ -72,7 +72,7 @@ static bool unblock(int fd)
 static void duppipe(int fd, int idx, int *fds)
 {
     close(fd);
-    dup(fds[idx]);
+    ignore_value(dup(fds[idx]));
     close(fds[0]);
     close(fds[1]);
 }

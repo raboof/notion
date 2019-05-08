@@ -31,6 +31,7 @@ DECLSTRUCT(WRectangle){
 extern int rectangle_compare(const WRectangle *g, const WRectangle *h);
 extern bool rectangle_contains(const WRectangle *g, int x, int y);
 extern void rectangle_constrain(WRectangle *g, const WRectangle *bounds);
+extern void rectangle_clamp_or_center(WRectangle *g, const WRectangle *bounds);
 
 extern void rectange_debugprint(const WRectangle *g, const char *n);
 

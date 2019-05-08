@@ -44,6 +44,8 @@ void ioncore_groupws_set(ExtlTab tab)
             ioncore_placement_method=PLACEMENT_UDLR;
         else if(strcmp(method, "lrud")==0)
             ioncore_placement_method=PLACEMENT_LRUD;
+        else if(strcmp(method, "pointer")==0)
+            ioncore_placement_method=PLACEMENT_POINTER;
         else if(strcmp(method, "random")==0)
             ioncore_placement_method=PLACEMENT_RANDOM;
         else
@@ -55,12 +57,20 @@ void ioncore_groupws_set(ExtlTab tab)
 
 void ioncore_groupws_get(ExtlTab t)
 {
-    extl_table_sets_s(t, "float_placement_method",
-                      (ioncore_placement_method==PLACEMENT_UDLR
-                       ? "udlr"
-                       : (ioncore_placement_method==PLACEMENT_LRUD
-                          ? "lrud"
-                          : "random")));
+    const char *method;
+    if(ioncore_placement_method==PLACEMENT_UDLR){
+        method="udlr";
+    }else if(ioncore_placement_method==PLACEMENT_LRUD){
+        method="lrud";
+    }else if(ioncore_placement_method==PLACEMENT_POINTER){
+        method="pointer";
+    }else if(ioncore_placement_method==PLACEMENT_RANDOM){
+        method="random";
+    }else{
+        warn(TR("Unknown placement constant %d."), ioncore_placement_method);
+        method="random";
+    }
+    extl_table_sets_s(t, "float_placement_method", method);
 }
 
 
@@ -223,9 +233,17 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
     if(b!=NULL && !HAS_DYN(b, region_prepare_manage))
         b=NULL;
 
-    use_bottom=(act_b
-                ? !extl_table_is_bool_set(cwin->proptab, "float")
-                : act_b);
+    if(act_b){
+        bool do_float=FALSE;
+        if(!extl_table_gets_b(cwin->proptab, "float", &do_float)){
+            if(cwin->region.flags&REGION_PLEASE_FLOAT){
+                do_float=TRUE;
+            }
+        }
+        use_bottom=!do_float;
+    }else{
+        use_bottom=FALSE;
+    }
 
     if(b!=NULL && use_bottom)
         ph=region_prepare_manage(b, cwin, param, bpriority);

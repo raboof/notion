@@ -86,7 +86,7 @@ static long tvdiffmsec(struct timeval *tv1, struct timeval *tv2)
     return (int)(t1-t2);
 }
 
-void moveresmode_accel(WMoveresMode *mode, int *wu, int *hu, int accel_mode)
+void moveresmode_accel(WMoveresMode *UNUSED(mode), int *wu, int *hu, int accel_mode)
 {
     struct timeval tv;
     long adiff, udiff;

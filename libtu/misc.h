@@ -30,6 +30,14 @@
 #  define UNUSED(x) UNUSED_ ## x
 #endif
 
+/* https://stackoverflow.com/a/39618857 */
+#if 3 < __GNUC__ + (4 <= __GNUC_MINOR__)
+# define ignore_value(x) \
+    (__extension__ ({ __typeof__ (x) __x = (x); (void) __x; }))
+#else
+# define ignore_value(x) ((void) (x))
+#endif
+
 extern void* malloczero(size_t size);
 extern void* remalloczero(void *ptr, size_t oldsize, size_t newsize);
 

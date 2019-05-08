@@ -9,13 +9,17 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR) $(shell pkg-config --cflags-only-I xrandr)
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(shell $(PKG_CONFIG) --cflags-only-other xrandr)
+XRANDR_CFLAGS_ONLYI     := $(shell $(PKG_CONFIG) --cflags-only-I xrandr)
+XRANDR_CFLAGS_ONLYOTHER := $(shell $(PKG_CONFIG) --cflags-only-other xrandr)
+XRANDR_LDLIBS           := $(shell $(PKG_CONFIG) --libs xrandr)
+
+INCLUDES += $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(X11_INCLUDES) -I$(TOPDIR) $(XRANDR_CFLAGS_ONLYI)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(XRANDR_CFLAGS_ONLYOTHER)
 
 SOURCES=mod_xrandr.c
 
 MAKE_EXPORTS=mod_xrandr
-LIBS = $(X11_LIBS) $(shell $(PKG_CONFIG) --libs xrandr)
+LIBS = $(X11_LIBS) $(XRANDR_LDLIBS)
 MODULE=mod_xrandr
 MODULE_STUB=mod_xrandr.lua
 ETC=cfg_xrandr.lua

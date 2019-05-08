@@ -70,6 +70,8 @@ extern void ioncore_update_modmap();
 extern int ioncore_unmod(int state, int keycode);
 extern bool ioncore_ismod(int keycode);
 extern int ioncore_modstate();
+extern int ioncore_ksb(unsigned long serial);
+extern uint ioncore_modifiers(unsigned long serial);
 
 extern WBindmap *create_bindmap();
 

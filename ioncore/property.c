@@ -493,3 +493,24 @@ void ioncore_x_set_utf8_property(int win, int atom, ExtlTab tab)
 
 /*}}}*/
 
+/*{{{ Atom */
+
+
+bool xwindow_get_atom_property(Window win, Atom a, Atom *vret)
+{
+    Atom *p=NULL;
+    ulong n;
+
+    n=xwindow_get_property(win, a, XA_ATOM, 1L, FALSE, (uchar**)&p);
+
+    if(n>0 && p!=NULL){
+        *vret=*p;
+        XFree((void*)p);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+
+/*}}}*/

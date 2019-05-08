@@ -283,4 +283,3 @@ double statusd_last_modified(const char *fname)
 
     return (double)(st.st_mtime>st.st_ctime ? st.st_mtime : st.st_ctime);
 }
-

@@ -33,6 +33,8 @@ static Atom atom_net_virtual_roots=0;
 static Atom atom_net_active_window=0;
 static Atom atom_net_wm_allowed_actions=0;
 static Atom atom_net_wm_moveresize=0;
+static Atom atom_net_wm_window_type=0;
+static Atom atom_net_wm_window_type_dialog=0;
 
 #define N_NETWM 9
 
@@ -60,6 +62,8 @@ void netwm_init()
     atom_net_active_window=XInternAtom(ioncore_g.dpy, "_NET_ACTIVE_WINDOW", False);
     atom_net_wm_allowed_actions=XInternAtom(ioncore_g.dpy, "_NET_WM_ALLOWED_ACTIONS", False);
     atom_net_wm_moveresize=XInternAtom(ioncore_g.dpy, "_NET_WM_MOVERESIZE", False);
+    atom_net_wm_window_type=XInternAtom(ioncore_g.dpy, "_NET_WM_WINDOW_TYPE", False);
+    atom_net_wm_window_type_dialog=XInternAtom(ioncore_g.dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
 }
 
 
@@ -264,9 +268,26 @@ char **netwm_get_name(WClientWin *cwin)
     return xwindow_get_text_property(cwin->win, atom_net_wm_name, NULL);
 }
 
+/*}}}*/
+
+
+/*{{{ _NET_WM_WINDOW_TYPE */
+
+Atom netwm_window_type(WClientWin *cwin)
+{
+    Atom p;
+    if(xwindow_get_atom_property(cwin->win, atom_net_wm_window_type, &p)){
+        return p;
+    }
+    return None;
+}
 
 /*}}}*/
 
+Atom netwm_window_type_get_atom_dialog(void)
+{
+    return atom_net_wm_window_type_dialog;
+}
 
 /*{{{ netwm_handle_client_message */
 

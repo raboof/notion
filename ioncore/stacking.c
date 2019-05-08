@@ -369,7 +369,7 @@ static WStacking *unweave_subtree(WStacking **stacking, WStacking *regst,
 
 
 void stacking_restack(WStacking **stacking, WStacking *st, Window fb_win,
-                      WStackingFilter *filt, void *filt_data, bool lower)
+                      WStackingFilter *UNUSED(filt), void *UNUSED(filt_data), bool lower)
 {
     WStacking *tmp=unweave_subtree(stacking, st, lower);
 

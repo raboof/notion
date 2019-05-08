@@ -352,6 +352,7 @@ static bool init_global()
     ioncore_g.switchto_new=TRUE;
     ioncore_g.no_mousefocus=FALSE;
     ioncore_g.unsqueeze_enabled=TRUE;
+    ioncore_g.window_dialog_float=FALSE;
     ioncore_g.autoraise=TRUE;
     ioncore_g.autosave_layout=TRUE;
     ioncore_g.window_stacking_request=IONCORE_WINDOWSTACKINGREQUEST_IGNORE;

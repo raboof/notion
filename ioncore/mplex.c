@@ -1291,7 +1291,7 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 }
 
 
-static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
+static void get_params(WMPlex *UNUSED(mplex), ExtlTab tab, int mask,
                        WMPlexAttachParams *par)
 {
     int layer=1;
@@ -1308,7 +1308,7 @@ static void get_params(WMPlex *mplex, ExtlTab tab, int mask,
         }
 
         if(extl_table_is_bool_set(tab, "modal"))
-            par->level=MAXOF(par->level, STACKING_LEVEL_MODAL1);
+            par->level=MAXOF(par->level, (unsigned int)STACKING_LEVEL_MODAL1);
     }
 
     if(extl_table_is_bool_set(tab, "unnumbered"))

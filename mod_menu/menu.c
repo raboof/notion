@@ -1190,7 +1190,7 @@ static void scroll_down(WTimer *timer, WMenu *menu)
 }
 
 
-static void end_scroll(WMenu *menu)
+static void end_scroll(WMenu *UNUSED(menu))
 {
     reset_scroll_timer();
 }

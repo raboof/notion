@@ -7,6 +7,7 @@
 --
 
 local ioncore=_G.ioncore
+local loadstring = loadstring or load
 
 local warn=ioncore.warn
 
