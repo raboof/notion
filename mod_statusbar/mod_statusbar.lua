@@ -266,7 +266,9 @@ function mod_statusbar.launch_statusd(cfg)
 
     local cfg=mod_statusbar.cfg_statusd(cfg or {})
     local params=""
-    table.foreach(mods, function(k) params=params.." -m "..k end)
+    for m in pairs(mods) do
+        params=params.." -m "..m
+    end
     local cmd=statusd.." -q -c "..cfg..params
 
     local rcv=coroutine.wrap(mod_statusbar.rcv_statusd)
