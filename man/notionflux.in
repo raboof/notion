@@ -73,7 +73,7 @@ $ echo "print('foo'); return 'bar'" | notionflux
 .PP
 
 .SH SEE ALSO
-The Notion home page, \fIhttp://notion.sf.net/\fP
+The Notion home page, \fIhttps://notionwm.net/\fP
 .PP
 The document "Configuring and extending Notion with Lua" found on the
 Notion home page.

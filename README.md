@@ -3,21 +3,26 @@ Notion
 
 [![Build Status](https://travis-ci.org/raboof/notion.svg?branch=master)](https://travis-ci.org/raboof/notion)
 
-Copyright (c) the Notion team 2010-2017.
+Copyright (c) the Notion team 2010-2019.
 Copyright (c) Tuomo Valkonen 1999-2009.
 
-http://notion.sf.net
-
+https://notionwm.net
 
 Building and installing
 -----------------------
 
+<<<<<<< HEAD
 See also:
 
   https://sourceforge.net/apps/mediawiki/notion/index.php?title=Development
 
+=======
+>>>>>>> master
 1. Get the source code.
-    git clone git://notion.git.sourceforge.net/gitroot/notion/notion
+
+```
+git clone https://github.com/raboof/notion
+```
 
 2. In addition to the standard C library headers and the GNU toolchain, you
    will need the following tools and libraries for building Notion.
@@ -124,9 +129,13 @@ Questions, comments, problems?
 ------------------------------
 
 If the available documentation does not answer your question, please
-post it to the mailing list. Details can be found on the Notion web page
-listed at the top of this file.
+join our IRC channel, [#notion on freenode](https://webchat.freenode.net/?channels=#notion).
 
+Contributing
+------------
+
+Contributions to Notion are very welcome! Please join us on [GitHub](https://github.com/raboof/notion/).
+The [Notes for the module and patch writer](http://notion.sourceforge.net/notionnotes/) might be helpful.
 
 Credits
 -------
