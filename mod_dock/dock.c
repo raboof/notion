@@ -1186,7 +1186,7 @@ WDock *mod_dock_create(ExtlTab tab)
     /* Create the dock */
 
     if(floating){
-        WMPlexAttachParams par;
+        WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
 
         par.flags=(MPLEX_ATTACH_UNNUMBERED
                    |MPLEX_ATTACH_SIZEPOLICY

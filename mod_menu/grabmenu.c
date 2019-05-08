@@ -60,7 +60,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                             ExtlTab param)
 {
     WMenuCreateParams fnp;
-    WMPlexAttachParams par;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
     WMenu *menu;
     uint state, kcb;
     bool sub;

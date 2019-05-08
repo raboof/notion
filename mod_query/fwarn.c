@@ -48,7 +48,7 @@ WMessage *mod_query_do_warn(WMPlex *mplex, const char *p)
 EXTL_EXPORT
 WMessage *mod_query_do_message(WMPlex *mplex, const char *p)
 {
-    WMPlexAttachParams par;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
 
     if(p==NULL)
         return NULL;

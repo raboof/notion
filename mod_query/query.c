@@ -33,7 +33,7 @@ WEdln *mod_query_do_query(WMPlex *mplex, const char *prompt, const char *dflt,
                           ExtlFn cycle, ExtlFn bcycle)
 {
     WEdlnCreateParams fnp;
-    WMPlexAttachParams par;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
     WEdln *wedln;
 
     fnp.prompt=prompt;

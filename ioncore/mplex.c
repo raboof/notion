@@ -1279,7 +1279,7 @@ WRegion *mplex_do_attach_new(WMPlex *mplex, WMPlexAttachParams *param,
 
 WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 {
-    WMPlexAttachParams param;
+    WMPlexAttachParams param=MPLEXATTACHPARAMS_INIT;
     WRegionAttachData data;
 
     param.flags=flags&~MPLEX_ATTACH_SET_FLAGS;
@@ -1437,7 +1437,7 @@ WPHolder *mplex_prepare_manage(WMPlex *mplex, const WClientWin *cwin,
                                const WManageParams *param, int priority)
 {
     int cpriority=MANAGE_PRIORITY_SUB(priority, MANAGE_PRIORITY_NORMAL);
-    WMPlexAttachParams ap;
+    WMPlexAttachParams ap=MPLEXATTACHPARAMS_INIT;
     WPHolder *ph=NULL;
     WMPlexPHolder *mph;
 

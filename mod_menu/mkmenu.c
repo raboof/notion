@@ -32,7 +32,7 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                         ExtlTab param)
 {
     WMenuCreateParams fnp;
-    WMPlexAttachParams par;
+    WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
 
     fnp.handler=handler;
     fnp.tab=tab;
