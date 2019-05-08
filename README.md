@@ -11,13 +11,6 @@ https://notionwm.net
 Building and installing
 -----------------------
 
-<<<<<<< HEAD
-See also:
-
-  https://sourceforge.net/apps/mediawiki/notion/index.php?title=Development
-
-=======
->>>>>>> master
 1. Get the source code.
 
 ```
