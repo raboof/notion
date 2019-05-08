@@ -44,6 +44,6 @@ _install:
 	$(INSTALL) -m $(DATA_MODE) notion.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m $(DATA_MODE) notionflux.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALLDIR) $(DESTDIR)$(SHAREDIR)
-	for i in $(WELCOME_TARGETS); do \
+	for i in $(TARGETS); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(SHAREDIR) ; \
 	done
