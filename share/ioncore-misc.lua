@@ -49,5 +49,6 @@ end
 --DOC
 -- gettext+string.format
 function ioncore.TR(s, ...)
+    local args = {...}
     return string.format(ioncore.gettext(s), unpack(arg))
 end
