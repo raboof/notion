@@ -163,7 +163,7 @@ static char *get_socket()
     a=XInternAtom(dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", True);
 
     if(a==None)
-        die_e("Missing atom. Notion not running?");
+        die_e("Missing _NOTION_MOD_NOTIONFLUX_SOCKET atom. Perhaps Notion is not running, or mod_notionflux is not loaded");
 
     s=xwindow_get_string_property(DefaultRootWindow(dpy), a, NULL);
 
