@@ -325,6 +325,19 @@ end
 local function mk_completion_test(str, sub_ok, casei_ok)
     local settings=mod_query.get()
 
+    if not str then
+        return function(s) return true end
+    end
+
+    local function mk(str, sub_ok)
+        if sub_ok then
+            return function(s) return string.find(s, str, 1, true) end
+        else
+            local len=string.len(str)
+            return function(s) return string.sub(s, 1, len)==str end
+        end
+    end
+
     local casei=(casei_ok and mod_query.get().caseicompl)
 
     if not casei then
