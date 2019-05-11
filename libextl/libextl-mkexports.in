@@ -114,7 +114,7 @@ function sort_classes(cls)
         end
     end
 
-    for cls in pairs(classes) do
+    for cls in sorted_keys(classes) do
         insert(cls)
     end
 
@@ -472,7 +472,7 @@ end
 function write_class_fns(h, cls, data)
     fprintf(h, "\n\nstatic ExtlExportedFnSpec %s_exports[] = {\n", cls)
 
-    for fn, info in pairs(data.fns) do
+    for fn, info in sorted_pairs(data.fns) do
         local ods, ids="NULL", "NULL"
         if info.odesc~="v" then
             ods='"' .. info.odesc .. '"'
@@ -520,7 +520,7 @@ function write_exports(h)
 
     -- Write class infos and check that the class is implemented in the
     -- module.
-    for c, data in pairs(classes) do
+    for c, data in sorted_pairs(classes) do
         if string.lower(c)==c then
             data.module=true
         else
@@ -533,16 +533,16 @@ function write_exports(h)
     end
 
     -- Write L2 call handlers
-    for name, info in pairs(chnds) do
+    for name, info in sorted_pairs(chnds) do
         writechnd(h, name, info)
     end
 
     fprintf(h, "\n")
 
-    for cls, data in pairs(classes) do
+    for cls, data in sorted_pairs(classes) do
         if data.fns then
             -- Write function declarations
-            for fn in pairs(data.fns) do
+            for fn in sorted_keys(data.fns) do
                 fprintf(h, "extern void %s();\n", fn)
             end
             -- Write function table
@@ -586,6 +586,29 @@ function write_exports(h)
     fprintf(h, "}\n\n")
 end
 
+function sorted_keys(t)
+    local keys={}
+    for key in pairs(t) do keys[#keys+1] = key end
+    table.sort(keys)
+
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i]
+        end
+    end
+end
+
+function sorted_pairs(t)
+    local nextKey = sorted_keys(t)
+    return function()
+        local key = nextKey()
+        if key then
+            return key, t[key]
+        end
+    end
+end
 
 function write_header(h)
     local p=pfx(module)
