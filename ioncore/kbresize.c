@@ -389,7 +389,8 @@ WMoveresMode *region_begin_kbresize(WRegion *reg)
     accel_reset();
 
     ioncore_grab_establish(reg, resize_handler,
-                           (GrabKilledHandler*)cancel_moveres, 0);
+                           (GrabKilledHandler*)cancel_moveres,
+                           0, GRAB_DEFAULT_FLAGS);
 
     return mode;
 }

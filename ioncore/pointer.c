@@ -274,7 +274,8 @@ bool ioncore_do_handle_buttonpress(XButtonEvent *ev)
                                              button, p_area);
     }
 
-    ioncore_grab_establish(reg, handle_key, pointer_grab_killed, 0);
+    ioncore_grab_establish(reg, handle_key, pointer_grab_killed,
+                           0, GRAB_DEFAULT_FLAGS);
     p_grabstate=ST_HELD;
 
     call_button(pressbind, ev);

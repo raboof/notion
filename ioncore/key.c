@@ -87,7 +87,9 @@ static bool quote_next_handler(WRegion *reg, XEvent *xev)
 EXTL_EXPORT_MEMBER
 void clientwin_quote_next(WClientWin *cwin)
 {
-    ioncore_grab_establish((WRegion*)cwin, quote_next_handler, NULL, 0);
+    ioncore_grab_establish((WRegion*)cwin,
+                           quote_next_handler, NULL,
+                           0, GRAB_DEFAULT_FLAGS);
     ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
 
@@ -111,8 +113,8 @@ static void waitrelease(WRegion *reg)
      * be removed before the modifiers are released.
      */
     ioncore_grab_establish((WRegion*)region_rootwin_of(reg),
-                           waitrelease_handler,
-                           NULL, 0);
+                           waitrelease_handler, NULL,
+                           0, GRAB_DEFAULT_FLAGS);
     ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
 
@@ -269,7 +271,8 @@ static bool submapgrab_handler(WRegion* reg, XEvent *xev)
 
 static void submapgrab(WRegion *reg)
 {
-    ioncore_grab_establish(reg, submapgrab_handler, clear_subs, 0);
+    ioncore_grab_establish(reg, submapgrab_handler, clear_subs,
+                           0, GRAB_DEFAULT_FLAGS);
     ioncore_change_grab_cursor(IONCORE_CURSOR_WAITKEY);
 }
 
