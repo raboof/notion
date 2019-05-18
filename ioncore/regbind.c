@@ -208,9 +208,22 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
     *binding_owner_ret=reg;
 
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
+if(ev->keycode==45)
+  fprintf(stderr, "binding info\n");
         bindmap=rbind->bindmap;
+if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WClientWin))){
+  fprintf(stderr, "skipping rbind with clientwin owner\n");
+  continue;
+}
+if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WGroupCW))){
+  fprintf(stderr, "skipping rbind with wgroupcw owner\n");
+  continue;
+}
+fprintf(stderr, "rbind with other owner\n");
 
         for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
+if(ev->keycode==45)
+  fprintf(stderr, "entered submap\n");
             binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, s->state, s->key);
 
             if(binding==NULL){
@@ -235,8 +248,16 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
             break;
     }
 
-    if(binding!=NULL && rbind->owner!=NULL)
+    if(binding!=NULL && rbind->owner!=NULL){
+if(ev->keycode==45)
+  fprintf(stderr, "binding with owner\n");
+if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WFrame)))
+  fprintf(stderr, "binding with frame owner\n");
+if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WClientWin)))
+  fprintf(stderr, "binding with clientwin owner\n");
+
         *binding_owner_ret=rbind->owner;
+    }
 
     return binding;
 }

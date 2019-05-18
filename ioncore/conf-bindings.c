@@ -206,6 +206,10 @@ static bool do_submap(WBindmap *bindmap, const char *str,
 
     kcb=XKeysymToKeycode(ioncore_g.dpy, ksb);
     bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
+if (kcb==45)
+  fprintf(stderr, "bnd %d\n", bnd);
+if (kcb==45 && bnd!=NULL)
+  fprintf(stderr, "func %d\n", bnd->func);
 
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
         return bindmap_defbindings(bnd->submap, subtab, TRUE);
@@ -216,8 +220,9 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     binding.ksb=ksb;
     binding.kcb=kcb;
     binding.area=0;
-    binding.func=extl_fn_none();
+    binding.func=bnd==NULL?extl_fn_none():bnd->func;
     binding.submap=create_bindmap();
+  fprintf(stderr, "creating, func %d, submap %d\n", binding.func, binding.submap);
 
     if(binding.submap==NULL)
         return FALSE;
@@ -280,6 +285,8 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         goto fail;
     }
 
+if(strcmp(ksb_str, "Mod4+K")==0)
+  fprintf(stderr, "ksb_str %s\n", ksb_str);
     if(extl_table_gets_t(tab, "submap", &subtab)){
         ret=do_submap(bindmap, ksb_str, subtab, action, mod, ksb);
         extl_unref_table(subtab);
@@ -296,15 +303,12 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         }
 
         if(!extl_table_gets_f(tab, "func", &func)){
-            /*warn("Function for binding %s not set/nil/undefined.", ksb_str);
-            goto fail;*/
             func=extl_fn_none();
         }
         ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr);
         if(!ret)
             extl_unref_fn(func);
     }
-
 fail:
     if(action_str!=NULL)
         free(action_str);
@@ -420,9 +424,8 @@ static bool get_kpress(WBindmap *UNUSED(bindmap), WBinding *b, ExtlTab t)
     if(b->submap!=NULL){
         ExtlTab stab=bindmap_getbindings(b->submap);
         extl_table_sets_t(t, "submap", stab);
-    }else{
-        extl_table_sets_f(t, "func", b->func);
     }
+    extl_table_sets_f(t, "func", b->func);
 
     return TRUE;
 }

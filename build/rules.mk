@@ -89,7 +89,7 @@ ifdef MODULE
 
 ifneq ($(PRELOAD_MODULES),1)
 
-CFLAGS += -fPIC -DPIC
+CFLAGS += -g -fPIC -DPIC
 LD_SHAREDFLAGS=-shared
 
 # notion might not link to Xext, so modules will have to link to it themselves

@@ -121,6 +121,10 @@ function ioncore.submap(kcb_, list)
     return {action = "kpress", kcb = kcb_, submap = list}
 end
 
+--function ioncore.submap_wait(cmd, guard)
+--    return putcmd(cmd, guard, {action = "kpress", kcb = keyspec})
+--end
+
 --DOC
 -- Creates a binding description table for the action of pressing a key given
 -- by \var{keyspec} (with possible modifiers) to the function \var{func}.
