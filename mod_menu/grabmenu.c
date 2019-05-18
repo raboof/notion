@@ -107,7 +107,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     menu->gm_state=state;
 
     ioncore_grab_establish((WRegion*)menu, grabmenu_handler,
-                           grabkilled_handler, 0);
+                           grabkilled_handler, 0, GRAB_DEFAULT_FLAGS);
 
     return menu;
 }

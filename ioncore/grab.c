@@ -102,10 +102,9 @@ static void do_grab_install(GrabStatus *grab)
     current_grab=grab;
 }
 
-
 void ioncore_grab_establish(WRegion *reg, GrabHandler *func,
                             GrabKilledHandler *kh,
-                            long eventmask)
+                            long eventmask, int flags)
 {
     assert((~eventmask)&(KeyPressMask|KeyReleaseMask));
 
@@ -115,6 +114,7 @@ void ioncore_grab_establish(WRegion *reg, GrabHandler *func,
         current_grab->handler=func;
         current_grab->killedhandler=kh;
         current_grab->eventmask=eventmask;
+        current_grab->flags=flags;
         current_grab->remove=FALSE;
         current_grab->cursor=IONCORE_CURSOR_DEFAULT;
         current_grab->confine_to=None; /*region_root_of(reg);*/
@@ -201,6 +201,7 @@ bool ioncore_handle_grabs(XEvent *ev)
 {
     GrabStatus *gr;
     int gr_sqid;
+    int actions;
 
     while(current_grab && current_grab->remove)
         do_grab_remove();
@@ -225,10 +226,12 @@ bool ioncore_handle_grabs(XEvent *ev)
      */
     gr=current_grab;
     gr_sqid=gr->sqid;
-    if(gr->handler(gr->holder, ev) && gr->sqid==gr_sqid)
+
+    actions = gr->handler(gr->holder, ev);
+    if(actions&GRAB_COMPLETE && gr->sqid==gr_sqid)
         mark_for_removal(gr, FALSE);
 
-    return TRUE;
+    return !(actions&GRAB_FORWARD);
 }
 
 
@@ -243,6 +246,10 @@ bool ioncore_grab_held()
     return idx_grab>0;
 }
 
+bool ioncore_pointer_grab_held()
+{
+    return current_grab!=NULL && current_grab->flags&GRAB_POINTER;
+}
 
 void ioncore_change_grab_cursor(int cursor)
 {

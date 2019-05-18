@@ -464,13 +464,13 @@ void ioncore_handle_buttonpress(XEvent *ev)
     XEvent tmp;
     bool finished=FALSE;
 
-    if(ioncore_grab_held())
+    if(ioncore_pointer_grab_held())
         return;
 
     if(!ioncore_do_handle_buttonpress(&(ev->xbutton)))
         return;
 
-    while(!finished && ioncore_grab_held()){
+    while(!finished && ioncore_pointer_grab_held()){
         XFlush(ioncore_g.dpy);
         ioncore_get_event(ev, IONCORE_EVENTMASK_PTRLOOP);
 

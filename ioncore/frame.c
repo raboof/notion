@@ -778,16 +778,30 @@ bool frame_set_numbers(WFrame *frame, int sp)
     return frame->flags&FRAME_SHOW_NUMBERS;
 }
 
+static int numbers_grab_handler(WRegion *reg, XEvent *xev)
+{
+    frame_set_numbers((WFrame*)reg, SETPARAM_UNSET);
+    return GRAB_COMPLETE|GRAB_FORWARD;
+}
 
 /*EXTL_DOC
  * Control whether tabs show numbers (set/unset/toggle).
- * Resulting state is returned, which may not be what was
+ * When showing numbers 'during_grab', the numbers are shown
+ * until the next keyboard event comes in.
+ * The resulting state is returned, which may not be what was
  * requested.
  */
 EXTL_EXPORT_AS(WFrame, set_numbers)
 bool frame_set_numbers_extl(WFrame *frame, const char *how)
 {
-    return frame_set_numbers(frame, libtu_string_to_setparam(how));
+    if(how!=NULL && strcmp(how, "during_grab")==0){
+        bool new_state = frame_set_numbers(frame, SETPARAM_SET);
+        ioncore_grab_establish(frame, numbers_grab_handler, NULL,
+                               0, GRAB_DEFAULT_FLAGS&~GRAB_POINTER);
+        return new_state;
+    }
+    else
+        return frame_set_numbers(frame, libtu_string_to_setparam(how));
 }
 
 
@@ -798,7 +812,6 @@ bool frame_is_numbers(WFrame *frame)
 {
     return frame->flags&FRAME_SHOW_NUMBERS;
 }
-
 
 /* EXTL_DOC
  * Is the attribute \var{attr} set?

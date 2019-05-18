@@ -111,6 +111,8 @@ extern bool frame_is_shaded(WFrame *frame);
 extern bool frame_set_numbers(WFrame *frame, int sp);
 extern bool frame_is_numbers(WFrame *frame);
 
+extern void frame_hint(WFrame *frame);
+
 extern int frame_default_index(WFrame *frame);
 
 /* Misc */

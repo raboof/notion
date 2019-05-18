@@ -208,7 +208,8 @@ WMgmtMode *mod_mgmtmode_begin(WRegion *reg)
 
     ioncore_grab_establish((WRegion*)region_rootwin_of(reg),
                            mgmt_handler,
-                           (GrabKilledHandler*)cancel_mgmt, 0);
+                           (GrabKilledHandler*)cancel_mgmt, 0,
+                           GRAB_DEFAULT_FLAGS);
 
     mgmtmode_draw(mgmt_mode);
 
