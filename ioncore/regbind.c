@@ -196,8 +196,8 @@ void region_remove_bindings(WRegion *reg)
 }
 
 
-WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
-                                   const WSubmapState *sc,
+WBinding *region_lookup_keyaction(WRegion *reg, int action,
+                                   const XKeyEvent *ev, const WSubmapState *sc,
                                    WRegion **binding_owner_ret)
 {
     WRegBindingInfo *rbind=NULL;
@@ -208,23 +208,12 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
     *binding_owner_ret=reg;
 
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
-if(ev->keycode==45)
-  fprintf(stderr, "binding info\n");
         bindmap=rbind->bindmap;
-if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WClientWin))){
-  fprintf(stderr, "skipping rbind with clientwin owner\n");
-  continue;
-}
-if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WGroupCW))){
-  fprintf(stderr, "skipping rbind with wgroupcw owner\n");
-  continue;
-}
-fprintf(stderr, "rbind with other owner\n");
 
         for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
-if(ev->keycode==45)
+if(ev->keycode==45||ev->keycode==23)
   fprintf(stderr, "entered submap\n");
-            binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, s->state, s->key);
+            binding=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, s->state, s->key);
 
             if(binding==NULL){
                 bindmap=NULL;
@@ -235,6 +224,8 @@ if(ev->keycode==45)
         }
 
         if(bindmap==NULL){
+if(ev->keycode==45||ev->keycode==23)
+  fprintf(stderr, "no bindmap here at all\n");
             /* There may be no next iteration so we must reset binding here
              * because we have not found a proper binding.
              */
@@ -242,7 +233,7 @@ if(ev->keycode==45)
             continue;
         }
 
-        binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, ev->state, ev->keycode);
+        binding=bindmap_lookup_binding(bindmap, action, ev->state, ev->keycode);
 
         if(binding!=NULL)
             break;
@@ -262,6 +253,21 @@ if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WClientWin)))
     return binding;
 }
 
+WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
+                                   const WSubmapState *sc,
+                                   WRegion **binding_owner_ret)
+{
+    return region_lookup_keyaction(reg, BINDING_KEYPRESS, ev, sc,
+                                   binding_owner_ret);
+}
+
+WBinding *region_lookup_submap(WRegion *reg, const XKeyEvent *ev,
+                                   const WSubmapState *sc,
+                                   WRegion **binding_owner_ret)
+{
+    return region_lookup_keyaction(reg, BINDING_SUBMAP, ev, sc,
+                                   binding_owner_ret);
+}
 
 WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
                                 uint kcb, int area)

@@ -196,39 +196,36 @@ static bool do_action(WBindmap *bindmap, const char *str,
 
 
 static bool do_submap(WBindmap *bindmap, const char *str,
-                      ExtlTab subtab, uint action, uint mod, uint ksb)
+                      ExtlTab subtab, uint mod, uint ksb)
 {
     WBinding binding, *bnd;
     uint kcb;
 
-    if(action!=BINDING_KEYPRESS)
-        return FALSE;
-
     kcb=XKeysymToKeycode(ioncore_g.dpy, ksb);
-    bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
-if (kcb==45)
-  fprintf(stderr, "bnd %d\n", bnd);
-if (kcb==45 && bnd!=NULL)
-  fprintf(stderr, "func %d\n", bnd->func);
+  fprintf(stderr, "lookup_binding\n");
+    bnd=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, mod, kcb);
+  fprintf(stderr, "lookedup_binding\n");
 
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
         return bindmap_defbindings(bnd->submap, subtab, TRUE);
 
     binding.wait=FALSE;
-    binding.act=BINDING_KEYPRESS;
+    binding.act=BINDING_SUBMAP;
     binding.state=mod;
     binding.ksb=ksb;
     binding.kcb=kcb;
     binding.area=0;
-    binding.func=bnd==NULL?extl_fn_none():bnd->func;
+    binding.func=extl_fn_none();
     binding.submap=create_bindmap();
-  fprintf(stderr, "creating, func %d, submap %d\n", binding.func, binding.submap);
 
     if(binding.submap==NULL)
         return FALSE;
 
-    if(bindmap_add_binding(bindmap, &binding))
+  fprintf(stderr, "adding binding\n");
+    if(bindmap_add_binding(bindmap, &binding)){
+  fprintf(stderr, "added binding, bindmap_defbindings\n");
         return bindmap_defbindings(binding.submap, subtab, TRUE);
+    }
 
     binding_deinit(&binding);
 
@@ -244,6 +241,7 @@ static StringIntMap action_map[]={
     {"mclick", BINDING_BUTTONCLICK},
     {"mdblclick", BINDING_BUTTONDBLCLICK},
     {"mdrag", BINDING_BUTTONMOTION},
+    {"submap", BINDING_SUBMAP},
     {NULL, 0}
 };
 
@@ -255,7 +253,6 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
     int action=0;
     uint ksb=0, mod=0;
-    ExtlTab subtab;
     ExtlFn func;
     bool wr=FALSE;
     int area=0;
@@ -270,6 +267,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         wr=TRUE;
     }else{
         action=stringintmap_value(action_map, action_str, -1);
+fprintf(stderr, "action type %s\n", action_str);
         if(action<0){
             warn(TR("Unknown binding type \"%s\"."), action_str);
             goto fail;
@@ -280,15 +278,20 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         goto fail;
 
     if(!ioncore_parse_keybut(ksb_str, &mod, &ksb,
-                             (action!=BINDING_KEYPRESS && action!=-1),
+                             (action!=BINDING_KEYPRESS && action!=BINDING_SUBMAP && action!=-1),
                              init_any)){
         goto fail;
     }
 
 if(strcmp(ksb_str, "Mod4+K")==0)
   fprintf(stderr, "ksb_str %s\n", ksb_str);
-    if(extl_table_gets_t(tab, "submap", &subtab)){
-        ret=do_submap(bindmap, ksb_str, subtab, action, mod, ksb);
+    if(action==BINDING_SUBMAP){
+        ExtlTab subtab;
+        extl_table_gets_t(tab, "submap", &subtab);
+if(strcmp(ksb_str, "Mod4+K")==0)
+  fprintf(stderr, "do_submap%s\n", ksb_str);
+        ret=do_submap(bindmap, ksb_str, subtab, mod, ksb);
+  fprintf(stderr, "did_submap%s\n", ksb_str);
         extl_unref_table(subtab);
     }else{
         if(areamap!=NULL){

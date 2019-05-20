@@ -22,6 +22,7 @@
 #define BINDING_BUTTONMOTION    2
 #define BINDING_BUTTONCLICK     3
 #define BINDING_BUTTONDBLCLICK  4
+#define BINDING_SUBMAP          5
 
 #define BINDMAP_INIT        {0, NULL, NULL, NULL, NULL}
 

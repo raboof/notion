@@ -107,7 +107,6 @@ void ioncore_grab_establish(WRegion *reg, GrabHandler *func,
                             long eventmask, int flags)
 {
     assert((~eventmask)&(KeyPressMask|KeyReleaseMask));
-fprintf(stderr, "establishing grab\n");
 
     if(idx_grab<MAX_GRABS){
         current_grab=&grabs[idx_grab++];

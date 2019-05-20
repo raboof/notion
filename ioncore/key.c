@@ -196,8 +196,8 @@ static bool submap_defined(WRegion *reg, XKeyEvent *ev)
 
     do{
         WRegion *binding_owner=NULL;
-        WBinding *binding=region_lookup_keybinding(reg, ev, oreg->submapstat,
-                                                   &binding_owner);
+        WBinding *binding=region_lookup_submap(reg, ev, oreg->submapstat,
+                                               &binding_owner);
         
         if(binding!=NULL && binding->submap!=NULL)
             return TRUE;
@@ -220,11 +220,6 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
 
     oreg=reg;
     grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
-
-if(ev->keycode==45)
-  fprintf(stderr, "do_key 45, grabbed %d\n", grabbed);
-if(ev->keycode==11)
-  fprintf(stderr, "do_key 11, grabbed %d\n", grabbed);
 
     if(grabbed){
         /* Find the deepest nested active window grabbing this key. */
@@ -268,9 +263,13 @@ if(ev->keycode==11)
 
     has_submap = submap_defined(oreg, ev);
     if(has_submap){
-        if(add_sub(oreg, ev->keycode, ev->state))
+if(ev->keycode==45)
+  fprintf(stderr, "submap defined\n");
+        if(add_sub(oreg, ev->keycode, ev->state)){
+if(ev->keycode==45)
+  fprintf(stderr, "submap defined, grab needed\n");
             grab_needed = TRUE;
-        else
+        }else
             clear_subs(oreg);
     }
 
@@ -323,6 +322,8 @@ if(ev->keycode==45)
         insstr((WWindow*)oreg, ev);
     }
 
+if(ev->keycode==45)
+  fprintf(stderr, "grab needed %d\n", grab_needed);
     return grab_needed;
 }
 
