@@ -211,7 +211,8 @@ WBinding *region_lookup_keyaction(WRegion *reg, int action,
         bindmap=rbind->bindmap;
 
         for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
-if(ev->keycode==45||ev->keycode==23)
+            binding=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, s->state, s->key);
+
             if(binding==NULL){
                 bindmap=NULL;
                 break;
