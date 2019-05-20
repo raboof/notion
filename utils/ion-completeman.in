@@ -104,7 +104,7 @@ scan() {
 cachefile=""
 
 if test "x$HOME" != x; then
-    usercache="$HOME/.ion3/mancache"
+    usercache="$HOME/.notion/mancache"
 fi
 
 syscache="@VARDIR@/mancache"
