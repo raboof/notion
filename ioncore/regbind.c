@@ -212,9 +212,6 @@ WBinding *region_lookup_keyaction(WRegion *reg, int action,
 
         for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
 if(ev->keycode==45||ev->keycode==23)
-  fprintf(stderr, "entered submap\n");
-            binding=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, s->state, s->key);
-
             if(binding==NULL){
                 bindmap=NULL;
                 break;
@@ -224,8 +221,6 @@ if(ev->keycode==45||ev->keycode==23)
         }
 
         if(bindmap==NULL){
-if(ev->keycode==45||ev->keycode==23)
-  fprintf(stderr, "no bindmap here at all\n");
             /* There may be no next iteration so we must reset binding here
              * because we have not found a proper binding.
              */
@@ -239,16 +234,8 @@ if(ev->keycode==45||ev->keycode==23)
             break;
     }
 
-    if(binding!=NULL && rbind->owner!=NULL){
-if(ev->keycode==45)
-  fprintf(stderr, "binding with owner\n");
-if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WFrame)))
-  fprintf(stderr, "binding with frame owner\n");
-if(ev->keycode==45&&obj_is((Obj*)rbind->owner, &CLASSDESCR(WClientWin)))
-  fprintf(stderr, "binding with clientwin owner\n");
-
+    if(binding!=NULL && rbind->owner!=NULL)
         *binding_owner_ret=rbind->owner;
-    }
 
     return binding;
 }

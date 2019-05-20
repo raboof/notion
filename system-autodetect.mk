@@ -168,7 +168,7 @@ CC ?= gcc
 
 WARN=-W -Wall -pedantic
 
-CFLAGS += -g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
+CFLAGS += -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
 LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)

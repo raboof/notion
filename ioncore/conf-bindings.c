@@ -202,9 +202,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     uint kcb;
 
     kcb=XKeysymToKeycode(ioncore_g.dpy, ksb);
-  fprintf(stderr, "lookup_binding\n");
     bnd=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, mod, kcb);
-  fprintf(stderr, "lookedup_binding\n");
 
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
         return bindmap_defbindings(bnd->submap, subtab, TRUE);
@@ -221,11 +219,8 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     if(binding.submap==NULL)
         return FALSE;
 
-  fprintf(stderr, "adding binding\n");
-    if(bindmap_add_binding(bindmap, &binding)){
-  fprintf(stderr, "added binding, bindmap_defbindings\n");
+    if(bindmap_add_binding(bindmap, &binding))
         return bindmap_defbindings(binding.submap, subtab, TRUE);
-    }
 
     binding_deinit(&binding);
 
@@ -267,7 +262,6 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         wr=TRUE;
     }else{
         action=stringintmap_value(action_map, action_str, -1);
-fprintf(stderr, "action type %s\n", action_str);
         if(action<0){
             warn(TR("Unknown binding type \"%s\"."), action_str);
             goto fail;
@@ -283,15 +277,10 @@ fprintf(stderr, "action type %s\n", action_str);
         goto fail;
     }
 
-if(strcmp(ksb_str, "Mod4+K")==0)
-  fprintf(stderr, "ksb_str %s\n", ksb_str);
     if(action==BINDING_SUBMAP){
         ExtlTab subtab;
         extl_table_gets_t(tab, "submap", &subtab);
-if(strcmp(ksb_str, "Mod4+K")==0)
-  fprintf(stderr, "do_submap%s\n", ksb_str);
         ret=do_submap(bindmap, ksb_str, subtab, mod, ksb);
-  fprintf(stderr, "did_submap%s\n", ksb_str);
         extl_unref_table(subtab);
     }else{
         if(areamap!=NULL){
@@ -427,8 +416,9 @@ static bool get_kpress(WBindmap *UNUSED(bindmap), WBinding *b, ExtlTab t)
     if(b->submap!=NULL){
         ExtlTab stab=bindmap_getbindings(b->submap);
         extl_table_sets_t(t, "submap", stab);
+    }else{
+        extl_table_sets_f(t, "func", b->func);
     }
-    extl_table_sets_f(t, "func", b->func);
 
     return TRUE;
 }

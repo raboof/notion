@@ -227,26 +227,11 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             reg=reg->active_sub;
 
         do{
-if (obj_is((Obj*)reg, &CLASSDESCR(WFrame)))
-  fprintf(stderr, "Frame:\n");
-
             binding=region_lookup_keybinding(reg, ev, oreg->submapstat,
                                              &binding_owner);
-fprintf(stderr, "lookup returned binding %d with submap %d\n", binding, binding==NULL?0:binding->submap);
 
-            if(binding!=NULL && binding->func!=extl_fn_none()){
-fprintf(stderr, "found\n");
+            if(binding!=NULL && binding->func!=extl_fn_none())
                 break;
-/*
-                submap=submap||bnd->submap;
-fprintf(stderr, "considering bnd with submap %d and func %d\n", bnd->submap, bnd->func);
-                if(binding==NULL && bnd->func!=extl_fn_none()){
-                    binding=bnd;
-                    binding_owner=bnd_owner;
-                    subreg=bnd_subreg;
-                }
-*/
-            }
             if(OBJ_IS(reg, WRootWin))
                 break;
 
@@ -258,38 +243,15 @@ fprintf(stderr, "considering bnd with submap %d and func %d\n", bnd->submap, bnd
                                          &binding_owner);
     }
 
-if(ev->keycode==11)
-  fprintf(stderr, "binding %d\n", binding);
-
     has_submap = submap_defined(oreg, ev);
     if(has_submap){
-if(ev->keycode==45)
-  fprintf(stderr, "submap defined\n");
-        if(add_sub(oreg, ev->keycode, ev->state)){
-if(ev->keycode==45)
-  fprintf(stderr, "submap defined, grab needed\n");
+        if(add_sub(oreg, ev->keycode, ev->state))
             grab_needed = TRUE;
-        }else
+        else
             clear_subs(oreg);
     }
 
     if(binding!=NULL){
-/*
-        if(binding->submap!=NULL){
-            if(add_sub(oreg, ev->keycode, ev->state))
-                grab_needed = TRUE;
-            else
-                clear_subs(oreg);
-        }
-*/
-
-if(ev->keycode==45)
-  fprintf(stderr, "binding submap %d\n", binding->submap);
-if(ev->keycode==45)
-  fprintf(stderr, "binding owner %d, func %d\n", binding_owner, binding->func);
-if(ev->keycode==11)
-  fprintf(stderr, "binding submap %d\n", binding->submap);
-
         if(binding_owner!=NULL && binding->func!=extl_fn_none()){
             WRegion *mgd=region_managed_within(binding_owner, subreg);
             bool subs=(oreg->submapstat!=NULL);
@@ -307,8 +269,6 @@ if(ev->keycode==11)
             /* TODO: having to pass both mgd and subreg for some handlers
              * to work is ugly and complex.
              */
-if(ev->keycode==45)
-  fprintf(stderr, "calling %d (not %d)\n", binding->func, extl_fn_none());
             extl_call(binding->func, "ooo", NULL, binding_owner, mgd, subreg);
 
             current_kcb=0;
@@ -322,8 +282,6 @@ if(ev->keycode==45)
         insstr((WWindow*)oreg, ev);
     }
 
-if(ev->keycode==45)
-  fprintf(stderr, "grab needed %d\n", grab_needed);
     return grab_needed;
 }
 

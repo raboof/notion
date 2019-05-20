@@ -100,10 +100,6 @@ local function dobindings(f, bindings)
         return t
     end
 
-    function p.submap_wait(cmd, guard)
-        return putcmd(cmd, guard, {action = "submap_wait"})
-    end
-
     function p.kpress(keyspec, cmd, guard)
         return putcmd(cmd, guard, {action = "kpress", kcb = keyspec})
     end
@@ -223,7 +219,7 @@ local function docgroup_bindings(bindings)
                     out[outi]={doc=v.text, bindings={}}
                 elseif v.submap then
                     parsetable(v.submap, prefix..v.kcb.." ")
-                elseif v.action~="submap_wait" then
+                else
                     assert(out[outi])
                     v.kcb=prefix..v.kcb
                     table.insert(out[outi].bindings, v)
@@ -258,7 +254,7 @@ local function combine_bindings(v)
         first=false
         if b.action=="kpress" or b.action=="kpress_wait" then
             s=s..b.kcb
-        elseif b.action~="submap_wait" then
+        else
             if not b.area then
                 s=s..TR("%s %s", b.kcb, nact[b.action])
             else
