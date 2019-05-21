@@ -237,6 +237,7 @@ defbindings("WFrame.toplevel", {
     bdoc("Query for a client window to attach."),
     kpress(META.."A", "mod_query.query_attachclient(_)"),
 
+    kpress(META.."K", "WFrame.set_numbers(_, 'during_grab')"),
     submap(META.."K", {
         bdoc("Switch to n:th object within the frame."),
         kpress("1", "WFrame.switch_nth(_, 0)"),

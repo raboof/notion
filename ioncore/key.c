@@ -186,13 +186,37 @@ bool ioncore_current_key(uint *kcb, uint *state, bool *sub)
     return TRUE;
 }
 
+static bool submap_defined(WRegion *reg, XKeyEvent *ev)
+{
+    WRegion *oreg=reg;
+
+    /* Find the deepest nested active window grabbing this key. */
+    while(reg->active_sub!=NULL)
+        reg=reg->active_sub;
+
+    do{
+        WRegion *binding_owner=NULL;
+        WBinding *binding=region_lookup_submap(reg, ev, oreg->submapstat,
+                                               &binding_owner);
+        
+        if(binding!=NULL && binding->submap!=NULL)
+            return TRUE;
+
+        reg=REGION_PARENT_REG(reg);
+    }while(reg!=NULL);
+
+    return FALSE;
+}
 
 /* Return value TRUE = grab needed */
 static bool do_key(WRegion *reg, XKeyEvent *ev)
 {
     WBinding *binding=NULL;
+
     WRegion *oreg=NULL, *binding_owner=NULL, *subreg=NULL;
     bool grabbed;
+    bool grab_needed = FALSE;
+    bool has_submap = FALSE;
 
     oreg=reg;
     grabbed=(oreg->flags&REGION_BINDINGS_ARE_GRABBED);
@@ -206,7 +230,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             binding=region_lookup_keybinding(reg, ev, oreg->submapstat,
                                              &binding_owner);
 
-            if(binding!=NULL)
+            if(binding!=NULL && binding->func!=extl_fn_none())
                 break;
             if(OBJ_IS(reg, WRootWin))
                 break;
@@ -219,17 +243,21 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
                                          &binding_owner);
     }
 
+    has_submap = submap_defined(oreg, ev);
+    if(has_submap){
+        if(add_sub(oreg, ev->keycode, ev->state))
+            grab_needed = TRUE;
+        else
+            clear_subs(oreg);
+    }
+
     if(binding!=NULL){
-        if(binding->submap!=NULL){
-            if(add_sub(oreg, ev->keycode, ev->state))
-                return grabbed;
-            else
-                clear_subs(oreg);
-        }else if(binding_owner!=NULL){
+        if(binding_owner!=NULL && binding->func!=extl_fn_none()){
             WRegion *mgd=region_managed_within(binding_owner, subreg);
             bool subs=(oreg->submapstat!=NULL);
 
-            clear_subs(oreg);
+            if(!has_submap)
+                clear_subs(oreg);
 
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
@@ -254,7 +282,7 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
         insstr((WWindow*)oreg, ev);
     }
 
-    return FALSE;
+    return grab_needed;
 }
 
 

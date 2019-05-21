@@ -196,22 +196,19 @@ static bool do_action(WBindmap *bindmap, const char *str,
 
 
 static bool do_submap(WBindmap *bindmap, const char *str,
-                      ExtlTab subtab, uint action, uint mod, uint ksb)
+                      ExtlTab subtab, uint mod, uint ksb)
 {
     WBinding binding, *bnd;
     uint kcb;
 
-    if(action!=BINDING_KEYPRESS)
-        return FALSE;
-
     kcb=XKeysymToKeycode(ioncore_g.dpy, ksb);
-    bnd=bindmap_lookup_binding(bindmap, action, mod, kcb);
+    bnd=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, mod, kcb);
 
     if(bnd!=NULL && bnd->submap!=NULL && bnd->state==mod)
         return bindmap_defbindings(bnd->submap, subtab, TRUE);
 
     binding.wait=FALSE;
-    binding.act=BINDING_KEYPRESS;
+    binding.act=BINDING_SUBMAP;
     binding.state=mod;
     binding.ksb=ksb;
     binding.kcb=kcb;
@@ -239,6 +236,7 @@ static StringIntMap action_map[]={
     {"mclick", BINDING_BUTTONCLICK},
     {"mdblclick", BINDING_BUTTONDBLCLICK},
     {"mdrag", BINDING_BUTTONMOTION},
+    {"submap", BINDING_SUBMAP},
     {NULL, 0}
 };
 
@@ -250,7 +248,6 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
     int action=0;
     uint ksb=0, mod=0;
-    ExtlTab subtab;
     ExtlFn func;
     bool wr=FALSE;
     int area=0;
@@ -275,13 +272,15 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         goto fail;
 
     if(!ioncore_parse_keybut(ksb_str, &mod, &ksb,
-                             (action!=BINDING_KEYPRESS && action!=-1),
+                             (action!=BINDING_KEYPRESS && action!=BINDING_SUBMAP && action!=-1),
                              init_any)){
         goto fail;
     }
 
-    if(extl_table_gets_t(tab, "submap", &subtab)){
-        ret=do_submap(bindmap, ksb_str, subtab, action, mod, ksb);
+    if(action==BINDING_SUBMAP){
+        ExtlTab subtab;
+        extl_table_gets_t(tab, "submap", &subtab);
+        ret=do_submap(bindmap, ksb_str, subtab, mod, ksb);
         extl_unref_table(subtab);
     }else{
         if(areamap!=NULL){
@@ -296,15 +295,12 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         }
 
         if(!extl_table_gets_f(tab, "func", &func)){
-            /*warn("Function for binding %s not set/nil/undefined.", ksb_str);
-            goto fail;*/
             func=extl_fn_none();
         }
         ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr);
         if(!ret)
             extl_unref_fn(func);
     }
-
 fail:
     if(action_str!=NULL)
         free(action_str);

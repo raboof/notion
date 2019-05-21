@@ -118,7 +118,7 @@ function ioncore.submap(kcb_, list)
                    return submap(kcb_, lst)
                end
     end
-    return {action = "kpress", kcb = kcb_, submap = list}
+    return {action = "submap", kcb = kcb_, submap = list}
 end
 
 --DOC

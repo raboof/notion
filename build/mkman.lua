@@ -91,7 +91,7 @@ local function dobindings(f, bindings)
                        return submap(kcb_, lst)
                    end
         end
-        return {action = "kpress", kcb = kcb_, submap = list}
+        return {action = "submap", kcb = kcb_, submap = list}
     end
 
     local function putcmd(cmd, guard, t)

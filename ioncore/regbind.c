@@ -196,8 +196,8 @@ void region_remove_bindings(WRegion *reg)
 }
 
 
-WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
-                                   const WSubmapState *sc,
+WBinding *region_lookup_keyaction(WRegion *reg, int action,
+                                   const XKeyEvent *ev, const WSubmapState *sc,
                                    WRegion **binding_owner_ret)
 {
     WRegBindingInfo *rbind=NULL;
@@ -211,7 +211,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
         bindmap=rbind->bindmap;
 
         for(s=sc; s!=NULL && bindmap!=NULL; s=s->next){
-            binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, s->state, s->key);
+            binding=bindmap_lookup_binding(bindmap, BINDING_SUBMAP, s->state, s->key);
 
             if(binding==NULL){
                 bindmap=NULL;
@@ -229,7 +229,7 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
             continue;
         }
 
-        binding=bindmap_lookup_binding(bindmap, BINDING_KEYPRESS, ev->state, ev->keycode);
+        binding=bindmap_lookup_binding(bindmap, action, ev->state, ev->keycode);
 
         if(binding!=NULL)
             break;
@@ -241,6 +241,21 @@ WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
     return binding;
 }
 
+WBinding *region_lookup_keybinding(WRegion *reg, const XKeyEvent *ev,
+                                   const WSubmapState *sc,
+                                   WRegion **binding_owner_ret)
+{
+    return region_lookup_keyaction(reg, BINDING_KEYPRESS, ev, sc,
+                                   binding_owner_ret);
+}
+
+WBinding *region_lookup_submap(WRegion *reg, const XKeyEvent *ev,
+                                   const WSubmapState *sc,
+                                   WRegion **binding_owner_ret)
+{
+    return region_lookup_keyaction(reg, BINDING_SUBMAP, ev, sc,
+                                   binding_owner_ret);
+}
 
 WBinding *region_lookup_binding(WRegion *reg, int act, uint state,
                                 uint kcb, int area)
