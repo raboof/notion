@@ -37,7 +37,7 @@ local defaults = {
 }
                             
 local settings = table.join(statusd.get_config("inetaddr2"), defaults)
-local inetaddr2_timer = statusd.create_timer()
+local inetaddr2_timer
 local mode_paths = {}
 local mode_path = ""
 
@@ -140,7 +140,8 @@ if (settings.mode_path_check == true) then
     assert(mode_path ~= "", "Could not find a suitable binary for " .. settings.mode)
 end
 
-inetaddr2_timer:set(100, update_inetaddr)
+inetaddr2_timer = statusd.create_timer()
+update_inetaddr()
 
 statusd_inetaddr2_export = {
     get_ip_address_using__ifconfig = get_ip_address_using__ifconfig,

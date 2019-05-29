@@ -79,17 +79,23 @@ _G["statusd"] = {
 dofile('statusd_inetaddr2.lua')
 
 function do_test(fn_name, input, output)
-  print("\nTesting: " .. fn_name)
-  print("\nInput: ")
-  print(input["iface"])
-  print(input["lines"])
+  io.write("[TEST] " .. fn_name .. ": ")
+  -- print("\nInput: ")
+  -- print(input["iface"])
+  -- print(input["lines"])
   ret = statusd_inetaddr2_export[fn_name](input["iface"], input["lines"])
-  print_tables("Output", ret)
-  print_tables("Expected Output", output)
-  assert(table_compare(output, ret))
+  if table_compare(output, ret) == true then
+      print("[OK]")
+  else
+      print("[ERROR]")
+      print_tables("Output", ret)
+      print_tables("Expected Output", output)
+  end
 end
 
 -- now perform some tests:
+
+print("[TESTING] statusd_inetaddr2 ====")
 
 -- {{{ test given input
 
