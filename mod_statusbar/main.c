@@ -52,14 +52,13 @@ WBindmap *mod_statusbar_statusbar_bindmap=NULL;
 
 
 #define BL 1024
-
+#define USEC 1000000
 
 static bool process_pipe(int fd, ExtlFn fn,
                          bool *doneseen, bool *eagain)
 {
     char buf[BL];
     int n;
-    bool fnret;
 
     *eagain=FALSE;
 
@@ -80,9 +79,6 @@ static bool process_pipe(int fd, ExtlFn fn,
 
     return FALSE;
 }
-
-
-#define USEC 1000000
 
 
 static bool wait_statusd_init(int outfd, int errfd, ExtlFn dh, ExtlFn eh)

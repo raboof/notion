@@ -28,7 +28,7 @@ local function update()
     return tm
 end
 
-local function timer_handler(tmr)
+local function timer_handler()
     local tm=update()
 
     local t=os.date('*t', tm)
@@ -38,4 +38,4 @@ local function timer_handler(tmr)
 end
 
 timer=statusd.create_timer()
-timer_handler(timer)
+timer_handler()
