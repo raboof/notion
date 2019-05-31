@@ -312,6 +312,9 @@ void ioncore_handle_enter_window(XEvent *ev)
     XEnterWindowEvent *eev=&(ev->xcrossing);
     WRegion *reg=NULL;
 
+    if(ioncore_g.no_mousefocus)
+        return;
+
     if(ioncore_g.input_mode!=IONCORE_INPUTMODE_NORMAL)
         return;
 
