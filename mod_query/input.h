@@ -25,7 +25,7 @@ DECLCLASS(WInput){
 extern bool input_init(WInput *input, WWindow *par, const WFitParams *fp);
 extern void input_deinit(WInput *input);
 
-extern void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp);
+extern bool input_fitrep(WInput *input, WWindow *par, const WFitParams *fp);
 extern void input_refit(WInput *input);
 extern void input_cancel(WInput *input);
 extern bool input_rqclose(WInput *input);

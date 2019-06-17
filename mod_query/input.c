@@ -76,10 +76,13 @@ void input_refit(WInput *input)
 }
 
 
-void input_fitrep(WInput *input, WWindow *par, const WFitParams *fp)
+bool input_fitrep(WInput *input, WWindow *par, const WFitParams *fp)
 {
+    if(par!=NULL && !region_same_rootwin((WRegion*)input, (WRegion*)par))
+        return FALSE;
     input->last_fp=*fp;
     input_do_refit(input, par);
+    return TRUE;
 }
 
 
