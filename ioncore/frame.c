@@ -786,7 +786,7 @@ static int numbers_grab_handler(WRegion *reg, XEvent *xev)
 
 /*EXTL_DOC
  * Control whether tabs show numbers (set/unset/toggle).
- * When showing numbers 'during_grab', the numbers are shown
+ * When showing numbers 'during\_grab', the numbers are shown
  * until the next keyboard event comes in.
  * The resulting state is returned, which may not be what was
  * requested.
