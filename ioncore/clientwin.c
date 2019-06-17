@@ -52,6 +52,7 @@ WHook *clientwin_mapped_hook=NULL;
 WHook *clientwin_unmapped_hook=NULL;
 WHook *clientwin_property_change_hook=NULL;
 
+#define CLIENTWIN_DEFAULT_FLAGS CLIENTWIN_PROP_I_MINSIZE
 
 /*{{{ Get properties */
 
@@ -88,9 +89,12 @@ void clientwin_get_protocols(WClientWin *cwin)
                         CLIENTWIN_PROP_I_RSZINC)
 
 
-#define DO_SZH(NAME, FLAG, IFLAG, SZHFLAG, W, H, C)  \
-    if(extl_table_is_bool_set(tab, "ignore_" NAME)){ \
-        cwin->flags|=IFLAG;                          \
+#define DO_SZH(NAME, FLAG, IFLAG, SZHFLAG, W, H, C){ \
+    bool ignore;                                     \
+    if(extl_table_gets_b(tab, "ignore_" NAME, &ignore)){ \
+        if(ignore) cwin->flags|=IFLAG;               \
+        else cwin->flags&=~IFLAG;                    \
+        fprintf(stderr, "ignore: %d, flags now: %d\n", ignore, cwin->flags);\
     }else if(extl_table_gets_t(tab, NAME, &tab2)){   \
         if(extl_table_gets_i(tab2, "w", &i1) &&      \
            extl_table_gets_i(tab2, "h", &i2)){       \
@@ -101,7 +105,8 @@ void clientwin_get_protocols(WClientWin *cwin)
             cwin->flags|=FLAG;                       \
         }                                            \
         extl_unref_table(tab2);                      \
-    }
+    }                                                \
+}
 
 
 static void clientwin_get_winprops(WClientWin *cwin)
@@ -311,7 +316,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 {
     WFitParams fp;
 
-    cwin->flags=0;
+    cwin->flags=CLIENTWIN_DEFAULT_FLAGS;
     cwin->win=win;
     cwin->state=WithdrawnState;
 
