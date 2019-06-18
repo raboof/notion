@@ -1,253 +1,138 @@
-/*
- * mod_notionflux/notionflux/notionflux.c
- *
- * Copyright (c) Tuomo Valkonen 2004-2005.
- *
- * This is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- */
+/* Copyright (C) 2019 Moritz Wilhelmy
 
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
+   This utility is part of the notion window manager, but uses a different
+   license because GNU readline requires it.
 
-#include <libtu/types.h>
+   notionflux is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License (to be compatible with
+   GNU readline) as well as Lesser General Public License (to be more compatible
+   with notion itself) as published by the Free Software Foundation, either
+   version 2 of the Licenses, or (at your option) any later version.
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
+   By linking against readline, the created binary will be subject to the terms
+   of GPL version 3.
+
+   notionflux is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with notionflux.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <string.h>
-#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+
 #include "../notionflux.h"
 
-static void die(const char *s)
+#define die(...) fprintf(stderr, __VA_ARGS__), exit(1)
+
+#define SOCK_ATOM "_NOTION_MOD_NOTIONFLUX_SOCKET"
+
+char const *sockfilename = NULL;
+
+char const *get_socket_filename(void)
 {
-    fprintf(stderr, "%s\n", s);
-    exit(1);
+	Display *dpy = XOpenDisplay(NULL);
+        if (!dpy)
+		die("Failed to open display\n");
+
+	Window root = DefaultRootWindow(dpy);
+        Atom sockname_prop = XInternAtom(dpy, SOCK_ATOM, True);
+	if (sockname_prop == None)
+		die("No %s property set on the root window... is notion "
+		    "running with mod_notionflux loaded?\n", SOCK_ATOM);
+
+	Atom type;
+	int d1; /* dummy */
+	unsigned long d2, d3; /* dummy */
+	unsigned char *ret;
+	int pr = XGetWindowProperty(dpy, root, sockname_prop, 0L, 512L, False,
+				    XA_STRING, &type, &d1, &d2, &d3, &ret);
+
+	if (pr != Success || type != XA_STRING)
+		 die("XGetWindowProperty failed\n");
+
+	char *rv = strdup((char*)ret);
+
+	XFree(ret);
+	XCloseDisplay(dpy);
+	return rv;
+}
+
+FILE *sock_connect(void)
+{
+	struct sockaddr_un serv;
+	if (strlen(sockfilename) >= sizeof(serv.sun_path))
+		die("Socket file name too long\n");
+	int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+
+        serv.sun_family = AF_UNIX;
+	strcpy(serv.sun_path, sockfilename);
+	if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) == -1)
+		die("Failed to connect to socket %s\n", sockfilename);
+
+	FILE *f = fdopen(sock, "w+");
+	if (!f)
+		die("fdopen failed\n");
+
+	return f;
+}
+
+/* read multiple lines */
+void slurp(FILE *f, char *buf, size_t n)
+{
+	while (n > 0 && fgets(buf, n, f) != NULL) {
+		size_t len = strlen(buf);
+		n -= len;
+		buf += len;
+	}
+}
+
+/* fputs, but with trailing NUL character - expected by mod_notionflux */
+void barf(FILE *f, char *str)
+{
+	fputs(str, f);
+	fputc('\0', f);
+	fflush(f);
 }
 
 
-static void die_e(const char *s)
+int main(int argc, char **argv)
 {
-    perror(s);
-    exit(1);
+	sockfilename = get_socket_filename();
+	FILE *remote = sock_connect();
+        char buf[MAX_DATA + 1];
+	char *data;
+
+	if (argc == 1) {
+		data = buf;
+		slurp(stdin, buf, MAX_DATA);
+	} else if (argc == 3 && strcmp(argv[1], "-e") == 0) {
+		data = argv[2];
+		if (strlen(data) > MAX_DATA)
+			die("Too much data\n");
+	} else {
+		die("Usage: %s [-e code]\n", argv[0]);
+	}
+
+	barf(remote, data);
+	slurp(remote, buf, MAX_DATA + 1);
+
+	if (buf[0] != 'S' && buf[0] != 'E')
+		die("Unknown response type %c\n", buf[0]);
+
+	fputs(buf + 1, buf[0] == 'S' ? stdout : stderr);
+
+	return 0;
 }
-
-static void mywrite(int fd, const char *buf, int n)
-{
-    while(n>0){
-        int k;
-        k=write(fd, buf, n);
-        if(k<0 && (errno!=EAGAIN && errno!=EINTR))
-            die_e("Writing");
-        if(k>0){
-            n-=k;
-            buf+=k;
-        }
-    }
-}
-
-
-static int myread(int fd, char *buf, int n)
-{
-    int left=n;
-
-    while(left>0){
-        int k;
-        k=read(fd, buf, left);
-        if(k<0 && (errno!=EAGAIN && errno!=EINTR))
-            die_e("Writing");
-        if(k==0)
-            break;
-        if(k>0){
-            left-=k;
-            buf+=k;
-        }
-    }
-    return n-left;
-}
-
-
-static char buf[MAX_DATA];
-
-
-/*{{{ X */
-
-
-static Display *dpy=NULL;
-
-
-static ulong xwindow_get_property_(Window win, Atom atom, Atom type,
-                                   ulong n32expected, bool more, uchar **p,
-                                   int *format)
-{
-    Atom real_type;
-    ulong n=-1, extra=0;
-    int status;
-
-    do{
-        status=XGetWindowProperty(dpy, win, atom, 0L, n32expected,
-                                  False, type, &real_type, format, &n,
-                                  &extra, p);
-
-        if(status!=Success || *p==NULL)
-            return -1;
-
-        if(extra==0 || !more)
-            break;
-
-        XFree((void*)*p);
-        n32expected+=(extra+4)/4;
-        more=FALSE;
-    }while(1);
-
-    if(n==0){
-        XFree((void*)*p);
-        *p=NULL;
-        return -1;
-    }
-
-    return n;
-}
-
-
-ulong xwindow_get_property(Window win, Atom atom, Atom type,
-                           ulong n32expected, bool more, uchar **p)
-{
-    int format=0;
-    return xwindow_get_property_(win, atom, type, n32expected, more, p,
-                                 &format);
-}
-
-
-char *xwindow_get_string_property(Window win, Atom a, int *nret)
-{
-    char *p;
-    int n;
-
-    n=xwindow_get_property(win, a, XA_STRING, 64L, TRUE, (uchar**)&p);
-
-    if(nret!=NULL)
-        *nret=n;
-
-    return (n<=0 ? NULL : p);
-}
-
-
-void xwindow_set_string_property(Window win, Atom a, const char *value)
-{
-    if(value==NULL){
-        XDeleteProperty(dpy, win, a);
-    }else{
-        XChangeProperty(dpy, win, a, XA_STRING,
-                        8, PropModeReplace, (uchar*)value, strlen(value));
-    }
-}
-
-
-static char *get_socket()
-{
-    Atom a;
-    char *s;
-
-    dpy=XOpenDisplay(NULL);
-
-    if(dpy==NULL)
-        die_e("Unable to open display.");
-
-    a=XInternAtom(dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", True);
-
-    if(a==None)
-        die_e("Missing _NOTION_MOD_NOTIONFLUX_SOCKET atom. Perhaps Notion is not running, or mod_notionflux is not loaded");
-
-    s=xwindow_get_string_property(DefaultRootWindow(dpy), a, NULL);
-
-    XCloseDisplay(dpy);
-
-    return s;
-}
-
-
-/*}}}*/
-
-
-int main(int argc, char *argv[])
-{
-    int sock;
-    struct sockaddr_un serv;
-    const char *sockname;
-    int use_stdin=1;
-    char res;
-    int n;
-    int exit_status=0;
-
-    if(argc>1){
-        if(argc!=3 || strcmp(argv[1], "-e")!=0)
-            die("Usage: notionflux [-e code]");
-
-        if(strlen(argv[2])>=MAX_DATA)
-            die("Too much data.");
-
-        use_stdin=0;
-    }
-
-    sockname=get_socket();
-    if(sockname==NULL)
-        die("No socket.");
-
-    if(strlen(sockname)>SOCK_MAX)
-        die("Socket name too long.");
-
-    sock=socket(AF_UNIX, SOCK_STREAM, 0);
-    if(sock<0)
-        die_e("Opening socket");
-
-    serv.sun_family=AF_UNIX;
-    strcpy(serv.sun_path, sockname);
-
-    if(connect(sock, (struct sockaddr*)&serv, sizeof(struct sockaddr_un))<0)
-        die_e("Connecting socket");
-
-    if(!use_stdin){
-        mywrite(sock, argv[2], strlen(argv[2])+1);
-    }else{
-        char c='\0';
-        while(1){
-            if(fgets(buf, MAX_DATA, stdin)==NULL)
-                break;
-            mywrite(sock, buf, strlen(buf));
-        }
-        mywrite(sock, &c, 1);
-    }
-
-    n=myread(sock, &res, 1);
-
-    if(n!=1 || (res!='E' && res!='S'))
-        die("Invalid response");
-
-    while(1){
-        n=myread(sock, buf, MAX_DATA);
-
-        if(n==0)
-            break;
-
-        if(res=='S'){
-            mywrite(1, buf, n);
-        }
-        else{ /* res=='E' */
-            mywrite(2, buf, n);
-            exit_status=2;
-        }
-
-        if(n<MAX_DATA)
-            break;
-    }
-
-    return exit_status;
-}
-
