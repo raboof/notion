@@ -89,14 +89,12 @@ FILE *sock_connect(void)
 	return f;
 }
 
-/* read multiple lines */
-void slurp(FILE *f, char *buf, size_t n)
+/* read from f until EOF */
+size_t slurp(FILE *f, char *buf, size_t n)
 {
-	while (n > 0 && fgets(buf, n, f) != NULL) {
-		size_t len = strlen(buf);
-		n -= len;
-		buf += len;
-	}
+	size_t bytes = fread(buf, 1, n-1, f);
+	buf[bytes]='\0';
+	return bytes+1;
 }
 
 /* fputs, but with trailing NUL character - expected by mod_notionflux */
@@ -106,7 +104,6 @@ void barf(FILE *f, char *str)
 	fputc('\0', f);
 	fflush(f);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -127,12 +124,20 @@ int main(int argc, char **argv)
 	}
 
 	barf(remote, data);
-	slurp(remote, buf, MAX_DATA + 1);
 
-	if (buf[0] != 'S' && buf[0] != 'E')
-		die("Unknown response type %c\n", buf[0]);
+	size_t bytes = slurp(remote, buf, MAX_DATA+1);
+	if (!bytes)
+		die("fread failed\n");
 
-	fputs(buf + 1, buf[0] == 'S' ? stdout : stderr);
+        char type = buf[0];
+        if (type != 'S' && type != 'E')
+		die("Unknown response type '%c'(%x)\n", type, type);
 
-	return 0;
+        fputs(buf+1, type == 'S' ? stdout : stderr);
+        do {
+		bytes = slurp(remote, buf, MAX_DATA);
+		fputs(buf, type == 'S' ? stdout : stderr);
+	} while (bytes == MAX_DATA);
+
+        return 0;
 }

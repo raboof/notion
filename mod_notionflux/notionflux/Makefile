@@ -12,7 +12,7 @@ SOURCES=notionflux.c
 
 TARGETS=notionflux
 
-CFLAGS += $(XOPEN_SOURCE)
+CFLAGS += $(XOPEN_SOURCE) -std=c99
 
 INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
 
