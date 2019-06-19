@@ -106,8 +106,8 @@ USE_XFT:=$(shell (pkg-config --exists xft && echo 1))
 endif
 
 ifeq ($(USE_XFT),1)
-    X11_INCLUDES += `pkg-config xft --cflags`
-    X11_LIBS += `pkg-config xft --libs`
+    X11_INCLUDES += $(shell pkg-config xft --cflags)
+    X11_LIBS += $(shell pkg-config xft --libs)
     DEFINES += -DHAVE_X11_XFT
     DEFINES += -DHAVE_X11_BMF
 else
