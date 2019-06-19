@@ -44,11 +44,11 @@ char const *sockfilename = NULL;
 char const *get_socket_filename(void)
 {
 	Display *dpy = XOpenDisplay(NULL);
-        if (!dpy)
+	if (!dpy)
 		die("Failed to open display\n");
 
 	Window root = DefaultRootWindow(dpy);
-        Atom sockname_prop = XInternAtom(dpy, SOCK_ATOM, True);
+	Atom sockname_prop = XInternAtom(dpy, SOCK_ATOM, True);
 	if (sockname_prop == None)
 		die("No %s property set on the root window... is notion "
 		    "running with mod_notionflux loaded?\n", SOCK_ATOM);
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 {
 	sockfilename = get_socket_filename();
 	FILE *remote = sock_connect();
-        char buf[MAX_DATA + 1];
+	char buf[MAX_DATA + 1];
 	char *data;
 
 	if (argc == 1) {
@@ -129,15 +129,15 @@ int main(int argc, char **argv)
 	if (!bytes)
 		die("fread failed\n");
 
-        char type = buf[0];
-        if (type != 'S' && type != 'E')
+	char type = buf[0];
+	if (type != 'S' && type != 'E')
 		die("Unknown response type '%c'(%x)\n", type, type);
 
-        fputs(buf+1, type == 'S' ? stdout : stderr);
-        do {
+	fputs(buf+1, type == 'S' ? stdout : stderr);
+	do {
 		bytes = slurp(remote, buf, MAX_DATA);
 		fputs(buf, type == 'S' ? stdout : stderr);
 	} while (bytes == MAX_DATA);
 
-        return 0;
+	return 0;
 }
