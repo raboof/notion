@@ -114,6 +114,13 @@ else
     DEFINES += -DHAVE_X11_BMF
 endif
 
+##
+## GNU readline, currently only used by mod_notionflux/notionflux
+##
+ifeq ($(USE_READLINE),1)
+    READLINE_INCLUDES += $(shell pkg-config readline --cflags)
+    READLINE_LIBS += $(shell pkg-config readline --libs)
+endif
 
 ##
 ## Localisation
