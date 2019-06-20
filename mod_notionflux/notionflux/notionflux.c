@@ -259,11 +259,12 @@ bool is_lua_incomplete(char *lua, size_t len)
 
 int repl_main(void)
 {
-	char *line;
+	char *line = NULL;
 	char const *prompt = "lua> ";
 	rl_startup_hook = initialize_readline;
 
 	while (1) {
+		free(line);
 		line = readline(prompt);
 
 		if (!line) { /* EOF */
@@ -297,6 +298,7 @@ int repl_main(void)
 			fputs(out, stdout);
 		input_reset();
 	}
+	free(line);
 
 	return 0;
 }
