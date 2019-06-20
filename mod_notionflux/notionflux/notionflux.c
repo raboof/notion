@@ -168,9 +168,13 @@ bool buf_append(struct buf *buf, char const *str)
 
 void buf_grow(struct buf **buf, size_t n)
 {
-	*buf = realloc(*buf, (*buf)->size+n);
+	size_t newsize = sizeof(*buf) - sizeof((*buf)->buf) + (*buf)->size + n;
+	size_t pos = buf_pos(*buf);
+	*buf = realloc(*buf, newsize);
 	if (!*buf)
 		die("realloc failed\n");
+	(*buf)->size = newsize;
+	(*buf)->cur = (*buf)->buf + pos;
 }
 
 void *alloc(size_t bytes)
