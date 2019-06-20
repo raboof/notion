@@ -268,11 +268,11 @@ int repl_main(void)
 		line = readline(prompt);
 
 		if (!line) { /* EOF */
+			puts("^D");
 			if (!input.pos) {           /* quit */
-				break;
+				return 0;
 			} else {    /* abort previous input */
 				input_reset();
-				puts("^D");
 				continue;
 			}
 		}
@@ -298,9 +298,7 @@ int repl_main(void)
 			fputs(out, stdout);
 		input_reset();
 	}
-	free(line);
-
-	return 0;
+	/* unreachable */
 }
 
 int main(int argc, char **argv)
