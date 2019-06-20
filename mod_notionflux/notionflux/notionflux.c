@@ -320,6 +320,8 @@ int repl_main(void)
 		if (line[0] == '\0') /* empty line, skip */
 			continue;
 
+		add_history(line);
+
 		if (!input_append(line) || !input_append("\n")) {
 			printf("Maximum length (%db) exceeded.\n", MAX_DATA);
 			input_reset();
