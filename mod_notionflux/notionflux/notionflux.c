@@ -21,7 +21,6 @@
    along with notionflux.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define _POSIX_C_SOURCE 200809L /* strndup */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -146,19 +145,24 @@ bool response(char buf[MAX_DATA], FILE **sock)
 
 struct buf {
 	size_t size;
-	size_t pos;
+	char *cur;
 	char buf[MAX_DATA];
 };
+
+size_t buf_pos(struct buf *buf)
+{
+	return buf->cur - buf->buf;
+}
 
 bool buf_append(struct buf *buf, char const *str)
 {
 	size_t len = strlen(str);
 
-	if (buf->pos + len >= buf->size)
+	if (buf_pos(buf) + len >= buf->size)
 		return false;
 
-	memcpy(buf->buf + buf->pos, str, len + 1);
-	buf->pos += len;
+	memcpy(buf->cur, str, len + 1);
+	buf->cur += len;
 	return true;
 }
 
@@ -169,6 +173,22 @@ void buf_grow(struct buf **buf, size_t n)
 		die("realloc failed\n");
 }
 
+void *alloc(size_t bytes)
+{
+	void *buf = malloc(bytes);
+	if (!buf)
+		die("malloc failed\n");
+	return buf;
+}
+
+struct buf *buf_make(void)
+{
+	struct buf *buf = alloc(sizeof(*buf));
+	buf->cur = buf->buf;
+	buf->buf[0] = 0;
+	buf->size = MAX_DATA;
+	return buf;
+}
 
 char *completion_generator(const char *text, int state)
 {
@@ -179,14 +199,11 @@ char *completion_generator(const char *text, int state)
 
 	if (state == 0) {
 		if (buf) free(buf); /* huh */
-		buf = malloc(sizeof(*buf));
-		if (!buf) die("malloc failed\n");
-		buf->pos = 0;
-		buf->buf[0] = 0;
-		buf->size = MAX_DATA;
+		buf = buf_make();
 
 		char temp[MAX_DATA];
 		snprintf(temp, MAX_DATA, req_str, text);
+
 		char type;
 		FILE *remote = request(temp, &type);
 		if (type == 'E') {
@@ -200,18 +217,32 @@ char *completion_generator(const char *text, int state)
 				buf_append(buf, temp);
 			}
 		}
-		buf->pos = 0;
+		buf->cur = buf->buf;
 	}
 
 	char const skip_chars[] = " \"\n\r";
-	buf->pos += strspn(buf->buf+buf->pos, skip_chars);
+	buf->cur += strspn(buf->cur, skip_chars);
 
-	if (buf->buf[buf->pos] == '\0')
+	if (*buf->cur == '\0')
 		goto finish;
 
-	size_t next = strcspn(buf->buf+buf->pos, skip_chars);
-	char *ret = strndup(buf->buf+buf->pos, next);
-	buf->pos += next+1;
+	size_t length = strcspn(buf->cur, skip_chars);
+	buf->cur[length] = '\0';
+
+	char *ret;
+	char *lastdot = strrchr(text, '.');
+	if (!lastdot) {
+		ret = strdup(buf->cur);
+	} else {
+		/* mod_query trims tables in completions, prepend back */
+		size_t dotpos = lastdot - text + 1;
+		ret = alloc(dotpos + length + 1);
+		ret[0] = '\0';
+		strncat(ret, text, dotpos);
+		strcat(ret, buf->cur);
+	}
+
+	buf->cur += length+1;
 	return ret;
 finish:
 	free(buf);
@@ -223,6 +254,10 @@ int initialize_readline(void)
 {
 	rl_readline_name = "notionflux";
 	rl_completion_entry_function = completion_generator;
+	rl_basic_word_break_characters = " \t\n#;|&{(["
+		"<>~="
+		"+-*/%^";
+	rl_basic_quote_characters = "\'\"";
 	return 0;
 }
 
@@ -255,13 +290,14 @@ bool is_lua_incomplete(char *lua, size_t len)
 #endif
 
 #define input_append(str) buf_append(&input, str)
-#define input_reset() prompt="lua> ", input.pos=0, input.buf[0]=0
+#define input_reset() prompt="lua> ", input.cur=input.buf, input.buf[0]=0
 
 int repl_main(void)
 {
 	char *line = NULL;
-	char const *prompt = "lua> ";
+	char const *prompt;
 	rl_startup_hook = initialize_readline;
+	input_reset();
 
 	while (1) {
 		free(line);
@@ -269,9 +305,9 @@ int repl_main(void)
 
 		if (!line) { /* EOF */
 			puts("^D");
-			if (!input.pos) {           /* quit */
+			if (buf_pos(&input) == 0) {      /* user quit */
 				return 0;
-			} else {    /* abort previous input */
+			} else {                /* abort previous input */
 				input_reset();
 				continue;
 			}
@@ -286,7 +322,7 @@ int repl_main(void)
 			continue;
 		}
 
-		if (is_lua_incomplete(input.buf, input.pos)) {
+		if (is_lua_incomplete(input.buf, buf_pos(&input))) {
 			prompt = "...> ";
 			continue;
 		}
