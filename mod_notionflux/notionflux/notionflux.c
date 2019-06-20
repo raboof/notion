@@ -21,6 +21,7 @@
    along with notionflux.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _POSIX_C_SOURCE 200809L /* strndup */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,58 +105,128 @@ size_t slurp(FILE *f, char *buf, size_t n)
 	return bytes+1;
 }
 
-/* fputs, but with trailing NUL character - expected by mod_notionflux */
-void barf(FILE *f, char *str)
+FILE *request(char const buf[MAX_DATA], char *type)
 {
-	fputs(str, f);
-	fputc('\0', f);
-	fflush(f);
+	FILE *sock = NULL;
+
+	sock = sock_connect();
+
+	fputs(buf, sock);
+	fputc('\0', sock);
+	fflush(sock);
+
+	fread(type, 1, 1, sock);
+
+	if (feof(sock) || ferror(sock))
+		die("Short response from mod_notionflux.\n");
+
+	if (*type != 'S' && *type != 'E')
+		die("Unknown response type (%x)\n", (int)*type);
+
+	return sock;
 }
 
-bool request(char buf[MAX_DATA], char *type) /* not reentrant */
+bool response(char buf[MAX_DATA], FILE **sock)
 {
-	static FILE *sock = NULL;
-
-	if (*type && !sock) { /* last call after socket was closed */
-		*type = '\0';
+	if (!*sock)
 		return false;
-	}
 
-	if (!*type) { /* first call, send request */
-		sock = sock_connect();
-		barf(sock, buf);
-
-		fread(type, 1, 1, sock);
-		if (feof(sock) || ferror(sock))
-			die("Short response from mod_notionflux.\n");
-
-		if (*type != 'S' && *type != 'E')
-			die("Unknown response type (%x)\n", (int)*type);
-	}
-
-	size_t bytes = slurp(sock, buf, MAX_DATA);
+	size_t bytes = slurp(*sock, buf, MAX_DATA);
 	if (bytes == MAX_DATA)
 		return true;
 
-	if (ferror(sock))
+	if (ferror(*sock))
 		die("Error condition on mod_notionflux response.\n");
 
 	// must be feof
-	fclose(sock);
-	sock = NULL;
+	fclose(*sock);
+	*sock = NULL;
 	return true;
+}
+
+struct buf {
+	size_t size;
+	size_t pos;
+	char buf[MAX_DATA];
+};
+
+bool buf_append(struct buf *buf, char const *str)
+{
+	size_t len = strlen(str);
+
+	if (buf->pos + len >= buf->size)
+		return false;
+
+	memcpy(buf->buf + buf->pos, str, len + 1);
+	buf->pos += len;
+	return true;
+}
+
+void buf_grow(struct buf **buf, size_t n)
+{
+	*buf = realloc(*buf, (*buf)->size+n);
+	if (!*buf)
+		die("realloc failed\n");
+}
+
+
+char *completion_generator(const char *text, int state)
+{
+	static struct buf *buf = NULL;
+	const char *req_str = "return table.concat("
+		"mod_query.do_complete_lua(_G,'%s'),' ');";
+	rl_completion_suppress_append = 1;
+
+	if (state == 0) {
+		if (buf) free(buf); /* huh */
+		buf = malloc(sizeof(*buf));
+		if (!buf) die("malloc failed\n");
+		buf->pos = 0;
+		buf->buf[0] = 0;
+		buf->size = MAX_DATA;
+
+		char temp[MAX_DATA];
+		snprintf(temp, MAX_DATA, req_str, text);
+		char type;
+		FILE *remote = request(temp, &type);
+		if (type == 'E') {
+			fclose(remote);
+			goto finish;
+		}
+
+		while (response(temp, &remote)) {
+			if (!buf_append(buf, temp)) {
+				buf_grow(&buf, MAX_DATA);
+				buf_append(buf, temp);
+			}
+		}
+		buf->pos = 0;
+	}
+
+	char const skip_chars[] = " \"\n\r";
+	buf->pos += strspn(buf->buf+buf->pos, skip_chars);
+
+	if (buf->buf[buf->pos] == '\0')
+		goto finish;
+
+	size_t next = strcspn(buf->buf+buf->pos, skip_chars);
+	char *ret = strndup(buf->buf+buf->pos, next);
+	buf->pos += next+1;
+	return ret;
+finish:
+	free(buf);
+	buf = NULL;
+	return NULL;
 }
 
 int initialize_readline(void)
 {
 	rl_readline_name = "notionflux";
+	rl_completion_entry_function = completion_generator;
 	return 0;
 }
 
-struct {
-	size_t pos;
-	char buf[MAX_DATA];
-} input = {0};
+struct buf input = {MAX_DATA, 0, {0}};
 
 #if 1 /* Taken from lua/lua.c, because they don't export it */
 
@@ -183,18 +254,7 @@ bool is_lua_incomplete(char *lua, size_t len)
 }
 #endif
 
-bool input_append(char const *str)
-{
-	size_t len = strlen(str);
-
-	if (input.pos+len >= sizeof(input.buf))
-		return false;
-
-	memcpy(input.buf+input.pos, str, len+1);
-	input.pos += len;
-	return true;
-}
-
+#define input_append(str) buf_append(&input, str)
 #define input_reset() prompt="lua> ", input.pos=0, input.buf[0]=0
 
 int repl_main(void)
@@ -211,7 +271,7 @@ int repl_main(void)
 				break;
 			} else {    /* abort previous input */
 				input_reset();
-				puts("");
+				puts("^D");
 				continue;
 			}
 		}
@@ -231,9 +291,10 @@ int repl_main(void)
 		}
 
 		char type = 0;
-		while (request(input.buf, &type)) {
-			fputs(input.buf, stdout);
-		}
+		FILE *remote = request(input.buf, &type);
+		char out[MAX_DATA];
+		while (response(out, &remote))
+			fputs(out, stdout);
 		input_reset();
 	}
 
@@ -243,9 +304,8 @@ int repl_main(void)
 int main(int argc, char **argv)
 {
 	sockfilename = get_socket_filename();
-	FILE *remote = sock_connect();
-	char buf[MAX_DATA + 1];
 	char *data;
+	char buf[MAX_DATA];
 
 	if (argc == 1 && isatty(STDIN_FILENO)) {
 		return repl_main();
@@ -260,21 +320,13 @@ int main(int argc, char **argv)
 		die("Usage: %s [-R|-e code]\n", argv[0]);
 	}
 
-	barf(remote, data);
+	FILE *remote;
+	char type;
+	remote = request(data, &type);
 
-	size_t bytes = slurp(remote, buf, MAX_DATA+1);
-	if (!bytes)
-		die("fread failed\n");
-
-	char type = buf[0];
-	if (type != 'S' && type != 'E')
-		die("Unknown response type '%c'(%x)\n", type, type);
-
-	fputs(buf+1, type == 'S' ? stdout : stderr);
-	do {
-		bytes = slurp(remote, buf, MAX_DATA);
-		fputs(buf, type == 'S' ? stdout : stderr);
-	} while (bytes == MAX_DATA);
+	FILE *dest = type == 'S' ? stdout : stderr;
+	while (response(buf, &remote))
+		fputs(buf, dest);
 
 	return 0;
 }
