@@ -1,86 +1,108 @@
-.TH NOTIONFLUX 1
-.SH NAME
-Notionflux - lua remote control for Notion.
-.SH SYNOPSIS
-.B notionflux
-.I "[-e code]"
-.SH "DESCRIPTION"
-
-.B notionflux
-allows you to access the notion lua scripting interface from the
-command\-line. It either takes a script from stdin or through the \'\-e\'
-parameter.
-
-The lua script will be executed by the Lua engine running in Notion, which
-means it has access to the Notion lua api (notioncore.* et al). Calls to
-\'print\' will print values to Notion\'s stdout (e.g. ~/.xsession\-errors).
-The scripts\' return value will be printed by
-.B notionflux
-.
-
-.SH "OPTIONS"
-.TP
-.B \-e code
-Lua code to execute.
-
-.SH "ENVIRONMENT"
-
-.B notionflux
-talks to
-.BR notion (1)
-through a socket, which is determined by the
-.B _NOTION_MOD_NOTIONFLUX_SOCKET
-property on the root of the display on which
-.BR notion (1)
-is running.
-
-.SH "SECURITY"
-
+.\" Copyright (c) 2019 Moritz Wilhelmy
+.\" This file is hereby licensed Creative Commons CC0 - no rights reserved
+.\" For more information, see https://creativecommons.org/share-your-work/public-domain/cc0/
+.\" This is an mdoc(7) manual page, as any manual page should be.
+.Dd June 20, 2019
+.Os notion
+.Dt notionflux 1
+.Sh NAME
+.Nm notionflux
+.Nd Lua remote control for notion
+.Sh SYNOPSIS
+.Nm Op Fl e Ar lua-code
+.Pp
+.Nm Op Fl R
+.Sh DESCRIPTION
+.Nm
+is a tool to send scripts to the Lua scripting engine inside the
+.Xr notion 1
+window manager. The script can thus access notion's internal Lua API.
+.Pp
+There are two modes of operation, interactive and batch.
+Interactive mode is enabled by running
+.Nm
+with its standard input connected to a terminal and without passing any commandline flags.
+.Pp
+Otherwise, batch mode is enabled:
+.Bl -tag -width Ds
+.It Fl R
+Force batch-mode even if stdin is connected to a terminal.
+Lua code is read from stdin until the end-of-file is reached,
+is sent to notion for processing, and the result is read back and displayed.
+.It Fl e Ar code
+Almost the same as above, except instead of reading from stdin, the command line parameter
+.Ar code
+is submitted for processing.
+.El
+.Sh INTERACTIVE MODE
+This mode is similar to running an interactive
+.Xr lua 1
+shell. Tab completion for notion's Lua API is available, as well as line-editing.
+.Pp
+Code that has been entered is evaluated by notion as soon as it is a complete
+Lua statement. The result is displayed after which the next statement can be
+entered.
+.Sh ENVIRONMENT
+.Bl -tag -width DISPLAY
+.It Ev DISPLAY
 The
-.B notionflux
-socket is created with read/write permissions only for the user who started
-.BR notion (1).
-Neither
-.BR notion (1)
-nor
-.B notionflux
-are
-.BR setuid (2),
-so
-.B notionflux
-should not pose any security threat.
-
-.SH "EXAMPLES"
-Write \'foo\' to
-.BR notion (1)\'s
-stdout and \'bar\' to the terminal, specifying the script on the commandline:
-.PP
-.nf
-.RS
-$ notionflux \-e "print('foo'); return 'bar'"
-"bar"
-.RE
-.fi
-.PP
-Or the same, but now via STDIN:
-.PP
-.nf
-.RS
-$ echo "print('foo'); return 'bar'" | notionflux
-"bar"
-.RE
-.fi
-.PP
-
-.SH SEE ALSO
-The Notion home page, \fIhttps://notionwm.net/\fP
-.PP
-The document "Configuring and extending Notion with Lua" found on the
-Notion home page.
-.PP
-.I DOCDIR/
-.PP
-\fIX(7x)\fP, \fInotionflux(1)\fP
-
-.SH AUTHOR
-Notionflux was written by the Notion team, based on ionflux which was written by Tuomo Valkonen <tuomov at iki.fi>.
+.Ev DISPLAY
+environment variable must be set to an X server running notion in order for
+.Nm
+to obtain the socket path.
+.El
+.Sh SECURITY
+.Nm
+connects to
+.Xr notion 1
+through a Unix domain socket. This socket is created with read/write permissions
+only for the user who started notion. The socket path can be queried with the following command:
+.Bd -literal -offset indent
+.Ic $ xprop Fl root Cm _NOTION_MOD_NOTIONFLUX_SOCKET
+_NOTION_MOD_NOTIONFLUX_SOCKET(STRING) = "/tmp/fileuj6onu"
+.Ed
+.Pp
+.Sh EXAMPLES
+The command
+.Bd -literal -offset indent
+.Ic $ Nm Fl e Qq Cm return notioncore.current():name()
+"emacs: notionflux.1"
+.Ed
+.Pp
+will display the title of the currently focused window, while
+.Bd -literal -offset indent
+.Ic $ Nm Fl e Qq Cm print(notioncore.current():name())
+nil
+.Ed
+.Pp
+will print the message to notion's standard output (usually
+.Pa ~/.xsession\-errors )
+.Pp
+In any response from mod_notionflux, strings are quoted in a way that can be
+directly pasted back into a Lua interpreter to yield the same string, while
+other types are turned into their string representation using
+.Fn tostring .
+This is why there are quotation marks around the response in the first example
+where nil (which is the return value of a block which has no return statement)
+does not have them.
+.Sh SEE ALSO
+.Lk https://notionwm.net/ "The notion homepage"
+.Pp
+The document
+.Dq Configuring and extending Notion with Lua
+found on the Notion homepage.
+.Pp
+.Pa DOCDIR/
+.Pp
+.Xr notion 1 ,
+.Xr X 7 ,
+.Xr lua 1 ,
+.Xr readline 3
+.Sh HISTORY
+An ionflux command appeared in ion3 around 2004. It was adapted to notion by the
+notion development team when notion was forked from ion3 in 2010.
+.Sh AUTHOR
+.Nm
+was rewritten in 2019 by
+.An Moritz Wilhelmy
+under the GNU GPL in order to add the interactive mode.
