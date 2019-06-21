@@ -1,253 +1,396 @@
-/*
- * mod_notionflux/notionflux/notionflux.c
- *
- * Copyright (c) Tuomo Valkonen 2004-2005.
- *
- * This is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- */
+/* Copyright (C) 2019 Moritz Wilhelmy
 
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
+   This utility is part of the notion window manager, but uses a different
+   license because GNU readline requires it.
 
-#include <libtu/types.h>
+   notionflux is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License (to be compatible with
+   GNU readline) as well as Lesser General Public License (to be more compatible
+   with notion itself) as published by the Free Software Foundation, either
+   version 2 of the Licenses, or (at your option) any later version.
+
+   By linking against readline, the created binary will be subject to the terms
+   of GPL version 3.
+
+   notionflux is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with notionflux.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+#include <unistd.h>
+#include <stdbool.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <lua.h>
+#include <lauxlib.h>
+
 #include "../notionflux.h"
 
-static void die(const char *s)
+#define die(...) fprintf(stderr, __VA_ARGS__), exit(1)
+
+#define SOCK_ATOM "_NOTION_MOD_NOTIONFLUX_SOCKET"
+
+char const *sockfilename = NULL;
+
+char const *get_socket_filename(void)
 {
-    fprintf(stderr, "%s\n", s);
-    exit(1);
+	Display *dpy = XOpenDisplay(NULL);
+	if (!dpy)
+		die("Failed to open display\n");
+
+	Window root = DefaultRootWindow(dpy);
+	Atom sockname_prop = XInternAtom(dpy, SOCK_ATOM, True);
+	if (sockname_prop == None)
+		die("No %s property set on the root window... is notion "
+		    "running with mod_notionflux loaded?\n", SOCK_ATOM);
+
+	Atom type;
+	int d1; /* dummy */
+	unsigned long d2, d3; /* dummy */
+	unsigned char *ret;
+	int pr = XGetWindowProperty(dpy, root, sockname_prop, 0L, 512L, False,
+				    XA_STRING, &type, &d1, &d2, &d3, &ret);
+
+	if (pr != Success || type != XA_STRING)
+		 die("XGetWindowProperty failed\n");
+
+	char *rv = strdup((char*)ret);
+
+	XFree(ret);
+	XCloseDisplay(dpy);
+	return rv;
 }
 
-
-static void die_e(const char *s)
+FILE *sock_connect(void)
 {
-    perror(s);
-    exit(1);
+	struct sockaddr_un serv;
+	if (strlen(sockfilename) >= sizeof(serv.sun_path))
+		die("Socket file name too long\n");
+	int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+
+	serv.sun_family = AF_UNIX;
+	strcpy(serv.sun_path, sockfilename);
+	if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) == -1)
+		die("Failed to connect to socket %s\n", sockfilename);
+
+	FILE *f = fdopen(sock, "w+");
+	if (!f)
+		die("fdopen failed\n");
+
+	return f;
 }
 
-static void mywrite(int fd, const char *buf, int n)
+/* read from f until EOF */
+size_t slurp(FILE *f, char *buf, size_t n)
 {
-    while(n>0){
-        int k;
-        k=write(fd, buf, n);
-        if(k<0 && (errno!=EAGAIN && errno!=EINTR))
-            die_e("Writing");
-        if(k>0){
-            n-=k;
-            buf+=k;
-        }
-    }
+	size_t bytes = fread(buf, 1, n-1, f);
+	buf[bytes]='\0';
+	return bytes+1;
 }
 
-
-static int myread(int fd, char *buf, int n)
+FILE *request(char const buf[MAX_DATA], char *type)
 {
-    int left=n;
+	FILE *sock = NULL;
 
-    while(left>0){
-        int k;
-        k=read(fd, buf, left);
-        if(k<0 && (errno!=EAGAIN && errno!=EINTR))
-            die_e("Writing");
-        if(k==0)
-            break;
-        if(k>0){
-            left-=k;
-            buf+=k;
-        }
-    }
-    return n-left;
+	sock = sock_connect();
+
+	fputs(buf, sock);
+	fputc('\0', sock);
+	fflush(sock);
+
+	fread(type, 1, 1, sock);
+
+	if (feof(sock) || ferror(sock))
+		die("Short response from mod_notionflux.\n");
+
+	if (*type != 'S' && *type != 'E')
+		die("Unknown response type (%x)\n", (int)*type);
+
+	return sock;
 }
 
-
-static char buf[MAX_DATA];
-
-
-/*{{{ X */
-
-
-static Display *dpy=NULL;
-
-
-static ulong xwindow_get_property_(Window win, Atom atom, Atom type,
-                                   ulong n32expected, bool more, uchar **p,
-                                   int *format)
+bool response(char buf[MAX_DATA], FILE **sock)
 {
-    Atom real_type;
-    ulong n=-1, extra=0;
-    int status;
+	if (!*sock)
+		return false;
 
-    do{
-        status=XGetWindowProperty(dpy, win, atom, 0L, n32expected,
-                                  False, type, &real_type, format, &n,
-                                  &extra, p);
+	size_t bytes = slurp(*sock, buf, MAX_DATA);
+	if (bytes == MAX_DATA)
+		return true;
 
-        if(status!=Success || *p==NULL)
-            return -1;
+	if (ferror(*sock))
+		die("Error condition on mod_notionflux response.\n");
 
-        if(extra==0 || !more)
-            break;
-
-        XFree((void*)*p);
-        n32expected+=(extra+4)/4;
-        more=FALSE;
-    }while(1);
-
-    if(n==0){
-        XFree((void*)*p);
-        *p=NULL;
-        return -1;
-    }
-
-    return n;
+	// must be feof
+	fclose(*sock);
+	*sock = NULL;
+	return true;
 }
 
+struct buf {
+	size_t size;
+	char *cur;
+	char buf[MAX_DATA];
+};
 
-ulong xwindow_get_property(Window win, Atom atom, Atom type,
-                           ulong n32expected, bool more, uchar **p)
+size_t buf_pos(struct buf *buf)
 {
-    int format=0;
-    return xwindow_get_property_(win, atom, type, n32expected, more, p,
-                                 &format);
+	return buf->cur - buf->buf;
 }
 
-
-char *xwindow_get_string_property(Window win, Atom a, int *nret)
+bool buf_append(struct buf *buf, char const *str)
 {
-    char *p;
-    int n;
+	size_t len = strlen(str);
 
-    n=xwindow_get_property(win, a, XA_STRING, 64L, TRUE, (uchar**)&p);
+	if (buf_pos(buf) + len >= buf->size)
+		return false;
 
-    if(nret!=NULL)
-        *nret=n;
-
-    return (n<=0 ? NULL : p);
+	memcpy(buf->cur, str, len + 1);
+	buf->cur += len;
+	return true;
 }
 
-
-void xwindow_set_string_property(Window win, Atom a, const char *value)
+void buf_grow(struct buf **buf, size_t n)
 {
-    if(value==NULL){
-        XDeleteProperty(dpy, win, a);
-    }else{
-        XChangeProperty(dpy, win, a, XA_STRING,
-                        8, PropModeReplace, (uchar*)value, strlen(value));
-    }
+	size_t bufsize = (*buf)->size + n;
+	size_t structsize = bufsize + (sizeof(struct buf) - sizeof((*buf)->buf));
+	size_t pos = buf_pos(*buf);
+	*buf = realloc(*buf, structsize);
+	if (!*buf)
+		die("realloc failed\n");
+	(*buf)->size = bufsize;
+	(*buf)->cur = (*buf)->buf + pos;
 }
 
-
-static char *get_socket()
+void *alloc(size_t bytes)
 {
-    Atom a;
-    char *s;
-
-    dpy=XOpenDisplay(NULL);
-
-    if(dpy==NULL)
-        die_e("Unable to open display.");
-
-    a=XInternAtom(dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", True);
-
-    if(a==None)
-        die_e("Missing _NOTION_MOD_NOTIONFLUX_SOCKET atom. Perhaps Notion is not running, or mod_notionflux is not loaded");
-
-    s=xwindow_get_string_property(DefaultRootWindow(dpy), a, NULL);
-
-    XCloseDisplay(dpy);
-
-    return s;
+	void *buf = malloc(bytes);
+	if (!buf)
+		die("malloc failed\n");
+	return buf;
 }
 
-
-/*}}}*/
-
-
-int main(int argc, char *argv[])
+struct buf *buf_make(void)
 {
-    int sock;
-    struct sockaddr_un serv;
-    const char *sockname;
-    int use_stdin=1;
-    char res;
-    int n;
-    int exit_status=0;
-
-    if(argc>1){
-        if(argc!=3 || strcmp(argv[1], "-e")!=0)
-            die("Usage: notionflux [-e code]");
-
-        if(strlen(argv[2])>=MAX_DATA)
-            die("Too much data.");
-
-        use_stdin=0;
-    }
-
-    sockname=get_socket();
-    if(sockname==NULL)
-        die("No socket.");
-
-    if(strlen(sockname)>SOCK_MAX)
-        die("Socket name too long.");
-
-    sock=socket(AF_UNIX, SOCK_STREAM, 0);
-    if(sock<0)
-        die_e("Opening socket");
-
-    serv.sun_family=AF_UNIX;
-    strcpy(serv.sun_path, sockname);
-
-    if(connect(sock, (struct sockaddr*)&serv, sizeof(struct sockaddr_un))<0)
-        die_e("Connecting socket");
-
-    if(!use_stdin){
-        mywrite(sock, argv[2], strlen(argv[2])+1);
-    }else{
-        char c='\0';
-        while(1){
-            if(fgets(buf, MAX_DATA, stdin)==NULL)
-                break;
-            mywrite(sock, buf, strlen(buf));
-        }
-        mywrite(sock, &c, 1);
-    }
-
-    n=myread(sock, &res, 1);
-
-    if(n!=1 || (res!='E' && res!='S'))
-        die("Invalid response");
-
-    while(1){
-        n=myread(sock, buf, MAX_DATA);
-
-        if(n==0)
-            break;
-
-        if(res=='S'){
-            mywrite(1, buf, n);
-        }
-        else{ /* res=='E' */
-            mywrite(2, buf, n);
-            exit_status=2;
-        }
-
-        if(n<MAX_DATA)
-            break;
-    }
-
-    return exit_status;
+	struct buf *buf = alloc(sizeof(*buf));
+	buf->cur = buf->buf;
+	buf->buf[0] = 0;
+	buf->size = MAX_DATA;
+	return buf;
 }
 
+char *completion_generator(const char *text, int state)
+{
+	static struct buf *buf = NULL;
+	const char *req_str = "return table.concat("
+		"mod_query.do_complete_lua(_G,'%s'),' ');";
+	rl_completion_suppress_append = 1;
+
+	if (state == 0) {
+		if (buf) free(buf); /* huh */
+		buf = buf_make();
+
+		char temp[MAX_DATA];
+		snprintf(temp, MAX_DATA, req_str, text);
+
+		char type;
+		FILE *remote = request(temp, &type);
+		if (type == 'E') {
+			fclose(remote);
+			goto finish;
+		}
+
+		while (response(temp, &remote)) {
+			if (!buf_append(buf, temp)) {
+				buf_grow(&buf, MAX_DATA);
+				buf_append(buf, temp);
+			}
+		}
+		buf->cur = buf->buf;
+	}
+
+	char const skip_chars[] = " \"\n\r";
+	buf->cur += strspn(buf->cur, skip_chars);
+
+	if (*buf->cur == '\0')
+		goto finish;
+
+	size_t length = strcspn(buf->cur, skip_chars);
+	buf->cur[length] = '\0';
+
+	char *ret;
+	char *lastdot = strrchr(text, '.');
+	if (!lastdot) {
+		ret = strdup(buf->cur);
+	} else {
+		/* mod_query trims tables in completions, prepend back */
+		size_t dotpos = lastdot - text + 1;
+		ret = alloc(dotpos + length + 1);
+		ret[0] = '\0';
+		strncat(ret, text, dotpos);
+		strcat(ret, buf->cur);
+	}
+
+	buf->cur += length+1;
+	return ret;
+finish:
+	free(buf);
+	buf = NULL;
+	return NULL;
+}
+
+int initialize_readline(void)
+{
+	rl_readline_name = "notionflux";
+	rl_completion_entry_function = completion_generator;
+	rl_basic_word_break_characters = " \t\n#;|&{(["
+		"<>~="
+		"+-*/%^";
+	rl_basic_quote_characters = "\'\"";
+	return 0;
+}
+
+struct buf input = {MAX_DATA, 0, {0}};
+
+#if 1 /* Ideas taken from lua/lua.c, because the REPL isn't part of liblua */
+
+/* mark in error messages for incomplete statements */
+#define EOFMARK		"<eof>"
+#define marklen		(sizeof(EOFMARK)/sizeof(char) - 1)
+
+bool is_lua_incomplete(lua_State *L, char const *lua, size_t len)
+{
+	lua_settop(L, 0);
+	int status = luaL_loadbuffer(L, lua, len, "=stdin");
+
+	if (status == LUA_ERRSYNTAX) {
+		size_t lmsg;
+		const char *msg = lua_tolstring(L, -1, &lmsg);
+		if (lmsg >= marklen && strcmp(msg + lmsg - marklen, EOFMARK) == 0) {
+			lua_pop(L, 1);
+			return true;
+		}
+	}
+	return false;
+}
+
+char const *make_lua_exp(char *lua, size_t size)
+{
+	static lua_State *L = NULL;
+	if (!L) L=luaL_newstate();
+
+	/* Inspired by Lua 5.3:
+	 * Attempt to add a return keyword and see if the snippet can be loaded
+	 * without an error (which would mean that it is an expression). If not,
+	 * see if it is complete. If it isn't complete either, wait for the user
+	 * to finish the statement. This way, the user doesn't have to type
+	 * return in front of everything and still gets to see the return value. */
+
+	const char *retline = lua_pushfstring(L, "return %s;", lua);
+	int status = luaL_loadbuffer(L, retline, strlen(retline), "=stdin");
+	lua_settop(L, 0);
+
+	if (status == LUA_OK)
+		return retline; /* presumably managed by lua's GC */
+	else if (!is_lua_incomplete(L, lua, size))
+		return lua;
+	return NULL;
+}
+#endif
+
+#define input_append(str) buf_append(&input, str)
+#define input_reset() prompt="lua> ", input.cur=input.buf, input.buf[0]=0
+
+int repl_main(void)
+{
+	char *line = NULL;
+	char const *prompt;
+	rl_startup_hook = initialize_readline;
+	input_reset();
+
+	while (1) {
+		free(line);
+		line = readline(prompt);
+
+		if (!line) { /* EOF */
+			puts("^D");
+			if (buf_pos(&input) == 0) {      /* user quit */
+				return 0;
+			} else {                /* abort previous input */
+				input_reset();
+				continue;
+			}
+		}
+
+		if (line[0] == '\0') /* empty line, skip */
+			continue;
+
+		add_history(line);
+
+		if (!input_append(line) || !input_append("\n")) {
+			printf("Maximum length (%db) exceeded.\n", MAX_DATA);
+			input_reset();
+			continue;
+		}
+
+		char const *lua_exp = make_lua_exp(input.buf, buf_pos(&input));
+		if (!lua_exp) {
+			prompt = "...> ";
+			continue;
+		}
+
+		char type = 0;
+		FILE *remote = request(lua_exp, &type);
+		char out[MAX_DATA];
+		while (response(out, &remote))
+			fputs(out, stdout);
+		input_reset();
+	}
+	/* unreachable */
+}
+
+int main(int argc, char **argv)
+{
+	sockfilename = get_socket_filename();
+	char *data;
+	char buf[MAX_DATA];
+
+	if (argc == 1 && isatty(STDIN_FILENO)) {
+		return repl_main();
+	} else if (argc == 1 || (argc == 2 && strcmp(argv[1], "-R") == 0)) {
+		data = buf;
+		slurp(stdin, buf, MAX_DATA);
+	} else if (argc == 3 && strcmp(argv[1], "-e") == 0) {
+		data = argv[2];
+		if (strlen(data) > MAX_DATA)
+			die("Too much data\n");
+	} else {
+		die("Usage: %s [-R|-e code]\n", argv[0]);
+	}
+
+	FILE *remote;
+	char type;
+	remote = request(data, &type);
+
+	FILE *dest = type == 'S' ? stdout : stderr;
+	while (response(buf, &remote))
+		fputs(buf, dest);
+
+	return 0;
+}

@@ -33,7 +33,7 @@ notion.%.1: notion.%.in $(CONFIGS) ../po/%.po
 	$(MKMAN) -po ../po/$*.po -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
 
 notionflux.1: notionflux.in $(CONFIGS)
-	$(MKMAN) -i $< -o $@ $(CONFIGS)
+	$(MKMAN) -i $< -o $@ -D DOCDIR $(DOCDIR) $(CONFIGS)
 
 welcome%txt: welcome%head notion%1
 	(cat welcome$*head; \

@@ -114,6 +114,17 @@ else
     DEFINES += -DHAVE_X11_BMF
 endif
 
+##
+## GNU readline, currently only used by mod_notionflux/notionflux
+##
+ifeq ($(USE_READLINE),1)
+    # Debian does not install readline.pc
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=901650
+    READLINE_INCLUDES_FALLBACK := -D_XOPEN_SOURCE=600 -I/usr/include/readline
+    READLINE_LIBS_FALLBACK := -lreadline
+    READLINE_INCLUDES ?= $(shell pkg-config readline --cflags || echo $(READLINE_INCLUDES_FALLBACK))
+    READLINE_LIBS ?= $(shell pkg-config readline --libs || echo $(READLINE_LIBS_FALLBACK))
+endif
 
 ##
 ## Localisation
