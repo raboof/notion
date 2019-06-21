@@ -21,11 +21,13 @@
    along with notionflux.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdbool.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -266,7 +268,7 @@ int initialize_readline(void)
 	return 0;
 }
 
-struct buf input = {MAX_DATA, 0, {0}};
+struct buf input = {MAX_DATA, input.buf, {0}};
 
 #if 1 /* Ideas taken from lua/lua.c, because the REPL isn't part of liblua */
 
@@ -365,23 +367,68 @@ int repl_main(void)
 	/* unreachable */
 }
 
+char const *make_dofile_exp(char const *path, struct buf *buf)
+{
+	char rpath[PATH_MAX];
+	if (!realpath(path, rpath))
+		die("Failed to resolve path: %s\n", strerror(errno));
+
+	FILE *f = fopen(rpath, "r");
+	if (!f)
+		die("Failed to open file for reading: %s.\n", strerror(errno));
+	fclose(f);
+
+	buf_append(buf, "return dofile('");
+
+	/* quote the string for lua */
+	for (char *p=rpath; *p!='\0' && buf_pos(buf) < buf->size; p++){
+		/* this switch statement is not strictly required because nobody
+		 * is going to see the string */
+		switch (*p) {
+		case '\r': buf_append(buf, "\\r"); continue;
+		case '\n': buf_append(buf, "\\n"); continue;
+		case '\t': buf_append(buf, "\\t"); continue;
+		case '\'': buf_append(buf, "\\'"); continue;
+		case '\f': buf_append(buf, "\\f"); continue;
+		case '\v': buf_append(buf, "\\v"); continue;
+		}
+
+		if (*p >= ' ' && *p <= '~') { /* printable 7-bit ASCII */
+			char b[] = {*p, '\0'};
+			buf_append(buf, b);
+		} else {
+			char b[6] = {0};
+			snprintf(b, sizeof(b), "\\%d", *p);
+			buf_append(buf, b);
+		}
+	}
+
+	if (!buf_append(buf, "');--"))
+		die("Filename too long.\n");
+
+	buf->cur = buf->buf;
+	return buf->buf;
+}
+
 int main(int argc, char **argv)
 {
 	sockfilename = get_socket_filename();
-	char *data;
-	char buf[MAX_DATA];
+	struct buf buf = {MAX_DATA, buf.buf, {0}};
+	char const *data;
 
 	if (argc == 1 && isatty(STDIN_FILENO)) {
 		return repl_main();
 	} else if (argc == 1 || (argc == 2 && strcmp(argv[1], "-R") == 0)) {
-		data = buf;
-		slurp(stdin, buf, MAX_DATA);
+		data = buf.buf;
+		slurp(stdin, buf.buf, buf.size);
+	} else if (argc == 2 && argv[1][0] != '-') {
+		data = make_dofile_exp(argv[1], &buf);
 	} else if (argc == 3 && strcmp(argv[1], "-e") == 0) {
 		data = argv[2];
 		if (strlen(data) > MAX_DATA)
 			die("Too much data\n");
 	} else {
-		die("Usage: %s [-R|-e code]\n", argv[0]);
+		die("Usage: %s [-R|-e code|filename]\n", argv[0]);
 	}
 
 	FILE *remote;
@@ -389,8 +436,8 @@ int main(int argc, char **argv)
 	remote = request(data, &type);
 
 	FILE *dest = type == 'S' ? stdout : stderr;
-	while (response(buf, &remote))
-		fputs(buf, dest);
+	while (response(buf.buf, &remote))
+		fputs(buf.buf, dest);
 
 	return 0;
 }

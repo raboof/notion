@@ -12,6 +12,8 @@
 .Nm Op Fl e Ar lua-code
 .Pp
 .Nm Op Fl R
+.Pp
+.Nm Op Pa file
 .Sh DESCRIPTION
 .Nm
 is a tool to send scripts to the Lua scripting engine inside the
@@ -33,6 +35,8 @@ is sent to notion for processing, and the result is read back and displayed.
 Almost the same as above, except instead of reading from stdin, the command line parameter
 .Ar code
 is submitted for processing.
+.It Pa file
+The content of the file is evaluated.
 .El
 .Sh INTERACTIVE MODE
 This mode is similar to running an interactive
@@ -65,18 +69,37 @@ _NOTION_MOD_NOTIONFLUX_SOCKET(STRING) = "/tmp/fileuj6onu"
 .Sh EXAMPLES
 The command
 .Bd -literal -offset indent
-.Ic $ Nm Fl e Qq Cm return notioncore.current():name()
+.Ic $ Nm Fl e Qq return notioncore.current():name()
 "emacs: notionflux.1"
 .Ed
 .Pp
 will display the title of the currently focused window, while
 .Bd -literal -offset indent
-.Ic $ Nm Fl e Qq Cm print(notioncore.current():name())
+.Ic $ Nm Fl e Qq print(notioncore.current():name())
 nil
 .Ed
 .Pp
 will print the message to notion's standard output (usually
-.Pa ~/.xsession\-errors )
+.Pa ~/.xsession\-errors ) .
+.Pp
+Using input redirection:
+.Bd -literal -offset indent
+.Ic $ Cm echo Qo return notioncore.current() Qc | Nm Op Fl R
+WClientWin: 0x9bb6b8
+.Ed
+.Pp
+Using interactive mode:
+.Bd -literal -offset indent
+.Ic $ Nm
+lua> notioncore.current():rootwin_of()
+WRootWin: 0x8c9688
+lua> do
+\&...>   local x = 42 -- Lua defaults to global scope, don't litter
+\&...>   return x
+\&...> end
+42
+lua> ^D
+.Ed
 .Pp
 In any response from mod_notionflux, strings are quoted in a way that can be
 directly pasted back into a Lua interpreter to yield the same string, while
@@ -92,6 +115,8 @@ The document
 .Dq Configuring and extending Notion with Lua
 found on the Notion homepage.
 .Pp
+.Lk https://www.lua.org/manual/LUA_REFVERSION/manual.html "The Lua LUA_REFVERSION reference manual"
+.Pp
 .Pa DOCDIR/
 .Pp
 .Xr notion 1 ,
@@ -106,3 +131,7 @@ notion development team when notion was forked from ion3 in 2010.
 was rewritten in 2019 by
 .An Moritz Wilhelmy
 under the GNU GPL in order to add the interactive mode.
+.Sh BUGS
+Currently, the script must be 4095 bytes or shorter. If you need more, consider
+passing a filename, which is passed to notion for evaluation and therefore
+circumvents this limit.

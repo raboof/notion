@@ -14,6 +14,7 @@ MKMAN=$(LUA) ../build/mkman.lua
 NROFF=nroff -man -Tlatin1
 #FILTERCRAP=perl -p -i -e 's/.\10//g'
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
+LUA_REFVERSION:=$(shell $(LUA) -e 'print(_VERSION:match("[\x25d.]+"))')
 
 CONFIGS=../etc/cfg_notioncore.lua \
 	../etc/cfg_tiling.lua \
@@ -33,7 +34,7 @@ notion.%.1: notion.%.in $(CONFIGS) ../po/%.po
 	$(MKMAN) -po ../po/$*.po -i $< -o $@ -D ETCDIR $(ETCDIR) -D DOCDIR $(DOCDIR) $(CONFIGS)
 
 notionflux.1: notionflux.in $(CONFIGS)
-	$(MKMAN) -i $< -o $@ -D DOCDIR $(DOCDIR) $(CONFIGS)
+	$(MKMAN) -i $< -o $@ -D DOCDIR $(DOCDIR) -D LUA_REFVERSION $(LUA_REFVERSION) $(CONFIGS)
 
 welcome%txt: welcome%head notion%1
 	(cat welcome$*head; \
@@ -47,3 +48,8 @@ _install:
 	for i in $(TARGETS); do \
 		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(SHAREDIR) ; \
 	done
+
+clean:
+	$(RM) -f $(TARGETS)
+
+.PHONY: clean
