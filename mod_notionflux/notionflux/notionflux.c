@@ -44,6 +44,10 @@
 
 #include "../notionflux.h"
 
+#ifndef LUA_OK
+#define LUA_OK 0
+#endif
+
 #define die(...) fprintf(stderr, __VA_ARGS__), exit(1)
 
 #define SOCK_ATOM "_NOTION_MOD_NOTIONFLUX_SOCKET"
