@@ -324,6 +324,14 @@ static int extl_obj_gc_handler(lua_State *st)
     return 0;
 }
 
+static int extl_obj_tostring(lua_State *st)
+{
+    Obj *obj=NULL;
+    if(!extl_stack_get(st, 1, 'o', FALSE, NULL, &obj) || !obj)
+        return 0;
+    lua_pushfstring(st, "%s: %p", OBJ_TYPESTR(obj), lua_topointer(st, 1));
+    return 1;
+}
 
 static int extl_obj_typename(lua_State *st)
 {
@@ -2291,6 +2299,9 @@ static bool extl_do_register_class(lua_State *st, ClassData *data)
     lua_pushstring(st, "__gc");
     lua_pushcfunction(st, extl_obj_gc_handler);
     lua_rawset_check(st, -3); /* set metatable.__gc=extl_obj_gc_handler */
+    lua_pushstring(st, "__tostring");
+    lua_pushcfunction(st, extl_obj_tostring);
+    lua_rawset_check(st, -3); /* set metatable.__tostring=extl_obj_tostring */
     lua_pushfstring(st, "luaextl_%s_metatable", data->cls);
     lua_insert(st, -2);
     lua_rawset(st, LUA_REGISTRYINDEX);
