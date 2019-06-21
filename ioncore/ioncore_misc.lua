@@ -17,6 +17,8 @@ local layouts={
     default = empty,
 }
 
+local unpack = unpack or table.unpack
+
 --DOC
 -- Define a new workspace layout with name \var{name}, and
 -- attach/creation parameters given in \var{tab}. The layout

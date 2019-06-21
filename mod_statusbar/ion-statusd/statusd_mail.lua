@@ -19,6 +19,8 @@ local defaults={
     files = {}
 }
 
+local unpack = unpack or table.unpack
+
 local settings=table.join(statusd.get_config(mon), defaults)
 
 local function TR(s, ...)

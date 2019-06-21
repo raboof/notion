@@ -10,6 +10,8 @@
 
 local translations={}
 
+local unpack = unpack or table.unpack
+
 local function gettext(x)
     local t=translations[x]
     if not t or t=="" then
