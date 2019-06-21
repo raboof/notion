@@ -268,29 +268,49 @@ int initialize_readline(void)
 
 struct buf input = {MAX_DATA, 0, {0}};
 
-#if 1 /* Taken from lua/lua.c, because they don't export it */
+#if 1 /* Ideas taken from lua/lua.c, because the REPL isn't part of liblua */
 
 /* mark in error messages for incomplete statements */
 #define EOFMARK		"<eof>"
 #define marklen		(sizeof(EOFMARK)/sizeof(char) - 1)
 
-bool is_lua_incomplete(char *lua, size_t len)
+bool is_lua_incomplete(lua_State *L, char const *lua, size_t len)
 {
-	static lua_State *L = NULL;
-	if (!L) L=luaL_newstate();
-
-	lua_settop(L, 0); /* clear stack */
-	int status = luaL_loadbuffer(L, lua, len, "");
+	lua_settop(L, 0);
+	int status = luaL_loadbuffer(L, lua, len, "=stdin");
 
 	if (status == LUA_ERRSYNTAX) {
 		size_t lmsg;
 		const char *msg = lua_tolstring(L, -1, &lmsg);
-		if (lmsg >= marklen && strcmp(msg+lmsg-marklen, EOFMARK) == 0) {
+		if (lmsg >= marklen && strcmp(msg + lmsg - marklen, EOFMARK) == 0) {
 			lua_pop(L, 1);
 			return true;
 		}
 	}
 	return false;
+}
+
+char const *make_lua_exp(char *lua, size_t size)
+{
+	static lua_State *L = NULL;
+	if (!L) L=luaL_newstate();
+
+	/* Inspired by Lua 5.3:
+	 * Attempt to add a return keyword and see if the snippet can be loaded
+	 * without an error (which would mean that it is an expression). If not,
+	 * see if it is complete. If it isn't complete either, wait for the user
+	 * to finish the statement. This way, the user doesn't have to type
+	 * return in front of everything and still gets to see the return value. */
+
+	const char *retline = lua_pushfstring(L, "return %s;", lua);
+	int status = luaL_loadbuffer(L, retline, strlen(retline), "=stdin");
+	lua_settop(L, 0);
+
+	if (status == LUA_OK)
+		return retline; /* presumably managed by lua's GC */
+	else if (!is_lua_incomplete(L, lua, size))
+		return lua;
+	return NULL;
 }
 #endif
 
@@ -329,13 +349,14 @@ int repl_main(void)
 			continue;
 		}
 
-		if (is_lua_incomplete(input.buf, buf_pos(&input))) {
+		char const *lua_exp = make_lua_exp(input.buf, buf_pos(&input));
+		if (!lua_exp) {
 			prompt = "...> ";
 			continue;
 		}
 
 		char type = 0;
-		FILE *remote = request(input.buf, &type);
+		FILE *remote = request(lua_exp, &type);
 		char out[MAX_DATA];
 		while (response(out, &remote))
 			fputs(out, stdout);
