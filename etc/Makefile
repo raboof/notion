@@ -27,5 +27,5 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 _install: etc_install
-	rm -f $(ETCDIR)/look.lua
-	ln -s look_newviolet.lua $(ETCDIR)/look.lua
+	rm -f $(DESTDIR)$(ETCDIR)/look.lua
+	ln -s look_newviolet.lua $(DESTDIR)$(ETCDIR)/look.lua
