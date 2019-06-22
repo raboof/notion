@@ -17,8 +17,6 @@ local layouts={
     default = empty,
 }
 
-local unpack = unpack or table.unpack
-
 --DOC
 -- Define a new workspace layout with name \var{name}, and
 -- attach/creation parameters given in \var{tab}. The layout
@@ -75,8 +73,7 @@ end
 --DOC
 -- gettext+string.format
 function ioncore.TR(s, ...)
-    local arg = {...}
-    return string.format(ioncore.gettext(s), unpack(arg))
+    return string.format(ioncore.gettext(s), ...)
 end
 
 

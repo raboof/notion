@@ -19,12 +19,10 @@ local defaults={
     files = {}
 }
 
-local unpack = unpack or table.unpack
-
 local settings=table.join(statusd.get_config(mon), defaults)
 
 local function TR(s, ...)
-    return string.format(statusd.gettext(s), unpack(arg))
+    return string.format(statusd.gettext(s), ...)
 end
 
 local function check_spool()
