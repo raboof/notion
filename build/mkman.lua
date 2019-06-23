@@ -10,8 +10,6 @@
 
 local translations={}
 
-local unpack = unpack or table.unpack
-
 local function gettext(x)
     local t=translations[x]
     if not t or t=="" then
@@ -22,7 +20,7 @@ local function gettext(x)
 end
 
 local function TR(x, ...)
-    return string.format(gettext(x), unpack(arg))
+    return string.format(gettext(x), ...)
 end
 
 local function read_translations(pofile)
