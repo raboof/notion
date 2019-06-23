@@ -78,8 +78,7 @@ static const char ioncore_copy[]=
 
 static const char ioncore_license[]=DUMMY_TR(
     "This software is licensed under the GNU Lesser General Public License\n"
-    "(LGPL), version 2.1, extended with terms applying to the use of the\n"
-    "former name of the project, Ion(tm), unless otherwise indicated in\n"
+    "(LGPL), version 2.1, unless otherwise indicated in\n"
     "components taken from elsewhere. For details, see the file LICENSE\n"
     "that you should have received with this software.\n"
     "\n"
