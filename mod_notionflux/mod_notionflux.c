@@ -27,6 +27,7 @@
 #include <libmainloop/select.h>
 #include <libtu/errorlog.h>
 #include <libextl/extl.h>
+#include <libextl/luaextl.h>
 
 #include "notionflux.h"
 
@@ -41,18 +42,6 @@ Buf bufs[MAX_SERVED];
 static int listenfd=-1;
 static char *listenfile=NULL;
 static ExtlFn tostringfn;
-
-
-/* Without the 'or nil' kludge tostring may have no parameters. */
-static const char tostringstr[]=
-    "local arg={...}\n"
-    "local callable=arg[1]\n"
-    "local result=callable()\n"
-    "if type(result)=='string' then\n"
-    "    return string.format('%q', result)\n"
-    "else\n"
-    "    return tostring(result)\n"
-    "end\n";
 
 static void writes(int fd, const char *s)
 {
@@ -307,14 +296,11 @@ bool mod_notionflux_init()
         bufs[i].ndata=0;
     }
 
-    if(!extl_loadstring(tostringstr, &tostringfn))
+    if(!extl_lookup_global_value(&tostringfn, 'f', "mod_notionflux", "run_lua", NULL))
         return FALSE;
 
-    if(!start_listening()){
-        extl_unref_fn(tostringfn);
-        close_connections();
-        return FALSE;
-    }
+    if (!start_listening())
+        goto err_listening;
 
     flux_socket=XInternAtom(ioncore_g.dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", False);
 
@@ -323,6 +309,11 @@ bool mod_notionflux_init()
     }
 
     return TRUE;
+
+err_listening:
+    extl_unref_fn(tostringfn);
+    close_connections();
+    return FALSE;
 }
 
 

@@ -18,6 +18,7 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=mod_notionflux.c
 
+MODULE_STUB=mod_notionflux.lua
 MODULE=mod_notionflux
 
 ######################################
