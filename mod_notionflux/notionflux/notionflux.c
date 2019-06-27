@@ -415,8 +415,6 @@ char const *make_dofile_exp(char const *path, struct buf *buf)
 
 	/* quote the string for lua */
 	for (char *p=rpath; *p!='\0' && buf_pos(buf) < buf->size; p++){
-		/* this switch statement is not strictly required because nobody
-		 * is going to see the string */
 		switch (*p) {
 		case '\r': buf_append(buf, "\\r"); continue;
 		case '\n': buf_append(buf, "\\n"); continue;
@@ -424,6 +422,7 @@ char const *make_dofile_exp(char const *path, struct buf *buf)
 		case '\'': buf_append(buf, "\\'"); continue;
 		case '\f': buf_append(buf, "\\f"); continue;
 		case '\v': buf_append(buf, "\\v"); continue;
+		case '\\': buf_append(buf, "\\\\"); continue;
 		}
 
 		if (*p >= ' ' && *p <= '~') { /* printable 7-bit ASCII */

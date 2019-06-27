@@ -108,12 +108,8 @@ static int unix_recv_fd(int unix)
     }else if(rv==0){ /* remote socket was shut down */
         return -2;
     }
-
-    if(memcmp(iov_buf, magic, sizeof(magic))!=0){
-        warn("Magic number mismatch on notionflux socket - "
-             "is notionflux the same version as notion?");
-        return -1;
-    }
+    if(memcmp(iov_buf, magic, sizeof(magic))!=0)
+        return -3;
 
     for (cmsg=CMSG_FIRSTHDR(&msg); cmsg!=NULL; cmsg=CMSG_NXTHDR(&msg, cmsg)) {
         if(iter>0){
@@ -154,6 +150,14 @@ static void receive_data(int fd, void *buf_)
         int stdout_fd=unix_recv_fd(fd);
         if(stdout_fd==-2)
             goto closefd;
+        if(stdout_fd==-3){
+            char const *err="Magic number mismatch on notionflux socket - "
+                "is notionflux the same version as notion?";
+            writes(fd, "E");
+            writes(fd, err);
+            warn(err);
+            goto closefd;
+        }
 
         if(stdout_fd==-1) {
             if(errno==EWOULDBLOCK || errno==EAGAIN)
@@ -199,7 +203,10 @@ static void receive_data(int fd, void *buf_)
 
     errorlog_begin(&el);
 
-    if(!extl_lookup_global_value(&tostringfn, 'f', "mod_notionflux", "run_lua", NULL)) return;
+    if(!extl_lookup_global_value(&tostringfn, 'f', "mod_notionflux", "run_lua", NULL)){
+        warn("mod_notionflux.run_lua() function is missing");
+        return;
+    }
     if(extl_loadstring(buf->data, &fn)){
         char *retstr=NULL;
         if(extl_call(tostringfn, "fi", "s", fn, idx, &retstr)){
@@ -211,6 +218,7 @@ static void receive_data(int fd, void *buf_)
         }
         extl_unref_fn(fn);
     }
+    extl_unref_fn(tostringfn);
     errorlog_end(&el);
     if(el.msgs!=NULL && !success){
         writes(fd, "E");
@@ -381,7 +389,6 @@ void close_connections()
             close_conn(&(bufs[i]));
     }
 
-    extl_unref_fn(tostringfn);
 }
 
 char mod_notionflux_ion_api_version[]=ION_API_VERSION;
@@ -415,7 +422,6 @@ bool mod_notionflux_init()
     return TRUE;
 
 err_listening:
-    extl_unref_fn(tostringfn);
     close_connections();
     return FALSE;
 }
