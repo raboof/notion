@@ -249,22 +249,20 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             grab_needed = TRUE;
         else
             clear_subs(oreg);
-    }
+    }else
+        clear_subs(oreg);
 
     if(binding!=NULL){
         if(binding_owner!=NULL && binding->func!=extl_fn_none()){
             WRegion *mgd=region_managed_within(binding_owner, subreg);
             bool subs=(oreg->submapstat!=NULL);
 
-            if(!has_submap)
-                clear_subs(oreg);
-
             if(grabbed)
                 XUngrabKeyboard(ioncore_g.dpy, CurrentTime);
 
             current_kcb=ev->keycode;
             current_state=ev->state;
-            current_submap=subs;
+            current_submap=oreg->submapstat!=NULL;
 
             /* TODO: having to pass both mgd and subreg for some handlers
              * to work is ugly and complex.
@@ -276,8 +274,6 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
             if(ev->state!=0 && !subs && binding->wait)
                 waitrelease(oreg);
         }
-    }else if(oreg->submapstat!=NULL){
-        clear_subs(oreg);
     }else if(OBJ_IS(oreg, WWindow)){
         insstr((WWindow*)oreg, ev);
     }

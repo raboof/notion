@@ -390,7 +390,7 @@ static void grab_key(Display *display, uint keycode, uint ksb,
 
 void binding_grab_on(const WBinding *binding, Window win)
 {
-    if(binding->act==BINDING_KEYPRESS && binding->kcb!=0){
+    if((binding->act==BINDING_KEYPRESS || binding->act==BINDING_SUBMAP) && binding->kcb!=0){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
         grab_key(ioncore_g.dpy, binding->kcb, binding->ksb, binding->state,
                  win, True, GrabModeAsync, GrabModeAsync);
@@ -424,7 +424,7 @@ void binding_grab_on(const WBinding *binding, Window win)
 
 void binding_ungrab_on(const WBinding *binding, Window win)
 {
-    if(binding->act==BINDING_KEYPRESS){
+    if(binding->act==BINDING_KEYPRESS || binding->act==BINDING_SUBMAP){
 #ifndef CF_HACK_IGNORE_EVIL_LOCKS
         XUngrabKey(ioncore_g.dpy, binding->kcb, binding->state, win);
 #else
@@ -515,7 +515,7 @@ static WBinding *do_bindmap_lookup_binding(WBindmap *bindmap,
 
         if(binding==NULL){
             tmp.state=state;
-            tmp.ksb=(act==BINDING_KEYPRESS ? AnyKey : AnyButton);
+            tmp.ksb=((act==BINDING_KEYPRESS || act==BINDING_SUBMAP) ? AnyKey : AnyButton);
 
             binding=search_binding_ksb(bindmap, &tmp);
 
