@@ -17,6 +17,7 @@ INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 SOURCES=mod_notionflux.c
+MAKE_EXPORTS=mod_notionflux
 
 MODULE_STUB=mod_notionflux.lua
 MODULE=mod_notionflux

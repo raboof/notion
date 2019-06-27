@@ -83,6 +83,32 @@ char const *get_socket_filename(void)
 	return rv;
 }
 
+/* Send file descriptors over a unix domain socket.
+   See unix(4), unix(7), sendmsg(2), cmsg(3) */
+bool unix_send_fds(int unix, int fd) {
+	/* yay for boilerplate */
+	struct msghdr msg = {0};
+	struct cmsghdr *cmsg;
+	unsigned char iov_buf[4] = {23, 42, 128, 7}; /* our magic number, I guess */
+	struct iovec io = {.iov_base = &iov_buf, .iov_len = sizeof(iov_buf)};
+	union { /* something smart about alignment */
+		char buf[CMSG_SPACE(sizeof(fd))];
+		struct cmsghdr align;
+	} u;
+	msg.msg_iov = &io;
+	msg.msg_iovlen = 1;
+	msg.msg_control = &u.buf;
+	msg.msg_controllen = sizeof(u.buf);
+	cmsg = CMSG_FIRSTHDR(&msg);
+	cmsg->cmsg_level = SOL_SOCKET;
+	cmsg->cmsg_type = SCM_RIGHTS;
+	cmsg->cmsg_len = CMSG_LEN(sizeof(fd));
+	memcpy(CMSG_DATA(cmsg), &fd, sizeof(fd));
+	if (sendmsg(unix, &msg, 0) == -1)
+		return false;
+	return true;
+}
+
 FILE *sock_connect(void)
 {
 	struct sockaddr_un serv;
@@ -94,6 +120,9 @@ FILE *sock_connect(void)
 	strcpy(serv.sun_path, sockfilename);
 	if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) == -1)
 		die("Failed to connect to socket %s\n", sockfilename);
+
+	if (!unix_send_fds(sock, STDOUT_FILENO)) /* used for lua's print() */
+		die("Failed to send stdout to notion.\n");
 
 	FILE *f = fdopen(sock, "w+");
 	if (!f)
@@ -143,7 +172,7 @@ bool response(char buf[MAX_DATA], FILE **sock)
 	if (ferror(*sock))
 		die("Error condition on mod_notionflux response.\n");
 
-	// must be feof
+	/* must be feof */
 	fclose(*sock);
 	*sock = NULL;
 	return true;

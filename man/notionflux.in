@@ -76,11 +76,20 @@ The command
 will display the title of the currently focused window, while
 .Bd -literal -offset indent
 .Ic $ Nm Fl e Qq print(notioncore.current():name())
+"emacs: notionflux.1"
 nil
 .Ed
 .Pp
-will print the message to notion's standard output (usually
-.Pa ~/.xsession\-errors ) .
+will collect the messages and print them before returning.
+In order to write to notion's standard output (usually
+.Pa ~/.xsession\-errors ) ,
+like print used to in previous versions of
+.Nm ,
+please use
+.Bd -literal -offset indent
+$ notionflux -e 'io.stdout:write("hello .xsession-errors!\\n")'
+nil
+.Ed
 .Pp
 Using input redirection:
 .Bd -literal -offset indent
