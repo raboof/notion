@@ -3,22 +3,19 @@
 .\" For more information, see https://creativecommons.org/share-your-work/public-domain/cc0/
 .\" This is an mdoc(7) manual page, as any manual page should be.
 .Dd June 20, 2019
-.Os notion
 .Dt notionflux 1
+.Os notion
 .Sh NAME
 .Nm notionflux
 .Nd Lua remote control for notion
 .Sh SYNOPSIS
-.Nm Op Fl e Ar lua-code
-.Pp
-.Nm Op Fl R
-.Pp
-.Nm Op Pa file
+.Nm Op Fl R | Fl e Ar lua-code | Pa file
 .Sh DESCRIPTION
 .Nm
 is a tool to send scripts to the Lua scripting engine inside the
 .Xr notion 1
-window manager. The script can thus access notion's internal Lua API.
+window manager.
+The script can thus access notion's internal Lua API.
 .Pp
 There are two modes of operation, interactive and batch.
 Interactive mode is enabled by running
@@ -41,11 +38,12 @@ The content of the file is evaluated.
 .Sh INTERACTIVE MODE
 This mode is similar to running an interactive
 .Xr lua 1
-shell. Tab completion for notion's Lua API is available, as well as line-editing.
+shell.
+Tab completion for notion's Lua API is available, as well as line-editing.
 .Pp
 Code that has been entered is evaluated by notion as soon as it is a complete
-Lua statement. The result is displayed after which the next statement can be
-entered.
+Lua statement.
+The result is displayed after which the next statement can be entered.
 .Sh ENVIRONMENT
 .Bl -tag -width DISPLAY
 .It Ev DISPLAY
@@ -59,23 +57,23 @@ to obtain the socket path.
 .Nm
 connects to
 .Xr notion 1
-through a Unix domain socket. This socket is created with read/write permissions
-only for the user who started notion. The socket path can be queried with the following command:
+through a Unix domain socket.
+This socket is created with read/write permissions only for the user who started notion.
+The socket path can be queried with the following command:
 .Bd -literal -offset indent
-.Ic $ xprop Fl root Cm _NOTION_MOD_NOTIONFLUX_SOCKET
+$ xprop \-root _NOTION_MOD_NOTIONFLUX_SOCKET
 _NOTION_MOD_NOTIONFLUX_SOCKET(STRING) = "/tmp/fileuj6onu"
 .Ed
-.Pp
 .Sh EXAMPLES
 The command
 .Bd -literal -offset indent
-.Ic $ Nm Fl e Qq return notioncore.current():name()
+$ notionflux -e "return notioncore.current():name()"
 "emacs: notionflux.1"
 .Ed
 .Pp
 will display the title of the currently focused window, while
 .Bd -literal -offset indent
-.Ic $ Nm Fl e Qq print(notioncore.current():name())
+$ notionflux -e "print(notioncore.current():name())"
 "emacs: notionflux.1"
 nil
 .Ed
@@ -93,13 +91,13 @@ nil
 .Pp
 Using input redirection:
 .Bd -literal -offset indent
-.Ic $ Cm echo Qo return notioncore.current() Qc | Nm Op Fl R
+$ echo "return notioncore.current()" | notionflux
 WClientWin: 0x9bb6b8
 .Ed
 .Pp
 Using interactive mode:
 .Bd -literal -offset indent
-.Ic $ Nm
+$ notionflux
 lua> notioncore.current():rootwin_of()
 WRootWin: 0x8c9688
 lua> do
@@ -120,9 +118,7 @@ does not have them.
 .Sh SEE ALSO
 .Lk https://notionwm.net/ "The notion homepage"
 .Pp
-The document
-.Dq Configuring and extending Notion with Lua
-found on the Notion homepage.
+.Lk http://notion.sourceforge.net/notionconf/ "Configuring and extending Notion with Lua"
 .Pp
 .Lk https://www.lua.org/manual/LUA_REFVERSION/manual.html "The Lua LUA_REFVERSION reference manual"
 .Pp
@@ -133,14 +129,14 @@ found on the Notion homepage.
 .Xr lua 1 ,
 .Xr readline 3
 .Sh HISTORY
-An ionflux command appeared in ion3 around 2004. It was adapted to notion by the
-notion development team when notion was forked from ion3 in 2010.
-.Sh AUTHOR
+An ionflux command appeared in ion3 around 2004.
+It was adapted to notion by the notion development team when notion was forked from ion3 in 2010.
+.Sh AUTHORS
 .Nm
 was rewritten in 2019 by
 .An Moritz Wilhelmy
 under the GNU GPL in order to add the interactive mode.
 .Sh BUGS
-Currently, the script must be 4095 bytes or shorter. If you need more, consider
-passing a filename, which is passed to notion for evaluation and therefore
-circumvents this limit.
+Currently, the script must be 4095 bytes or shorter.
+If you need more, consider passing a filename, which is passed to notion for
+evaluation and therefore circumvents this limit.
