@@ -234,6 +234,7 @@ closefd:
 /**EXTL_DOC
  * Write \var{str} to the output file descriptor associated with client \var{idx}
  */
+EXTL_SAFE
 EXTL_EXPORT
 bool mod_notionflux_xwrite(int idx, const char *str)
 {
