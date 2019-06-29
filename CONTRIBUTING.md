@@ -25,9 +25,10 @@ When creating a Pull Request, make sure you have the legal right to make this
 contribution: all its contents have to be either your original work, or exist
 under a license that allows inclusion in Notion.
 
-Notion is licensed under the LGPL. The notionflux utility links against
+Notion is licensed under the LGPL. The `notionflux(1)` utility (that is part of
+mod_notionflux) links against
 libreadline, so this is GPL, but we ask you to dual-license any contributions
-to that module under the LGPL as well, so we could in theory replace
+to that utility under the LGPL as well. That way we could in theory replace
 libreadline with an LGPL-compatible library later on.
 
 ## Documentation
