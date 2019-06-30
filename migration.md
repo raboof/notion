@@ -8,6 +8,31 @@ The next major release of Notion will be Notion 4. This release will include a
 number of changes that are either not backwards compatible, or change the
 (default) behavior.
 
+## Dependencies
+
+Notion is no longer compatible with Lua 5.0. This change was required in order to
+support Lua 5.3, which removed "old-style" Lua 5.0 variadic function arguments,
+the "new-style" variadic arguments were introduced with Lua 5.1.
+
+If your custom scripts use the old `function(arg)` method of putting variadic
+arguments into an array named `arg`, you will need to use the new `function(...)`
+syntax instead.
+
+```lua
+function foo(a, b, arg)
+    print(unpack(arg))
+end
+```
+becomes
+```lua
+function foo(a, b, ...)
+    print(...)
+end
+```
+and capturing `...` into a table can be achieved with `local arg={...}`.
+
+Notion 4 also requires a C compiler capable of compiling C99.
+
 ## Custom styles
 
 Custom styles used to automatically inherit defaults from the "*" style. This
@@ -61,4 +86,3 @@ defwinprop{
     ignore_min_size = false,
 }
 ```
-
