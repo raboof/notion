@@ -244,12 +244,9 @@ static bool do_key(WRegion *reg, XKeyEvent *ev)
     }
 
     has_submap = submap_defined(oreg, ev);
-    if(has_submap){
-        if(add_sub(oreg, ev->keycode, ev->state))
-            grab_needed = TRUE;
-        else
-            clear_subs(oreg);
-    }else
+    if(has_submap && add_sub(oreg, ev->keycode, ev->state))
+        grab_needed = TRUE;
+    else
         clear_subs(oreg);
 
     if(binding!=NULL){
