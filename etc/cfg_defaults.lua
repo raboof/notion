@@ -2,7 +2,6 @@
 -- Notion default settings
 --
 
-dopath("cfg_notioncore")
 dopath("cfg_kludges")
 dopath("cfg_layouts")
 
@@ -15,3 +14,6 @@ dopath("mod_notionflux")
 dopath("mod_xrandr")
 
 dopath("net_client_list")
+
+-- loads cfg_bindings
+dopath("cfg_notioncore")
