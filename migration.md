@@ -67,7 +67,6 @@ After:
 defbindings("WFrame.toplevel", {
     kpress(META.."K", "WFrame.set_numbers(_, 'during_grab')"),
     submap(META.."K", {
-        submap_wait("ioncore.tabnum.show(_)"),
 ```
 
 ## Minimum window sizes
