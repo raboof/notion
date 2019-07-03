@@ -55,13 +55,13 @@ defbindings("WScreen", {
 
     bdoc("Go to n:th screen on multihead setup."),
     kpress(META.."Shift+1", "ioncore.goto_nth_screen(0)"),
-    kpress(META.."Escape", "ioncore.goto_nth_screen(0)"),
+    kpress(META.."F1", "ioncore.goto_nth_screen(0)"),
     kpress(META.."Shift+2", "ioncore.goto_nth_screen(1)"),
-    kpress(META.."F1", "ioncore.goto_nth_screen(1)"),
+    kpress(META.."F2", "ioncore.goto_nth_screen(1)"),
     kpress(META.."Shift+3", "ioncore.goto_nth_screen(2)"),
-    kpress(META.."F2", "ioncore.goto_nth_screen(2)"),
-    kpress(META.."Shift+4", "ioncore.goto_nth_screen(2)"),
     kpress(META.."F3", "ioncore.goto_nth_screen(2)"),
+    kpress(META.."Shift+4", "ioncore.goto_nth_screen(3)"),
+    -- kpress(META.."F4", "ioncore.goto_nth_screen(3)"),
 
     bdoc("Go to next/previous screen on multihead setup."),
     kpress(ALTMETA.."Escape", "ioncore.goto_prev_screen()"),
@@ -124,7 +124,7 @@ defbindings("WClientWin", {
 
 defbindings("WGroupCW", {
     bdoc("Toggle client window group full-screen mode"),
-    kpress_wait(META.."w", "WGroup.set_fullscreen(_, 'toggle')"),
+    kpress_wait(META.."Q", "WGroup.set_fullscreen(_, 'toggle')"),
 })
 
 
@@ -233,8 +233,8 @@ defbindings("WFrame", {
 -- Frames for transient windows ignore this bindmap
 
 defbindings("WFrame.toplevel", {
-    bdoc("Query for a client window to attach."),
-    kpress(META.."X", "mod_query.query_attachclient(_)"),
+    bdoc("Query for a client window to attach ('nick')."),
+    kpress(META.."N", "mod_query.query_attachclient(_)"),
 
     kpress(META.."A", "WFrame.switch_nth(_, 0)"),
     kpress(META.."S", "WFrame.switch_nth(_, 1)"),
