@@ -46,6 +46,7 @@ de.defstyle("frame", {
 })
 
 de.defstyle("frame-floating", {
+    based_on = "*",
     bar = "inside",
 
     padding_pixels = 1,
@@ -53,11 +54,13 @@ de.defstyle("frame-floating", {
 })
 
 de.defstyle("frame-tiled-alt", {
+    based_on = "*",
     bar = "inside",
     spacing = 0,
 })
 
 de.defstyle("frame-transient", {
+    based_on = "*",
     spacing = 0,
 })
 
@@ -122,15 +125,18 @@ de.defstyle("tab-menuentry", {
 })
 
 de.defstyle("tab-menuentry-big", {
+    based_on = "*",
     padding_pixels = 5,
 })
 
 de.defstyle("input", {
+    based_on = "*",
     background_colour = "#352722",
     padding_pixels = 2,
 })
 
 de.defstyle("input-edln", {
+    based_on = "*",
     background_colour = "#453832",
 
     highlight_pixels = 1,
@@ -149,6 +155,7 @@ de.defstyle("input-edln", {
 })
 
 de.defstyle("input-message", {
+    based_on = "*",
     background_colour = "#453832",
 })
 
@@ -177,6 +184,7 @@ de.defstyle("actnotify", {
 })
 
 de.defstyle("moveres_display", {
+    based_on = "*",
     based_on = "actnotify",
 })
 

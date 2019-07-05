@@ -111,6 +111,7 @@ de.defstyle("tab", {
 })
 
 de.defstyle("stdisp", {
+    based_on = "*",
     padding = 0,
     shadow_pixels = 0,
     padding_pixels = 0,
