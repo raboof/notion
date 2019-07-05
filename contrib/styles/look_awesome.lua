@@ -201,7 +201,7 @@ de.defstyle("moveres_display", {
 })
 
 de.defstyle("dock", {
-    --based_on = "frame-ionframe",
+    based_on = "*",
     border = 7,
     outline_style = "each",
 })
