@@ -111,19 +111,6 @@ bool stacking_assoc(WStacking *st, WRegion *reg)
 /*{{{ List processing */
 
 
-static WStacking *link_lists(WStacking *l1, WStacking *l2)
-{
-    /* As everywhere, doubly-linked lists without the forward
-     * link in last item!
-     */
-    WStacking *tmp=l2->prev;
-    l1->prev->next=l2;
-    l2->prev=l1->prev;
-    l1->prev=tmp;
-    return l1;
-}
-
-
 WStacking *stacking_unstack(WWindow *par, WStacking *regst)
 {
     WStacking *nxt=NULL, *st;

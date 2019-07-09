@@ -273,7 +273,6 @@ static DEStyle *do_create_style(WRootWin *rootwin, const char *name)
 DEStyle *de_create_style(WRootWin *rootwin, const char *name)
 {
     DEStyle *oldstyle, *style;
-    uint score;
 
     style=do_create_style(rootwin, name);
 

@@ -81,7 +81,6 @@ WRegion *grouped_handler(WWindow *par,
     WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
     WGroupCW *cwg;
     WRegion *reg;
-    WStacking *st;
 
     cwg=create_groupcw(par, fp);
 

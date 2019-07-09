@@ -144,7 +144,6 @@ static WGroup *find_group(WRegion *reg)
 
 bool ioncore_detach(WRegion *reg, int sp)
 {
-    WPHolder *ph=region_get_return(reg);
     WFrameMode mode;
     WGroup *grp;
     bool set, nset;
