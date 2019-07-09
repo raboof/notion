@@ -158,6 +158,7 @@ defbindings("WMPlex.toplevel", {
 
     bdoc("Run a terminal emulator."),
     kpress(META.."Return", "mod_query.exec_on_merr(_, XTERM or 'xterm')"),
+    kpress("F2", "mod_query.exec_on_merr(_, XTERM or 'xterm')"),
 
     bdoc("Query for command line to execute."),
     kpress(META.."J", "mod_query.query_exec(_)"),
