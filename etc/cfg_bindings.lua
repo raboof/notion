@@ -71,8 +71,8 @@ defbindings("WScreen", {
     kpress(META.."F9", "ioncore.create_ws(_)"),
 
     bdoc("Display the main menu."),
-    kpress("F12", "mod_query.query_menu(_, _sub, 'mainmenu', 'Main menu:')"),
-    --kpress("F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
+    kpress(META.."F12", "mod_menu.menu(_, _sub, 'mainmenu', {big=true})"),
+    kpress(ALTMETA.."F12", "mod_query.query_menu(_, _sub, 'mainmenu', 'Main menu:')"),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'mainmenu')"),
 
     bdoc("Display the window list menu."),
@@ -184,8 +184,8 @@ defbindings("WMPlex.toplevel", {
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
 
     bdoc("Display context menu."),
-    --kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
-    kpress(META.."M", "mod_query.query_menu(_, _sub, 'ctxmenu', 'Context menu:')"),
+    kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    kpress(ALTMETA.."M", "mod_query.query_menu(_, _sub, 'ctxmenu', 'Context menu:')"),
 
     bdoc("Query for manual page to be displayed."),
     kpress(META.."slash", "mod_query.query_man(_, ':man')"),
