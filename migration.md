@@ -46,7 +46,7 @@ de.defstyle("tab", {
 })
 ```
 
-## Keybindings
+## submap_wait keybindings
 
 When defining a submap in your keybindings, it used to be possible to introduce
 a `submap_wait` inside the submap that got triggered when the submap was
@@ -58,7 +58,7 @@ Before:
 ```
 defbindings("WFrame.toplevel", {
     submap(META.."K", {
-        submap_wait("ioncore.tabnum.show(_)"),
+        submap_wait("WFrame.set_numbers(_, 'during_grab')"),
 ```
 
 After:
@@ -67,6 +67,26 @@ After:
 defbindings("WFrame.toplevel", {
     kpress(META.."K", "WFrame.set_numbers(_, 'during_grab')"),
     submap(META.."K", {
+```
+
+## Tab numbers
+
+In Notion 3 there was a `ioncore.tabnum` module that took care of showing
+numbers on `META.."K"`. This has now been replaced with `WFrame.set_numbers`
+again.
+
+Before:
+
+```
+defbindings("WFrame.toplevel", {
+    kpress(META.."K", "ioncore.tabnum.show(_)"),
+```
+
+After:
+
+```
+defbindings("WFrame.toplevel", {
+    kpress(META.."K", "WFrame.set_numbers(_, 'during_grab')"),
 ```
 
 ## Minimum window sizes
