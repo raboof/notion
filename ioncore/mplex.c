@@ -576,7 +576,6 @@ static WStacking *mplex_do_to_focus_on(WMPlex *mplex, WStacking *node,
                                        WStacking *to_try)
 {
     WStacking *stacking=mplex_get_stacking(mplex);
-    WStacking *st=NULL;
 
     if(stacking==NULL)
         return NULL;
@@ -1075,7 +1074,6 @@ bool mplex_managed_rqorder(WMPlex *mplex, WRegion *reg, WRegionOrder order)
 static bool mplex_stack(WMPlex *mplex, WStacking *st)
 {
     WStacking *tmp=NULL;
-    Window bottom=None, top=None;
     WStacking **stackingp=mplex_get_stackingp(mplex);
 
     if(stackingp==NULL)
@@ -1294,7 +1292,6 @@ WRegion *mplex_attach_simple(WMPlex *mplex, WRegion *reg, int flags)
 static void get_params(WMPlex *UNUSED(mplex), ExtlTab tab, int mask,
                        WMPlexAttachParams *par)
 {
-    int layer=1;
     char *tmpstr;
     int tmp;
     int ok=~mask;

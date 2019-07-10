@@ -20,6 +20,7 @@
 #include "xwindow.h"
 #include "extlconv.h"
 #include "group.h"
+#include "activity.h"
 
 
 /*{{{ Atoms */

@@ -302,7 +302,6 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
     DEStyle *style;
     char *fnt;
-    uint n;
     char *based_on_name;
     DEStyle *based_on=NULL;
     GrStyleSpec based_on_spec;

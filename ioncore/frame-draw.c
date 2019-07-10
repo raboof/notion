@@ -215,67 +215,6 @@ void frame_clear_shape(WFrame *frame)
 
 void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *elastic, int *minw);//FIXME
 
-static void frame_shaped_recalc_bar_size(WFrame *frame)
-{
-    int bar_w=0, textw=0, tmaxw=frame->tabs_params.tab_min_w, tmp=0;
-    WLListIterTmp itmp;
-    WRegion *sub;
-    const char *p;
-    GrBorderWidths bdw;
-    char *title;
-    uint bdtotal;
-    int i, m;
-
-    if(frame->bar_brush==NULL)
-        return;
-
-    m=FRAME_MCOUNT(frame);
-
-    if(m>0){
-        grbrush_get_border_widths(frame->bar_brush, &bdw);
-        bdtotal=((m-1)*(bdw.tb_ileft+bdw.tb_iright+bdw.spacing)
-                 +bdw.right+bdw.left);
-
-        FRAME_MX_FOR_ALL(sub, frame, itmp){
-            p=region_displayname(sub);
-            if(p==NULL)
-                continue;
-
-            textw=grbrush_get_text_width(frame->bar_brush,
-                                         p, strlen(p));
-            if(textw>tmaxw)
-                tmaxw=textw;
-        }
-
-        bar_w=frame->tabs_params.bar_max_width_q*REGION_GEOM(frame).w;
-        if(bar_w<frame->tabs_params.tab_min_w &&
-           REGION_GEOM(frame).w>frame->tabs_params.tab_min_w)
-            bar_w=frame->tabs_params.tab_min_w;
-
-        tmp=bar_w-bdtotal-m*tmaxw;
-
-        if(tmp>0){
-            /* No label truncation needed, good. See how much can be padded. */
-            tmp/=m*2;
-            if(tmp>CF_TAB_MAX_TEXT_X_OFF)
-                tmp=CF_TAB_MAX_TEXT_X_OFF;
-            bar_w=(tmaxw+tmp*2)*m+bdtotal;
-        }else{
-            /* Some labels must be truncated */
-        }
-    }else{
-        bar_w=frame->tabs_params.tab_min_w;
-        if(bar_w>frame->tabs_params.bar_max_width_q*REGION_GEOM(frame).w)
-            bar_w=frame->tabs_params.bar_max_width_q*REGION_GEOM(frame).w;
-    }
-
-    if(frame->bar_w!=bar_w){
-        frame->bar_w=bar_w;
-        frame_set_shape(frame);
-    }
-}
-
-
 static void free_title(WFrame *frame, int i)
 {
     if(frame->titles[i].text!=NULL){
@@ -302,13 +241,13 @@ static void free_title(WFrame *frame, int i)
 */
 void frame_get_max_width_and_elastic(WFrame * frame,int bar_w,int *maxw,int *elastic, int *minw){
     /* Dummy implementation O(n^2), instead of O(n*log(n)) */
-    int textw=0,tmp,tmaxw,tminw=frame->tabs_params.propor_tab_min_w;
+    int textw=0,tmp,tminw=frame->tabs_params.propor_tab_min_w;
     WLListIterTmp itmp;
     WRegion *sub;
     const char *displayname;
     GrBorderWidths bdw;
     uint bdtotal,curw,nextw;
-    int i, m, n;
+    int m, n;
 
     m=FRAME_MCOUNT(frame);
 

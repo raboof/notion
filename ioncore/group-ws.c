@@ -37,7 +37,6 @@
 void ioncore_groupws_set(ExtlTab tab)
 {
     char *method=NULL;
-    ExtlTab t;
 
     if(extl_table_gets_s(tab, "float_placement_method", &method)){
         if(strcmp(method, "udlr")==0)
@@ -180,7 +179,7 @@ bool groupws_attach_framed_extl(WGroupWS *ws, WRegion *reg, ExtlTab t)
 
 
 static WPHolder *groupws_do_prepare_manage(WGroupWS *ws,
-                                           const WClientWin *cwin,
+                                           const WClientWin *UNUSED(cwin),
                                            const WManageParams *param,
                                            int geom_weak)
 {
@@ -268,7 +267,8 @@ WPHolder *groupws_prepare_manage(WGroupWS *ws, const WClientWin *cwin,
 }
 
 
-WPHolder *groupws_prepare_manage_transient(WGroupWS *ws, const WClientWin *cwin,
+WPHolder *groupws_prepare_manage_transient(WGroupWS *ws,
+                                           const WClientWin *UNUSED(cwin),
                                            const WManageParams *param,
                                            int UNUSED(unused))
 {

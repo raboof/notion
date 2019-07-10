@@ -31,7 +31,7 @@
 
 
 static WPHolder *groupcw_transient_pholder(WGroupCW *cwg,
-                                           const WClientWin *cwin,
+                                           const WClientWin *UNUSED(cwin),
                                            const WManageParams *mp)
 {
     WGroupAttachParams param=GROUPATTACHPARAMS_INIT;
