@@ -1298,6 +1298,56 @@ function mod_query.show_tree(mplex, reg, max_depth)
     mod_query.message(mplex, get_info(reg, "", 0))
 end
 
+function binding_to_str(ctx, binding)
+    if binding.kcb then
+        return binding.kcb .. "@" .. ctx .. " " .. binding.doc
+    else
+        return ctx .. " " .. binding.doc
+    end
+end
+
+function str_to_binding(str)
+    for ctx,bindmap in pairs(notioncore.do_getbindings()) do
+        for _,binding in pairs(bindmap) do
+            if binding.doc then
+                local b_str = binding_to_str(ctx, binding)
+                if str==b_str then
+                    return binding
+                end
+            end
+        end
+    end
+end
+
+function mod_query.binding_handler(frame, str, binding)
+    str_to_binding(str).func(frame)
+end
+
+function mod_query.complete_binding(str)
+    local entries={}
+    local test_add=mk_completion_add(entries, str, true, true)
+
+    for ctx,bindmap in pairs(notioncore.do_getbindings()) do
+        for _,binding in pairs(bindmap) do
+            if binding.doc then
+                test_add(binding_to_str(ctx, binding))
+            end
+        end
+    end
+
+    return entries
+end
+
+--DOC
+-- Find keybindings
+function mod_query.query_bindings(mplex, sub)
+    mod_query.query(mplex, TR("Find keybinding:"), nil,
+        mod_query.binding_handler,
+        mod_query.make_completor(mod_query.complete_binding),
+        ""
+)
+end
+
 -- }}}
 
 -- Load extras

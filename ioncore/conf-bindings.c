@@ -157,10 +157,9 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 
 /*{{{ bindmap_defbindings */
 
-
 static bool do_action(WBindmap *bindmap, const char *str,
                       ExtlFn func, uint act, uint mod, uint ksb,
-                      int area, bool wr)
+                      int area, bool wr, const char* doc)
 {
     WBinding binding;
 
@@ -177,6 +176,7 @@ static bool do_action(WBindmap *bindmap, const char *str,
     binding.kcb=(act==BINDING_KEYPRESS ? XKeysymToKeycode(ioncore_g.dpy, ksb) : ksb);
     binding.area=area;
     binding.submap=NULL;
+    binding.doc=doc?strdup(doc):NULL;
 
     if(func!=extl_fn_none()){
         binding.func=extl_ref_fn(func);
@@ -215,6 +215,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     binding.area=0;
     binding.func=extl_fn_none();
     binding.submap=create_bindmap();
+    binding.doc=NULL;
 
     if(binding.submap==NULL)
         return FALSE;
@@ -242,7 +243,8 @@ static StringIntMap action_map[]={
 
 
 static bool do_entry(WBindmap *bindmap, ExtlTab tab,
-                     const StringIntMap *areamap, bool init_any)
+                     const StringIntMap *areamap, bool init_any,
+                     char **doc)
 {
     bool ret=FALSE;
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
@@ -260,6 +262,9 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
     if(strcmp(action_str, "kpress_wait")==0){
         action=BINDING_KEYPRESS;
         wr=TRUE;
+    }else if(strcmp(action_str, "doc")==0){
+        extl_table_gets_s(tab, "text", doc);
+        return TRUE;
     }else{
         action=stringintmap_value(action_map, action_str, -1);
         if(action<0){
@@ -297,7 +302,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         if(!extl_table_gets_f(tab, "func", &func)){
             func=extl_fn_none();
         }
-        ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr);
+        ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr, *doc);
         if(!ret)
             extl_unref_fn(func);
     }
@@ -316,12 +321,13 @@ bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap)
 {
     int i, n, nok=0;
     ExtlTab ent;
+    char *current_doc = NULL;
 
     n=extl_table_get_n(tab);
 
     for(i=1; i<=n; i++){
         if(extl_table_geti_t(tab, i, &ent)){
-            nok+=do_entry(bindmap, ent, bindmap->areamap, submap);
+            nok+=do_entry(bindmap, ent, bindmap->areamap, submap, &current_doc);
             extl_unref_table(ent);
             continue;
         }
@@ -379,7 +385,7 @@ static char *get_button(char *mods, uint ksb)
     const char *s=stringintmap_key(button_map, ksb, NULL);
 
     if(s==NULL){
-        warn(TR("Unable to convert button to string."));
+        warn(TR("Unable to convert button to string: [%d]."), ksb);
         return NULL;
     }
 
@@ -410,6 +416,7 @@ static bool get_kpress(WBindmap *UNUSED(bindmap), WBinding *b, ExtlTab t)
         return FALSE;
 
     extl_table_sets_s(t, "kcb", key);
+    extl_table_sets_s(t, "doc", b->doc);
 
     free(key);
 
@@ -464,7 +471,7 @@ static ExtlTab getbinding(WBindmap *bindmap, WBinding *b)
     if(b->act==BINDING_KEYPRESS){
         if(get_kpress(bindmap, b, t))
             return t;
-    }else{
+    }else if(b->act!=BINDING_SUBMAP){
         if(get_mact(bindmap, b, t))
             return t;
     }

@@ -101,8 +101,7 @@ local function putcmd(cmd, guard, tab)
 end
 
 --DOC
--- Used to enter documentation among bindings so that other programs
--- can read it. Does nothing.
+-- Used to enter documentation among bindings.
 function ioncore.bdoc(text)
     return {action = "doc", text = text}
 end
@@ -193,9 +192,7 @@ function ioncore.defbindings(context, bindings)
                 v2=table.copy(v)
                 v2.submap=filterdoc(v2.submap)
             end
-            if v2.action~="doc" then
-                table.insert(t, v2)
-            end
+            table.insert(t, v2)
         end
         return t
     end
