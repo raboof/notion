@@ -407,7 +407,8 @@ void frame_recalc_bar(WFrame *frame)
         if(textw>0){
             if(frame->flags&FRAME_SHOW_NUMBERS){
                 char *s=NULL;
-                libtu_asprintf(&s, "[%d]", i+1);
+                const char *name=region_displayname(sub);
+                libtu_asprintf(&s, "[%d] %s", i+1, name);
                 if(s!=NULL){
                     title=grbrush_make_label(frame->bar_brush, s, textw);
                     free(s);
