@@ -56,13 +56,27 @@ If you'd like to associate your donation with a particular support/documentation
 
 # History
 
-_**Not**ion_ is a fork of [Ion](https://tuomov.iki.fi/software/#TOC-Ion-2000-2009-), which has been abandoned by its original author, [Tuomo Valkonen](http://tuomov.iki.fi/).
+## Notion 4
+
+The current major version of Notion is Notion 3. The next upcoming version of Notion will be Notion 4.
+
+If you want to try this out, you are welcome to take 'master' for a spin! Be sure to report any problems you might have to the [issue tracker](https://github.com/raboof/notion/issues).
+
+This release will include a number of changes that are either not backwards
+compatible, or change the (default) behavior. Those are described in more detail
+in the [migration notes](migration.md).
+
+## Ion3
+
+_**Not**ion_ was originally a fork of [Ion](https://tuomov.iki.fi/software/#TOC-Ion-2000-2009-), which has been abandoned by its original author, [Tuomo Valkonen](http://tuomov.iki.fi/).
 
 Former Ion3 users will be glad to hear any changes to configuration will be backwards-compatible, so you can simply drop your `~/.ion3` tweaks into `~/.notion` and rename `cfg_ion.lua` to `cfg_notion.lua`.
 
 # License
 
-Notion is available under a slightly modified LGPL license: in short, the only extra restriction is you cannot release it under the name 'Ion' and cannot mix it with GPL code, but read the license itself for details.
+Notion 3 is available under a slightly modified LGPL license: in short, the only extra restriction is you cannot release it under the name 'Ion' and cannot mix it with GPL code, but read the license itself for details.
+
+Notion 4, which is not yet released, will be plain LGPL again. You can build a prerelease of Notion 4 from the 'master' branch.
 
 # Other software
 
