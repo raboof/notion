@@ -1340,7 +1340,7 @@ end
 
 --DOC
 -- Find keybindings
-function mod_query.query_bindings(mplex, sub)
+function mod_query.query_binding(mplex, sub)
     mod_query.query(mplex, TR("Find keybinding:"), nil,
         mod_query.binding_handler,
         mod_query.make_completor(mod_query.complete_binding),
