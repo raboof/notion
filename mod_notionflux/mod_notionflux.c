@@ -2,6 +2,7 @@
  * mod_notionflux/mod_notionflux/mod_notionflux.c
  *
  * Copyright (c) Tuomo Valkonen 2004-2005.
+ * Copyright (c) Moritz Wilhelmy 2019
  *
  * This is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -27,11 +28,14 @@
 #include <libmainloop/select.h>
 #include <libtu/errorlog.h>
 #include <libextl/extl.h>
+#include <libextl/luaextl.h>
 
 #include "notionflux.h"
+#include "exports.h"
 
 typedef struct{
     int fd;
+    FILE *stdout;
     int ndata;
     char *data;
 } Buf;
@@ -41,18 +45,6 @@ Buf bufs[MAX_SERVED];
 static int listenfd=-1;
 static char *listenfile=NULL;
 static ExtlFn tostringfn;
-
-
-/* Without the 'or nil' kludge tostring may have no parameters. */
-static const char tostringstr[]=
-    "local arg={...}\n"
-    "local callable=arg[1]\n"
-    "local result=callable()\n"
-    "if type(result)=='string' then\n"
-    "    return string.format('%q', result)\n"
-    "else\n"
-    "    return tostring(result)\n"
-    "end\n";
 
 static void writes(int fd, const char *s)
 {
@@ -71,12 +63,78 @@ static void close_conn(Buf *buf)
     close(buf->fd);
     buf->fd=-1;
     buf->ndata=0;
+    if(buf->stdout!=NULL){
+        fclose(buf->stdout);
+        buf->stdout=NULL;
+    }
     if(buf->data!=NULL){
         free(buf->data);
         buf->data=NULL;
     }
 }
 
+/* Receive file descriptors from a unix domain socket.
+   See unix(4), unix(7), sendmsg(2), cmsg(3) */
+static int unix_recv_fd(int unix)
+{
+    /* tasty, tasty boilerplate. */
+    struct msghdr msg={0};
+    struct cmsghdr *cmsg;
+    struct iovec iov;
+    unsigned char magic[4]={23, 42, 128, 7};
+    char iov_buf[4];
+    int fd=-1;
+    union { /* alignment, alignment, cmsg(3) */
+        char buf[CMSG_SPACE(sizeof(fd))];
+        struct cmsghdr align;
+    } u;
+    int iter=0, rv;
+
+    iov.iov_len=sizeof(iov_buf);
+    iov.iov_base=&iov_buf;
+
+    msg.msg_name=NULL;
+    msg.msg_namelen=0;
+    msg.msg_iov=&iov;
+    msg.msg_iovlen=1;
+
+    msg.msg_control=&u.buf;
+    msg.msg_controllen=sizeof(u.buf);
+
+    rv=recvmsg(unix, &msg, MSG_CMSG_CLOEXEC);
+    if (rv== -1){
+        warn("Failed to receive fd from unix domain socket.");
+        return -1;
+    }else if(rv==0){ /* remote socket was shut down */
+        return -2;
+    }
+    if(memcmp(iov_buf, magic, sizeof(magic))!=0)
+        return -3;
+
+    for (cmsg=CMSG_FIRSTHDR(&msg); cmsg!=NULL; cmsg=CMSG_NXTHDR(&msg, cmsg)) {
+        if(iter>0){
+            warn("notionflux client is sending us unexpected packets");
+        }else if(cmsg->cmsg_level == SOL_SOCKET
+              && cmsg->cmsg_type == SCM_RIGHTS
+              && cmsg->cmsg_len == CMSG_LEN(sizeof(fd))){
+            unsigned char const *data=CMSG_DATA(cmsg);
+            int newfd=*((int *)data);
+            if (newfd == -1) {
+                warn("notionflux managed to send invalid fd.");
+            }else if (fd != -1 && newfd != fd) {
+                warn("notionflux client is spamming us with fds, ignoring.");
+                close(newfd); /* only want one fd from this connection */
+            } else {
+                fd = newfd;
+            }
+        }else{
+            warn("Unknown control message on unix domain socket.");
+        }
+        iter++;
+    }
+
+    return fd;
+}
 
 static void receive_data(int fd, void *buf_)
 {
@@ -86,13 +144,38 @@ static void receive_data(int fd, void *buf_)
     ExtlFn fn;
     int i, n;
     bool success=FALSE;
+    int idx=buf-bufs;
+
+    if(buf->stdout==NULL){ /* no fd received yet, must be the very beginning */
+        int stdout_fd=unix_recv_fd(fd);
+        if(stdout_fd==-2)
+            goto closefd;
+        if(stdout_fd==-3){
+            char const *err="Magic number mismatch on notionflux socket - "
+                "is notionflux the same version as notion?";
+            writes(fd, "E");
+            writes(fd, err);
+            warn(err);
+            goto closefd;
+        }
+
+        if(stdout_fd==-1) {
+            if(errno==EWOULDBLOCK || errno==EAGAIN)
+                return; /* try again later */
+            warn("No file descriptor received from notionflux, closing.");
+            goto closefd;
+        }
+        if((buf->stdout=fdopen(stdout_fd, "w"))==NULL) {
+            warn("fdopen() failed on fd from notionflux");
+            goto closefd;
+        }
+    }
 
     n=read(fd, buf->data+buf->ndata, MAX_DATA-buf->ndata);
 
     if(n==0){
         warn("Connection closed prematurely.");
-        close_conn(buf);
-        return;
+        goto closefd;
     }
 
     if(n<0){
@@ -112,17 +195,21 @@ static void receive_data(int fd, void *buf_)
 
     if(!end && buf->ndata+n==MAX_DATA){
         writes(fd, "Error: too much data\n");
-        close_conn(buf);
-        return;
+        goto closefd;
     }
 
     if(!end)
         return;
 
     errorlog_begin(&el);
+
+    if(!extl_lookup_global_value(&tostringfn, 'f', "mod_notionflux", "run_lua", NULL)){
+        warn("mod_notionflux.run_lua() function is missing");
+        return;
+    }
     if(extl_loadstring(buf->data, &fn)){
         char *retstr=NULL;
-        if(extl_call(tostringfn, "f", "s", fn, &retstr)){
+        if(extl_call(tostringfn, "fi", "s", fn, idx, &retstr)){
             success=TRUE;
             writes(fd, "S");
             writes(fd, retstr);
@@ -131,6 +218,7 @@ static void receive_data(int fd, void *buf_)
         }
         extl_unref_fn(fn);
     }
+    extl_unref_fn(tostringfn);
     errorlog_end(&el);
     if(el.msgs!=NULL && !success){
         writes(fd, "E");
@@ -138,9 +226,22 @@ static void receive_data(int fd, void *buf_)
     }
     errorlog_deinit(&el);
 
+closefd:
     close_conn(buf);
+    return;
 }
 
+/**EXTL_DOC
+ * Write \var{str} to the output file descriptor associated with client \var{idx}
+ */
+EXTL_SAFE
+EXTL_EXPORT
+bool mod_notionflux_xwrite(int idx, const char *str)
+{
+    if (idx<0 || idx>=MAX_SERVED || bufs[idx].stdout==NULL)
+        return FALSE;
+    return fputs(str, bufs[idx].stdout)!=EOF;
+}
 
 static void connection_attempt(int lfd, void *UNUSED(data))
 {
@@ -289,7 +390,6 @@ void close_connections()
             close_conn(&(bufs[i]));
     }
 
-    extl_unref_fn(tostringfn);
 }
 
 char mod_notionflux_ion_api_version[]=ION_API_VERSION;
@@ -301,20 +401,18 @@ bool mod_notionflux_init()
     int i;
     WRootWin *rw;
 
+    if (!mod_notionflux_register_exports())
+        return FALSE;
+
     for(i=0; i<MAX_SERVED; i++){
         bufs[i].fd=-1;
+        bufs[i].stdout=NULL;
         bufs[i].data=NULL;
         bufs[i].ndata=0;
     }
 
-    if(!extl_loadstring(tostringstr, &tostringfn))
-        return FALSE;
-
-    if(!start_listening()){
-        extl_unref_fn(tostringfn);
-        close_connections();
-        return FALSE;
-    }
+    if (!start_listening())
+        goto err_listening;
 
     flux_socket=XInternAtom(ioncore_g.dpy, "_NOTION_MOD_NOTIONFLUX_SOCKET", False);
 
@@ -323,6 +421,10 @@ bool mod_notionflux_init()
     }
 
     return TRUE;
+
+err_listening:
+    close_connections();
+    return FALSE;
 }
 
 

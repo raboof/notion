@@ -1,7 +1,7 @@
 /*
  * libextl/luaextl.c
  *
- * Copyright (c) The Notion Team 2011
+ * Copyright (c) The Notion Team 2011-2019
  * Copyright (c) Tuomo Valkonen 1999-2005.
  *
  * This library is free software; you can redistribute it and/or
@@ -2623,3 +2623,37 @@ void extl_resethook()
 
 /*}}}*/
 
+/* {{{ lookup global */
+
+/* resolve a chain of table accesses */
+bool extl_lookup_global_value(void *out, char type, ...) {
+    va_list ap;
+    lua_State *st=l_st;
+    char const *key;
+    int oldtop=lua_gettop(st);
+    bool ok=FALSE;
+
+    /* no lua_checkstack because we're always below LUA_MINSTACK */
+#if LUA_VERSION_NUM >= 502
+    lua_pushglobaltable(st);
+#else
+    lua_getfield(st, LUA_GLOBALSINDEX, "_G");
+#endif
+
+    va_start(ap, type);
+
+    while ((key=va_arg(ap, char const *))) {
+        lua_getfield(st, -1, key);
+        lua_replace(st, -2);
+        if (lua_isnil(st, -1)) /* not found */
+            goto error;
+    }
+
+    ok=extl_stack_get(st, -1, type, FALSE, NULL, out);
+error:
+    va_end(ap);
+    lua_settop(st, oldtop);
+    return ok;
+}
+
+/* }}} */

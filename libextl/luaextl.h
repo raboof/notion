@@ -94,6 +94,8 @@ extern bool extl_table_get_vararg(ExtlTab ref, char itype, char type,
                                   va_list *args);
 extern bool extl_table_get(ExtlTab ref, char itype, char type, ...);
 
+extern bool extl_lookup_global_value(void *out, char type, ...);
+
 extern bool extl_table_gets_a(ExtlTab ref, const char *entry, ExtlAny *ret);
 extern bool extl_table_gets_o(ExtlTab ref, const char *entry, Obj **ret);
 extern bool extl_table_gets_i(ExtlTab ref, const char *entry, int *ret);
