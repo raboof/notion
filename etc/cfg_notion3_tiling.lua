@@ -4,20 +4,26 @@
 
 -- Bindings for the tilings.
 defbindings("WTiling", {
-    bdoc("Split current frame horizontally."),
-    kpress(META.."I", "WTiling.split_at(_, _sub, 'right', true)"),
-
     bdoc("Split current frame vertically."),
-    kpress(ALTMETA.."I", "WTiling.split_at(_, _sub, 'bottom', true)"),
-
-    bdoc("Destroy current frame."),
-    kpress(META.."X", "WTiling.unsplit_at(_, _sub)"),
+    kpress(META.."S", "WTiling.split_at(_, _sub, 'bottom', true)"),
 
     bdoc("Go to frame above/below current frame."),
-    kpress(META.."W", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
-    kpress(ALTMETA.."W", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
+    kpress(META.."P", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
+    kpress(META.."N", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
     mclick(META.."Shift+Button4", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
     mclick(META.."Shift+Button5", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
+
+    bdoc("Go to frame right/left of current frame."),
+    kpress(META.."Tab", "ioncore.goto_next(_sub, 'right')"),
+    submap(META.."K", {
+        kpress("Tab", "ioncore.goto_next(_sub, 'left')"),
+
+        bdoc("Split current frame horizontally."),
+        kpress("S", "WTiling.split_at(_, _sub, 'right', true)"),
+
+        bdoc("Destroy current frame."),
+        kpress("X", "WTiling.unsplit_at(_, _sub)"),
+    }),
 })
 
 -- Frame bindings.
