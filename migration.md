@@ -10,6 +10,8 @@ number of changes that are either not backwards compatible, or change the
 
 ## Dependencies
 
+### Lua
+
 Notion is no longer compatible with Lua 5.0. This change was required in order to
 support Lua 5.3, which removed "old-style" Lua 5.0 variadic function arguments,
 the "new-style" variadic arguments were introduced with Lua 5.1.
@@ -30,6 +32,8 @@ function foo(a, b, ...)
 end
 ```
 and capturing `...` into a table can be achieved with `local arg={...}`.
+
+### C compiler
 
 Notion 4 also requires a C compiler capable of compiling C99.
 
