@@ -4,17 +4,18 @@
 
 -- Bindings for the tilings.
 defbindings("WTiling", {
-    bdoc("Split current frame horizontally."),
+    bdoc("Split current frame horizontally.", "hsplit"),
     kpress(META.."I", "WTiling.split_at(_, _sub, 'right', true)"),
 
-    bdoc("Split current frame vertically."),
+    bdoc("Split current frame vertically.", "vsplit"),
     kpress(ALTMETA.."I", "WTiling.split_at(_, _sub, 'bottom', true)"),
 
-    bdoc("Destroy current frame."),
+    bdoc("Destroy current frame.", "unsplit"),
     kpress(META.."X", "WTiling.unsplit_at(_, _sub)"),
 
-    bdoc("Go to frame above/below current frame."),
+    bdoc("Go to frame below current frame.", "vframe"),
     kpress(META.."W", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
+    bdoc("Go to frame above current frame.", "^frame"),
     kpress(ALTMETA.."W", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
     mclick(META.."Shift+Button4", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
     mclick(META.."Shift+Button5", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
@@ -22,10 +23,8 @@ defbindings("WTiling", {
 
 -- Frame bindings.
 defbindings("WFrame.floating", {
-    submap(META.."K", {
-        bdoc("Tile frame, if no tiling exists on the workspace"),
-        kpress("B", "mod_tiling.mkbottom(_)"),
-    }),
+    bdoc("Tile frame, if no tiling exists on the workspace", "tile"),
+    kpress(ALTMETA.."B", "mod_tiling.mkbottom(_)"),
 })
 
 -- Context menu for tiled workspaces.

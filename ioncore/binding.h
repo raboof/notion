@@ -44,6 +44,7 @@ DECLSTRUCT(WBinding){
     WBindmap *submap;
     ExtlFn func;
     const char *doc;
+    const char *label;
 };
 
 

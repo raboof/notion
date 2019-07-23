@@ -98,3 +98,319 @@ function ioncore.tagged_attach(reg, param)
     return true
 end
 
+function ioncore.show_live_docs(frame)
+    keysfile = io.open("/tmp/notionkeys.html", "w")
+    io.output(keysfile)
+
+    io.write([[
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Notion keyboard reference</title>
+    <style>
+* {
+}
+
+body {
+    font: 71%/1.5 Verdana, Sans-Serif;
+    background: #eee;
+}
+#container {
+    margin: 0;
+    padding: 0;
+    margin: auto;
+    width: 688px;
+}
+#write {
+    margin: 0 0 5px;
+    padding: 5px;
+    width: 671px;
+    height: 200px;
+    font: 1em/1.5 Verdana, Sans-Serif;
+    background: #fff;
+    border: 1px solid #f9f9f9;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+#keyboard {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+        #keyboard li {
+        float: left;
+        margin: 0 5px 5px 0;
+        width: 40px;
+        height: 60px;
+        #line-height: 40px;
+        text-align: center;
+        background: #fff;
+        border: 1px solid #f9f9f9;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        }
+            .capslock, .tab, .left-shift {
+            clear: left;
+            }
+                #keyboard .tab, #keyboard .delete, #keyboard .backspace {
+                width: 70px;
+                }
+                #keyboard .capslock {
+                width: 80px;
+                }
+                #keyboard .return {
+                width: 77px;
+                }
+                #keyboard .left-shift {
+                width: 95px;
+                }
+                #keyboard .right-shift {
+                width: 109px;
+                }
+            #keyboard .lastitem {
+            margin-right: 0;
+            }
+            .uppercase {
+            text-transform: uppercase;
+            }
+            #keyboard .space {
+            clear: left;
+            width: 681px;
+            }
+            .on {
+            display: none;
+            }
+            #keyboard li:hover {
+            position: relative;
+            top: 1px;
+            left: 1px;
+            border-color: #e5e5e5;
+            cursor: pointer;
+            }
+.modk, .shift
+{
+  background-color: #CCCCCC;
+}
+h2
+{
+  margin-top: 10px;
+}
+.legend
+{
+  clear: both;
+  margin: 10px;
+}
+td
+{
+  font-size: 10px;
+}
+.keytable
+{
+  margin: 0px auto;
+}
+
+#keyboard li.spacer {
+  background: none;
+  border: 1px solid transparent;
+  width: 4px
+}
+</style>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script>
+$().ready(function(){
+  $('.shortcut').mouseenter(function() {
+      $(this).css({'background-color': 'lightblue'});
+      $($(this).attr('ref')).css({'background-color': 'lightblue'});
+  });
+  $('.shortcut').mouseleave(function() {
+      $(this).css({'background-color': '#eee'});
+      $($(this).attr('ref')).css({'background-color': 'white'});
+  });
+  $('.shortcut').each(function() {
+      var shortcut = this;
+      $($(this).attr('ref')).mouseenter(function() {
+          $(shortcut).css({'background-color': 'lightblue'});
+          $(this).css({'background-color': 'lightblue'});
+      });
+      $($(this).attr('ref')).mouseleave(function() {
+          $(shortcut).css({'background-color': '#eee'});
+          $(this).css({'background-color': 'white'});
+      });
+  });
+});
+</script>
+</head>
+<body>
+<h1>Notion keyboard reference:</h1>
+
+<!-- CSS keyboard from http://net.tutsplus.com/tutorials/javascript-ajax/creating-a-keyboard-with-css-and-jquery/ -->
+
+]])
+
+    bindings_by_key = {}
+
+    function bindings_for(label)
+        --io.write(label .. " commands:\n")
+        for _,binding in pairs(notioncore.do_getbindings()["W" .. label]) do
+            if binding["doc"] then
+                --io.write(binding["kcb"] .. ": " .. binding["doc"] .. "\n")
+                if binding["label"] then
+                    bindings_by_key[binding["kcb"]] = binding["label"]
+                end
+            end
+        end
+    end
+    bindings_for("ClientWin")
+    bindings_for("Screen")
+    bindings_for("Frame")
+    bindings_for("Frame.toplevel")
+    bindings_for("GroupCW")
+    bindings_for("Tiling")
+    bindings_for("MPlex.toplevel")
+
+    function binding_label(label)
+        if label:sub(1,2) == "->" then
+            return "&rarr;" .. label:sub(3,#label)
+        elseif label:sub(1,2) == "<-" then
+            return "&larr;" .. label:sub(3,#label)
+        elseif label:sub(1,1) == "^" then
+            return "&uarr;" .. label:sub(2,#label)
+        elseif label=="vframe" then
+            return "&darr;frame"
+        elseif label=="hsplit" then
+            return "&harr;split"
+        elseif label=="vsplit" then
+            return "&varr;split"
+        elseif label=="hmax" then
+            return "&harr;max"
+        elseif label=="vmax" then
+            return "&varr;max"
+        else
+            return label
+        end
+    end
+
+    function print_key(label, class, name)
+        if name == nil then
+            name = label
+        end
+        io.write("<li id=\"" .. name .. "\"")
+        if class then
+            io.write(" class=\"" .. class .. "\"")
+        end
+        io.write(">" .. label)
+        if bindings_by_key["Mod4+" .. name] then
+            io.write("<br>" .. binding_label(bindings_by_key["Mod4+" .. name]))
+        end
+        if bindings_by_key["Shift+Mod4+" .. name] then
+            io.write('<br><span class="shift">' .. binding_label(bindings_by_key["Shift+Mod4+" .. name]) .. '</shift>')
+        end
+        io.write("</li>\n")
+    end
+
+    bindings_by_key["Shift+Mod4+grave"] = bindings_by_key["Shift+Mod4+asciitilde"]
+
+    io.write("<div id=\"container\">\n")
+    io.write("<ul id=\"keyboard\">\n")
+
+    print_key("Esc", nil, "Escape")
+    io.write("<li class=\"spacer\"></li>\n")
+    for i=1,4 do print_key("F" .. i) end
+    io.write("<li class=\"spacer\"></li>\n")
+    for i=5,8 do print_key("F" .. i) end
+    io.write("<li class=\"spacer\"></li>\n")
+    for i=9,12 do print_key("F" .. i) end
+    io.write("<li class=\"spacer\"></li>\n")
+    io.write("<li class=\"spacer\"></li>\n")
+    io.write("<li class=\"spacer\"></li>\n")
+
+    print_key("`", nil, "grave")
+    for i=1,9 do print_key(i) end
+    print_key("0")
+    print_key("-")
+    print_key("=", nil, "equal")
+    print_key("Backspace", "backspace lastitem", "BackSpace")
+
+    print_key("Tab", "tab")
+    keys = "QWERTYUIOP"
+    for i=1,#keys do
+        print_key(keys:sub(i,i))
+    end
+    print_key("[", nil, "bracketleft")
+    print_key("]", nil, "bracketright")
+    print_key("\\", "lastitem", "backslash")
+
+    print_key("caps lock", "capslock", "Caps_Lock")
+    keys = "ASDFGHJKL"
+    for i=1,#keys do
+        print_key(keys:sub(i,i))
+    end
+    print_key(";", nil, "semicolon")
+    print_key("'", nil, "apostrophe")
+    print_key("return", "return lastitem", "Return")
+
+    io.write("<li class=\"left-shift\">shift</li>\n")
+    keys = "ZXCVBNM"
+    for i=1,#keys do
+        print_key(keys:sub(i,i))
+    end
+    print_key(",", nil, "comma")
+    print_key(".", nil, "period")
+    print_key("/", nil, "slash")
+    io.write("<li class=\"right-shift lastitem\">shift</li>\n")
+    io.write("</ul></div>")
+
+    io.write("<table class=\"keytable\" style=\"clear: left\">\n")
+    io.write("<tbody><tr>\n")
+    io.write("<td width=\"400px\" valign=\"top\">\n")
+    io.write("<h2>META key</h2>\n")
+    io.write("All keybindings are activated by also pressing the META key, which by default is the 'windows' key.<br>\n")
+    io.write("The 'grey' bindings are activated by pressing Shift in addition to META.<br><br>\n")
+
+
+    function list_keys_for(label, ctx)
+        if label then
+            io.write("<tr><th colspan=\"2\">" .. label .. "</th></tr>\n")
+        end
+        for _,binding in pairs(notioncore.do_getbindings()[ctx]) do
+            if binding["doc"] then
+                ref = binding["kcb"]
+                if ref:sub(1,6) == "Shift+" then
+                    ref = ref:sub(7, #ref)
+                end
+                if ref:sub(1,5) == "Mod4+" then
+                    ref = ref:sub(6, #ref)
+                end
+                io.write("<tr class=\"shortcut\" ref=\"#" .. ref .. "\"><td>" .. binding["kcb"] .. "</td><td>" .. binding["doc"] .. "</td></tr>\n")
+                --if binding["label"] then
+                --    bindings_by_key[binding["kcb"]] = binding["label"]
+                --end
+            end
+        end
+    end
+
+    io.write("<table>\n")
+    list_keys_for("Screen", "WScreen")
+    list_keys_for("Client windows", "WClientWin")
+    list_keys_for(nil, "WGroupCW")
+    io.write("</table>\n")
+    io.write("</td><td valign=\"top\">")
+    io.write("<table>\n")
+    list_keys_for("Frames", "WFrame")
+    list_keys_for(nil, "WFrame.toplevel")
+    list_keys_for("Tilings", "WTiling")
+    list_keys_for("Tabs", "WMPlex.toplevel")
+    io.write("</table>\n")
+
+    io.write("</td>")
+    io.write("</tr></tbody>\n")
+    io.write("</table>\n")
+
+    io.write("</body>")
+    io.write("</html>")
+
+    io.close(keysfile)
+
+    mod_query.exec_on_merr(frame, "run-mailcap --mode=view /tmp/notionkeys.html")
+end
