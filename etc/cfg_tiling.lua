@@ -14,8 +14,8 @@ defbindings("WTiling", {
     kpress(META.."X", "WTiling.unsplit_at(_, _sub)"),
 
     bdoc("Go to frame above/below current frame."),
-    kpress(META.."W", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
-    kpress(ALTMETA.."W", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
+    kpress(META.."W", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
+    kpress(ALTMETA.."W", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
     mclick(META.."Shift+Button4", "ioncore.goto_next(_sub, 'up', {no_ascend=_})"),
     mclick(META.."Shift+Button5", "ioncore.goto_next(_sub, 'down', {no_ascend=_})"),
 })
