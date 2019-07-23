@@ -171,6 +171,10 @@ defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."F6",
            "mod_query.query_runfile(_, 'run-mailcap --action=view')"),
 
+    bdoc("Query for keybinding."),
+    kpress(META.."F7",
+           "mod_query.query_binding(_, _sub)"),
+
     bdoc("Query for workspace to go to or create a new one."),
     kpress(ALTMETA.."F9", "mod_query.query_workspace(_)"),
 
