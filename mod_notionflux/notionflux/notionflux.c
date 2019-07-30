@@ -109,6 +109,15 @@ bool unix_send_fds(int unix, int fd) {
 	return true;
 }
 
+bool notion_restarted(void)
+{
+	char const *newsock = get_socket_filename();
+	bool ret = strcmp(sockfilename, newsock) != 0;
+	free((void*)sockfilename);
+	sockfilename = newsock;
+	return ret;
+}
+
 FILE *sock_connect(void)
 {
 	struct sockaddr_un serv;
@@ -118,8 +127,14 @@ FILE *sock_connect(void)
 
 	serv.sun_family = AF_UNIX;
 	strcpy(serv.sun_path, sockfilename);
-	if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) == -1)
-		die("Failed to connect to socket %s\n", sockfilename);
+	if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) == -1) {
+		if (notion_restarted()) {
+			fputs("Notion was restarted, connecting to new instance.\n", stderr);
+			return sock_connect();
+		} else {
+			die("Failed to connect to socket %s\n", sockfilename);
+		}
+	}
 
 	if (!unix_send_fds(sock, STDOUT_FILENO)) /* used for lua's print() */
 		die("Failed to send stdout to notion.\n");
