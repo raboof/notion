@@ -53,6 +53,7 @@
 #define SOCK_ATOM "_NOTION_MOD_NOTIONFLUX_SOCKET"
 
 char const *sockfilename = NULL;
+char const *histfile = NULL;
 
 char const *get_socket_filename(void)
 {
@@ -301,6 +302,33 @@ int initialize_readline(void)
 	return 0;
 }
 
+void read_histfile(void)
+{
+	char *home = getenv("HOME");
+	if (!home) {
+		fputs("$HOME is not set, can't find history file.\n", stderr);
+		return;
+	}
+
+	char fname[4096];
+	snprintf(fname, sizeof(fname), "%s/.notion/notionflux.hist", home);
+	histfile = strdup(fname);
+
+	int err = read_history(fname);
+	if (err != 0 && err != ENOENT)
+		fprintf(stderr, "Error reading history file: %s.\n", strerror(err));
+}
+
+void save_histfile(void)
+{
+	if (histfile && strlen(histfile) > 0) {
+		int err = write_history(histfile);
+		if (err != 0)
+			fprintf(stderr, "Error writing history: %s.\n", strerror(err));
+	}
+}
+
+
 struct buf input = {MAX_DATA, input.buf, {0}};
 
 #if 1 /* Ideas taken from lua/lua.c, because the REPL isn't part of liblua */
@@ -359,6 +387,7 @@ int repl_main(void)
 	rl_startup_hook = initialize_readline;
 	input_reset();
 
+	read_histfile();
 	while (1) {
 		free(line);
 		line = readline(prompt);
@@ -449,6 +478,7 @@ int main(int argc, char **argv)
 	char const *data;
 
 	if (argc == 1 && isatty(STDIN_FILENO)) {
+		atexit(save_histfile);
 		return repl_main();
 	} else if (argc == 1 || (argc == 2 && strcmp(argv[1], "-R") == 0)) {
 		data = buf.buf;
