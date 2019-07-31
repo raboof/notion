@@ -373,6 +373,8 @@ char const *make_lua_exp(char *lua, size_t size)
 	static lua_State *L = NULL;
 	if (!L) L=luaL_newstate();
 
+	lua_settop(L, 0);
+
 	/* Inspired by Lua 5.3:
 	 * Attempt to add a return keyword and see if the snippet can be loaded
 	 * without an error (which would mean that it is an expression). If not,
@@ -382,10 +384,9 @@ char const *make_lua_exp(char *lua, size_t size)
 
 	const char *retline = lua_pushfstring(L, "return %s;", lua);
 	int status = luaL_loadbuffer(L, retline, strlen(retline), "=stdin");
-	lua_settop(L, 0);
 
 	if (status == LUA_OK)
-		return retline; /* presumably managed by lua's GC */
+		return retline; /* managed by Lua's GC */
 	else if (!is_lua_incomplete(L, lua, size))
 		return lua;
 	return NULL;
