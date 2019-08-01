@@ -163,6 +163,14 @@ void binding_deinit(WBinding *binding)
         bindmap_destroy(binding->submap);
         binding->submap=NULL;
     }
+    if(binding->doc){
+        free(binding->doc);
+        binding->doc=NULL;
+    }
+    if(binding->label){
+        free(binding->label);
+        binding->label=NULL;
+    }
 
     binding->func=extl_unref_fn(binding->func);
 }
@@ -171,7 +179,9 @@ void binding_deinit(WBinding *binding)
 static void do_destroy_binding(WBinding *binding)
 {
     assert(binding!=NULL);
+
     binding_deinit(binding);
+
     free(binding);
 }
 

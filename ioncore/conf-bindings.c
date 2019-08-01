@@ -218,6 +218,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     binding.func=extl_fn_none();
     binding.submap=create_bindmap();
     binding.doc=NULL;
+    binding.label=NULL;
 
     if(binding.submap==NULL)
         return FALSE;
