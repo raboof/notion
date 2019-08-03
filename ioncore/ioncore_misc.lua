@@ -361,8 +361,8 @@ $().ready(function(){
     io.write("<tbody><tr>\n")
     io.write("<td width=\"400px\" valign=\"top\">\n")
     io.write("<h2>META key</h2>\n")
-    io.write("All keybindings are activated by also pressing the META key, which by default is the 'windows' key.<br>\n")
-    io.write("The 'grey' bindings are activated by pressing Shift in addition to META.<br><br>\n")
+    io.write("All keybindings are activated by pressing the META key, which by default is the 'windows' key.<br>\n")
+    io.write("The 'grey' bindings are activated by pressing ALTMETA (by default pressing Shift while holding META).<br><br>\n")
 
     local function list_keys_for(label, ctx)
         if label then
