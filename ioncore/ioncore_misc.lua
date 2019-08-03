@@ -99,7 +99,7 @@ function ioncore.tagged_attach(reg, param)
 end
 
 function ioncore.show_live_docs(frame)
-    keysfile = io.open("/tmp/notionkeys.html", "w")
+    local keysfile = io.open("/tmp/notionkeys.html", "w")
     io.output(keysfile)
 
     io.write([[
@@ -248,16 +248,12 @@ $().ready(function(){
 
 ]])
 
-    bindings_by_key = {}
+    local bindings_by_key = {}
 
-    function bindings_for(label)
-        --io.write(label .. " commands:\n")
+    local function bindings_for(label)
         for _,binding in pairs(notioncore.do_getbindings()["W" .. label]) do
-            if binding["doc"] then
-                --io.write(binding["kcb"] .. ": " .. binding["doc"] .. "\n")
-                if binding["label"] then
-                    bindings_by_key[binding["kcb"]] = binding["label"]
-                end
+            if binding["doc"] and binding["label"] then
+                bindings_by_key[binding["kcb"]] = binding["label"]
             end
         end
     end
@@ -269,7 +265,7 @@ $().ready(function(){
     bindings_for("Tiling")
     bindings_for("MPlex.toplevel")
 
-    function binding_label(label)
+    local function binding_label(label)
         if label:sub(1,2) == "->" then
             return "&rarr;" .. label:sub(3,#label)
         elseif label:sub(1,2) == "<-" then
@@ -291,7 +287,7 @@ $().ready(function(){
         end
     end
 
-    function print_key(label, class, name)
+    local function print_key(label, class, name)
         if name == nil then
             name = label
         end
@@ -333,7 +329,7 @@ $().ready(function(){
     print_key("Backspace", "backspace lastitem", "BackSpace")
 
     print_key("Tab", "tab")
-    keys = "QWERTYUIOP"
+    local keys = "QWERTYUIOP"
     for i=1,#keys do
         print_key(keys:sub(i,i))
     end
@@ -368,14 +364,13 @@ $().ready(function(){
     io.write("All keybindings are activated by also pressing the META key, which by default is the 'windows' key.<br>\n")
     io.write("The 'grey' bindings are activated by pressing Shift in addition to META.<br><br>\n")
 
-
-    function list_keys_for(label, ctx)
+    local function list_keys_for(label, ctx)
         if label then
             io.write("<tr><th colspan=\"2\">" .. label .. "</th></tr>\n")
         end
         for _,binding in pairs(notioncore.do_getbindings()[ctx]) do
             if binding["doc"] then
-                ref = binding["kcb"]
+                local ref = binding["kcb"]
                 if ref:sub(1,6) == "Shift+" then
                     ref = ref:sub(7, #ref)
                 end
