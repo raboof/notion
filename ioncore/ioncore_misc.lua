@@ -99,7 +99,8 @@ function ioncore.tagged_attach(reg, param)
 end
 
 function ioncore.show_live_docs(frame)
-    local keysfile = io.open("/tmp/notionkeys.html", "w")
+    local filename = os.tmpname()
+    local keysfile = io.open(filename, "w")
 
     keysfile:write([[
 <html>
@@ -406,5 +407,5 @@ $().ready(function(){
 
     io.close(keysfile)
 
-    mod_query.exec_on_merr(frame, "run-mailcap --mode=view /tmp/notionkeys.html")
+    mod_query.exec_on_merr(frame, "run-mailcap --mode=view " .. filename)
 end
