@@ -102,8 +102,8 @@ end
 
 --DOC
 -- Used to enter documentation among bindings.
-function ioncore.bdoc(text)
-    return {action = "doc", text = text}
+function ioncore.bdoc(text, label)
+    return {action = "doc", text = text, label = label}
 end
 
 --DOC

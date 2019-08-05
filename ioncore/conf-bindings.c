@@ -159,7 +159,8 @@ bool ioncore_parse_keybut(const char *str, uint *mod_ret, uint *ksb_ret,
 
 static bool do_action(WBindmap *bindmap, const char *str,
                       ExtlFn func, uint act, uint mod, uint ksb,
-                      int area, bool wr, const char* doc)
+                      int area, bool wr,
+                      const char* doc, const char* label)
 {
     WBinding binding;
 
@@ -177,6 +178,7 @@ static bool do_action(WBindmap *bindmap, const char *str,
     binding.area=area;
     binding.submap=NULL;
     binding.doc=doc?strdup(doc):NULL;
+    binding.label=label?strdup(label):NULL;
 
     if(func!=extl_fn_none()){
         binding.func=extl_ref_fn(func);
@@ -216,6 +218,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     binding.func=extl_fn_none();
     binding.submap=create_bindmap();
     binding.doc=NULL;
+    binding.label=NULL;
 
     if(binding.submap==NULL)
         return FALSE;
@@ -244,7 +247,7 @@ static StringIntMap action_map[]={
 
 static bool do_entry(WBindmap *bindmap, ExtlTab tab,
                      const StringIntMap *areamap, bool init_any,
-                     char **doc)
+                     char **doc, char **label)
 {
     bool ret=FALSE;
     char *action_str=NULL, *ksb_str=NULL, *area_str=NULL;
@@ -264,6 +267,8 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         wr=TRUE;
     }else if(strcmp(action_str, "doc")==0){
         extl_table_gets_s(tab, "text", doc);
+        if (!extl_table_gets_s(tab, "label", label))
+            *label=NULL;
         return TRUE;
     }else{
         action=stringintmap_value(action_map, action_str, -1);
@@ -302,7 +307,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         if(!extl_table_gets_f(tab, "func", &func)){
             func=extl_fn_none();
         }
-        ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr, *doc);
+        ret=do_action(bindmap, ksb_str, func, action, mod, ksb, area, wr, *doc, *label);
         if(!ret)
             extl_unref_fn(func);
     }
@@ -322,12 +327,14 @@ bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap)
     int i, n, nok=0;
     ExtlTab ent;
     char *current_doc = NULL;
+    char *current_label = NULL;
 
     n=extl_table_get_n(tab);
 
     for(i=1; i<=n; i++){
         if(extl_table_geti_t(tab, i, &ent)){
-            nok+=do_entry(bindmap, ent, bindmap->areamap, submap, &current_doc);
+            nok+=do_entry(bindmap, ent, bindmap->areamap, submap,
+                          &current_doc, &current_label);
             extl_unref_table(ent);
             continue;
         }
@@ -404,7 +411,6 @@ static bool get_kpress(WBindmap *UNUSED(bindmap), WBinding *b, ExtlTab t)
         extl_table_sets_s(t, "action", "kpress");
 
     mods=get_mods(b->state);
-
     if(mods==NULL)
         return FALSE;
 
@@ -417,6 +423,7 @@ static bool get_kpress(WBindmap *UNUSED(bindmap), WBinding *b, ExtlTab t)
 
     extl_table_sets_s(t, "kcb", key);
     extl_table_sets_s(t, "doc", b->doc);
+    extl_table_sets_s(t, "label", b->label);
 
     free(key);
 
