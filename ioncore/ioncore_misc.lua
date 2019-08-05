@@ -100,9 +100,8 @@ end
 
 function ioncore.show_live_docs(frame)
     local keysfile = io.open("/tmp/notionkeys.html", "w")
-    io.output(keysfile)
 
-    io.write([[
+    keysfile:write([[
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -291,35 +290,35 @@ $().ready(function(){
         if name == nil then
             name = label
         end
-        io.write("<li id=\"" .. name .. "\"")
+        keysfile:write("<li id=\"" .. name .. "\"")
         if class then
-            io.write(" class=\"" .. class .. "\"")
+            keysfile:write(" class=\"" .. class .. "\"")
         end
-        io.write(">" .. label)
+        keysfile:write(">" .. label)
         if bindings_by_key["Mod4+" .. name] then
-            io.write("<br>" .. binding_label(bindings_by_key["Mod4+" .. name]))
+            keysfile:write("<br>" .. binding_label(bindings_by_key["Mod4+" .. name]))
         end
         if bindings_by_key["Shift+Mod4+" .. name] then
-            io.write('<br><span class="shift">' .. binding_label(bindings_by_key["Shift+Mod4+" .. name]) .. '</shift>')
+            keysfile:write('<br><span class="shift">' .. binding_label(bindings_by_key["Shift+Mod4+" .. name]) .. '</shift>')
         end
-        io.write("</li>\n")
+        keysfile:write("</li>\n")
     end
 
     bindings_by_key["Shift+Mod4+grave"] = bindings_by_key["Shift+Mod4+asciitilde"]
 
-    io.write("<div id=\"container\">\n")
-    io.write("<ul id=\"keyboard\">\n")
+    keysfile:write("<div id=\"container\">\n")
+    keysfile:write("<ul id=\"keyboard\">\n")
 
     print_key("Esc", nil, "Escape")
-    io.write("<li class=\"spacer\"></li>\n")
+    keysfile:write("<li class=\"spacer\"></li>\n")
     for i=1,4 do print_key("F" .. i) end
-    io.write("<li class=\"spacer\"></li>\n")
+    keysfile:write("<li class=\"spacer\"></li>\n")
     for i=5,8 do print_key("F" .. i) end
-    io.write("<li class=\"spacer\"></li>\n")
+    keysfile:write("<li class=\"spacer\"></li>\n")
     for i=9,12 do print_key("F" .. i) end
-    io.write("<li class=\"spacer\"></li>\n")
-    io.write("<li class=\"spacer\"></li>\n")
-    io.write("<li class=\"spacer\"></li>\n")
+    keysfile:write("<li class=\"spacer\"></li>\n")
+    keysfile:write("<li class=\"spacer\"></li>\n")
+    keysfile:write("<li class=\"spacer\"></li>\n")
 
     print_key("`", nil, "grave")
     for i=1,9 do print_key(i) end
@@ -346,7 +345,7 @@ $().ready(function(){
     print_key("'", nil, "apostrophe")
     print_key("return", "return lastitem", "Return")
 
-    io.write("<li class=\"left-shift\">shift</li>\n")
+    keysfile:write("<li class=\"left-shift\">shift</li>\n")
     keys = "ZXCVBNM"
     for i=1,#keys do
         print_key(keys:sub(i,i))
@@ -354,19 +353,19 @@ $().ready(function(){
     print_key(",", nil, "comma")
     print_key(".", nil, "period")
     print_key("/", nil, "slash")
-    io.write("<li class=\"right-shift lastitem\">shift</li>\n")
-    io.write("</ul></div>")
+    keysfile:write("<li class=\"right-shift lastitem\">shift</li>\n")
+    keysfile:write("</ul></div>")
 
-    io.write("<table class=\"keytable\" style=\"clear: left\">\n")
-    io.write("<tbody><tr>\n")
-    io.write("<td width=\"400px\" valign=\"top\">\n")
-    io.write("<h2>META key</h2>\n")
-    io.write("All keybindings are activated by pressing the META key, which by default is the 'windows' key.<br>\n")
-    io.write("The 'grey' bindings are activated by pressing ALTMETA (by default pressing Shift while holding META).<br><br>\n")
+    keysfile:write("<table class=\"keytable\" style=\"clear: left\">\n")
+    keysfile:write("<tbody><tr>\n")
+    keysfile:write("<td width=\"400px\" valign=\"top\">\n")
+    keysfile:write("<h2>META key</h2>\n")
+    keysfile:write("All keybindings are activated by pressing the META key, which by default is the 'windows' key.<br>\n")
+    keysfile:write("The 'grey' bindings are activated by pressing ALTMETA (by default pressing Shift while holding META).<br><br>\n")
 
     local function list_keys_for(label, ctx)
         if label then
-            io.write("<tr><th colspan=\"2\">" .. label .. "</th></tr>\n")
+            keysfile:write("<tr><th colspan=\"2\">" .. label .. "</th></tr>\n")
         end
         for _,binding in pairs(notioncore.do_getbindings()[ctx]) do
             if binding["doc"] then
@@ -377,7 +376,7 @@ $().ready(function(){
                 if ref:sub(1,5) == "Mod4+" then
                     ref = ref:sub(6, #ref)
                 end
-                io.write("<tr class=\"shortcut\" ref=\"#" .. ref .. "\"><td>" .. binding["kcb"] .. "</td><td>" .. binding["doc"] .. "</td></tr>\n")
+                keysfile:write("<tr class=\"shortcut\" ref=\"#" .. ref .. "\"><td>" .. binding["kcb"] .. "</td><td>" .. binding["doc"] .. "</td></tr>\n")
                 --if binding["label"] then
                 --    bindings_by_key[binding["kcb"]] = binding["label"]
                 --end
@@ -385,25 +384,25 @@ $().ready(function(){
         end
     end
 
-    io.write("<table>\n")
+    keysfile:write("<table>\n")
     list_keys_for("Screen", "WScreen")
     list_keys_for("Client windows", "WClientWin")
     list_keys_for(nil, "WGroupCW")
-    io.write("</table>\n")
-    io.write("</td><td valign=\"top\">")
-    io.write("<table>\n")
+    keysfile:write("</table>\n")
+    keysfile:write("</td><td valign=\"top\">")
+    keysfile:write("<table>\n")
     list_keys_for("Frames", "WFrame")
     list_keys_for(nil, "WFrame.toplevel")
     list_keys_for("Tilings", "WTiling")
     list_keys_for("Tabs", "WMPlex.toplevel")
-    io.write("</table>\n")
+    keysfile:write("</table>\n")
 
-    io.write("</td>")
-    io.write("</tr></tbody>\n")
-    io.write("</table>\n")
+    keysfile:write("</td>")
+    keysfile:write("</tr></tbody>\n")
+    keysfile:write("</table>\n")
 
-    io.write("</body>")
-    io.write("</html>")
+    keysfile:write("</body>")
+    keysfile:write("</html>")
 
     io.close(keysfile)
 
