@@ -61,7 +61,7 @@
 #include "exec.h"
 #include "screen-notify.h"
 #include "log.h"
-
+#include "tempdir.h"
 
 #include "../version.h"
 #include "exports.h"
@@ -663,6 +663,8 @@ void ioncore_deinit()
     stringstore_deinit();
 
     mainloop_unregister_input_fd(ioncore_g.conn);
+
+    ioncore_tempdir_cleanup();
 
     dpy=ioncore_g.dpy;
     ioncore_g.dpy=NULL;
