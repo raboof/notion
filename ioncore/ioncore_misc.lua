@@ -99,7 +99,7 @@ function ioncore.tagged_attach(reg, param)
 end
 
 function ioncore.show_live_docs(frame)
-    local filename = os.tmpname()
+    local filename = os.tmpname() .. ".html"
     local keysfile = io.open(filename, "w")
 
     keysfile:write([[
