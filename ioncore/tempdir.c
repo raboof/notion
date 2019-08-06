@@ -20,8 +20,8 @@
 #include "tempdir.h"
 #include "log.h"
 
-char template[]="/tmp/notion.XXXXXX\0\0";
-char const *tempdir=NULL;
+static char template[]="/tmp/notion.XXXXXX\0\0";
+static char const *tempdir=NULL;
 
 /*EXTL_DOC
  * Returns the global temporary directory for this notion instance with a

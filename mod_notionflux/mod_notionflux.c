@@ -25,6 +25,7 @@
 #include <ioncore/common.h>
 #include <ioncore/global.h>
 #include <ioncore/property.h>
+#include <ioncore/tempdir.h>
 #include <libmainloop/select.h>
 #include <libtu/errorlog.h>
 #include <libextl/extl.h>
@@ -305,19 +306,21 @@ static void connection_attempt(int lfd, void *UNUSED(data))
     close(fd);
 }
 
-
 static bool start_listening()
 {
     struct sockaddr_un addr;
+    char const *tempdir=ioncore_tempdir();
+    char const *filename="notionflux.socket";
 
-    listenfile=tmpnam(NULL);
-    if(listenfile==NULL){
-        warn_err();
-        return FALSE;
-    }
+    listenfile = ALLOC_N(char, strlen(tempdir)+strlen(filename)+1);
+    if(!listenfile || !tempdir)
+        goto err;
 
-    if(strlen(listenfile)>SOCK_MAX){
-        warn("Too long socket path");
+    strcat(listenfile, tempdir);
+    strcat(listenfile, filename);
+
+    if(strlen(listenfile)>sizeof(addr.sun_path)-1){
+        warn("Socket path too long");
         goto err;
     }
 
@@ -329,6 +332,7 @@ static bool start_listening()
         goto errwarn;
 
     addr.sun_family=AF_UNIX;
+
     strcpy(addr.sun_path, listenfile);
 
     {
@@ -339,10 +343,11 @@ static bool start_listening()
             goto errwarn;
     }
 
-    if(bind(listenfd, (struct sockaddr*) &addr,
-            strlen(addr.sun_path)+sizeof(addr.sun_family))<0){
+    if(bind(listenfd, (struct sockaddr*) &addr, sizeof(addr))<0)
         goto errwarn;
-    }
+
+    if(chmod(listenfile, S_IRUSR|S_IWUSR)<0)
+        goto errwarn;
 
     if(listen(listenfd, MAX_SERVED)<0)
         goto errwarn;
@@ -360,14 +365,13 @@ err:
         listenfd=-1;
     }
 
-    /*if(listenfile!=NULL){
+    if(listenfile!=NULL){
         free(listenfile);
         listenfile=NULL;
-    }*/
+    }
 
     return FALSE;
 }
-
 
 void close_connections()
 {
@@ -381,8 +385,8 @@ void close_connections()
 
     if(listenfile!=NULL){
         unlink(listenfile);
-        /*free(listenfile);
-        listenfile=NULL;*/
+        free(listenfile);
+        listenfile=NULL;
     }
 
     for(i=0; i<MAX_SERVED; i++){
