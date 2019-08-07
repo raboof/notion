@@ -4,7 +4,7 @@ The original Ion was written and maintained by Tuomo Valkonen between 2003 and
 After he stopped using Linux, Arnout Engelen took over the maintainership and
 renamed Ion to Notion to conform to the Ion license, which did not allow for
 the name Ion to be used by forks. The license has since been changed back to
-the ordinary LGPL v2.1+ and code which is only available under the Ion has been
+the ordinary LGPL v2.1+ and code which was only available under the Ion license has been
 replaced.
 
 Copyright inside the notion codebase is attributed to "The Notion development
