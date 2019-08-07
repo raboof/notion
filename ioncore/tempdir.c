@@ -52,7 +52,7 @@ void ioncore_tempdir_cleanup(void)
     DIR *dir;
     struct dirent *dent;
     char fname[sizeof(template)+NAME_MAX];
-    size_t const offs=strlen(tempdir);
+    size_t const offs=strlen(template);
 
     if(!tempdir)
         return;
