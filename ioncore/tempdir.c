@@ -69,6 +69,7 @@ void ioncore_tempdir_cleanup(void)
         strcpy(fname+offs, dent->d_name);
         unlink(fname);
     }
+    closedir(dir);
     rmdir(tempdir);
     tempdir=NULL;
 }
