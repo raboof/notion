@@ -1,7 +1,7 @@
 /*
  * notion/ioncore/tempdir.h
  *
- * Copyright (c) 2019 Moritz Wilhelmy
+ * Copyright (c) 2019 The Notion development team
  *
  * See the included file LICENSE for details.
  */

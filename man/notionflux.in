@@ -1,4 +1,4 @@
-.\" Copyright (c) 2019 Moritz Wilhelmy
+.\" Copyright (c) 2019 The Notion development team
 .\" This file is hereby licensed Creative Commons CC0 - no rights reserved
 .\" For more information, see https://creativecommons.org/share-your-work/public-domain/cc0/
 .\" This is an mdoc(7) manual page, as any manual page should be.
@@ -134,7 +134,7 @@ It was adapted to notion by the notion development team when notion was forked f
 .Sh AUTHORS
 .Nm
 was rewritten in 2019 by
-.An Moritz Wilhelmy
+.An The Notion development team
 under the GNU GPL in order to add the interactive mode.
 .Sh BUGS
 Currently, the script must be 4095 bytes or shorter.
