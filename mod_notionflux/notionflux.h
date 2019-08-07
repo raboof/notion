@@ -16,6 +16,5 @@
 #define MAX_SERVED 8
 #define CHUNK 1024
 #define MAX_DATA (1024*4)
-#define SOCK_MAX (108-1)
 
 #endif
