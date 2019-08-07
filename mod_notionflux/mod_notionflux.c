@@ -2,7 +2,7 @@
  * mod_notionflux/mod_notionflux/mod_notionflux.c
  *
  * Copyright (c) Tuomo Valkonen 2004-2005.
- * Copyright (c) Moritz Wilhelmy 2019
+ * Copyright (c) The Notion development team 2019
  *
  * This is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by

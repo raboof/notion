@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Moritz Wilhelmy
+/* Copyright (C) 2019 The Notion development team
 
    This utility is part of the notion window manager, but uses a different
    license because GNU readline requires it.
