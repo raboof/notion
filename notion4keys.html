@@ -1,0 +1,304 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Notion keyboard reference</title>
+    <style>
+* {
+}
+
+body {
+    font: 71%/1.5 Verdana, Sans-Serif;
+    background: #eee;
+}
+#container {
+    margin: 0;
+    padding: 0;
+    margin: auto;
+    width: 688px;
+}
+#write {
+    margin: 0 0 5px;
+    padding: 5px;
+    width: 671px;
+    height: 200px;
+    font: 1em/1.5 Verdana, Sans-Serif;
+    background: #fff;
+    border: 1px solid #f9f9f9;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+#keyboard {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+        #keyboard li {
+        float: left;
+        margin: 0 5px 5px 0;
+        width: 40px;
+        height: 60px;
+        #line-height: 40px;
+        text-align: center;
+        background: #fff;
+        border: 1px solid #f9f9f9;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        }
+            .capslock, .tab, .left-shift {
+            clear: left;
+            }
+                #keyboard .tab, #keyboard .delete, #keyboard .backspace {
+                width: 70px;
+                }
+                #keyboard .capslock {
+                width: 80px;
+                }
+                #keyboard .return {
+                width: 77px;
+                }
+                #keyboard .left-shift {
+                width: 95px;
+                }
+                #keyboard .right-shift {
+                width: 109px;
+                }
+            #keyboard .lastitem {
+            margin-right: 0;
+            }
+            .uppercase {
+            text-transform: uppercase;
+            }
+            #keyboard .space {
+            clear: left;
+            width: 681px;
+            }
+            .on {
+            display: none;
+            }
+            #keyboard li:hover {
+            position: relative;
+            top: 1px;
+            left: 1px;
+            border-color: #e5e5e5;
+            cursor: pointer;
+            }
+.modk, .shift
+{
+  background-color: #CCCCCC;
+}
+h2
+{
+  margin-top: 10px;
+}
+.legend
+{
+  clear: both;
+  margin: 10px;
+}
+td
+{
+  font-size: 10px;
+}
+.keytable
+{
+  margin: 0px auto;
+}
+
+#keyboard li.spacer {
+  background: none;
+  border: 1px solid transparent;
+  width: 4px
+}
+</style>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script>
+$().ready(function(){
+  $('.shortcut').mouseenter(function() {
+      $(this).css({'background-color': 'lightblue'});
+      $($(this).attr('ref')).css({'background-color': 'lightblue'});
+  });
+  $('.shortcut').mouseleave(function() {
+      $(this).css({'background-color': '#eee'});
+      $($(this).attr('ref')).css({'background-color': 'white'});
+  });
+  $('.shortcut').each(function() {
+      var shortcut = this;
+      $($(this).attr('ref')).mouseenter(function() {
+          $(shortcut).css({'background-color': 'lightblue'});
+          $(this).css({'background-color': 'lightblue'});
+      });
+      $($(this).attr('ref')).mouseleave(function() {
+          $(shortcut).css({'background-color': '#eee'});
+          $(this).css({'background-color': 'white'});
+      });
+  });
+});
+</script>
+</head>
+<body>
+<h1>Notion keyboard reference:</h1>
+
+<!-- CSS keyboard from http://net.tutsplus.com/tutorials/javascript-ajax/creating-a-keyboard-with-css-and-jquery/ -->
+
+<div id="container">
+<ul id="keyboard">
+<li id="Escape">Esc<br>&rarr;scr<br><span class="shift">&larr;scr</shift></li>
+<li class="spacer"></li>
+<li id="F1">F1<br>scr 0</li>
+<li id="F2">F2<br>scr 1</li>
+<li id="F3">F3<br>scr 2</li>
+<li id="F4">F4<br><span class="shift">ssh</shift></li>
+<li class="spacer"></li>
+<li id="F5">F5<br><span class="shift">edit</shift></li>
+<li id="F6">F6<br><span class="shift">view</shift></li>
+<li id="F7">F7<br>qkb</li>
+<li id="F8">F8</li>
+<li class="spacer"></li>
+<li id="F9">F9<br><span class="shift">+ws</shift></li>
+<li id="F10">F10</li>
+<li id="F11">F11</li>
+<li id="F12">F12</li>
+<li class="spacer"></li>
+<li class="spacer"></li>
+<li class="spacer"></li>
+<li id="grave">`<br>&rarr;ws<br><span class="shift">&larr;ws</shift></li>
+<li id="1">1<br>ws 0<br><span class="shift">scr 0</shift></li>
+<li id="2">2<br>ws 1<br><span class="shift">scr 1</shift></li>
+<li id="3">3<br>ws 2<br><span class="shift">scr 2</shift></li>
+<li id="4">4<br>ws 3<br><span class="shift">scr 3</shift></li>
+<li id="5">5<br>ws 4</li>
+<li id="6">6<br>ws 5</li>
+<li id="7">7<br>ws 6</li>
+<li id="8">8<br>ws 7</li>
+<li id="9">9<br>ws 8</li>
+<li id="0">0<br>ws 9</li>
+<li id="-">-</li>
+<li id="equal">=</li>
+<li id="BackSpace" class="backspace lastitem">Backspace</li>
+<li id="Tab" class="tab">Tab<br>&rarr;frame<br><span class="shift">&larr;frame</shift></li>
+<li id="Q">Q<br>fullscr<br><span class="shift">quote</shift></li>
+<li id="W">W<br>&darr;frame<br><span class="shift">&uarr;frame</shift></li>
+<li id="E">E</li>
+<li id="R">R<br>resize<br><span class="shift">raise</shift></li>
+<li id="T">T<br>tag<br><span class="shift">-tags</shift></li>
+<li id="Y">Y</li>
+<li id="U">U</li>
+<li id="I">I<br>&harr;split<br><span class="shift">&varr;split</shift></li>
+<li id="O">O</li>
+<li id="P">P</li>
+<li id="bracketleft">[</li>
+<li id="bracketright">]</li>
+<li id="backslash" class="lastitem">\</li>
+<li id="Caps_Lock" class="capslock">caps lock<br>&rarr;tab<br><span class="shift">&larr;tab</shift></li>
+<li id="A">A<br>tab 0</li>
+<li id="S">S<br>tab 1</li>
+<li id="D">D<br>tab 2</li>
+<li id="F">F<br>tab 3</li>
+<li id="G">G<br>go</li>
+<li id="H">H<br><span class="shift">&harr;max</shift></li>
+<li id="J">J<br>run<br><span class="shift">lua</shift></li>
+<li id="K">K</li>
+<li id="L">L<br>lock<br><span class="shift">nudge</shift></li>
+<li id="semicolon">;</li>
+<li id="apostrophe">'</li>
+<li id="Return" class="return lastitem">return<br>xterm</li>
+<li class="left-shift">shift</li>
+<li id="Z">Z</li>
+<li id="X">X<br>unsplit</li>
+<li id="C">C<br>ctx<br><span class="shift">qctx</shift></li>
+<li id="V">V<br><span class="shift">&varr;max</shift></li>
+<li id="B">B</li>
+<li id="N">N</li>
+<li id="M">M</li>
+<li id="comma">,<br><span class="shift">tab-></shift></li>
+<li id="period">.<br><span class="shift">tab<-</shift></li>
+<li id="slash">/<br>help<br><span class="shift">man</shift></li>
+<li class="right-shift lastitem">shift</li>
+</ul></div><table class="keytable" style="clear: left">
+<tbody><tr>
+<td width="400px" valign="top">
+<h2>META key</h2>
+All keybindings are activated by pressing the META key, which by default is the 'windows' key.<br>
+The 'grey' bindings are activated by pressing ALTMETA (by default pressing Shift while holding META).<br><br>
+<table>
+<tr><th colspan="2">Screen</th></tr>
+<tr class="shortcut" ref="#Escape"><td>Mod4+Escape</td><td>Go to next screen on multihead setup.</td></tr>
+<tr class="shortcut" ref="#Escape"><td>Shift+Mod4+Escape</td><td>Go to previous screen on multihead setup.</td></tr>
+<tr class="shortcut" ref="#1"><td>Mod4+1</td><td>Switch to object 0 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#1"><td>Shift+Mod4+1</td><td>Go to screen 0 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#2"><td>Mod4+2</td><td>Switch to object 1 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#2"><td>Shift+Mod4+2</td><td>Go to screen 1 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#3"><td>Mod4+3</td><td>Switch to object 2 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#3"><td>Shift+Mod4+3</td><td>Go to screen 2 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#4"><td>Mod4+4</td><td>Switch to object 3 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#4"><td>Shift+Mod4+4</td><td>Go to screen 3 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#5"><td>Mod4+5</td><td>Switch to object 4 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#6"><td>Mod4+6</td><td>Switch to object 5 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#7"><td>Mod4+7</td><td>Switch to object 6 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#8"><td>Mod4+8</td><td>Switch to object 7 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#9"><td>Mod4+9</td><td>Switch to object 8 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#0"><td>Mod4+0</td><td>Switch to object 9 (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#Tab"><td>Mod4+Tab</td><td>Forward-circulate focus.</td></tr>
+<tr class="shortcut" ref="#Tab"><td>Shift+Mod4+Tab</td><td>Backward-circulate focus.</td></tr>
+<tr class="shortcut" ref="#R"><td>Shift+Mod4+R</td><td>Raise focused object, if possible.</td></tr>
+<tr class="shortcut" ref="#D"><td>Mod4+D</td><td>Toggle floating dock.</td></tr>
+<tr class="shortcut" ref="#grave"><td>Mod4+grave</td><td>Switch to next object (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#asciitilde"><td>Shift+Mod4+asciitilde</td><td>Switch to previous object (workspace, full screen client window) within current screen.</td></tr>
+<tr class="shortcut" ref="#space"><td>Mod4+space</td><td>Toggle scratchpad.</td></tr>
+<tr class="shortcut" ref="#F1"><td>Mod4+F1</td><td>Go to screen 0 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#F2"><td>Mod4+F2</td><td>Go to screen 1 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#F3"><td>Mod4+F3</td><td>Go to screen 2 on multihead setup.</td></tr>
+<tr class="shortcut" ref="#F9"><td>Mod4+F9</td><td>Create a new workspace of chosen default type.</td></tr>
+<tr class="shortcut" ref="#F12"><td>F12</td><td>Display the main menu.</td></tr>
+<tr class="shortcut" ref="#F12"><td>Mod4+F12</td><td>Display the main menu.</td></tr>
+<tr><th colspan="2">Client windows</th></tr>
+<tr class="shortcut" ref="#Q"><td>Shift+Mod4+Q</td><td>Send next key press to the client window. Some programs may not allow this by default.</td></tr>
+<tr class="shortcut" ref="#L"><td>Shift+Mod4+L</td><td>Nudge the client window. This might help with some programs' resizing problems.</td></tr>
+<tr class="shortcut" ref="#C"><td>Shift+Mod4+C</td><td>Kill client owning the client window.</td></tr>
+<tr class="shortcut" ref="#Q"><td>Mod4+Q</td><td>Toggle client window group full-screen mode</td></tr>
+</table>
+</td><td valign="top"><table>
+<tr><th colspan="2">Frames</th></tr>
+<tr class="shortcut" ref="#R"><td>Mod4+R</td><td>Begin move/resize mode.</td></tr>
+<tr class="shortcut" ref="#H"><td>Shift+Mod4+H</td><td>Maximize the frame horizontally.</td></tr>
+<tr class="shortcut" ref="#V"><td>Shift+Mod4+V</td><td>Maximize the frame vertically.</td></tr>
+<tr class="shortcut" ref="#Caps_Lock"><td>Mod4+Caps_Lock</td><td>Switch to next object within the frame.</td></tr>
+<tr class="shortcut" ref="#Caps_Lock"><td>Shift+Mod4+Caps_Lock</td><td>Switch to previous object within the frame.</td></tr>
+<tr class="shortcut" ref="#A"><td>Mod4+A</td><td>Switch to tab 0 in this frame.</td></tr>
+<tr class="shortcut" ref="#S"><td>Mod4+S</td><td>Switch to tab 1 in this frame.</td></tr>
+<tr class="shortcut" ref="#D"><td>Mod4+D</td><td>Switch to tab 2 in this frame.</td></tr>
+<tr class="shortcut" ref="#F"><td>Mod4+F</td><td>Switch to tab 3 in this frame.</td></tr>
+<tr class="shortcut" ref="#H"><td>Shift+Mod4+H</td><td>Maximize the frame horizontally/vertically.</td></tr>
+<tr class="shortcut" ref="#V"><td>Shift+Mod4+V</td><td>Maximize the frame horizontally/vertically.</td></tr>
+<tr class="shortcut" ref="#N"><td>Mod4+N</td><td>Attach tagged objects to this frame.</td></tr>
+<tr class="shortcut" ref="#comma"><td>Shift+Mod4+comma</td><td>Move current tab to the right within the frame.</td></tr>
+<tr class="shortcut" ref="#period"><td>Shift+Mod4+period</td><td>Move current tab to the left within the frame.</td></tr>
+<tr><th colspan="2">Tilings</th></tr>
+<tr class="shortcut" ref="#W"><td>Mod4+W</td><td>Go to frame below current frame.</td></tr>
+<tr class="shortcut" ref="#W"><td>Shift+Mod4+W</td><td>Go to frame above current frame.</td></tr>
+<tr class="shortcut" ref="#I"><td>Mod4+I</td><td>Split current frame horizontally.</td></tr>
+<tr class="shortcut" ref="#I"><td>Shift+Mod4+I</td><td>Split current frame vertically.</td></tr>
+<tr class="shortcut" ref="#X"><td>Mod4+X</td><td>Destroy current frame.</td></tr>
+<tr><th colspan="2">Tabs</th></tr>
+<tr class="shortcut" ref="#T"><td>Mod4+T</td><td>Toggle tag of current object.</td></tr>
+<tr class="shortcut" ref="#T"><td>Shift+Mod4+T</td><td>Clear all tags.</td></tr>
+<tr class="shortcut" ref="#Return"><td>Mod4+Return</td><td>Run a terminal emulator.</td></tr>
+<tr class="shortcut" ref="#G"><td>Mod4+G</td><td>Query for a client window to go to.</td></tr>
+<tr class="shortcut" ref="#J"><td>Mod4+J</td><td>Query for command line to execute.</td></tr>
+<tr class="shortcut" ref="#J"><td>Shift+Mod4+J</td><td>Query for Lua code to execute.</td></tr>
+<tr class="shortcut" ref="#L"><td>Mod4+L</td><td>Lock screen</td></tr>
+<tr class="shortcut" ref="#C"><td>Mod4+C</td><td>Display context menu.</td></tr>
+<tr class="shortcut" ref="#C"><td>Shift+Mod4+C</td><td>Query for context menu.</td></tr>
+<tr class="shortcut" ref="#slash"><td>Mod4+slash</td><td>Show Notion 'live docs'.</td></tr>
+<tr class="shortcut" ref="#slash"><td>Shift+Mod4+slash</td><td>Query for manual page to be displayed.</td></tr>
+<tr class="shortcut" ref="#F2"><td>F2</td><td>Run a terminal emulator.</td></tr>
+<tr class="shortcut" ref="#F4"><td>Shift+Mod4+F4</td><td>Query for host to connect to with SSH.</td></tr>
+<tr class="shortcut" ref="#F5"><td>Shift+Mod4+F5</td><td>Query for file to edit.</td></tr>
+<tr class="shortcut" ref="#F6"><td>Shift+Mod4+F6</td><td>Query for file to view.</td></tr>
+<tr class="shortcut" ref="#F7"><td>Mod4+F7</td><td>Query for keybinding.</td></tr>
+<tr class="shortcut" ref="#F9"><td>Shift+Mod4+F9</td><td>Query for workspace to go to or create a new one.</td></tr>
+</table>
+</td></tr></tbody>
+</table>
+</body></html>
