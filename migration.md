@@ -8,6 +8,20 @@ The next major release of Notion will be Notion 4. This release will include a
 number of changes that are either not backwards compatible, or change the
 (default) behavior.
 
+## Keybindings
+
+Notion 4 comes with a complete new set of keybindings. You can see an overview
+[here](notion4keys.html). If you are already running Notion4, you can also use
+`META+/` to get a generated overview of your current bindings.
+
+### Reverting to the old bindings
+
+While we encourage you to give the new bindings a try and provide feedback,
+of course many existing Notion users might want to stay on the old keybindings.
+This can be done by taking `etc/cfg_bindings_notion3.lua` and
+`etc/cfg_tiling_notion3.lua` and copying them to your
+`~/.notion/cfg_bindings.lua` and `~/.notion/cfg_tiling.lua`
+
 ## Dependencies
 
 ### Lua
