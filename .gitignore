@@ -1,5 +1,7 @@
 TAGS
 tags
+.tags
+.session
 .project
 *.d
 *.a
