@@ -60,6 +60,9 @@ static OptParserOpt ion_opts[]={
     {OPT_ID('N'), "noerrorlog", 0, NULL,
      DUMMY_TR("Do not create startup error log and display it "
               "with xmessage.")},
+    {OPT_ID('Z'), "nodefaultconfig", 0, NULL,
+     DUMMY_TR("Do not add the default directories to the "
+              "search path.")},
 
     {'h', "help", 0, NULL,
      DUMMY_TR("Show this help")},
@@ -149,18 +152,12 @@ int main(int argc, char*argv[])
     char *efnam=NULL;
     bool may_continue=FALSE;
     bool noerrorlog=FALSE;
+    bool nodefaultconfig=FALSE;
 
     libtu_init(argv[0]);
 
     if(!ioncore_init("notion", argc, argv, LOCALEDIR))
         return EXIT_FAILURE;
-
-    extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
-    extl_add_searchdir(MODULEDIR);
-    extl_add_searchdir(ETCDIR);
-    extl_add_searchdir(SHAREDIR);
-    extl_add_searchdir(LCDIR);
-    extl_set_userdirs("notion");
 
     optparser_init(argc, argv, OPTP_MIDLONG, ion_opts);
 
@@ -187,6 +184,9 @@ int main(int argc, char*argv[])
         case OPT_ID('N'):
             noerrorlog=TRUE;
             break;
+        case OPT_ID('Z'):
+            nodefaultconfig=TRUE;
+            break;
         case 'h':
             help();
             return EXIT_SUCCESS;
@@ -201,6 +201,27 @@ int main(int argc, char*argv[])
             help();
             return EXIT_FAILURE;
         }
+    }
+
+    char *tmp_searchpath=NULL;
+
+    if(!nodefaultconfig && extl_searchpath()){
+        tmp_searchpath=scopy(extl_searchpath());
+        extl_set_searchpath(NULL);
+    }
+
+    if(!nodefaultconfig){
+        extl_add_searchdir(EXTRABINDIR); /* ion-completefile */
+        extl_add_searchdir(MODULEDIR);
+        extl_add_searchdir(ETCDIR);
+        extl_add_searchdir(SHAREDIR);
+        extl_add_searchdir(LCDIR);
+        extl_set_userdirs("notion");
+    }
+
+    if(tmp_searchpath){
+        extl_add_searchdir(tmp_searchpath);
+        free(tmp_searchpath);
     }
 
     if(!noerrorlog){
