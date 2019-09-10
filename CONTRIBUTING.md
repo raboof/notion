@@ -37,6 +37,31 @@ The 2 main documents relevant when contributing to Notion are
 [Configuring and extending Notion with Lua](http://notion.sourceforge.net/notionconf/)
 and [Notes for the module and patch writer](http://notion.sourceforge.net/notionnotes/)
 
+## Utilities
+
+To run a built copy of notion from a checkout, with only
+libraries/modules from the checkout, run something like
+
+```
+./notion/notion -nodefaultconfig $(./utils/dev-search-dirs.sh)
+```
+
+which is more or less equivalent to running
+
+```
+./notion/notion -nodefaultconfig \
+-s de \
+-s etc \
+-s ioncore \
+...
+```
+
+To run notion inside an existing X session, you may find it useful to
+install Xephyr and run the scripts
+
+- `utils/xephyr/start-xephyr.sh`
+- `utils/xephyr/xephyr-notion.sh`
+
 ## Releasing and versioning
 
 Currently under discussion at https://github.com/raboof/notion/issues/121
