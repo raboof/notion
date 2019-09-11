@@ -71,7 +71,7 @@ local function dobindings(f, bindings)
     local dummy = function() end
 
     p.META="Mod4+"
-    p.ALTMETA=""
+    p.ALTMETA="Shift+"
 
     p.dopath=dummy
     p.defmenu=dummy
