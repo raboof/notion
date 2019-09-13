@@ -31,7 +31,7 @@ local oldindex
 
 -- Historically, the options now called 'META' and 'ALTMETA' were called 'MOD1' and 'MOD2'.
 -- The code below makes sure:
--- * the default values for those settings are 'Mod4+' (the 'windows key') and ''
+-- * the default values for those settings are 'Mod4+' (the 'windows key') and 'Mod4+Shift'
 -- * that setting either META/ALTMETA or MOD1/MOD2 will specify the primary and secondary meta keys
 -- * that getting either META/ALTMETA or MOD1/MOD2 will return the (default or configured) primary and secondary meta keys
 
@@ -41,9 +41,9 @@ local function getmod(t, s)
     elseif s=="MOD1" then
         return rawget(t, "META") or "Mod4+"
     elseif s=="ALTMETA" then
-        return rawget(t, "MOD2") or ""
+        return rawget(t, "MOD2") or "Mod4+Shift+"
     elseif s=="MOD2" then
-        return rawget(t, "ALTMETA") or ""
+        return rawget(t, "ALTMETA") or "Mod4+Shift+"
     elseif oldindex then
         return oldindex(t, s)
     end
