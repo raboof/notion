@@ -165,7 +165,7 @@ static bool do_action(WBindmap *bindmap, const char *str,
     WBinding binding;
 
     if(wr && mod==0){
-        warn(TR("Can not wait on modifiers when no modifiers set in \"%s\"."),
+        warn(TR("Can not wait on modifiers when no modifiers set in \"%s\". Perhaps you have incorrectly set ALTMETA to the empty string?"),
              str);
         wr=FALSE;
     }
