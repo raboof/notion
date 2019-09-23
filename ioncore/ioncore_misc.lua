@@ -264,6 +264,7 @@ $().ready(function(){
     bindings_for("GroupCW")
     bindings_for("Tiling")
     bindings_for("MPlex.toplevel")
+    bindings_for("MPlex")
 
     local function binding_label(label)
         if label:sub(1,2) == "->" then
@@ -396,6 +397,7 @@ $().ready(function(){
     list_keys_for(nil, "WFrame.toplevel")
     list_keys_for("Tilings", "WTiling")
     list_keys_for("Tabs", "WMPlex.toplevel")
+    list_keys_for(nil, "WMPlex")
     keysfile:write("</table>\n")
 
     keysfile:write("</td>")
