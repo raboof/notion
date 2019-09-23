@@ -207,9 +207,9 @@ defbindings("WMPlex.toplevel", {
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
 
     bdoc("Display context menu.", "ctx"),
-    kpress(META.."C", "mod_menu.menu(_, _sub, 'ctxmenu')"),
+    kpress(META.."M", "mod_menu.menu(_, _sub, 'ctxmenu')"),
     bdoc("Query for context menu.", "qctx"),
-    kpress(ALTMETA.."C", "mod_query.query_menu(_, _sub, 'ctxmenu', 'Context menu:')"),
+    kpress(ALTMETA.."M", "mod_query.query_menu(_, _sub, 'ctxmenu', 'Context menu:')"),
 
     bdoc("Show Notion 'live docs'.", "help"),
     kpress(META.."slash", "notioncore.show_live_docs(_)"),
