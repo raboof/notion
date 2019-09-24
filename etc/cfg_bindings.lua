@@ -263,8 +263,10 @@ defbindings("WFrame", {
 -- Frames for transient windows ignore this bindmap
 
 defbindings("WFrame.toplevel", {
-    bdoc("Query for a client window to attach ('nick').", "nick"),
-    kpress(META.."N", "mod_query.query_attachclient(_)"),
+    bdoc("Attach tagged objects to this frame.", "nick"),
+    kpress(META.."N", "ioncore.tagged_attach(_)"),
+    bdoc("Query for a client window to attach ('nick').", "qnick"),
+    kpress(ALTMETA.."N", "mod_query.query_attachclient(_)"),
 
     bdoc("Switch to tab 0 in this frame.", "tab 0"),
     kpress(META.."A", "WFrame.switch_nth(_, 0)"),
@@ -283,9 +285,6 @@ defbindings("WFrame.toplevel", {
     bdoc("Maximize the frame horizontally/vertically."),
     kpress(META.."H", "WFrame.maximize_horiz(_)"),
     kpress(META.."V", "WFrame.maximize_vert(_)"),
-
-    bdoc("Attach tagged objects to this frame."),
-    kpress(META.."N", "ioncore.tagged_attach(_)"),
 })
 
 -- Bindings for floating frames
