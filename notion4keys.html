@@ -148,14 +148,14 @@ $().ready(function(){
 <li id="F1">F1<br>scr 0</li>
 <li id="F2">F2<br>scr 1</li>
 <li id="F3">F3<br>scr 2</li>
-<li id="F4">F4<br><span class="shift">ssh</shift></li>
+<li id="F4">F4<br>ssh</li>
 <li class="spacer"></li>
-<li id="F5">F5<br><span class="shift">edit</shift></li>
-<li id="F6">F6<br><span class="shift">view</shift></li>
+<li id="F5">F5<br>edit</li>
+<li id="F6">F6<br>view</li>
 <li id="F7">F7<br>qkb</li>
 <li id="F8">F8</li>
 <li class="spacer"></li>
-<li id="F9">F9<br><span class="shift">+ws</shift></li>
+<li id="F9">F9<br>+ws</li>
 <li id="F10">F10</li>
 <li id="F11">F11</li>
 <li id="F12">F12</li>
@@ -193,10 +193,10 @@ $().ready(function(){
 <li id="Caps_Lock" class="capslock">caps lock<br>&rarr;tab<br><span class="shift">&larr;tab</shift></li>
 <li id="A">A<br>tab 0</li>
 <li id="S">S<br>tab 1</li>
-<li id="D">D<br>tab 2</li>
+<li id="D">D<br>tab 2<br><span class="shift">detach</shift></li>
 <li id="F">F<br>tab 3</li>
 <li id="G">G<br>go</li>
-<li id="H">H<br><span class="shift">&harr;max</shift></li>
+<li id="H">H<br>&harr;max</li>
 <li id="J">J<br>run<br><span class="shift">lua</shift></li>
 <li id="K">K</li>
 <li id="L">L<br>lock<br><span class="shift">nudge</shift></li>
@@ -206,13 +206,13 @@ $().ready(function(){
 <li class="left-shift">shift</li>
 <li id="Z">Z</li>
 <li id="X">X<br>unsplit</li>
-<li id="C">C<br>ctx<br><span class="shift">qctx</shift></li>
-<li id="V">V<br><span class="shift">&varr;max</shift></li>
+<li id="C">C<br>close<br><span class="shift">kill</shift></li>
+<li id="V">V<br>&varr;max</li>
 <li id="B">B</li>
 <li id="N">N</li>
-<li id="M">M</li>
-<li id="comma">,<br><span class="shift">tab-></shift></li>
-<li id="period">.<br><span class="shift">tab<-</shift></li>
+<li id="M">M<br>ctx<br><span class="shift">qctx</shift></li>
+<li id="comma">,<br>tab-></li>
+<li id="period">.<br>tab<-</li>
 <li id="slash">/<br>help<br><span class="shift">man</shift></li>
 <li class="right-shift lastitem">shift</li>
 </ul></div><table class="keytable" style="clear: left">
@@ -261,19 +261,19 @@ The 'grey' bindings are activated by pressing ALTMETA (by default pressing Shift
 </td><td valign="top"><table>
 <tr><th colspan="2">Frames</th></tr>
 <tr class="shortcut" ref="#R"><td>Mod4+R</td><td>Begin move/resize mode.</td></tr>
-<tr class="shortcut" ref="#H"><td>Shift+Mod4+H</td><td>Maximize the frame horizontally.</td></tr>
-<tr class="shortcut" ref="#V"><td>Shift+Mod4+V</td><td>Maximize the frame vertically.</td></tr>
+<tr class="shortcut" ref="#H"><td>Mod4+H</td><td>Maximize the frame horizontally.</td></tr>
+<tr class="shortcut" ref="#V"><td>Mod4+V</td><td>Maximize the frame vertically.</td></tr>
 <tr class="shortcut" ref="#Caps_Lock"><td>Mod4+Caps_Lock</td><td>Switch to next object within the frame.</td></tr>
 <tr class="shortcut" ref="#Caps_Lock"><td>Shift+Mod4+Caps_Lock</td><td>Switch to previous object within the frame.</td></tr>
 <tr class="shortcut" ref="#A"><td>Mod4+A</td><td>Switch to tab 0 in this frame.</td></tr>
 <tr class="shortcut" ref="#S"><td>Mod4+S</td><td>Switch to tab 1 in this frame.</td></tr>
 <tr class="shortcut" ref="#D"><td>Mod4+D</td><td>Switch to tab 2 in this frame.</td></tr>
 <tr class="shortcut" ref="#F"><td>Mod4+F</td><td>Switch to tab 3 in this frame.</td></tr>
-<tr class="shortcut" ref="#H"><td>Shift+Mod4+H</td><td>Maximize the frame horizontally/vertically.</td></tr>
-<tr class="shortcut" ref="#V"><td>Shift+Mod4+V</td><td>Maximize the frame horizontally/vertically.</td></tr>
+<tr class="shortcut" ref="#H"><td>Mod4+H</td><td>Maximize the frame horizontally/vertically.</td></tr>
+<tr class="shortcut" ref="#V"><td>Mod4+V</td><td>Maximize the frame horizontally/vertically.</td></tr>
 <tr class="shortcut" ref="#N"><td>Mod4+N</td><td>Attach tagged objects to this frame.</td></tr>
-<tr class="shortcut" ref="#comma"><td>Shift+Mod4+comma</td><td>Move current tab to the right within the frame.</td></tr>
-<tr class="shortcut" ref="#period"><td>Shift+Mod4+period</td><td>Move current tab to the left within the frame.</td></tr>
+<tr class="shortcut" ref="#comma"><td>Mod4+comma</td><td>Move current tab to the right within the frame.</td></tr>
+<tr class="shortcut" ref="#period"><td>Mod4+period</td><td>Move current tab to the left within the frame.</td></tr>
 <tr><th colspan="2">Tilings</th></tr>
 <tr class="shortcut" ref="#W"><td>Mod4+W</td><td>Go to frame below current frame.</td></tr>
 <tr class="shortcut" ref="#W"><td>Shift+Mod4+W</td><td>Go to frame above current frame.</td></tr>
@@ -288,16 +288,18 @@ The 'grey' bindings are activated by pressing ALTMETA (by default pressing Shift
 <tr class="shortcut" ref="#J"><td>Mod4+J</td><td>Query for command line to execute.</td></tr>
 <tr class="shortcut" ref="#J"><td>Shift+Mod4+J</td><td>Query for Lua code to execute.</td></tr>
 <tr class="shortcut" ref="#L"><td>Mod4+L</td><td>Lock screen</td></tr>
-<tr class="shortcut" ref="#C"><td>Mod4+C</td><td>Display context menu.</td></tr>
-<tr class="shortcut" ref="#C"><td>Shift+Mod4+C</td><td>Query for context menu.</td></tr>
+<tr class="shortcut" ref="#M"><td>Mod4+M</td><td>Display context menu.</td></tr>
+<tr class="shortcut" ref="#M"><td>Shift+Mod4+M</td><td>Query for context menu.</td></tr>
 <tr class="shortcut" ref="#slash"><td>Mod4+slash</td><td>Show Notion 'live docs'.</td></tr>
 <tr class="shortcut" ref="#slash"><td>Shift+Mod4+slash</td><td>Query for manual page to be displayed.</td></tr>
 <tr class="shortcut" ref="#F2"><td>F2</td><td>Run a terminal emulator.</td></tr>
-<tr class="shortcut" ref="#F4"><td>Shift+Mod4+F4</td><td>Query for host to connect to with SSH.</td></tr>
-<tr class="shortcut" ref="#F5"><td>Shift+Mod4+F5</td><td>Query for file to edit.</td></tr>
-<tr class="shortcut" ref="#F6"><td>Shift+Mod4+F6</td><td>Query for file to view.</td></tr>
+<tr class="shortcut" ref="#F4"><td>Mod4+F4</td><td>Query for host to connect to with SSH.</td></tr>
+<tr class="shortcut" ref="#F5"><td>Mod4+F5</td><td>Query for file to edit.</td></tr>
+<tr class="shortcut" ref="#F6"><td>Mod4+F6</td><td>Query for file to view.</td></tr>
 <tr class="shortcut" ref="#F7"><td>Mod4+F7</td><td>Query for keybinding.</td></tr>
-<tr class="shortcut" ref="#F9"><td>Shift+Mod4+F9</td><td>Query for workspace to go to or create a new one.</td></tr>
+<tr class="shortcut" ref="#F9"><td>Mod4+F9</td><td>Query for workspace to go to or create a new one.</td></tr>
+<tr class="shortcut" ref="#D"><td>Shift+Mod4+D</td><td>Detach (float) or reattach an object to its previous location.</td></tr>
+<tr class="shortcut" ref="#C"><td>Mod4+C</td><td>Close current object.</td></tr>
 </table>
 </td></tr></tbody>
 </table>
