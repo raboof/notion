@@ -14,6 +14,16 @@ Notion 4 comes with a complete new set of keybindings. You can see an overview
 [here](notion4keys.html). If you are already running Notion4, you can also use
 `META+/` to get a generated overview of your current bindings.
 
+### ALTMETA
+
+Notion used to have ALTMETA set to the empty string by default. This is no
+longer the case in Notion4: ALTMETA has taken the place of the old `Meta+K`
+submap in many cases, and is by default set to `Mod4+Shift+`
+
+This means if you still have ALTMETA set to the empty string in your
+configuration, you might have to change that, since otherwise some 'regular'
+keys would be taken by Notion.
+
 ### Reverting to the old bindings
 
 While we encourage you to give the new bindings a try and provide feedback,
