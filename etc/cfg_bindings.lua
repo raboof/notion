@@ -186,14 +186,14 @@ defbindings("WMPlex.toplevel", {
     kpress(ALTMETA.."J", "mod_query.query_lua(_)"),
 
     bdoc("Query for host to connect to with SSH.", "ssh"),
-    kpress(ALTMETA.."F4", "mod_query.query_ssh(_, ':ssh')"),
+    kpress(META.."F4", "mod_query.query_ssh(_, ':ssh')"),
 
     bdoc("Query for file to edit.", "edit"),
-    kpress(ALTMETA.."F5",
+    kpress(META.."F5",
            "mod_query.query_editfile(_, 'run-mailcap --action=edit')"),
 
     bdoc("Query for file to view.", "view"),
-    kpress(ALTMETA.."F6",
+    kpress(META.."F6",
            "mod_query.query_runfile(_, 'run-mailcap --action=view')"),
 
     bdoc("Query for keybinding.", "qkb"),
@@ -201,7 +201,7 @@ defbindings("WMPlex.toplevel", {
            "mod_query.query_binding(_, _sub)"),
 
     bdoc("Query for workspace to go to or create a new one.", "+ws"),
-    kpress(ALTMETA.."F9", "mod_query.query_workspace(_)"),
+    kpress(META.."F9", "mod_query.query_workspace(_)"),
 
     bdoc("Query for a client window to go to.", "go"),
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
@@ -225,9 +225,9 @@ defbindings("WMPlex.toplevel", {
 
 defbindings("WFrame", {
     bdoc("Maximize the frame horizontally.", "hmax"),
-    kpress(ALTMETA.."H", "WFrame.maximize_horiz(_)"),
+    kpress(META.."H", "WFrame.maximize_horiz(_)"),
     bdoc("Maximize the frame vertically.", "vmax"),
-    kpress(ALTMETA.."V", "WFrame.maximize_vert(_)"),
+    kpress(META.."V", "WFrame.maximize_vert(_)"),
 
     bdoc("Display context menu."),
     mpress("Button3", "mod_menu.pmenu(_, _sub, 'ctxmenu')"),
@@ -276,13 +276,13 @@ defbindings("WFrame.toplevel", {
     kpress(META.."F", "WFrame.switch_nth(_, 3)"),
 
     bdoc("Move current tab to the right within the frame.", "tab->"),
-    kpress(ALTMETA.."comma", "WFrame.dec_index(_, _sub)", "_sub:non-nil"),
+    kpress(META.."comma", "WFrame.dec_index(_, _sub)", "_sub:non-nil"),
     bdoc("Move current tab to the left within the frame.", "tab<-"),
-    kpress(ALTMETA.."period", "WFrame.inc_index(_, _sub)", "_sub:non-nil"),
+    kpress(META.."period", "WFrame.inc_index(_, _sub)", "_sub:non-nil"),
 
     bdoc("Maximize the frame horizontally/vertically."),
-    kpress(ALTMETA.."H", "WFrame.maximize_horiz(_)"),
-    kpress(ALTMETA.."V", "WFrame.maximize_vert(_)"),
+    kpress(META.."H", "WFrame.maximize_horiz(_)"),
+    kpress(META.."V", "WFrame.maximize_vert(_)"),
 
     bdoc("Attach tagged objects to this frame."),
     kpress(META.."N", "ioncore.tagged_attach(_)"),
