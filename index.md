@@ -29,9 +29,9 @@ Check out this [quick reference to the keyboard commands](./notionkeys.html)
 
 The manual page is a good reference. For an introduction, you may follow the [tour](tour.html)
 
-For advanced configuration documentation, see [Configuring and extending Notion with Lua](http://notion.sourceforge.net/notionconf/)
+For advanced configuration documentation, see [Configuring and extending Notion with Lua](https://raboof.github.io/notion-doc/notionconf/)
 
-For writing patches and modules, see [Notes for the module and patch writer](http://notion.sourceforge.net/notionnotes/)
+For writing patches and modules, see [Notes for the module and patch writer](https://raboof.github.io/notion-doc/notionnotes/)
 
 # Support, bugs and feature requests
 
