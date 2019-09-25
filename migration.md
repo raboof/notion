@@ -97,6 +97,10 @@ defbindings("WFrame.toplevel", {
     submap(META.."K", {
 ```
 
+## submap_enter keybindings
+
+submap_enter keybindings are no longer supported, but you can use 'kpress' as above.
+
 ## Tab numbers
 
 In Notion 3 there was a `ioncore.tabnum` module that took care of showing
