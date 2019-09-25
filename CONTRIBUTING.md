@@ -34,8 +34,8 @@ libreadline with an LGPL-compatible library later on.
 ## Documentation
 
 The 2 main documents relevant when contributing to Notion are
-[Configuring and extending Notion with Lua](http://notion.sourceforge.net/notionconf/)
-and [Notes for the module and patch writer](http://notion.sourceforge.net/notionnotes/)
+[Configuring and extending Notion with Lua](https://raboof.github.io/notion-doc/notionconf/)
+and [Notes for the module and patch writer](https://raboof.github.io/notion-doc/notionnotes/)
 
 ## Utilities
 

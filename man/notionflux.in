@@ -118,7 +118,7 @@ does not have them.
 .Sh SEE ALSO
 .Lk https://notionwm.net/ "The notion homepage"
 .Pp
-.Lk http://notion.sourceforge.net/notionconf/ "Configuring and extending Notion with Lua"
+.Lk https://raboof.github.io/notion-doc/notionconf/ "Configuring and extending Notion with Lua"
 .Pp
 .Lk https://www.lua.org/manual/LUA_REFVERSION/manual.html "The Lua LUA_REFVERSION reference manual"
 .Pp
