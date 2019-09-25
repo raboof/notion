@@ -128,7 +128,7 @@ Contributing
 ------------
 
 Contributions to Notion are very welcome! Please join us on [GitHub](https://github.com/raboof/notion/).
-The [Notes for the module and patch writer](http://notion.sourceforge.net/notionnotes/) might be helpful.
+The [Notes for the module and patch writer](https://raboof.github.io/notion-doc/notionnotes/) might be helpful.
 
 Credits
 -------
