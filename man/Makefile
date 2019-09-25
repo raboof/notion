@@ -16,7 +16,7 @@ NROFF=nroff -man -Tlatin1
 FILTERCRAP=$(LUA) -e 'io.write((string.gsub(io.read("*a"), ".\8", "")))'
 LUA_REFVERSION:=$(shell $(LUA) -e 'print(_VERSION:match("[\x25d.]+"))')
 
-CONFIGS=../etc/cfg_notioncore.lua \
+CONFIGS=../etc/cfg_bindings.lua \
 	../etc/cfg_tiling.lua \
 	../etc/cfg_query.lua \
 	../etc/cfg_menu.lua
