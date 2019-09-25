@@ -57,5 +57,5 @@ preload.c:
 	$(LUA) ../build/mkpreload.lua $(MODULE_LIST) > preload.c
 
 _install:
-	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) notion $(BINDIR)
+	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m $(BIN_MODE) notion $(DESTDIR)$(BINDIR)
