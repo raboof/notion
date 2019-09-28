@@ -11,7 +11,7 @@ longer very active.
 We use the [github issue tracker](https://github.com/raboof/notion/issues) and
 pull requests for code contribution.
 
-For discussion about the future of the project, we either use issues tagged "enhancement".
+For discussion about the future of the project, we use issues tagged "enhancement".
 
 For support questions and notion related chat such as quickly asking a question,
 we use IRC:
