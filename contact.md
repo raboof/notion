@@ -4,10 +4,6 @@ title: Contact
 ---
 # Contact
 
-There is a [mailing list](https://sourceforge.net/p/notion/mailman/notion-devel/)
-on sourceforge, but ever since the project has migrated to github, it is no
-longer very active.
-
 We use the [github issue tracker](https://github.com/raboof/notion/issues) and
 pull requests for code contribution.
 
@@ -18,3 +14,10 @@ we use IRC:
 #notion on Freenode ([Webchat](https://webchat.freenode.net/?channels=%23notion)).
 
 Please don't hesitate to get in touch, usually IRC is the easiest way.
+
+## Mailing list archive
+
+There is a [mailing list](https://sourceforge.net/p/notion/mailman/notion-devel/)
+on sourceforge, but ever since the project has migrated to github, it is no
+longer very active. It does however provide a view into the past, and may answer
+some questions if you're willing to dig.
