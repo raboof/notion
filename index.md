@@ -1,5 +1,6 @@
 ---
 layout: default
+title: Home
 ---
 
 _**Not**ion_ is a tiling, tabbed window manager for the X window system:

@@ -1,8 +1,9 @@
 ---
 layout: default
+title: Migration
 ---
 
-# Migration
+# Migration from (Not)Ion3
 
 The next major release of Notion will be Notion 4. This release will include a
 number of changes that are either not backwards compatible, or change the

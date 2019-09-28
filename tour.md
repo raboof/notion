@@ -1,6 +1,9 @@
 ---
 layout: default
+title: Tour
 ---
+A guided Tour through Notion
+============================
 
 ## Introduction
 
