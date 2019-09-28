@@ -53,4 +53,4 @@ While notion comes with its own mod_query, some external tools have sprung up ov
 * [i3bar](https://i3wm.org/) — status bar from i3 (not to be confused with ion3)
 * [lxpanel](https://github.com/lxde/lxpanel) — the official LXDE status bar
 
-Generally, this document only serves as a list of links right now. If you feel like contributing a guide for any of these or other notion related tools because you have experience with them, please write a markdown document and send it to us (preferably via pull-request). In case of questions, please feel free to contact us on #notion on Freenode.
+Generally, this document only serves as a list of links right now. If you feel like contributing a guide for any of these or other notion related tools because you have experience with them, please write a markdown document and send it to us (preferably via pull-request). Feel free to [contact](contact.html) us.

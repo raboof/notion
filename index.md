@@ -36,9 +36,7 @@ For writing patches and modules, see [Notes for the module and patch writer](htt
 
 # Support, bugs and feature requests
 
-Find us on IRC, in #notion on freenode.
-
-Report your bugs and feature requests [in the GitHub trackers](https://github.com/raboof/notion/issues).
+See [Contact](contact.html).
 
 # Donations
 
