@@ -36,9 +36,7 @@ For writing patches and modules, see [Notes for the module and patch writer](htt
 
 # Support, bugs and feature requests
 
-Find us on IRC, in #notion on freenode.
-
-Report your bugs and feature requests [in the GitHub trackers](https://github.com/raboof/notion/issues).
+See [Contact](contact.html).
 
 # Donations
 
@@ -78,29 +76,3 @@ Former Ion3 users will be glad to hear any changes to configuration will be back
 Notion 3 is available under a slightly modified LGPL license: in short, the only extra restriction is you cannot release it under the name 'Ion' and cannot mix it with GPL code, but read the license itself for details.
 
 Notion 4, which is not yet released, will be plain LGPL again. You can build a prerelease of Notion 4 from the 'master' branch.
-
-# Other software
-
-## Supplemental
-
-The following software combines well with Notion: 
-
-* [stalonetray](http://stalonetray.sourceforge.net/) shows FreeDesktop (XEmbed) and KDE trayicons
-* [trayion](https://code.google.com/archive/p/trayion/) shows FreeDesktop (XEmbed) trayicons (like Qt4 and gtk2)
-* [arandr](http://christian.amsuess.com/tools/arandr/) a flexible tool for manipulating your monitor layout, resolutions, orientations
-
-Clipboard utilities:
-
-* [autocutsel](http://www.nongnu.org/autocutsel/) for keeping various clipboards synchronized
-* [parcellite](http://parcellite.sourceforge.net/) more advanced clipboard management (with history)
-
-Notification daemons:
-
-* [notification-daemon](https://wiki.gnome.org/NotificationDaemon) shows only 1 notification at a time
-* [notify-osd](https://launchpad.net/notify-osd) shows only 1 notification at a time
-* [xfce4-notifyd](https://docs.xfce.org/apps/notifyd/start) shows a title bar
-
-## Alternatives
-
-* [i3wm](https://i3wm.org) very nice tiling wm, but doesn't handle tabbing quite as nicely as Notion
-* [awesomewm](https://awesomewm.org/) the most popular tiling wm
