@@ -16,7 +16,7 @@ So far we have only scratched the surface of this potential.
 ## On governance
 
 Notion is a relatively small community. At this scale it doesn't seem worth it
-yet to set up a governence structure as found in larger communities, so until
+yet to set up a governance structure as found in larger communities, so until
 then, raboof is acting as the BDFN: "Benevolent Dictator For Now".
 We will revisit this choice when the community grows.
 
