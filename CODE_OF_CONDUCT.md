@@ -16,24 +16,46 @@ So far we have only scratched the surface of this potential.
 ## On governance
 
 Notion is a relatively small community. At this scale it doesn't seem worth it
-yet to set up a governance structure as found in larger communities, so until
-then, raboof is acting as the BDFN: "Benevolent Dictator For Now".
+to set up a governance structure as found in larger communities, so raboof is
+acting as a BDFN: "Benevolent Dictator For Now".
 We will revisit this choice when the community grows.
 
-## On conduct
+## Guidelines
 
-We welcome all communication, even heated and direct debate, as long as it is
-respectful to all involved. If anyone feels unwelcome, disrespected or even
-threatened by someone else's behaviour, this means we have something to
-improve. The emphasis should not be on punishing bad behaviour, but on finding
-ways to take better consideration of each other going forward.
+To clarify what kind of behaviour we encourage in our community, we have taken
+inspiration from the
+[Community Guidelines](https://wiki.blender.org/wiki/Contact/CodeOfConduct)
+used in the Blender project:
 
-If you feel uncomfortable voicing concerns around conduct publically, feel free
-to contact raboof. He promises to treat such issues with respect and privacy,
-and work with you and any others to find a way to resolve the situation.
-If this contact point does not work for you we unfortunately don't have any
-alternatives available at this time.
+*Be respectful and considerate*
 
-Ultimately, when a participant appears unwilling or unable to adjust his
-conduct to a reasonable degree, we will have no choice but to ban that user
-from the project. Luckily this has never been necessary so far.
+* Disagreement is no excuse for poor behaviour or personal attacks.
+* Remember that a community where people feel uncomfortable is not a productive one.
+
+*Be patient and generous*
+
+* If someone asks for help it is because they need it.
+* Do politely suggest specific documentation or more appropriate venues where appropriate, but avoid aggressive or vague responses.
+
+*Assume people mean well*
+
+* Remember that decisions are often a difficult choice between competing priorities.
+* If you disagree, please do so politely.
+* If something seems outrageous, check that you did not misinterpret it.
+* Ask for clarification rather than assuming the worst.
+
+*Try to be concise*
+
+* Avoid repeating what has been said already.
+* Making a conversation larger makes it difficult to follow, and people often feel personally attacked if they receive multiple messages telling them the same thing.
+
+## In case of problems
+
+If, despite the above guidelines, you would ever feel disrespected or even
+threatened, feel free to contact Arnout Engelen (raboof). All such reports
+will be treated with respect and privacy, and we will work together to find a
+way to resolve the situation.
+
+We recognize that misunderstandings happen and well-meant actions may have
+unintended effects. We will only take actions when a user appears unwilling or
+unable to sufficiently adjust his behaviour after repeated conversations.
