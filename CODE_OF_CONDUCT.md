@@ -58,4 +58,4 @@ way to resolve the situation.
 
 We recognize that misunderstandings happen and well-meant actions may have
 unintended effects. We will only take actions when a user appears unwilling or
-unable to sufficiently adjust his behaviour after repeated conversations.
+unable to sufficiently adjust their behaviour after repeated conversations.
