@@ -87,6 +87,7 @@ DEFont *de_load_font(const char *fontname)
 #ifdef HAVE_X11_BMF
 #ifdef HAVE_X11_XFT
 bitmap_font:
+    if(font==NULL){
 #endif
 
     if(ioncore_g.use_mb){
@@ -116,6 +117,9 @@ bitmap_font:
         }
         return NULL;
     }
+#ifdef HAVE_X11_XFT
+    }
+#endif /* HAVE_X11_XFT */
 #endif /* HAVE_X11_BMF */
 
     fnt=ALLOC(DEFont);
