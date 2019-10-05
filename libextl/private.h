@@ -83,12 +83,14 @@ typedef Watch ExtlProxy;
 #define EXTL_BEGIN_PROXY_OBJ(PROXY, OBJ)       \
     watch_init(PROXY);                         \
     watch_setup(PROXY, OBJ, NULL);             \
-    (OBJ)->flags|=OBJ_EXTL_CACHED;
+    (OBJ)->flags|=OBJ_EXTL_CACHED;             \
+    ((void)0)
 
 #define EXTL_END_PROXY_OBJ(PROXY, OBJ) \
     assert((PROXY)->obj==OBJ);         \
     watch_reset(PROXY);                \
-    (OBJ)->flags&=~OBJ_EXTL_CACHED;
+    (OBJ)->flags&=~OBJ_EXTL_CACHED;    \
+    ((void)0)
 
 #define EXTL_DESTROY_OWNED_OBJ(OBJ) destroy_obj(OBJ)
 

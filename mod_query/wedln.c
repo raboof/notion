@@ -79,7 +79,7 @@ static void dispu(const char* s, int l)
         tx+=wedln_draw_strsect(wedln, geom->x+tx, ty,       \
                                str, LEN, GR_ATTR(A));       \
         str+=LEN; len-=LEN;                                 \
-    }
+    } ((void)0)
 
 
 GR_DEFATTR(active);

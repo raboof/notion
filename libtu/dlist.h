@@ -23,7 +23,7 @@
         (ITEM)->PREV=(LIST)->PREV;        \
         (ITEM)->PREV->NEXT=(ITEM);        \
         (LIST)->PREV=(ITEM);              \
-    }
+    } ((void)0)
 
 
 #define LINK_ITEM_FIRST(LIST, ITEM, NEXT, PREV) \
@@ -34,7 +34,8 @@
         (ITEM)->PREV=(LIST)->PREV;              \
         (LIST)->PREV=(ITEM);                    \
     }                                           \
-    (LIST)=(ITEM);
+    (LIST)=(ITEM);                              \
+    ((void)0)
 
 
 #define LINK_ITEM_LAST LINK_ITEM
@@ -47,7 +48,8 @@
     if((BEFORE)==(LIST))                                 \
         (LIST)=(ITEM);                                   \
     else                                                 \
-        (ITEM)->PREV->NEXT=(ITEM)
+        (ITEM)->PREV->NEXT=(ITEM);                       \
+    ((void)0)
 
 
 #define LINK_ITEM_AFTER(LIST, AFTER, ITEM, NEXT, PREV) \
@@ -57,7 +59,8 @@
     if((ITEM)->NEXT==NULL)                             \
         (LIST)->PREV=(ITEM);                           \
     else                                               \
-        (ITEM)->NEXT->PREV=ITEM;
+        (ITEM)->NEXT->PREV=ITEM;                       \
+    ((void)0)
 
 
 #define UNLINK_ITEM(LIST, ITEM, NEXT, PREV)  \
@@ -75,7 +78,8 @@
         }                                    \
     }                                        \
     (ITEM)->NEXT=NULL;                       \
-    (ITEM)->PREV=NULL;
+    (ITEM)->PREV=NULL;                       \
+    ((void)0)
 
 
 /*}}}*/

@@ -106,7 +106,7 @@ void clientwin_get_protocols(WClientWin *cwin)
         }                                            \
         extl_unref_table(tab2);                      \
     }                                                \
-}
+} ((void)0)
 
 
 static void clientwin_get_winprops(WClientWin *cwin)

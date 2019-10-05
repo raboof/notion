@@ -50,11 +50,11 @@ static const char *errors[]={
 
 #define STRBLEN 32
 
-#define STRING_DECL(X) int err=0; char* X=NULL; char X##_tmp[STRBLEN]; int X##_tmpl=0
-#define STRING_DECL_P(X, P) int err=0; char* X=NULL; char X##_tmp[STRBLEN]=P; int X##_tmpl=sizeof(P)-1
-#define STRING_APPEND(X, C) {if(!_string_append(&X, X##_tmp, &X##_tmpl, c)) err=-ENOMEM;}
+#define STRING_DECL(X) int err=0; char* X=NULL; char X##_tmp[STRBLEN]; int X##_tmpl=0; ((void)0)
+#define STRING_DECL_P(X, P) int err=0; char* X=NULL; char X##_tmp[STRBLEN]=P; int X##_tmpl=sizeof(P)-1; ((void)0)
+#define STRING_APPEND(X, C) {if(!_string_append(&X, X##_tmp, &X##_tmpl, c)) err=-ENOMEM;} ((void)0)
 #define STRING_FREE(X) if(X!=NULL) free(X)
-#define STRING_FINISH(X) {if(err!=0) return err; if(!_string_finish(&X, X##_tmp, X##_tmpl)) err=-ENOMEM;}
+#define STRING_FINISH(X) {if(err!=0) return err; if(!_string_finish(&X, X##_tmp, X##_tmpl)) err=-ENOMEM;} ((void)0)
 
 
 static bool _string_append(char **p, char *tmp, int *tmplen, char c)
@@ -955,4 +955,3 @@ void tok_init(Token *tok)
 
     memcpy(tok, &dummy, sizeof(*tok));
 }
-

@@ -55,7 +55,7 @@ static void rb_iprint_tree(Rb_node t, int level);
 #define setroot(n) n->s.root = 1
 #define setint(n) n->s.internal = 1
 #define setext(n) n->s.internal = 0
-#define setnormal(n) { n->s.root = 0; n ->s.head = 0; }
+#define setnormal(n) { n->s.root = 0; n ->s.head = 0; } ((void)0)
 #define sibling(n) ((isleft(n)) ? n->p.parent->c.child.right \
                                 : n->p.parent->c.child.left)
 
@@ -85,7 +85,7 @@ static void delete_item(Rb_node item)		/* Deletes an arbitrary iterm */
   setext(new);\
   setblack(new);\
   setnormal(new);\
-}
+} ((void)0)
 
 static void mk_new_int(Rb_node l, Rb_node r, Rb_node p, int il)
 {
@@ -621,5 +621,3 @@ Rb_node rb_insertp(Rb_node tree, const void *key, void *val)
 {
   return rb_insertg(tree, key, val, ptrcmp);
 }
-
-

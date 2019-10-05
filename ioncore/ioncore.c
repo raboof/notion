@@ -323,7 +323,8 @@ static bool register_classes()
 
 #define INITSTR(NM)                             \
     ioncore_g.notifies.NM=stringstore_alloc(#NM); \
-    if(ioncore_g.notifies.NM==STRINGID_NONE) return FALSE;
+    if(ioncore_g.notifies.NM==STRINGID_NONE) return FALSE; \
+    ((void)0)
 
 static bool init_global()
 {
@@ -726,4 +727,3 @@ const char *ioncore_aboutmsg()
 
 
 /*}}}*/
-
