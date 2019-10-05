@@ -611,12 +611,12 @@ bool ioncore_startup(const char *display, const char *cfgfile,
     if(!ioncore_init_x(display, stflags))
         return FALSE;
 
-    gr_read_config();
-
     if(!extl_read_config("ioncore_ext", NULL, TRUE))
         return FALSE;
 
     ioncore_read_main_config(cfgfile);
+
+    gr_read_config();
 
     if(!ioncore_init_layout())
         return FALSE;

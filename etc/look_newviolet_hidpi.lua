@@ -22,13 +22,13 @@ de.defstyle("*", {
     border_style = "elevated",
     border_sides = "tb",
 
-    font = "xft:Source Code Sans:size=16",
+    font = "xft:Source Sans Pro:size=20",
     text_align = "center",
 })
 
 
 de.defstyle("tab", {
-    font = "xft:Source Code Sans:size=16",
+    font = "xft:Source Sans Pro:size=20",
 
     de.substyle("active-selected", {
         highlight_colour = "#aaaacc",
