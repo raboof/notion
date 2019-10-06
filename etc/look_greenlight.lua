@@ -29,14 +29,12 @@ de.defstyle("*", {
 
 
 de.defstyle("frame", {
-    based_on = "*",
     background_colour = "#000000",
     transparent_background = false,
 })
 
 
 de.defstyle("tab", {
-    based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-10-*-*-*-*-*-*-*",
     spacing = 1,
 
@@ -54,7 +52,6 @@ de.defstyle("tab", {
 
 
 de.defstyle("input", {
-    based_on = "*",
     text_align = "left",
     spacing = 1,
 

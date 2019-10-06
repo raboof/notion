@@ -27,7 +27,6 @@
 
 /*{{{ Style specifications */
 
-
 static bool get_spec(ExtlTab tab, const char *name, GrStyleSpec *spec,
                      char **pat_ret)
 {
@@ -291,8 +290,65 @@ void de_get_nonfont(WRootWin *rootwin, DEStyle *style, ExtlTab tab)
     de_get_extra_cgrps(rootwin, style, tab);
 }
 
+/**
+ * @returns the style with the given name
+ */
+static DEStyle* load_based_on(WRootWin *rootwin, const char *name)
+{
+    GrStyleSpec spec;
+    bool found;
 
+    found = gr_stylespec_load(&spec, name);
 
+    if (found) {
+        DEStyle* based_on = de_get_style(rootwin, &spec);
+
+        gr_stylespec_unalloc(&spec);
+
+        if(based_on==NULL){
+            warn(TR("Unknown base style. \"%s\""), name);
+            return NULL;
+        }else{
+            based_on->usecount++;
+            return based_on;
+        }
+    } else {
+        return NULL;
+    }
+}
+
+/*
+ * @param tab tab of the 'child' style
+ * @param child_name name of the 'child' style
+ *
+ * @returns the parent style, or NULL for the root "*" style.
+ */
+static DEStyle* get_based_on(WRootWin *rootwin, ExtlTab tab, const char *child_name)
+{
+    char *parent_name;
+    if (strcmp(child_name, "*") == 0) {
+        return NULL;
+    } else if (!extl_table_gets_s(tab, "based_on", &parent_name)) {
+        // No "based_on" field found.
+        // In that case we should try prefixes of this style,
+        // or otherwise the root "*" style.
+        char *prefix = strdup(child_name);
+        while (strlen(prefix) > 0) {
+            prefix[strlen(prefix)-1] = '\0';
+            DEStyle* parent = load_based_on(rootwin, prefix);
+            if (parent != NULL) {
+                free(prefix);
+                return parent;
+            }
+        }
+        free(prefix);
+        return load_based_on(rootwin, "*");
+    } else {
+        DEStyle* found = load_based_on(rootwin, parent_name);
+        free(parent_name);
+        return found;
+    }
+}
 
 /*EXTL_DOC
  * Define a style for the root window \var{rootwin}.
@@ -302,9 +358,6 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
 {
     DEStyle *style;
     char *fnt;
-    char *based_on_name;
-    DEStyle *based_on=NULL;
-    GrStyleSpec based_on_spec;
 
     if(name==NULL)
         return FALSE;
@@ -314,32 +367,15 @@ bool de_defstyle_rootwin(WRootWin *rootwin, const char *name, ExtlTab tab)
     if(style==NULL)
         return FALSE;
 
-    if(get_spec(tab, "based_on", &based_on_spec, &based_on_name)){
-        based_on=de_get_style(rootwin, &based_on_spec);
-
-        gr_stylespec_unalloc(&based_on_spec);
-
-        if(based_on==style){
-            warn(TR("'based_on' for %s points back to the style itself."),
-                 name);
-        }else if(based_on==NULL){
-            warn(TR("Unknown base style. \"%s\""), based_on_name);
-        }else{
-            style->based_on=based_on;
-            based_on->usecount++;
-            /* Copy simple parameters */
-        }
-
-        free(based_on_name);
-    }
+    style->based_on = get_based_on(rootwin, tab, name);
 
     de_get_nonfont(rootwin, style, tab);
 
     if(extl_table_gets_s(tab, "font", &fnt)){
         de_load_font_for_style(style, fnt);
         free(fnt);
-    }else if(based_on!=NULL && based_on->font!=NULL){
-        de_set_font_for_style(style, based_on->font);
+    }else if(style->based_on!=NULL && style->based_on->font!=NULL){
+        de_set_font_for_style(style, style->based_on->font);
     }
 
     if(style->font==NULL)

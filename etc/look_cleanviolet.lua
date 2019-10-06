@@ -30,7 +30,6 @@ de.defstyle("*", {
 
 
 de.defstyle("tab", {
-    based_on = "*",
     font = "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*",
 
     de.substyle("active-selected", {
@@ -52,7 +51,6 @@ de.defstyle("tab", {
 
 
 de.defstyle("input", {
-    based_on = "*",
     text_align = "left",
     spacing = 1,
     -- Greyish violet background

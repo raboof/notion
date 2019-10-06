@@ -18,7 +18,6 @@ de.defstyle("*", {
 })
 
 de.defstyle("tab", {
-    based_on = "*",
     font = "-misc-fixed-medium-r-*-*-13-*-*-*-*-60-*-*",
     de.substyle("active-selected", {
         shadow_colour = "white",
@@ -48,7 +47,6 @@ de.defstyle("tab", {
 })
 
 de.defstyle("input", {
-    based_on = "*",
     shadow_colour = "grey",
     highlight_colour = "grey",
     background_colour = "#545d75",
@@ -71,7 +69,6 @@ de.defstyle("input", {
 dopath("lookcommon_clean")
 
 de.defstyle("tab-menuentry-big", {
-    based_on = "tab-menuentry",
     padding_pixels = 7,
 })
 
