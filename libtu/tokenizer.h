@@ -14,14 +14,14 @@
 #include "types.h"
 
 
-#define TOK_SET_BOOL(TOK, VAL)         {(TOK)->type=TOK_BOOL; (TOK)->u.bval=VAL;}
-#define TOK_SET_LONG(TOK, VAL)         {(TOK)->type=TOK_LONG; (TOK)->u.lval=VAL;}
-#define TOK_SET_DOUBLE(TOK, VAL)     {(TOK)->type=TOK_DOUBLE; (TOK)->u.dval=VAL;}
-#define TOK_SET_CHAR(TOK, VAL)         {(TOK)->type=TOK_CHAR; (TOK)->u.cval=VAL;}
-#define TOK_SET_STRING(TOK, VAL)     {(TOK)->type=TOK_STRING; (TOK)->u.sval=VAL;}
-#define TOK_SET_IDENT(TOK, VAL)     {(TOK)->type=TOK_IDENT; (TOK)->u.sval=VAL;}
-#define TOK_SET_COMMENT(TOK, VAL)     {(TOK)->type=TOK_COMMENT; (TOK)->u.sval=VAL;}
-#define TOK_SET_OP(TOK, VAL)         {(TOK)->type=TOK_OP; (TOK)->u.opval=VAL;}
+#define TOK_SET_BOOL(TOK, VAL)         {(TOK)->type=TOK_BOOL; (TOK)->u.bval=VAL;} ((void)0)
+#define TOK_SET_LONG(TOK, VAL)         {(TOK)->type=TOK_LONG; (TOK)->u.lval=VAL;} ((void)0)
+#define TOK_SET_DOUBLE(TOK, VAL)     {(TOK)->type=TOK_DOUBLE; (TOK)->u.dval=VAL;} ((void)0)
+#define TOK_SET_CHAR(TOK, VAL)         {(TOK)->type=TOK_CHAR; (TOK)->u.cval=VAL;} ((void)0)
+#define TOK_SET_STRING(TOK, VAL)     {(TOK)->type=TOK_STRING; (TOK)->u.sval=VAL;} ((void)0)
+#define TOK_SET_IDENT(TOK, VAL)     {(TOK)->type=TOK_IDENT; (TOK)->u.sval=VAL;} ((void)0)
+#define TOK_SET_COMMENT(TOK, VAL)     {(TOK)->type=TOK_COMMENT; (TOK)->u.sval=VAL;} ((void)0)
+#define TOK_SET_OP(TOK, VAL)         {(TOK)->type=TOK_OP; (TOK)->u.opval=VAL;} ((void)0)
 
 #define TOK_TYPE(TOK)                ((TOK)->type)
 #define TOK_BOOL_VAL(TOK)            ((TOK)->u.bval)

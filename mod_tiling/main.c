@@ -114,7 +114,8 @@ static bool register_regions()
 
 #define INIT_HOOK_(NM)                             \
     NM=mainloop_register_hook(#NM, create_hook()); \
-    if(NM==NULL) return FALSE;
+    if(NM==NULL) return FALSE; \
+    ((void)0)
 
 
 static bool init_hooks()
@@ -151,4 +152,3 @@ err:
 
 
 /*}}}*/
-

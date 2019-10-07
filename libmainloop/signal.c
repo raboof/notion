@@ -431,7 +431,7 @@ static void ignore_handler(int UNUSED(signal_num))
 #endif
 
 #define IFTRAP(X) if(sigismember(which, X))
-#define DEADLY(X) IFTRAP(X) signal(X, deadly_signal_handler);
+#define DEADLY(X) IFTRAP(X) signal(X, deadly_signal_handler)
 #define IGNORE(X) IFTRAP(X) signal(X, SIG_IGN)
 
 void mainloop_trap_signals(const sigset_t *which)
@@ -508,4 +508,3 @@ void mainloop_trap_signals(const sigset_t *which)
 
 
 /*}}}*/
-

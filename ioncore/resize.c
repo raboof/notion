@@ -108,7 +108,7 @@ static WInfoWin *setup_moveres_display(WWindow *parent, int cx, int cy)
     fp.g.w+=chars_for_num(REGION_GEOM(parent).h);
     fp.g.w*=max_width(INFOWIN_BRUSH(infowin), "0123456789x+");
     fp.g.w+=bdw.left+bdw.right;
-    fp.g.h=fnte.max_height+bdw.top+bdw.bottom;;
+    fp.g.h=fnte.max_height+bdw.top+bdw.bottom;
 
     fp.g.x=cx-fp.g.w/2;
     fp.g.y=cy-fp.g.h/2;
@@ -898,4 +898,3 @@ void region_absolute_geom_to_parent(WRegion *reg, const WRectangle *rgeom,
 }
 
 /*}}}*/
-

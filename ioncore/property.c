@@ -294,7 +294,7 @@ char *ioncore_x_get_atom_name(int atom)
     {                                                         \
         TYPE *d=(TYPE*)p;                                     \
         for(i=0; i<n; i++) extl_table_seti_i(tab, i+1, d[i]); \
-    }
+    } ((void)0)
 
 
 /*EXTL_DOC
@@ -347,7 +347,7 @@ ExtlTab ioncore_x_get_window_property(int win, int atom, int atom_type,
             d[i]=tmp;                                      \
         }                                                  \
         p=(uchar*)d;                                       \
-    }
+    } ((void)0)
 
 
 static bool get_mode(const char *mode, int *m)

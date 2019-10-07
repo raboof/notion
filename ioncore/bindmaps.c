@@ -52,7 +52,7 @@ static StringIntMap frame_areas[]={
     if(ioncore_ ## X ## _bindmap!=NULL){                    \
         ioncore_free_bindmap(Y, ioncore_ ## X ## _bindmap); \
         ioncore_ ## X ## _bindmap=NULL;                     \
-    }
+    } ((void)0)
 
 void ioncore_deinit_bindmaps()
 {
@@ -76,8 +76,9 @@ void ioncore_deinit_bindmaps()
 
 #define DO_ALLOC(X, Y, Z)                                  \
     ioncore_ ## X ## _bindmap=ioncore_alloc_bindmap(Y, Z); \
-    if(ioncore_ ## X ## _bindmap==NULL)                    \
-        return FALSE;
+    if(ioncore_ ## X ## _bindmap==NULL){                   \
+        return FALSE;                                      \
+    } ((void)0)
 
 bool ioncore_init_bindmaps()
 {
@@ -249,4 +250,3 @@ WBindmap *region_add_cycle_bindmap(WRegion *reg, uint kcb, uint state,
 
     return bindmap;
 }
-

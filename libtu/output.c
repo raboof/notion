@@ -211,8 +211,13 @@ void warn_err_obj_line(const char *obj, int line)
  */
 
 #define CALL_V_RET(NAME, ARGS) \
-    char *ret; va_list args; va_start(args, p); ret=NAME ARGS; \
-    va_end(args); return ret;
+    char *ret; \
+    va_list args; \
+    va_start(args, p); \
+    ret=NAME ARGS; \
+    va_end(args); \
+    return ret; \
+    ((void)0)
 
 
 char* errmsg(const char *p, ...)

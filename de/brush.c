@@ -29,7 +29,9 @@
 #define MATCHES(S, A) (gr_stylespec_score(&(S), A)>0)
 
 #define ENSURE_INITSPEC(S, NM) \
-    if((S).attrs==NULL) gr_stylespec_load(&(S), NM);
+    if((S).attrs==NULL){ \
+        gr_stylespec_load(&(S), NM); \
+    } ((void)0)
 
 
 static GrStyleSpec tabframe_spec=GR_STYLESPEC_INIT;
@@ -293,6 +295,3 @@ IMPLCLASS(DEBrush, GrBrush, debrush_deinit, debrush_dynfuntab);
 
 
 /*}}}*/
-
-
-

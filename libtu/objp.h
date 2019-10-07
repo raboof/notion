@@ -41,12 +41,14 @@ DECLSTRUCT(ClassDescr){
 #define CREATEOBJ_IMPL(OBJ, LOWOBJ, INIT_ARGS)                     \
     OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \
     OBJ_INIT(p, OBJ);                                             \
-    if(!LOWOBJ ## _init INIT_ARGS) { free((void*)p); return NULL; } return p
+    if(!LOWOBJ ## _init INIT_ARGS) { free((void*)p); return NULL; } return p; \
+    ((void)0)
 
 #define SIMPLECREATEOBJ_IMPL(OBJ, LOWOBJ)                          \
     OBJ *p;  p=ALLOC(OBJ); if(p==NULL){ warn_err(); return NULL; } \
-    OBJ_INIT(p, OBJ);                                             \
-    return p;
+    OBJ_INIT(p, OBJ);                                              \
+    return p;                                                      \
+    ((void)0)
 
 #define END_DYNFUNTAB {NULL, NULL}
 
@@ -56,16 +58,18 @@ extern bool has_dynfun(const Obj *obj, DynFun *func);
 
 #define CALL_DYN(FUNC, OBJ, ARGS)                                \
     bool funnotfound;                                            \
-    lookup_dynfun((Obj*)OBJ, (DynFun*)FUNC, &funnotfound) ARGS;
+    lookup_dynfun((Obj*)OBJ, (DynFun*)FUNC, &funnotfound) ARGS;  \
+    ((void)0)
 
 #define CALL_DYN_RET(RETV, RET, FUNC, OBJ, ARGS)                 \
     typedef RET ThisDynFun();                                    \
     bool funnotfound;                                            \
     ThisDynFun *funtmp;                                          \
-    funtmp=(ThisDynFun*)lookup_dynfun((Obj*)OBJ, (DynFun*)FUNC, \
+    funtmp=(ThisDynFun*)lookup_dynfun((Obj*)OBJ, (DynFun*)FUNC,  \
                                       &funnotfound);             \
-    if(!funnotfound)                                             \
-        RETV=funtmp ARGS;
+    if(!funnotfound){                                            \
+        RETV=funtmp ARGS;                                        \
+    } ((void)0)
 
 #define HAS_DYN(OBJ, FUNC) has_dynfun((Obj*)OBJ, (DynFun*)FUNC)
 
