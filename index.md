@@ -22,7 +22,9 @@ Supported platforms:
 * Solaris (Solaris 10, OpenSolaris as well as [OpenIndiana](https://www.illumos.org/issues/1283))
 * [NetBSD](http://pkgsrc.se/wm/notion)
 
-Other than the above-linked packages, the _**Not**ion_ project does not publish binary releases. You can download a convienent source package from [github releases](https://github.com/raboof/notion/releases) or clone our [git repo](https://github.com/raboof/notion).
+# Get Notion
+
+Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion).
 
 # Documentation
 
