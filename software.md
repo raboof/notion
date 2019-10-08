@@ -2,6 +2,10 @@
 layout: default
 title: Software
 ---
+# Download Notion
+
+Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion)
+
 # Supplemental Software
 
 The intent of this page is to collect software that is known to integrate well
