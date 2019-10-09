@@ -778,8 +778,8 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
             break;
         }
     }else{
-        dock_geom.w=tile_size.w;
-        dock_geom.h=tile_size.h;
+        dock_geom.w=0;
+        dock_geom.h=0;
     }
     border_dock_geom.w=dock_bdw.left+dock_geom.w+dock_bdw.right;
     border_dock_geom.h=dock_bdw.top+dock_geom.h+dock_bdw.bottom;
