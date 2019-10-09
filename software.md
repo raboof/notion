@@ -4,7 +4,7 @@ title: Software
 ---
 # Download Notion
 
-Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion)
+Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion). Since commits merged into the `master` branch need proof-reading by another contributor, it is relatively stable. Stable releases are also available via GitHub.
 
 # Supplemental Software
 
