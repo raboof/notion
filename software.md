@@ -46,9 +46,36 @@ While notion comes with its own mod_query, some external tools have sprung up ov
 * [dmenu](https://tools.suckless.org/dmenu/) — very lightweight
 * [rofi](https://github.com/davatorium/rofi) — self-proclaimed replacement for dmenu
 
+## Screen lockers
+
+**Not**ion ships with a script called *notion-lock*, which tries to invoke the following commands in the following order:
+
+* [xscreensaver](https://www.jwz.org/xscreensaver/) — the classic screensaver for X11
+* [i3lock](https://i3wm.org/i3lock/) — i3's lock screen, not a screensaver
+* [xlock](http://sillycycle.com/xlockmore.html) — I'm not sure which one is older, xscreensaver or xlock(more).
+
+X11 lock screens only lock the X display, not the entire console display, so someone attempting a VT-switch (Ctrl+Alt+F<1..12>) will not be prevented from doing so. Furthermore, it is not very reliable, since windows can still move themselves in front of the lock screen window (which is an ordinary X11 window pushing itself into the foreground). For more information, see [Why screen lockers on X11 cannot be secure](http://blog.martin-graesslin.com/blog/2015/01/why-screen-lockers-on-x11-cannot-be-secure/). 
+
+The following locking applications use the console and attempt to be more secure:
+
+* [vlock](https://packages.debian.org/buster/vlock) — official master site is unfortunately gone, some forks exist
+* [physlock](https://github.com/muennich/physlock) — possibly inspired by vlock, seems maintained
+
 ## Other utilities
 
+These utilities fit well into the **Not**ion workflow, according to some users.
+
 * [arandr](http://christian.amsuess.com/tools/arandr/) — a flexible tool for manipulating your monitor layout, resolutions, orientations
+
+### Terminals
+
+* [xterm](https://invisible-island.net/xterm/) — The classical X11 terminal. Known to be ugly by default, it can be configured using `~/.Xdefaults`.
+* [rxvt-unicode](http://software.schmorp.de/pkg/rxvt-unicode.html) — Also known as urxvt. Known for its good unicode support. Configurable via `~/.Xdefaults`. Supports perl scripting and comes with a bunch of scripts for various useful tasks such as scrollback search, opening urls with keyboard shortcuts, etc.
+
+### Image viewers
+
+* [feh](https://feh.finalrewind.org/) — minimalist image viewer
+* [sxiv](https://github.com/muennich/sxiv) — still minimalist, includes features like thumbnails, gif playback, custom keybindings
 
 ## Untested, please review
 
