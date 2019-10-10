@@ -617,12 +617,12 @@ end
 
 --DOC
 -- Asks for a file to be viewed. This script uses
--- \command{run-mailcap --action=view} by default, but you may provide an
+-- \command{xdg-open} by default, but you may provide an
 -- alternative script to use. The default prompt is "View file:" (translated).
 function mod_query.query_runfile(mplex, script, prompt)
     mod_query.query_execfile(mplex,
                              prompt or TR("View file:"),
-                             script or "run-mailcap --action=view")
+                             script or "xdg-open")
 
 end
 
