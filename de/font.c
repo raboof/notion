@@ -62,10 +62,9 @@ DEFont *de_load_font(const char *fontname)
     if(strncmp(fontname, "xft:", 4)==0){
         font=XftFontOpenName(ioncore_g.dpy, DefaultScreen(ioncore_g.dpy), fontname+4);
     }else{
+        font=XftFontOpenXlfd(ioncore_g.dpy, DefaultScreen(ioncore_g.dpy), fontname);
 #ifdef HAVE_X11_BMF
         goto bitmap_font;
-#else
-        font=XftFontOpenXlfd(ioncore_g.dpy, DefaultScreen(ioncore_g.dpy), fontname);
 #endif
     }
 
