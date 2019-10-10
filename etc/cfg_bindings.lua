@@ -190,11 +190,11 @@ defbindings("WMPlex.toplevel", {
 
     bdoc("Query for file to edit.", "edit"),
     kpress(META.."F5",
-           "mod_query.query_editfile(_, 'run-mailcap --action=edit')"),
+           "mod_query.query_editfile(_, EDIT_COMMAND or 'run-mailcap --action=edit')"),
 
     bdoc("Query for file to view.", "view"),
     kpress(META.."F6",
-           "mod_query.query_runfile(_, 'run-mailcap --action=view')"),
+           "mod_query.query_runfile(_, VIEW_COMMAND or 'xdg-open')"),
 
     bdoc("Query for keybinding.", "qkb"),
     kpress(META.."F7",

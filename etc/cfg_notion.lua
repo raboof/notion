@@ -19,6 +19,10 @@
 
 -- Terminal emulator.
 --XTERM="xterm"
+-- Edit file command, mod_query.query_editfile
+--EDIT_COMMAND="run-mailcap --action=edit"
+-- View file command, mod_query.query_viewfile
+--VIEW_COMMAND="xdg-open"
 
 -- Some basic settings.
 ioncore.set{
