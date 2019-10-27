@@ -39,8 +39,10 @@ int test_get_token() {
         return 31;
     if (tok.type != TOK_DOUBLE)
         return 32;
-    if (TOK_DOUBLE_VAL(&tok) != 2.3)
+    if (TOK_DOUBLE_VAL(&tok) != 2.3){
+        fprintf(stderr, "Expected 2.3, got %f\n", TOK_DOUBLE_VAL(&tok));
         return 33;
+    }
 
     // ignore comment and go to next line
     if(tokz_get_token(tokz, &tok) == FALSE)
