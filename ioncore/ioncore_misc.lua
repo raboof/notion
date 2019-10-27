@@ -409,5 +409,5 @@ $().ready(function(){
 
     io.close(keysfile)
 
-    mod_query.exec_on_merr(frame, "run-mailcap --mode=view " .. filename)
+    mod_query.exec_on_merr(frame, (VIEW_COMMAND or 'xdg-open') .. ' ' .. filename)
 end
