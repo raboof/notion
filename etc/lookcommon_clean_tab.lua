@@ -8,6 +8,10 @@ de.defstyle("actnotify", {
 })
 
 de.defstyle("tab-frame", {
+    -- uncomment following lines to show icons on titlebar (available if built with Cairo)
+    -- show_icon = true,
+    -- icon_align_left = false,
+
     -- TODO: some kind of amend option. It should not be necessary to
     -- duplicate this definition for both tab-frame and tab-menuentry,
     -- or for each style, nor use more complex hacks to communicate
