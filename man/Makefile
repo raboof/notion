@@ -8,6 +8,8 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
+SHELL=bash -o pipefail
+
 TARGETS=notion.1 notionflux.1 welcome.txt
 
 MKMAN=$(LUA) ../build/mkman.lua
