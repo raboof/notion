@@ -8,7 +8,7 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) -I..
+INCLUDES += $(X11_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES) $(CAIRO_INCLUDES) -I..
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 

@@ -127,15 +127,20 @@ ifeq ($(USE_READLINE),1)
 endif
 
 ##
-## Cairo
+## Cairo -- only used for drawing icons, enabled by default
 ##
 
-CAIRO_LIBS=$(shell $(PKG_CONFIG) --libs cairo)
-CAIRO_INCLUDES=$(shell $(PKG_CONFIG) --cflags cairo)
-
-# Be a bit lazy and include cairo all places x11 is used
-X11_LIBS += $(CAIRO_LIBS)
-X11_INCLUDES += $(CAIRO_INCLUDES)
+USE_CAIRO ?= 1
+ifeq ($(USE_CAIRO),1)
+    CAIRO_LIBS     ?= $(shell $(PKG_CONFIG) --libs   cairo || true)
+    CAIRO_INCLUDES ?= $(shell $(PKG_CONFIG) --cflags cairo || true)
+    ifeq ($(CAIRO_LIBS),)
+        USE_CAIRO := 0
+        export USE_CAIRO
+        $(info >> Could not find libcairo, continuing without. Your build will not support window icons.)
+    endif
+    CAIRO_INCLUDES += -DHAVE_CAIRO
+endif
 
 ##
 ## Localisation
