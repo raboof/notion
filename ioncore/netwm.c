@@ -342,6 +342,8 @@ bool netwm_handle_property(WClientWin *cwin, const XPropertyEvent *ev)
 
 /*{{{ _NET_WM_ICON stuff */
 
+
+#ifdef HAVE_CAIRO
 static cairo_user_data_key_t cairo_userdata_key;
 
 
@@ -382,6 +384,7 @@ cairo_surface_t *draw_surface_from_data(int width, int height, ulong *data)
 
     return surface;
 }
+#endif
 
 
 /**
@@ -390,9 +393,9 @@ cairo_surface_t *draw_surface_from_data(int width, int height, ulong *data)
  * 
  * Adapted from awesome-wm
  */
-cairo_surface_t *netwm_window_icon(WClientWin *cwin, uint preferred_size)
+void /*cairo_surface_t*/ *netwm_window_icon(WClientWin *cwin, uint preferred_size)
 {
-    cairo_surface_t *ret=NULL;
+    void /*cairo_surface_t*/ *ret=NULL;
     ulong *data=NULL, *end, *found_data = 0;
     uint found_size = 0;
 
@@ -459,7 +462,9 @@ cairo_surface_t *netwm_window_icon(WClientWin *cwin, uint preferred_size)
         goto cleanup;
     }
 
+#ifdef HAVE_CAIRO
     ret=draw_surface_from_data(found_data[0], found_data[1], found_data + 2);
+#endif
 
  cleanup:
     if(data)

@@ -11,8 +11,10 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#ifdef HAVE_CAIRO
 #include <cairo/cairo.h>
 #include <cairo/cairo-xlib.h>
+#endif
 
 #include <libtu/types.h>
 #include <libtu/output.h>

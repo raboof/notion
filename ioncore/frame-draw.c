@@ -79,11 +79,13 @@ void frame_update_attr(WFrame *frame, int i, WRegion *reg)
 
     spec=&frame->titles[i].attr;
 
+#ifdef HAVE_CAIRO
     cairo_surface_t *tab_icon=frame->titles[i].icon;
     if(tab_icon){
         cairo_surface_destroy(tab_icon);
         tab_icon=NULL;
     }
+#endif
 
     frame->titles[i].icon = reg ? region_icon(reg) : NULL;
 
@@ -416,10 +418,12 @@ void frame_recalc_bar(WFrame *frame)
             /* TODO: subtract possible icon width */
             int icon_w=0;
             if(frame->show_icon){
+#ifdef HAVE_CAIRO
                 const cairo_surface_t *icon=region_icon(sub);
                 if(icon) {
                     icon_w=cairo_image_surface_get_width(icon)+3;
                 }
+#endif
             }
             if(frame->flags&FRAME_SHOW_NUMBERS){
                 char *s=NULL;

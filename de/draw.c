@@ -545,7 +545,7 @@ void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
 }
 
 void debrush_draw_iconbox(DEBrush *brush,
-                          cairo_t *cr,
+                          void /*cairo_t*/ *surface,
                           const WRectangle *geom,
                           const GrTextElem *elem,
                           DEColourGroup *cg,
@@ -580,11 +580,14 @@ void debrush_draw_iconbox(DEBrush *brush,
 
     if(elem->icon){
         uint icon_x=icon_align_left ? geom->x+bdw.left : tx;
+#ifdef HAVE_CAIRO
+        cairo_t *cr = surface;
         cairo_set_source_surface(cr, elem->icon, icon_x, geom->y+bdw.top);
         /* cairo_set_source_surface(cr, elem->icon, geom->x+bdw.left+1, geom->y+bdw.top); */
         /* cairo_rectangle(cr, geom->x, geom->y, 16, 16); */
         /* cairo_fill(cr); */
         cairo_paint(cr);
+#endif
         if(icon_align_left)
             tx=MAXOF(icon_x+icon_width, tx);
         else
@@ -608,8 +611,12 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
     GrBorderWidths bdw;
     int i;
     bool show_icon=FALSE;
+#ifdef HAVE_CAIRO
     cairo_surface_t *xsurf=NULL;
     cairo_t *cr=NULL;
+#else
+    void *cr=NULL;
+#endif
 
     debrush_get_extra(brush, "show_icon", 'b', &show_icon);
 
@@ -618,9 +625,11 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
     grbrush_get_border_widths(&(brush->grbrush), &bdw);
 
     if(show_icon){
+#ifdef HAVE_CAIRO
         /* Seems like under-reporting the window dimensions to cairo is ok */
         xsurf=cairo_xlib_surface_create(ioncore_g.dpy, brush->win, DefaultVisual(ioncore_g.dpy, 0), geom->x+geom->w, geom->h);
         cr=cairo_create(xsurf);
+#endif
     }
 
     for(i=0; ; i++){
@@ -648,10 +657,12 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
         g.x+=bdw.spacing;
     }
 
+#ifdef HAVE_CAIRO
     if(xsurf)
         cairo_surface_destroy(xsurf);
     if(cr)
         cairo_destroy(cr);
+#endif
 }
 
 

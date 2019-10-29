@@ -309,8 +309,11 @@ static void frame_free_titles(WFrame *frame)
     if(frame->titles!=NULL){
         for(i=0; i<frame->titles_n; i++){
             title=frame->titles[i];
-            if(title.icon)
+            if(title.icon) {
+#ifdef HAVE_CAIRO
                 cairo_surface_destroy(title.icon);
+#endif
+            }
             if(title.text)
                 free(title.text);
             gr_stylespec_unalloc(&title.attr);

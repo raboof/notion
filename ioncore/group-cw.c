@@ -170,9 +170,9 @@ const char *groupcw_displayname(WGroupCW *cwg)
     return name;
 }
 
-cairo_surface_t *groupcw_icon(WGroupCW *cwg)
+void /*cairo_surface_t*/ *groupcw_icon(WGroupCW *cwg)
 {
-    cairo_surface_t *icon=NULL;
+    void /*cairo_surface_t*/ *icon=NULL;
 
     if(cwg->grp.bottom!=NULL && cwg->grp.bottom->reg!=NULL)
         icon=region_icon(cwg->grp.bottom->reg);

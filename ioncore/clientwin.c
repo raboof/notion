@@ -45,7 +45,7 @@
 
 static void set_clientwin_state(WClientWin *cwin, unsigned int state);
 static bool send_clientmsg(Window win, Atom a, Time stmp);
-static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon);
+static void clientwin_set_icon(WClientWin *cwin, void /*cairo_surface_t*/ *icon);
 
 
 WHook *clientwin_do_manage_alt=NULL;
@@ -124,12 +124,14 @@ static void clientwin_get_winprops(WClientWin *cwin)
         return;
 
     if(extl_table_gets_s(tab, "icon", &icon_path)){
+#ifdef HAVE_CAIRO
         cairo_surface_t *icon=cairo_image_surface_create_from_png(icon_path);
         if(cairo_surface_status(icon)==CAIRO_STATUS_FILE_NOT_FOUND){
             warn("Could not open icon specified in winprop: %s", icon_path);
         }else{
             clientwin_set_icon(cwin, icon);
         }
+#endif
         free(icon_path);
     }
 
@@ -237,7 +239,8 @@ void clientwin_get_input_wm_hint(WClientWin *cwin)
     }
 }
 
-
+ 
+#ifdef HAVE_CAIRO
 static cairo_surface_t *scale_cairo_image_surface(cairo_surface_t *source, int target_w, int target_h)
 {
     int source_w=cairo_image_surface_get_width(source);
@@ -253,23 +256,27 @@ static cairo_surface_t *scale_cairo_image_surface(cairo_surface_t *source, int t
     cairo_paint(cr);
     return result;
 }
+#endif
 
 static void clientwin_get_icon_from_hint(WClientWin *cwin)
 {
-    cairo_surface_t *icon=netwm_window_icon(cwin, 16);
+    void /* cairo_surface_t */ *icon=netwm_window_icon(cwin, 16);
     clientwin_set_icon(cwin, icon);
 }
 
 /* Set cwin's icon, possibly rescaling it to fit.
  * NB: takes ownership of icon
  */
-static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon)
+static void clientwin_set_icon(WClientWin *cwin, void /*cairo_surface_t*/ *icon)
 {
     if(cwin->icon){
+#ifdef HAVE_CAIRO
         cairo_surface_destroy(cwin->icon);
+#endif
         cwin->icon=NULL;
     }
 
+#ifdef HAVE_CAIRO
     if(icon!=NULL && cairo_image_surface_get_width(icon)!=16){
         /* TODO: Are all icons square? */
         /* rescale */
@@ -277,6 +284,7 @@ static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon)
         cairo_surface_destroy(icon);
         icon = scaled;
     }
+#endif
 
     cwin->icon=icon;
 }
@@ -763,7 +771,9 @@ static bool reparent_root(WClientWin *cwin)
 void clientwin_deinit(WClientWin *cwin)
 {
     if(cwin->icon){
+#ifdef HAVE_CAIRO
         cairo_surface_destroy(cwin->icon);
+#endif
         cwin->icon=NULL;
     }
 
@@ -1156,7 +1166,7 @@ static void clientwin_size_hints(WClientWin *cwin, WSizeHints *hints_ret)
 }
 
 
-static cairo_surface_t *clientwin_icon(WClientWin *cwin)
+static void /*cairo_surface_t*/ *clientwin_icon(WClientWin *cwin)
 {
     return cwin->icon;
 }
