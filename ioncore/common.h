@@ -14,6 +14,9 @@
 #ifdef HAVE_CAIRO
 #include <cairo/cairo.h>
 #include <cairo/cairo-xlib.h>
+#else
+typedef void* cairo_surface_t;
+typedef void* cairo_t;
 #endif
 
 #include <libtu/types.h>

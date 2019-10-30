@@ -545,7 +545,7 @@ void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
 }
 
 void debrush_draw_iconbox(DEBrush *brush,
-                          void /*cairo_t*/ *surface,
+                          cairo_t *cr,
                           const WRectangle *geom,
                           const GrTextElem *elem,
                           DEColourGroup *cg,
@@ -581,7 +581,6 @@ void debrush_draw_iconbox(DEBrush *brush,
     if(elem->icon){
         uint icon_x=icon_align_left ? geom->x+bdw.left : tx;
 #ifdef HAVE_CAIRO
-        cairo_t *cr = surface;
         cairo_set_source_surface(cr, elem->icon, icon_x, geom->y+bdw.top);
         /* cairo_set_source_surface(cr, elem->icon, geom->x+bdw.left+1, geom->y+bdw.top); */
         /* cairo_rectangle(cr, geom->x, geom->y, 16, 16); */
@@ -611,12 +610,8 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
     GrBorderWidths bdw;
     int i;
     bool show_icon=FALSE;
-#ifdef HAVE_CAIRO
     cairo_surface_t *xsurf=NULL;
     cairo_t *cr=NULL;
-#else
-    void *cr=NULL;
-#endif
 
     debrush_get_extra(brush, "show_icon", 'b', &show_icon);
 

@@ -202,7 +202,7 @@ void region_do_set_focus(WRegion *reg, bool warp)
  *
  * NULL if no icon.
  */
-void /*cairo_surface_t*/ *region_icon(WRegion *reg)
+cairo_surface_t *region_icon(WRegion *reg)
 {
     void *icon=NULL;
 #ifdef HAVE_CAIRO
@@ -291,7 +291,7 @@ void region_updategr_default(WRegion *reg)
     }
 }
 
-void /*cairo_surface_t*/ *region_icon_default(WRegion *reg)
+cairo_surface_t *region_icon_default(WRegion *reg)
 {
     return NULL;
 }

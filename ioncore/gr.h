@@ -63,7 +63,7 @@ typedef struct{
     char *text;
     int iw;
     GrStyleSpec attr;
-    void /*cairo_surface_t*/ *icon;
+    cairo_surface_t *icon;
 } GrTextElem;
 
 typedef enum{

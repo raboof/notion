@@ -45,7 +45,7 @@
 
 static void set_clientwin_state(WClientWin *cwin, unsigned int state);
 static bool send_clientmsg(Window win, Atom a, Time stmp);
-static void clientwin_set_icon(WClientWin *cwin, void /*cairo_surface_t*/ *icon);
+static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon);
 
 
 WHook *clientwin_do_manage_alt=NULL;
@@ -260,14 +260,14 @@ static cairo_surface_t *scale_cairo_image_surface(cairo_surface_t *source, int t
 
 static void clientwin_get_icon_from_hint(WClientWin *cwin)
 {
-    void /* cairo_surface_t */ *icon=netwm_window_icon(cwin, 16);
+    cairo_surface_t *icon=netwm_window_icon(cwin, 16);
     clientwin_set_icon(cwin, icon);
 }
 
 /* Set cwin's icon, possibly rescaling it to fit.
  * NB: takes ownership of icon
  */
-static void clientwin_set_icon(WClientWin *cwin, void /*cairo_surface_t*/ *icon)
+static void clientwin_set_icon(WClientWin *cwin, cairo_surface_t *icon)
 {
     if(cwin->icon){
 #ifdef HAVE_CAIRO
@@ -1166,7 +1166,7 @@ static void clientwin_size_hints(WClientWin *cwin, WSizeHints *hints_ret)
 }
 
 
-static void /*cairo_surface_t*/ *clientwin_icon(WClientWin *cwin)
+static cairo_surface_t *clientwin_icon(WClientWin *cwin)
 {
     return cwin->icon;
 }

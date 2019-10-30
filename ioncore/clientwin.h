@@ -52,7 +52,7 @@ DECLCLASS(WClientWin){
     int event_mask;
     Window win;
 
-    void /*cairo_surface_t*/ *icon;
+    cairo_surface_t *icon;
 
     int orig_bw;
 
