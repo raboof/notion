@@ -6,7 +6,6 @@ de.defstyle("stdisp", {
     text_align = "left",
     background_colour = "#000000",
     foreground_colour = "grey",
-    font="-misc-fixed-medium-r-*-*-13-*-*-*-*-60-*-*",
 
     de.substyle("important", {
         foreground_colour = "green",

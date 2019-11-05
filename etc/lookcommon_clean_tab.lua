@@ -55,6 +55,5 @@ de.defstyle("tab-menuentry", {
 })
 
 de.defstyle("tab-menuentry-big", {
-    font = "-*-helvetica-medium-r-normal-*-17-*-*-*-*-*-*-*",
     padding_pixels = 7,
 })
