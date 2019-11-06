@@ -287,6 +287,8 @@ char *completion_generator(const char *text, int state)
 
 	char *ret;
 	char *lastdot = strrchr(text, '.');
+	char *lastcolon = strrchr(text, ':');
+	lastdot = lastcolon && lastdot < lastcolon ? lastcolon : lastdot;
 	if (!lastdot) {
 		ret = strdup(buf->cur);
 	} else {
