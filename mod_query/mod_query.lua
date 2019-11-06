@@ -1298,7 +1298,7 @@ function mod_query.show_tree(mplex, reg, max_depth)
     mod_query.message(mplex, get_info(reg, "", 0))
 end
 
-function binding_to_str(ctx, binding)
+local function binding_to_str(ctx, binding)
     if binding.kcb then
         return binding.kcb .. "@" .. ctx .. " " .. binding.doc
     else
@@ -1306,7 +1306,7 @@ function binding_to_str(ctx, binding)
     end
 end
 
-function str_to_binding(str)
+local function str_to_binding(str)
     for ctx,bindmap in pairs(notioncore.do_getbindings()) do
         for _,binding in pairs(bindmap) do
             if binding.doc then
