@@ -201,7 +201,7 @@ defbindings("WMPlex.toplevel", {
            "mod_query.query_binding(_, _sub)"),
 
     bdoc("Query for workspace to go to or create a new one.", "+ws"),
-    kpress(META.."F9", "mod_query.query_workspace(_)"),
+    kpress(ALTMETA.."F9", "mod_query.query_workspace(_)"),
 
     bdoc("Query for a client window to go to.", "go"),
     kpress(META.."G", "mod_query.query_gotoclient(_)"),
