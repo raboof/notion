@@ -1,11 +1,21 @@
 language: c
+os:
+  - linux
+  - osx
+addons:
+  homebrew:
+    packages:
+    - lua
+    - gettext
+    casks:
+    - xquartz
 compiler:
   - gcc
   - clang
 env:
   - 
   - USE_XFT=0
-before_install: sudo apt-get install lua5.2 liblua5.2-dev gettext libxft-dev libxinerama-dev libxrandr-dev libreadline-dev
+before_install: if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew unlink gettext && brew link gettext --force; else sudo apt-get install lua5.2 liblua5.2-dev gettext libxft-dev libxinerama-dev libxrandr-dev libreadline-dev; fi
 script:
   - make
   - make test
