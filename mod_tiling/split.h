@@ -61,9 +61,12 @@ DECLCLASS(WSplitInner){
 };
 
 
+// A split containing 2 WSplit children
 DECLCLASS(WSplitSplit){
     WSplitInner isplit;
+    // direction
     int dir;
+    // top/left and bottom/right child
     WSplit *tl, *br;
     int current;
 };
@@ -74,7 +77,7 @@ DECLCLASS(WSplitRegion){
     WRegion *reg;
 };
 
-
+// WSplitRegion for holding the stdisp
 DECLCLASS(WSplitST){
     WSplitRegion regnode;
     int orientation;
