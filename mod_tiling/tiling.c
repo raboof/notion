@@ -515,7 +515,6 @@ bool tiling_managed_add(WTiling *ws, WRegion *reg)
 bool tiling_do_attach_initial(WTiling *ws, WRegion *reg)
 {
     assert(ws->split_tree==NULL);
-    fprintf(stderr, "tiling_do_attach_initial\n");
 
     ws->split_tree=(WSplit*)create_splitregion(&REGION_GEOM(reg), reg);
     if(ws->split_tree==NULL)
@@ -543,7 +542,6 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
                 WRegionSimpleCreateFn *create_frame_fn, bool ci)
 {
     const char *p[1];
-    fprintf(stderr, "tiling_init\n");
 
     ws->split_tree=NULL;
     ws->create_frame_fn=(create_frame_fn
@@ -594,7 +592,6 @@ bool tiling_init(WTiling *ws, WWindow *parent, const WFitParams *fp,
 
     region_register(&(ws->reg));
     region_add_bindmap((WRegion*)ws, mod_tiling_tiling_bindmap);
-    fprintf(stderr, "tiling_initted\n");
 
     return TRUE;
 }
@@ -702,34 +699,12 @@ void tiling_managed_remove(WTiling *ws, WRegion *reg)
     if(node==(WSplitRegion*)(ws->stdispnode))
         ws->stdispnode=NULL;
 
-    if(node!=NULL){
-        bool reused=FALSE;
+    if(node!=NULL)
+        splittree_remove((WSplit*)node, (!norestore && other!=NULL));
 
-        if(other==NULL && !norestore){
-            WWindow *par=REGION_PARENT(ws);
-            WFitParams fp;
-
-            assert(par!=NULL);
-
-            fp.g=node->split.geom;
-            fp.mode=REGION_FIT_EXACT;
-
-            other=(ws->create_frame_fn)(par, &fp);
-
-            if(other!=NULL){
-                node->reg=other;
-                tiling_managed_add(ws, other);
-                reused=TRUE;
-            }else{
-                warn(TR("Tiling in useless state."));
-            }
-        }
-
-        if(!reused)
-            splittree_remove((WSplit*)node, (!norestore && other!=NULL));
-    }
-
-    if(!norestore && other!=NULL && act && mcf)
+    if(other==NULL)
+        destroy_obj((Obj*)ws);
+    else if(!norestore && act && mcf)
         region_warp(other);
 }
 
@@ -1082,20 +1057,13 @@ void do_unsplit(WRegion *reg)
     if(ws==NULL)
         return;
 
-    fprintf(stderr, "unsplitting %s at %x\n", OBJ_TYPESTR(reg), reg);
-
     ph=region_get_rescue_pholder_for((WRegion*)ws, reg);
 
     if(ph==NULL){
-        fprintf(stderr, "no rescue needed?\n");
         res=!region_rescue_needed(reg);
-        fprintf(stderr, "res %d\n", res);
     }else{
-        fprintf(stderr, "rescueing\n");
         res=region_rescue(reg, ph);
-        fprintf(stderr, "rescued, destroying ph\n");
         destroy_obj((Obj*)ph);
-        fprintf(stderr, "destroyed ph\n");
     }
 
     if(!res){
@@ -1104,9 +1072,7 @@ void do_unsplit(WRegion *reg)
         return;
     }
 
-    fprintf(stderr, "destroying %x\n", reg);
     destroy_obj((Obj*)reg);
-    fprintf(stderr, "end do_unsplit\n");
 }
 
 
@@ -1679,7 +1645,6 @@ WRegion *tiling_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
         ws->split_tree=tiling_load_node(ws, &REGION_GEOM(ws), treetab);
         extl_unref_table(treetab);
     }
-    fprintf(stderr, "loaded node\n");
 
     if(ws->split_tree==NULL){
         warn(TR("The workspace is empty."));
@@ -1690,7 +1655,6 @@ WRegion *tiling_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
     ws->split_tree->ws_if_root=ws;
     split_restack(ws->split_tree, ws->dummywin, Above);
 
-    fprintf(stderr, "restacked\n");
     return (WRegion*)ws;
 }
 
