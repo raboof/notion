@@ -64,7 +64,6 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
                 WFrameMode mode, char *name)
 {
     WRectangle mg;
-    fprintf(stderr, "creating frame at %x\n", frame);
 
     frame->flags=0;
     frame->saved_geom.w=0;

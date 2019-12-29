@@ -191,7 +191,6 @@ bool splitinner_init(WSplitInner *split, const WRectangle *geom)
 
 bool splitsplit_init(WSplitSplit *split, const WRectangle *geom, int dir)
 {
-    fprintf(stderr, "creating wsplitsplit at %x\n", split);
     splitinner_init(&(split->isplit), geom);
     split->dir=dir;
     split->tl=NULL;
@@ -275,7 +274,6 @@ void splitsplit_deinit(WSplitSplit *split)
 void splitregion_deinit(WSplitRegion *split)
 {
     if(split->reg!=NULL){
-        fprintf(stderr, "deinitting splitregion at %x with reg %s %x\n", split, OBJ_TYPESTR(split->reg), split->reg);
         set_node_of_reg(split->reg, NULL);
         split->reg=NULL;
     }
@@ -1865,7 +1863,6 @@ void splitinner_mark_current(WSplitInner *split, WSplit *child)
 
 static void splitsplit_forall(WSplitSplit *node, WSplitFn *fn)
 {
-    fprintf(stderr, "executing fn for both children of the WSplitSplit at %x: %s %x -> %s %x & %s %x\n", node, OBJ_TYPESTR(node->isplit.split.parent), node->isplit.split.parent, OBJ_TYPESTR(node->tl), node->tl, OBJ_TYPESTR(node->br), node->br);
     fn(node->tl);
     fn(node->br);
 }
@@ -1996,10 +1993,8 @@ void split_map(WSplit *split)
 
 static void splitregion_unmap(WSplitRegion *split)
 {
-    if(split->reg!=NULL) {
-        fprintf(stderr, "unmapping splitregion at %x with reg %s %x\n", split, OBJ_TYPESTR(split->reg), split->reg);
+    if(split->reg!=NULL)
         region_unmap(split->reg);
-    }
 }
 
 static void splitinner_unmap(WSplitInner *split)

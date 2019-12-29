@@ -29,8 +29,6 @@ void destroy_obj(Obj *obj)
 {
     ClassDescr *d;
 
-    fprintf(stderr, "Destroying object of type %s at %x\n", OBJ_TYPESTR(obj), obj);
-
     if(OBJ_IS_BEING_DESTROYED(obj))
         return;
 
@@ -149,7 +147,6 @@ DynFun *lookup_dynfun(const Obj *obj, DynFun *func,
 
     descr=obj->obj_type;
 
-    //fprintf(stderr, "lookup_dynfun for obj %s at %x, obj_type at %x\n", OBJ_TYPESTR(obj), obj, obj->obj_type);
     for(; descr!=&Obj_classdescr; descr=descr->ancestor){
         if(descr->funtab==NULL)
             continue;
