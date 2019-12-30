@@ -1,4 +1,12 @@
 categories:
+  - title: 'Documentation'
+    label: 'docs'
+  - title: 'Keybindings'
+    label: 'keybindings'
+  - title: 'Notionflux'
+    label: 'notionflux'
+  - title: 'Looks'
+    label: 'looks'
   - title: 'Under the hood'
     label: 'development'
 template: |
