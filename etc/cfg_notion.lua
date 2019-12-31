@@ -93,13 +93,11 @@ ioncore.set{
 }
 
 -- Load default settings. The file cfg_defaults loads all the files
--- commented out below, except mod_dock. If you do not want to load
+-- commented out below, except mod_statusbar. If you do not want to load
 -- something, comment out this line, and uncomment the lines corresponding
 -- to the modules or configuration files that you want, below.
+-- Note that mod_dock and mod_statusbar are mutually exclusive.
 dopath("cfg_defaults")
-
--- Load configuration of the Notion 'core'. Most bindings are here.
---dopath("cfg_notioncore")
 
 -- Load some kludges to make apps behave better.
 --dopath("cfg_kludges")
@@ -116,6 +114,11 @@ dopath("cfg_defaults")
 --dopath("mod_sp")
 --dopath("mod_notionflux")
 --dopath("mod_xrandr")
+
+--dopath("net_client_list")
+--
+-- loads cfg_bindings
+--dopath("cfg_notioncore")
 
 --
 -- Common customisations
