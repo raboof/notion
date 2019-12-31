@@ -138,3 +138,12 @@ defwinprop{
     ignore_min_size = false,
 }
 ```
+
+## Dock and statusbar
+
+Notion used to load mod_statusbar by default. Notion 4 default configuration is
+to load mod_dock. To change this behavior, edit cfg_defaults.lua to load mod_statusbar
+instead of mod_dock.
+
+Note that mod_statusbar and mod_dock are still mutually exclusive.
+
