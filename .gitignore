@@ -2,6 +2,7 @@ TAGS
 tags
 .tags
 .session
+.notion
 .project
 *.d
 *.a
