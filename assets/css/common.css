@@ -32,14 +32,17 @@ h2 		{ font-size:18px; }
 h3		{ font-size: 16px; color: #666; }
 
 #wrapper 		{ width:760px; margin:0 auto; }
-#header 		{ line-height: 10em; position:relative; display:block; width:760px; height:102px; background:#FFF url(../images/bg_header.gif) repeat-x; }
-#header .logo 	{ position:absolute; left:40px; top:0px; }
+#header 		{ line-height: 10em; position:relative; display:block; width:760px; height:102px; background:#FFF url(../images/bg_header.gif) repeat-x; text-align: center; }
 #header a {
 	color: white;
 	font-size: 42px;
 	font-family: "Liberation Sans", sans-serif;
 	text-decoration: none;
+	height: 100%;
+	vertical-align: middle;
+	display: inline-block;
 }
+#header .logo 	{ height: 51px; vertical-align: middle; max-height: 102px; margin-top: 25px }
 
 #nav 			{ display:block; width:760px; height:26px; margin:0; padding:0; list-style:none; text-align:center; background:#A13D3D url(../images/bg_nav.gif) repeat-x; }
 #nav li 		{ float:left; width:150px;  }
