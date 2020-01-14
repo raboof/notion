@@ -1727,8 +1727,10 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
                                     do_attach_stdisp, NULL,
                                     &data);
 
-        if(stdisp==NULL)
+        if(stdisp==NULL) {
+            warn(TR("Failed to attach stdisp to mplex"));
             return NULL;
+	}
 
     }else if(strcmp(s, "keep")==0){
         stdisp=(WRegion*)(mplex->stdispwatch.obj);
@@ -1738,6 +1740,7 @@ WRegion *mplex_set_stdisp_extl(WMPlex *mplex, ExtlTab t)
     }
 
     if(!mplex_set_stdisp(mplex, stdisp, &din)){
+        warn(TR("Failed to set stdisp."));
         destroy_obj((Obj*)stdisp);
         return NULL;
     }

@@ -638,7 +638,7 @@ void grbrush_unset_attr(GrBrush *brush, GrAttr attr)
 
 
 /*EXTL_DOC
- * Read drawing engine configuration file \file{draw.lua}.
+ * Read drawing engine configuration file \file{look.lua}, select 'de' engine if none is selected yet.
  */
 EXTL_EXPORT_AS(gr, read_config)
 void gr_read_config()
