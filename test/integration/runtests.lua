@@ -73,7 +73,8 @@ for i,testset in ipairs(testsets) do
     print('[TEST] ' .. test)
     local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:7 " .. basedir .. "mod_notionflux/notionflux/notionflux")
     local testoutput = testoutputpipe:read("*a")
-    if(testoutput ~= "\"ok\"\n") then
+    local okend = "\"ok\"\n"
+    if(testoutput == "" or testoutput:sub(-#okend) ~= okend) then
       print('[ERROR] ' .. testoutput)
       errors = errors + 1
     else
