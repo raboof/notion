@@ -5,8 +5,8 @@ print("[TESTING] Integration")
 
 local success, posix = pcall(require, "posix")
 if not success then
-    print("[SKIP] posix module not found")
-    os.exit(0)
+    print("[ERROR] posix module not found")
+    os.exit(1)
 end
 
 function sleep(sec)
