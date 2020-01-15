@@ -101,7 +101,7 @@ WRegion *create_region_load(WWindow *par, const WFitParams *fp,
     reg=fn(par, fp, tab);
 
     if(reg==NULL){
-	 warn(TR("Creation of \"%s\" returned null", objclass));
+	warn(TR("Creation of \"%s\" returned null"), objclass);
         if(clientwin_was_missing && add_cb!=NULL && ph_cb!=NULL){
             WPHolder *ph=ph_cb();
             if(ph!=NULL){
