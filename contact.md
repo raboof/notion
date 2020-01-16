@@ -21,3 +21,7 @@ There is a [mailing list](https://sourceforge.net/p/notion/mailman/notion-devel/
 on sourceforge, but ever since the project has migrated to github, it is no
 longer very active. It does however provide a view into the past, and may answer
 some questions if you're willing to dig.
+
+## Mastodon
+
+You can [follow us on Mastodon!](https://fosstodon.org/@notion)
