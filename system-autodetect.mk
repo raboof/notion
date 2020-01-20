@@ -179,7 +179,15 @@ CC ?= gcc
 
 WARN=-W -Wall -pedantic
 
-CFLAGS += -g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
+#
+# For increased debug info, pass DEBUG=1 to make
+#
+ifeq ($(DEBUG),1)
+    CFLAGS+= -ggdb3 -O0
+else
+    CFLAGS+= -g -Os
+endif
+CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
 LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)
