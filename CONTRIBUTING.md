@@ -62,6 +62,12 @@ install Xephyr and run the scripts
 - `utils/xephyr/start-xephyr.sh`
 - `utils/xephyr/xephyr-notion.sh`
 
+## Developing on NixOS
+
+When running NixOS, you can easily fetch the relevant dependencies with
+`nix-shell '<nixpkgs>' -A notion`. Unfortunately Xephyr on NixOS doesn't
+automatically load the X11 fonts, see https://github.com/NixOS/nixpkgs/issues/28599
+
 ## Releasing and versioning
 
 Currently under discussion at https://github.com/raboof/notion/issues/121
