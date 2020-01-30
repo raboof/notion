@@ -2,13 +2,13 @@
 
 print("[TESTING] Integration")
 
+local basedir = "../../"
+local notion_binary = basedir .. "notion/notion"
+local notionflux_binary = basedir .. "mod_notionflux/notionflux/notionflux"
+
 local running_on_travis = os.getenv('TRAVIS')
-local notion_binary = "../../notion/notion"
-local notionflux_binary = "../../mod_notionflux/notionflux/notionflux"
 if running_on_travis then
     print('TRAVIS detected')
-    -- notion_binary = "/usr/local/bin/notion"
-    -- notionflux_binary = "/usr/local/bin/notionflux"
 end
 
 local success, posix = pcall(require, "posix")
@@ -74,7 +74,28 @@ for i,testset in ipairs(testsets) do
 
   local notionpid = posix.fork()
   if (notionpid == 0) then
-    local result,errstr,errno = posix.exec(notion_binary, "-noerrorlog", "-display", ":99")
+    local result,errstr,errno = posix.exec(
+        notion_binary,
+        "-noerrorlog",
+        "-s", basedir .. "contrib/scripts",
+        "-s", basedir .. "de",
+        "-s", basedir .. "etc",
+        "-s", basedir .. "ioncore",
+        "-s", basedir .. "mod_dock",
+        "-s", basedir .. "mod_menu",
+        "-s", basedir .. "mod_mgmtmode",
+        "-s", basedir .. "mod_notionflux",
+        "-s", basedir .. "mod_query",
+        "-s", basedir .. "mod_sm",
+        "-s", basedir .. "mod_sp",
+        "-s", basedir .. "mod_statusbar",
+        "-s", basedir .. "mod_statusbar/ion-statusd",
+        "-s", basedir .. "mod_tiling",
+        "-s", basedir .. "mod_xinerama",
+        "-s", basedir .. "mod_xkbevents",
+        "-s", basedir .. "mod_xrandr",
+        "-display", ":99"
+        )
     print('Error replacing current process with notion: ' .. errstr)
     os.exit(1)
   end
