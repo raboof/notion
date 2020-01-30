@@ -115,8 +115,9 @@ for i,testset in ipairs(testsets) do
     end
   end
 
-  print 'Killing notion process...'
-  posix.kill(notionpid)
+  print('Killing notion process...')
+  posix.kill(notionpid, posix.SIGKILL)
+  print(posix.wait(notionpid))
   sleep(3)
 
 end
