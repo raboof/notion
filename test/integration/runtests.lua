@@ -1,7 +1,15 @@
 --# on Debian in lua-posix
-local basedir = "../../"
 
 print("[TESTING] Integration")
+
+local running_on_travis = os.getenv('TRAVIS')
+local notion_binary = "../../notion/notion"
+local notionflux_binary = "../../mod_notionflux/notionflux/notionflux"
+if running_on_travis then
+    print('TRAVIS detected')
+    -- notion_binary = "/usr/local/bin/notion"
+    -- notionflux_binary = "/usr/local/bin/notionflux"
+end
 
 local success, posix = pcall(require, "posix")
 if not success then
@@ -34,16 +42,20 @@ local function find_in_path(file)
     return false
 end
 
-print('Running tests against ' .. basedir .. 'notion/notion')
+print('Running tests against ' .. notion_binary)
 
 local xpid = posix.fork()
 if (xpid == 0) then
+    if running_on_travis then
+        print('TRAVIS should have Xfvb running')
+        os.exit(1)
+    end
     local xorg_binary = find_in_path("Xorg")
     if xorg_binary == false then
         print('Error launching Xorg dummy, Xorg binary not found')
     end
     print('Starting Xorg dummy: ' .. xorg_binary)
-    local result,errstr,errno = posix.exec(xorg_binary, "-noreset", "+extension", "GLX", "+extension", "RANDR", "+extension", "RENDER", "-logfile", "./10.log", "-config", "./xorg.conf", ":7")
+    local result,errstr,errno = posix.exec(xorg_binary, "-noreset", "+extension", "GLX", "+extension", "RANDR", "+extension", "RENDER", "-logfile", "./99.log", "-config", "./xorg.conf", ":99")
     print('Error replacing current process with Xorg dummy: ' .. errstr)
     os.exit(1)
 end
@@ -56,13 +68,13 @@ local errors = 0
 for i,testset in ipairs(testsets) do
   posix.setenv('HOME', testset);
 
-  os.execute("rm -rf " .. testset .. "/.notion/default-session--7")
+  os.execute("rm -rf " .. testset .. "/.notion/default-session--99")
 
   print('Starting notion in ./' .. testset .. '...')
 
   local notionpid = posix.fork()
   if (notionpid == 0) then
-    local result,errstr,errno = posix.exec(basedir .. "notion/notion", "-noerrorlog", "-display", ":7")
+    local result,errstr,errno = posix.exec(notion_binary, "-noerrorlog", "-display", ":99")
     print('Error replacing current process with notion: ' .. errstr)
     os.exit(1)
   end
@@ -71,7 +83,7 @@ for i,testset in ipairs(testsets) do
 
   for test in getTests(testset) do
     print('[TEST] ' .. test)
-    local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:7 " .. basedir .. "mod_notionflux/notionflux/notionflux")
+    local testoutputpipe = io.popen("cat " .. test .. " | DISPLAY=:99 " .. notionflux_binary)
     local testoutput = testoutputpipe:read("*a")
     local okend = "\"ok\"\n"
     if(testoutput == "" or testoutput:sub(-#okend) ~= okend) then
