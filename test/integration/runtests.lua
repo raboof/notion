@@ -60,7 +60,7 @@ if (xpid == 0) then
     os.exit(1)
 end
 
-sleep(1)
+sleep(3)
 
 local testsets = { 'basic_test', 'xinerama', 'xrandr' }
 local errors = 0
@@ -100,7 +100,7 @@ for i,testset in ipairs(testsets) do
     os.exit(1)
   end
 
-  sleep(2)
+  sleep(3)
 
   for test in getTests(testset) do
     print('[TEST] ' .. test)
@@ -117,7 +117,7 @@ for i,testset in ipairs(testsets) do
 
   print 'Killing notion process...'
   posix.kill(notionpid)
-  sleep(1)
+  sleep(3)
 
 end
 
