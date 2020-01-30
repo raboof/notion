@@ -45,7 +45,7 @@ end
 
 mod_xrandr.screenlayoutupdated()
 
-if (notioncore.find_screen_id(1) == Nil) then
+if (notioncore.find_screen_id(1) == nil) then
   return "Number of screens should be 2, again at the start of this test"
 end
 
@@ -58,8 +58,11 @@ end
 if notioncore.find_screen_id(0):mx_nth(0):name() ~= 'WGroupWS' then
   return "First workspace not correctly returned to first screen"
 end
-if notioncore.find_screen_id(1):mx_nth(0):name() ~= 'WGroupWS<1>' then
-  return "Second workspace not correctly returned to second screen"
+if notioncore.find_screen_id(0):mx_nth(1):name() ~= 'WGroupWS<1>' then
+  return "Second workspace correctly kept on first screen"
+end
+if notioncore.find_screen_id(1):mx_nth(0):name() ~= 'WGroupWS<2>' then
+  return "Second screen did not get new workspace: " .. notioncore.find_screen_id(1):mx_nth(0):name()
 end
 
 return "ok"

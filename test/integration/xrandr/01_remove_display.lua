@@ -67,8 +67,8 @@ print('Updating layout when there is 2 screens present')
 -- remove one, and then leave checking that one was removed up to the next test.
 mod_xrandr.screenlayoutupdated()
 
-if notioncore.find_screen_id(0):mx_count() ~= 1 then
-  return "After updating screen 0 should have 1 workspaces instead of " ..
+if notioncore.find_screen_id(0):mx_count() ~= 2 then
+  return "After updating screen 0 should have 2 workspaces instead of " ..
     notioncore.find_screen_id(0):mx_count() .. ": " .. mx_names(notioncore.find_screen_id(0))
 end
 if notioncore.find_screen_id(1):mx_count() ~= 1 then
