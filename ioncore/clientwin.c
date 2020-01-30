@@ -361,7 +361,7 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
     netwm_update_allowed_actions(cwin);
 
-    if(netwm_window_type(cwin)==netwm_window_type_get_atom_dialog()){
+    if(ioncore_g.window_dialog_float && netwm_window_type(cwin)==netwm_window_type_get_atom_dialog()){
         cwin->region.flags|=REGION_PLEASE_FLOAT;
     }
 
