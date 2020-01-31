@@ -59,7 +59,7 @@ if notioncore.find_screen_id(0):mx_nth(0):name() ~= 'WGroupWS' then
   return "First workspace not correctly returned to first screen"
 end
 if notioncore.find_screen_id(0):mx_nth(1):name() ~= 'WGroupWS<1>' then
-  return "Second workspace correctly kept on first screen"
+  return "Second workspace not correctly returned on first screen"
 end
 if notioncore.find_screen_id(1):mx_nth(0):name() ~= 'WGroupWS<2>' then
   return "Second screen did not get new workspace: " .. notioncore.find_screen_id(1):mx_nth(0):name()
