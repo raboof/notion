@@ -29,8 +29,8 @@ keys would be taken by Notion.
 
 While we encourage you to give the new bindings a try and provide feedback,
 of course many existing Notion users might want to stay on the old keybindings.
-This can be done by taking `etc/cfg_bindings_notion3.lua` and
-`etc/cfg_tiling_notion3.lua` and copying them to your
+This can be done by taking `etc/cfg_notion3_keybindings.lua` and
+`etc/cfg_notion3_tiling.lua` and copying them to your
 `~/.notion/cfg_bindings.lua` and `~/.notion/cfg_tiling.lua`
 
 ## Dependencies
