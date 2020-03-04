@@ -39,5 +39,6 @@ RUN apt update && apt install -y lua-posix \
 RUN mkdir /notion
 WORKDIR /notion
 COPY . /notion/
+RUN make clean
 RUN make
 ENTRYPOINT ["/bin/bash"]
