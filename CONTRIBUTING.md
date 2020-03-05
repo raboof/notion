@@ -66,7 +66,8 @@ install Xephyr and run the scripts
 
 We don't publish binaries, that is up to the distributions.
 
-Releasing is simply a matter of setting the relevant git tag. 
+Releasing is simply a matter of setting the relevant git tag
+(by revising and publishing the [draft](https://github.com/raboof/notion/releases/)).
 Whether to update the minor or patch level is decided case-by-case.
 
 ## Getting in touch
