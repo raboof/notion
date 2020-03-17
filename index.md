@@ -24,7 +24,9 @@ Supported platforms:
 
 # Get Notion
 
-Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion).
+Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion), either
+by checking out the latest master or downloading a source package for the latest
+[release](https://github.com/raboof/notion/releases)
 
 # Documentation
 
