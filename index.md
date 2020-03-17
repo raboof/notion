@@ -18,9 +18,11 @@ Features include:
 
 Supported platforms:
 
-* Linux ([gentoo](https://packages.gentoo.org/packages/x11-wm/notion), [Debian](https://packages.debian.org/search?keywords=notion&searchon=names&suite=unstable&section=all), [Arch](https://www.archlinux.org/packages/?sort=&q=notion&maintainer=&last_update=&flagged=&limit=50), [SUSE](https://build.opensuse.org/package/show/X11:windowmanagers/notion), [Fedora](https://bintray.com/jsbackus/notion/fedora))
-* Solaris (Solaris 10, OpenSolaris as well as [OpenIndiana](https://www.illumos.org/issues/1283))
-* [NetBSD](http://pkgsrc.se/wm/notion)
+_**Not**ion_ primarily targets Linux, with version 4.0.0 making its way into
+distributions now. In the past _**Not**ion_ has also successfully ran on Solaris
+(Solaris 10, OpenSolaris and OpenIndiana), NetBSD and OSX. This is not currently
+actively supported, however, so running _**Not**ion_ there might need some code
+changes.
 
 # Get Notion
 
