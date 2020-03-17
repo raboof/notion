@@ -57,13 +57,10 @@ If you'd like to associate your donation with a particular support/documentation
 
 # History
 
-## Notion 4
+## Notion 3
 
-The current major version of Notion is Notion 3. The next upcoming version of Notion will be Notion 4.
-
-If you want to try this out, you are welcome to take 'master' for a spin! Be sure to report any problems you might have to the [issue tracker](https://github.com/raboof/notion/issues).
-
-This release will include a number of changes that are either not backwards
+The current major version of Notion is Notion 4.
+This release includes a number of changes that are either not backwards
 compatible, or change the (default) behavior. Those are described in more detail
 in the [migration notes](migration.md).
 
