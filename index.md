@@ -26,9 +26,17 @@ changes.
 
 # Get Notion
 
-Get _**Not**ion_ from our [git repo](https://github.com/raboof/notion), either
+The preferred way to get _**Not**ion_ is through your distributions' package
+manager. We are included in:
+
+* [Arch](https://www.archlinux.org/packages/community/x86_64/notion/) and Manjaro
+* [Slack](https://slackbuilds.org/repository/14.2/desktop/notion/)
+
+If _**Not**ion_ is not yet available for your distribution, or you would like
+to try a newer version, then you can get the sources from our
+[git repo](https://github.com/raboof/notion), either
 by checking out the latest master or downloading a source package for the latest
-[release](https://github.com/raboof/notion/releases)
+[release](https://github.com/raboof/notion/releases).
 
 # Documentation
 
