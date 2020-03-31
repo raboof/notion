@@ -31,6 +31,7 @@ manager. We are included in:
 
 * [Arch](https://www.archlinux.org/packages/community/x86_64/notion/) and Manjaro
 * [Slack](https://slackbuilds.org/repository/14.2/desktop/notion/)
+* [NixOS](https://nixos.org/nixos/packages.html?channel=nixpkgs-unstable&query=notion-4)
 
 If _**Not**ion_ is not yet available for your distribution, or you would like
 to try a newer version, then you can get the sources from our
