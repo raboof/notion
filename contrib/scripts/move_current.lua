@@ -18,7 +18,7 @@ function move_current.move(ws, dir)
 end
 
 defbindings("WTiling", {
-    submap("META+K", {
+    submap(META.."K", {
         kpress("Up", function(ws) move_current.move(ws, "up") end),
         kpress("Down", function(ws) move_current.move(ws, "down") end),
         kpress("Left", function(ws) move_current.move(ws, "left") end),
