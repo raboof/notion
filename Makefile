@@ -1,6 +1,7 @@
 ##
 ## Notion Makefile
 ##
+REL?=p 
 
 export NOTION_RELEASE = $(shell ./version.sh)
 
@@ -48,7 +49,7 @@ snapshot:
 	git checkout version.h
 
 dist:
-	RELEASE=`./nextversion.sh` ;\
+	RELEASE=`./nextversion.sh -$(REL)` ;\
 	git tag -s -m "Release $$RELEASE" $$RELEASE ; git push --tags
 
 .PHONY: test
