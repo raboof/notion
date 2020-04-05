@@ -1,7 +1,6 @@
 ##
 ## Notion Makefile
 ##
-REL?=p 
 
 export NOTION_RELEASE = $(shell ./version.sh)
 
@@ -48,11 +47,14 @@ snapshot:
 	cd $$DIR ;\
 	git checkout version.h
 
-dist:
-	RELEASE=`./nextversion.sh -$(REL)` ;\
-	git tag -s -m "Release $$RELEASE" $$RELEASE ; git push --tags
+RELEASE_TARGETS := $(addsuffix -dist,major minor patch)
+$(RELEASE_TARGETS):
+	@./nextversion.sh $(@) >/dev/null 2>/dev/null
+	$(eval RELEASE_VERSION=$(shell ./nextversion.sh $(@)))
+	git tag -s -m "Release $(RELEASE_VERSION)" $(RELEASE_VERSION)
+	git push --tags
 
-.PHONY: test
+.PHONY: test $(RELEASE_TARGETS)
 
 test:
 	$(MAKE) -C mod_xrandr test
