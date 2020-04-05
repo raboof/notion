@@ -47,7 +47,7 @@ snapshot:
 	cd $$DIR ;\
 	git checkout version.h
 
-RELEASE_TARGETS := $(addsuffix -dist,major minor patch)
+RELEASE_TARGETS := $(addsuffix -release,major minor patch)
 $(RELEASE_TARGETS):
 	@./nextversion.sh $(@) >/dev/null 2>/dev/null
 	$(eval RELEASE_VERSION=$(shell ./nextversion.sh $(@)))
