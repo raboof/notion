@@ -52,7 +52,7 @@ $(RELEASE_TARGETS):
 	@./nextversion.sh $(@) >/dev/null 2>/dev/null
 	$(eval RELEASE_VERSION=$(shell ./nextversion.sh $(@)))
 	git tag -s -m "Release $(RELEASE_VERSION)" $(RELEASE_VERSION)
-	git push --tags
+	@echo 'Use "git push --tags" to push the newly tagged release.'
 
 .PHONY: test $(RELEASE_TARGETS)
 
