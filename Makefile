@@ -36,17 +36,6 @@ _install:
 		$(INSTALL) -m $(DATA_MODE) $$i $(DESTDIR)$(DOCDIR); \
 	done
 
-snapshot:
-	PWD=`pwd` ;\
-	DIR=`basename "$$PWD"` ;\
-	RELEASE=`./nextversion.sh`-snapshot ;\
-	perl -p -i -e "s/^#define NOTION_RELEASE.*/#define NOTION_RELEASE \"$$RELEASE\"/" version.h ;\
-	cd .. ;\
-	tar --exclude-vcs -czf notion-$$RELEASE-src.tar.gz $$DIR ;\
-	tar --exclude-vcs -cjf notion-$$RELEASE-src.tar.bz2 $$DIR ;\
-	cd $$DIR ;\
-	git checkout version.h
-
 RELEASE_TARGETS := $(addsuffix -release,major minor patch)
 $(RELEASE_TARGETS):
 	@./nextversion.sh $(@) >/dev/null 2>/dev/null
