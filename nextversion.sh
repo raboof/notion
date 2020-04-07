@@ -10,7 +10,7 @@ CURRENT_VERSION=$(git describe | cut -d- -f1)
 
 if [[ ! $CURRENT_VERSION =~ ^[1-9][0-9]?\.[0-9]+\.[0-9]+$ ]]; then
   (
-    echo "Error: '${CURRENT_VERSION}' is not a valid semver format";
+    echo "Error: '${CURRENT_VERSION}' is not a valid version format";
     echo "";
     usage
   ) 1>&2
