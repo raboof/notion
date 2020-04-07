@@ -1,18 +1,44 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-PREFIX=3-`date +"%Y%m%d"`
-
-alreadyTagged() {
-  #nfound = git tag -l | grep $1 | wc
-  return 0;
+function usage {
+    echo "Usage: $0 [major|minor|patch]"
+    echo "     defaults to patch"
 }
 
-for minor in 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20
-do
-  VERSION=$PREFIX$minor
-  if [ "0" = "`git tag -l | grep $VERSION | wc -l`" ]
-  then
-    echo $PREFIX$minor;
+
+CURRENT_VERSION=$(git describe | cut -d- -f1)
+
+if [[ ! $CURRENT_VERSION =~ ^[1-9][0-9]?\.[0-9]+\.[0-9]+$ ]]; then
+  (
+    echo "Error: '${CURRENT_VERSION}' is not a valid semver format";
+    echo "";
+    usage
+  ) 1>&2
+  exit 1
+fi
+
+CV=( ${CURRENT_VERSION//./ } )
+
+ARG=${1:-patch}
+if [[ "${ARG}" == "major"* ]]; then
+    ((CV[0]++))
+    CV[1]=0
+    CV[2]=0
+elif [[ "${ARG}" == "minor"* ]]; then
+    ((CV[0]+=0))
+    ((CV[1]++))
+    CV[2]=0
+elif [[ "${ARG}" == "patch"* ]]; then
+    ((CV[0]+=0))
+    ((CV[1]+=0))
+    ((CV[2]++))
+else
+    (
+      echo "Unknown argument '${ARG}'";
+      echo "";
+      usage;
+    ) 1>&2
     exit 1
-  fi
-done
+fi
+
+echo "${CV[0]}.${CV[1]}.${CV[2]}"
