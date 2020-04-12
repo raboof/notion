@@ -40,7 +40,7 @@ DECLCLASS(WRootWin){
 
 
 extern void rootwin_deinit(WRootWin *rootwin);
-extern WScreen *rootwin_current(WRootWin *rootwin);
+extern WScreen *rootwin_current_scr(WRootWin *rootwin);
 extern void rootwin_warp_pointer(WRootWin *root, int x, int y);
 
 extern void rootwin_manage_initial_windows(WRootWin *rootwin);

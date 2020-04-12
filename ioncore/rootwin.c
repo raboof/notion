@@ -438,7 +438,7 @@ static bool scr_ok(WRegion *r)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WScreen *rootwin_current(WRootWin *rootwin)
+WScreen *rootwin_current_scr(WRootWin *rootwin)
 {
     WRegion *r=REGION_ACTIVE_SUB(rootwin);
     WScreen *scr;
@@ -495,6 +495,7 @@ static DynFunTab rootwin_dynfuntab[]={
     {region_do_set_focus, rootwin_do_set_focus},
     {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
+    {(DynFun*)region_current, (DynFun*)rootwin_current_scr},
     {region_managed_remove, rootwin_managed_remove},
     {(DynFun*)region_managed_disposeroot,
      (DynFun*)rootwin_managed_disposeroot},

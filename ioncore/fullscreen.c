@@ -57,7 +57,7 @@ bool region_enter_fullscreen(WRegion *reg, bool switchto)
     WScreen *scr=region_screen_of(reg);
 
     if(scr==NULL){
-        scr=rootwin_current(region_rootwin_of(reg));
+        scr=rootwin_current_scr(region_rootwin_of(reg));
         if(scr==NULL)
             return FALSE;
     }
