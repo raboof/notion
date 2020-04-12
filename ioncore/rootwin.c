@@ -438,7 +438,7 @@ static bool scr_ok(WRegion *r)
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
-WScreen *rootwin_current_scr(WRootWin *rootwin)
+WScreen *rootwin_current(WRootWin *rootwin)
 {
     WRegion *r=REGION_ACTIVE_SUB(rootwin);
     WScreen *scr;
