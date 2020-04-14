@@ -173,6 +173,10 @@ EXTL_EXPORT
 bool ioncore_do_defbindings(const char *name, ExtlTab tab)
 {
     WBindmap *bm=ioncore_lookup_bindmap(name);
+
+    if(bm==NULL)
+        bm=ioncore_alloc_bindmap(name, NULL);
+
     if(bm==NULL){
         warn("Unknown bindmap %s.", name);
         return FALSE;
