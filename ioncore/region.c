@@ -248,6 +248,10 @@ WRegion *region_current(WRegion *mgr)
     return ret;
 }
 
+WRegion *region_current_default(WRegion *reg)
+{
+    return reg->active_sub;
+}
 
 void region_child_removed(WRegion *reg, WRegion *sub)
 {
@@ -1023,6 +1027,9 @@ static DynFunTab region_dynfuntab[]={
 
     {region_updategr,
      region_updategr_default},
+
+    {(DynFun*)region_current,
+     (DynFun*)region_current_default},
 
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)region_rescue_child_clientwins},

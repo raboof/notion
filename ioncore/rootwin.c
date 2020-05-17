@@ -434,7 +434,7 @@ static bool scr_ok(WRegion *r)
 
 
 /*EXTL_DOC
- * Returns previously active screen on root window \var{rootwin}.
+ * Returns the most recently active screen on root window \var{rootwin}.
  */
 EXTL_SAFE
 EXTL_EXPORT_MEMBER
@@ -495,7 +495,6 @@ static DynFunTab rootwin_dynfuntab[]={
     {region_do_set_focus, rootwin_do_set_focus},
     {(DynFun*)region_xwindow, (DynFun*)rootwin_x_window},
     {(DynFun*)region_fitrep, (DynFun*)rootwin_fitrep},
-    {(DynFun*)region_current, (DynFun*)rootwin_current_scr},
     {region_managed_remove, rootwin_managed_remove},
     {(DynFun*)region_managed_disposeroot,
      (DynFun*)rootwin_managed_disposeroot},
