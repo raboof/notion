@@ -55,13 +55,34 @@ ioncore.set{
     --warp_factor_x=0.0,
     --warp_factor_y=0.0,
 
+    -- Should a managing MPlex switch to a newly mapped client window?
+    --switchto=true,
+
+    -- Should notification tooltips be displayed for hidden workspaces with
+    -- activity?
+    --screen_notify=true,
+
+    -- Specifies where to add new regions on the mutually exclusive list of a
+    -- frame. One of ''last'', ''next'' (for after current), ''next-act''
+    -- (for after current and anything with activity right after it).
+    --frame_default_index="next",
+
+    -- Put transients in nested frames.
+    --framed_transients=true,
+
     -- Float window placement method:
     -- one of 'udlr' (up down left right), 'lrud' (left right up down), 'pointer' or 'random'.
-    --float_placement_method="udlr"
+    --float_placement_method="udlr",
+
+    -- Auto-unsqueeze transients/menus/queries/etc.
+    --unsqueeze=true,
 
     -- Float non-transient dialog type windows.
     -- Can be useful for applications that try to place their own dialog windows.
     --window_dialog_float=true,
+
+    -- Autoraise regions in groups on goto. \\
+    --autoraise=true,
 
     -- Automatically save layout on restart and exit.
     --autosave_layout=true,
