@@ -64,16 +64,9 @@ Notion 4 also requires a C compiler capable of compiling C99.
 
 ## Custom styles
 
-Custom styles used to automatically inherit defaults from the "*" style. This
-is no longer the case. To get the old behavior back, adding `based_on = "*"`
-at the top of any custom styles is likely sufficient:
-
-```
-de.defstyle("tab", {
-    based_on = "*",
-    font = "xft:Source Code Sans:size=16",
-})
-```
+Custom style based that import `lookcommon_emboss.lua` may need to be adapted,
+as the defaults in that file have had updates that are only available under the
+Ion license and thus cannot be part of Notion any more.
 
 ## submap_wait keybindings
 
