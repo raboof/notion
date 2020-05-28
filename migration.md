@@ -5,9 +5,11 @@ title: Migration
 
 # Migration from (Not)Ion3
 
-The next major release of Notion will be Notion 4. This release will include a
-number of changes that are either not backwards compatible, or change the
-(default) behavior.
+Notion 4 includes a number of changes that are either not backwards compatible,
+or change the default behavior.
+
+If you are coming from Notion 3 (or even from Ion3), you might want to review
+these notes before jumping in.
 
 ## Keybindings
 
@@ -139,4 +141,3 @@ to load mod_dock. To change this behavior, edit cfg_defaults.lua to load mod_sta
 instead of mod_dock.
 
 Note that mod_statusbar and mod_dock are still mutually exclusive.
-
