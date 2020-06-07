@@ -245,6 +245,10 @@ ExtlTab mod_xrandr_get_outputs_for_geom(ExtlTab geom)
     XRRScreenResources *res = XRRGetScreenResources(ioncore_g.dpy, ioncore_g.rootwins->dummy_win);
     ExtlTab result = extl_create_table();
 
+    if (!res) {
+      return result;
+    }
+	
     for(i=0; i < res->noutput; i++){
         int x,y;
         int w,h;
