@@ -4,7 +4,7 @@
 
 -- Bindings for the tilings.
 defbindings("WTiling", {
-    bdoc("Split current frame vertically."),
+    bdoc("Split current into rows."),
     kpress(META.."S", "WTiling.split_at(_, _sub, 'bottom', true)"),
 
     bdoc("Go to frame above/below current frame."),
@@ -18,7 +18,7 @@ defbindings("WTiling", {
     submap(META.."K", {
         kpress("Tab", "ioncore.goto_next(_sub, 'left')"),
 
-        bdoc("Split current frame horizontally."),
+        bdoc("Split current into columns."),
         kpress("S", "WTiling.split_at(_, _sub, 'right', true)"),
 
         bdoc("Destroy current frame."),
@@ -39,9 +39,9 @@ defctxmenu("WTiling", "Tiling", {
     menuentry("Destroy frame",
               "WTiling.unsplit_at(_, _sub)"),
 
-    menuentry("Split vertically",
+    menuentry("Into rows",
               "WTiling.split_at(_, _sub, 'bottom', true)"),
-    menuentry("Split horizontally",
+    menuentry("Into columns",
               "WTiling.split_at(_, _sub, 'right', true)"),
 
     menuentry("Flip", "WTiling.flip_at(_, _sub)"),
@@ -61,9 +61,9 @@ defctxmenu("WTiling", "Tiling", {
     }),
 
     submenu("At root", {
-        menuentry("Split vertically",
+        menuentry("Into rows",
                   "WTiling.split_top(_, 'bottom')"),
-        menuentry("Split horizontally",
+        menuentry("Into columns",
                   "WTiling.split_top(_, 'right')"),
         menuentry("Flip", "WTiling.flip_at(_)"),
         menuentry("Transpose", "WTiling.transpose_at(_)"),
