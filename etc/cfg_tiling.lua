@@ -4,10 +4,10 @@
 
 -- Bindings for the tilings.
 defbindings("WTiling", {
-    bdoc("Split current frame horizontally.", "hsplit"),
+    bdoc("Split current into columns.", "hsplit"),
     kpress(META.."I", "WTiling.split_at(_, _sub, 'right', true)"),
 
-    bdoc("Split current frame vertically.", "vsplit"),
+    bdoc("Split current into rows.", "vsplit"),
     kpress(ALTMETA.."I", "WTiling.split_at(_, _sub, 'bottom', true)"),
 
     bdoc("Destroy current frame.", "unsplit"),
@@ -32,9 +32,9 @@ defctxmenu("WTiling", "Tiling", {
     menuentry("Destroy frame",
               "WTiling.unsplit_at(_, _sub)"),
 
-    menuentry("Split vertically",
+    menuentry("Into rows",
               "WTiling.split_at(_, _sub, 'bottom', true)"),
-    menuentry("Split horizontally",
+    menuentry("Into columns",
               "WTiling.split_at(_, _sub, 'right', true)"),
 
     menuentry("Flip", "WTiling.flip_at(_, _sub)"),
@@ -54,9 +54,9 @@ defctxmenu("WTiling", "Tiling", {
     }),
 
     submenu("At root", {
-        menuentry("Split vertically",
+        menuentry("Into Rows",
                   "WTiling.split_top(_, 'bottom')"),
-        menuentry("Split horizontally",
+        menuentry("Into columns",
                   "WTiling.split_top(_, 'right')"),
         menuentry("Flip", "WTiling.flip_at(_)"),
         menuentry("Transpose", "WTiling.transpose_at(_)"),
