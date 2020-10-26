@@ -326,9 +326,8 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
     fp.g.h=attr->height;
     fp.mode=REGION_FIT_EXACT;
 
-    /* The idiot who invented special server-supported window borders that
-     * are not accounted for in the window size should be "taken behind a
-     * sauna".
+    /* handle server-supported window borders that are not accounted for in
+     * the window size
      */
     cwin->orig_bw=attr->border_width;
     configure_cwin_bw(cwin->win, 0);
