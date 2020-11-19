@@ -77,8 +77,10 @@ static void do_timer_set()
         return;
     }
 
-    val.it_interval.tv_usec=val.it_value.tv_usec;
-    val.it_interval.tv_sec=val.it_value.tv_sec;
+    // This really just needs to be a one-shot timer, but it is possible
+    // to miss it if it happens too soon. So add a small interval just
+    // so we _eventually_ wake up.
+    val.it_interval.tv_usec=100000;
 
     if((setitimer(ITIMER_REAL, &val, NULL))){
         had_tmr=TRUE;
