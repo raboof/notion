@@ -37,7 +37,9 @@ static Atom atom_net_wm_moveresize=0;
 static Atom atom_net_wm_window_type=0;
 static Atom atom_net_wm_window_type_dialog=0;
 
-#define N_NETWM 9
+static Atom atom_net_frame_extents=0;
+
+#define N_NETWM 10
 
 static Atom atom_net_supported=0;
 
@@ -65,6 +67,8 @@ void netwm_init()
     atom_net_wm_moveresize=XInternAtom(ioncore_g.dpy, "_NET_WM_MOVERESIZE", False);
     atom_net_wm_window_type=XInternAtom(ioncore_g.dpy, "_NET_WM_WINDOW_TYPE", False);
     atom_net_wm_window_type_dialog=XInternAtom(ioncore_g.dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+
+    atom_net_frame_extents=XInternAtom(ioncore_g.dpy, "_NET_FRAME_EXTENTS", False);
 }
 
 
@@ -82,6 +86,7 @@ void netwm_init_rootwin(WRootWin *rw)
     atoms[6]=atom_net_active_window;
     atoms[7]=atom_net_wm_allowed_actions;
     atoms[8]=atom_net_wm_moveresize;
+    atoms[9]=atom_net_frame_extents;
 
     XChangeProperty(ioncore_g.dpy, WROOTWIN_ROOT(rw),
                     atom_net_supporting_wm_check, XA_WINDOW,
@@ -101,6 +106,15 @@ void netwm_init_rootwin(WRootWin *rw)
     xwindow_set_utf8_property(rw->dummy_win, atom_net_wm_name, p, 1);
 }
 
+void netwm_set_frame_extents(WClientWin* cwin, int left, int right, int top, int bottom) {
+    unsigned long data[4];
+    data[0] = left;
+    data[1] = right;
+    data[2] = top;
+    data[3] = bottom;
+    XChangeProperty(ioncore_g.dpy, cwin->win, atom_net_frame_extents,
+                    XA_CARDINAL, 32, PropModeReplace, (uchar*)data, 4);
+}
 
 /*}}}*/
 
