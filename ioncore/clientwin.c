@@ -364,6 +364,14 @@ static bool clientwin_init(WClientWin *cwin, WWindow *par, Window win,
 
     netwm_update_allowed_actions(cwin);
 
+    // This would ideally include the decoration sizes,
+    // but since these are on the parent frame and are
+    // different depending on the frame mode, let's
+    // omit those for now. Setting just these minimal
+    // extents already fixes #59 (see there and #303
+    // for more discussion on this).
+    netwm_set_frame_extents(cwin, 0, 0, 0, 0);
+
     if(ioncore_g.window_dialog_float && netwm_window_type(cwin)==netwm_window_type_get_atom_dialog()){
         cwin->region.flags|=REGION_PLEASE_FLOAT;
     }
