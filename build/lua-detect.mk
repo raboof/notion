@@ -31,7 +31,7 @@ lua_ver_extract = $(shell $1 -v 2>&1 | cut -f2 -d' ' | cut -f-2 -d.)
 PKG_CONFIG_ALL_PACKAGES:= $(shell pkg-config --list-all | cut -f1 -d' ')
 
 # these are in order of preference
-LUA_CANDIDATES:=		$(or $(LUA_VERSION),5.3 5.2 5.1)
+LUA_CANDIDATES:=		$(or $(LUA_VERSION),5.4 5.3 5.2 5.1)
 LUA_BIN_CANDIDATES:=		$(foreach ver,$(LUA_CANDIDATES),lua$(ver) lua-$(ver))
 LUAC_BIN_CANDIDATES:=		$(foreach ver,$(LUA_CANDIDATES),luac$(ver) luac-$(ver))
 
