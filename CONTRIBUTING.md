@@ -68,14 +68,6 @@ When running NixOS, you can easily fetch the relevant dependencies with
 `nix-shell '<nixpkgs>' -A notion`. Unfortunately Xephyr on NixOS doesn't
 automatically load the X11 fonts, see https://github.com/NixOS/nixpkgs/issues/28599
 
-## Releasing and versioning
-
-We don't publish binaries, that is up to the distributions.
-
-Releasing is simply a matter of setting the relevant git tag
-(by revising and publishing the [draft](https://github.com/raboof/notion/releases/)).
-Whether to update the minor or patch level is decided case-by-case.
-
 ## Getting in touch
 
 Find us on IRC, in #notion on freenode
