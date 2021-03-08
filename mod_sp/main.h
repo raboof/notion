@@ -16,7 +16,7 @@ extern void mod_sp_deinit();
 
 extern WBindmap *mod_sp_scratchpad_bindmap;
 
-#define CF_SCRATCHPAD_DEFAULT_W 640
-#define CF_SCRATCHPAD_DEFAULT_H 480
+#define CF_SCRATCHPAD_DEFAULT_W 800
+#define CF_SCRATCHPAD_DEFAULT_H 600
 
 #endif /* ION_MOD_SP_MAIN_H */
