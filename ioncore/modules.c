@@ -115,12 +115,22 @@ static bool check_has_version(dlhandle handle, const char *modulename)
     return get_version(handle, modulename) != NULL;
 }
 
-static bool check_version(dlhandle handle, const char *modulename)
+enum version_match {
+    VERSION_MISMATCH,
+    VERSION_MATCH_EXACT,
+    VERSION_MATCH_APPROXIMATE
+};
+
+static enum version_match check_version(dlhandle handle, const char *modulename)
 {
     char *versionstr=get_version(handle, modulename);
+    size_t first_minus=strcspn(NOTION_API_VERSION, "-");
     if(versionstr==NULL)
-        return FALSE;
-    return (strcmp(versionstr, NOTION_API_VERSION)==0);
+        return VERSION_MISMATCH;
+    if (strcmp(versionstr, NOTION_API_VERSION)==0)
+        return VERSION_MATCH_EXACT;
+    return (strncmp(versionstr, NOTION_API_VERSION, first_minus)==0)
+        ?VERSION_MATCH_APPROXIMATE:VERSION_MISMATCH;
 }
 
 
@@ -212,11 +222,18 @@ static int try_load(const char *file, void *UNUSED(param))
         goto err3;
     }
 
-    if(!check_version(handle, name)){
+    switch(check_version(handle, name)){
+    case VERSION_MISMATCH:
         warn_obj(file, TR("Module version mismatch: expected '%s', found '%s'."
                           " Refusing to use."),
                        NOTION_API_VERSION, get_version(handle, name));
         goto err3;
+        break;
+    case VERSION_MATCH_APPROXIMATE:
+        warn_obj(file, TR("Module version mismatch: expected '%s', found '%s'."
+                          " versions match up to the first minus, using anyway."),
+                       NOTION_API_VERSION, get_version(handle, name));
+        break;
     }
 
     mod=add_module(name, handle);
