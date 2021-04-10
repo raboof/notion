@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # by Dan Weiner <dbw@uchicago.edu>
 # Public Domain

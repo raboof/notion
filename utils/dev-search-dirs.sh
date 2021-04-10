@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-this_rel=$(dirname ${BASH_SOURCE[0]})
+this_rel=$(dirname "$0")
 rel_root=$this_rel/..
 
 notion_root=$(realpath $rel_root)
