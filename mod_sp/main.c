@@ -51,6 +51,8 @@ char mod_sp_ion_api_version[]=NOTION_API_VERSION;
 
 /*{{{ Exports */
 
+static int sp_width = CF_SCRATCHPAD_DEFAULT_W;
+static int sp_height = CF_SCRATCHPAD_DEFAULT_H;
 
 static WRegion *create_frame_scratchpad(WWindow *parent, const WFitParams *fp,
                                         void *UNUSED(unused))
@@ -82,8 +84,8 @@ static WRegion *create_scratchws(WWindow *parent, const WFitParams *fp,
     par.szplcy=SIZEPOLICY_FREE_GLUE;
 
     par.geom_set=TRUE;
-    par.geom.w=MINOF(fp->g.w, CF_SCRATCHPAD_DEFAULT_W);
-    par.geom.h=MINOF(fp->g.h, CF_SCRATCHPAD_DEFAULT_H);
+    par.geom.w=MINOF(fp->g.w, sp_width);
+    par.geom.h=MINOF(fp->g.h, sp_height);
     par.geom.x=(fp->g.w-par.geom.w)/2;
     par.geom.y=(fp->g.h-par.geom.h)/2;
 
@@ -166,6 +168,19 @@ bool mod_sp_create_scratchpad(WScreen *scr)
     }
 
     return create(&scr->mplex, MPLEX_ATTACH_HIDDEN)!=NULL;
+}
+
+/*EXTL_DOC
+ * Set default dimension for newly created scratchpads
+ * with parameters \var{width} and \var{height}.
+ */
+EXTL_EXPORT
+void mod_sp_set_size(int width, int height)
+{
+    if(width>0)
+        sp_width = width;
+    if(height>0)
+        sp_height = height;
 }
 
 /*EXTL_DOC
