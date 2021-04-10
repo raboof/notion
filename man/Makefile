@@ -8,7 +8,7 @@ include $(TOPDIR)/build/system-inc.mk
 
 ######################################
 
-SHELL=bash -o pipefail
+SHELL=sh -e
 
 TARGETS=notion.1 notionflux.1 welcome.txt
 
