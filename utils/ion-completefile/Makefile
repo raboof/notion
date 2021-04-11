@@ -10,7 +10,7 @@ include $(TOPDIR)/build/system-inc.mk
 
 LIBS += $(LIBTU_LIBS)
 INCLUDES += $(LIBTU_INCLUDES)
-CFLAGS += $(XOPEN_SOURCE)
+CFLAGS += $(XOPEN_SOURCE) $(INCLUDES)
 
 SOURCES=ion-completefile.c
 
@@ -23,7 +23,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 ion-completefile: $(SOURCES)
-	$(CC) $< $(CFLAGS) $(LDFLAGS) -o $@
+	$(CC) $< $(CFLAGS) $(LDFLAGS) $(LIBS) -o $@
 
 _install:
 	$(INSTALLDIR) $(DESTDIR)$(EXTRABINDIR)
