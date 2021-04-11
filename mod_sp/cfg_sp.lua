@@ -2,6 +2,9 @@
 -- Ion mod_sp configuration file
 --
 
+-- Set default size for scratchpad
+mod_sp.set_size(1400, 800);
+
 defbindings("WScreen", {
     bdoc("Toggle scratchpad."),
     kpress(META.."space", "mod_sp.set_shown_on(_, 'toggle')"),
