@@ -1,3 +1,6 @@
+TOPDIR=../..
+include $(TOPDIR)/system-autodetect.mk
+
 .PHONY: test
 
 libXinerama.so.1.0: Xinerama.c

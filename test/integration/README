@@ -2,17 +2,19 @@ Each subdirectory here is an integration test.
 
 == Requirements ==
 
-- xserver-xorg-video-dummy
-- lposix (aka lua-posix in Debian)
+- xserver-xorg-video-dummy 
+- luaposix (aka lua-posix in Debian)
+  - Debian base distros: ```apt-get install lua-posix```
+  - All distros using luarocks: ```luarocks install luaposix```
 
 == Running the tests ==
 
-Install notion and run 'make test'
+Run ```make test``` on notion's source directory
 
 == How it works ==
 
 Each integration test basically looks like this:
-- Start a dummy X server (Xdummy)
+- Start a dummy X server (X's dummy dirver)
 - Start notion with the configuration in $test/config
   - basically $test/config behaves like the ~user/.notion dir for this test
   - Right now this starts the currenly *installed* notion.
@@ -28,6 +30,5 @@ Each integration test basically looks like this:
 
 - the x.org dummy driver does not appear to support RandR
   - .. but we might be able to test some of the mod_xinerama stuff with fakexinerama
-- there might be some SELINUX noise, probably due to the way Xdummy works
 - Xdummy doesn't properly autodetect which X ports are free, so we use a fixed
   value of :7

@@ -2,10 +2,19 @@ language: c
 compiler:
   - gcc
   - clang
+addons:
+  apt:
+    packages:
+      - xvfb
+install:
+  - export DISPLAY=':99.0'
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 env:
   - 
   - USE_XFT=0
-before_install: sudo apt-get install lua5.2 liblua5.2-dev gettext libxft-dev libxinerama-dev libxrandr-dev libreadline-dev
+before_install:
+  - sudo apt-get install lua5.2 liblua5.2-dev gettext libxft-dev libxinerama-dev libxrandr-dev libreadline-dev lua-posix
+  - sudo ln -sf /usr/lib/x86_64-linux-gnu/lua/5.2/posix_c.so /usr/lib/x86_64-linux-gnu/lua/5.2/posix.so
 script:
   - make
   - make test
