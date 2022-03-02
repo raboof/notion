@@ -1,3 +1,7 @@
+-- Authors: Rico Schiekel <fire@paranetic.de>, Canaan Hadley-Voth, Kevin Granade <kevin.granade@gmail.com>, Akaky Chertyhansky <akakychert@gmail.com>
+-- License: Unknown
+-- Last Changed: 2022-02-23
+
 -- statusbar_workspace.lua
 --
 -- Show current workspace name in the statusbar.
