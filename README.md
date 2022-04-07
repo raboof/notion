@@ -38,7 +38,7 @@ git clone https://github.com/raboof/notion
 
    On a Debian based system, these dependencies are provided by the following
    packages.
-     build-essential lua5.1 liblua5.1-0-dev libx11-dev libxext-dev libsm-dev gettext
+     build-essential lua5.4 liblua5.4-dev libx11-dev libxext-dev libsm-dev gettext
      libxinerama-dev libxrandr-dev libxft-dev
 
 3. If the default build settings don't suit you, review system-autodetect.mk
