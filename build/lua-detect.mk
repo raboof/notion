@@ -28,7 +28,7 @@ lua_ver_extract = $(shell $1 -v 2>&1 | cut -f2 -d' ' | cut -f-2 -d.)
 # and there won't be any guarantees it looks the same as elsewhere.
 # We try the package names lua$(ver), lua-$(ver) for all candidate versions in
 # descending order and last but not least "lua" here.
-PKG_CONFIG_ALL_PACKAGES:= $(shell pkg-config --list-all | cut -f1 -d' ')
+PKG_CONFIG_ALL_PACKAGES:= $(shell $(PKG_CONFIG) --list-all | cut -f1 -d' ')
 
 # these are in order of preference
 LUA_CANDIDATES:=		$(or $(LUA_VERSION),5.4 54 5.3 53 5.2 52 5.1 51)
@@ -52,12 +52,12 @@ $(error It seems that pkg-config is not aware of your lua package. Make sure \
 	variables manually: LUA LUAC LUA_VERSION LUA_LIBS LUA_INCLUDES)
 endif
 
-PKG_CONFIG_LUA_VERSION:=	$(shell pkg-config --modversion $(PKG_CONFIG_LUA) | cut -d. -f-2)
+PKG_CONFIG_LUA_VERSION:=	$(shell $(PKG_CONFIG) --modversion $(PKG_CONFIG_LUA) | cut -d. -f-2)
 
 $(info >> pkg-config found Lua $(PKG_CONFIG_LUA_VERSION) (available: $(PKG_CONFIG_LUA_PACKAGES:=)).)
 
-LUA_LIBS=	$(shell pkg-config --libs $(PKG_CONFIG_LUA))
-LUA_INCLUDES=	$(shell pkg-config --cflags $(PKG_CONFIG_LUA))
+LUA_LIBS=	$(shell $(PKG_CONFIG) --libs $(PKG_CONFIG_LUA))
+LUA_INCLUDES=	$(shell $(PKG_CONFIG) --cflags $(PKG_CONFIG_LUA))
 LUA_VERSION?=	$(PKG_CONFIG_LUA_VERSION)
 
 LUA=		$(firstword $(foreach bin,$(LUA_BIN_CANDIDATES),$(call pathsearch,$(bin))))
