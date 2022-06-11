@@ -72,13 +72,13 @@ ifdef MODULE
 ifneq ($(PRELOAD_MODULES),1)
 
 CC_PICFLAGS=-fPIC -DPIC
-LD_SHAREDFLAGS=-shared
+LD_SHAREDFLAGS=-shared -Wl,-soname -Wl,$@
 
 %.o: %.c
 	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
 
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LD_SHAREDFLAGS) $(OBJS) $(EXT_OBJS) -o $@ $(LIBS)
 
 
 module_install: module_stub_install

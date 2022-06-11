@@ -34,7 +34,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 ion-statusd: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LINKOPTS) $(OBJS) $(EXT_OBJS) -o $@ $(LIBS)
 
 _install: lc_install
 	$(INSTALLDIR) $(DESTDIR)$(EXTRABINDIR)

@@ -90,14 +90,14 @@ ifdef MODULE
 ifneq ($(PRELOAD_MODULES),1)
 
 CFLAGS += -fPIC -DPIC
-LD_SHAREDFLAGS=-shared
+LD_SHAREDFLAGS=-shared -Wl,-soname -Wl,$@
 
 # notion might not link to Xext, so modules will have to link to it themselves
 # if they need it:
 LIBS += $(X11_LIBS)
 
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LD_SHAREDFLAGS) $(OBJS) $(EXT_OBJS) -o $@ $(LIBS)
 
 
 module_install: module_stub_install

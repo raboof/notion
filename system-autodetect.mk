@@ -190,7 +190,7 @@ endif
 CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
-LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)
+LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
 # The following options are mainly for development use and can be used
