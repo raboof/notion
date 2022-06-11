@@ -90,9 +90,6 @@ else # PRELOAD_MODULES
 PICOPT=-fPIC -DPIC
 LINKOPT=-shared
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
 	$(RANLIB) $@
@@ -114,13 +111,6 @@ else
 LUA_SOURCES += $(MODULE_STUB)
 
 endif #MODULE_STUB
-
-else # !MODULE
-
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 
 endif# !MODULE
 

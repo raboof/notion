@@ -82,9 +82,6 @@ endif # !MAKE_EXPORTS
 
 OBJS=$(subst .c,.o,$(SOURCES) $(EXPORTS_C))
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 ifdef MODULE
 
 ifneq ($(PRELOAD_MODULES),1)
