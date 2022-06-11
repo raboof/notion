@@ -17,6 +17,6 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 test: $(SOURCES)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) -o tutest $(SOURCES) tutest.c $(LIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(INCLUDES) -o tutest $(SOURCES) tutest.c $(LIBS)
 	./tutest
 	$(RM) ./tutest

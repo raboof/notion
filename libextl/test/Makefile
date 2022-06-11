@@ -24,7 +24,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 test: $(SOURCES)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) extltest.c $(INCLUDES) -o $@ $(LIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(SOURCES) extltest.c $(INCLUDES) -o $@ $(LIBS)
 	./extltest
 	# $(RM) extltest
 

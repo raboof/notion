@@ -23,7 +23,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 ion-completefile: $(SOURCES)
-	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
 
 _install:
 	$(INSTALLDIR) $(DESTDIR)$(EXTRABINDIR)

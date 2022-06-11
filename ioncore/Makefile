@@ -50,7 +50,7 @@ include $(TOPDIR)/build/rules.mk
 
 # without -finstrument-functions
 profiling.o: profiling.c
-	$(CC) $(CFLAGS:-finstrument-functions=) -c profiling.c -o profiling.o
+	$(CC) $(CPPFLAGS) $(CFLAGS:-finstrument-functions=) -c $< -o $@
 
 ioncore.o: exports.h
 

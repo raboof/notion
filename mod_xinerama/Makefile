@@ -61,4 +61,4 @@ mod_xinerama.o: exports.h
 ################ ls_xinerama utility ###############
 
 ls_xinerama: ls_xinerama.c
-	$(CC) $(CFLAGS) $(LDFLAGS) ls_xinerama.c -o $@ $(LIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) ls_xinerama.c -o $@ $(LIBS)

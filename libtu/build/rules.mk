@@ -79,7 +79,7 @@ CC_PICFLAGS=-fPIC -DPIC
 LD_SHAREDFLAGS=-shared -Wl,-soname -Wl,$@
 
 %.o: %.c
-	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CC_PICFLAGS) -c $< -o $@
 
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LD_SHAREDFLAGS) $(OBJS) $(EXT_OBJS) -o $@ $(LIBS)
