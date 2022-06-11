@@ -93,12 +93,6 @@ endif # lua
 endif # LUA_MANUAL
 
 
-##
-## C compiler
-##
-
-CC=gcc
-
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
