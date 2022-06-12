@@ -28,7 +28,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 notionflux: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) -o $@ $(LIBS)
 
 _install: notionflux
 	$(INSTALLDIR) $(DESTDIR)$(BINDIR)

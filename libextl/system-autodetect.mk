@@ -2,6 +2,8 @@
 ## System settings
 ##
 
+# Some system may have custom pkg-config executable name
+PKG_CONFIG ?= pkg-config
 
 ##
 ## Installation paths
@@ -65,24 +67,24 @@ LUAC=$(LUA_DIR)/bin/luac
 
 ifndef LUA_MANUAL
 
-ifeq (5.2,$(findstring 5.2,$(shell pkg-config --exists lua5.2 && pkg-config --modversion lua5.2)))
+ifeq (5.2,$(findstring 5.2,$(shell $(PKG_CONFIG) --exists lua5.2 && $(PKG_CONFIG) --modversion lua5.2)))
 
-LUA_LIBS=`pkg-config --libs lua5.2`
-LUA_INCLUDES=`pkg-config --cflags lua5.2`
+LUA_LIBS=`$(PKG_CONFIG) --libs lua5.2`
+LUA_INCLUDES=`$(PKG_CONFIG) --cflags lua5.2`
 LUA=`which lua5.2`
 LUAC=`which luac5.2`
 
-else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua5.1 && pkg-config --modversion lua5.1)))
+else ifeq (5.1,$(findstring 5.1,$(shell $(PKG_CONFIG) --exists lua5.1 && $(PKG_CONFIG) --modversion lua5.1)))
 
-LUA_LIBS=`pkg-config --libs lua5.1`
-LUA_INCLUDES=`pkg-config --cflags lua5.1`
+LUA_LIBS=`$(PKG_CONFIG) --libs lua5.1`
+LUA_INCLUDES=`$(PKG_CONFIG) --cflags lua5.1`
 LUA=`which lua5.1`
 LUAC=`which luac5.1`
 
-else ifeq (5.1,$(findstring 5.1,$(shell pkg-config --exists lua && pkg-config --modversion lua)))
+else ifeq (5.1,$(findstring 5.1,$(shell $(PKG_CONFIG) --exists lua && $(PKG_CONFIG) --modversion lua)))
 
-LUA_LIBS=`pkg-config --libs lua`
-LUA_INCLUDES=`pkg-config --cflags lua`
+LUA_LIBS=`$(PKG_CONFIG) --libs lua`
+LUA_INCLUDES=`$(PKG_CONFIG) --cflags lua`
 LUA=`which lua`
 LUAC=`which luac`
 
@@ -91,20 +93,15 @@ endif # lua
 endif # LUA_MANUAL
 
 
-##
-## C compiler
-##
-
-CC=gcc
-
 # Same as '-Wall -pedantic' without '-Wunused' as callbacks often
 # have unused variables.
 WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wtrigraphs -Wformat -Wchar-subscripts \
 	-Wparentheses -pedantic -Wuninitialized
 
-CFLAGS=-g -Os $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
-LDFLAGS=-g -Os $(EXTRA_LIBS) $(LIBS)
+CFLAGS ?= -g -Os
+CFLAGS += $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
+LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 
 # The following options are mainly for development use and can be used
 # to check that the code seems to conform to some standards. Depending

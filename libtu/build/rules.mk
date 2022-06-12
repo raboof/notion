@@ -76,13 +76,13 @@ ifdef MODULE
 ifneq ($(PRELOAD_MODULES),1)
 
 CC_PICFLAGS=-fPIC -DPIC
-LD_SHAREDFLAGS=-shared
+LD_SHAREDFLAGS=-shared -Wl,-soname -Wl,$@
 
 %.o: %.c
-	$(CC) $(CC_PICFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CC_PICFLAGS) -c $< -o $@
 
 $(MODULE).so: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LD_SHAREDFLAGS) $(LDFLAGS) $(OBJS) $(EXT_OBJS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LD_SHAREDFLAGS) $(OBJS) $(EXT_OBJS) -o $@ $(LIBS)
 
 
 module_install: module_stub_install
@@ -93,9 +93,6 @@ else # PRELOAD_MODULES
 
 PICOPT=-fPIC -DPIC
 LINKOPT=-shared
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
@@ -118,13 +115,6 @@ else
 LUA_SOURCES += $(MODULE_STUB)
 
 endif #MODULE_STUB
-
-else # !MODULE
-
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 
 endif# !MODULE
 

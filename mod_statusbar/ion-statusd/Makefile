@@ -14,8 +14,8 @@ CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
-	   -DCF_ION_EXECUTABLE=\"notion\"
+           -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" \
+           -DCF_ION_EXECUTABLE=\"notion\"
 
 SOURCES = ion-statusd.c exec.c extlrx.c
 
@@ -34,7 +34,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 ion-statusd: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LINKOPTS) $(OBJS) $(EXT_OBJS) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LINKOPTS) $(OBJS) $(EXT_OBJS) -o $@ $(LIBS)
 
 _install: lc_install
 	$(INSTALLDIR) $(DESTDIR)$(EXTRABINDIR)

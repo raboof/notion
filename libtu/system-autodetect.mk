@@ -32,12 +32,6 @@ INCDIR=$(PREFIX)/include
 HAS_SYSTEM_ASPRINTF=1
 
 
-##
-## C compiler
-##
-
-CC=gcc
-
 # The POSIX_SOURCE, XOPEN_SOURCE and WARN options should not be necessary,
 # they're mainly for development use. So, if they cause trouble (not
 # the ones that should be used on your system or the system is broken),
@@ -53,8 +47,9 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wparentheses -pedantic -Wuninitialized
 
 
-CFLAGS=-g -Os $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
-LDFLAGS=-g $(LIBS) $(EXTRA_LIBS)
+CFLAGS ?= -g -Os
+CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
+LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 
 
 ##

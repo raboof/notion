@@ -11,6 +11,9 @@ include $(TOPDIR)/modulelist.mk
 
 ######################################
 
+LD_START_GROUP := -Wl,--start-group
+LD_END_GROUP := -Wl,--end-group
+
 SOURCES=notion.c
 
 TARGETS=notion
@@ -19,10 +22,8 @@ INCLUDES += $(X11_INCLUDES)
 INCLUDES += $(LIBMAINLOOP_INCLUDES) $(LIBTU_INCLUDES) $(LIBEXTL_INCLUDES)
 INCLUDES += -I..
 
-LIBS += $(X11_LIBS)
-LIBS += $(WHOLEA) $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS) $(NO_WHOLEA)
-LIBS += $(LUA_LIBS) $(DL_LIBS)
-LIBS += -lm
+LIBS += $(LD_START_GROUP) $(LIBMAINLOOP_LIBS) $(LIBEXTL_LIBS) $(LIBTU_LIBS) $(LD_END_GROUP)
+LIBS += $(X11_LIBS) $(LUA_LIBS) $(DL_LIBS) -lm
 
 ifeq ($(PRELOAD_MODULES),1)
 EXT_OBJS += $(foreach mod, $(MODULE_LIST), ../$(mod)/$(mod).a)
@@ -40,7 +41,7 @@ EXT_OBJS += ../ioncore/ioncore.a
 
 DEFINES += -DETCDIR=\"$(ETCDIR)\" -DSHAREDIR=\"$(SHAREDIR)\" \
            -DEXTRABINDIR=\"$(EXTRABINDIR)\" -DMODULEDIR=\"$(MODULEDIR)\" \
-	   -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+           -DLCDIR=\"$(LCDIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 
 CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
 
@@ -51,7 +52,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 notion: $(OBJS) $(EXT_OBJS)
-	$(CC) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LINKOPTS) $(OBJS) $(WHOLEA) $(EXT_OBJS) $(NO_WHOLEA) -o $@ $(LIBS)
 
 preload.c:
 	$(LUA) ../build/mkpreload.lua $(MODULE_LIST) > preload.c

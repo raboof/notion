@@ -102,12 +102,12 @@ DEFINES += -DCF_XFREE86_TEXTPROP_BUG_WORKAROUND
 ##
 
 ifeq ($(USE_XFT),)
-USE_XFT:=$(shell (pkg-config --exists xft && echo 1))
+USE_XFT:=$(shell ($(PKG_CONFIG) --exists xft && echo 1))
 endif
 
 ifeq ($(USE_XFT),1)
-    X11_INCLUDES += $(shell pkg-config xft --cflags)
-    X11_LIBS += $(shell pkg-config xft --libs)
+    X11_INCLUDES += $(shell $(PKG_CONFIG) xft --cflags)
+    X11_LIBS += $(shell $(PKG_CONFIG) xft --libs)
     DEFINES += -DHAVE_X11_XFT
     DEFINES += -DHAVE_X11_BMF
 else
@@ -122,8 +122,8 @@ ifeq ($(USE_READLINE),1)
     # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=901650
     READLINE_INCLUDES_FALLBACK := -D_XOPEN_SOURCE=600 -I/usr/include/readline
     READLINE_LIBS_FALLBACK := -lreadline
-    READLINE_INCLUDES ?= $(shell pkg-config readline --cflags || echo $(READLINE_INCLUDES_FALLBACK))
-    READLINE_LIBS ?= $(shell pkg-config readline --libs || echo $(READLINE_LIBS_FALLBACK))
+    READLINE_INCLUDES ?= $(shell $(PKG_CONFIG) readline --cflags || echo $(READLINE_INCLUDES_FALLBACK))
+    READLINE_LIBS ?= $(shell $(PKG_CONFIG) readline --libs || echo $(READLINE_LIBS_FALLBACK))
 endif
 
 ##
@@ -190,7 +190,7 @@ endif
 CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
-LDFLAGS += -Wl,--as-needed $(LIBS) $(EXTRA_LIBS)
+LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 EXPORT_DYNAMIC=-Xlinker --export-dynamic
 
 # The following options are mainly for development use and can be used
