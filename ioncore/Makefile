@@ -56,6 +56,5 @@ ioncore.o: exports.h
 
 ioncore.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 _install: lc_install

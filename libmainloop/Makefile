@@ -26,6 +26,5 @@ include $(TOPDIR)/build/rules.mk
 
 libmainloop.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 _install:

@@ -2,6 +2,9 @@
 ## Some make rules
 ##
 
+AR ?= ar
+ARFLAGS = cr
+
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
 MODULE_TARGETS := $(MODULE).a $(MODULE).lc
@@ -108,7 +111,6 @@ LINKOPT=-shared
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 module_install: module_stub_install
 

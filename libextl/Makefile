@@ -39,7 +39,6 @@ ifdef LUA
 
 libextl.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 libextl-mkexports: libextl-mkexports.in
 	sed "1s:LUA50:$(LUA):" $< > $@

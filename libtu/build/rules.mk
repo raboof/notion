@@ -96,7 +96,6 @@ LINKOPT=-shared
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 module_install: module_stub_install
 
