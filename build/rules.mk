@@ -3,7 +3,7 @@
 ##
 
 AR ?= ar
-ARFLAGS = cr
+ARFLAGS = rcs
 
 ifdef MODULE
 ifeq ($(PRELOAD_MODULES),1)
