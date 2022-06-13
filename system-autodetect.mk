@@ -74,11 +74,6 @@ include $(TOPDIR)/build/lua-detect.mk
 ## X libraries, includes and options
 ##
 
-# Paths
-X11_PREFIX ?= /usr/X11R6
-# SunOS/Solaris
-#X11_PREFIX ?= /usr/openwin
-
 X11_LIBS:=$(shell $(PKG_CONFIG) --libs x11 xext)
 X11_INCLUDES:=$(shell $(PKG_CONFIG) --cflags-only-I x11 xext)
 
