@@ -183,9 +183,10 @@ WARN=-W -Wall -pedantic
 # For increased debug info, pass DEBUG=1 to make
 #
 ifeq ($(DEBUG),1)
-    CFLAGS+= -ggdb3 -O0
+    CFLAGS ?= -O0
+    CFLAGS += -ggdb3
 else
-    CFLAGS+= -g -Os
+    CFLAGS ?= -g -Os
 endif
 CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
