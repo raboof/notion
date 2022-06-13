@@ -36,7 +36,6 @@ include $(TOPDIR)/build/rules.mk
 
 libtu.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 install:
 	$(INSTALLDIR) $(DESTDIR)$(LIBDIR)

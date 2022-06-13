@@ -74,11 +74,6 @@ include $(TOPDIR)/build/lua-detect.mk
 ## X libraries, includes and options
 ##
 
-# Paths
-X11_PREFIX ?= /usr/X11R6
-# SunOS/Solaris
-#X11_PREFIX ?= /usr/openwin
-
 X11_LIBS:=$(shell $(PKG_CONFIG) --libs x11 xext)
 X11_INCLUDES:=$(shell $(PKG_CONFIG) --cflags-only-I x11 xext)
 
@@ -175,17 +170,16 @@ EXTRA_LIBS += -lrt
 ## C compiler.
 ##
 
-CC ?= gcc
-
 WARN=-W -Wall -pedantic
 
 #
 # For increased debug info, pass DEBUG=1 to make
 #
 ifeq ($(DEBUG),1)
-    CFLAGS+= -ggdb3 -O0
+    CFLAGS ?= -O0
+    CFLAGS += -ggdb3
 else
-    CFLAGS+= -g -Os
+    CFLAGS ?= -g -Os
 endif
 CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
@@ -217,21 +211,13 @@ C99_SOURCE?=-std=c99 -DCF_HAS_VA_COPY
 # might allow for those optimisations to be taken without any  special
 # libc or compiler options.
 
-##
-## AR
-##
-
-AR ?= ar
-ARFLAGS ?= cr
-RANLIB ?= ranlib
-
 
 ##
 ## Install & strip
 ##
 
 INSTALL ?= sh $(TOPDIR)/install-sh -c
-INSTALL_STRIP = -s
+INSTALL_STRIP ?= -s
 INSTALLDIR ?= mkdir -p
 
 BIN_MODE ?= 755

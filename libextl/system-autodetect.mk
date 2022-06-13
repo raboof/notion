@@ -126,14 +126,6 @@ LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 # might allow for those optimisations to be taken without any  special
 # libc or compiler options.
 
-##
-## AR
-##
-
-AR=ar
-ARFLAGS=cr
-RANLIB=ranlib
-
 
 ##
 ## Install & strip

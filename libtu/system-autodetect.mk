@@ -53,15 +53,6 @@ LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 
 
 ##
-## AR
-##
-
-AR=ar
-ARFLAGS=cr
-RANLIB=ranlib
-
-
-##
 ## Install & strip
 ##
 

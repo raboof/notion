@@ -87,7 +87,7 @@ $(MODULE).so: $(OBJS) $(EXT_OBJS)
 
 module_install: module_stub_install
 	$(INSTALLDIR) $(MODULEDIR)
-	$(INSTALL) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
+	$(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE) $(MODULE).so $(MODULEDIR)
 
 else # PRELOAD_MODULES
 
@@ -96,7 +96,6 @@ LINKOPT=-shared
 
 $(MODULE).a: $(OBJS) $(EXT_OBJS)
 	$(AR) $(ARFLAGS) $@ $+
-	$(RANLIB) $@
 
 module_install: module_stub_install
 
