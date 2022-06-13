@@ -232,7 +232,7 @@ RANLIB ?= ranlib
 ##
 
 INSTALL ?= sh $(TOPDIR)/install-sh -c
-INSTALL_STRIP = -s
+INSTALL_STRIP ?= -s
 INSTALLDIR ?= mkdir -p
 
 BIN_MODE ?= 755

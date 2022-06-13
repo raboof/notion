@@ -59,4 +59,4 @@ preload.c:
 
 _install:
 	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) notion $(DESTDIR)$(BINDIR)
+	$(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE) notion $(DESTDIR)$(BINDIR)

@@ -38,4 +38,4 @@ ion-statusd: $(OBJS) $(EXT_OBJS)
 
 _install: lc_install
 	$(INSTALLDIR) $(DESTDIR)$(EXTRABINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) ion-statusd $(DESTDIR)$(EXTRABINDIR)
+	$(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE) ion-statusd $(DESTDIR)$(EXTRABINDIR)

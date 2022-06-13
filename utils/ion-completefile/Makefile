@@ -27,4 +27,4 @@ ion-completefile: $(SOURCES)
 
 _install:
 	$(INSTALLDIR) $(DESTDIR)$(EXTRABINDIR)
-	$(INSTALL) -s -m $(BIN_MODE) ion-completefile $(DESTDIR)$(EXTRABINDIR)
+	$(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE) ion-completefile $(DESTDIR)$(EXTRABINDIR)

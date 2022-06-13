@@ -32,4 +32,4 @@ notionflux: $(OBJS) $(EXT_OBJS)
 
 _install: notionflux
 	$(INSTALLDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m $(BIN_MODE) notionflux $(DESTDIR)$(BINDIR)
+	$(INSTALL) $(INSTALL_STRIP) -m $(BIN_MODE) notionflux $(DESTDIR)$(BINDIR)
