@@ -175,8 +175,6 @@ EXTRA_LIBS += -lrt
 ## C compiler.
 ##
 
-CC ?= gcc
-
 WARN=-W -Wall -pedantic
 
 #
