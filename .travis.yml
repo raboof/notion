@@ -5,7 +5,7 @@ compiler:
 env:
   - 
   - USE_XFT=0
-before_install: sudo apt-get install lua5.2 liblua5.2-dev gettext libxft-dev libxinerama-dev libxrandr-dev libreadline-dev
+before_install: sudo apt-get install lua5.2 liblua5.2-dev gettext libxft-dev libxinerama-dev libxrandr-dev libreadline-dev libsm-dev
 script:
   - make
   - make test
