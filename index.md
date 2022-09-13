@@ -69,11 +69,27 @@ If you'd like to support Notion, you can donate. I will not spend the donations 
 
 If you'd like to associate your donation with a particular support/documentation request, bug or other goal, you can make a note of that.
 
+# Roadmap
+
+_**Not**ion_ is fairly feature complete (and extensible via lua scripting), we mainly
+expect 'bugfix' changes to the source code - though if you have a cool idea for a
+feature or are missing an extension point for your script, contributions are very welcome.
+
+## Wayland support
+
+We would love to see a Wayland compositor that works like _**Not**ion_. As far as we know there is nobody actively working on this, however.
+
+### Implementation
+
+Likely the best way to approach this would be to start a new codebase: supporting both X11 and Wayland from the same code would increase the complexity, and possibly tempt us into a structure that could cause us miss out on some of the advantages Wayland might bring.
+
+One of the powers of X11 is that it is relatively easy to combine different utilities, for example using _**Not**ion_ with your favourite task bar/switcher. Is this possible on Wayland as well, or would we have to 'embed' such tools as libraries? Are there good candidates or would we have to maintain our own?
+
 # History
 
 ## Notion 3
 
-The current major version of Notion is Notion 4.
+The current major version of _**Not**ion_ is _**Not**ion_ 4.
 This release includes a number of changes that are either not backwards
 compatible, or change the (default) behavior. Those are described in more detail
 in the [migration notes](migration.md).
