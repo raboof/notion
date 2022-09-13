@@ -94,6 +94,8 @@ This release includes a number of changes that are either not backwards
 compatible, or change the (default) behavior. Those are described in more detail
 in the [migration notes](migration.md).
 
+The previous major version, Notion 3, is available under a slightly modified LGPL license: in short, the only extra restriction is you cannot release it under the name 'Ion' and cannot mix it with GPL code, but read the license itself for details.
+
 ## Ion3
 
 _**Not**ion_ was originally a fork of [Ion](https://tuomov.iki.fi/software/#TOC-Ion-2000-2009-), which has been abandoned by its original author, [Tuomo Valkonen](http://tuomov.iki.fi/).
@@ -102,6 +104,4 @@ Former Ion3 users will be glad to hear any changes to configuration will be back
 
 # License
 
-Notion 3 is available under a slightly modified LGPL license: in short, the only extra restriction is you cannot release it under the name 'Ion' and cannot mix it with GPL code, but read the license itself for details.
-
-Notion 4, which is not yet released, will be plain LGPL again. You can build a prerelease of Notion 4 from the 'master' branch.
+Notion is licensed under the LGPL.
