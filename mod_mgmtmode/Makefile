@@ -24,3 +24,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 _install: module_install
+
+######################################
+
+main.o: exports.h
