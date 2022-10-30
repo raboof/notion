@@ -29,3 +29,7 @@ include $(TOPDIR)/build/rules.mk
 ######################################
 
 _install: module_install
+
+######################################
+
+mod_notionflux.o: exports.h
