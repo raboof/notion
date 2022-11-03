@@ -77,7 +77,9 @@ feature or are missing an extension point for your script, contributions are ver
 
 ## Wayland support
 
-We would love to see a Wayland compositor that works like _**Not**ion_. As far as we know there is nobody actively working on this, however.
+We would love to see a Wayland compositor that works like _**Not**ion_.
+
+[volare](https://codeberg.org/raboof/volare) intends to go in that direction.
 
 ### Implementation
 
