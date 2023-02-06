@@ -137,8 +137,8 @@ HAS_SYSTEM_ASPRINTF=1
 #DEFINES += -DCF_NO_LOCALE
 
 # On some other systems you may something like this:
-#EXTRA_LIBS += -lintl
-#EXTRA_INCLUDES +=
+#LIBS += -L/usr/local/lib -lintl
+#CPPFLAGS += -I/usr/local/include
 
 
 ##
@@ -153,7 +153,7 @@ HAS_SYSTEM_ASPRINTF ?= 1
 # The following setting is needed with GNU libc for clock_gettime and the
 # monotonic clock. Other systems may not need it, or may not provide a
 # monotonic clock at all (which Ion can live with, and usually detect).
-EXTRA_LIBS += -lrt
+LIBS += -lrt
 
 # Cygwin needs this. Also when you disable _BSD_SOURCE you may need it.
 #DEFINES += -DCF_NO_GETLOADAVG
@@ -181,7 +181,7 @@ ifeq ($(DEBUG),1)
 else
     CFLAGS ?= -g -Os
 endif
-CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) $(EXTRA_INCLUDES) \
+CFLAGS += $(WARN) $(DEFINES) $(INCLUDES) \
           -DHAS_SYSTEM_ASPRINTF=$(HAS_SYSTEM_ASPRINTF)
 
 LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
