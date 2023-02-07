@@ -100,7 +100,7 @@ WARN=	-W -Wimplicit -Wreturn-type -Wswitch -Wcomment \
 	-Wparentheses -pedantic -Wuninitialized
 
 CFLAGS ?= -g -Os
-CFLAGS += $(WARN) $(DEFINES) $(EXTRA_INCLUDES) $(INCLUDES)
+CFLAGS += $(WARN) $(DEFINES) $(INCLUDES)
 LDFLAGS ?= -Wl,-O1 -Wl,--as-needed
 
 # The following options are mainly for development use and can be used
