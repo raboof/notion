@@ -370,7 +370,16 @@ bool region_rescue_some_clientwins(WRegion *reg, WRescueInfo *info,
                     break;
                 }
             }
-            if(!pholder_attach(info->ph, 0, (WRegion*)cwin))
+
+            WRegion *movereg = (WRegion*)cwin;
+
+            /* If the client window is managed by a GroupCW, move the GroupCW instead. */
+            WGroupCW *cwg = REGION_MANAGER_CHK(movereg, WGroupCW);
+            if(cwg!=NULL){
+                movereg = (WRegion*)cwg;
+            }
+
+            if(!pholder_attach(info->ph, 0, movereg))
                 fails++;
         }
     }
