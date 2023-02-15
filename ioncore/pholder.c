@@ -190,15 +190,15 @@ WPHolder *region_managed_get_pholder(WRegion *reg, WRegion *mgd)
 
 WPHolder *region_get_rescue_pholder_for(WRegion *reg, WRegion *mgd)
 {
-    if(OBJ_IS_BEING_DESTROYED(reg) || reg->flags&REGION_CWINS_BEING_RESCUED){
-        return FALSE;
-    }else{
-        WPHolder *ret=NULL;
+    WPHolder *ret=NULL;
 
-        CALL_DYN_RET(ret, WPHolder*, region_get_rescue_pholder_for,
-                     reg, (reg, mgd));
+    if(OBJ_IS_BEING_DESTROYED(reg) || reg->flags&REGION_CWINS_BEING_RESCUED){
         return ret;
     }
+
+    CALL_DYN_RET(ret, WPHolder*, region_get_rescue_pholder_for,
+                 reg, (reg, mgd));
+    return ret;
 }
 
 
