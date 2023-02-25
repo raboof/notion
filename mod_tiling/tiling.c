@@ -1072,7 +1072,7 @@ void do_unsplit(WRegion *reg)
         return;
     }
 
-    destroy_obj((Obj*)reg);
+    mainloop_defer_destroy((Obj*)reg);
 }
 
 
