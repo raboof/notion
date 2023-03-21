@@ -147,13 +147,20 @@ bool mod_tiling_untile(WTiling *tiling)
 
         reg2=group_do_attach(grp, &param, &data);
 
+        // See #334: tiling->unsplit from the context menu crashes notion
+        if(tiling->managed_list == NULL) {
+            break;
+        }
+
         if(reg2==NULL)
             warn(TR("Unable to move a region from tiling to group."));
     }
 
     tiling->batchop=FALSE;
 
-    region_dispose((WRegion*)tiling);
+    if(tiling->managed_list != NULL) {
+        region_dispose((WRegion*)tiling);
+    }
 
     return TRUE;
 }
