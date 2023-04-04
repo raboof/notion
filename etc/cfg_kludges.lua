@@ -45,6 +45,12 @@ defwinprop {
     acrobatic = true,
 }
 
+-- https://github.com/raboof/notion/issues/359
+defwinprop {
+    class = "ghidra-Ghidra",
+    acrobatic = true,
+}
+
 -- You might want to enable these if you really must use XMMS.
 --[[
 defwinprop {
