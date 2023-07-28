@@ -29,9 +29,9 @@ changes.
 The preferred way to get _**Not**ion_ is through your distributions' package
 manager. We are included in:
 
-* [Arch](https://www.archlinux.org/packages/community/x86_64/notion/) and Manjaro
+* [Arch](https://www.archlinux.org/packages/extra/x86_64/notion/) and Manjaro
 * [Slack](https://slackbuilds.org/repository/14.2/desktop/notion/)
-* [NixOS](https://nixos.org/nixos/packages.html?channel=nixpkgs-unstable&query=notion-4)
+* [NixOS](https://nixos.org/nixos/packages.html?channel=unstable&query=notion)
 * [openSUSE](https://build.opensuse.org/package/show/X11:windowmanagers/notion)
 
 If _**Not**ion_ is not yet available for your distribution, or you would like
