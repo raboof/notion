@@ -796,7 +796,7 @@ bool frame_set_numbers_extl(WFrame *frame, const char *how)
 {
     if(how!=NULL && strcmp(how, "during_grab")==0){
         bool new_state = frame_set_numbers(frame, SETPARAM_SET);
-        ioncore_grab_establish(frame, numbers_grab_handler, NULL,
+        ioncore_grab_establish((WRegion *)frame, numbers_grab_handler, NULL,
                                0, GRAB_DEFAULT_FLAGS&~GRAB_POINTER);
         return new_state;
     }
