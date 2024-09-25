@@ -282,14 +282,14 @@ static const WDockParam dock_param_tile_width={
     "width",
     "tile width",
     NULL,
-    64
+    420
 };
 
 static const WDockParam dock_param_tile_height={
     "height",
     "tile height",
     NULL,
-    64
+    420
 };
 
 
