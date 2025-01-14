@@ -52,7 +52,7 @@ extern void region_focuslist_move_after(WRegion *reg, WRegion *after);
 /* Notify the focus handling that the region is deinit'ing */
 extern void region_focus_deinit(WRegion *reg);
 
-extern WRegion *ioncore_goto_previous();
+extern WRegion *ioncore_goto_previous(int count);
 
 /* Handlers to this hook should take WRegion* as parameter. */
 extern WHook *region_do_warp_alt;
