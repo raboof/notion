@@ -14,7 +14,7 @@ SUBDIRS = $(INSTALL_SUBDIRS)
 ######################################
 
 INCLUDES += $(X11_INCLUDES) -I$(TOPDIR)
-CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE)
+CFLAGS += $(XOPEN_SOURCE) $(C99_SOURCE) $(POSIX_SOURCE)
 
 SOURCES=mod_notionflux.c
 MAKE_EXPORTS=mod_notionflux
