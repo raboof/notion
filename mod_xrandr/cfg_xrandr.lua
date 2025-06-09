@@ -2,9 +2,9 @@
 -- physical screen that a workspace wants to be on, is part of the C class
 -- WGroupWS. For "full screen workspaces" and scratchpads, we only keep this
 -- information in a temporary list.
-InitialOutputs={}
+local InitialOutputs={}
 
-function getInitialOutputs(ws)
+local function getInitialOutputs(ws)
     if obj_is(ws, "WGroupCW") or is_scratchpad(ws) then
         return InitialOutputs[ws:name()]
     elseif obj_is(ws, "WGroupWS") then
@@ -14,7 +14,7 @@ function getInitialOutputs(ws)
     end
 end
 
-function setInitialOutputs(ws, outputs)
+local function setInitialOutputs(ws, outputs)
     if obj_is(ws, "WGroupCW") or is_scratchpad(ws) then
         InitialOutputs[ws:name()] = outputs
     elseif obj_is(ws, "WGroupWS") then
@@ -22,14 +22,14 @@ function setInitialOutputs(ws, outputs)
     end
 end
 
-function nilOrEmpty(t)
+local function nilOrEmpty(t)
     return not t or empty(t)
 end
 
 function mod_xrandr.workspace_added(ws)
     if nilOrEmpty(getInitialOutputs(ws)) then
-        outputs = mod_xrandr.get_outputs(ws:screen_of(ws))
-        outputKeys = {}
+        local outputs = mod_xrandr.get_outputs(ws:screen_of(ws))
+        local outputKeys = {}
         for k,v in pairs(outputs) do
             table.insert(outputKeys, k)
         end
@@ -38,7 +38,7 @@ function mod_xrandr.workspace_added(ws)
     return true
 end
 
-function for_all_workspaces_do(fn)
+local function for_all_workspaces_do(fn)
     local workspaces={}
     notioncore.region_i(function(scr)
         scr:managed_i(function(ws)
@@ -62,15 +62,17 @@ function mod_xrandr.screenmanagedchanged(tab)
     end
 end
 
-screen_managed_changed_hook = notioncore.get_hook('screen_managed_changed_hook')
+local screen_managed_changed_hook = notioncore.get_hook('screen_managed_changed_hook')
 if screen_managed_changed_hook then
     screen_managed_changed_hook:add(mod_xrandr.screenmanagedchanged)
 end
 
-post_layout_setup_hook = notioncore.get_hook('ioncore_post_layout_setup_hook')
-post_layout_setup_hook:add(mod_xrandr.workspaces_added)
+local post_layout_setup_hook = notioncore.get_hook('ioncore_post_layout_setup_hook')
+if post_layout_setup_hook then
+    post_layout_setup_hook:add(mod_xrandr.workspaces_added)
+end
 
-function add_safe(t, key, value)
+local function add_safe(t, key, value)
     if t[key] == nil then
         t[key] = {}
     end
@@ -80,10 +82,10 @@ end
 
 -- parameter: list of output names
 -- returns: map from screen name to screen
-function candidate_screens_for_output(max_screen_id, all_outputs, outputname)
+local function candidate_screens_for_output(max_screen_id, all_outputs, outputname)
     local retval = {}
 
-    function addIfContainsOutput(screen)
+    local function addIfContainsOutput(screen)
         local outputs_within_screen = mod_xrandr.get_outputs_within(all_outputs, screen)
         if screen:id() <= max_screen_id and outputs_within_screen[outputname] ~= nil then
             retval[screen:name()] = screen
@@ -97,7 +99,7 @@ end
 
 -- parameter: maximum screen id, list of all output names, list of output names for which we want the screens
 -- returns: map from screen name to screen
-function candidate_screens_for_outputs(max_screen_id, all_outputs, outputnames)
+local function candidate_screens_for_outputs(max_screen_id, all_outputs, outputnames)
     local result = {}
 
     if outputnames == nil then return result end
@@ -111,30 +113,30 @@ function candidate_screens_for_outputs(max_screen_id, all_outputs, outputnames)
     return result;
 end
 
-function firstValue(t)
+local function firstValue(t)
    local key, value = next(t)
    return value
 end
 
-function firstKey(t)
+local function firstKey(t)
    local key, value = next(t)
    return key
 end
 
-function empty(t)
+local function empty(t)
     return not next(t)
 end
 
-function singleton(t)
+local function singleton(t)
     local first = next(t)
     return first and not next(t, first)
 end
 
-function is_scratchpad(ws)
+local function is_scratchpad(ws)
     return package.loaded["mod_sp"] and mod_sp.is_scratchpad(ws)
 end
 
-function find_scratchpad(screen)
+local function find_scratchpad(screen)
     local sp
     screen:managed_i(function(ws)
         if is_scratchpad(ws) then
@@ -147,7 +149,7 @@ function find_scratchpad(screen)
     return sp
 end
 
-function move_if_needed(workspace, screen_id)
+local function move_if_needed(workspace, screen_id)
     local screen = notioncore.find_screen_id(screen_id)
 
     if workspace:screen_of() ~= screen then
@@ -173,11 +175,11 @@ end
 -- Arrange the workspaces over the first number_of_screens screens
 function mod_xrandr.rearrangeworkspaces(max_screen_id)
     -- for each screen id, which workspaces should be on that screen
-    new_mapping = {}
+    local new_mapping = {}
     -- workspaces that want to be on an output that's currently not on any screen
-    orphans = {}
+    local orphans = {}
     -- workspaces that want to be on multiple available outputs
-    wanderers = {}
+    local wanderers = {}
 
     local all_outputs = mod_xrandr.get_all_outputs()
 
@@ -185,9 +187,10 @@ function mod_xrandr.rearrangeworkspaces(max_screen_id)
     -- its placeholder and thereby the possibility to return it from full
     -- screen later. Let's therefore try to close any full screen workspace
     -- before rearranging.
-    full_screen_workspaces={}
+    local full_screen_workspaces={}
     for_all_workspaces_do(function(ws)
-        if obj_is(ws, "WGroupCW") then table.insert(full_screen_workspaces, ws)
+        if obj_is(ws, "WGroupCW") then
+            table.insert(full_screen_workspaces, ws)
         end
         return true
     end)
@@ -197,7 +200,7 @@ function mod_xrandr.rearrangeworkspaces(max_screen_id)
 
     -- round one: divide workspaces in directly assignable,
     -- orphans and wanderers
-    function roundone(workspace)
+    for_all_workspaces_do(function(workspace)
         local screens = candidate_screens_for_outputs(max_screen_id, all_outputs, getInitialOutputs(workspace))
         if nilOrEmpty(screens) then
             table.insert(orphans, workspace)
@@ -207,8 +210,7 @@ function mod_xrandr.rearrangeworkspaces(max_screen_id)
             wanderers[workspace] = screens
         end
         return true
-    end
-    for_all_workspaces_do(roundone)
+    end)
 
     for workspace,screens in pairs(wanderers) do
         -- TODO add to screen with least # of workspaces instead of just the
@@ -255,8 +257,7 @@ function mod_xrandr.screenlayoutupdated()
     notioncore.profiling_stop()
 end
 
-randr_screen_change_notify_hook = notioncore.get_hook('randr_screen_change_notify')
-
+local randr_screen_change_notify_hook = notioncore.get_hook('randr_screen_change_notify')
 if randr_screen_change_notify_hook then
     randr_screen_change_notify_hook:add(mod_xrandr.screenlayoutupdated)
 end
