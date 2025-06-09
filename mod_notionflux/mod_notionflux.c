@@ -2,7 +2,7 @@
  * mod_notionflux/mod_notionflux/mod_notionflux.c
  *
  * Copyright (c) Tuomo Valkonen 2004-2005.
- * Copyright (c) The Notion development team 2019
+ * Copyright (c) The Notion development team 2019-2023
  *
  * This is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by
@@ -328,8 +328,10 @@ static bool start_listening()
     if(listenfd<0)
         goto errwarn;
 
+#ifndef __FreeBSD__
     if(fchmod(listenfd, S_IRUSR|S_IWUSR)<0)
         goto errwarn;
+#endif
 
     addr.sun_family=AF_UNIX;
 
