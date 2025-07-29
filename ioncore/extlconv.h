@@ -15,6 +15,7 @@
 #include <libtu/objlist.h>
 #include "common.h"
 #include "region.h"
+#include "sizepolicy.h"
 
 extern bool extl_iter_obj(ExtlFn fn, Obj *obj);
 extern bool extl_iter_objlist_(ExtlFn fn, ObjIterator *iter, void *st);
@@ -29,6 +30,12 @@ extern bool extl_table_gets_rectangle(ExtlTab tab, const char *nam,
                                       WRectangle *rect);
 extern void extl_table_sets_rectangle(ExtlTab tab, const char *nam,
                                       const WRectangle *rect);
+/*
+  Sets *szplcy to the "sizepolicy" extracted from tab;
+  or if tab doesn't have "sizepolicy", sets *szplcy = dfault.
+  Returns TRUE if the value was found in tab.
+*/
+extern bool extl_table_gets_sizepolicy(ExtlTab tab, WSizePolicy* szplcy, WSizePolicy dfault);
 
 #endif /* ION_IONCORE_EXTLCONV_H */
 
