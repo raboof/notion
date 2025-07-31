@@ -132,3 +132,26 @@ bool extl_table_gets_rectangle(ExtlTab tab, const char *nam,
 /*}}}*/
 
 
+/*{{{ SizePolicy */
+
+bool extl_table_gets_sizepolicy(ExtlTab tab, WSizePolicy* szplcy, WSizePolicy dfault)
+{
+    char* tmps;
+
+    if (extl_table_gets_i(tab, "sizepolicy", szplcy))
+        return TRUE;
+
+    if (extl_table_gets_s(tab, "sizepolicy", &tmps)) {
+        if (string2sizepolicy(tmps, szplcy)) {
+            free(tmps);
+            return TRUE;
+        }
+        free(tmps);
+    }
+
+    *szplcy = dfault;
+    return FALSE;
+}
+
+
+/*}}}*/

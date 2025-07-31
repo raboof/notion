@@ -736,7 +736,6 @@ WRegion *group_do_attach(WGroup *ws,
 static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
 {
     int tmp;
-    char *tmps;
     ExtlTab g;
 
     par->switchto_set=0;
@@ -766,14 +765,7 @@ static void get_params(WGroup *ws, ExtlTab tab, WGroupAttachParams *par)
     if(extl_table_is_bool_set(tab, "switchto"))
         par->switchto=1;
 
-    if(extl_table_gets_i(tab, "sizepolicy", &tmp)){
-        par->szplcy_set=1;
-        par->szplcy=tmp;
-    }else if(extl_table_gets_s(tab, "sizepolicy", &tmps)){
-        if(string2sizepolicy(tmps, &par->szplcy))
-            par->szplcy_set=1;
-        free(tmps);
-    }
+    par->szplcy_set = extl_table_gets_sizepolicy(tab, &par->szplcy, 0);
 
     if(extl_table_gets_t(tab, "geom", &g)){
         int n=0;
