@@ -30,7 +30,7 @@ static DEFont *fonts=NULL;
 const char *de_default_fontname()
 {
 #ifdef HAVE_X11_XFT
-        return "xft:sans-serif:size=12";
+    return "xft:sans-serif:size=12";
 #else
     if(ioncore_g.use_mb)
         return "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*";
