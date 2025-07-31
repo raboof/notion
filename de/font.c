@@ -84,7 +84,9 @@ DEFont *de_load_font(const char *fontname)
         }
         return NULL;
     }else{
-        FcPatternPrint(font->pattern);
+        /* FcPatternPrint(font->pattern); */
+        /* If you're thinking of commenting the above in, have a look at the
+        FC_DEBUG environment variable supported by Fontconfig. */
     }
 #endif /* HAVE_X11_XFT */
 
