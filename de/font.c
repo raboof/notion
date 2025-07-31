@@ -29,10 +29,14 @@ static DEFont *fonts=NULL;
 
 const char *de_default_fontname()
 {
+#ifdef HAVE_X11_XFT
+    return "xft:sans-serif:size=12";
+#else
     if(ioncore_g.use_mb)
         return "-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*";
     else
         return "fixed";
+#endif
 }
 
 DEFont *de_load_font(const char *fontname)
@@ -80,7 +84,9 @@ DEFont *de_load_font(const char *fontname)
         }
         return NULL;
     }else{
-        FcPatternPrint(font->pattern);
+        /* FcPatternPrint(font->pattern); */
+        /* If you're thinking of commenting the above in, have a look at the
+        FC_DEBUG environment variable supported by Fontconfig. */
     }
 #endif /* HAVE_X11_XFT */
 
