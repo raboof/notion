@@ -81,7 +81,7 @@ static void region_focuslist_deinit(WRegion *reg)
  * actually have received the focus when this function returns.
  */
 EXTL_EXPORT
-WRegion *ioncore_goto_previous()
+WRegion *ioncore_goto_previous(int count)
 {
     WRegion *next;
 
@@ -99,7 +99,7 @@ WRegion *ioncore_goto_previous()
         next!=NULL;
         next=next->active_next){
 
-        if(!REGION_IS_ACTIVE(next))
+        if(!REGION_IS_ACTIVE(next) && --count <= 0)
             break;
     }
 
