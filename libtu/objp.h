@@ -26,7 +26,7 @@ DECLSTRUCT(ClassDescr){
     ClassDescr *ancestor;
     int funtab_n;
     DynFunTab *funtab;
-    void (*destroy_fn)();
+    void (*destroy_fn)(Obj *obj);
 };
 
 #define OBJ_TYPESTR(OBJ) ((OBJ) ? ((Obj*)OBJ)->obj_type->name : NULL)
