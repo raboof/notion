@@ -59,6 +59,7 @@
 #include <ioncore/event.h>
 #include <ioncore/resize.h>
 #include <ioncore/sizehint.h>
+#include <ioncore/stacking.h>
 #include <ioncore/basicpholder.h>
 
 #include "exports.h"
@@ -106,6 +107,7 @@ DECLCLASS(WDock){
     WWindow win;
     WDock *dock_next, *dock_prev;
     int pos, grow;
+    int tile_w, tile_h;
     bool is_auto;
     GrBrush *brush;
     WDockApp *dockapps;
@@ -289,7 +291,8 @@ static const WDockParam dock_param_tile_height={
     "height",
     "tile height",
     NULL,
-    64
+    /* Default to auto. */
+    0
 };
 
 
@@ -337,8 +340,8 @@ static void dock_get_tile_size(WDock *dock, WRectangle *ret)
 
     ret->x=0;
     ret->y=0;
-    ret->w=dock_param_tile_width.dflt;
-    ret->h=dock_param_tile_height.dflt;
+    ret->w=dock->tile_w;
+    ret->h=dock->tile_h;
     if(dock->brush==NULL)
         return;
     if(grbrush_get_extra(dock->brush, "tile_size", 't', &tile_size_table)){
@@ -594,34 +597,6 @@ static void dock_arrange_dockapps(WDock *dock, const WRectangle *bd_dockg,
 }
 
 
-static void calc_dock_pos(WRectangle *dg, const WRectangle *pg, int pos)
-{
-    switch(pos&DOCK_HPOS_MASK){
-    case DOCK_HPOS_LEFT:
-        dg->x=pg->x;
-        break;
-    case DOCK_HPOS_CENTER:
-        dg->x=pg->x+(pg->w-dg->w)/2;
-        break;
-    case DOCK_HPOS_RIGHT:
-        dg->x=pg->x+(pg->w-dg->w);
-        break;
-    }
-
-    switch(pos&DOCK_VPOS_MASK){
-    case DOCK_VPOS_TOP:
-        dg->y=pg->y;
-        break;
-    case DOCK_VPOS_MIDDLE:
-        dg->y=pg->y+(pg->h-dg->h)/2;
-        break;
-    case DOCK_VPOS_BOTTOM:
-        dg->y=pg->y+(pg->h-dg->h);
-        break;
-    }
-}
-
-
 static void dock_set_minmax(WDock *dock, int grow, const WRectangle *g)
 {
     dock->min_w=g->w;
@@ -640,16 +615,6 @@ static void dockapp_calc_preferred_size(WDock *UNUSED(dock), int grow,
                                         const WRectangle *tile_size,
                                         WDockApp *da)
 {
-    int w=da->geom.w, h=da->geom.h;
-
-    if(grow==DOCK_GROW_UP || grow==DOCK_GROW_DOWN){
-        da->geom.w=MINOF(w, tile_size->w);
-        da->geom.h=h;
-    }else{
-        da->geom.w=w;
-        da->geom.h=MINOF(h, tile_size->h);
-    }
-
     region_size_hints_correct(da->reg, &(da->geom.w), &(da->geom.h), TRUE);
 }
 
@@ -660,30 +625,17 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
                                  bool just_update_minmax)
 {
     WDockApp *dockapp=NULL, *thisdockapp=NULL, thisdockapp_copy;
-    WRectangle parent_geom, dock_geom, border_dock_geom;
+    WRectangle dock_geom, border_dock_geom;
     GrBorderWidths dock_bdw, dockapp_bdw;
     int n_dockapps=0, max_w=1, max_h=1, total_w=0, total_h=0;
     int pos, grow;
     WRectangle tile_size;
-    WWindow *par=REGION_PARENT(dock);
 
     /* dock_resize calls with NULL parameters. */
     assert(reg!=NULL || (geomret==NULL && !(flags&REGION_RQGEOM_TRYONLY)));
 
     dock_get_pos_grow(dock, &pos, &grow);
     dock_get_tile_size(dock, &tile_size);
-
-    /* Determine parent and tile geoms */
-    parent_geom.x=0;
-    parent_geom.y=0;
-    if(par!=NULL){
-        parent_geom.w=REGION_GEOM(par).w;
-        parent_geom.h=REGION_GEOM(par).h;
-    }else{
-        /* Should not happen in normal operation. */
-        parent_geom.w=1;
-        parent_geom.h=1;
-    }
 
     /* Determine dock and dockapp border widths */
     memset(&dock_bdw, 0, sizeof(GrBorderWidths));
@@ -778,13 +730,14 @@ static void dock_managed_rqgeom_(WDock *dock, WRegion *reg, int flags,
             break;
         }
     }else{
-        dock_geom.w=0;
-        dock_geom.h=0;
+        dock_geom.w=tile_size.w;
+        dock_geom.h=tile_size.h;
     }
+
+    border_dock_geom.x=REGION_GEOM(dock).x;
+    border_dock_geom.y=REGION_GEOM(dock).y;
     border_dock_geom.w=dock_bdw.left+dock_geom.w+dock_bdw.right;
     border_dock_geom.h=dock_bdw.top+dock_geom.h+dock_bdw.bottom;
-
-    calc_dock_pos(&border_dock_geom, &parent_geom, pos);
 
     /* Fit dock to new geom if required */
     if(!(flags&REGION_RQGEOM_TRYONLY)){
@@ -975,6 +928,42 @@ static void mplexpos(int pos, int *mpos)
 }
 
 
+static void mplex_set_szplcy(WMPlex *mplex, WRegion *reg, WSizePolicy szplcy)
+{
+    WStacking *st = mplex_find_stacking(mplex, reg);
+    if (st != NULL) {
+        st->szplcy = szplcy;
+    }
+}
+
+
+static void mplexszplcy(int pos, WSizePolicy *szplcy)
+{
+    int hp=pos&DOCK_HPOS_MASK, vp=pos&DOCK_VPOS_MASK;
+    WSizePolicy p;
+
+    p=(vp!=DOCK_VPOS_MIDDLE
+       ? (vp==DOCK_VPOS_TOP
+          ? (hp!=DOCK_HPOS_CENTER
+             ? (hp==DOCK_HPOS_RIGHT
+                ? SIZEPOLICY_GRAVITY_NORTHEAST
+                : SIZEPOLICY_GRAVITY_NORTHWEST)
+             : SIZEPOLICY_GRAVITY_NORTH)
+          : (hp!=DOCK_HPOS_CENTER
+             ? (hp==DOCK_HPOS_RIGHT
+                ? SIZEPOLICY_GRAVITY_SOUTHEAST
+                : SIZEPOLICY_GRAVITY_SOUTHWEST)
+             : SIZEPOLICY_GRAVITY_SOUTH))
+       : (hp!=DOCK_HPOS_CENTER
+          ? (hp==DOCK_HPOS_RIGHT
+             ? SIZEPOLICY_GRAVITY_EAST
+             : SIZEPOLICY_GRAVITY_WEST)
+          : SIZEPOLICY_GRAVITY_CENTER));
+
+    *szplcy=p;
+}
+
+
 static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
 {
     char *s;
@@ -1002,6 +991,12 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
     if(extl_table_gets_b(conftab, dock_param_is_auto.key, &b))
         dock->is_auto=b;
 
+    if(extl_table_gets_i(conftab, dock_param_tile_width.key, &dock->tile_w))
+        posset=TRUE;
+
+    if(extl_table_gets_i(conftab, dock_param_tile_height.key, &dock->tile_h))
+        posset=TRUE;
+
     if(resize && (growset || posset)){
         WMPlex *par=OBJ_CAST(REGION_PARENT(dock), WMPlex);
         WRegion *stdisp=NULL;
@@ -1018,6 +1013,10 @@ static void dock_do_set(WDock *dock, ExtlTab conftab, bool resize)
                     dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
                 }
                 mplex_set_stdisp(par, (WRegion*)dock, &din);
+            }else if((WRegion*)par==REGION_MANAGER(dock)){
+                WSizePolicy szplcy;
+                mplexszplcy(dock->pos, &szplcy);
+                mplex_set_szplcy(par, (WRegion*)dock, szplcy);
             }
         }
 
@@ -1057,6 +1056,8 @@ static void dock_do_get(WDock *dock, ExtlTab conftab)
                       region_name((WRegion*)dock));
     dock_param_extl_table_get(&dock_param_pos, conftab, dock->pos);
     dock_param_extl_table_get(&dock_param_grow, conftab, dock->grow);
+    extl_table_sets_i(conftab, dock_param_tile_width.key, dock->tile_w);
+    extl_table_sets_i(conftab, dock_param_tile_height.key, dock->tile_h);
     extl_table_sets_b(conftab, dock_param_is_auto.key, dock->is_auto);
     extl_table_sets_b(conftab, "save", dock->save);
 }
@@ -1090,6 +1091,8 @@ static bool dock_init(WDock *dock, WWindow *parent, const WFitParams *fp)
 
     dock->pos=dock_param_pos.dflt;
     dock->grow=dock_param_grow.dflt;
+    dock->tile_w=dock_param_tile_width.dflt;
+    dock->tile_h=dock_param_tile_height.dflt;
     dock->is_auto=dock_param_is_auto.dflt;
     dock->brush=NULL;
     dock->dockapps=NULL;
@@ -1184,62 +1187,53 @@ WDock *mod_dock_create(ExtlTab tab)
     }
 
     /* Create the dock */
+    WFitParams fp;
 
-    if(floating){
-        WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+    fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
+    fp.g.x=0;
+    fp.g.y=0;
+    fp.g.w=1;
+    fp.g.h=1;
 
-        par.flags=(MPLEX_ATTACH_UNNUMBERED
-                   |MPLEX_ATTACH_SIZEPOLICY
-                   |MPLEX_ATTACH_GEOM);
-
-        par.szplcy=SIZEPOLICY_FREE;
-        par.geom.x=0;
-        par.geom.y=0;
-        par.geom.w=1;
-        par.geom.h=1;
-
-        if(extl_table_is_bool_set(tab, "floating_hidden"))
-            par.flags|=MPLEX_ATTACH_HIDDEN;
-
-        dock=(WDock*)mplex_do_attach_new((WMPlex*)screen, &par,
-                                         (WRegionCreateFn*)create_dock,
-                                         NULL);
-    }else{
-        WFitParams fp;
-
-        fp.mode=REGION_FIT_BOUNDS|REGION_FIT_WHATEVER;
-        fp.g.x=0;
-        fp.g.y=0;
-        fp.g.w=1;
-        fp.g.h=1;
-
-        dock=create_dock((WWindow*)screen, &fp);
-    }
+    dock=create_dock((WWindow*)screen, &fp);
 
     if(dock==NULL){
         warn("Failed to create dock.");
         return NULL;
     }
 
+
     /* Get parameters */
     dock->save=FALSE;
     dock_do_set(dock, tab, FALSE);
 
+    /* Calculate min/max size */
+    dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
+
     /* Final setup */
     if(floating){
-        WRQGeomParams rq=RQGEOMPARAMS_INIT;
-        const WRectangle *pg=&REGION_GEOM(screen);
+        WMPlexAttachParams par=MPLEXATTACHPARAMS_INIT;
+        WRegionAttachData data;
 
-        /* Just calculate real min/max size */
-        dock_managed_rqgeom_(dock, NULL, 0, NULL, NULL, TRUE);
+        par.flags=(MPLEX_ATTACH_UNNUMBERED
+                   |MPLEX_ATTACH_SIZEPOLICY
+                   |MPLEX_ATTACH_GEOM);
 
-        rq.geom.w=MINOF(dock->min_w, pg->w);
-        rq.geom.h=MINOF(dock->min_h, pg->h);
-        calc_dock_pos(&rq.geom, pg, dock->pos);
+        par.geom.w=dock->min_w;
+        par.geom.h=dock->min_h;
+        par.geom.x=0;
+        par.geom.y=0;
 
-        region_rqgeom((WRegion*)dock, &rq, NULL);
+        mplexszplcy(dock->pos, &par.szplcy);
 
-        return dock;
+        if(extl_table_is_bool_set(tab, "floating_hidden"))
+            par.flags|=MPLEX_ATTACH_HIDDEN;
+
+        data.type=REGION_ATTACH_REPARENT;
+        data.u.reg=(WRegion*)dock;
+
+        if(mplex_do_attach((WMPlex*)screen, &par, &data))
+            return dock;
     }else{
         mplexpos(dock->pos, &din.pos);
         din.fullsize=FALSE; /* not supported */
