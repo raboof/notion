@@ -150,8 +150,7 @@ static bool try_fullscreen(WClientWin *cwin, WScreen *dflt,
         fs_scr=clientwin_fullscreen_chkrq(cwin, param->geom.w, param->geom.h);
 
     if(fs_scr!=NULL){
-        WPHolder *fs_ph=region_prepare_manage((WRegion*)fs_scr, cwin, param,
-                                              MANAGE_PRIORITY_NOREDIR);
+        WPHolder *fs_ph=region_make_return_pholder((WRegion*)cwin);
 
         if(fs_ph!=NULL){
             int swf=(param->switchto ? PHOLDER_ATTACH_SWITCHTO : 0);
