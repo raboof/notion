@@ -14,7 +14,7 @@ if not package.loaded["mod_xinerama"] then
     dopath("mod_xinerama")
 end
 
-function filter(t, predicate)
+local function filter(t, predicate)
      local result = {}
      for k,v in pairs(t) do
          if predicate(v) then
