@@ -23,8 +23,9 @@ include $(TOPDIR)/build/rules.mk
 
 ######################################
 
+.PHONY: test
 test: $(SOURCES)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(SOURCES) extltest.c $(INCLUDES) -o $@ $(LIBS)
-	./extltest
-	# $(RM) extltest
+	./$@
+	# $(RM) $@
 
