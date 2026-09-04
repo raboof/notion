@@ -127,6 +127,7 @@ void moveresmode_accel(WMoveresMode *UNUSED(mode), int *wu, int *hu, int accel_m
 static ExtlExportedFn *moveres_safe_fns[]={
     (ExtlExportedFn*)&moveresmode_resize,
     (ExtlExportedFn*)&moveresmode_move,
+    (ExtlExportedFn*)&moveresmode_nudge,
     (ExtlExportedFn*)&moveresmode_rqgeom_extl,
     (ExtlExportedFn*)&moveresmode_geom,
     (ExtlExportedFn*)&moveresmode_finish,
@@ -301,6 +302,21 @@ void moveresmode_move(WMoveresMode *mode, int horizmul, int vertmul)
 
 
 /*EXTL_DOC
+ * Move the move/resize mode target by an exact number of pixels:
+ * \var{dx} pixels horizontally (positive rightwards, negative leftwards)
+ * and \var{dy} pixels vertically (positive downwards, negative upwards).
+ * Unlike \fnref{WMoveresMode.move}, no accelerator or timed auto-end is
+ * applied, so every call moves the target by the exact pixel amounts
+ * specified.
+ */
+EXTL_EXPORT_AS(WMoveresMode, nudge)
+void moveresmode_nudge(WMoveresMode *mode, int dx, int dy)
+{
+    moveresmode_delta_move(mode, dx, dy, NULL);
+}
+
+
+/*EXTL_DOC
  * Request exact geometry in move/resize mode. For details on parameters,
  * see \fnref{WRegion.rqgeom}.
  */
@@ -387,6 +403,30 @@ WMoveresMode *region_begin_kbresize(WRegion *reg)
         return NULL;
 
     accel_reset();
+
+    ioncore_grab_establish(reg, resize_handler,
+                           (GrabKilledHandler*)cancel_moveres,
+                           0, GRAB_DEFAULT_FLAGS);
+
+    return mode;
+}
+
+
+/*EXTL_DOC
+ * Enter a move-only mode for \var{reg}, intended for floating regions.
+ * Works like \fnref{WRegion.begin_kbresize} but starts in move position
+ * mode and does not auto-cancel after a delay; the mode is left by
+ * pressing Enter (\fnref{WMoveresMode.finish}) or Escape
+ * (\fnref{WMoveresMode.cancel}). The \fnref{WMoveresMode} bindings are
+ * used in this mode.
+ */
+EXTL_EXPORT_MEMBER
+WMoveresMode *region_begin_kbmove(WRegion *reg)
+{
+    WMoveresMode *mode=region_begin_move(reg, NULL, FALSE);
+
+    if(mode==NULL)
+        return NULL;
 
     ioncore_grab_establish(reg, resize_handler,
                            (GrabKilledHandler*)cancel_moveres,
