@@ -15,6 +15,7 @@
 #include <libextl/extl.h>
 
 extern WMoveresMode *region_begin_kbresize(WRegion *reg);
+extern WMoveresMode *region_begin_kbmove(WRegion *reg);
 
 extern void ioncore_set_moveres_accel(ExtlTab tab);
 extern void ioncore_get_moveres_accel(ExtlTab tab);
@@ -29,5 +30,6 @@ extern ExtlTab moveresmode_geom(WMoveresMode *mode);
 extern ExtlTab moveresmode_rqgeom_extl(WMoveresMode *mode, ExtlTab g);
 extern void moveresmode_accel(WMoveresMode *mode,
                               int *wu, int *hu, int accel_mode);
+extern void moveresmode_nudge(WMoveresMode *mode, int dx, int dy);
 
 #endif /* ION_IONCORE_KBRESIZE_H */

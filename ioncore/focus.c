@@ -75,6 +75,52 @@ static void region_focuslist_deinit(WRegion *reg)
 
 
 /*EXTL_DOC
+ * Go to and return to a previously active region, hop style
+ * You can go count back in -1, or 1 direction.
+ *
+ * Note that this function is asynchronous; the region will not
+ * actually have received the focus when this function returns.
+ */
+EXTL_EXPORT
+WRegion *ioncore_goto_hop(int count, int direction)
+{
+    WRegion *next;
+
+    if(ioncore_g.focuslist==NULL)
+        return NULL;
+
+    /* We're trying to access the focus list from lua (likely from the UI). I
+     * thus force any pending focuslist updates to complete now */
+    region_focuslist_awaiting_insertion_trigger();
+
+    /* Find the nth region on focus history list that isn't currently
+     * active.
+     */
+    if (direction > 0) {
+        for(next=ioncore_g.focuslist->active_next;
+            next!=NULL;
+            next=next->active_next){
+
+            if(!REGION_IS_ACTIVE(next) && --count <= 0)
+                break;
+        }
+    } else {
+        for(next=ioncore_g.focuslist->active_prev;
+            next!=NULL;
+            next=next->active_prev){
+
+            if(!REGION_IS_ACTIVE(next) && --count <= 0)
+                break;
+        }
+    }
+
+    if(next!=NULL)
+        region_goto(next);
+
+    return next;
+}
+
+/*EXTL_DOC
  * Go to and return to a previously active region (if any).
  *
  * Note that this function is asynchronous; the region will not
