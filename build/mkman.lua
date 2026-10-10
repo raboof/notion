@@ -326,7 +326,7 @@ if not of then
 end
 
 for l in f:lines() do
-    l=string.gsub(l, '%s*BINDINGS:([%w%.%-]+)%s*',
+    local l=string.gsub(l, '%s*BINDINGS:([%w%.%-]+)%s*',
                   function(s)
                       if not bindings[s] then
                           --error('No bindings for '..s)
